@@ -1,0 +1,2 @@
+# Update gitignore
+npx goops
