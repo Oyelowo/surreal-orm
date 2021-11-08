@@ -4,6 +4,7 @@ mod tests {
     fn it_works() {
         let result = 2 + 2;
         assert_eq!(result, 4);
+        assert_eq!(super::utils::maths::add_one(3), 4);
     }
 }
 
@@ -12,7 +13,7 @@ mod tests {
 
 mod utils;
 
-pub use utils::maths;
+pub use utils::{maths, nested};
 
 // pub use crate::utils::maths;
 
