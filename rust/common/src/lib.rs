@@ -10,8 +10,9 @@ mod tests {
 
 
 
-pub mod utils;
-pub use utils::maths::add_one;
+mod utils;
+
+pub use utils::maths;
 
 // pub use crate::utils::maths;
 

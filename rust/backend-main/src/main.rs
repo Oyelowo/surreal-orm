@@ -1,7 +1,7 @@
 use common;
 
 fn main() {
-    let added = common::add_one(3);
+    let added = common::maths::add_one(3);
     println!("Hello, world!, {}", added);
 }
 
@@ -12,7 +12,7 @@ mod tests {
     fn test_adder() {
         // let result = common::maths::add_one(13);
         // let result = common::utils::maths::add_one(43);
-        assert_eq!(common::add_one(13), 14);
+        assert_eq!(common::maths::add_one(13), 14);
     }
 }
 
