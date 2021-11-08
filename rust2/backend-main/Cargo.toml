@@ -2,14 +2,8 @@
 name = "backend-main"
 version = "0.1.0"
 edition = "2021"
-authors = ["Oyelowo Oyedayo"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 common = {path = "../common"}
-actix-web = "3.3.2"
-actix-rt = "2.4.0"
-async-graphql = "2.11.1"
-async-graphql-actix-web = "2.11.1"
-slab = "0.4.5"

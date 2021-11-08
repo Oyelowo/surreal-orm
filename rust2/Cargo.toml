@@ -1,0 +1,7 @@
+[workspace]
+
+members = [
+    "backend-main",
+    "backend-second",
+    "common"
+]
