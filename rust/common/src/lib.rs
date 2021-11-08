@@ -7,28 +7,21 @@ mod tests {
     }
 }
 
-mod utils;
 
-// #[macro_use]
-mod my_macros;
 
-// pub use crate::utils::nested::*;
 
-// pub use crate::my_macros::pub_struct;
-pub use my_macros::pub_struct;
-pub use utils::{local_function};
-pub use utils::nested::{get_test_function};
-// pub use utils::nested;
-// pub use utils::local_function;
-// pub use utils::*;
-// pub use crate::utils::*;
-// pub use crate::my_macros::*;
+pub mod utils;
+pub use utils::maths::add_one;
 
-fn get_shared_function() ->  &'static str {
-    utils::nested::get_test_function();
-    utils::local_indirect_access();
-    utils::local_function();
-    get_shared_function();
+// pub use crate::utils::maths;
 
-    return "Oyelowo"
-}
+// pub use crate::utils::nested;
+// pub use crate::utils::maths;
+// pub use crate::utils::{nested, maths};
+// pub use crate::utils::maths;
+
+// pub fn eat_at_restaurant() {
+//     // maths::add_one(5);
+//     utils::maths::add_one(56);
+//     // nested::get_test_function();
+// }

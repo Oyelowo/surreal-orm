@@ -2,11 +2,11 @@
 // and `inaccessible.rs` files and insert them here under their respective
 // modules
 mod inaccessible;
-mod nested;
-mod maths;
+pub mod nested;
+pub mod maths;
 
-pub use nested::*;
-pub use maths::*;
+// pub use nested::*;
+// pub use maths::*;
 // pub use maths::*;
 
 pub fn local_function() {
