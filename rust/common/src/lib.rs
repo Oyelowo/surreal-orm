@@ -1,23 +1,19 @@
-// mod macros;
+// Don't export all utils module directly, let pub use do the selective exporting, so u expose only what's necessary by default
+// pub mod utils;
+mod macros;
+mod util_module_alternative;
 mod utils;
-pub mod macros;
 
+pub use macros::calculator;
+pub use util_module_alternative::greeter_alt::alt_good_morning;
+pub use utils::{greet::good_morning, local_function, maths};
 
-pub use utils::{maths, greet, local_function};
-
-// pub use crate::macros::calculator;
-// pub use add;
-// #[macro_use]
-// pub extern crate add;
-
-// fn rer() {
-//     add!(55,5);
-// }
-
-// #[cfg(test)]
-// mod tests {
-//     #[test]
-//     fn test_adder() {
-//         assert_eq!(super::add!(55,5), 60);
-//     }
-// }
+#[macro_use]
+// extern crate ;
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_adder() {
+        assert_eq!(super::sum!(55, 5), 60);
+    }
+}

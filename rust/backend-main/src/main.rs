@@ -1,19 +1,26 @@
-use common::{greet, maths, add};
+use common::{self, alt_good_morning, good_morning, maths, sum};
 
 fn main() {
-    let added = maths::add_one(3);
-    greet::good_morning();
-    println!("Hello, world!, {}", added);
+    let sum = sum!(3, 3, 5, 6);
+    print!("Sum of some: {:?}", sum);
 
-    // let p = add!(4, 5);
+    let sum2 = common::sum!(4);
+    print!("Sum of some: {:?}", sum2);
+
+    good_morning();
+    alt_good_morning();
+
+    let added = maths::add_one(3);
+    println!("Hello, world!, {}", added);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
     fn test_adder() {
         assert_eq!(super::maths::add_one(13), 14);
-        assert_eq!(add!(5,5,5), 15);
+        assert_eq!(sum!(5, 5, 5), 15);
     }
 }

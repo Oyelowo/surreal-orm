@@ -1,5 +1,5 @@
 #[macro_export]
-macro_rules! add{
+macro_rules! sum{
  // first arm in case of single argument and last remaining variable/number
     ($a:expr)=>{
         $a
@@ -13,7 +13,7 @@ macro_rules! add{
 // add the number and the result of remaining arguments 
     ($a:expr,$($b:tt)*)=>{
        {
-           $a+add!($($b)*)
+           $a+sum!($($b)*)
        }
     }
 }
