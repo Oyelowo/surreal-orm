@@ -1,8 +1,6 @@
 pub mod greet;
 pub mod maths;
 
-
-
 pub fn local_function() {
     greet::good_morning();
     local_indirect_access();

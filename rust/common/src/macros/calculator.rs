@@ -10,11 +10,10 @@ macro_rules! sum{
             $a+$b
         }
     };
-// add the number and the result of remaining arguments 
+// add the number and the result of remaining arguments
     ($a:expr,$($b:tt)*)=>{
        {
            $a+sum!($($b)*)
        }
     }
 }
-

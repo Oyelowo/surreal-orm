@@ -1,3 +1,1 @@
-pub fn jj() {
-    
-}
+pub fn jj() {}

@@ -6,7 +6,6 @@ pub fn good_morning() {
     println!("called `my::nested::function()`");
 }
 
-
 fn private_function() {
     let sum = maths::add_one(4);
     println!("called `my::nested::private_function(), {}", sum);
