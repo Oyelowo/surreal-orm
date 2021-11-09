@@ -1,29 +1,23 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-        assert_eq!(super::utils::maths::add_one(3), 4);
-    }
-}
-
-
-
-
+mod macros;
 mod utils;
+pub mod klin;
 
-pub use utils::{maths, nested};
 
-// pub use crate::utils::maths;
+pub use utils::{maths, greet, local_function};
 
-// pub use crate::utils::nested;
-// pub use crate::utils::maths;
-// pub use crate::utils::{nested, maths};
-// pub use crate::utils::maths;
+// pub use crate::macros::calculator;
+// pub use add;
+// #[macro_use]
+// pub extern crate add;
 
-// pub fn eat_at_restaurant() {
-//     // maths::add_one(5);
-//     utils::maths::add_one(56);
-//     // nested::get_test_function();
+// fn rer() {
+//     add!(55,5);
+// }
+
+// #[cfg(test)]
+// mod tests {
+//     #[test]
+//     fn test_adder() {
+//         assert_eq!(super::add!(55,5), 60);
+//     }
 // }
