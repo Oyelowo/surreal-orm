@@ -4,7 +4,7 @@ mod macros;
 mod util_module_alternative;
 mod utils;
 
-pub use macros::calculator;
+pub use macros::{calculator, helpers};
 pub use util_module_alternative::greeter_alt::alt_good_morning;
 pub use utils::{greet::good_morning, local_function, maths};
 

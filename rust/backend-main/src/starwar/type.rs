@@ -1,0 +1,1 @@
+// all the Product related GraphQL types also query and mutation included (export a string containing GraphQL types
