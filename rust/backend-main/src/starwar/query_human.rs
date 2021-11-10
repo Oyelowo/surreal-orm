@@ -1,11 +1,8 @@
-use async_graphql::{
-    connection::{query, Connection, Edge, EmptyFields},
-    Context, Enum, Interface, Object, Result,
-};
+use async_graphql::{Context, Object};
 
 use super::model::StarWars;
-use super::type_gql::{StarWarsChar, Character, Episode};
-use super::query_droid::{Droid};
+use super::query_droid::Droid;
+use super::type_gql::{Character, Episode, StarWarsChar};
 
 pub struct Human<'a>(pub &'a StarWarsChar);
 

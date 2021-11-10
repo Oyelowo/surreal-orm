@@ -1,19 +1,20 @@
 #![allow(clippy::needless_lifetimes)]
 //  all the query resolvers
 
-// use crate::starwars::models::{StarWarsChar};
+// use crate::starwars::model::{StarWarsChar};
 use super::model::StarWars;
-use super::type_gql::{Character, Episode, StarWarsChar};
 use super::query::{Droid, Human};
+use super::type_gql::{Character, Episode, StarWarsChar};
 use async_graphql::{
     connection::{query, Connection, Edge, EmptyFields},
-    Context, Enum, Interface, Object, Result,
+    Context, Object, Result,
 };
 
-pub struct QueryRoot;
+#[derive(Default)]
+pub struct StarWarQueryRoot;
 
 #[Object]
-impl QueryRoot {
+impl StarWarQueryRoot {
     async fn hero<'a>(
         &self,
         ctx: &Context<'a>,

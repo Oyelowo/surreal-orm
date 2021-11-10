@@ -1,11 +1,7 @@
-use std::collections::HashMap;
-
 // all the Product related GraphQL types also query and mutation included (export a string containing GraphQL types
-use async_graphql::{
-    Context, Enum, Interface, Object, Result,
-};
+use super::query::{Droid, Human};
+use async_graphql::{Enum, Interface};
 use common::pub_struct;
-use super::query::{Human, Droid};
 
 pub_struct!(StarWarsChar {
     id: &'static str,
@@ -16,11 +12,6 @@ pub_struct!(StarWarsChar {
     home_planet: Option<&'static str>,
     primary_function: Option<&'static str>,
 });
-
-
-fn rer() {
-    // let kk = Human(&StarWarsChar{id: "43", name: "aer", is_human: true, friends: vec![], appears_in: Episode::Empire, home_planet: Some("43"), primary_function: Some("43")});
-}
 
 /// One of the films in the Star Wars Trilogy
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Debug)]
@@ -35,7 +26,6 @@ pub enum Episode {
     Jedi,
 }
 pub use Episode::*;
-
 
 #[derive(Interface)]
 #[graphql(

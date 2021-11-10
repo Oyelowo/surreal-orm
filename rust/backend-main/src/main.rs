@@ -1,45 +1,13 @@
 #![warn(unused_imports)]
 use actix_web::{guard, web, App, HttpResponse, HttpServer, Result};
-// use async_graphql::;
-use async_graphql::{
-    http::{playground_source, GraphQLPlaygroundConfig},
-    Context, EmptyMutation, EmptySubscription, Object, Schema, SimpleObject,
-};
+use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_actix_web::{Request, Response};
-use backend_main::starwar::StarWarsSchema;
+use backend_main::{
+    get_schema,
+    starwar::{model::StarWars, StarWarsSchema},
+};
 use common::{self, alt_good_morning, good_morning, maths, sum};
-use serde_json;
 
-
-// use starwars_lib::{StarWars, StarWarsSchema};
-
-// use starwars::{QueryRoot, StarWars, StarWarsSchema};
-
-struct Query;
-
-#[Object]
-impl Query {
-    /// Returns the sum of a and b
-    async fn add(&self, a: i32, b: i32) -> i32 {
-        a + b
-    }
-}
-
-#[derive(SimpleObject)]
-pub struct Demo {
-    pub id: usize,
-}
-
-pub struct QueryRoot;
-
-#[Object]
-impl QueryRoot {
-    async fn demo(&self, _ctx: &Context<'_>) -> Demo {
-        Demo { id: 42 }
-    }
-}
-
-//async fn index(schema: web::Data<StarWarsSchema>, req: Request) -> Response {
 async fn index(schema: web::Data<StarWarsSchema>, req: Request) -> Response {
     schema.execute(req.into_inner()).await.into()
 }
@@ -54,9 +22,7 @@ async fn index_playground() -> Result<HttpResponse> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let schema = Schema::build(Query, EmptyMutation, EmptySubscription)
-        //.data(StarWars::new())
-        .finish();
+    let schema = get_schema().data(StarWars::new()).finish();
 
     println!("Playground: http://localhost:8000");
 

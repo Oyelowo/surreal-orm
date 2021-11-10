@@ -1,13 +1,13 @@
-// // pub mod star_wars::;
-// // mod star_wars::models;
-// pub mod starwar;
-
-// pub use starwar as starwars_lib;
-// pub use starwar::resolvers;
-// // pub use starwars::models::StarWars;
-
+use async_graphql::{EmptyMutation, EmptySubscription, MergedObject, Schema, SchemaBuilder};
 
 pub mod starwar;
 
 // pub use starwar as _;
-// pub use starwar as starwar_lib;
+use starwar::query::StarWarQueryRoot;
+
+#[derive(MergedObject, Default)]
+pub struct Query(StarWarQueryRoot);
+
+pub fn get_schema() -> SchemaBuilder<Query, EmptyMutation, EmptySubscription> {
+    return Schema::build(Query::default(), EmptyMutation, EmptySubscription);
+}

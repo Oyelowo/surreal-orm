@@ -1,6 +1,6 @@
 // the Starwar database schema. Should ideally be combined with types?
-use common::pub_struct;
 use super::type_gql::{Episode, StarWarsChar};
+use common::pub_struct;
 
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 use slab::Slab;
