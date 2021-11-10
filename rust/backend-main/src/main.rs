@@ -3,7 +3,7 @@ use actix_web::{guard, web, App, HttpResponse, HttpServer, Result};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_actix_web::{Request, Response};
 use backend_main::{
-    get_schema,
+    get_graphql_schema,
     starwar::{model::StarWars, StarWarsSchema},
 };
 use common::{self, alt_good_morning, good_morning, maths, sum};
@@ -22,8 +22,9 @@ async fn index_playground() -> Result<HttpResponse> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let schema = get_schema().data(StarWars::new()).finish();
+    let schema = get_graphql_schema().data(StarWars::new()).finish();
 
+    example_shared_libaray();
     println!("Playground: http://localhost:8000");
 
     HttpServer::new(move || {

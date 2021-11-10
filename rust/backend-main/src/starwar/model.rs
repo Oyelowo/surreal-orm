@@ -2,7 +2,6 @@
 use super::type_gql::{Episode, StarWarsChar};
 use common::pub_struct;
 
-use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 use slab::Slab;
 use std::collections::HashMap;
 

@@ -8,6 +8,6 @@ use starwar::query::StarWarQueryRoot;
 #[derive(MergedObject, Default)]
 pub struct Query(StarWarQueryRoot);
 
-pub fn get_schema() -> SchemaBuilder<Query, EmptyMutation, EmptySubscription> {
+pub fn get_graphql_schema() -> SchemaBuilder<Query, EmptyMutation, EmptySubscription> {
     return Schema::build(Query::default(), EmptyMutation, EmptySubscription);
 }
