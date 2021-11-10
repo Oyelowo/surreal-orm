@@ -1,1 +1,0 @@
-//  all the query resolvers

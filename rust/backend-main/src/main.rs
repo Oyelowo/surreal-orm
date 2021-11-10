@@ -6,8 +6,10 @@ use async_graphql::{
     Context, EmptyMutation, EmptySubscription, Object, Schema, SimpleObject,
 };
 use async_graphql_actix_web::{Request, Response};
+use backend_main::starwar::StarWarsSchema;
 use common::{self, alt_good_morning, good_morning, maths, sum};
 use serde_json;
+
 
 // use starwars_lib::{StarWars, StarWarsSchema};
 
@@ -37,7 +39,6 @@ impl QueryRoot {
     }
 }
 
-type StarWarsSchema = Schema<Query, EmptyMutation, EmptySubscription>;
 //async fn index(schema: web::Data<StarWarsSchema>, req: Request) -> Response {
 async fn index(schema: web::Data<StarWarsSchema>, req: Request) -> Response {
     schema.execute(req.into_inner()).await.into()

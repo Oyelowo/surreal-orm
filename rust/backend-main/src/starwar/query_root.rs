@@ -1,108 +1,14 @@
 #![allow(clippy::needless_lifetimes)]
-
-// all the Product related GraphQL types also query and mutation included (export a string containing GraphQL types
+//  all the query resolvers
 
 // use crate::starwars::models::{StarWarsChar};
-use super::model::{StarWars, StarWarsChar};
-use async_graphql::connection::{query, Connection, Edge, EmptyFields};
-use async_graphql::{Context, Enum, Interface, Object, Result};
-
-/// One of the films in the Star Wars Trilogy
-#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug)]
-pub enum Episode {
-    /// Released in 1977.
-    NewHope,
-
-    /// Released in 1980.
-    Empire,
-
-    /// Released in 1983.
-    Jedi,
-}
-
-pub struct Human<'a>(&'a StarWarsChar);
-
-/// A humanoid creature in the Star Wars universe.
-#[Object]
-impl<'a> Human<'a> {
-    /// The id of the human.
-    async fn id(&self) -> &str {
-        self.0.id
-    }
-
-    /// The name of the human.
-    async fn name(&self) -> &str {
-        self.0.name
-    }
-
-    /// The friends of the human, or an empty list if they have none.
-    async fn friends<'ctx>(&self, ctx: &Context<'ctx>) -> Vec<Character<'ctx>> {
-        let star_wars = ctx.data_unchecked::<StarWars>();
-        star_wars
-            .friends(self.0)
-            .into_iter()
-            .map(|ch| {
-                if ch.is_human {
-                    Human(ch).into()
-                } else {
-                    Droid(ch).into()
-                }
-            })
-            .collect()
-    }
-
-    /// Which movies they appear in.
-    async fn appears_in(&self) -> &[Episode] {
-        &self.0.appears_in
-    }
-
-    /// The home planet of the human, or null if unknown.
-    async fn home_planet(&self) -> &Option<&str> {
-        &self.0.home_planet
-    }
-}
-
-pub struct Droid<'a>(&'a StarWarsChar);
-
-/// A mechanical creature in the Star Wars universe.
-#[Object]
-impl<'a> Droid<'a> {
-    /// The id of the droid.
-    async fn id(&self) -> &str {
-        self.0.id
-    }
-
-    /// The name of the droid.
-    async fn name(&self) -> &str {
-        self.0.name
-    }
-
-    /// The friends of the droid, or an empty list if they have none.
-    async fn friends<'ctx>(&self, ctx: &Context<'ctx>) -> Vec<Character<'ctx>> {
-        let star_wars = ctx.data_unchecked::<StarWars>();
-        star_wars
-            .friends(self.0)
-            .into_iter()
-            .map(|ch| {
-                if ch.is_human {
-                    Human(ch).into()
-                } else {
-                    Droid(ch).into()
-                }
-            })
-            .collect()
-    }
-
-    /// Which movies they appear in.
-    async fn appears_in(&self) -> &[Episode] {
-        &self.0.appears_in
-    }
-
-    /// The primary function of the droid.
-    async fn primary_function(&self) -> &Option<&str> {
-        &self.0.primary_function
-    }
-}
+use super::model::StarWars;
+use super::type_gql::{Character, Episode, StarWarsChar};
+use super::query::{Droid, Human};
+use async_graphql::{
+    connection::{query, Connection, Edge, EmptyFields},
+    Context, Enum, Interface, Object, Result,
+};
 
 pub struct QueryRoot;
 
@@ -146,6 +52,7 @@ impl QueryRoot {
             .iter()
             .copied()
             .collect::<Vec<_>>();
+
         query_characters(after, before, first, last, &humans)
             .await
             .map(|conn| conn.map_node(Human))
@@ -177,18 +84,6 @@ impl QueryRoot {
             .await
             .map(|conn| conn.map_node(Droid))
     }
-}
-
-#[derive(Interface)]
-#[graphql(
-    field(name = "id", type = "&str"),
-    field(name = "name", type = "&str"),
-    field(name = "friends", type = "Vec<Character<'ctx>>"),
-    field(name = "appears_in", type = "&[Episode]")
-)]
-pub enum Character<'a> {
-    Human(Human<'a>),
-    Droid(Droid<'a>),
 }
 
 async fn query_characters<'a>(

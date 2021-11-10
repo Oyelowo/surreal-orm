@@ -1,28 +1,10 @@
-// the Product database schema. Should ideally be combined with types?
-
+// the Starwar database schema. Should ideally be combined with types?
 use common::pub_struct;
+use super::type_gql::{Episode, StarWarsChar};
 
-// mod resolvers;
-// use resolvers::QueryRoot;
-// use starwars_lib::resolvers::QueryRoot;
-use super::resolver::{QueryRoot, Episode};
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 use slab::Slab;
 use std::collections::HashMap;
-
-// mod super::resolvers;
-
-pub type StarWarsSchema = Schema<QueryRoot, EmptyMutation, EmptySubscription>;
-
-pub_struct!(StarWarsChar {
-    id: &'static str,
-    name: &'static str,
-    is_human: bool,
-    friends: Vec<usize>,
-    appears_in: Vec<Episode>,
-    home_planet: Option<&'static str>,
-    primary_function: Option<&'static str>,
-});
 
 pub_struct! (StarWars {
     luke: usize,
