@@ -1,0 +1,62 @@
+{
+  droids {
+    edges {
+      node {
+        id
+        name
+        friends {
+          id
+        }
+        appearsIn 
+        primaryFunction
+      }
+      cursor
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+  }
+}
+
+
+{
+  droid(id: "2000") {
+    id
+    friends {
+      __typename
+      name
+      appearsIn
+      friends {
+        id
+        name
+        friends {
+          id
+          name
+          friends {
+            id
+            name
+            friends {
+              id
+              name
+              friends {
+                id
+                name
+                friends {
+                  id
+                  name
+                  friends {
+                    id
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

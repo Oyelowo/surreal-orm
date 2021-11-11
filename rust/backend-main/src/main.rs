@@ -23,7 +23,7 @@ async fn index_playground() -> Result<HttpResponse> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let schema = get_graphql_schema().data(StarWars::new()).finish();
+    let schema = get_graphql_schema().data(StarWars::new()).limit_depth(5).finish();
 
     example_shared_libaray();
     println!("Playground: http://localhost:8000");
