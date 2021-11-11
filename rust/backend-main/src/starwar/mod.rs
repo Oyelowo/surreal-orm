@@ -1,5 +1,3 @@
-use async_graphql::{EmptyMutation, EmptySubscription, Schema};
-
 pub mod model;
 pub mod type_gql;
 
@@ -11,5 +9,3 @@ mod query_root;
 pub mod query {
     pub use super::{query_droid::Droid, query_human::Human, query_root::StarWarQueryRoot};
 }
-
-pub type StarWarsSchema = Schema<query::StarWarQueryRoot, EmptyMutation, EmptySubscription>;

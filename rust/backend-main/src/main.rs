@@ -4,11 +4,12 @@ use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_actix_web::{Request, Response};
 use backend_main::{
     get_graphql_schema,
-    starwar::{model::StarWars, StarWarsSchema},
+    GraphQLSchema,
+    starwar::{model::StarWars},
 };
 use common::{self, alt_good_morning, good_morning, maths, sum};
 
-async fn index(schema: web::Data<StarWarsSchema>, req: Request) -> Response {
+async fn index(schema: web::Data<GraphQLSchema>, req: Request) -> Response {
     schema.execute(req.into_inner()).await.into()
 }
 

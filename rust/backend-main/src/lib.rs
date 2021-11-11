@@ -5,8 +5,11 @@ pub mod starwar;
 // pub use starwar as _;
 use starwar::query::StarWarQueryRoot;
 
+
 #[derive(MergedObject, Default)]
 pub struct Query(StarWarQueryRoot);
+
+pub type GraphQLSchema = Schema<Query, EmptyMutation, EmptySubscription>;
 
 pub fn get_graphql_schema() -> SchemaBuilder<Query, EmptyMutation, EmptySubscription> {
     return Schema::build(Query::default(), EmptyMutation, EmptySubscription);
