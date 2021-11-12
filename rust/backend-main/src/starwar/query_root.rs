@@ -129,6 +129,10 @@ async fn query_characters<'a>(
                 slice = &slice[..first.min(slice.len())];
 
                 // Subtract from the end
+                // TODO: CROSS-CHECK the statement below. Seems incorrect
+                // e.g if user wants first 7, at end of 20, we would want this to end at 20 minus the first set or length of slice,
+                // which means the end should be inital end(either the original character length or before specied e.g 20) minus
+                // the first set the user wants or lendth or slice i.e new_end = 20 (old_end) - 7(first)or (slice.len) = 14.
                 end -= first.min(slice.len());
             } else if let Some(last) = last {
                 // similarly here, but from behind. e.g if u want last 20, but slice is only 15 items.
