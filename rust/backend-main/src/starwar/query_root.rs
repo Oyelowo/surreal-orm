@@ -25,9 +25,9 @@ impl StarWarQueryRoot {
     ) -> Character<'a> {
         let star_wars = ctx.data_unchecked::<StarWars>();
         if episode == Episode::Empire {
-            Human(star_wars.chars.get(star_wars.luke).unwrap()).into()
+            Human(star_wars.chars.get(star_wars.luke).expect("Getting starwars cha failed")).into()
         } else {
-            Droid(star_wars.chars.get(star_wars.artoo).unwrap()).into()
+            Droid(star_wars.chars.get(star_wars.artoo).expect("Getting starwars cha failed")).into()
         }
     }
 
