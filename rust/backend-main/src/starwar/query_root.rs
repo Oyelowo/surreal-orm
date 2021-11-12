@@ -107,6 +107,7 @@ async fn query_characters<'a>(
                 if after >= characters.len() {
                     return Ok(Connection::new(false, false));
                 }
+                // Start character from after
                 start = after + 1;
             }
 
@@ -114,16 +115,29 @@ async fn query_characters<'a>(
                 if before == 0 {
                     return Ok(Connection::new(false, false));
                 }
+
+                // End from before
                 end = before;
             }
 
             let mut slice = &characters[start..end];
 
             if let Some(first) = first {
+                // Take minimum between the first and the length of the slice. This is in case user
+                // asks for more than is available in the slice. e.g  if first= 20. but slice length is just 15,
+                // we want to only return first 15 of the slie rather than 20, as 20 is larger than the entire slice.
                 slice = &slice[..first.min(slice.len())];
+
+                // Subtract from the end
                 end -= first.min(slice.len());
             } else if let Some(last) = last {
+                // similarly here, but from behind. e.g if u want last 20, but slice is only 15 items.
+                // Ideally, we would want to return 15 items instead starting from the 0th element. So [15(slice) - 15(minimum btw slice i.e 15 and lasti.e 20) ..]  = [0..]
+                // Case 2 e.g: slice is bigger(20) than last(15), this would then be [20 - 15(minimum btw slice i.e 20 and lasti.e 15) ...] = [5 ..]
+                // I.O.W, the logic makes sure we get the last items even if larger than the slice size, without reaching outside of the slice size
                 slice = &slice[slice.len() - last.min(slice.len())..];
+
+                // Reset start position as the difference between the end and either the last provided by user or slice length.
                 start = end - last.min(slice.len());
             }
 
