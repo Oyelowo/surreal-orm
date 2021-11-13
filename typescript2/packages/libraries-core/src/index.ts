@@ -4,3 +4,5 @@ export function awesomeFn() {
 
 
 export * from "./components/HelloWorld";
+export * from "./components/CardTailWindExample";
+export * from "./components/TextField";
