@@ -26,36 +26,50 @@ This repository explains how to create monorepos project using npm and TypeScrip
 Put each package under the `packages` directory.
 
 ```
+❯ tree -I "node_modules"                        
+.
 .
 ├── node_modules/
+├── LICENSE.txt
 ├── README.md
+├── lerna.json
 ├── package-lock.json
 ├── package.json
 ├── packages
-│   ├── x-cli
-│   │   ├── lib
-│   │   │   ├── cli.d.ts
-│   │   │   ├── cli.js
-│   │   │   ├── cli.js.map
-│   │   │   ├── main.d.ts
-│   │   │   ├── main.js
-│   │   │   └── main.js.map
-│   │   ├── package.json
-│   │   ├── src
-│   │   │   ├── cli.ts
-│   │   │   └── main.ts
-│   │   └── tsconfig.json
-│   └── x-core
-│       ├── lib
-│       │   ├── index.d.ts
-│       │   ├── index.js
-│       │   └── index.js.map
-│       ├── package.json
-│       ├── src
-│       │   └── index.ts
-│       └── tsconfig.json
+│   ├── frontend-main
+│   │   ├── README.md
+│   │   ├── next-env.d.ts
+│   │   ├── next.config.js
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   ├── pages
+│   │   │   ├── _app.tsx
+│   │   │   ├── api
+│   │   │   │   └── hello.ts
+│   │   │   └── index.tsx
+│   │   ├── public
+│   │   │   ├── favicon.ico
+│   │   │   └── vercel.svg
+│   │   ├── styles
+│   │   │   ├── Home.module.css
+│   │   │   └── globals.css
+│   │   ├── tsconfig.json
+│   │   └── tsconfig.tsbuildinfo
+│   └── libraries-core
+│       ├── lib
+│       │   ├── index.d.ts
+│       │   ├── index.js
+│       │   └── index.js.map
+│       ├── package.json
+│       ├── src
+│       │   └── index.ts
+│       ├── tsconfig.json
+│       └── tsconfig.tsbuildinfo
+├── renovate.json
 ├── tsconfig.build.json
 └── tsconfig.json
+
+9 directories, 29 files
 ```
 
 ## Workspaces
@@ -85,14 +99,14 @@ But in development the `x-core` package is not published so you can't install it
 For example, `packages/x-cli/src/main.spec.ts` is a test code for `main.ts`, which depends on `packages/x-core/src/index.ts` .
 
 ```ts
-/* packages/x-cli/src/main.ts.*/
+/* packages/frontend-main/pages/index.ts.*/
 
-import { awesomeFn } from "@oyelowo/x-core";
+import { awesomeFn } from "@oyelowo/libraries-core";
 
 export async function main() {
   // dependencies across child packages
-  const out = await awesomeFn();
-  return out;
+  const hello = await awesomeFn();
+  return hello;
 }
 ```
 
@@ -122,7 +136,7 @@ First, you add `composite: true` to project-root tsconfig.json to use project re
 Second, configure each package's tsconfig and configure dependencies across packages.
 
 ```js
-/* packages/x-cli/tsconfig.json */
+/* packages/frontend-main/tsconfig.json */
 
 {
   "extends": "../../tsconfig.json",
@@ -130,7 +144,7 @@ Second, configure each package's tsconfig and configure dependencies across pack
     "rootDir": "src",
     "outDir": "lib"
   },
-  "references": [{ "path": "../x-core" }]
+  "references": [{ "path": "../libraries-core" }]
 }
 ```
 

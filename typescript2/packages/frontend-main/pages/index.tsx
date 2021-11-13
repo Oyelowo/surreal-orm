@@ -3,6 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import { awesomeFn } from "@oyelowo/libraries-core";
+import {HelloWorld} from "@oyelowo/libraries-core";
 
 const Home: NextPage = () => {
   return (
@@ -16,6 +17,8 @@ const Home: NextPage = () => {
       <main className={styles.main}>
         <h1 className={styles.title}>{awesomeFn()}: Oyelowo</h1>
         Home of grind!
+
+        <HelloWorld />
       </main>
 
       <footer className={styles.footer}>
