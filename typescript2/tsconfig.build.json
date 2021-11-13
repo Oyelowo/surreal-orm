@@ -1,4 +1,0 @@
-{
-  "files": [],
-  "references": [{ "path": "packages/libraries-core" }, {"path": "packages/frontend-main"}]
-}
