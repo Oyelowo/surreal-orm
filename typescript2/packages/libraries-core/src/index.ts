@@ -1,5 +1,5 @@
 export function awesomeFn() {
-  return "Hello";
+  return "Hello, you should try this!";
 }
 
 
