@@ -1,0 +1,20 @@
+{
+  "name": "@oyelowo/libraries-core",
+  "version": "1.0.0",
+  "description": "Awesome functions",
+  "main": "lib/index.js",
+  "scripts": {
+    "compile": "tsc",
+    "test": "echo \"T.B.D.\""
+  },
+  "types": "lib/index.d.ts",
+  "keywords": [],
+  "author": "oyelowo",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^16.0.0"
+  },
+  "devDependencies": {
+    "typescript": "4.4.4"
+  }
+}
