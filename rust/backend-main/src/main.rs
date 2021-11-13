@@ -6,6 +6,7 @@ use backend_main::{
     get_graphql_schema,
     GraphQLSchema,
     starwar::{model::StarWars},
+    user::model::UserData,
 };
 use common::{self, alt_good_morning, good_morning, maths, sum};
 
@@ -23,7 +24,7 @@ async fn index_playground() -> Result<HttpResponse> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let schema = get_graphql_schema().data(StarWars::new()).limit_depth(5).finish();
+    let schema = get_graphql_schema().data(StarWars::new()).data(UserData::new()).limit_depth(5).finish();
 
     example_shared_libaray();
     println!("Playground: http://localhost:8000");
@@ -38,6 +39,9 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
+
+
+
 
 fn example_shared_libaray() {
     let sum = sum!(3, 3, 5, 6);

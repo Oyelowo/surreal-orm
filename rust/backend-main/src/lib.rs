@@ -7,12 +7,18 @@ pub mod user;
 use starwar::query::StarWarQueryRoot;
 use user::query::UserQueryRoot;
 
+use user::mutation::UserMutationRoot;
+
 
 #[derive(MergedObject, Default)]
 pub struct Query(StarWarQueryRoot, UserQueryRoot);
 
-pub type GraphQLSchema = Schema<Query, EmptyMutation, EmptySubscription>;
+#[derive(MergedObject, Default)]
+pub struct Mutation(UserMutationRoot);
 
-pub fn get_graphql_schema() -> SchemaBuilder<Query, EmptyMutation, EmptySubscription> {
-    return Schema::build(Query::default(), EmptyMutation, EmptySubscription);
+pub type GraphQLSchema = Schema<Query, Mutation, EmptySubscription>;
+// pub type GraphQLSchema = Schema<Query, EmptyMutation, EmptySubscription>;
+
+pub fn get_graphql_schema() -> SchemaBuilder<Query, Mutation, EmptySubscription> {
+    return Schema::build(Query::default(), Mutation::default(), EmptySubscription);
 }
