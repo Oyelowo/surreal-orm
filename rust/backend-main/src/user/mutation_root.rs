@@ -24,11 +24,11 @@ pub struct UserMutationRoot;
 
 #[Object]
 impl UserMutationRoot {
-    async fn create_user(&self, #[graphql(desc = "id of the droid")]user_input: UserInput) -> User {
+    async fn create_user(&self, #[graphql(desc = "new user")]user: UserInput) -> User {
         User {
-            id: user_input.id,
-            name: user_input.name,
-            age: user_input.age,
+            id: user.id,
+            name: user.name,
+            age: user.age,
             family_count: 5
         }
     }
