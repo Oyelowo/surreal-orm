@@ -1,0 +1,29 @@
+{
+  "packages": [
+    "packages/*"
+  ],
+  "version": "1.3.2",
+  "npmClient": "npm",
+  "useWorkspaces": true,
+  "command": {
+    "bootstrap": {
+      "hoist": true
+    },
+    "publish": {
+      "preDistTag": "next",
+      "noGitReset": true
+    },
+    "version": {
+      "allowBranch": "main",
+      "conventionalCommits": true,
+      "createRelease": "github",
+      "gitRemote": "upstream",
+      "message": "chore(release): publish %v"
+    }
+  },
+  "ignoreChanges": [
+    "**/__fixtures__/**",
+    "**/__tests__/**",
+    "**/*.md"
+  ]
+}
