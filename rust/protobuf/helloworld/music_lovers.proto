@@ -1,0 +1,39 @@
+syntax = "proto3";
+package music_lovers;
+
+
+service lovers {
+    // Request message contains the name to be greeted
+    rpc GetMusicLover (GetMusicLoverRequest) returns (MusicLover);
+
+    rpc GetAllMusicLovers (Empty) returns (GetAllMusicLoversReply);
+
+    rpc CreateMusicLover (CreateMusicLoverRequest) returns (MusicLover);
+}
+
+message Empty {
+
+}
+
+message GetMusicLoverRequest {
+    int32 id = 1;
+}
+
+message GetAllMusicLoversReply {
+      repeated  MusicLover music_lovers = 1;
+}
+
+message CreateMusicLoverRequest {
+    string name = 1;
+    repeated string favorite_songs = 2;
+}
+
+
+message MusicLover {
+    // Reply contains the greeting message
+    int32 id = 1;
+    string name = 2;
+    repeated string favorite_songs = 3;
+    string message = 4;
+}
+
