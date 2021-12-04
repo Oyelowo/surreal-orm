@@ -9,7 +9,7 @@ async fn main() -> Result<()> {
 
     Server::builder()
     .accept_http1(true)
-        .add_service(GreeterApp::new())
+        .add_service(get_greeter_server())
         .serve(addr)
         .await?;
 
