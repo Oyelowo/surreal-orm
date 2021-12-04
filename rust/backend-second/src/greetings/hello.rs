@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use tonic::{transport::Server, Request, Response, Status};
-pub mod grpc_generated_proto {
-   tonic::include_proto!("helloworld");
+pub mod hello_world {
+    tonic::include_proto!("helloworld");
 }
 
 use hello_world::greeter_server::{Greeter, GreeterServer};
