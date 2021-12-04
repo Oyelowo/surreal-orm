@@ -31,7 +31,7 @@ pub struct GreeterApp {}
 impl GreeterApp {
     pub fn new() -> GreeterServer<MyGreeter> {
         let greeter = MyGreeter::default();
-        let greeter: GreeterServer<MyGreeter> = GreeterServer::new(greeter);
+        let greeter = GreeterServer::new(greeter);
         return greeter;
     }
 }
