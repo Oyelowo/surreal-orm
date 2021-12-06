@@ -1,9 +1,9 @@
-use anyhow::{Context, Result};
+use anyhow::{Result};
 
 
 fn main()-> Result<()>  {
-    let files = &["../protobuf/helloworld/helloworld.proto", "helloworld/music_lovers.proto"];
-    let dirs = &["../protobuf"];
+    let files = &["helloworld.proto", "music_lovers.proto"];
+    let dirs = &["protobuf"];
 
     tonic_build::configure().build_server(true).build_client(true)
     //.out_dir("./src/grpc_generated_proto")

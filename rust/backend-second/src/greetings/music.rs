@@ -1,5 +1,5 @@
-use anyhow::{Context, Result};
-use tonic::{transport::Server, Request, Response, Status};
+use anyhow::{Result};
+use tonic::{Request, Response, Status};
 pub mod music_lovers {
     tonic::include_proto!("music_lovers");
 }
@@ -19,10 +19,16 @@ impl Lovers for MyMusicLovers {
         request: Request<CreateMusicLoverRequest>,
     ) -> Result<Response<MusicLoverReply>, Status> {
         println!("create_music_lover: {:?}", request);
+        let all_music_lovers = get_fake_music_lovers();
+        let CreateMusicLoverRequest {
+            name,
+            favorite_songs,
+        } = request.into_inner();
+
         Ok(Response::new(MusicLoverReply {
-            id: 1,
-            name: "Oyelowo, newly created".to_string(),
-            favorite_songs: vec!["speechless".to_string(), "earthsong".to_string()],
+            id: all_music_lovers.len() as u32 + 1,
+            name: name,
+            favorite_songs: favorite_songs,
             message: "Fakely just created".to_string(),
         }))
     }
@@ -43,7 +49,7 @@ impl Lovers for MyMusicLovers {
 
         let found_music_lover = all_music_lovers
             .into_iter()
-            .find(|lover| lover.id == request.get_ref().id)
+            .find(|lover| lover.id == request.get_ref().id as u32)
             .unwrap_or(fallback_music_lover);
 
         Ok(Response::new(found_music_lover))

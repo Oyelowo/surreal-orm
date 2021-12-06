@@ -1,5 +1,5 @@
-use anyhow::{Context, Result};
-use tonic::{transport::Server, Request, Response, Status};
+use anyhow::{Result};
+use tonic::{Request, Response, Status};
 pub mod hello_world {
     tonic::include_proto!("helloworld");
 }
@@ -34,11 +34,4 @@ impl GreeterApp {
         let greeter = GreeterServer::new(greeter);
         return greeter;
     }
-}
-
-pub fn get_greeter_server() -> GreeterServer<MyGreeter> {
-    let greeter = MyGreeter::default();
-
-    let greeter = GreeterServer::new(greeter);
-    return greeter;
 }

@@ -31,7 +31,7 @@ message CreateMusicLoverRequest {
 
 message MusicLoverReply {
     // Reply contains the greeting message
-    int32 id = 1;
+    uint32 id = 1;
     string name = 2;
     repeated string favorite_songs = 3;
     string message = 4;
