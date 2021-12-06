@@ -4,9 +4,6 @@ use hello_world::{greeter_client::GreeterClient, HelloRequest};
 pub mod hello_world {
     tonic::include_proto!("helloworld");
 }
-pub mod music {
-    tonic::include_proto!("music");
-}
 
 #[tokio::main]
 async fn main() -> Result<()> {

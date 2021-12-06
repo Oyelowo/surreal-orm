@@ -1,9 +1,5 @@
 use anyhow::Result;
 use music::{fan_client::FanClient, CreateMusicLoverRequest, Empty, GetMusicLoverRequest};
-
-pub mod hello_world {
-    tonic::include_proto!("helloworld");
-}
 pub mod music {
     tonic::include_proto!("music");
 }
