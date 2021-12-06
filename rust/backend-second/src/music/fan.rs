@@ -1,11 +1,11 @@
-use anyhow::{Result};
+use anyhow::Result;
 use tonic::{Request, Response, Status};
-pub mod music_lovers {
-    tonic::include_proto!("music_lovers");
+pub mod music {
+    tonic::include_proto!("music");
 }
 
-use music_lovers::{
-    lovers_server::{Lovers, LoversServer},
+use music::{
+    fan_server::{Fan, FanServer},
     CreateMusicLoverRequest, Empty, GetAllMusicLoversReply, GetMusicLoverRequest, MusicLoverReply,
 };
 
@@ -13,7 +13,7 @@ use music_lovers::{
 pub struct MyMusicLovers {}
 
 #[tonic::async_trait]
-impl Lovers for MyMusicLovers {
+impl Fan for MyMusicLovers {
     async fn create_music_lover(
         &self,
         request: Request<CreateMusicLoverRequest>,
@@ -63,7 +63,7 @@ impl Lovers for MyMusicLovers {
         let all_music_lovers = get_fake_music_lovers();
 
         let reply = GetAllMusicLoversReply {
-             music_lovers: all_music_lovers
+            music_lovers: all_music_lovers,
         };
         Ok(Response::new(reply))
     }
@@ -105,11 +105,10 @@ fn get_fake_music_lovers() -> Vec<MusicLoverReply> {
     music_lovers
 }
 
+pub struct MusicFanApp {}
 
-pub struct MusicLoverApp {}
-
-impl MusicLoverApp {
-    pub fn new() -> LoversServer<MyMusicLovers> {
-        LoversServer::new(MyMusicLovers::default())
+impl MusicFanApp {
+    pub fn new() -> FanServer<MyMusicLovers> {
+        FanServer::new(MyMusicLovers::default())
     }
 }

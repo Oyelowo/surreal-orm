@@ -1,8 +1,8 @@
 syntax = "proto3";
-package music_lovers;
+package music;
 
 
-service lovers {
+service fan {
     // Request message contains the name to be greeted
     rpc GetMusicLover (GetMusicLoverRequest) returns (MusicLoverReply);
 
