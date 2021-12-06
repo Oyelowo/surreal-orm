@@ -4,11 +4,11 @@ package music_lovers;
 
 service lovers {
     // Request message contains the name to be greeted
-    rpc GetMusicLover (GetMusicLoverRequest) returns (MusicLover);
+    rpc GetMusicLover (GetMusicLoverRequest) returns (MusicLoverReply);
 
     rpc GetAllMusicLovers (Empty) returns (GetAllMusicLoversReply);
 
-    rpc CreateMusicLover (CreateMusicLoverRequest) returns (MusicLover);
+    rpc CreateMusicLover (CreateMusicLoverRequest) returns (MusicLoverReply);
 }
 
 message Empty {
@@ -20,7 +20,7 @@ message GetMusicLoverRequest {
 }
 
 message GetAllMusicLoversReply {
-      repeated  MusicLover music_lovers = 1;
+      repeated  MusicLoverReply music_lovers = 1;
 }
 
 message CreateMusicLoverRequest {
@@ -29,11 +29,10 @@ message CreateMusicLoverRequest {
 }
 
 
-message MusicLover {
+message MusicLoverReply {
     // Reply contains the greeting message
     int32 id = 1;
     string name = 2;
     repeated string favorite_songs = 3;
     string message = 4;
 }
-
