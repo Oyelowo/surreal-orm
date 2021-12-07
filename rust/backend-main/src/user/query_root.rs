@@ -1,6 +1,8 @@
 
 use super::model::UserData;
-use super::query::User;
+//use super::query::User;
+// use super::User;
+use super::query_user::User;
 
 use async_graphql::*;
 

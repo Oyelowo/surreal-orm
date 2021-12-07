@@ -1,6 +1,6 @@
-use super::query::User;
-use std::rc::Rc;
-use std::cell::RefCell;
+// use super::query::User;
+// use super::User;
+use super::query_user::User;
 
 #[derive(Clone)]
 pub struct UserData {
