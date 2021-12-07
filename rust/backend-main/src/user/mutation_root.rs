@@ -1,9 +1,8 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 use async_graphql::*;
-use super::query::User;
+use crate::user::{User, UserInput};
 use super::model::UserData;
-use super::inputs::UserInput;
 
 #[derive(SimpleObject)]
 #[graphql(complex)] // NOTE: If you want the `ComplexObject` macro to take effect, this `complex` attribute is required.
@@ -24,11 +23,11 @@ pub struct UserMutationRoot;
 
 #[Object]
 impl UserMutationRoot {
-    async fn create_user(&self, #[graphql(desc = "new user")]user: UserInput) -> User {
+    async fn create_user(&self, #[graphql(desc = "id of the droid")]user_input: UserInput) -> User {
         User {
-            id: user.id,
-            name: user.name,
-            age: user.age,
+            id: user_input.id,
+            name: user_input.name,
+            age: user_input.age,
             family_count: 5
         }
     }

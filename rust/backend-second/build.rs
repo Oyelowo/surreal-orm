@@ -1,12 +1,12 @@
-use anyhow::{Context, Result};
+use anyhow::{Result};
 
 
 fn main()-> Result<()>  {
-    let files = &["helloworld/helloworld.proto", "helloworld/music_lovers.proto"];
-    let dirs = &["../protobuf"];
+    let files = &["helloworld.proto", "music.proto"];
+    let dirs = &["protobuf"];
 
     tonic_build::configure().build_server(true).build_client(true)
-    .out_dir("./src/grpc_generated_proto")
+    // .out_dir("./grpc_generated_proto")
     .compile(files, dirs)
     .unwrap_or_else(|e| panic!("protobuf compilation failed: {}", e));
 

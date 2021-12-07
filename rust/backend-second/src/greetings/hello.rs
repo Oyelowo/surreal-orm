@@ -1,10 +1,7 @@
-use anyhow::{Context, Result};
-use tonic::{transport::Server, Request, Response, Status};
+use anyhow::{Result};
+use tonic::{Request, Response, Status};
 pub mod hello_world {
-    // #[path = "grpc_generated_proto.hello_world.rs"]
-    // pub mod hello_world;
-    //pub mod hello_world;
-    tonic::include_proto!("helloworld");
+   tonic::include_proto!("helloworld");
 }
 
 use hello_world::greeter_server::{Greeter, GreeterServer};
@@ -22,29 +19,19 @@ impl Greeter for MyGreeter {
         println!("Got a request: {:?}", request);
 
         let reply = hello_world::HelloReply {
-            message: format!("Hello {}!", request.get_ref().name).into(),
+            message: format!("Hello {}!", request.into_inner().name).into(),
         };
 
         Ok(Response::new(reply))
     }
 }
 
-pub struct GreeterApp {
-    server: GreeterServer<MyGreeter>,
-}
+pub struct GreeterApp {}
 
 impl GreeterApp {
-    fn new() ->  GreeterServer<MyGreeter>  {
+    pub fn new() -> GreeterServer<MyGreeter> {
         let greeter = MyGreeter::default();
-        let greeter:  GreeterServer<MyGreeter>  = GreeterServer::new(greeter);
-return greeter;
-        // Self { server: greeter }
+        let greeter = GreeterServer::new(greeter);
+        return greeter;
     }
-}
-
-pub fn get_greeter_server() -> GreeterServer<MyGreeter> {
-    let greeter = MyGreeter::default();
-
-    let greeter = GreeterServer::new(greeter);
-    return greeter;
 }

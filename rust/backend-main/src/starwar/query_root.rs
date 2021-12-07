@@ -3,7 +3,9 @@
 
 // use crate::starwars::model::{StarWarsChar};
 use super::model::StarWars;
-use super::query::{Droid, Human};
+// use super::query::{Droid, Human};
+use super::query_human::{Human};
+use super::query_droid::{Droid};
 use super::type_gql::{Character, Episode, StarWarsChar};
 use async_graphql::{
     connection::{query, Connection, Edge, EmptyFields},

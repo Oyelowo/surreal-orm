@@ -1,14 +1,30 @@
 #![warn(unused_imports)]
 use actix_web::{guard, web, App, HttpResponse, HttpServer, Result};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
+use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{Request, Response};
-use backend_main::{
-    get_graphql_schema,
-    GraphQLSchema,
-    starwar::{model::StarWars},
-    user::model::UserData,
-};
+use std::{env};
 use common::{self, alt_good_morning, good_morning, maths, sum};
+
+pub mod starwar;
+pub mod user;
+
+use starwar::{StarWarQueryRoot, StarWars};
+use user::{UserData, UserMutationRoot, UserQueryRoot};
+
+#[derive(MergedObject, Default)]
+pub struct Query(StarWarQueryRoot, UserQueryRoot);
+
+#[derive(MergedObject, Default)]
+pub struct Mutation(UserMutationRoot);
+
+pub type GraphQLSchema = Schema<Query, Mutation, EmptySubscription>;
+// pub type GraphQLSchema = Schema<Query, EmptyMutation, EmptySubscription>;
+
+pub fn get_graphql_schema() -> SchemaBuilder<Query, Mutation, EmptySubscription> {
+    return Schema::build(Query::default(), Mutation::default(), EmptySubscription);
+}
+
 
 async fn index(schema: web::Data<GraphQLSchema>, req: Request) -> Response {
     schema.execute(req.into_inner()).await.into()
@@ -22,9 +38,28 @@ async fn index_playground() -> Result<HttpResponse> {
         )))
 }
 
+
+// #[derive(Serialize)]
+// enum ENV {
+//     DEVEVELOPMENT,
+//     PRODUCTION,
+//     STAGING
+// }
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let schema = get_graphql_schema().data(StarWars::new()).data(UserData::new()).limit_depth(5).finish();
+    let env = env::var("RUST_ENV").unwrap_or("development".to_string());
+    let limit = if env == "development" {
+        usize::max_value()
+    } else {
+        5
+    };
+    let schema = get_graphql_schema()
+        .data(StarWars::new())
+        .data(UserData::new())
+        .limit_depth(limit)
+        // .limit_depth(5) // This and also limi_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
+        .finish();
 
     example_shared_libaray();
     println!("Playground: http://localhost:8000");
@@ -39,9 +74,6 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
-
-
-
 
 fn example_shared_libaray() {
     let sum = sum!(3, 3, 5, 6);
