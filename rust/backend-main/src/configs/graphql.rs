@@ -66,24 +66,4 @@ impl GraphQlApp {
 
         Ok(schema)
     }
-    pub fn setup2() -> anyhow::Result<Schema<Query, Mutation, EmptySubscription>> {
-        let env = Environemnt::try_from(
-            env::var("RUST_ENV").unwrap_or_else(|e| format!("problem:{:?}", e)),
-        )?;
-
-        use Environemnt::*;
-        let limit = match env {
-            LOCAL | DEVEVELOPMENT | STAGING => usize::max_value(),
-            _ => 5,
-        };
-
-        let schema = get_graphql_schema()
-            .data(StarWars::new())
-            .data(UserData::new())
-            .limit_depth(limit)
-            // .limit_depth(5) // This and also limi_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
-            .finish();
-
-        Ok(schema)
-    }
 }
