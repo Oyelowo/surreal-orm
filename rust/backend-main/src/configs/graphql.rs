@@ -34,7 +34,6 @@ pub async fn index(schema: web::Data<GraphQLSchema>, req: Request) -> Response {
     schema.execute(req.into_inner()).await.into()
 }
 
-
 pub async fn index_playground() -> HttpResponse {
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
@@ -46,10 +45,8 @@ pub async fn index_playground() -> HttpResponse {
 pub struct GraphQlApp;
 
 impl GraphQlApp {
-    pub fn setup() -> Result<Schema<Query, Mutation, EmptySubscription>, EnvironmentVariableError> {
-        let env = Environemnt::try_from(
-            env::var("RUST_ENV").unwrap_or_else(|e| format!("problem:{:?}", e)),
-        )?;
+    pub fn setup() -> anyhow::Result<Schema<Query, Mutation, EmptySubscription>> {
+        let env = Environemnt::try_from(env::var("RUST_ENV")?)?;
 
         use Environemnt::*;
         let limit = match env {
