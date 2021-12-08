@@ -4,8 +4,8 @@
 // use crate::starwars::model::{StarWarsChar};
 use super::model::StarWars;
 // use super::query::{Droid, Human};
-use super::query_human::{Human};
-use super::query_droid::{Droid};
+use super::query_droid::Droid;
+use super::query_human::Human;
 use super::type_gql::{Character, Episode, StarWarsChar};
 use async_graphql::{
     connection::{query, Connection, Edge, EmptyFields},
@@ -27,9 +27,21 @@ impl StarWarQueryRoot {
     ) -> Character<'a> {
         let star_wars = ctx.data_unchecked::<StarWars>();
         if episode == Episode::Empire {
-            Human(star_wars.chars.get(star_wars.luke).expect("Getting starwars cha failed")).into()
+            Human(
+                star_wars
+                    .chars
+                    .get(star_wars.luke)
+                    .expect("Getting starwars cha failed"),
+            )
+            .into()
         } else {
-            Droid(star_wars.chars.get(star_wars.artoo).expect("Getting starwars cha failed")).into()
+            Droid(
+                star_wars
+                    .chars
+                    .get(star_wars.artoo)
+                    .expect("Getting starwars cha failed"),
+            )
+            .into()
         }
     }
 

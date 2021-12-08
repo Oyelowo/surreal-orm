@@ -1,8 +1,5 @@
-use std::rc::Rc;
-use std::cell::RefCell;
 use async_graphql::*;
-use crate::user::{User, UserInput};
-use super::model::UserData;
+use super::{User, UserInput};
 
 #[derive(SimpleObject)]
 #[graphql(complex)] // NOTE: If you want the `ComplexObject` macro to take effect, this `complex` attribute is required.
