@@ -1,22 +1,25 @@
-# Leveraging the pre-built Docker images with 
-# cargo-chef and the Rust toolchain
-FROM lukemathwalker/cargo-chef:latest-rust-1.53.0 AS chef
+FROM rust as planner
 WORKDIR app
+# We only pay the installation cost once, 
+# it will be cached from the second build onwards
+RUN cargo install cargo-chef 
+COPY ../ .
+RUN cargo chef prepare  --recipe-path recipe.json
 
-FROM chef AS planner
-COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
-
-FROM chef AS builder 
+FROM rust as cacher
+WORKDIR app
+RUN cargo install cargo-chef
 COPY --from=planner /app/recipe.json recipe.json
-# Build dependencies - this is the caching Docker layer!
 RUN cargo chef cook --release --recipe-path recipe.json
-# Build application
+
+FROM rust as builder
+WORKDIR app
 COPY . .
+# Copy over the cached dependencies
+COPY --from=cacher /app/target target
 RUN cargo build --release --bin app
 
-# We do not need the Rust toolchain to run the binary!
-FROM debian:bullseye-slim AS runtime
+FROM rust as runtime
 WORKDIR app
 COPY --from=builder /app/target/release/app /usr/local/bin
-ENTRYPOINT ["/usr/local/bin/app"]
+ENTRYPOINT ["./usr/local/bin/app"]
