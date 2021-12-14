@@ -1,8 +1,5 @@
 use anyhow::Result;
-use std::env;
 use thiserror::Error;
-
-
 
 #[derive(Error, Debug)]
 pub enum EnvironmentVariableError {
@@ -10,7 +7,7 @@ pub enum EnvironmentVariableError {
     NotSet,
 
     #[error("environment variable: `{name}` is invalid. Check that it is correctly spelt")]
-    Invalid{name: String},
+    Invalid { name: String },
 
     #[error("unknown environment variable error. You are on your own. lol")]
     Unknown,
@@ -35,12 +32,8 @@ impl TryFrom<String> for Environemnt {
             "staging" => Ok(STAGING),
             "development" => Ok(DEVEVELOPMENT),
             "production" => Ok(PRODUCTION),
-
-            err => match err {
-                "" => Err(EnvironmentVariableError::NotSet),
-                _ => Err(EnvironmentVariableError::Invalid{name: err.into()}),
-            },
+            "" => Err(EnvironmentVariableError::NotSet),
+            err => Err(EnvironmentVariableError::Invalid { name: err.into() }),
         }
     }
 }
-

@@ -4,18 +4,16 @@ mod starwar;
 #[path = "../user/mod.rs"]
 mod user;
 
-use actix_web::{guard, web, App, HttpResponse, HttpServer};
-use anyhow::{Context, Result};
+use actix_web::{web, HttpResponse};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{Request, Response};
-use common::{self, alt_good_morning, good_morning, maths, sum};
-use std::env::{self, VarError};
+use std::env::{self};
 
 use starwar::{StarWarQueryRoot, StarWars};
 use user::{UserData, UserMutationRoot, UserQueryRoot};
 
-use super::configuration::{Environemnt, EnvironmentVariableError};
+use super::configuration::{Environemnt};
 
 #[derive(MergedObject, Default)]
 pub struct Query(StarWarQueryRoot, UserQueryRoot);
