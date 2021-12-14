@@ -1,14 +1,14 @@
 ARG BASE_IMAGE=rust:1.57
 
-FROM $BASE_IMAGE as planner
+FROM $BASE_IMAGE as rust-with-chef
 WORKDIR /app
 RUN cargo install cargo-chef --version 0.1.33
+
+FROM rust-with-chef as planner
 COPY . .
 RUN cargo chef prepare  --recipe-path recipe.json
 
-FROM $BASE_IMAGE as cacher
-WORKDIR /app
-RUN cargo install cargo-chef --version 0.1.33
+FROM rust-with-chef as cacher
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
