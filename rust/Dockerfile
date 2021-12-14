@@ -1,39 +1,43 @@
-# Leveraging the pre-built Docker images with 
-# cargo-chef and the Rust toolchain
-FROM lukemathwalker/cargo-chef:latest-rust-1.57.0 AS chef
+ARG BASE_IMAGE=rust:1.57
+
+FROM $BASE_IMAGE as planner
 WORKDIR /app
-
-FROM chef AS planner
+RUN cargo install cargo-chef --version 0.1.33
 COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
+RUN cargo chef prepare  --recipe-path recipe.json
 
-
-## DEPENDENNCIES
-FROM chef AS builder-dependencies-only
+FROM $BASE_IMAGE as cacher
+WORKDIR /app
+RUN cargo install cargo-chef --version 0.1.33
 COPY --from=planner /app/recipe.json recipe.json
-# Build dependencies - this is the caching Docker layer!
 RUN cargo chef cook --release --recipe-path recipe.json
-# Build application
-COPY . .
 
+
+FROM $BASE_IMAGE AS shared
+WORKDIR /app
+COPY . .
+# Copy over the cached dependencies
+COPY --from=cacher /app/target target
+COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
 ## FIRST BACKEND SERVICE
-FROM builder-dependencies-only AS builder-backend-main 
+FROM shared AS builder-backend-main 
 RUN cargo build --release -p backend-main
 
 # We do not need the Rust toolchain to run the binary!
 FROM gcr.io/distroless/cc AS backend-main
 WORKDIR /app
-COPY --from=builder-backend-main /app/target/release/backend-main /usr/local/bin
-ENTRYPOINT ["/usr/local/bin/app"]
+COPY --from=builder-backend-main /app/target/release/backend-main ./
+ENV RUST_ENV=local
+ENTRYPOINT ["./backend-main"]
 
 ## SECOND BACKEND SERVICE
-FROM builder-dependencies-only AS builder-second
+FROM shared AS builder-second
 RUN rustup component add rustfmt
 RUN cargo build --release -p backend-second
 
 # We do not need the Rust toolchain to run the binary!
 FROM gcr.io/distroless/cc AS backend-second
 WORKDIR /app
-COPY --from=builder-second app/target/release/backend-main /usr/local/bin
-ENTRYPOINT ["/usr/local/bin/app"]
+COPY --from=builder-second app/target/release/backend-second ./
+ENTRYPOINT ["./backend-second"]
