@@ -2,11 +2,18 @@
 use actix_web::{guard, web, App, HttpServer};
 
 mod configs;
-use configs::{index, index_playground, GraphQlApp};
+use configs::{index, index_playground, Configs, GraphQlApp};
+
+use crate::configs::ApplicationConfigs;
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    println!("Playground: http://localhost:8000");
+async fn main() -> anyhow::Result<()> {
+    let Configs {
+        application: ApplicationConfigs { domain, .. },
+        ..
+    } = Configs::init();
+
+    println!("Playground: {}", domain);
 
     let schema = GraphQlApp::setup().expect("Problem setting up graphql");
 
@@ -16,7 +23,9 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/").guard(guard::Post()).to(index))
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
     })
-    .bind("127.0.0.1:8000")?
+    .bind(domain)?
     .run()
-    .await 
+    .await?;
+
+    Ok(())
 }

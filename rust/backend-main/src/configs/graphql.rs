@@ -13,7 +13,9 @@ use std::env::{self};
 use starwar::{StarWarQueryRoot, StarWars};
 use user::{UserData, UserMutationRoot, UserQueryRoot};
 
-use super::configuration::{Environemnt};
+use crate::configs::Configs;
+
+use super::configuration::Environemnt;
 
 #[derive(MergedObject, Default)]
 pub struct Query(StarWarQueryRoot, UserQueryRoot);
@@ -44,10 +46,10 @@ pub struct GraphQlApp;
 
 impl GraphQlApp {
     pub fn setup() -> anyhow::Result<Schema<Query, Mutation, EmptySubscription>> {
-        let env = Environemnt::try_from(env::var("RUST_ENV")?)?;
-
+        let Configs {environment, ..} = Configs::init();
+        
         use Environemnt::*;
-        let (limit_depth, limit_complexity) = match env {
+        let (limit_depth, limit_complexity) = match environment {
             LOCAL | DEVEVELOPMENT | STAGING => (usize::max_value(), usize::max_value()),
             _ => (5, 7),
         };

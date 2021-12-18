@@ -28,9 +28,10 @@ RUN cargo build --release -p backend-main
 # We do not need the Rust toolchain to run the binary!
 FROM gcr.io/distroless/cc AS backend-main
 WORKDIR /app
-COPY --from=builder-backend-main /app/target/release/backend-main ./
+EXPOSE 8000
+COPY --from=builder-backend-main /app/target/release/backend-main /usr/local/bin/backend-main
 ENV RUST_ENV=local
-ENTRYPOINT ["./backend-main"]
+ENTRYPOINT ["/usr/local/bin/backend-main"]
 
 ## SECOND BACKEND SERVICE
 FROM shared AS builder-second
@@ -40,5 +41,5 @@ RUN cargo build --release -p backend-second
 # We do not need the Rust toolchain to run the binary!
 FROM gcr.io/distroless/cc AS backend-second
 WORKDIR /app
-COPY --from=builder-second app/target/release/backend-second ./
-ENTRYPOINT ["./backend-second"]
+COPY --from=builder-second app/target/release/backend-second /usr/local/bin/backend-second
+ENTRYPOINT ["/usr/local/bin/backend-second"]

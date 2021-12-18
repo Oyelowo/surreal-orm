@@ -68,7 +68,7 @@ pub fn new() -> Self {
     }
     
     
-        pub fn delete_user(&mut self, id: i32) -> User {
+        pub fn _delete_user(&mut self, id: i32) -> User {
             let position = self.users.iter().position(|u| u.id == id).unwrap();
 
             let k = self.users.remove(position);
