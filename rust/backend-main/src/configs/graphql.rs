@@ -46,10 +46,10 @@ pub struct GraphQlApp;
 
 impl GraphQlApp {
     pub fn setup() -> anyhow::Result<Schema<Query, Mutation, EmptySubscription>> {
-        let Configs {environment, ..} = Configs::init();
-        
+        let Configs { application, .. } = Configs::init();
+
         use Environemnt::*;
-        let (limit_depth, limit_complexity) = match environment {
+        let (limit_depth, limit_complexity) = match application.environment {
             LOCAL | DEVEVELOPMENT | STAGING => (usize::max_value(), usize::max_value()),
             _ => (5, 7),
         };

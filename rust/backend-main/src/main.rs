@@ -4,14 +4,10 @@ use actix_web::{guard, web, App, HttpServer};
 mod configs;
 use configs::{index, index_playground, Configs, GraphQlApp};
 
-use crate::configs::ApplicationConfigs;
-
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
-    let Configs {
-        application: ApplicationConfigs { domain, .. },
-        ..
-    } = Configs::init();
+    let Configs { application, .. } = Configs::init();
+    let domain = application.derive_domain();
 
     println!("Playground: {}", domain);
 
