@@ -1,6 +1,4 @@
 use serde::Deserialize;
-use thiserror::Error;
-
 
 #[derive(PartialEq, Debug, Deserialize)]
 pub enum Environemnt {
