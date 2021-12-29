@@ -23,23 +23,26 @@ COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
 ## FIRST BACKEND SERVICE
 FROM shared AS builder-backend-main 
-RUN cargo build --release -p backend-main
+RUN cargo build -p backend-main
 
 # We do not need the Rust toolchain to run the binary!
 FROM gcr.io/distroless/cc AS backend-main
 WORKDIR /app
 EXPOSE 8000
-COPY --from=builder-backend-main /app/target/release/backend-main /usr/local/bin/backend-main
+ENV HOST=0.0.0.0
+ENV PORT=8000
+
+COPY --from=builder-backend-main /app/target/debug/backend-main /usr/local/bin/backend-main
 ENV RUST_ENV=local
 ENTRYPOINT ["/usr/local/bin/backend-main"]
 
 ## SECOND BACKEND SERVICE
 FROM shared AS builder-second
 RUN rustup component add rustfmt
-RUN cargo build --release -p backend-second
+RUN cargo build -p backend-second
 
 # We do not need the Rust toolchain to run the binary!
 FROM gcr.io/distroless/cc AS backend-second
 WORKDIR /app
-COPY --from=builder-second app/target/release/backend-second /usr/local/bin/backend-second
+COPY --from=builder-second app/target/debug/backend-second /usr/local/bin/backend-second
 ENTRYPOINT ["/usr/local/bin/backend-second"]
