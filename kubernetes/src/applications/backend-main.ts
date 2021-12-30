@@ -1,15 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
-import { Namespace } from "@pulumi/kubernetes/core/v1";
 import * as kx from "@pulumi/kubernetesx";
-
-
-export const namespace = new Namespace('dev')
-// Instantiate a Kubernetes Provider and specify the render directory.
-export const provider = new k8s.Provider("render-yaml", {
-  namespace: namespace.id,
-  renderYamlToDirectory: "rendered",
-});
-
+import { provider } from "./shared";
 
 type Memory = `${number}${
   | "E"
@@ -53,7 +44,7 @@ export const configMap = new kx.ConfigMap(
   { provider }
 );
 
-// Create a Kubernetes fSecret.
+// Create a Kubernetes Secret.
 export const secret = new kx.Secret(
   "secret",
   {
@@ -63,6 +54,7 @@ export const secret = new kx.Secret(
   },
   { provider }
 );
+
 
 // Define a Pod.
 export const pb = new kx.PodBuilder({
@@ -75,7 +67,7 @@ export const pb = new kx.PodBuilder({
         HOST: "",
         PORT: "",
       },
-      image: "oyelowo/web",
+      image: "nginx",
       ports: { http: 8080 },
       volumeMounts: [],
       resources: {
@@ -94,7 +86,7 @@ export const pb = new kx.PodBuilder({
 
 // Create a Kubernetes Deployment.
 export const deployment = new kx.Deployment(
-  "web",
+  "nginx",
   {
     spec: pb.asDeploymentSpec({ replicas: 3 }),
   },
@@ -103,8 +95,8 @@ export const deployment = new kx.Deployment(
 
 // // Create a Kubernetes Service.
 export const service = deployment.createService({
-  type: kx.types.ServiceType.ClusterIP,
-
-
+    type: kx.types.ServiceType.ClusterIP,
 });
 
+
+console.log("rerekrekrek",service.urn)
