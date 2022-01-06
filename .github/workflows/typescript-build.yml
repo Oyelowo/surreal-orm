@@ -1,16 +1,10 @@
-name: Frontend_Main
+name: Typescript applications build
 
 on:
   push:
     branches: [master]
     paths: 
       - 'typescript/**'
-  pull_request:
-    branches: [master]
-    paths: 
-      - 'typescript/**'
-    
-
 
 env:
   CARGO_TERM_COLOR: always
@@ -20,39 +14,7 @@ env:
   IMAGE_WITH_TAG_SLIM: ghcr.io/oyelowo/$IMAGE.slim:${GITHUB_REF#refs/heads/}-$GITHUB_SHA
 
 jobs:
-  build:
-    name: build and test
-    timeout-minutes: 10
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: typescript
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v2
-        with:
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-          node-version: '16'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build & Unit Test
-        run: npm run test
-
-      - name: Lint
-        run: npm run lint
-
-      # - name: E2E Tests
-      #   run: npm run cypress:run
-
-
-  build_web:
+  build_and_push_typescript_applications:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -70,13 +32,13 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: build docker image
+      - name: build web docker image
         run: docker build -f Dockerfile.prod --target web  -t ${{ env.IMAGE_WITH_TAG }}  .
 
-      - name: Slim down docker image
+      - name: Slim down web docker image
         run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  ${{ env.IMAGE_WITH_TAG }} --tag ${{ env.IMAGE_WITH_TAG_SLIM }}
 
-      - name: Push docker image
+      - name: Push web docker image
         # docker slim above slims down the image and append ".slim" to the original image tag
         run: docker push  ${{ env.IMAGE_WITH_TAG_SLIM }}
         
