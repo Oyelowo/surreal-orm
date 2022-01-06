@@ -9,7 +9,7 @@ clippy-fix:
 	cargo clippy --fix
 
 
-# backend-main
+# 1. backend-main
 run-backend-main:
 	cargo run -p backend-main --bin backend-main
 
@@ -21,7 +21,7 @@ deploy-backend-main:
 	docker run -p 3000:3000 oyelowo/backend-main 
 
 
-# backend-second
+# 2. backend-second
 run-backend-second:
 	cargo run -p backend-second --bin backend-second
 
