@@ -1,9 +1,9 @@
 format:
-	cargo fmt
+	cargo fmt --al -- --check
 	cargo clippy -fix
 
 check:
-	cargo clippy
+	cargo clippy -- -D  warnings
 
 clippy-fix:
 	cargo clippy --fix

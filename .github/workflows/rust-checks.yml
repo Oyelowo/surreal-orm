@@ -78,12 +78,18 @@ jobs:
       run:
         working-directory: rust
     steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
       - run: rustup component add clippy
       - run: cargo clippy -- -D warnings
-        
+
+
   build_and_push_rust_applications:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged
+    if: github.event.pull_request.merged || github.ref == 'refs/heads/master'
     defaults:
       run:
         working-directory: rust
@@ -99,7 +105,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      # Build and push image for backend-main
+      # 1. APPLICATION 1: Build and push image for backend-main
       - name: build backend-main docker image
         run:  docker build -f Dockerfile.prod --target backend-main  -t ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }} .
 
@@ -111,7 +117,7 @@ jobs:
         run: docker push  ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
 
 
-      # Build and push image for backend-second
+      # 2. APPLICATION 2: Build and push image for backend-second
       - name: build backend-second docker image
         run:  docker build -f Dockerfile.prod --target backend-second  -t ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }} .
 
