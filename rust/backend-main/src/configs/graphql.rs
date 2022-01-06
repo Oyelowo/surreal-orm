@@ -8,7 +8,7 @@ use actix_web::{web, HttpResponse};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{Request, Response};
-use std::env::{self};
+
 
 use starwar::{StarWarQueryRoot, StarWars};
 use user::{UserData, UserMutationRoot, UserQueryRoot};
@@ -27,7 +27,7 @@ pub type GraphQLSchema = Schema<Query, Mutation, EmptySubscription>;
 // pub type GraphQLSchema = Schema<Query, EmptyMutation, EmptySubscription>;
 
 pub fn get_graphql_schema() -> SchemaBuilder<Query, Mutation, EmptySubscription> {
-    return Schema::build(Query::default(), Mutation::default(), EmptySubscription);
+    Schema::build(Query::default(), Mutation::default(), EmptySubscription)
 }
 
 pub async fn index(schema: web::Data<GraphQLSchema>, req: Request) -> Response {

@@ -19,7 +19,7 @@ impl Greeter for MyGreeter {
         println!("Got a request: {:?}", request);
 
         let reply = hello_world::HelloReply {
-            message: format!("Hello {}!", request.into_inner().name).into(),
+            message: format!("Hello {}!", request.into_inner().name),
         };
 
         Ok(Response::new(reply))
@@ -31,7 +31,7 @@ pub struct GreeterApp {}
 impl GreeterApp {
     pub fn new() -> GreeterServer<MyGreeter> {
         let greeter = MyGreeter::default();
-        let greeter = GreeterServer::new(greeter);
-        return greeter;
+        
+        GreeterServer::new(greeter)
     }
 }

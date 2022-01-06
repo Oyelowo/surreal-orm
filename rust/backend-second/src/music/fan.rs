@@ -27,8 +27,8 @@ impl Fan for MyMusicLovers {
 
         Ok(Response::new(MusicLoverReply {
             id: all_music_lovers.len() as u32 + 1,
-            name: name,
-            favorite_songs: favorite_songs,
+            name,
+            favorite_songs,
             message: "Fakely just created".to_string(),
         }))
     }

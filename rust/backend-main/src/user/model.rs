@@ -54,7 +54,7 @@ pub fn new() -> Self {
             },
         ];
 
-        return Self { users };
+        Self { users }
     }
 
     pub fn get_user(&self, id: i32) -> User {
@@ -71,10 +71,10 @@ pub fn new() -> Self {
         pub fn _delete_user(&mut self, id: i32) -> User {
             let position = self.users.iter().position(|u| u.id == id).unwrap();
 
-            let k = self.users.remove(position);
+            
 
             // let k = self.users.into_iter().find(|u| u.id == id).unwrap();
-            k
+            self.users.remove(position)
         }
 
 }
