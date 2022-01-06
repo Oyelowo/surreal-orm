@@ -1,0 +1,75 @@
+name: Rust applications checks
+
+on:
+  push:
+    branches: [master]
+    paths: 
+      - 'rust/**'
+
+  pull_request:
+    paths: 
+      - 'rust/**'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check_and_test_rust_monorepo:
+    name: Run code checks for rust workspace
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Run cargo test
+        run: cargo test
+        
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - run: rustup component add rustfmt
+        working-directory: backend/
+      - run: cargo fmt --all -- --check
+        working-directory: backend/
+        
+        
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - run: rustup component add clippy
+      - run: cargo clippy -- -D warnings
