@@ -10,4 +10,4 @@ mod query_root;
 //     pub use super::{query_droid::Droid, query_human::Human, query_root::StarWarQueryRoot};
 // }
 
-pub use self::{query_droid::Droid, query_human::Human, query_root::StarWarQueryRoot, model::*};
+pub use self::{model::*, query_droid::Droid, query_human::Human, query_root::StarWarQueryRoot};

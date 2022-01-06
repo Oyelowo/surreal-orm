@@ -1,5 +1,4 @@
-
 mod configuration;
 mod graphql;
 
-pub use self::{graphql::*, configuration::*};
+pub use self::{configuration::*, graphql::*};

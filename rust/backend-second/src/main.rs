@@ -1,9 +1,8 @@
 mod greetings;
 mod music;
 
-
 use anyhow::Result;
-use greetings::{GreeterApp};
+use greetings::GreeterApp;
 use music::MusicFanApp;
 use tonic::transport::Server;
 
@@ -15,10 +14,8 @@ async fn main() -> Result<()> {
         .accept_http1(true)
         .add_service(GreeterApp::new())
         .add_service(MusicFanApp::new())
-
         .serve(addr)
         .await?;
-
 
     Ok(())
 }

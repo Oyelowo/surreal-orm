@@ -21,7 +21,7 @@ mod model;
 // }
 // pub use self::type_gql::UserInput;
 
-pub use self::{type_gql::*, mutation_root::*, query_root::*, query_user::*, model::*};
+pub use self::{model::*, mutation_root::*, query_root::*, query_user::*, type_gql::*};
 
 // pub mod inputs {
 //     pub use super::type_gql::UserInput;

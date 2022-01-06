@@ -1,6 +1,5 @@
 use common::{self, alt_good_morning, good_morning, maths, sum};
 
-
 fn main() {
     example_shared_libaray();
 }

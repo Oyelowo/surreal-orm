@@ -9,7 +9,6 @@ use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{Request, Response};
 
-
 use starwar::{StarWarQueryRoot, StarWars};
 use user::{UserData, UserMutationRoot, UserQueryRoot};
 

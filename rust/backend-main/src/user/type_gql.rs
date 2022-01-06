@@ -1,7 +1,5 @@
 use async_graphql::*;
 
-
-
 #[derive(InputObject)]
 pub struct UserInput {
     pub id: i32,

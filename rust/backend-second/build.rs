@@ -1,27 +1,24 @@
-use anyhow::{Result};
+use anyhow::Result;
 
-
-fn main()-> Result<()>  {
+fn main() -> Result<()> {
     let files = &["helloworld.proto", "music.proto"];
     let dirs = &["protobuf"];
 
-    tonic_build::configure().build_server(true).build_client(true)
-    // .out_dir("./grpc_generated_proto")
-    .compile(files, dirs)
-    .unwrap_or_else(|e| panic!("protobuf compilation failed: {}", e));
+    tonic_build::configure()
+        .build_server(true)
+        .build_client(true)
+        // .out_dir("./grpc_generated_proto")
+        .compile(files, dirs)
+        .unwrap_or_else(|e| panic!("protobuf compilation failed: {}", e));
 
-       // recompile protobufs only if any of the proto files changes.
+    // recompile protobufs only if any of the proto files changes.
     for file in files {
         println!("cargo:rerun-if-changed={}", file);
     }
     Ok(())
 }
 
-
-
-
-
-/* 
+/*
 use std::env;
 use std::path::PathBuf;
 

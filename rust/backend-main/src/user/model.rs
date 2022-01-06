@@ -8,7 +8,7 @@ pub struct UserData {
 }
 
 impl UserData {
-pub fn new() -> Self {
+    pub fn new() -> Self {
         let users = vec![
             User {
                 id: 1,
@@ -62,21 +62,17 @@ pub fn new() -> Self {
         // let user = self.users.into_iter().find(|u| u.id == id).unwrap();
         user
     }
-    
+
     pub fn get_users(self) -> Vec<User> {
         self.users.into_iter().collect()
     }
-    
-    
-        pub fn _delete_user(&mut self, id: i32) -> User {
-            let position = self.users.iter().position(|u| u.id == id).unwrap();
 
-            
+    pub fn _delete_user(&mut self, id: i32) -> User {
+        let position = self.users.iter().position(|u| u.id == id).unwrap();
 
-            // let k = self.users.into_iter().find(|u| u.id == id).unwrap();
-            self.users.remove(position)
-        }
-
+        // let k = self.users.into_iter().find(|u| u.id == id).unwrap();
+        self.users.remove(position)
+    }
 }
 
 // struct UserData2 {
@@ -138,12 +134,11 @@ pub fn new() -> Self {
 //         // let k = self.users.into_iter().find(|u| u.id == id).unwrap();
 //         *k
 //     }
-    
+
 //     pub fn get_all_users(&self) -> Vec<&User> {
 //         self.users.borrow().iter().collect()
 //     }
-    
-    
+
 //         pub fn remove_fake_user(&self, id: i32) -> User {
 //             let position = self.users.borrow().iter().position(|u| u.id == id).unwrap();
 

@@ -1,7 +1,7 @@
-use anyhow::{Result};
+use anyhow::Result;
 use tonic::{Request, Response, Status};
 pub mod hello_world {
-   tonic::include_proto!("helloworld");
+    tonic::include_proto!("helloworld");
 }
 
 use hello_world::greeter_server::{Greeter, GreeterServer};
@@ -31,7 +31,7 @@ pub struct GreeterApp {}
 impl GreeterApp {
     pub fn new() -> GreeterServer<MyGreeter> {
         let greeter = MyGreeter::default();
-        
+
         GreeterServer::new(greeter)
     }
 }

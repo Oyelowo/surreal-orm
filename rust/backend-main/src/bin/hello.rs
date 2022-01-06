@@ -37,10 +37,7 @@ impl TryFrom<String> for Environemnt {
     }
 }
 
-
-
 fn main() -> Result<()> {
-
     let env = Environemnt::try_from(env::var("RUST_ENV")?)?;
 
     if env == Environemnt::Development {

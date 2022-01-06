@@ -1,6 +1,5 @@
 use async_graphql::*;
 
-
 #[derive(SimpleObject, Clone)]
 pub struct User {
     pub id: i32,

@@ -1,7 +1,7 @@
 // all the Product related GraphQL types also query and mutation included (export a string containing GraphQL types
 //use super::query::{Droid, Human};
-use super::query_human::{Human};
-use super::query_droid::{Droid};
+use super::query_droid::Droid;
+use super::query_human::Human;
 use async_graphql::{Enum, Interface};
 use common::pub_struct;
 

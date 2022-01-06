@@ -2,7 +2,7 @@ use async_graphql::{Context, Object};
 
 use super::model::StarWars;
 // use super::Human;
-use super::query_human::{Human};
+use super::query_human::Human;
 //use super::type_gql::{Character, Episode, StarWarsChar};
 // use self::{Character, Episode, StarWarsChar};
 use super::type_gql::{Character, Episode, StarWarsChar};
