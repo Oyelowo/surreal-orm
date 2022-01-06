@@ -43,5 +43,6 @@ RUN cargo build --release -p backend-second
 # We do not need the Rust toolchain to run the binary!
 FROM gcr.io/distroless/cc AS backend-second
 WORKDIR /app
+EXPOSE 50051
 COPY --from=builder-second app/target/release/backend-second /usr/local/bin/backend-second
 ENTRYPOINT ["/usr/local/bin/backend-second"]
