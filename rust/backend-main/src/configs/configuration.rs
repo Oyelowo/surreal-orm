@@ -3,10 +3,10 @@ use serde::Deserialize;
 #[derive(PartialEq, Debug, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Environemnt {
-    LOCAL,
-    DEVELOPMENT,
-    STAGING,
-    PRODUCTION,
+    Local,
+    Development,
+    Staging,
+    Production,
 }
 
 #[derive(Deserialize, Debug)]

@@ -26,10 +26,10 @@ impl Greeter for MyGreeter {
     }
 }
 
-pub struct GreeterApp {}
+pub struct GreeterApp;
 
 impl GreeterApp {
-    pub fn new() -> GreeterServer<MyGreeter> {
+    pub fn get_server() -> GreeterServer<MyGreeter> {
         let greeter = MyGreeter::default();
 
         GreeterServer::new(greeter)

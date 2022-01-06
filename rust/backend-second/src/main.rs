@@ -12,8 +12,8 @@ async fn main() -> Result<()> {
 
     Server::builder()
         .accept_http1(true)
-        .add_service(GreeterApp::new())
-        .add_service(MusicFanApp::new())
+        .add_service(GreeterApp::get_server())
+        .add_service(MusicFanApp::get_server())
         .serve(addr)
         .await?;
 

@@ -49,7 +49,7 @@ impl GraphQlApp {
 
         use Environemnt::*;
         let (limit_depth, limit_complexity) = match application.environment {
-            LOCAL | DEVELOPMENT | STAGING => (usize::max_value(), usize::max_value()),
+            Local | Development | Staging => (usize::max_value(), usize::max_value()),
             _ => (5, 7),
         };
 

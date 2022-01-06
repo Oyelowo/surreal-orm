@@ -105,10 +105,10 @@ fn get_fake_music_lovers() -> Vec<MusicLoverReply> {
     music_lovers
 }
 
-pub struct MusicFanApp {}
+pub struct MusicFanApp;
 
 impl MusicFanApp {
-    pub fn new() -> FanServer<MyMusicLovers> {
+    pub fn get_server() -> FanServer<MyMusicLovers> {
         FanServer::new(MyMusicLovers::default())
     }
 }

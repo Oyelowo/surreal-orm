@@ -68,9 +68,7 @@ jobs:
           toolchain: stable
           override: true
       - run: rustup component add rustfmt
-        working-directory: backend/
       - run: cargo fmt --all -- --check
-        working-directory: backend/
         
         
   clippy:
