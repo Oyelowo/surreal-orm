@@ -21,7 +21,7 @@ deploy-backend-main:
 	docker run -p 3000:3000 oyelowo/backend-main 
 
 
-# 2. backend-second 
+# 2. backend-second
 run-backend-second:
 	cargo run -p backend-second --bin backend-second
 
