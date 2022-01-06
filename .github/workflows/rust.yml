@@ -1,4 +1,4 @@
-name: Rust applications checks
+name: Rust monorepo CICD
 
 on:
   push:
@@ -12,15 +12,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  CONTAINER_REPOSIT0RY: ghcr.io/oyelowo
-
-  BACKEND_MAIN_IMAGE_NAME: backend-main
-  BACKEND_MAIN_IMAGE_TAG: $GITHUB_REF_NAME-$GITHUB_SHA
-  BACKEND_MAIN_IMAGE_WITH_TAG: $CONTAINER_REPOSIT0RY/$BACKEND_MAIN_IMAGE_NAME:$GITHUB_REF_NAME-$GITHUB_SHA
-
-  BACKEND_SECOND_IMAGE_NAME: backend-second
-  BACKEND_SECOND_IMAGE_TAG: $GITHUB_REF_NAME-$GITHUB_SHA
-  BACKEND_SECOND_IMAGE_WITH_TAG: $CONTAINER_REPOSIT0RY/$BACKEND_SECOND_IMAGE_NAME:$GITHUB_REF_NAME-$GITHUB_SHA
 
 jobs:
   check_and_test_rust_monorepo:
@@ -57,7 +48,7 @@ jobs:
       - name: Run cargo test
         run: cargo test
         
-  fmt:
+  format:
     name: Rustfmt
     runs-on: ubuntu-latest
     defaults:
@@ -89,10 +80,22 @@ jobs:
       - run: cargo clippy -- -D warnings
 
 
+  ############## BUILD AND DEPLOY IMAGES #################
   build_and_push_rust_applications:
-    needs: [check_and_test_rust_monorepo, fmt, clippy]
+    if: github.event.pull_request.merged ||  ${{ github.ref == 'refs/heads/master' }}
+    needs: [check_and_test_rust_monorepo, format, clippy]
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged || github.ref == 'refs/heads/master'
+    env:
+      CONTAINER_REPOSIT0RY: ghcr.io/oyelowo
+
+      BACKEND_MAIN_IMAGE_NAME: backend-main
+      BACKEND_MAIN_IMAGE_TAG: $GITHUB_REF_NAME-$GITHUB_SHA
+      BACKEND_MAIN_IMAGE_WITH_TAG: $CONTAINER_REPOSIT0RY/$BACKEND_MAIN_IMAGE_NAME:$GITHUB_REF_NAME-$GITHUB_SHA
+
+      BACKEND_SECOND_IMAGE_NAME: backend-second
+      BACKEND_SECOND_IMAGE_TAG: $GITHUB_REF_NAME-$GITHUB_SHA
+      BACKEND_SECOND_IMAGE_WITH_TAG: $CONTAINER_REPOSIT0RY/$BACKEND_SECOND_IMAGE_NAME:$GITHUB_REF_NAME-$GITHUB_SHA
+
     defaults:
       run:
         working-directory: rust
