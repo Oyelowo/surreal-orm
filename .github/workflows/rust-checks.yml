@@ -12,6 +12,15 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  CONTAINER_REPOSIT0RY: ghcr.io/oyelowo
+
+  BACKEND_MAIN_IMAGE_NAME: backend-main
+  BACKEND_MAIN_IMAGE_TAG: ${GITHUB_REF#refs/heads/}-$GITHUB_SHA
+  BACKEND_MAIN_IMAGE_WITH_TAG: $CONTAINER_REPOSIT0RY/$BACKEND_MAIN_IMAGE_NAME:$BACKEND_MAIN_IMAGE_TAG
+
+  BACKEND_SECOND_IMAGE_NAME: backend-second
+  BACKEND_SECOND_IMAGE_TAG: ${GITHUB_REF#refs/heads/}-$GITHUB_SHA
+  BACKEND_SECOND_IMAGE_WITH_TAG: $CONTAINER_REPOSIT0RY/$BACKEND_SECOND_IMAGE_NAME:$BACKEND_SECOND_IMAGE_TAG
 
 jobs:
   check_and_test_rust_monorepo:
@@ -73,3 +82,48 @@ jobs:
     steps:
       - run: rustup component add clippy
       - run: cargo clippy -- -D warnings
+        
+  build_and_push_rust_applications:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged
+    defaults:
+      run:
+        working-directory: rust
+        
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      # Build and push image for backend-main
+      - name: build backend-main docker image
+        run:  docker build -f Dockerfile.prod --target backend-main  -t ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }} .
+
+      # This step can be removed if I decide I dont want to slimdown the image further anymore or if docker-slim starts to become problematic
+      - name: Slim down backend-main docker image
+        run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }} --tag ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
+
+      - name: Push backend-main docker image
+        run: docker push  ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
+
+
+      # Build and push image for backend-second
+      - name: build backend-second docker image
+        run:  docker build -f Dockerfile.prod --target backend-second  -t ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }} .
+
+      # This step can be removed if I decide I dont want to slimdown the image further anymore or if docker-slim starts to become problematic
+      - name: Slim down backend-second docker image
+        run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }} --tag ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }}
+
+      - name: Push backend-second docker image
+        run: docker push  ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }}
+        
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+
