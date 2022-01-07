@@ -1,0 +1,30 @@
+FROM node:16.13.1-alpine AS sourcer
+RUN apk update
+WORKDIR /app
+COPY ./typescript .
+# Copies the root and all workspaces `package.json` to /json perserving their parent directories structure
+RUN mkdir /json && find . -type f -name package.json -not -path '*/node_modules/*' | xargs -i cp --parents {} /json
+
+FROM node:16.13.1-alpine AS installer
+RUN apk update
+WORKDIR /app
+COPY --from=sourcer /app/package-lock.json .
+COPY --from=sourcer /json .
+RUN npm i
+
+
+FROM node AS builder
+WORKDIR /app
+COPY --from=installer /app .
+COPY ./typescript .
+RUN npm run build -- --scope=web
+
+
+FROM node:16.13.1-alpine AS web
+WORKDIR /app
+EXPOSE 3000
+COPY --from=builder /app/apps/web/.next/standalone .
+# Also copt the static files into the standalone for nodejs server to serve. This can also be
+# served over the CDN or nginx.
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+CMD ["node", "/app/apps/web/server.js"]
