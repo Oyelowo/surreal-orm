@@ -14,7 +14,7 @@ COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
 
-FROM $BASE_IMAGE AS shared
+FROM $BASE_IMAGE AS base
 WORKDIR /app
 COPY . .
 # Copy over the cached dependencies
@@ -22,7 +22,7 @@ COPY --from=cacher /app/target target
 COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
 ## FIRST BACKEND SERVICE
-FROM shared AS builder-backend-main 
+FROM base AS builder-backend-main 
 RUN cargo build --release -p backend-main
 
 # We do not need the Rust toolchain to run the binary!
@@ -36,7 +36,7 @@ ENV PORT=8000
 ENTRYPOINT ["/usr/local/bin/backend-main"]
 
 ## SECOND BACKEND SERVICE
-FROM shared AS builder-second
+FROM base AS builder-second
 RUN rustup component add rustfmt
 RUN cargo build --release -p backend-second
 

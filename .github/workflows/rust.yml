@@ -85,51 +85,87 @@ jobs:
     if: github.event.pull_request.merged ||  ${{ github.ref == 'refs/heads/master' }}
     needs: [check_and_test_rust_monorepo, format, clippy]
     runs-on: ubuntu-latest
-    env:
-      CONTAINER_REPOSIT0RY: ghcr.io/oyelowo
-
-      BACKEND_MAIN_IMAGE_NAME: backend-main
-      BACKEND_MAIN_IMAGE_TAG: $GITHUB_REF_NAME-$GITHUB_SHA
-      BACKEND_MAIN_IMAGE_WITH_TAG: $CONTAINER_REPOSIT0RY/$BACKEND_MAIN_IMAGE_NAME:$GITHUB_REF_NAME-$GITHUB_SHA
-
-      BACKEND_SECOND_IMAGE_NAME: backend-second
-      BACKEND_SECOND_IMAGE_TAG: $GITHUB_REF_NAME-$GITHUB_SHA
-      BACKEND_SECOND_IMAGE_WITH_TAG: $CONTAINER_REPOSIT0RY/$BACKEND_SECOND_IMAGE_NAME:$GITHUB_REF_NAME-$GITHUB_SHA
 
     defaults:
       run:
         working-directory: rust
         
     steps:
+      - uses: actions/checkout@v2
+      # Using other environment variables as input into another 
+      # does not work for normal "env: <value>" setup as the input environment
+      # variable to another would be treated literally by github parser rather than evaluating it.
+      # This is why environment variables are set through shell here and used for most things
+      # for consistency sake.
+      - name: Set environment variables
+        run: |
+          echo "BACKEND_MAIN_IMAGE_WITH_TAG=ghcr.io/oyelowo/template-app-backend-main:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          
+          echo "BACKEND_SECOND_IMAGE_WITH_TAG=ghcr.io/oyelowo/template-app-backend-second:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+
+          
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check out code
-        uses: actions/checkout@v2
 
-      # 1. APPLICATION 1: Build and push image for backend-main
-      - name: build backend-main docker image
-        run:  docker build -f Dockerfile.prod --target backend-main  -t ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }} .
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      
 
-      # This step can be removed if I decide I dont want to slimdown the image further anymore or if docker-slim starts to become problematic
-      - name: Slim down backend-main docker image
-        run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }} --tag ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
+      - name: Build and cache backend-main image
+        uses: docker/build-push-action@v2
+        with:
+          context: rust
+          file: rust/Dockerfile.prod
+          target: backend-main
+          tags: ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
+          push: true
+          cache-from: |
+            type=gha,scope=backend-main
+          cache-to: |
+            type=gha,scope=backend-main,mode=max
 
-      - name: Push backend-main docker image
-        run: docker push  ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
+      - name: Build and cache backend-second image
+        uses: docker/build-push-action@v2
+        with:
+          context: rust
+          file: rust/Dockerfile.prod
+          target: backend-second
+          tags: ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }}
+          push: true
+          cache-from: |
+            type=gha,scope=backend-second
+          cache-to: |
+            type=gha,scope=backend-second,mode=max
 
 
-      # 2. APPLICATION 2: Build and push image for backend-second
-      - name: build backend-second docker image
-        run:  docker build -f Dockerfile.prod --target backend-second  -t ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }} .
+      # - name: Check out code
+      #   uses: actions/checkout@v2
 
-      - name: Push backend-second docker image
-        run: docker push  ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }}
+      # # 1. APPLICATION 1: Build and push image for backend-main
+      # - name: build backend-main docker image
+      #   run:  docker build -f Dockerfile.prod --target backend-main  -t ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }} .
+
+      # # This step can be removed if I decide I dont want to slimdown the image further anymore or if docker-slim starts to become problematic
+      # - name: Slim down backend-main docker image
+      #   run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }} --tag ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
+
+      # - name: Push backend-main docker image
+      #   run: docker push  ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
+
+      # # 2. APPLICATION 2: Build and push image for backend-second
+      # - name: build backend-second docker image
+      #   run:  docker build -f Dockerfile.prod --target backend-second  -t ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }} .
+
+      # - name: Push backend-second docker image
+      #   run: docker push  ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }}
         
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+      # - name: Image digest
+      #   run: echo ${{ steps.docker_build.outputs.digest }}
 

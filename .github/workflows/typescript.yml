@@ -15,7 +15,6 @@ env:
 
 jobs:
   check_and_test_typescript_monorepo:
-    if: "false" # FIXME: remove
     name: Run code checks for typescript monorepo
     timeout-minutes: 10
     runs-on: ubuntu-latest
@@ -49,19 +48,23 @@ jobs:
   ############## BUILD AND DEPLOY IMAGES #################
   build_and_push_typescript_applications:
     if: github.event.pull_request.merged || ${{ github.ref == 'refs/heads/master' }}
-    # needs: [check_and_test_typescript_monorepo]
+    needs: [check_and_test_typescript_monorepo]
     runs-on: ubuntu-latest
-    env:
-      CONTAINER_REPOSIT0RY: ghcr.io/oyelowo
-      WEB_IMAGE_NAME: web
-      WEB_IMAGE_TAG: $GITHUB_REF_NAME-$GITHUB_SHA
-      WEB_IMAGE_WITH_TAG: $CONTAINER_REPOSIT0RY/$WEB_IMAGE_NAME:$GITHUB_REF_NAME-$GITHUB_SHA
 
     defaults:
       run:
         working-directory: typescript
         
     steps:
+      - uses: actions/checkout@v2
+      # Using other environment variables as input into another 
+      # does not work for normal "env: <value>" setup as the input environment
+      # variable to another would be treated literally by github parser rather than evaluating it.
+      # This is why environment variables are set through shell here and used for most things
+      # for consistency sake.
+      - name: Set environment variables
+        run: |
+          echo "WEB_IMAGE_WITH_TAG=ghcr.io/oyelowo/template-app-web:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
       
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
@@ -70,79 +73,23 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/checkout@v2
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      
-      - name: Build base image
-        id: docker_build_base
+
+      - name: Build and cache web image
         uses: docker/build-push-action@v2
         with:
-          context: .
-          file: Dockerfile.prod
-          push: false
-          load: false
-          cache-from: |
-            type=gha,scope=base
-          cache-to: |
-            type=gha,scope=base,mode=max
+          context: typescript
+          file: typescript/Dockerfile.prod
           target: web
-
-      # - name: Check out code
-      #   uses: actions/checkout@v2
-
-      # - name: Set up QEMU
-      #   uses: docker/setup-qemu-action@master
-      #   with:
-      #     platforms: all
-
-      # - name: Set up Docker Buildx
-      #   id: buildx
-      #   uses: docker/setup-buildx-action@v1
-      #   with:
-      #     install: true
-
-      # - name: Cache Docker layers
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: /tmp/.buildx-cache
-      #     key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-multi-buildx
-
-      # - name: Prepare
-      #   id: prep
-      #   run: |
-      #     TAG=$(echo $GITHUB_SHA | head -c7)
-      #     IMAGE=${{ env.GITHUB_REPOSITORY }}
-      #     echo ${{ env.GITHUB_REPOSITORY }}
-      #     echo ::set-output name=tagged_image::${{ env.WEB_IMAGE_WITH_TAG}}
-      #     echo ::set-output name=tag::${TAG}
-
-      # - name: Check directory
-      #   run: |
-      #     ls -lart
-      #     pwd
-      #     echo pwd
-
-      # - name: Build image and push
-      #   id: docker_build
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     context: . # We already chose the typescript folder as the workspace directory
-      #     file: Dockerfile.prod
-      #     # builder: ${{ steps.buildx.outputs.name }}
-      #     push: true
-      #     # platforms: linux/amd64,linux/arm/v7,linux/arm64
-      #     tags: ${{ steps.prep.outputs.tagged_image }}
-      #     target: web # Sets the target stage to build
-      #     #labels: ${{ steps.meta.outputs.labels }}
-      #     # cache-from: type=gha, scope=${{ github.workflow }}
-      #     # cache-to: type=gha, scope=${{ github.workflow }}, mode=max
-      #     cache-from: type=gha
-      #     cache-to: type=gha #,mode=max
+          tags: ${{env.WEB_IMAGE_WITH_TAG}}
+          push: true
+          cache-from: |
+            type=gha,scope=web
+          cache-to: |
+            type=gha,scope=web,mode=max
 
 
       # - name: build web docker image
