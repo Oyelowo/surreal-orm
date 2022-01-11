@@ -12,7 +12,6 @@ edition = "2021"
 
 [dependencies]
 common = {path = "../common"}
-hello-macro-derive = {path = "../hello-macro-derive"}
 hello-macro = {path = "../hello-macro"}
 async-graphql = "2.11.1"
 async-graphql-actix-web = "2.11.1"
