@@ -1,5 +1,5 @@
 pub trait  HelloMacro {
-    fn heldlo_macro();
+    fn hello_macro();
 }
 
 
