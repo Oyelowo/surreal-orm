@@ -5,14 +5,8 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-#[lib]
-# proc-macro = true
-# name = "collection_derive"
-# path = "src/macros/collection_derive.rs"
-
 [dependencies]
 common = {path = "../common"}
-hello-macro = {path = "../hello-macro"}
 async-graphql = "2.11.1"
 async-graphql-actix-web = "2.11.1"
 actix-web = "3.3.2"
@@ -29,9 +23,7 @@ envy = "0.4.2"
 validator = { version = "0.12", features = ["derive"] }
 
 
-syn = "1.0"
-quote = "1.0"
-darling = "0.13.1"
+
 derive_more = "0.99.17"
 ron = "0.7.0"
 serde-aux = "3.0.1"
