@@ -1,4 +1,6 @@
-pub mod hello;
+mod hello;
+mod foo_bar;
 
-pub use hello::gene;
+pub use hello::generate_hello_macro;
+pub use foo_bar::generate_foo_bar;
 

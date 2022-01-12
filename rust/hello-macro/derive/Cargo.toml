@@ -7,16 +7,15 @@ edition = "2021"
 
 [dependencies]
 
-syn = "1.0"
-quote = "1.0"
+# syn = "1.0"
 proc-macro2 = "1.0.32"
-# syn = { version = "1.0.85", features = ["full", "extra-traits", "visit-mut", "visit"] }
-# quote = "1.0.10"
+syn = { version = "1.0.85", features = ["full", "extra-traits", "visit-mut", "visit"] }
+quote = "1.0.10"
 # Inflector = "0.11.4"
 # proc-macro-crate = "1.1.0"
-# darling = "0.13.0"
-# thiserror = "1.0.24"
-# proc-macro2-diagnostics = "0.9"
+darling = "0.13.1"
+thiserror = "1.0.24"
+proc-macro2-diagnostics = "0.9"
 
 [lib]
 proc-macro = true

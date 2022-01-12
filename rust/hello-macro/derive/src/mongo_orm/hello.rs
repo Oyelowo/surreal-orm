@@ -7,7 +7,7 @@ pub trait  HelloMacro {
     fn hello_macro();
 }
 */
-pub fn gene(input: TokenStream) -> TokenStream {
+pub fn generate_hello_macro(input: TokenStream) -> TokenStream {
     // Construct a representation of Rust code as a syntax tree
     // that we can manipulate
     let ast: DeriveInput = syn::parse(input).expect("Failed to parse");
