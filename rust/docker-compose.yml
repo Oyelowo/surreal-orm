@@ -3,14 +3,30 @@ services:
   mongodb:
     image: mongo:latest
     container_name: mongodb
-    hostname: mongodb
-    # environment:
-    #   MONGO_INITDB_ROOT_USERNAME: root
-    #   MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    # hostname: mongodb
     ports:
       - 27017:27017
-    volumes:
-      - mongodb_data_container:/data/db
+    # environment:
+    #   - MONGO_INITDB_ROOT_USERNAME=admin
+    #   - MONGO_INITDB_ROOT_PASSWORD=password
+    # volumes:
+    #   - mongodb_data_container:/data/db
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    ports:
+      - 8081:8081
+    # environment:
+    #   - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+    #   - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+    #   - ME_CONFIG_MONGODB_SERVER=mongodb
+    #   - ME_CONFIG_BASICAUTH_USERNAME=admin
+    #   - ME_CONFIG_BASICAUTH_PASSWORD=password
+
 
   mongoclient:
     image: mongoclient/mongoclient:latest
@@ -21,18 +37,7 @@ services:
     ports:
       - 3300:3000
 
-  mongo-express:
-    image: mongo-express
-    restart: always
-    depends_on:
-      - mongodb
-    ports:
-      - 8081:8081
-    environment:
-      # ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      # ME_CONFIG_MONGODB_ADMINPASSWORD: rootpassword
-      # ME_CONFIG_MONGODB_URL: mongodb://root:rootpassword@mongo:27017/
-      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/
+
 
   postgres-service:
     image: postgres:latest
@@ -69,4 +74,6 @@ services:
 
 volumes:
   mongodb_data_container:
+    driver: local
   pgadmin:
+    driver: local
