@@ -65,9 +65,7 @@ impl StarWarQueryRoot {
         let humans = ctx
             .data_unchecked::<StarWars>()
             .humans()
-            .iter()
-            .copied()
-            .collect::<Vec<_>>();
+            .to_vec();
 
         query_characters(after, before, first, last, &humans)
             .await
@@ -90,12 +88,7 @@ impl StarWarQueryRoot {
         first: Option<i32>,
         last: Option<i32>,
     ) -> Result<Connection<usize, Droid<'a>, EmptyFields, EmptyFields>> {
-        let droids = ctx
-            .data_unchecked::<StarWars>()
-            .droids()
-            .iter()
-            .copied()
-            .collect::<Vec<_>>();
+        let droids = ctx.data_unchecked::<StarWars>().droids().to_vec();
         query_characters(after, before, first, last, &droids)
             .await
             .map(|conn| conn.map_node(Droid))
