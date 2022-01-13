@@ -7,6 +7,7 @@ use super::model::StarWars;
 use super::query_droid::Droid;
 use super::query_human::Human;
 use super::type_gql::{Character, Episode, StarWarsChar};
+use async_graphql::Error;
 use async_graphql::{
     connection::{query, Connection, Edge, EmptyFields},
     Context, Object, Result,
@@ -166,7 +167,7 @@ async fn query_characters<'a>(
                     .enumerate()
                     .map(|(idx, item)| Edge::new(start + idx, *item)),
             );
-            Ok(connection)
+            Ok::<_, Error>(connection)
         },
     )
     .await

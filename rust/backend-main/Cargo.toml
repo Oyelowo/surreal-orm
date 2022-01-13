@@ -7,9 +7,9 @@ edition = "2021"
 
 [dependencies]
 common = {path = "../common"}
-async-graphql = "2.11.1"
-async-graphql-actix-web = "2.11.1"
-actix-web = "3.3.2"
+async-graphql = "3.0.21"
+async-graphql-actix-web = "3.0.21"
+actix-web = { version = "4.0.0-beta.19", default-features = false }
 actix-rt = "2.4.0"
 futures = "0.3"
 mongodb = "2.1.0"

@@ -7,7 +7,8 @@ mod user;
 use actix_web::{web, HttpResponse};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
-use async_graphql_actix_web::{Request, Response};
+use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
+
 
 use starwar::{StarWarQueryRoot, StarWars};
 use user::{UserData, UserMutationRoot, UserQueryRoot};
@@ -29,16 +30,16 @@ pub fn get_graphql_schema() -> SchemaBuilder<Query, Mutation, EmptySubscription>
     Schema::build(Query::default(), Mutation::default(), EmptySubscription)
 }
 
-pub async fn index(schema: web::Data<GraphQLSchema>, req: Request) -> Response {
+
+pub async fn index(schema: web::Data<GraphQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
 }
 
 pub async fn index_playground() -> HttpResponse {
+     let source = playground_source(GraphQLPlaygroundConfig::new("/").subscription_endpoint("/"));
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(playground_source(
-            GraphQLPlaygroundConfig::new("/").subscription_endpoint("/"),
-        ))
+        .body(source)
 }
 
 pub struct GraphQlApp;

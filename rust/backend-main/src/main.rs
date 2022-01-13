@@ -5,11 +5,9 @@ mod configs;
 
 use configs::{index, index_playground, Configs, GraphQlApp};
 
-
-
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
-    mongo_main();
+    // mongo_main().await.expect("edan happen");
     let Configs { application, .. } = Configs::init();
     let domain = application.derive_domain();
 
@@ -19,7 +17,7 @@ async fn main() -> anyhow::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .data(schema.clone())
+            .app_data(web::Data::new(schema.clone()))
             .service(web::resource("/").guard(guard::Post()).to(index))
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
     })
@@ -70,7 +68,7 @@ impl Book {
         // Get a handle to the deployment.
         let client = Client::with_options(client_options)?;
         let db = client.database("mydb");
-    let typed_collection = db.collection::<Book>("books");
+        let typed_collection = db.collection::<Book>("books");
 
         typed_collection.insert_one(self, None).await?;
         Ok(self)
@@ -89,7 +87,7 @@ fn validate_unique_username(username: &str) -> Result<(), ValidationError> {
 async fn mongo_main() -> anyhow::Result<()> {
     // Parse a connection string into an options struct.
     let mut client_options = ClientOptions::parse("mongodb://localhost:27017").await?;
-
+    println!("kljhkl{:?}", client_options);
     // Manually set an option.
     client_options.app_name = Some("My App".into());
 
