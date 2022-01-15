@@ -9,6 +9,7 @@ use anyhow::Context;
 use configs::{index, index_playground, Configs, GraphQlApp};
 
 use futures::stream::StreamExt;
+use mongodb::options::{FindOneOptions, FindOptions, ReadConcern};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::{Validate, ValidationError};
@@ -20,7 +21,7 @@ use wither::{
 };
 
 #[derive(Debug, Serialize, Deserialize, TypedBuilder, Validate, Model)]
-#[serde(rename_all(serialize = "camelCase", deserialize="camelCase"))]
+#[serde(rename_all = "camelCase")]
 // #[model(index(keys=r#"doc!{"email": 1}"#, options=r#"doc!{"unique": true}"#))]
 struct Book {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
@@ -63,8 +64,8 @@ fn validate_unique_username(username: &str) -> std::result::Result<(), Validatio
 
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
-   // mongo_main().await.expect("mongo flop");
-      let uri = "mongodb://localhost:27017/";
+    // mongo_main().await.expect("mongo flop");
+    let uri = "mongodb://localhost:27017/";
     let db = Client::with_uri_str(uri).await?.database("mydb");
     Book::sync(&db).await?;
 
@@ -73,7 +74,7 @@ async fn main() -> anyhow::Result<()> {
         .title("Steroid Legend of Goro".into())
         .author("Oyelowo Oyedayo".into())
         .first_name("Oyedayoo".into())
-        .email("ye2@gmail.com".into())
+        .email("ye@gmail.com".into())
         .age(99)
         .build();
 
@@ -83,11 +84,18 @@ async fn main() -> anyhow::Result<()> {
     println!("Booid after id() {:?}", book.id());
 
     // // fetch all books
-    // let mut cursor = Book::find(&db, None, None).await?;
+    let mut cursor = Book::find(&db, None, None).await?;
 
-    // while let Some(user) = cursor.next().await {
-    //     println!("User...{:?}", user);
-    // }
+    while let Some(book) = cursor.next().await {
+        println!("Book...{:?}", book);
+    }
+
+    let p = FindOneOptions::builder()
+        .read_concern(ReadConcern::majority())
+        .build();
+
+    let k = Book::find_one(&db, doc!{"email": "ye2@gmail.com"}, p).await?;
+    println!("fdgfg: {:?}", k);
 
     let Configs { application, .. } = Configs::init();
     let domain = application.derive_domain();
