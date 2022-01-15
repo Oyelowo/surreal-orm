@@ -21,7 +21,8 @@ serde_json = "1.0"
 typed-builder = "0.9.1"
 envy = "0.4.2"
 validator = { version = "0.12", features = ["derive"] }
-wither = "0.9.0"
+wither = {git= "https://github.com/thedodd/wither", branch = "master"}
+# wither = "0.9.0"
 
 async-trait = "0.1.52"
 derive_more = "0.99.17"

@@ -1,5 +1,5 @@
 #![warn(unused_imports)]
-use std::borrow::Borrow;
+use std::fmt::Display;
 
 use actix_web::{guard, web, App, HttpServer};
 
@@ -8,56 +8,49 @@ mod configs;
 use anyhow::Context;
 use configs::{index, index_playground, Configs, GraphQlApp};
 
-use mongodb::{
-    bson::{doc, oid::ObjectId, Document},
-    options::{ClientOptions, FindOptions, InsertOneOptions},
-    results::InsertOneResult,
-    Client, Database, Collection,
-};
-
-use serde::{de::{value::Error, DeserializeOwned}, Deserialize, Serialize, __private::de::Borrowed};
+use futures::stream::StreamExt;
+use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::{Validate, ValidationError};
-// This trait is required to use `try_next()` on the cursor
-use futures::{stream::TryStreamExt, Future};
-use async_trait::async_trait;
-#[derive(Debug, Serialize, Deserialize, TypedBuilder, Validate)]
-#[serde(rename_all = "camelCase")]
+use wither::{
+    bson::{doc, oid::ObjectId},
+    mongodb::Client,
+    prelude::Model,
+    Result,
+};
+
+#[derive(Debug, Serialize, Deserialize, TypedBuilder, Validate, Model)]
+#[serde(rename_all(serialize = "camelCase", deserialize="camelCase"))]
+// #[model(index(keys=r#"doc!{"email": 1}"#, options=r#"doc!{"unique": true}"#))]
 struct Book {
-    // #[serde(with = "uuid_as_binary")]
-    #[serde(rename = "_id")]
+    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
-    pub id: ObjectId,
+    pub id: Option<ObjectId>,
 
     #[validate(length(min = 1), custom = "validate_unique_username")]
     first_name: String,
     title: String,
     author: String,
 
+    // #[builder(default, setter(strip_option))]
     #[validate(email)]
-    #[builder(default, setter(strip_option))]
-    email: Option<String>,
+    email: String,
 
     #[validate(range(min = 18, max = 50))]
     #[builder(default = 20)]
     age: u32,
 }
 
-// use thiserror::Error;
-
-// #[derive(Error, Debug)]
-// pub enum MongoCollectionError {
-//     #[error("environment variable is not set")]
-//     NotSet,
-
-//     #[error("environment variable: `{0}` is invalid. Check that it is correctly spelled")]
-//     Invalid(String),
-
-//     #[error("unknown environment variable error. You are on your own. lol")]
-//     Unknown,
-// }
-pub type Result<T> = std::result::Result<T, Error>;
-
+// Define a model. Simple as deriving a few traits.
+#[derive(Debug, Model, Serialize, Deserialize)]
+#[model(index(keys = r#"doc!{"email": 1}"#, options = r#"doc!{"unique": true}"#))]
+struct User {
+    /// The ID of the model.
+    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
+    pub id: Option<ObjectId>,
+    /// The user's email address.
+    pub email: String,
+}
 
 fn validate_unique_username(username: &str) -> std::result::Result<(), ValidationError> {
     if username == "xXxShad0wxXx" {
@@ -70,37 +63,76 @@ fn validate_unique_username(username: &str) -> std::result::Result<(), Validatio
 
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
-    // mongo_main().await.unwrap();
-    // Parse a connection string into an options struct.
-    let mut client_options = ClientOptions::parse("mongodb://localhost:27017/mydb").await?;
-    println!("kljhkl{:?}", client_options);
-    // Manually set an option.
-    client_options.app_name = Some("My App".into());
+   // mongo_main().await.expect("mongo flop");
+      let uri = "mongodb://localhost:27017/";
+    let db = Client::with_uri_str(uri).await?.database("mydb");
+    Book::sync(&db).await?;
 
-    // Get a handle to the deployment.
-    let client = Client::with_options(client_options)?;
-
-    // List the names of the databases in that deployment.
-    for db_name in client.list_database_names(None, None).await? {
-        println!("{}", db_name);
-    }
-
-    // Get a handle to a database.
-    let db = client.database("mydb");
-
-    // List the names of the collections in that database.
-    for collection_name in db.list_collection_names(None).await? {
-        println!("{}", collection_name);
-    }
-
-    let typed_collection = db.collection::<Book>("bookz");
-
-    Book::builder()
+    // Create a book.
+    let mut book = Book::builder()
         .title("Steroid Legend of Goro".into())
         .author("Oyelowo Oyedayo".into())
         .first_name("Oyedayoo".into())
+        .email("ye2@gmail.com".into())
         .age(99)
         .build();
+
+    println!("Booid before {:?}", book);
+    book.save(&db, None).await?;
+    println!("Booid after id {:?}", book.id);
+    println!("Booid after id() {:?}", book.id());
+
+    // // fetch all books
+    // let mut cursor = Book::find(&db, None, None).await?;
+
+    // while let Some(user) = cursor.next().await {
+    //     println!("User...{:?}", user);
+    // }
+
+    let Configs { application, .. } = Configs::init();
+    let domain = application.derive_domain();
+
+    println!("Playground: {}", domain);
+
+    let schema = GraphQlApp::setup().expect("Problem setting up graphql");
+
+    HttpServer::new(move || {
+        App::new()
+            .app_data(web::Data::new(schema.clone()))
+            .service(web::resource("/").guard(guard::Post()).to(index))
+            .service(web::resource("/").guard(guard::Get()).to(index_playground))
+    })
+    .bind(domain)?
+    .run()
+    .await?;
+
+    Ok(())
+}
+
+async fn mongo_main() -> anyhow::Result<()> {
+    let uri = "mongodb://localhost:27017/";
+    let db = Client::with_uri_str(uri).await?.database("mydb");
+    Book::sync(&db).await?;
+
+    // Create a book.
+    let mut book = Book::builder()
+        .title("Steroid Legend of Goro".into())
+        .author("Oyelowo Oyedayo".into())
+        .first_name("Oyedayoo".into())
+        .email("ye@gmail.com".into())
+        .age(99)
+        .build();
+
+    println!("Booid before {:?}", book);
+    book.save(&db, None).await?;
+    println!("Booid after {:?}", book);
+
+    // fetch all books
+    let mut cursor = Book::find(&db, None, None).await?;
+
+    while let Some(user) = cursor.next().await {
+        println!("User...{:?}", user);
+    }
 
     // let books = vec![
     //     Book::builder()
@@ -129,85 +161,5 @@ async fn main() -> anyhow::Result<()> {
     //     println!("title: {:?}", book);
     // }
 
-    let Configs { application, .. } = Configs::init();
-    let domain = application.derive_domain();
-
-    println!("Playground: {}", domain);
-
-    let schema = GraphQlApp::setup().expect("Problem setting up graphql");
-
-    HttpServer::new(move || {
-        App::new()
-            .app_data(web::Data::new(schema.clone()))
-            .service(web::resource("/").guard(guard::Post()).to(index))
-            .service(web::resource("/").guard(guard::Get()).to(index_playground))
-    })
-    .bind(domain)?
-    .run()
-    .await?;
-
-    Ok(())
-}
-
-async fn mongo_main() -> anyhow::Result<()> {
-    // // Parse a connection string into an options struct.
-    // let mut client_options = ClientOptions::parse("mongodb://admin:password@localhost:27017/mydb").await?;
-    // println!("kljhkl{:?}", client_options);
-    // // Manually set an option.
-    // client_options.app_name = Some("My App".into());
-
-    // // Get a handle to the deployment.
-    // let client = Client::with_options(client_options)?;
-
-    // // List the names of the databases in that deployment.
-    // for db_name in client.list_database_names(None, None).await? {
-    //     println!("{}", db_name);
-    // }
-
-    // // Get a handle to a database.
-    // let db = client.database("mydb");
-
-    // // List the names of the collections in that database.
-    // for collection_name in db.list_collection_names(None).await? {
-    //     println!("{}", collection_name);
-    // }
-
-    // let collection = db.collection::<Document>("writer");
-    // let docs = vec![
-    //     doc! {"title": "1984", "author": "George Orwell"},
-    //     doc! { "title": "Animal Farm", "author": "George Orwell" },
-    //     doc! { "title": "The Great Gatsby", "author": "F. Scott Fitzgerald" },
-    // ];
-
-    // collection.insert_many(docs, None).await?;
-
-    // let typed_collection = db.collection::<Book>("books");
-
-    // let books = vec![
-    //     Book::builder()
-    //         .title("Legend of Goro".into())
-    //         .author("Oyelowo Oyedayo".into())
-    //         .first_name("Oyelowo".into())
-    //         .age(99)
-    //         .build(),
-    //     Book::builder()
-    //         .title("Night of day".into())
-    //         .author("Mari Koko".into())
-    //         .first_name("Mari".into())
-    //         .age(72)
-    //         .build(),
-    // ];
-
-    // typed_collection.insert_many(books, None).await?;
-
-    // // Query the books in the collection with a filter and an option.
-    // let filter = doc! { "author": "George Orwell" };
-    // let find_options = FindOptions::builder().sort(doc! { "title": 1 }).build();
-    // let mut cursor = typed_collection.find(filter, find_options).await?;
-
-    // // Iterate over the results of the cursor.
-    // while let Some(book) = cursor.try_next().await? {
-    //     println!("title: {}", book.title);
-    // }
     Ok(())
 }
