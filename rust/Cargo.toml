@@ -4,6 +4,5 @@ members = [
     "backend-main",
     "backend-second",
     "common",
-    "hello-macro",
-    "sss"
+    # "my-macros",
 ]

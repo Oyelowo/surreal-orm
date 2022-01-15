@@ -1,4 +1,6 @@
 #![warn(unused_imports)]
+use std::borrow::Borrow;
+
 use actix_web::{guard, web, App, HttpServer};
 
 mod configs;
@@ -10,10 +12,10 @@ use mongodb::{
     bson::{doc, oid::ObjectId, Document},
     options::{ClientOptions, FindOptions, InsertOneOptions},
     results::InsertOneResult,
-    Client, Database,
+    Client, Database, Collection,
 };
 
-use serde::{de::value::Error, Deserialize, Serialize};
+use serde::{de::{value::Error, DeserializeOwned}, Deserialize, Serialize, __private::de::Borrowed};
 use typed_builder::TypedBuilder;
 use validator::{Validate, ValidationError};
 // This trait is required to use `try_next()` on the cursor
@@ -56,36 +58,6 @@ struct Book {
 // }
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[async_trait]
-trait OrmCollection {
-    const COLLECTION_NAME: &'static str = "book";
-    async fn save2(&self) -> anyhow::Result<&Self> {
-        let mut client_options = ClientOptions::parse("mongodb://localhost:27017/mydb").await?;
-
-        // Manually set an option.
-        client_options.app_name = Some("My App".into());
-
-        // Get a handle to the deployment.
-        let client = Client::with_options(client_options)?;
-        let db = client.database("mydb");
-        let typed_collection = db.collection::<Book>(Self::COLLECTION_NAME);
-
-        let k = typed_collection.insert_one(self, None).await;
-        Ok(self)
-    }
-    async fn save(
-        &self,
-        db: &Database,
-        options: impl Into<Option<InsertOneOptions>>,
-    ) -> InsertOneResult {
-        let typed_collection = db.collection::<Book>(Self::COLLECTION_NAME);
-
-        let k = typed_collection.insert_one(self, options).await.unwrap();
-        k
-    }
-}
-
-impl OrmCollection for Book {}
 
 fn validate_unique_username(username: &str) -> std::result::Result<(), ValidationError> {
     if username == "xXxShad0wxXx" {
@@ -121,34 +93,41 @@ async fn main() -> anyhow::Result<()> {
         println!("{}", collection_name);
     }
 
-    let typed_collection = db.collection::<Book>("bookeeee");
+    let typed_collection = db.collection::<Book>("bookz");
 
-    let books = vec![
-        Book::builder()
-            .title("Legend of Goro".into())
-            .author("Oyelowo Oyedayo".into())
-            .first_name("Oyelowo".into())
-            .age(99)
-            .build(),
-        Book::builder()
-            .title("Night of day".into())
-            .author("Mari Koko".into())
-            .first_name("Mari".into())
-            .age(72)
-            .build(),
-    ];
+    Book::builder()
+        .title("Steroid Legend of Goro".into())
+        .author("Oyelowo Oyedayo".into())
+        .first_name("Oyedayoo".into())
+        .age(99)
+        .build();
 
-    typed_collection.insert_many(books, None).await?;
+    // let books = vec![
+    //     Book::builder()
+    //         .title("Legend of Goro".into())
+    //         .author("Oyelowo Oyedayo".into())
+    //         .first_name("Oyelowo".into())
+    //         .age(99)
+    //         .build(),
+    //     Book::builder()
+    //         .title("Night of day".into())
+    //         .author("Mari Koko".into())
+    //         .first_name("Mari".into())
+    //         .age(72)
+    //         .build(),
+    // ];
 
-    // Query the books in the collection with a filter and an option.
-    // let filter = doc! { "author": "George Orwell" };
-    // let find_options = FindOptions::builder().sort(doc! { "title": 1 }).build();
-    let mut cursor = typed_collection.find(None, None).await?;
+    // typed_collection.insert_many(books, None).await?;
 
-    // Iterate over the results of the cursor.
-    while let Some(book) = cursor.try_next().await? {
-        println!("title: {:?}", book);
-    }
+    // // Query the books in the collection with a filter and an option.
+    // // let filter = doc! { "author": "George Orwell" };
+    // // let find_options = FindOptions::builder().sort(doc! { "title": 1 }).build();
+    // let mut cursor = typed_collection.find(None, None).await?;
+
+    // // Iterate over the results of the cursor.
+    // while let Some(book) = cursor.try_next().await? {
+    //     println!("title: {:?}", book);
+    // }
 
     let Configs { application, .. } = Configs::init();
     let domain = application.derive_domain();
