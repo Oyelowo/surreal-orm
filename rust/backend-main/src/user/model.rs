@@ -27,20 +27,33 @@ pub struct User {
     pub id:  Option<ObjectId>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
-    first_name: String,
+    pub first_name: String,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
-    last_name: String,
+    pub last_name: String,
 
     // #[builder(default, setter(strip_option))]
     #[validate(email)]
-    email: String,
+    pub email: String,
 
     #[validate(range(min = 18, max = 160))]
     #[builder(default = 20)]
-    age: u8,
+    pub age: u8,
 
     // #[graphql(skip)]
     // pub family_count: i32,
 }
 
+
+
+/* 
+
+fn validate_unique_username(username: &str) -> std::result::Result<(), ValidationError> {
+    if username == "xXxShad0wxXx" {
+        // the value of the username will automatically be added later
+        return Err(ValidationError::new("terrible_username"));
+    }
+
+    Ok(())
+}
+*/

@@ -3,15 +3,10 @@ use super::model::User;
 use async_graphql::*;
 use futures::stream::StreamExt;
 use mongodb::{
-    options::{FindOneOptions, FindOptions, ReadConcern},
+    options::{FindOneOptions, ReadConcern},
     Database,
 };
-use wither::{
-    bson::{doc, oid::ObjectId},
-    mongodb::Client,
-    prelude::Model,
-    ModelCursor, Result,
-};
+use wither::{bson::doc, prelude::Model};
 
 #[derive(Default)]
 pub struct UserQueryRoot;
@@ -24,27 +19,26 @@ impl UserQueryRoot {
         #[graphql(desc = "id of the droid")] id: i32,
     ) -> Option<User> {
         let db = ctx.data_unchecked::<Database>();
-        let k = User::find_one(db, None, None).await.expect("fdfdf");
-        k
+        let find_one_options = FindOneOptions::builder()
+            .read_concern(ReadConcern::majority())
+            .build();
+
+        let user = User::find_one(db, doc! {"id": id}, find_one_options)
+            .await
+            .expect("Unable to find user");
+        user
     }
 
     async fn users(&self, ctx: &Context<'_>) -> Vec<User> {
         let db = ctx.data_unchecked::<Database>();
-        User::sync(db).await.unwrap();
-        // let mut cursor = User::find(db, None, None).await.expect("fdfdf");
         let mut cursor = User::find(db, None, None).await.expect("fdfdf");
 
         let mut users = vec![];
-        for user in cursor.next().await {
-            users.push(user.expect("not working users"));
+        while let Some(user) = cursor.next().await {
+            println!("User...{:?}", user);
+            users.push(user.unwrap());
         }
-        users
-        //     let mut users = vec![];
-        //     while let Some(user) = cursor.next().await {
-        //         println!("User...{:?}", user);
-        //         users.push(user.unwrap());
-        //     }
 
-        //     users
+        users
     }
 }

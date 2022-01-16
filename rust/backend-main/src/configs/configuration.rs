@@ -16,8 +16,15 @@ pub struct ApplicationConfigs {
     pub environment: Environemnt,
 }
 
+impl From<ApplicationConfigs> for String {
+    fn from(app_config: ApplicationConfigs) -> String {
+        format!("{}:{}", app_config.host, app_config.port)
+    }
+}
+
+
 impl ApplicationConfigs {
-    pub fn derive_domain(self) -> String {
+    pub fn get_url(self) -> String {
         format!("{}:{}", self.host, self.port)
     }
 }

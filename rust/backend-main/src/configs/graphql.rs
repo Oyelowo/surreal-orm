@@ -1,6 +1,4 @@
 #![warn(unused_imports)]
-#[path = "../starwar/mod.rs"]
-mod starwar;
 #[path = "../user/mod.rs"]
 mod user;
 
@@ -9,8 +7,9 @@ use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
-
-use starwar::{StarWarQueryRoot, StarWars};
+use super::configuration::Environemnt;
+use crate::configs::Configs;
+use async_trait::async_trait;
 use user::{User, UserMutationRoot, UserQueryRoot};
 use wither::{
     bson::{doc, oid::ObjectId},
@@ -18,9 +17,6 @@ use wither::{
     prelude::Model,
     Result,
 };
-use crate::configs::Configs;
-use async_trait::async_trait;
-use super::configuration::Environemnt;
 
 #[derive(MergedObject, Default)]
 pub struct Query(UserQueryRoot);
@@ -36,20 +32,18 @@ pub fn get_graphql_schema() -> SchemaBuilder<Query, Mutation, EmptySubscription>
     Schema::build(Query::default(), Mutation::default(), EmptySubscription)
 }
 
-
 pub async fn index(schema: web::Data<GraphQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
 }
 
 pub async fn index_playground() -> HttpResponse {
-     let source = playground_source(GraphQLPlaygroundConfig::new("/").subscription_endpoint("/"));
+    let source = playground_source(GraphQLPlaygroundConfig::new("/").subscription_endpoint("/"));
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(source)
 }
 
 pub struct GraphQlApp;
-
 
 impl GraphQlApp {
     pub async fn setup() -> anyhow::Result<Schema<Query, Mutation, EmptySubscription>> {
@@ -61,12 +55,13 @@ impl GraphQlApp {
             _ => (5, 7),
         };
 
-            let uri = "mongodb://localhost:27017/";
+        let uri = "mongodb://localhost:27017/";
         let db = Client::with_uri_str(uri).await?.database("mydb");
+
+        User::sync(&db).await.expect("problem syncing user");
 
         let schema = get_graphql_schema()
             .data(db)
-            .data(StarWars::new())
             .limit_depth(limit_depth) // This and also limi_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
             .limit_complexity(limit_complexity)
             .finish();

@@ -1,1 +1,0 @@
-// functions to handle data request/response from database.
