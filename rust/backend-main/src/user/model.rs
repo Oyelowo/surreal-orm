@@ -28,7 +28,6 @@ pub struct User {
     pub email: String,
 
     #[validate(range(min = 18, max = 160))]
-    #[builder(default = 20)]
     pub age: u8,
 
     #[serde(default)]

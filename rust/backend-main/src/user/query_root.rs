@@ -4,7 +4,7 @@ use async_graphql::*;
 use futures::stream::StreamExt;
 use mongodb::{
     options::{FindOneOptions, ReadConcern},
-    Database,
+    Database, bson::oid::ObjectId,
 };
 use wither::{bson::doc, prelude::Model};
 
@@ -16,7 +16,7 @@ impl UserQueryRoot {
     async fn user(
         &self,
         ctx: &Context<'_>,
-        #[graphql(desc = "id of the droid")] id: i32,
+        #[graphql(desc = "id of the User")] id: String,
     ) -> Option<User> {
         let db = ctx.data_unchecked::<Database>();
         let find_one_options = FindOneOptions::builder()
