@@ -8,16 +8,14 @@ use wither::{
     prelude::Model,
 };
 
-#[derive(
-    Model, SimpleObject, InputObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,
-)]
-#[graphql(input_name = "UserInput")]
+#[derive(Model, SimpleObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
+// #[graphql(input_name = "UserInput")]
 #[serde(rename_all = "camelCase")]
 // #[model(index(keys=r#"doc!{"email": 1}"#, options=r#"doc!{"unique": true}"#))]
 pub struct User {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
-    #[graphql(skip)]
+    // #[graphql(skip)]
     pub id: Option<ObjectId>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
@@ -35,7 +33,13 @@ pub struct User {
     pub age: u8,
 }
 
-pub type UserInput = User;
+#[derive(InputObject, TypedBuilder)]
+pub struct UserInput {
+    pub last_name: String,
+    pub first_name: String,
+    pub email: String,
+    pub age: u8,
+}
 
 /*
 
