@@ -29,6 +29,7 @@ impl UserMutationRoot {
             .last_name(user_input.last_name.into())
             .email(user_input.email.into())
             .age(user_input.age)
+            .social_media(user_input.social_media)
             .build();
         // let mut user = User {
         //     id: None,
