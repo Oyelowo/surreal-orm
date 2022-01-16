@@ -1,6 +1,4 @@
 mod query_root;
-pub mod query_user;
-
 mod mutation_root;
 mod type_gql;
 

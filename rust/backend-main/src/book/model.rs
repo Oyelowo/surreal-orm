@@ -20,7 +20,9 @@ use wither::{
     Result,
 };
 
-#[derive(Debug, Serialize, Deserialize, TypedBuilder, Validate, Model)]
+#[derive(
+    Model, SimpleObject, InputObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,
+)]
 #[serde(rename_all = "camelCase")]
 // #[model(index(keys=r#"doc!{"email": 1}"#, options=r#"doc!{"unique": true}"#))]
 struct Book {

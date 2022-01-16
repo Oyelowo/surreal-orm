@@ -1,0 +1,21 @@
+mutation createUser($userInput: UserInput!) {
+  createUser(userInput: $userInput) {
+    id
+    firstName
+    lastName
+    email
+    age
+
+  }
+}
+
+*Input**
+
+{
+  "userInput": {
+  "firstName": "Tunwi",
+      "lastName":  "rerTunwi",
+    "email": "gg@gmail.com",
+  "age": 99
+  }
+}

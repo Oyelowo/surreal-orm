@@ -1,30 +1,24 @@
-// use super::query::User;
-// use super::User;
-// use super::query_user::User;
 use async_graphql::*;
 
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
-use validator::{Validate, ValidationError};
+use validator::Validate;
 use wither::{
     bson::{doc, oid::ObjectId},
-    mongodb::Client,
     prelude::Model,
-    Result,
 };
 
-
-
-
-#[derive(Debug, Serialize, Deserialize, TypedBuilder, Validate, Model)]
+#[derive(
+    Model, SimpleObject, InputObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,
+)]
+#[graphql(input_name = "UserInput")]
 #[serde(rename_all = "camelCase")]
-#[derive(SimpleObject,InputObject ,Clone)]
 // #[model(index(keys=r#"doc!{"email": 1}"#, options=r#"doc!{"unique": true}"#))]
 pub struct User {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
     #[graphql(skip)]
-    pub id:  Option<ObjectId>,
+    pub id: Option<ObjectId>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub first_name: String,
@@ -39,14 +33,11 @@ pub struct User {
     #[validate(range(min = 18, max = 160))]
     #[builder(default = 20)]
     pub age: u8,
-
-    // #[graphql(skip)]
-    // pub family_count: i32,
 }
 
+pub type UserInput = User;
 
-
-/* 
+/*
 
 fn validate_unique_username(username: &str) -> std::result::Result<(), ValidationError> {
     if username == "xXxShad0wxXx" {

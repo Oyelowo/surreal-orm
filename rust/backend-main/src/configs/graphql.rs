@@ -9,13 +9,10 @@ use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 use super::configuration::Environemnt;
 use crate::configs::Configs;
-use async_trait::async_trait;
 use user::{User, UserMutationRoot, UserQueryRoot};
 use wither::{
-    bson::{doc, oid::ObjectId},
     mongodb::Client,
     prelude::Model,
-    Result,
 };
 
 #[derive(MergedObject, Default)]
