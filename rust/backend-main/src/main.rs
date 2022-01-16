@@ -102,7 +102,7 @@ async fn main() -> anyhow::Result<()> {
 
     println!("Playground: {}", domain);
 
-    let schema = GraphQlApp::setup().expect("Problem setting up graphql");
+    let schema = GraphQlApp::setup().await.expect("Problem setting up graphql");
 
     HttpServer::new(move || {
         App::new()

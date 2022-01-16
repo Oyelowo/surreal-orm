@@ -11,14 +11,20 @@ use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 
 use starwar::{StarWarQueryRoot, StarWars};
-use user::{UserData, UserMutationRoot, UserQueryRoot};
-
+use user::{User, UserMutationRoot, UserQueryRoot};
+use wither::{
+    bson::{doc, oid::ObjectId},
+    mongodb::Client,
+    prelude::Model,
+    Result,
+};
 use crate::configs::Configs;
-
+use async_trait::async_trait;
 use super::configuration::Environemnt;
 
 #[derive(MergedObject, Default)]
-pub struct Query(StarWarQueryRoot, UserQueryRoot);
+pub struct Query(UserQueryRoot);
+// pub struct Query(StarWarQueryRoot, UserQueryRoot);
 
 #[derive(MergedObject, Default)]
 pub struct Mutation(UserMutationRoot);
@@ -44,8 +50,9 @@ pub async fn index_playground() -> HttpResponse {
 
 pub struct GraphQlApp;
 
+
 impl GraphQlApp {
-    pub fn setup() -> anyhow::Result<Schema<Query, Mutation, EmptySubscription>> {
+    pub async fn setup() -> anyhow::Result<Schema<Query, Mutation, EmptySubscription>> {
         let Configs { application, .. } = Configs::init();
 
         use Environemnt::*;
@@ -54,9 +61,12 @@ impl GraphQlApp {
             _ => (5, 7),
         };
 
+            let uri = "mongodb://localhost:27017/";
+        let db = Client::with_uri_str(uri).await?.database("mydb");
+
         let schema = get_graphql_schema()
+            .data(db)
             .data(StarWars::new())
-            .data(UserData::new())
             .limit_depth(limit_depth) // This and also limi_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
             .limit_complexity(limit_complexity)
             .finish();

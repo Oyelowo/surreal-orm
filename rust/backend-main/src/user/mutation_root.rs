@@ -1,4 +1,5 @@
-use super::{User, UserInput};
+// use super::{User, UserInput};
+use super::User;
 use async_graphql::*;
 
 #[derive(SimpleObject)]
@@ -20,15 +21,12 @@ pub struct UserMutationRoot;
 
 #[Object]
 impl UserMutationRoot {
-    async fn create_user(
-        &self,
-        #[graphql(desc = "id of the droid")] user_input: UserInput,
-    ) -> User {
-        User {
-            id: user_input.id,
-            name: user_input.name,
-            age: user_input.age,
-            family_count: 5,
-        }
+    async fn create_user(&self, #[graphql(desc = "id of the droid")] user_input: User) -> User {
+        User::builder()
+            .first_name("Oyelowo".into())
+            .last_name("Oyedayo".into())
+            .email("nothingexits@fang.com".into())
+            .age(120)
+            .build()
     }
 }
