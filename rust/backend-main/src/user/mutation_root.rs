@@ -13,8 +13,8 @@ impl UserMutationRoot {
         &self,
         ctx: &Context<'_>,
         #[graphql(desc = "user data")] user_input: UserInput,
-    ) -> User {
-        user_input.validate().expect("Invalid input");
+    ) -> anyhow::Result<User> {
+        user_input.validate()?;
         let db = ctx.data_unchecked::<Database>();
         // let mut user1 = User::builder()
         //     .first_name(user_input.first_name.into())
@@ -25,7 +25,7 @@ impl UserMutationRoot {
         //     .build();
         let mut user = User { ..user_input };
 
-        user.save(db, None).await.expect("problem storing user");
-        user
+        user.save(db, None).await?;
+        Ok(user)
     }
 }
