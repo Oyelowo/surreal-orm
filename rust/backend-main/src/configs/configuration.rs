@@ -22,7 +22,6 @@ impl From<ApplicationConfigs> for String {
     }
 }
 
-
 impl ApplicationConfigs {
     pub fn get_url(self) -> String {
         format!("{}:{}", self.host, self.port)

@@ -10,10 +10,7 @@ use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use super::configuration::Environemnt;
 use crate::configs::Configs;
 use user::{User, UserMutationRoot, UserQueryRoot};
-use wither::{
-    mongodb::Client,
-    prelude::Model,
-};
+use wither::{mongodb::Client, prelude::Model};
 
 #[derive(MergedObject, Default)]
 pub struct Query(UserQueryRoot);

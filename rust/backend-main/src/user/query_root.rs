@@ -21,9 +21,9 @@ impl UserQueryRoot {
     ) -> anyhow::Result<Option<User>> {
         let db = ctx.data_unchecked::<Database>();
         let find_one_options = FindOneOptions::builder()
-        .read_concern(ReadConcern::majority())
-        .build();
-        
+            .read_concern(ReadConcern::majority())
+            .build();
+
         let user = User::find_one(db, doc! {"_id": id}, find_one_options).await?;
 
         Ok(user)
