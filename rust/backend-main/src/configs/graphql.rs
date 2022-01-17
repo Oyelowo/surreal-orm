@@ -1,23 +1,29 @@
 #![warn(unused_imports)]
+#[path = "../book/mod.rs"]
+mod book;
 #[path = "../user/mod.rs"]
 mod user;
 
+use std::fmt::format;
+
 use actix_web::{web, HttpResponse};
+use anyhow::Context;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 use super::configuration::Environemnt;
 use crate::configs::Configs;
+use book::{Book, BookMutationRoot, BookQueryRoot};
 use user::{User, UserMutationRoot, UserQueryRoot};
 use wither::{mongodb::Client, prelude::Model};
 
 #[derive(MergedObject, Default)]
-pub struct Query(UserQueryRoot);
+pub struct Query(UserQueryRoot, BookQueryRoot);
 // pub struct Query(StarWarQueryRoot, UserQueryRoot);
 
 #[derive(MergedObject, Default)]
-pub struct Mutation(UserMutationRoot);
+pub struct Mutation(UserMutationRoot, BookMutationRoot);
 
 pub type GraphQLSchema = Schema<Query, Mutation, EmptySubscription>;
 // pub type GraphQLSchema = Schema<Query, EmptyMutation, EmptySubscription>;
@@ -37,6 +43,9 @@ pub async fn index_playground() -> HttpResponse {
         .body(source)
 }
 
+fn get_error_message<T: Model>() -> String {
+    format!("problem syncing {:?}", <T as Model>::COLLECTION_NAME)
+}
 pub struct GraphQlApp;
 
 impl GraphQlApp {
@@ -52,7 +61,11 @@ impl GraphQlApp {
         let uri = "mongodb://localhost:27017/";
         let db = Client::with_uri_str(uri).await?.database("mydb");
 
-        User::sync(&db).await.expect("problem syncing user");
+        User::sync(&db)
+            .await
+            .context(format!("problem syncing user {}", User::COLLECTION_NAME))?;
+        // Book::sync(&db).await.context("problem syncing book")?;
+        Book::sync(&db).await.context(get_error_message::<Book>())?;
 
         let schema = get_graphql_schema()
             .data(db)

@@ -1,45 +1,62 @@
-#![warn(unused_imports)]
-use std::fmt::Display;
+use async_graphql::*;
 
-use actix_web::{guard, web, App, HttpServer};
-
-mod configs;
-
-use anyhow::Context;
-use configs::{index, index_playground, Configs, GraphQlApp};
-
-use futures::stream::StreamExt;
-use mongodb::options::{FindOneOptions, FindOptions, ReadConcern};
+use mongodb::Database;
 use serde::{Deserialize, Serialize};
+use futures::stream::StreamExt;
 use typed_builder::TypedBuilder;
-use validator::{Validate, ValidationError};
+use validator::Validate;
 use wither::{
     bson::{doc, oid::ObjectId},
-    mongodb::Client,
     prelude::Model,
-    Result,
 };
 
+use crate::configs::graphql::user::User;
+
+
 #[derive(
-    Model, SimpleObject, InputObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,
+    Model, SimpleObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,
 )]
 #[serde(rename_all = "camelCase")]
-// #[model(index(keys=r#"doc!{"email": 1}"#, options=r#"doc!{"unique": true}"#))]
-struct Book {
+//#[graphql(input_name = "UserInput")]
+#[graphql(complex)]
+pub struct Book {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
     pub id: Option<ObjectId>,
 
-    #[validate(length(min = 1), custom = "validate_unique_username")]
-    first_name: String,
-    title: String,
-    author: String,
+    pub author_id: ObjectId,
 
-    // #[builder(default, setter(strip_option))]
-    #[validate(email)]
-    email: String,
-
-    #[validate(range(min = 18, max = 50))]
-    #[builder(default = 20)]
-    age: u32,
+    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    pub title: String,
 }
+
+
+#[ComplexObject]
+impl Book {
+    async fn author(&self, ctx: &Context<'_>) -> anyhow::Result<Option<User>> {
+        // TODO: Use dataloader to batch user
+        let db = ctx.data_unchecked::<Database>();
+        let author = User::find_one(db, doc! {"_id": self.author_id}, None).await?;
+        Ok(author)
+    }
+}
+
+
+// pub type UserInput = User;
+#[derive(InputObject, TypedBuilder)]
+pub struct BookInput {
+    pub author_id: ObjectId,
+    pub title: String,
+}
+
+/*
+
+fn validate_unique_username(username: &str) -> std::result::Result<(), ValidationError> {
+    if username == "xXxShad0wxXx" {
+        // the value of the username will automatically be added later
+        return Err(ValidationError::new("terrible_username"));
+    }
+
+    Ok(())
+}
+*/
