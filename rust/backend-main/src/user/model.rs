@@ -10,19 +10,7 @@ use wither::{
     prelude::Model,
 };
 
-
-#[derive(
-    Model, SimpleObject, InputObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,
-)]
-#[serde(rename_all = "camelCase")]
-#[graphql(input_name = "UserInput")]
-pub struct Book {
-    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    pub id: Option<ObjectId>,
-    pub author_id: ObjectId,
-    pub title: String,
-}
+use crate::book::Book;
 
 #[derive(Model, SimpleObject, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
 // #[derive(InputObject)]

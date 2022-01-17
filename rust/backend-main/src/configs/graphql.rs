@@ -1,11 +1,3 @@
-#![warn(unused_imports)]
-#[path = "../book/mod.rs"]
-mod book;
-#[path = "../user/mod.rs"]
-mod user;
-
-use std::fmt::format;
-
 use actix_web::{web, HttpResponse};
 use anyhow::Context;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
@@ -14,8 +6,8 @@ use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 use super::configuration::Environemnt;
 use crate::configs::Configs;
-use book::{Book, BookMutationRoot, BookQueryRoot};
-use user::{User, UserMutationRoot, UserQueryRoot};
+use crate::book::{Book, BookMutationRoot, BookQueryRoot};
+use crate::user::{User, UserMutationRoot, UserQueryRoot};
 use wither::{mongodb::Client, prelude::Model};
 
 #[derive(MergedObject, Default)]
@@ -44,8 +36,9 @@ pub async fn index_playground() -> HttpResponse {
 }
 
 fn get_error_message<T: Model>() -> String {
-    format!("problem syncing {:?}", <T as Model>::COLLECTION_NAME)
+    format!("problem syncing {:?}", T::COLLECTION_NAME)
 }
+
 pub struct GraphQlApp;
 
 impl GraphQlApp {
@@ -63,7 +56,7 @@ impl GraphQlApp {
 
         User::sync(&db)
             .await
-            .context(format!("problem syncing user {}", User::COLLECTION_NAME))?;
+            .context(get_error_message::<User>())?;
         // Book::sync(&db).await.context("problem syncing book")?;
         Book::sync(&db).await.context(get_error_message::<Book>())?;
 

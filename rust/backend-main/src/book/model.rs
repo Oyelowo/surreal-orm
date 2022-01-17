@@ -10,8 +10,7 @@ use wither::{
     prelude::Model,
 };
 
-use crate::configs::graphql::user::User;
-
+use crate::user::User;
 
 #[derive(
     Model, SimpleObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,
@@ -42,7 +41,7 @@ impl Book {
 }
 
 
-// pub type UserInput = User;
+// pub type BookInput = Book;
 #[derive(InputObject, TypedBuilder)]
 pub struct BookInput {
     pub author_id: ObjectId,
@@ -51,10 +50,10 @@ pub struct BookInput {
 
 /*
 
-fn validate_unique_username(username: &str) -> std::result::Result<(), ValidationError> {
-    if username == "xXxShad0wxXx" {
-        // the value of the username will automatically be added later
-        return Err(ValidationError::new("terrible_username"));
+fn validate_unique_bookname(bookname: &str) -> std::result::Result<(), ValidationError> {
+    if bookname == "xXxShad0wxXx" {
+        // the value of the bookname will automatically be added later
+        return Err(ValidationError::new("terrible_bookname"));
     }
 
     Ok(())

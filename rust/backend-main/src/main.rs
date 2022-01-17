@@ -1,6 +1,8 @@
 use actix_web::{guard, web, App, HttpServer};
 mod configs;
 use configs::{index, index_playground, Configs, GraphQlApp};
+pub mod book;
+pub mod user;
 
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
