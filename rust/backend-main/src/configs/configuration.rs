@@ -1,6 +1,6 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Debug, Deserialize)]
+#[derive(PartialEq, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Environemnt {
     Local,
@@ -9,22 +9,23 @@ pub enum Environemnt {
     Production,
 }
 
-#[derive(Deserialize, Debug)]
-pub struct ApplicationConfigs {
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct URL {
     pub port: u16,
     pub host: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ApplicationConfigs {
+    #[serde(flatten)]
+    pub url: URL,
     pub environment: Environemnt,
 }
 
-impl From<ApplicationConfigs> for String {
-    fn from(app_config: ApplicationConfigs) -> String {
-        format!("{}:{}", app_config.host, app_config.port)
-    }
-}
-
-impl ApplicationConfigs {
-    pub fn get_url(self) -> String {
-        format!("{}:{}", self.host, self.port)
+impl From<URL> for String {
+    fn from(url: URL) -> String {
+        format!("{}:{}", url.host, url.port)
     }
 }
 

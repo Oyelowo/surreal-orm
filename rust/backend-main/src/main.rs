@@ -1,17 +1,17 @@
 use actix_web::{guard, web, App, HttpServer};
 mod configs;
 use configs::{index, index_playground, Configs, GraphQlApp};
+
+use crate::configs::ApplicationConfigs;
 pub mod book;
 pub mod user;
 
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
     let Configs { application, .. } = Configs::init();
-    // let url = application.get_url();
+    let app_url: String = application.url.into();
 
-    let url = String::from(application);
-    println!("Playground: {}", url);
-    println!("Playground. into: {}", url);
+    println!("Playground: {}", app_url);
 
     let schema = GraphQlApp::setup()
         .await
@@ -23,7 +23,7 @@ async fn main() -> anyhow::Result<()> {
             .service(web::resource("/").guard(guard::Post()).to(index))
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
     })
-    .bind(url)?
+    .bind(app_url)?
     .run()
     .await?;
 
