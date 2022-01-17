@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_aux::prelude::deserialize_number_from_string;
 
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -11,6 +12,7 @@ pub enum Environemnt {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AppUrl {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
 }
@@ -30,6 +32,7 @@ impl From<AppUrl> for String {
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct DbUrl {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
     pub username: String,
