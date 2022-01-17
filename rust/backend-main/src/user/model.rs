@@ -1,8 +1,8 @@
 use async_graphql::*;
 
+use futures::stream::StreamExt;
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
-use futures::stream::StreamExt;
 use typed_builder::TypedBuilder;
 use validator::Validate;
 use wither::{
@@ -54,7 +54,6 @@ impl User {
         Ok(books)
     }
 }
-
 
 // pub type UserInput = User;
 #[derive(InputObject, TypedBuilder)]

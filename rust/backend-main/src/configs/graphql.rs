@@ -5,8 +5,8 @@ use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 use super::configuration::Environemnt;
-use crate::configs::Configs;
 use crate::book::{Book, BookMutationRoot, BookQueryRoot};
+use crate::configs::Configs;
 use crate::user::{User, UserMutationRoot, UserQueryRoot};
 use wither::{mongodb::Client, prelude::Model};
 
@@ -54,9 +54,7 @@ impl GraphQlApp {
         let uri = "mongodb://localhost:27017/";
         let db = Client::with_uri_str(uri).await?.database("mydb");
 
-        User::sync(&db)
-            .await
-            .context(get_error_message::<User>())?;
+        User::sync(&db).await.context(get_error_message::<User>())?;
         // Book::sync(&db).await.context("problem syncing book")?;
         Book::sync(&db).await.context(get_error_message::<Book>())?;
 

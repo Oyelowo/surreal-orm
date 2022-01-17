@@ -17,9 +17,9 @@ impl UserMutationRoot {
         // user_input.validate()?;
         let db = ctx.data_unchecked::<Database>();
         let mut user = User::builder()
-            .first_name(user_input.first_name.into())
-            .last_name(user_input.last_name.into())
-            .email(user_input.email.into())
+            .first_name(user_input.first_name)
+            .last_name(user_input.last_name)
+            .email(user_input.email)
             .age(user_input.age)
             .social_media(user_input.social_media)
             .build();
