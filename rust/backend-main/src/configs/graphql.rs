@@ -43,7 +43,10 @@ pub struct GraphQlApp;
 
 impl GraphQlApp {
     pub async fn setup() -> anyhow::Result<Schema<Query, Mutation, EmptySubscription>> {
-        let Configs { application, .. } = Configs::init();
+        let Configs {
+            application,
+            database,
+        } = Configs::init();
 
         use Environemnt::*;
         let (limit_depth, limit_complexity) = match application.environment {
@@ -51,8 +54,8 @@ impl GraphQlApp {
             _ => (5, 7),
         };
 
-        let uri = "mongodb://localhost:27017/";
-        let db = Client::with_uri_str(uri).await?.database("mydb");
+        let db_url: String = database.url.into();
+        let db = Client::with_uri_str(db_url).await?.database("mydb");
 
         User::sync(&db).await.context(get_error_message::<User>())?;
         // Book::sync(&db).await.context("problem syncing book")?;

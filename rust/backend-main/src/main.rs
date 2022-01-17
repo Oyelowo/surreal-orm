@@ -1,9 +1,7 @@
 use actix_web::{guard, web, App, HttpServer};
-mod configs;
 use configs::{index, index_playground, Configs, GraphQlApp};
-
-use crate::configs::ApplicationConfigs;
 pub mod book;
+pub mod configs;
 pub mod user;
 
 #[actix_web::main]
