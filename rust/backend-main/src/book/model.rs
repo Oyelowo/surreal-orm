@@ -1,8 +1,8 @@
 use async_graphql::*;
 
+use futures::stream::StreamExt;
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
-use futures::stream::StreamExt;
 use typed_builder::TypedBuilder;
 use validator::Validate;
 use wither::{
@@ -12,9 +12,7 @@ use wither::{
 
 use crate::user::User;
 
-#[derive(
-    Model, SimpleObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,
-)]
+#[derive(Model, SimpleObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
 #[serde(rename_all = "camelCase")]
 //#[graphql(input_name = "UserInput")]
 #[graphql(complex)]
@@ -29,17 +27,21 @@ pub struct Book {
     pub title: String,
 }
 
-
 #[ComplexObject]
 impl Book {
-    async fn author(&self, ctx: &Context<'_>) -> anyhow::Result<Option<User>> {
+    async fn authors(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<User>> {
         // TODO: Use dataloader to batch user
         let db = ctx.data_unchecked::<Database>();
-        let author = User::find_one(db, doc! {"_id": self.author_id}, None).await?;
-        Ok(author)
+        let mut cursor = User::find(db, doc! {"_id": self.id}, None).await?;
+
+        let mut authors = vec![];
+        while let Some(user) = cursor.next().await {
+            authors.push(user.unwrap());
+        }
+
+        Ok(authors)
     }
 }
-
 
 // pub type BookInput = Book;
 #[derive(InputObject, TypedBuilder)]
