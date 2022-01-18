@@ -1,4 +1,4 @@
-use super::{Book, BookInput};
+use super::{Post, PostInput};
 use async_graphql::*;
 use mongodb::Database;
 use validator::Validate;
@@ -12,19 +12,20 @@ impl BookMutationRoot {
     async fn add_book(
         &self,
         ctx: &Context<'_>,
-        #[graphql(desc = "user data")] book_input: BookInput,
-    ) -> anyhow::Result<Book> {
+        #[graphql(desc = "user data")] book_input: PostInput,
+    ) -> anyhow::Result<Post> {
         // book_input.validate()?;
         let db = ctx.data_unchecked::<Database>();
-        let mut book = Book::builder()
-            .author_ids(book_input.author_ids)
+        let mut post = Post::builder()
+            .poster_id(book_input.poster_id)
             .title(book_input.title)
+            .content(book_input.content)
             .build();
         // let mut book = User { ..book_input };
-        book.validate()?;
+        post.validate()?;
 
-        book.save(db, None).await?;
+        post.save(db, None).await?;
 
-        Ok(book)
+        Ok(post)
     }
 }

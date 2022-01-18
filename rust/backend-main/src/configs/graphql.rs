@@ -5,13 +5,13 @@ use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 use super::configuration::Environemnt;
-use crate::book::{Book, BookMutationRoot, BookQueryRoot};
+use crate::book::{BookMutationRoot, Post, PostQueryRoot};
 use crate::configs::Configs;
 use crate::user::{User, UserMutationRoot, UserQueryRoot};
 use wither::{mongodb::Client, prelude::Model};
 
 #[derive(MergedObject, Default)]
-pub struct Query(UserQueryRoot, BookQueryRoot);
+pub struct Query(UserQueryRoot, PostQueryRoot);
 // pub struct Query(StarWarQueryRoot, UserQueryRoot);
 
 #[derive(MergedObject, Default)]
@@ -59,7 +59,7 @@ impl GraphQlApp {
 
         User::sync(&db).await.context(get_error_message::<User>())?;
         // Book::sync(&db).await.context("problem syncing book")?;
-        Book::sync(&db).await.context(get_error_message::<Book>())?;
+        Post::sync(&db).await.context(get_error_message::<Post>())?;
 
         let schema = get_graphql_schema()
             .data(db)

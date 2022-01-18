@@ -9,7 +9,7 @@ use wither::{
     prelude::Model,
 };
 
-use crate::{book::Book, configs::model_cursor_to_vec};
+use crate::{book::Post, configs::model_cursor_to_vec};
 
 #[derive(Model, SimpleObject, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
 // #[derive(InputObject)]
@@ -41,9 +41,9 @@ pub struct User {
 
 #[ComplexObject]
 impl User {
-    async fn books(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<Book>> {
+    async fn posts(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<Post>> {
         let db = ctx.data_unchecked::<Database>();
-        let cursor = Book::find(db, doc! {"authorIds": self.id}, None).await?;
+        let cursor = Post::find(db, doc! {"poster_id": self.id}, None).await?;
         Ok(model_cursor_to_vec(cursor).await?)
     }
 }
