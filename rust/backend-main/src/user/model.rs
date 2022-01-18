@@ -1,6 +1,5 @@
 use async_graphql::*;
 
-use futures::stream::StreamExt;
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -10,7 +9,7 @@ use wither::{
     prelude::Model,
 };
 
-use crate::book::Book;
+use crate::{book::Book, configs::model_cursor_to_vec};
 
 #[derive(Model, SimpleObject, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
 // #[derive(InputObject)]
@@ -44,14 +43,8 @@ pub struct User {
 impl User {
     async fn books(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<Book>> {
         let db = ctx.data_unchecked::<Database>();
-        let mut cursor = Book::find(db, doc! {"authorIds": self.id}, None).await?;
-
-        let mut books = vec![];
-        while let Some(user) = cursor.next().await {
-            books.push(user?);
-        }
-
-        Ok(books)
+        let cursor = Book::find(db, doc! {"authorIds": self.id}, None).await?;
+        Ok(model_cursor_to_vec(cursor).await?)
     }
 }
 

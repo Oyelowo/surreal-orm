@@ -1,6 +1,5 @@
 use async_graphql::*;
 
-use futures::stream::StreamExt;
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -10,7 +9,7 @@ use wither::{
     prelude::Model,
 };
 
-use crate::user::User;
+use crate::{configs::model_cursor_to_vec, user::User};
 
 #[derive(Model, SimpleObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -32,15 +31,8 @@ impl Book {
     async fn authors(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<User>> {
         // TODO: Use dataloader to batch user
         let db = ctx.data_unchecked::<Database>();
-        let mut cursor =
-            User::find(db, doc! {"_id": { "$in": &self.author_ids}}, None).await?;
-
-        let mut authors = vec![];
-        while let Some(user) = cursor.next().await {
-            authors.push(user?);
-        }
-
-        Ok(authors)
+        let cursor = User::find(db, doc! {"_id": { "$in": &self.author_ids}}, None).await?;
+        Ok(model_cursor_to_vec(cursor).await?)
     }
 }
 
