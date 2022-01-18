@@ -44,11 +44,11 @@ pub struct User {
 impl User {
     async fn books(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<Book>> {
         let db = ctx.data_unchecked::<Database>();
-        let mut cursor = Book::find(db, doc! {"_id": self.id}, None).await?;
+        let mut cursor = Book::find(db, doc! {"authorIds": self.id}, None).await?;
 
         let mut books = vec![];
         while let Some(user) = cursor.next().await {
-            books.push(user.unwrap());
+            books.push(user?);
         }
 
         Ok(books)

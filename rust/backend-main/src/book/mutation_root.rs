@@ -17,7 +17,7 @@ impl BookMutationRoot {
         // book_input.validate()?;
         let db = ctx.data_unchecked::<Database>();
         let mut book = Book::builder()
-            .author_id(book_input.author_id)
+            .author_ids(book_input.author_ids)
             .title(book_input.title)
             .build();
         // let mut book = User { ..book_input };

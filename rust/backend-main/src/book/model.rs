@@ -21,7 +21,7 @@ pub struct Book {
     #[builder(default)]
     pub id: Option<ObjectId>,
 
-    pub author_id: ObjectId,
+    pub author_ids: Vec<ObjectId>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub title: String,
@@ -32,11 +32,12 @@ impl Book {
     async fn authors(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<User>> {
         // TODO: Use dataloader to batch user
         let db = ctx.data_unchecked::<Database>();
-        let mut cursor = User::find(db, doc! {"_id": self.id}, None).await?;
+        let mut cursor =
+            User::find(db, doc! {"_id": { "$in": &self.author_ids}}, None).await?;
 
         let mut authors = vec![];
         while let Some(user) = cursor.next().await {
-            authors.push(user.unwrap());
+            authors.push(user?);
         }
 
         Ok(authors)
@@ -46,7 +47,7 @@ impl Book {
 // pub type BookInput = Book;
 #[derive(InputObject, TypedBuilder)]
 pub struct BookInput {
-    pub author_id: ObjectId,
+    pub author_ids: Vec<ObjectId>,
     pub title: String,
 }
 
