@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
 use wither::{
-    bson::{doc, oid::ObjectId, Bson},
+    bson::{doc, oid::ObjectId},
     prelude::Model,
 };
 // use bson::DateTime;
@@ -61,6 +61,11 @@ impl User {
         let db = ctx.data_unchecked::<Database>();
         let cursor = Post::find(db, doc! {"posterId": self.id}, None).await?;
         Ok(model_cursor_to_vec(cursor).await?)
+    }
+
+    async fn post_count(&self, ctx: &Context<'_>) -> anyhow::Result<usize> {
+        let post_count = self.posts(ctx).await?.len();
+        Ok(post_count)
     }
 }
 

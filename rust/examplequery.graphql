@@ -1,71 +1,98 @@
-{
-  droids {
-    edges {
-      node {
-        id
-        name
-        friends {
-          id
-        }
-        appearsIn 
-        primaryFunction
-      }
-      cursor
-    }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
-  }
-}
-
-
-{
-  droid(id: "2000") {
-    id
-    friends {
-      __typename
-      name
-      appearsIn
-      friends {
-        id
-        name
-        friends {
-          id
-          name
-          friends {
-            id
-            name
-            friends {
-              id
-              name
-              friends {
-                id
-                name
-                friends {
-                  id
-                  name
-                  friends {
-                    id
-                    name
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-
 mutation createUser($userInput: UserInput!) {
   createUser(userInput: $userInput) {
     id
-    name
+    firstName
+    lastName
+    email
     age
+
+  }
+}
+
+// The input
+
+{
+  "userInput": {
+  "firstName": "Sake",
+      "lastName":  "Koivi",
+    "email": "sakkeko@gmail.com",
+  "age": 40,
+    "socialMedia": ["insta", "facebook"]
+  }
+}
+
+
+mutation createPost($postInput: PostInput!) {
+  createPost(postInput: $postInput) {
+    id
+    posterId
+    title
+    poster {
+      id
+      lastName
+      firstName
+      email
+      age
+      socialMedia
+    }
+  }
+}
+
+// The input
+
+{
+  "postInput": {
+  "posterId": "61e87e83a052f6da42738022",
+    "title":"First by sakke",
+    "content": "Good content first"
+  }
+}
+
+
+
+
+  {users{
+    id
+   firstName
+    lastName
+   age
+    email
+    socialMedia
+    createdAt
+    updatedAt
+    deletedAt
+    posts {
+      posterId
+      title
+      content
+    }
+
+      
+
+  }
+    
+  
+  }
+
+
+
+
+  {
+  user(id:"61e87e24a052f6da42738021"){
+    firstName
+    lastName
+    age
+    email
+    id
+    posts {
+      title
+      id
+      content
+      poster {
+        lastName
+        firstName
+        socialMedia
+      }
+    }
   }
 }

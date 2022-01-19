@@ -3,7 +3,6 @@ use crate::configs::model_cursor_to_vec;
 use super::model::Post;
 
 use async_graphql::*;
-use futures::stream::StreamExt;
 use mongodb::{
     bson::oid::ObjectId,
     options::{FindOneOptions, ReadConcern},
