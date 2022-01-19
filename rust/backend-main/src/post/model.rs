@@ -39,7 +39,7 @@ impl Post {
     }
 }
 
-// pub type PostInput = Book;
+// pub type PostInput = Post;
 #[derive(InputObject, TypedBuilder)]
 pub struct PostInput {
     pub poster_id: ObjectId,
@@ -49,10 +49,10 @@ pub struct PostInput {
 
 /*
 
-fn validate_unique_bookname(bookname: &str) -> std::result::Result<(), ValidationError> {
-    if bookname == "xXxShad0wxXx" {
-        // the value of the bookname will automatically be added later
-        return Err(ValidationError::new("terrible_bookname"));
+fn validate_unique_postname(postname: &str) -> std::result::Result<(), ValidationError> {
+    if postname == "xXxShad0wxXx" {
+        // the value of the postname will automatically be added later
+        return Err(ValidationError::new("terrible_postname"));
     }
 
     Ok(())

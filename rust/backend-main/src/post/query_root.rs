@@ -18,7 +18,7 @@ impl PostQueryRoot {
     async fn post(
         &self,
         ctx: &Context<'_>,
-        #[graphql(desc = "id of the Book")] id: ObjectId,
+        #[graphql(desc = "id of the Post")] id: ObjectId,
     ) -> anyhow::Result<Option<Post>> {
         let db = ctx.data_unchecked::<Database>();
         let find_one_options = FindOneOptions::builder()

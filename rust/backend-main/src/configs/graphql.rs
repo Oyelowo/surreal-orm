@@ -6,7 +6,7 @@ use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 use super::configuration::Environemnt;
 use crate::configs::Configs;
-use crate::post::{BookMutationRoot, Post, PostQueryRoot};
+use crate::post::{Post, PostMutationRoot, PostQueryRoot};
 use crate::user::{User, UserMutationRoot, UserQueryRoot};
 use wither::{mongodb::Client, prelude::Model};
 
@@ -14,7 +14,7 @@ use wither::{mongodb::Client, prelude::Model};
 pub struct Query(UserQueryRoot, PostQueryRoot);
 
 #[derive(MergedObject, Default)]
-pub struct Mutation(UserMutationRoot, BookMutationRoot);
+pub struct Mutation(UserMutationRoot, PostMutationRoot);
 
 pub type GraphQLSchema = Schema<Query, Mutation, EmptySubscription>;
 
@@ -58,7 +58,7 @@ impl GraphQlApp {
             .database("mydb");
 
         User::sync(&db).await.context(get_error_message::<User>())?;
-        // Book::sync(&db).await.context("problem syncing book")?;
+        // Post::sync(&db).await.context("problem syncing post")?;
         Post::sync(&db).await.context(get_error_message::<Post>())?;
 
         let schema = get_graphql_schema()
