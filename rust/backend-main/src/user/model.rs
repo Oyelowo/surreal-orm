@@ -5,11 +5,13 @@ use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
 use wither::{
-    bson::{doc, oid::ObjectId},
+    bson::{doc, oid::ObjectId, Bson},
     prelude::Model,
 };
+use chrono::{DateTime, Utc, serde::{ts_nanoseconds, ts_nanoseconds_option}};
+// use bson::DateTime;
+use crate::{post::Post, configs::model_cursor_to_vec};
 
-use crate::{book::Post, configs::model_cursor_to_vec};
 
 #[derive(Model, SimpleObject, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
 // #[derive(InputObject)]
@@ -21,6 +23,18 @@ pub struct User {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
     pub id: Option<ObjectId>,
+    
+    #[serde(with = "ts_nanoseconds_option")] // not really necessary
+    #[builder(default, setter(strip_option))]
+    pub created_at: Option<DateTime<Utc>>,
+    
+    #[serde(with = "ts_nanoseconds")]
+    #[builder(default=Utc::now())]
+    pub updated_at: DateTime<Utc>,
+    
+    #[serde(with = "ts_nanoseconds_option")]
+    #[builder(default)]
+    pub deleted_at: Option<DateTime<Utc>>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub first_name: String,

@@ -1,6 +1,6 @@
 use actix_web::{guard, web, App, HttpServer};
 use configs::{index, index_playground, Configs, GraphQlApp};
-pub mod book;
+pub mod post;
 pub mod configs;
 pub mod user;
 

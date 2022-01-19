@@ -1,5 +1,6 @@
 use super::{User, UserInput};
 use async_graphql::*;
+use chrono::Utc;
 use mongodb::Database;
 use validator::Validate;
 use wither::Model;
@@ -17,6 +18,7 @@ impl UserMutationRoot {
         // user_input.validate()?;
         let db = ctx.data_unchecked::<Database>();
         let mut user = User::builder()
+            .created_at(Utc::now())
             .first_name(user_input.first_name)
             .last_name(user_input.last_name)
             .email(user_input.email)

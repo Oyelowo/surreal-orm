@@ -5,7 +5,7 @@ use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 use super::configuration::Environemnt;
-use crate::book::{BookMutationRoot, Post, PostQueryRoot};
+use crate::post::{BookMutationRoot, Post, PostQueryRoot};
 use crate::configs::Configs;
 use crate::user::{User, UserMutationRoot, UserQueryRoot};
 use wither::{mongodb::Client, prelude::Model};

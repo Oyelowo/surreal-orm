@@ -9,17 +9,17 @@ pub struct BookMutationRoot;
 
 #[Object]
 impl BookMutationRoot {
-    async fn add_book(
+    async fn create_post(
         &self,
         ctx: &Context<'_>,
-        #[graphql(desc = "user data")] book_input: PostInput,
+        #[graphql(desc = "user data")] post_input: PostInput,
     ) -> anyhow::Result<Post> {
         // book_input.validate()?;
         let db = ctx.data_unchecked::<Database>();
         let mut post = Post::builder()
-            .poster_id(book_input.poster_id)
-            .title(book_input.title)
-            .content(book_input.content)
+            .poster_id(post_input.poster_id)
+            .title(post_input.title)
+            .content(post_input.content)
             .build();
         // let mut book = User { ..book_input };
         post.validate()?;

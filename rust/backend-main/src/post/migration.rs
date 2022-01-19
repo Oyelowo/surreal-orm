@@ -1,4 +1,4 @@
-use crate::book::Post;
+use crate::post::Post;
 // use chrono::{self, TimeZone};
 // use mongodb::bson::doc;
 use wither::{self, prelude::Migrating};
