@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
+use url::Url;
 
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -11,51 +12,32 @@ pub enum Environemnt {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct AppUrl {
-    #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub port: u16,
-    pub host: String,
-}
+pub struct AppUrl {}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ApplicationConfigs {
-    #[serde(flatten)]
-    pub url: AppUrl,
-    pub environment: Environemnt,
-}
-
-impl From<AppUrl> for String {
-    fn from(url: AppUrl) -> String {
-        format!("{}:{}", url.host, url.port)
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Default)]
-pub struct DbUrl {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
-    pub username: String,
-    pub password: String,
+    pub environment: Environemnt,
 }
 
-impl From<DbUrl> for String {
-    fn from(
-        DbUrl {
-            port: _, host: _, ..
-        }: DbUrl,
-    ) -> String {
-        // format!("mongodb://{host}:{port}/")
-        "mongodb://localhost:27017/".into()
+impl ApplicationConfigs {
+    pub fn get_url(&self) -> anyhow::Result<Url, url::ParseError> {
+        let url_str = format!("{}:{}", self.host, self.port);
+        Url::parse(url_str.as_str())
     }
 }
 
 #[derive(Deserialize, Debug, Default)]
 pub struct DatabaseConfigs {
     pub database_name: String,
+    pub username: String,
+    pub password: String,
+    pub host: String,
 
-    #[serde(flatten)]
-    pub url: DbUrl,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub port: u16,
 
     #[serde(default = "default_require_ssl")]
     pub require_ssl: Option<bool>,
@@ -63,6 +45,13 @@ pub struct DatabaseConfigs {
 
 fn default_require_ssl() -> Option<bool> {
     Some(false)
+}
+
+impl DatabaseConfigs {
+    pub fn get_url(&self) -> anyhow::Result<Url, url::ParseError> {
+        // Url::parse("mongodb://{self.host}:{self.port}/")
+        Url::parse("mongodb://localhost:27017/")
+    }
 }
 
 #[derive(Debug)]
