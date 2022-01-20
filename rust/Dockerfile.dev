@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=rust:1.57
+ARG BASE_IMAGE=rust:1.58
 
 FROM $BASE_IMAGE as rust-with-chef
 WORKDIR /app
