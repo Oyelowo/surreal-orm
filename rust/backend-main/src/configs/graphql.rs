@@ -42,7 +42,7 @@ pub struct GraphQlApp;
 impl GraphQlApp {
     pub async fn setup() -> anyhow::Result<Schema<Query, Mutation, EmptySubscription>> {
         let Configs {
-            application,
+            ref application,
             database,
         } = Configs::init();
 
@@ -52,10 +52,9 @@ impl GraphQlApp {
             _ => (5, 7),
         };
 
-        let db_url = database.get_url()?;
-        let db = Client::with_uri_str(db_url.as_str())
+        let db = Client::with_uri_str(database.get_url()?.as_ref())
             .await?
-            .database("mydb");
+            .database(database.name.as_str());
 
         User::sync(&db).await.context(get_error_message::<User>())?;
         // Post::sync(&db).await.context("problem syncing post")?;

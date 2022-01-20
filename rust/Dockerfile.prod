@@ -30,9 +30,13 @@ FROM gcr.io/distroless/cc AS backend-main
 WORKDIR /app
 EXPOSE 8000
 COPY --from=builder-backend-main /app/target/release/backend-main /usr/local/bin/backend-main
-ENV ENVIRONMENT=local
-ENV HOST="0.0.0.0"
-ENV PORT=8000
+ENV APP_ENVIRONMENT=local
+ENV APP_HOST="0.0.0.0"
+ENV APP_PORT=8000
+ENV MONGODB_NAME=mydb
+ENV MONGODB_USERNAME=mongo
+ENV MONGODB_PASSWORD=fakepassword
+ENV MONGODB_HOST=localhost
 ENTRYPOINT ["/usr/local/bin/backend-main"]
 
 ## SECOND BACKEND SERVICE

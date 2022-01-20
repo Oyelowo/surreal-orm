@@ -31,7 +31,7 @@ impl ApplicationConfigs {
 
 #[derive(Deserialize, Debug, Default)]
 pub struct DatabaseConfigs {
-    pub database_name: String,
+    pub name: String,
     pub username: String,
     pub password: String,
     pub host: String,
@@ -49,8 +49,8 @@ fn default_require_ssl() -> Option<bool> {
 
 impl DatabaseConfigs {
     pub fn get_url(&self) -> anyhow::Result<Url, url::ParseError> {
-        // Url::parse("mongodb://{self.host}:{self.port}/")
-        Url::parse("mongodb://localhost:27017/")
+        let Self { host, port, .. } = self;
+        Url::parse(format!("mongodb://{host}:{port}/").as_str())
     }
 }
 
@@ -62,10 +62,13 @@ pub struct Configs {
 
 impl Configs {
     pub fn init() -> Self {
-        let application = envy::from_env::<ApplicationConfigs>()
+        let application = envy::prefixed("APP_")
+            .from_env::<ApplicationConfigs>()
             .unwrap_or_else(|e| panic!("Failed config. Error: {:?}", e));
         // FIXME: Use as above once docker/kube is properly setup
-        let database = envy::from_env::<DatabaseConfigs>().unwrap_or_default();
+        let database = envy::prefixed("MONGODB_")
+            .from_env::<DatabaseConfigs>()
+            .unwrap_or_default();
 
         Self {
             application,
