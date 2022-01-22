@@ -7,9 +7,9 @@ pub mod user;
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
     let Configs { application, .. } = Configs::init();
-    let app_url = application.get_url();
+    let app_url = &application.get_url();
 
-    println!("Playground: {}", app_url.as_str());
+    println!("Playground: {}", app_url);
 
     let schema = GraphQlApp::setup()
         .await
@@ -21,7 +21,7 @@ async fn main() -> anyhow::Result<()> {
             .service(web::resource("/").guard(guard::Post()).to(index))
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
     })
-    .bind(app_url.as_str())?
+    .bind(app_url)?
     .run()
     .await?;
 

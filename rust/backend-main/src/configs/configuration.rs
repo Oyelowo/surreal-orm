@@ -26,9 +26,8 @@ pub struct ApplicationConfigs {
 impl ApplicationConfigs {
     pub fn get_url(&self) -> String {
         let Self { host, port, .. } = self;
-        println!("hjgjjgghg{host}:{port}");
-        // Url::parse(format!("{host}:{port}").as_str()).expect("Problem parsing application uri")
-        format!("{host}:{port}").into()
+        // Url::parse(format!("http://{host}:{port}").as_ref()).expect("Problem parsing application uri")
+        format!("{host}:{port}")
     }
 }
 
@@ -52,10 +51,11 @@ fn default_require_ssl() -> Option<bool> {
 }
 
 impl DatabaseConfigs {
-    pub fn get_url(&self) -> Url {
+    pub fn get_url(&self) -> String {
         let Self { host, port, .. } = self;
         Url::parse(format!("mongodb://{host}:{port}/").as_str())
             .expect("Problem pasing mongodb uri")
+            .into()
     }
 }
 

@@ -52,7 +52,7 @@ impl GraphQlApp {
             _ => (5, 7),
         };
 
-        let db = Client::with_uri_str(database.get_url().as_ref())
+        let db = Client::with_uri_str(database.get_url())
             .await?
             .database(database.name.as_str());
 
