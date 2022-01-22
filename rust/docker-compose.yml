@@ -22,14 +22,6 @@ services:
       MONGODB_PASSWORD: fakepassword
       MONGODB_HOST: mongodb
       MONGODB_PORT: 27017
-      app_environment: local
-      app_host: 0.0.0.0
-      app_port: 8000
-      mongodb_name: mydb
-      mongodb_username: mongo
-      mongodb_password: fakepassword
-      mongodb_host: mongodb
-      mongodb_port: 27017
 
   mongodb:
     image: mongo:latest

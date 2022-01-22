@@ -15,7 +15,7 @@ pub enum Environemnt {
 pub struct AppUrl {}
 
 #[derive(Serialize, Deserialize, Debug)]
-// #[serde(rename_all = "lowercase")]
+#[serde(rename_all = "lowercase")]
 pub struct ApplicationConfigs {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
@@ -67,11 +67,11 @@ pub struct Configs {
 
 impl Configs {
     pub fn init() -> Self {
-        let application = envy::prefixed("app_")
+        let application = envy::prefixed("APP_")
             .from_env::<ApplicationConfigs>()
             .unwrap_or_else(|e| panic!("Failed config. Error: {:?}", e));
         // FIXME: Use as above once docker/kube is properly setup
-        let database = envy::prefixed("mongodb_")
+        let database = envy::prefixed("MONGODB_")
             .from_env::<DatabaseConfigs>()
             .expect("problem with mongo db environment variables(s)");
 
