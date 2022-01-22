@@ -1,9 +1,40 @@
 version: '3.8'
 services:
+  backend-main:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      # args:
+      #   - name=value
+      target: backend-main
+    container_name: backend-main
+    # hostname: mongodb
+    depends_on:
+      - mongodb
+    ports:
+      - 8000:8000
+    environment:
+      APP_ENVIRONMENT: local
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      MONGODB_NAME: mydb
+      MONGODB_USERNAME: mongo
+      MONGODB_PASSWORD: fakepassword
+      MONGODB_HOST: mongodb
+      MONGODB_PORT: 27017
+      app_environment: local
+      app_host: 0.0.0.0
+      app_port: 8000
+      mongodb_name: mydb
+      mongodb_username: mongo
+      mongodb_password: fakepassword
+      mongodb_host: mongodb
+      mongodb_port: 27017
+
   mongodb:
     image: mongo:latest
     container_name: mongodb
-    # hostname: mongodb
+    hostname: mongodb
     ports:
       - 27017:27017
     # environment:
@@ -12,14 +43,14 @@ services:
     # volumes:
     #   - mongodb_data_container:/data/db
 
-  mongo-express:
-    image: mongo-express
-    container_name: mongo-express
-    restart: unless-stopped
-    depends_on:
-      - mongodb
-    ports:
-      - 8081:8081
+  # mongo-express:
+  #   image: mongo-express
+  #   container_name: mongo-express
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - mongodb
+  #   ports:
+  #     - 8082:8081
     # environment:
     #   - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
     #   - ME_CONFIG_MONGODB_ADMINPASSWORD=password
@@ -39,41 +70,41 @@ services:
 
 
 
-  postgres-service:
-    image: postgres:latest
-    container_name: postgres-container
-    ports:
-      - 55432:5432/tcp
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_DB: pg_db
-      POSTGRES_PASSWORD: appdbpassword
-    volumes:
-      - /var/lib/postgres
-      - ./dbscripts/postgres:/docker-entrypoint-initdb.d
-      # - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+  # postgres-service:
+  #   image: postgres:latest
+  #   container_name: postgres-container
+  #   ports:
+  #     - 55432:5432/tcp
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_DB: pg_db
+  #     POSTGRES_PASSWORD: appdbpassword
+  #   volumes:
+  #     - /var/lib/postgres
+  #     - ./dbscripts/postgres:/docker-entrypoint-initdb.d
+  #     # - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
-  pgadmin:
-    container_name: demo_pgadmin
-    image: "dpage/pgadmin4:4.24"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
-    volumes:
-      - pgadmin:/var/lib/pgadmin
-      - ./docker_pgadmin_servers.json:/pgadmin4/servers.json
-    ports:
-      - "15433:80"
-    entrypoint:
-      - "/bin/sh"
-      - "-c"
-      - "/bin/echo 'postgres:5432:*:postgres:password' > /tmp/pgpassfile && chmod 600 /tmp/pgpassfile && /entrypoint.sh"
-    restart: unless-stopped    
+  # pgadmin:
+  #   container_name: demo_pgadmin
+  #   image: "dpage/pgadmin4:4.24"
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #     PGADMIN_CONFIG_SERVER_MODE: "False"
+  #     PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+  #   volumes:
+  #     - pgadmin:/var/lib/pgadmin
+  #     - ./docker_pgadmin_servers.json:/pgadmin4/servers.json
+  #   ports:
+  #     - "15433:80"
+  #   entrypoint:
+  #     - "/bin/sh"
+  #     - "-c"
+  #     - "/bin/echo 'postgres:5432:*:postgres:password' > /tmp/pgpassfile && chmod 600 /tmp/pgpassfile && /entrypoint.sh"
+  #   restart: unless-stopped    
 
-volumes:
-  mongodb_data_container:
-    driver: local
-  pgadmin:
-    driver: local
+# volumes:
+#   mongodb_data_container:
+#      driver: local
+  # pgadmin:
+  #   driver: local

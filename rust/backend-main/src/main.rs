@@ -7,7 +7,7 @@ pub mod user;
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
     let Configs { application, .. } = Configs::init();
-    let app_url = application.get_url()?;
+    let app_url = application.get_url();
 
     println!("Playground: {}", app_url.as_str());
 

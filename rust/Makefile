@@ -18,7 +18,7 @@ build-backend-main:
 
 deploy-backend-main:
 	docker build -f Dockerfile.prod --target backend-main  -t oyelowo/backend-main .
-	docker run -p 3000:3000 oyelowo/backend-main 
+	docker run -p 8000:8000 oyelowo/backend-main 
 
 deploy-backend-main-slim:
 	docker build -f Dockerfile.prod --target backend-main  -t oyelowo/backend-main .

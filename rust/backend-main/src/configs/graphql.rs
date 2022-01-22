@@ -52,11 +52,11 @@ impl GraphQlApp {
             _ => (5, 7),
         };
 
-        let db = Client::with_uri_str(database.get_url()?.as_ref())
+        let db = Client::with_uri_str(database.get_url().as_ref())
             .await?
             .database(database.name.as_str());
 
-        User::sync(&db).await.context(get_error_message::<User>())?;
+        User::sync(&db).await.expect("Problem syncing users");
         // Post::sync(&db).await.context("problem syncing post")?;
         Post::sync(&db).await.context(get_error_message::<Post>())?;
 

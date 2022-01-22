@@ -15,6 +15,7 @@ pub enum Environemnt {
 pub struct AppUrl {}
 
 #[derive(Serialize, Deserialize, Debug)]
+// #[serde(rename_all = "lowercase")]
 pub struct ApplicationConfigs {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
@@ -23,13 +24,16 @@ pub struct ApplicationConfigs {
 }
 
 impl ApplicationConfigs {
-    pub fn get_url(&self) -> anyhow::Result<Url, url::ParseError> {
-        let url_str = format!("{}:{}", self.host, self.port);
-        Url::parse(url_str.as_str())
+    pub fn get_url(&self) -> String {
+        let Self { host, port, .. } = self;
+        println!("hjgjjgghg{host}:{port}");
+        // Url::parse(format!("{host}:{port}").as_str()).expect("Problem parsing application uri")
+        format!("{host}:{port}").into()
     }
 }
 
 #[derive(Deserialize, Debug, Default)]
+#[serde(rename_all = "lowercase")]
 pub struct DatabaseConfigs {
     pub name: String,
     pub username: String,
@@ -48,9 +52,10 @@ fn default_require_ssl() -> Option<bool> {
 }
 
 impl DatabaseConfigs {
-    pub fn get_url(&self) -> anyhow::Result<Url, url::ParseError> {
+    pub fn get_url(&self) -> Url {
         let Self { host, port, .. } = self;
         Url::parse(format!("mongodb://{host}:{port}/").as_str())
+            .expect("Problem pasing mongodb uri")
     }
 }
 
@@ -62,13 +67,13 @@ pub struct Configs {
 
 impl Configs {
     pub fn init() -> Self {
-        let application = envy::prefixed("APP_")
+        let application = envy::prefixed("app_")
             .from_env::<ApplicationConfigs>()
             .unwrap_or_else(|e| panic!("Failed config. Error: {:?}", e));
         // FIXME: Use as above once docker/kube is properly setup
-        let database = envy::prefixed("MONGODB_")
+        let database = envy::prefixed("mongodb_")
             .from_env::<DatabaseConfigs>()
-            .unwrap_or_default();
+            .expect("problem with mongo db environment variables(s)");
 
         Self {
             application,
