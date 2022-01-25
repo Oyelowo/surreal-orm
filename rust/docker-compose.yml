@@ -1,13 +1,36 @@
 version: '3.8'
 services:
-  backend-main:
+  # backend-main:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.prod
+  #     # args:
+  #     #   - name=value
+  #     target: backend-main
+  #   container_name: backend-main
+  #   # hostname: mongodb
+  #   depends_on:
+  #     - mongodb
+  #   ports:
+  #     - 8000:8000
+  #   environment:
+  #     APP_ENVIRONMENT: local
+  #     APP_HOST: 0.0.0.0
+  #     APP_PORT: 8000
+  #     MONGODB_NAME: mydb
+  #     MONGODB_USERNAME: mongo
+  #     MONGODB_PASSWORD: fakepassword
+  #     MONGODB_HOST: mongodb
+  #     MONGODB_PORT: 27017
+
+  backend-main-pg:
     build:
       context: .
       dockerfile: Dockerfile.prod
       # args:
       #   - name=value
-      target: backend-main
-    container_name: backend-main
+      target: backend-main-pg
+    container_name: backend-main-pg
     # hostname: mongodb
     depends_on:
       - mongodb
@@ -100,3 +123,4 @@ services:
 #      driver: local
   # pgadmin:
   #   driver: local
+

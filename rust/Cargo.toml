@@ -2,6 +2,7 @@
 
 members = [
     "backend-main",
+    "backend-main-pg",
     "backend-second",
     "common",
     # "my-macros",

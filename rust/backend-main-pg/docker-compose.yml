@@ -1,0 +1,89 @@
+version: '3.8'
+services:
+
+# Long-lived container
+# Postgres container to run the database
+  db:
+    image: postgres
+    restart: always
+    container_name: postgres
+    ports:
+      - 5432:5432/tcp
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: my_db
+    volumes:
+      - /var/lib/postgres
+      - ./dbscripts/postgres:/docker-entrypoint-initdb.d
+      # - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+
+  # Short-lived container 
+  # Uses sqlx-cli to run migrations on the database
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
+    #command: cargo sqlx prepare
+    depends_on:
+      - db
+    environment:
+       DATABASE_URL : postgres://postgres:1234@db:5432/my_db
+       SQLX_OFFLINE : true
+    # volumes:
+    #   - type: bind
+    #     source: ./sqlx-data.json
+    #     target: /sqlx-data.json
+
+  # backend-main-pg:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.prod
+  #     # args:
+  #     #   - name=value
+  #     target: backend-main-pg
+  #   container_name: backend-main-pg
+  #   # hostname: mongodb
+  #   depends_on:
+  #     - db
+  #     - migrations
+  #   ports:
+  #     - 8000:8000
+  #   environment:
+  #     APP_ENVIRONMENT: local
+  #     APP_HOST: 0.0.0.0
+  #     APP_PORT: 8000
+  #     POSTGRES_NAME: mydb
+  #     POSTGRES_USERNAME: mongo
+  #     POSTGRES_PASSWORD: fakepassword
+  #     POSTGRES_HOST: postgres
+  #     POSTGRES_PORT: 27017
+  #     DATABASE_URL: postgres://postgres:1234@db:5432/my_db
+  #     PORT: 80
+
+
+  # pgadmin:
+  #   container_name: demo_pgadmin
+  #   image: "dpage/pgadmin4:4.24"
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #     PGADMIN_CONFIG_SERVER_MODE: "False"
+  #     PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+  #   volumes:
+  #     - pgadmin:/var/lib/pgadmin
+  #     - ./docker_pgadmin_servers.json:/pgadmin4/servers.json
+  #   ports:
+  #     - "15433:80"
+  #   entrypoint:
+  #     - "/bin/sh"
+  #     - "-c"
+  #     - "/bin/echo 'postgres:5432:*:postgres:password' > /tmp/pgpassfile && chmod 600 /tmp/pgpassfile && /entrypoint.sh"
+  #   restart: unless-stopped    
+
+# volumes:
+#   mongodb_data_container:
+#      driver: local
+  # pgadmin:
+  #   driver: local
+
