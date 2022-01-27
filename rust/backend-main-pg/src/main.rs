@@ -6,14 +6,14 @@ use chrono::Utc;
 // pub mod user;
 // use sqlx::{postgres::PgRow, query, Executor, Row};
 // use async_std::sync::RwLock;
-use dotenv;
+use dotenv::dotenv;
 use uuid::Uuid;
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::{Entry, HashMap};
 use std::sync::Arc;
 use sqlx::Pool;
 use std::env;
-use sqlx::{query,postgres::PgPool,query_as, PgPool};
+use sqlx::{query,postgres::PgPool,query_as};
 
 
 
@@ -23,6 +23,7 @@ async fn main() -> anyhow::Result<()> {
     // let app_url = &application.get_url();
 
     // println!("Playground: {}", app_url);
+    dotenv().ok();
 
      let conn_str =
         std::env::var("DATABASE_URL").expect("Env var DATABASE_URL is required for this example.");
@@ -32,7 +33,7 @@ async fn main() -> anyhow::Result<()> {
 
         let test_id = Uuid::new_v4();
 
-   let k = query!(
+   let k = query_as!(User,
         r#"INSERT INTO users (id, first_name, last_name, email) VALUES 
         ( $1, $2, $3, $4) returning id, first_name, last_name, email
         "#,
@@ -40,7 +41,7 @@ async fn main() -> anyhow::Result<()> {
     )
     .fetch_one(&pool)
     .await?;
-    // let p = k.ema;
+
 
     // check that inserted todo can be fetched
     let n = query!("SELECT first_name FROM users WHERE id = $1", test_id)
@@ -48,6 +49,7 @@ async fn main() -> anyhow::Result<()> {
         .fetch_one(&mut transaction)
         .await?;
 
+        println!("#TRE{:?}",n);
 
     transaction.rollback();
 

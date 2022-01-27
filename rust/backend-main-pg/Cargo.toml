@@ -76,7 +76,7 @@ ormx = { version = "0.7", features = ["postgres"]}
 # ]
 
 
-sqlx = { version = "0.5.10", features = ["runtime-async-std", "macros", "chrono", "json", "postgres", "uuid"] }
+sqlx = { version = "0.5.10", features = ["runtime-actix-native-tls", "macros", "chrono", "json", "postgres", "uuid"] }
 chrono = "0.4"
 dotenv = "0.15"
 uuid = { version = "0.8", features = ["v4", "serde"] }
