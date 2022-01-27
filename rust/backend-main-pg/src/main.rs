@@ -39,7 +39,7 @@ async fn main() -> anyhow::Result<()> {
         test_id,
         "oyelowo",
         "oyedayo",
-        "oyej2@gmail.com"
+        "oyej23@gmail.com"
     )
     .fetch_one(&pool)
     .await?;
