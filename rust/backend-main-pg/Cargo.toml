@@ -12,7 +12,8 @@ async-graphql = {version = "3.0.21", features = ["apollo_tracing", "apollo_persi
 # sqlx = { version = "0.5", features = [ "runtime-actix-native-tls" , "postgres",  "chrono", "offline" , "macros"] }
 # sqlx = "0.5"
 # async-graphql = "3.0.21"
-actix-rt = "2.4.0"
+# actix-rt = "2.4.0"
+actix-rt = { version = "2.0.0", default-features = false, optional = true }
 actix-web = {version = "4.0.0-beta.19", default-features = false}
 async-graphql-actix-web = "3.0.21"
 bson = "2.1.0"
@@ -76,7 +77,7 @@ ormx = { version = "0.7", features = ["postgres"]}
 # ]
 
 
-sqlx = { version = "0.5.10", features = ["runtime-actix-native-tls", "macros", "chrono", "json", "postgres", "uuid"] }
+sqlx = { version = "0.5.10", features = ["runtime-tokio-native-tls", "macros", "chrono", "json", "postgres", "uuid"] }
 chrono = "0.4"
 dotenv = "0.15"
 uuid = { version = "0.8", features = ["v4", "serde"] }
