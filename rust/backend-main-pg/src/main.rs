@@ -7,13 +7,35 @@ use chrono::Utc;
 // use sqlx::{postgres::PgRow, query, Executor, Row};
 // use async_std::sync::RwLock;
 use dotenv::dotenv;
+use ormx::{self, conditional_query_as, Insert, Patch, Table};
 use serde::{Deserialize, Serialize};
 use sqlx::Pool;
 use sqlx::{postgres::PgPool, query, query_as};
+use validator::Validate;
 use std::collections::hash_map::{Entry, HashMap};
 use std::env;
 use std::sync::Arc;
 use uuid::Uuid;
+
+#[derive(Serialize, Deserialize, Table, Validate)]
+#[ormx(table = "users", id = id, insertable)]
+#[serde(rename_all = "camelCase")]
+struct User {
+    #[ormx(column = "id")]
+    #[ormx(get_one = get_by_id)]
+    #[ormx(default)]
+    id: Uuid,
+
+    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    first_name: String,
+
+    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    last_name: String,
+
+    #[ormx(get_optional(&str))]
+    #[validate(email)]
+    email: String,
+}
 
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
@@ -31,9 +53,17 @@ async fn main() -> anyhow::Result<()> {
 
     let test_id = Uuid::new_v4();
 
+    let connection = &mut *pool.acquire().await?;
+    let k = InsertUser {
+        first_name: "Oyelo".into(),
+        last_name: "day".into(),
+        email: "ddd@gm.com".into(),
+    }
+    .insert(connection)
+    .await?;
     let k = query_as!(
         User,
-        r#"INSERT INTO users (id, first_name, last_name, email) VALUES 
+        r#"INSERT INTO users (id, first_name, last_name, email) VALUES
         ( $1, $2, $3, $4) returning id, first_name, last_name, email
         "#,
         test_id,
@@ -49,7 +79,7 @@ async fn main() -> anyhow::Result<()> {
         .fetch_one(&mut transaction)
         .await?;
 
-    println!("#TRE{:?}", n);
+    println!("#TRE{:?}", n.id);
 
     transaction.rollback();
 
@@ -74,12 +104,4 @@ async fn main() -> anyhow::Result<()> {
 
     println!("gfg");
     Ok(())
-}
-
-#[derive(sqlx::FromRow, Debug, Clone)]
-struct User {
-    id: Uuid,
-    first_name: String,
-    last_name: String,
-    email: String,
 }
