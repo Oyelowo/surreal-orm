@@ -20,10 +20,10 @@ trait Collection {
 #[serde(rename_all = "camelCase")]
 //#[graphql(input_name = "PostInput")]
 #[graphql(complex)]
-#[ormx(table = "posts", id = id, insertable)]
+#[ormx(table = "posts", id = id, insertable, patchable, deletable)]
 pub struct Post {
     #[ormx(column = "id")]
-    #[ormx(get_one = get_by_id)]
+    #[ormx(get_one)]
     pub id: Uuid,
 
     // FK
@@ -36,20 +36,13 @@ pub struct Post {
     pub content: String,
 }
 
-impl Post {}
-
-impl Collection for Post {
-    fn find_one() -> Post {
-        todo!()
-    }
-}
 
 #[ComplexObject]
 impl Post {
     async fn poster(&self, ctx: &Context<'_>) -> anyhow::Result<User> {
         // TODO: Use dataloader to batch user
         let db = ctx.data_unchecked::<PgPool>();
-        let poster = User::get_by_id(db, &self.poster_id).await;
+        let poster = User::by_id(db, &self.poster_id).await;
         poster
     }
 }

@@ -43,8 +43,8 @@ pub struct GraphQlApp;
 impl GraphQlApp {
     pub async fn setup() -> anyhow::Result<Schema<Query, Mutation, EmptySubscription>> {
         let Configs {
-            ref application,
-            database,
+            application_settings: ref application,
+            database_settings: database,
         } = Configs::init();
 
         use Environemnt::*;

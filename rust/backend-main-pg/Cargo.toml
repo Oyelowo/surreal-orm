@@ -30,13 +30,13 @@ async-graphql = {version = "3.0.21", features = [
 ]}
 async-graphql-actix-web = "3.0.21"
 
-rand = "0.8.4"
 bson = "2.1.0"
 chrono = {version = "0.4.19", features = ["serde"]}
 chrono-tz = "0.6.1"
 ormx = {git = "https://github.com/NyxCode/ormx", features = ["postgres"], branch = "master"}
+rand = "0.8.4"
 # ormx = {version = "0.7", features = ["postgres"]}
-sqlx = {version = "0.5.10", features = ["runtime-tokio-native-tls", "postgres", "chrono", "offline", "json", "macros", "uuid"]}
+sqlx = {version = "0.5.10", features = ["runtime-tokio-native-tls", "postgres", "chrono", "offline", "json", "macros", "uuid", "migrate"]}
 uuid = {version = "0.8.2", features = ["v4", "serde"]}
 
 anyhow = "1.0.49"

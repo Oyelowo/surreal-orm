@@ -69,6 +69,7 @@ impl User {
     async fn posts(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<Post>> {
         let db = ctx.data_unchecked::<PgPool>();
         // let posts = ormx::conditional_query_as!(
+        let k = Post::by_poster_id()
         let posts = ormx::conditional_query_as!(
             Post,
             r#"SELECT *"#

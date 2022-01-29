@@ -1,10 +1,14 @@
 -- Add migration script here
+
 CREATE TABLE IF NOT EXISTS posts
 (
-    id         uuid PRIMARY NOT NULL,
-    title TEXT NOT NULL,
-    context   TEXT NOT NULL,
-    user_id integer
+    id          uuid PRIMARY KEY NOT NULL,
+    user_id     uuid NOT NULL,
+    created_at  TIMESTAMP NOT NULL,
+    updated_at  TIMESTAMP DEFAULT timezone('utc', now()),
+    deleted_at  TIMESTAMP DEFAULT NULL,
+    title       TEXT NOT NULL,
+    context     TEXT NOT NULL
 );
 
 /* 
@@ -26,7 +30,7 @@ This is not possible with inline foreign key constraint creation
 foreign keys.
  */
 
-alter table posts
-    add constraint fk_posts_users
-    foreign key (user_id)
+ALTER TABLE posts
+    ADD CONSTRAINT fk_posts_users
+    FOREIGN KEY (user_id)
     REFERENCES users (id)

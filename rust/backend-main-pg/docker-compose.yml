@@ -12,10 +12,10 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: my_db
-    volumes:
-      - /var/lib/postgres
-      - ./dbscripts/postgres:/docker-entrypoint-initdb.d
+      POSTGRES_DB: mydb
+    # volumes:
+      # - /var/lib/postgres
+      # - ./dbscripts/postgres:/docker-entrypoint-initdb.d
       # - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
   # Short-lived container 
@@ -29,37 +29,38 @@ services:
       - db
     environment:
        DATABASE_URL : postgres://postgres:1234@db:5432/my_db
-       SQLX_OFFLINE : true
+       # SQLX_OFFLINE : true
     # volumes:
     #   - type: bind
     #     source: ./sqlx-data.json
     #     target: /sqlx-data.json
 
-  # backend-main-pg:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.prod
-  #     # args:
-  #     #   - name=value
-  #     target: backend-main-pg
-  #   container_name: backend-main-pg
-  #   # hostname: mongodb
-  #   depends_on:
-  #     - db
-  #     - migrations
-  #   ports:
-  #     - 8000:8000
-  #   environment:
-  #     APP_ENVIRONMENT: local
-  #     APP_HOST: 0.0.0.0
-  #     APP_PORT: 8000
-  #     POSTGRES_NAME: mydb
-  #     POSTGRES_USERNAME: mongo
-  #     POSTGRES_PASSWORD: fakepassword
-  #     POSTGRES_HOST: postgres
-  #     POSTGRES_PORT: 27017
-  #     DATABASE_URL: postgres://postgres:1234@db:5432/my_db
-  #     PORT: 80
+  backend-main-pg:
+    build:
+      context: ../
+      dockerfile: Dockerfile.prod
+      # args:
+      #   - name=value
+      target: backend-main-pg
+    # container_name: backend-main-pg
+    # hostname: mongodb
+    depends_on:
+      - db
+      #- migrations
+    ports:
+       - 8000:8000
+    environment:
+      APP_ENVIRONMENT: local
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      POSTGRES_NAME: mydb
+      POSTGRES_DATABASE_NAME: mydb
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      DATABASE_URL: postgres://postgres:1234@db:5432/my_db
+  #   PORT: 80
 
 
   # pgadmin:
