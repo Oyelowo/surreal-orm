@@ -8,13 +8,9 @@ pub struct PostQueryRoot;
 
 #[Object]
 impl PostQueryRoot {
-    async fn post(
-        &self,
-        ctx: &Context<'_>,
-        #[graphql(desc = "id of the Post")] id: &Uuid,
-    ) -> anyhow::Result<Option<Post>> {
+    async fn post(&self, ctx: &Context<'_>, id: Uuid) -> anyhow::Result<Post> {
         let db = ctx.data_unchecked::<PgPool>();
-        let post = Post::by_id(db, id).await?;
+        let post = Post::by_id(db, &id).await?;
         Ok(post)
     }
 

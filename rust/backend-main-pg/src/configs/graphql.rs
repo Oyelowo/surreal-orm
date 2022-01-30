@@ -1,13 +1,14 @@
+use std::time::Duration;
+
 use actix_web::{web, HttpResponse};
-use anyhow::Context;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 use super::configuration::Environemnt;
 use crate::configs::Configs;
-use crate::post::{Post, PostMutationRoot, PostQueryRoot};
-use crate::user::{User, UserMutationRoot, UserQueryRoot};
+use crate::post::{PostMutationRoot, PostQueryRoot};
+use crate::user::{UserMutationRoot, UserQueryRoot};
 use sqlx::postgres::PgPoolOptions;
 
 #[derive(MergedObject, Default)]
@@ -33,9 +34,6 @@ pub async fn index_playground() -> HttpResponse {
         .body(source)
 }
 
-fn get_error_message<T: Model>() -> String {
-    format!("problem syncing {:?}", T::COLLECTION_NAME)
-}
 
 pub struct GraphQlApp;
 

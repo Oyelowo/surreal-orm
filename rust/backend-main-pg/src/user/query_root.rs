@@ -1,7 +1,7 @@
-use super::model::User;
+use super::model::{User, Role};
 
 use async_graphql::*;
-use sqlx::{query_as, PgPool, Pool, Postgres};
+use sqlx::{query, query_as, PgPool, Pool, Postgres};
 use uuid::Uuid;
 
 #[derive(Default)]
@@ -16,16 +16,14 @@ impl UserQueryRoot {
     ) -> anyhow::Result<User> {
         let db = ctx.data_unchecked::<PgPool>();
 
-        let user = User::get_by_id(db, &id).await?;
+        let user = User::by_id(db, &id).await?;
 
         Ok(user)
     }
 
     async fn users(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<User>> {
         let db = ctx.data_unchecked::<PgPool>();
-        let users = ormx::conditional_query_as!(User, "SELECT * FROM users")
-        .fetch_all(db)
-        .await?;
+        let users= query_as!(User, "SELECT * FROM users WHERE first_name LIKE $1", "kk".into()).fetch_all(db).await?;
 
         Ok(users)
     }

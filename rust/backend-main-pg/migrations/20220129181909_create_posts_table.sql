@@ -4,9 +4,9 @@ CREATE TABLE IF NOT EXISTS posts
 (
     id          uuid PRIMARY KEY NOT NULL,
     user_id     uuid NOT NULL,
-    created_at  TIMESTAMP NOT NULL,
-    updated_at  TIMESTAMP DEFAULT timezone('utc', now()),
-    deleted_at  TIMESTAMP DEFAULT NULL,
+    created_at  TIMESTAMPTZ NOT NULL,
+    updated_at  TIMESTAMPTZ DEFAULT timezone('utc', now()) NOT NULL,
+    deleted_at  TIMESTAMPTZ DEFAULT NULL,
     title       TEXT NOT NULL,
     content     TEXT NOT NULL
 );

@@ -1,19 +1,17 @@
 use async_graphql::*;
-
-use crate::post::Post;
-use chrono::{
-    serde::{ts_nanoseconds, ts_nanoseconds_option},
-    DateTime, Utc,
+use ormx::{Patch, Table};
+use sqlx::{
+    types::{
+        chrono::{DateTime, Utc},
+        Uuid,
+    },
+    PgPool,
 };
-use serde::{Deserialize, Serialize};
-use sqlx::{PgPool, Pool, Postgres, types::Uuid};
-use typed_builder::TypedBuilder;
 use validator::Validate;
 
-use ormx::{conditional_query_as, Delete, Insert, Patch, Table};
+use crate::post::Post;
 
 #[derive(SimpleObject, Table, Validate, Debug)]
-#[serde(rename_all = "camelCase")]
 #[graphql(complex)]
 #[ormx(table = "users", id = id, insertable, deletable)]
 pub struct User {
@@ -41,11 +39,10 @@ pub struct User {
 
     // #[validate(range(min = 18, max = 160))]
     // pub age: u8,
-
     #[ormx(custom_type)]
     role: Role,
 
-    disabled: String,
+    disabled: Option<String>,
 
     // #[serde(default)]
     // pub social_media: Vec<String>,
@@ -71,7 +68,6 @@ impl User {
 }
 
 //impl InputObject for InsertUser {}
-impl Validate for InsertUser {}
 
 // #[derive(InputObject, TypedBuilder)]
 // pub struct UserCreateInput {
@@ -83,21 +79,23 @@ impl Validate for InsertUser {}
 // }
 
 // Patches can be used to update multiple fields at once (in diesel, they're called "ChangeSets").
-#[derive(Patch, InputObject, Validate, TypedBuilder)]
+#[derive(Patch, InputObject, Validate)]
 #[ormx(table_name = "users", table = User, id = "id")]
-pub struct UpdateUser {
-    first_name: String,
-    last_name: String,
-    disabled: Option<String>,
+pub struct CreateUserInput {
+    pub first_name: String,
+    pub last_name: String,
+    pub email: String,
+    pub disabled: Option<String>,
 
-    #[graphql(skip)]
+    // #[graphql(skip)]
     #[ormx(custom_type)]
-    role: Role,
+    pub role: Role,
 }
 
-#[derive(Debug, sqlx::Type)]
-#[sqlx(type_name = "user_role")]
-#[sqlx(rename_all = "lowercase")]
+pub type UpdateUserInput = CreateUserInput;
+
+#[derive(Debug, sqlx::Type, Enum, Copy, Clone, Eq, PartialEq)]
+#[sqlx(type_name = "user_role", rename_all = "snake_case")]
 pub enum Role {
     User,
     Admin,
