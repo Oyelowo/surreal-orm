@@ -51,8 +51,6 @@ impl Post {
 #[derive(InputObject, Validate, Patch)]
 #[ormx(table_name = "posts", table = Post, id = "id")]
 pub struct CreatePostInput {
-    pub user_id: Uuid,
-
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub title: String,
 
