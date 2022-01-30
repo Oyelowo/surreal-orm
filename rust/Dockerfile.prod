@@ -35,6 +35,7 @@ ENTRYPOINT ["/usr/local/bin/backend-main"]
 
 ## FIRST BACKEND PG SERVICE
 FROM base AS builder-backend-main-pg 
+ENV SQLX_OFFLINE=true
 RUN cargo build --release -p backend-main-pg
 
 # We do not need the Rust toolchain to run the binary!
