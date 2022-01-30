@@ -43,7 +43,7 @@ services:
       #   - name=value
       target: backend-main-pg
     # container_name: backend-main-pg
-    # hostname: mongodb
+    # hostname: backend-main-pg
     depends_on:
       - db
       #- migrations
@@ -83,8 +83,6 @@ services:
   #   restart: unless-stopped    
 
 # volumes:
-#   mongodb_data_container:
-#      driver: local
   # pgadmin:
   #   driver: local
 

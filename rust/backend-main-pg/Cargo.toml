@@ -9,7 +9,7 @@ version = "0.1.0"
 # common = {path = "../common"}
 actix-rt = {version = "2.4.0", default-features = false, optional = true}
 actix-web = {version = "4.0.0-beta.19", default-features = false}
-async-graphql = {version = "3.0.21", features = [
+async-graphql = {version = "3.0.27", features = [
   "apollo_tracing",
   "apollo_persisted_queries",
   "bson",

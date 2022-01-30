@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS posts
     updated_at  TIMESTAMP DEFAULT timezone('utc', now()),
     deleted_at  TIMESTAMP DEFAULT NULL,
     title       TEXT NOT NULL,
-    context     TEXT NOT NULL
+    content     TEXT NOT NULL
 );
 
 /* 

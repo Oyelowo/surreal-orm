@@ -9,7 +9,6 @@ use crate::configs::Configs;
 use crate::post::{Post, PostMutationRoot, PostQueryRoot};
 use crate::user::{User, UserMutationRoot, UserQueryRoot};
 use sqlx::postgres::PgPoolOptions;
-use wither::{mongodb::Client, prelude::Model};
 
 #[derive(MergedObject, Default)]
 pub struct Query(UserQueryRoot, PostQueryRoot);
@@ -53,20 +52,14 @@ impl GraphQlApp {
             _ => (5, 7),
         };
 
-        // let pool = PgPoolOptions::new()
-        //     .max_connections(5)
-        //     .connect("postgres://postgres:password@localhost/test")
-        //     .await?;
+        let connection_pool = PgPoolOptions::new()
+            .connect_timeout(Duration::from_secs(5))
+            .connect_lazy_with(database.with_db());
 
-        let conn_str = std::env::var("DATABASE_URL")
-            .expect("Env var DATABASE_URL is required for this example.");
-
-        let db_pool = sqlx::PgPool::connect(&conn_str).await?;
-        // sqlx::migrate!().run(<&your_pool OR &mut your_connection>).await?
-        sqlx::migrate!("migrations").run(db_pool).await?;
+        sqlx::migrate!("./migrations").run(&connection_pool).await?;
 
         let schema = get_graphql_schema()
-            .data(db_pool)
+            .data(connection_pool)
             .limit_depth(limit_depth) // This and also limi_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
             .limit_complexity(limit_complexity)
             .finish();

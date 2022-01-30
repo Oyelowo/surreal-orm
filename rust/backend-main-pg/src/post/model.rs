@@ -1,6 +1,6 @@
 use async_graphql::*;
 
-use ormx::Insert;
+use ormx::{Insert, Table};
 use serde::{Deserialize, Serialize};
 use sqlx::{PgPool, Pool, Postgres};
 use typed_builder::TypedBuilder;
@@ -9,33 +9,31 @@ use validator::Validate;
 
 use crate::user::User;
 
-trait Collection {
-    fn find_one() -> Post;
-    fn create() -> Post;
-}
-
-#[derive(
-    ormx::Table,SimpleObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,
-)]
+#[derive(Table, SimpleObject, Validate, Debug)]
 #[serde(rename_all = "camelCase")]
 //#[graphql(input_name = "PostInput")]
 #[graphql(complex)]
-#[ormx(table = "posts", id = id, insertable, patchable, deletable)]
+#[ormx(table = "posts", id = id, insertable, deletable)]
 pub struct Post {
     #[ormx(column = "id")]
     #[ormx(get_one)]
     pub id: Uuid,
 
-    // FK
-    pub poster_id: Uuid,
+    // FK -> poster
+    #[ormx(get_many)]
+    pub user_id: Uuid,
 
-    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    pub created_at: DateTime<Utc>,
+
+    pub updated_at: DateTime<Utc>,
+
+    #[ormx(default)]
+    pub deleted_at: Option<DateTime<Utc>>,
+
     pub title: String,
 
-    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
-    pub content: String,
+    pub context: String, // FIXME: change back to content
 }
-
 
 #[ComplexObject]
 impl Post {
@@ -48,14 +46,19 @@ impl Post {
 }
 
 // pub type PostInput = Post;
-#[derive(InputObject, TypedBuilder, ormx::Patch)]
+#[derive(InputObject, Validate, Patch)]
 #[ormx(table_name = "posts", table = Post, id = "id")]
-pub struct PostInput {
-    pub poster_id: Uuid,
+pub struct UpdatePostInput {
+    pub user_id: Uuid,
+
+    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub title: String,
-    pub content: String,
+
+    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    pub context: String, // FIXME: change back to content
 }
 
+pub type CreatePostInput = CreatePostInput;
 /*
 fn validate_unique_postname(postname: &str) -> std::result::Result<(), ValidationError> {
     if postname == "xXxShad0wxXx" {

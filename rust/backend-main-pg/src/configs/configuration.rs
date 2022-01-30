@@ -52,13 +52,6 @@ fn default_require_ssl() -> Option<bool> {
 }
 
 impl DatabaseSettings {
-    pub fn get_url(&self) -> String {
-        let Self { host, port, .. } = self;
-        Url::parse(format!("mongodb://{host}:{port}/").as_str())
-            .expect("Problem pasing mongodb uri")
-            .into()
-    }
-
     pub fn with_db(&self) -> PgConnectOptions {
         let options = self.without_db().database(&self.name);
         options
@@ -97,7 +90,7 @@ impl Configs {
             // FIXME: Use as above once docker/kube is properly setup
         let database_settings = envy::prefixed("POSTGRES_")
             .from_env::<DatabaseSettings>()
-            .expect("problem with mongo db environment variables(s)");
+            .expect("problem with postgres db environment variables(s)");
 
         Self {
             application_settings,

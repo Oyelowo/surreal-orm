@@ -6,54 +6,46 @@ use chrono::{
     DateTime, Utc,
 };
 use serde::{Deserialize, Serialize};
-use sqlx::{PgPool, Pool, Postgres};
+use sqlx::{PgPool, Pool, Postgres, types::Uuid};
 use typed_builder::TypedBuilder;
 use validator::Validate;
 
-// use bson::DateTime;
-use ormx::{conditional_query_as, Insert, Patch, Table};
+use ormx::{conditional_query_as, Delete, Insert, Patch, Table};
 
-
-#[derive(SimpleObject, Table, TypedBuilder, Validate, Serialize, Deserialize, Debug)]
-// #[derive(InputObject)]
+#[derive(SimpleObject, Table, Validate, Debug)]
 #[serde(rename_all = "camelCase")]
-// #[graphql(input_name = "UserInput")]
 #[graphql(complex)]
-#[ormx(table = "users", id = id, insertable)]
+#[ormx(table = "users", id = id, insertable, deletable)]
 pub struct User {
     #[ormx(column = "id")]
-    #[ormx(get_one = get_by_id)]
+    #[ormx(get_one)]
+    id: Uuid,
+
+    created_at: DateTime<Utc>,
+
+    updated_at: DateTime<Utc>,
+
     #[ormx(default)]
-    #[builder(default)]
-    pub id: Option<uuid::Uuid>,
-
-    // #[builder(default)]
-    pub created_at: DateTime<Utc>,
-
-    // #[builder(default=Utc::now())]
-    pub updated_at: DateTime<Utc>,
-
-    #[builder(default)]
-    #[ormx(default)]
-    pub deleted_at: Option<DateTime<Utc>>,
+    deleted_at: Option<DateTime<Utc>>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
-    pub first_name: String,
+    first_name: String,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
-    pub last_name: String,
+    last_name: String,
 
-    // #[builder(default, setter(strip_option))]
     // generate `User::by_email(&str) -> Result<Option<Self>>`
     #[ormx(get_optional(&str))]
     #[validate(email)]
     pub email: String,
 
-    #[validate(range(min = 18, max = 160))]
-    pub age: u8,
+    // #[validate(range(min = 18, max = 160))]
+    // pub age: u8,
 
     #[ormx(custom_type)]
     role: Role,
+
+    disabled: String,
 
     // #[serde(default)]
     // pub social_media: Vec<String>,
@@ -68,16 +60,7 @@ pub struct User {
 impl User {
     async fn posts(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<Post>> {
         let db = ctx.data_unchecked::<PgPool>();
-        // let posts = ormx::conditional_query_as!(
-        let k = Post::by_poster_id()
-        let posts = ormx::conditional_query_as!(
-            Post,
-            r#"SELECT *"#
-            "FROM posts"
-        )
-        .fetch_all(db)
-        .await?;
-
+        let posts = Post::by_user_id(db, &self.id).await?;
         Ok(posts)
     }
 
@@ -87,10 +70,8 @@ impl User {
     }
 }
 
-
 //impl InputObject for InsertUser {}
 impl Validate for InsertUser {}
-
 
 // #[derive(InputObject, TypedBuilder)]
 // pub struct UserCreateInput {
@@ -101,19 +82,20 @@ impl Validate for InsertUser {}
 //     pub age: u8,
 // }
 
-
 // Patches can be used to update multiple fields at once (in diesel, they're called "ChangeSets").
-#[derive(Patch, InputObject, Validate)]
+#[derive(Patch, InputObject, Validate, TypedBuilder)]
 #[ormx(table_name = "users", table = User, id = "id")]
 pub struct UpdateUser {
     first_name: String,
     last_name: String,
-    // disabled: Option<String>,
-    // #[ormx(custom_type)]
-    // role: Role,
+    disabled: Option<String>,
+
+    #[graphql(skip)]
+    #[ormx(custom_type)]
+    role: Role,
 }
 
-#[derive(Debug, Copy, Clone, sqlx::Type)]
+#[derive(Debug, sqlx::Type)]
 #[sqlx(type_name = "user_role")]
 #[sqlx(rename_all = "lowercase")]
 pub enum Role {
@@ -121,9 +103,7 @@ pub enum Role {
     Admin,
 }
 
-
 // pub type UserInput = User;
-
 
 /*
 
