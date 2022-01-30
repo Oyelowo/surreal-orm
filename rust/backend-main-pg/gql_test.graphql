@@ -1,42 +1,101 @@
+mutation createUser($userInput: CreateUserInput!) {
+  createUser(userInput: $userInput) {
+    id
+    firstName
+    lastName
+    email
+
+  }
+}
+
+// The input
+
+
 {
-  user(id: 6) {
-    name
-    id
+  "userInput": {
+  "firstName": "Oye",
+      "lastName":  "Dayo",
+    "email": "newmail@gmail.com",
+    "disabled": "yeah",
+    "role": "ADMIN"
   }
-  users {
+}
+
+
+mutation createPost($postInput: CreatePostInput!) {
+  createPost(userId: "66e1d23f-42e3-49d8-8544-e51890b96e68", postInput: $postInput) {
     id
-    name
-    age
-  }
-  droid(id: "2000") {
-    id
-    friends {
-      name
+    userId
+    title
+    poster {
+      id
+      lastName
+      firstName
+      email
+    
     }
+  }
+}
+
+// The input
+
+{
+  "postInput": {
+  "userId": "66e1d23f-42e3-49d8-8544-e51890b96e68",
+    "title":"First by sakke",
+    "content": "Good content first"
+  }
+}
+
+
+
+
+  {users{
+    id
+   firstName
+    lastName
+    email
+    createdAt
+    updatedAt
+    deletedAt
+    postCount
+    posts {
+      title
+      content
+      updatedAt
+      userId
+      poster {
+        firstName
+      }
+    }
+
+
+      
+
+  }
+    
+  
   }
 
-  droids {
-    edges {
-      node {
-        id
-        name
-        friends {
-          id
-        }
-        appearsIn
-        primaryFunction
-      }
-      cursor
-    }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
-  }
-  hero(episode: "EMPIRE") {
+
+
+{
+  user(id:"6b25ffdc-f294-448e-b61d-dd6b8e754a2b"){
+    firstName
+    lastName
+
+    email
     id
-    name
+    postCount
+    posts {
+      title
+      id
+      content
+      poster {
+        lastName
+        firstName
+
+      }
+    }
   }
 }
