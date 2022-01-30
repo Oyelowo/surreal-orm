@@ -18,23 +18,23 @@ use crate::post::Post;
 pub struct User {
     #[ormx(column = "id")]
     #[ormx(get_one)]
-    id: Uuid,
+    pub id: Uuid,
 
-    created_at: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
 
-    updated_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 
     #[ormx(default)]
-    deleted_at: Option<DateTime<Utc>>,
+    pub deleted_at: Option<DateTime<Utc>>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
-    username: String,
+    pub username: String,
 
     #[validate(length(min = 1))]
-    first_name: String,
+    pub first_name: String,
 
     #[validate(length(min = 1))]
-    last_name: String,
+    pub last_name: String,
 
     // generate `User::by_email(&str) -> Result<Option<Self>>`
     #[ormx(get_optional(&str))]
@@ -45,9 +45,9 @@ pub struct User {
     pub age: i16,
 
     #[ormx(custom_type)]
-    role: Role,
+    pub role: Role,
 
-    disabled: Option<String>,
+    pub disabled: Option<String>,
 
     // #[serde(default)]
     // pub social_media: Vec<String>,
@@ -55,7 +55,7 @@ pub struct User {
     // don't include this field into `InsertUser` since it has a default value
     // generate `User::set_last_login(Option<NaiveDateTime>) -> Result<()>`
     #[ormx(default, set)]
-    last_login: Option<DateTime<Utc>>,
+    pub last_login: Option<DateTime<Utc>>,
 }
 
 #[ComplexObject]
