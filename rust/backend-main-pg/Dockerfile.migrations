@@ -14,8 +14,8 @@ COPY . .
 # Compares the migration history of the running database against the migrations/ folder and runs any scripts that are still pending.
 
 # RUN sqlx migrate run
-ENV DATABASE_URL=postgres://postgres:1234@db:5432/my_db
-ENV SQLX_OFFLINE=true
+ENV DATABASE_URL=postgres://postgres:1234@db:5432/mydb
+# ENV SQLX_OFFLINE=true
 # RUN cargo sqlx prepare --check
 
-CMD cargo sqlx prepare
+RUN sqlx migrate run

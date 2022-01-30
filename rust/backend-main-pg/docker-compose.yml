@@ -28,7 +28,7 @@ services:
     depends_on:
       - db
     environment:
-       DATABASE_URL : postgres://postgres:1234@db:5432/my_db
+       DATABASE_URL : postgres://postgres:1234@db:5432/mydb
        # SQLX_OFFLINE : true
     # volumes:
     #   - type: bind

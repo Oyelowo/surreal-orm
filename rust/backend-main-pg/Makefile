@@ -1,3 +1,7 @@
+update_sqlx_data:
+	# chmod +x ./update-sqlx-data.sh
+	./update-sqlx-data.sh
+
 migrate:
 	sqlx migrate add
 
