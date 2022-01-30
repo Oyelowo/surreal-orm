@@ -2,7 +2,7 @@ use super::{CreateUserInput, InsertUser, Role, User, UpdateUserInput};
 use async_graphql::*;
 use chrono::Utc;
 use ormx::{Insert, Table};
-use sqlx::{PgPool, PgConnection};
+use sqlx::{PgPool};
 use uuid::Uuid;
 use validator::Validate;
 
@@ -23,10 +23,12 @@ impl UserMutationRoot {
             id: Uuid::new_v4(),
             created_at: Utc::now(),
             updated_at: Utc::now(),
+            username: user_input.username,
             first_name: user_input.first_name,
             last_name: user_input.last_name,
             email: user_input.email,
             role: Role::User,
+            age: user_input.age,
             disabled: Some("nothing".into()), // age: user_input.age,
         };
 
@@ -60,7 +62,7 @@ impl UserMutationRoot {
 
         let mut user = User::by_id(db, &id).await?;
 
-        user.set_last_login(db, Some(Utc::now()));
+        user.set_last_login(db, Some(Utc::now())).await?;
         // user.email = "".into;
         user.patch(db, user_input).await?;
 

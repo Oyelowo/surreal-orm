@@ -2,7 +2,7 @@ use super::{CreatePostInput, InsertPost, Post, UpdatePostInput};
 use async_graphql::*;
 use chrono::Utc;
 use ormx::{Insert, Table};
-use sqlx::{types::Uuid, Acquire, PgPool};
+use sqlx::{types::Uuid, PgPool};
 use validator::Validate;
 
 #[derive(Default)]

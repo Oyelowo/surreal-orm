@@ -1,12 +1,12 @@
 use async_graphql::*;
 use ormx::{Patch, Table};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use sqlx::{
     types::{
         chrono::{DateTime, Utc},
         Uuid,
     },
-    PgPool, FromRow,
+    FromRow, PgPool,
 };
 use validator::Validate;
 
@@ -28,9 +28,12 @@ pub struct User {
     deleted_at: Option<DateTime<Utc>>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    username: String,
+
+    #[validate(length(min = 1))]
     first_name: String,
 
-    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    #[validate(length(min = 1))]
     last_name: String,
 
     // generate `User::by_email(&str) -> Result<Option<Self>>`
@@ -38,8 +41,9 @@ pub struct User {
     #[validate(email)]
     pub email: String,
 
-    // #[validate(range(min = 18, max = 160))]
-    // pub age: u8,
+    #[validate(range(min = 18, max = 160))]
+    pub age: i16,
+
     #[ormx(custom_type)]
     role: Role,
 
@@ -79,14 +83,28 @@ impl User {
 //     pub age: u8,
 // }
 
+
+
 // Patches can be used to update multiple fields at once (in diesel, they're called "ChangeSets").
 #[derive(Patch, InputObject, Validate)]
 #[ormx(table_name = "users", table = User, id = "id")]
 pub struct CreateUserInput {
+    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    pub username: String,
+
+    #[validate(length(min = 1))]
     pub first_name: String,
+
+    #[validate(length(min = 1))]
     pub last_name: String,
+
+    #[validate(email)]
     pub email: String,
+
     pub disabled: Option<String>,
+
+    #[validate(range(min = 18, max = 160))]
+    pub age: i16,
 
     // #[graphql(skip)]
     #[ormx(custom_type)]
@@ -95,7 +113,7 @@ pub struct CreateUserInput {
 
 pub type UpdateUserInput = CreateUserInput;
 
-#[derive(Debug, sqlx::Type, Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize,)]
+#[derive(Debug, sqlx::Type, Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[sqlx(type_name = "user_role", rename_all = "snake_case")]
 pub enum Role {
     User,

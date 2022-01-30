@@ -1,7 +1,7 @@
-use super::model::{User, Role};
+use super::model::{User};
 
 use async_graphql::*;
-use sqlx::{query, query_as, PgPool, Pool, Postgres};
+use sqlx::{query_as, PgPool};
 use uuid::Uuid;
 
 #[derive(Default)]

@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
-use url::Url;
 
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -53,10 +52,9 @@ fn default_require_ssl() -> Option<bool> {
 
 impl DatabaseSettings {
     pub fn with_db(&self) -> PgConnectOptions {
-        let options = self.without_db().database(&self.name);
-        options
+        self.without_db().database(&self.name)
     }
-    
+
     pub fn without_db(&self) -> PgConnectOptions {
         let ssl_mode = match self.require_ssl {
             Some(true) => PgSslMode::Require,
@@ -64,14 +62,13 @@ impl DatabaseSettings {
             _ => PgSslMode::Prefer,
         };
 
-        let connection = PgConnectOptions::new()
+        PgConnectOptions::new()
             .host(&self.host)
             .port(self.port)
             .username(&self.username)
             .password(&self.password)
-            .ssl_mode(ssl_mode);
+            .ssl_mode(ssl_mode)
         // .application_name("my-app");
-        connection
     }
 }
 
@@ -86,8 +83,8 @@ impl Configs {
         let application_settings = envy::prefixed("APP_")
             .from_env::<ApplicationSettings>()
             .unwrap_or_else(|e| panic!("Failed config. Error: {:?}", e));
-        
-            // FIXME: Use as above once docker/kube is properly setup
+
+        // FIXME: Use as above once docker/kube is properly setup
         let database_settings = envy::prefixed("POSTGRES_")
             .from_env::<DatabaseSettings>()
             .expect("problem with postgres db environment variables(s)");

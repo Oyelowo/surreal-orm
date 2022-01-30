@@ -1,7 +1,7 @@
 use super::model::Post;
 
 use async_graphql::*;
-use sqlx::{query_as, types::Uuid, PgPool};
+use sqlx::{types::Uuid, PgPool};
 
 #[derive(Default)]
 pub struct PostQueryRoot;
