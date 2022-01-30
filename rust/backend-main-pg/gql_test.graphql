@@ -4,6 +4,9 @@ mutation createUser($userInput: CreateUserInput!) {
     firstName
     lastName
     email
+    age
+    username
+    role
 
   }
 }
@@ -11,19 +14,22 @@ mutation createUser($userInput: CreateUserInput!) {
 // The input
 
 
+
 {
   "userInput": {
-  "firstName": "Oye",
+    "username":"oye2",
+  "firstName": "Oyee",
       "lastName":  "Dayo",
-    "email": "newmail@gmail.com",
+    "email": "newmail2@gmail.com",
     "disabled": "yeah",
-    "role": "ADMIN"
+    "role": "ADMIN",
+    "age": 22
   }
 }
 
 
 mutation createPost($postInput: CreatePostInput!) {
-  createPost(userId: "66e1d23f-42e3-49d8-8544-e51890b96e68", postInput: $postInput) {
+  createPost(userId: "39fbd4f5-1d3f-405c-bb77-a10471988fb7", postInput: $postInput) {
     id
     userId
     title
@@ -41,7 +47,6 @@ mutation createPost($postInput: CreatePostInput!) {
 
 {
   "postInput": {
-  "userId": "66e1d23f-42e3-49d8-8544-e51890b96e68",
     "title":"First by sakke",
     "content": "Good content first"
   }

@@ -702,6 +702,100 @@
       "nullable": []
     }
   },
+  "b1dc350d833d92b63e1ad5cccb75f29a9ae791832ef0e0b8e9bde411f67ca383": {
+    "query": "SELECT first_name, id, created_at, updated_at, deleted_at, username, last_name, email, age, disabled, last_login, role as \"role: Role\" FROM users",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "first_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 1,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "username",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "last_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "email",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 8,
+          "name": "age",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 9,
+          "name": "disabled",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "last_login",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 11,
+          "name": "role: Role",
+          "type_info": {
+            "Custom": {
+              "name": "user_role",
+              "kind": {
+                "Enum": [
+                  "user",
+                  "admin"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false
+      ]
+    }
+  },
   "b22f00c2b30f71ffb359bfb9070a1be26d2e756bd5e53760b4c4eedcad793b52": {
     "query": "UPDATE users SET created_at = $1, updated_at = $2, deleted_at = $3, username = $4, first_name = $5, last_name = $6, email = $7, age = $8, role = $9, disabled = $10, last_login = $11 WHERE id = $12",
     "describe": {
