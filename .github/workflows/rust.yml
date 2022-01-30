@@ -131,6 +131,19 @@ jobs:
           cache-to: |
             type=gha,scope=backend-main,mode=max
 
+      - name: Build and cache backend-main-pg image
+        uses: docker/build-push-action@v2
+        with:
+          context: rust
+          file: rust/Dockerfile.prod
+          target: backend-main-pg
+          tags: ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
+          push: true
+          cache-from: |
+            type=gha,scope=backend-main-pg
+          cache-to: |
+            type=gha,scope=backend-main-pg,mode=max
+
       - name: Build and cache backend-second image
         uses: docker/build-push-action@v2
         with:
