@@ -1,38 +1,137 @@
 {
   "db": "PostgreSQL",
-  "3c7dbbdd3c20703c90f79a5ef58feeb0c8435525a55d0f4eb6002c4cde3cfad4": {
-    "query": "UPDATE users SET first_name = $1, last_name = $2, email = $3 WHERE id = $4",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Varchar",
-          "Varchar",
-          "Varchar",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "46ebf9992dbb7b978bf99b23c599c84c96b158559c8a90a140115df48eef738d": {
-    "query": "INSERT INTO users (first_name, last_name, email) VALUES ($1, $2, $3) RETURNING id",
+  "004e27183c59b3bba7d5471abe768818192ca02a667a52a73407f462250e927f": {
+    "query": "SELECT id, created_at, updated_at, deleted_at, first_name, last_name, email, role AS \"role: _\", disabled, last_login FROM users",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
           "name": "id",
           "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "first_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "last_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "email",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "role: _",
+          "type_info": {
+            "Custom": {
+              "name": "user_role",
+              "kind": {
+                "Enum": [
+                  "user",
+                  "admin"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 8,
+          "name": "disabled",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "last_login",
+          "type_info": "Timestamptz"
         }
       ],
       "parameters": {
-        "Left": [
-          "Varchar",
-          "Varchar",
-          "Varchar"
-        ]
+        "Left": []
       },
       "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
+      ]
+    }
+  },
+  "4f17c842c8407460631eca641dd51a5700463ba3d51a440c4fdaef2b9b9a87fe": {
+    "query": "SELECT * FROM posts",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "user_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "content",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
         false
       ]
     }
@@ -49,8 +148,8 @@
       "nullable": []
     }
   },
-  "843923b9a0257cf80f1dff554e7dc8fdfc05f489328e8376513124dfb42996e3": {
-    "query": "SELECT * FROM users WHERE id = $1",
+  "6707e99fa9ca023705b6dba587a72a0df99d30cd930cbecd5c659321fc373148": {
+    "query": "SELECT id, user_id, created_at, updated_at, deleted_at, title, content FROM posts",
     "describe": {
       "columns": [
         {
@@ -60,56 +159,33 @@
         },
         {
           "ordinal": 1,
-          "name": "first_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 2,
-          "name": "last_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 3,
-          "name": "email",
-          "type_info": "Varchar"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "9c41ae993a97deb4cc26aa7098e75c629e69bd5be67155fccd592eb15e019a7b": {
-    "query": "SELECT id, first_name, last_name, email FROM users",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
+          "name": "user_id",
           "type_info": "Uuid"
         },
         {
-          "ordinal": 1,
-          "name": "first_name",
-          "type_info": "Varchar"
-        },
-        {
           "ordinal": 2,
-          "name": "last_name",
-          "type_info": "Varchar"
+          "name": "created_at",
+          "type_info": "Timestamptz"
         },
         {
           "ordinal": 3,
-          "name": "email",
-          "type_info": "Varchar"
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "content",
+          "type_info": "Text"
         }
       ],
       "parameters": {
@@ -119,12 +195,15 @@
         false,
         false,
         false,
+        false,
+        true,
+        false,
         false
       ]
     }
   },
-  "c2c3abe01cc6b5ee42e8072c3c0bf93110c7acd3f1b9495952c29ce1da4e06a8": {
-    "query": "SELECT id, first_name, last_name, email FROM users WHERE id = $1",
+  "69b95d23034bba6a4217a145be452a61f686b907b419e8b4a28f6ecaea939ffc": {
+    "query": "SELECT id, user_id, created_at, updated_at, deleted_at, title, content FROM posts WHERE user_id = $1",
     "describe": {
       "columns": [
         {
@@ -134,18 +213,33 @@
         },
         {
           "ordinal": 1,
-          "name": "first_name",
-          "type_info": "Varchar"
+          "name": "user_id",
+          "type_info": "Uuid"
         },
         {
           "ordinal": 2,
-          "name": "last_name",
-          "type_info": "Varchar"
+          "name": "created_at",
+          "type_info": "Timestamptz"
         },
         {
           "ordinal": 3,
-          "name": "email",
-          "type_info": "Varchar"
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "content",
+          "type_info": "Text"
         }
       ],
       "parameters": {
@@ -157,12 +251,15 @@
         false,
         false,
         false,
+        false,
+        true,
+        false,
         false
       ]
     }
   },
-  "f72363a2795037ab7133926fb8a8c2dc066caea051e3bbb7c53d98139692725b": {
-    "query": "SELECT id, first_name, last_name, email FROM users WHERE email = $1",
+  "7873194d0bb74a24e070d3d69a747f4d051a2758533684db164034d1f4e09c54": {
+    "query": "SELECT id, created_at, updated_at, deleted_at, first_name, last_name, email, role AS \"role: _\", disabled, last_login FROM users WHERE id = $1",
     "describe": {
       "columns": [
         {
@@ -172,35 +269,81 @@
         },
         {
           "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
           "name": "first_name",
           "type_info": "Varchar"
         },
         {
-          "ordinal": 2,
+          "ordinal": 5,
           "name": "last_name",
           "type_info": "Varchar"
         },
         {
-          "ordinal": 3,
+          "ordinal": 6,
           "name": "email",
           "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "role: _",
+          "type_info": {
+            "Custom": {
+              "name": "user_role",
+              "kind": {
+                "Enum": [
+                  "user",
+                  "admin"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 8,
+          "name": "disabled",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "last_login",
+          "type_info": "Timestamptz"
         }
       ],
       "parameters": {
         "Left": [
-          "Text"
+          "Uuid"
         ]
       },
       "nullable": [
         false,
         false,
         false,
-        false
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ]
     }
   },
-  "f762a0504994453dbd852169e3f8dc372e3f0dfcb2bdec9b7e3ecd85c03215d9": {
-    "query": "SELECT id, first_name, last_name, email FROM users LIMIT $1 OFFSET $2",
+  "94b9c42d6b0bf7ae49872e8cbc11148fa6e183d33eedc9d798e0ea15d08105be": {
+    "query": "SELECT id, user_id, created_at, updated_at, deleted_at, title, content FROM posts WHERE id = $1",
     "describe": {
       "columns": [
         {
@@ -210,18 +353,127 @@
         },
         {
           "ordinal": 1,
+          "name": "user_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "content",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    }
+  },
+  "98a1b2701d5b4854337b6aa380121750bf0584784fa5d35f1b361964809bf899": {
+    "query": "UPDATE users SET last_login = $1 WHERE id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "ae06b4e337b21cfca0d037a1eb56caedb626f4b9465932cf75dfb633e1371d75": {
+    "query": "SELECT id, created_at, updated_at, deleted_at, first_name, last_name, email, role AS \"role: _\", disabled, last_login FROM users LIMIT $1 OFFSET $2",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
           "name": "first_name",
           "type_info": "Varchar"
         },
         {
-          "ordinal": 2,
+          "ordinal": 5,
           "name": "last_name",
           "type_info": "Varchar"
         },
         {
-          "ordinal": 3,
+          "ordinal": 6,
           "name": "email",
           "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "role: _",
+          "type_info": {
+            "Custom": {
+              "name": "user_role",
+              "kind": {
+                "Enum": [
+                  "user",
+                  "admin"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 8,
+          "name": "disabled",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "last_login",
+          "type_info": "Timestamptz"
         }
       ],
       "parameters": {
@@ -234,12 +486,98 @@
         false,
         false,
         false,
-        false
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ]
     }
   },
-  "faadd01f0e335490a71a2eceee1c5800a1922c585ff4a8a08288fef8943653a2": {
-    "query": "INSERT INTO users (id, first_name, last_name, email) VALUES\n        ( $1, $2, $3, $4) returning id, first_name, last_name, email\n        ",
+  "b2b6583456bc988125d5f2fae04a3fc3d84fe86688080eff061baed995fd84cb": {
+    "query": "INSERT INTO posts (id, user_id, created_at, updated_at, title, content) VALUES ($1, $2, $3, $4, $5, $6) RETURNING deleted_at",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Timestamptz",
+          "Timestamptz",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        true
+      ]
+    }
+  },
+  "c7609edc661fb07278fabee376b1ab05188369318ae898729662e26ce2fd2143": {
+    "query": "UPDATE posts SET deleted_at = $1 WHERE id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "ca583c3f6235aec7a0dcc8fb7ff52d17a5bc5225912c5679ecfb48ffcd279edc": {
+    "query": "UPDATE posts SET user_id = $1, title = $2, content = $3 WHERE id = $4",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "d1275d6afcbbaa1e5ec8e86fae4d70ffe6da983467ebc50c184af28c2fc2dada": {
+    "query": "UPDATE users SET first_name = $1, last_name = $2, email = $3, disabled = $4, role = $5 WHERE id = $6",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Text",
+          {
+            "Custom": {
+              "name": "user_role",
+              "kind": {
+                "Enum": [
+                  "user",
+                  "admin"
+                ]
+              }
+            }
+          },
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "e12ad6b9ff5065c0bbd14eb2207d459644cc6c04e9d9ea9d16f31a30bedf86ef": {
+    "query": "SELECT id, user_id, created_at, updated_at, deleted_at, title, content FROM posts LIMIT $1 OFFSET $2",
     "describe": {
       "columns": [
         {
@@ -249,34 +587,238 @@
         },
         {
           "ordinal": 1,
-          "name": "first_name",
-          "type_info": "Varchar"
+          "name": "user_id",
+          "type_info": "Uuid"
         },
         {
           "ordinal": 2,
-          "name": "last_name",
-          "type_info": "Varchar"
+          "name": "created_at",
+          "type_info": "Timestamptz"
         },
         {
           "ordinal": 3,
-          "name": "email",
-          "type_info": "Varchar"
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "content",
+          "type_info": "Text"
         }
       ],
       "parameters": {
         "Left": [
-          "Uuid",
-          "Varchar",
-          "Varchar",
-          "Varchar"
+          "Int8",
+          "Int8"
         ]
       },
       "nullable": [
         false,
         false,
         false,
+        false,
+        true,
+        false,
         false
       ]
+    }
+  },
+  "e4cfc764a0d3833b873f9fbeff8b641f1b814c85ace5312ef87a16d707ff7181": {
+    "query": "SELECT id, created_at, updated_at, deleted_at, first_name, last_name, email, role AS \"role: _\", disabled, last_login FROM users WHERE email = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "first_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "last_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "email",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "role: _",
+          "type_info": {
+            "Custom": {
+              "name": "user_role",
+              "kind": {
+                "Enum": [
+                  "user",
+                  "admin"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 8,
+          "name": "disabled",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "last_login",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
+      ]
+    }
+  },
+  "eac5a7fc73b12edee15bacc9b8c71bd64753ceabcff2530dffe7d816ef7b2cc6": {
+    "query": "UPDATE users SET created_at = $1, updated_at = $2, deleted_at = $3, first_name = $4, last_name = $5, email = $6, role = $7, disabled = $8, last_login = $9 WHERE id = $10",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Timestamptz",
+          "Timestamptz",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          {
+            "Custom": {
+              "name": "user_role",
+              "kind": {
+                "Enum": [
+                  "user",
+                  "admin"
+                ]
+              }
+            }
+          },
+          "Text",
+          "Timestamptz",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "ec6632e482586fb7c37bd55fe8e06c2e7262826e6650fb549f1a0a9f1692c65c": {
+    "query": "UPDATE posts SET user_id = $1, created_at = $2, updated_at = $3, deleted_at = $4, title = $5, content = $6 WHERE id = $7",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz",
+          "Timestamptz",
+          "Timestamptz",
+          "Text",
+          "Text",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "f8241fd93b2a3efb39c17ac9f02d710b9d08607cd52396af74f0c244c9763253": {
+    "query": "INSERT INTO users (id, created_at, updated_at, first_name, last_name, email, role, disabled) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING deleted_at, last_login",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 1,
+          "name": "last_login",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz",
+          "Timestamptz",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          {
+            "Custom": {
+              "name": "user_role",
+              "kind": {
+                "Enum": [
+                  "user",
+                  "admin"
+                ]
+              }
+            }
+          },
+          "Text"
+        ]
+      },
+      "nullable": [
+        true,
+        true
+      ]
+    }
+  },
+  "f981f19da3798c0a6ca886819b15bdc2fb84d60aa394aa23de463b13e7c1d368": {
+    "query": "DELETE FROM posts WHERE id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   }
 }

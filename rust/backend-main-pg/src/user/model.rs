@@ -1,17 +1,18 @@
 use async_graphql::*;
 use ormx::{Patch, Table};
+use serde::{Serialize, Deserialize};
 use sqlx::{
     types::{
         chrono::{DateTime, Utc},
         Uuid,
     },
-    PgPool,
+    PgPool, FromRow,
 };
 use validator::Validate;
 
 use crate::post::Post;
 
-#[derive(SimpleObject, Table, Validate, Debug)]
+#[derive(SimpleObject, Serialize, Deserialize, Table, FromRow, Validate, Debug)]
 #[graphql(complex)]
 #[ormx(table = "users", id = id, insertable, deletable)]
 pub struct User {
@@ -94,7 +95,7 @@ pub struct CreateUserInput {
 
 pub type UpdateUserInput = CreateUserInput;
 
-#[derive(Debug, sqlx::Type, Enum, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, sqlx::Type, Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize,)]
 #[sqlx(type_name = "user_role", rename_all = "snake_case")]
 pub enum Role {
     User,

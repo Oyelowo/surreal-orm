@@ -23,8 +23,8 @@ impl UserQueryRoot {
 
     async fn users(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<User>> {
         let db = ctx.data_unchecked::<PgPool>();
-        let users= query_as!(User, "SELECT * FROM users WHERE first_name LIKE $1", "kk".into()).fetch_all(db).await?;
+        let users = query_as::<_, User>("SELECT * FROM users").fetch_all(db).await?;
 
-        Ok(users)
+       Ok(users)
     }
 }
