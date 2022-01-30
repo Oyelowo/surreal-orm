@@ -83,8 +83,6 @@ impl User {
 //     pub age: u8,
 // }
 
-
-
 // Patches can be used to update multiple fields at once (in diesel, they're called "ChangeSets").
 #[derive(Patch, InputObject, Validate)]
 #[ormx(table_name = "users", table = User, id = "id")]

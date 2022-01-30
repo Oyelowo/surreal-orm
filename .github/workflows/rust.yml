@@ -46,7 +46,7 @@ jobs:
           override: true
 
       - name: Run cargo test
-        run: cargo test
+        run: make test
         
   format:
     name: Rustfmt
@@ -61,7 +61,7 @@ jobs:
           toolchain: stable
           override: true
       - run: rustup component add rustfmt
-      - run: cargo fmt --all -- --check
+      - run: make fmt
         
         
   clippy:
@@ -77,7 +77,7 @@ jobs:
           toolchain: stable
           override: true
       - run: rustup component add clippy
-      - run: cargo clippy -- -D warnings
+      - run: make clippy
 
 
   ############## BUILD AND DEPLOY IMAGES #################

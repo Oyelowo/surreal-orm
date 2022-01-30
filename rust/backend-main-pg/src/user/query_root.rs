@@ -1,4 +1,4 @@
-use super::model::{User, Role};
+use super::model::User;
 
 use async_graphql::*;
 use sqlx::{query_as, PgPool};
@@ -26,7 +26,7 @@ impl UserQueryRoot {
         // let users = query_as::<_, User>("SELECT * FROM users").fetch_all(db).await?;
         let users = query_as!(
             User,
-            r#"SELECT first_name, id, created_at, updated_at, deleted_at, username, last_name, email, age, disabled, last_login, role as "role: Role" FROM users"#
+            r#"SELECT first_name, id, created_at, updated_at, deleted_at, username, last_name, email, age, disabled, last_login, role as "role: _" FROM users"#
         )
         .fetch_all(db)
         .await?;

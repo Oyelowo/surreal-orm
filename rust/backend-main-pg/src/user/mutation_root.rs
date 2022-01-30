@@ -1,8 +1,8 @@
-use super::{CreateUserInput, InsertUser, Role, User, UpdateUserInput};
+use super::{CreateUserInput, InsertUser, Role, UpdateUserInput, User};
 use async_graphql::*;
 use chrono::Utc;
 use ormx::{Insert, Table};
-use sqlx::{PgPool};
+use sqlx::PgPool;
 use uuid::Uuid;
 use validator::Validate;
 
@@ -34,7 +34,7 @@ impl UserMutationRoot {
 
         // This is necessary because ormx currently uses two transactions to enable insertion and selection
         // of latest inserted row for MySQL cos MySQL does not currently support returning from latest inserted
-        // within a query like POSTGRES does. Thus, we need to require the connection for the pool for this second 
+        // within a query like POSTGRES does. Thus, we need to require the connection for the pool for this second
         // selection even though we are not using MySQL. Until this issue is worked around...
         // It might be possible still achieve this within a transaction in MySQL tho.
         // Check the link for more info.
@@ -54,7 +54,7 @@ impl UserMutationRoot {
     ) -> anyhow::Result<User> {
         // user_input.validate()?;
         let db = ctx.data_unchecked::<PgPool>();
- 
+
         user_input.validate()?;
 
         // Extract user id from session or decoded token whichever way authentication is implemented

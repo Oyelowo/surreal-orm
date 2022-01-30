@@ -1,13 +1,15 @@
-format:
-	cargo fmt --al -- --check
-	cargo clippy -fix
+fmt:
+	SQLX_OFFLINE=true cargo fmt --all -- --check
+	# SQLX_OFFLINE=true cargo clippy -fix
 
-check:
-	cargo clippy -- -D  warnings
+clippy:
+	SQLX_OFFLINE=true cargo clippy -- -D  warnings
 
 clippy-fix:
-	cargo clippy --fix
+	SQLX_OFFLINE=true cargo clippy --fix
 
+test:
+	SQLX_OFFLINE=true cargo test
 
 # 1. backend-main
 run-backend-main:

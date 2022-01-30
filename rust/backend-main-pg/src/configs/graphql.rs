@@ -34,7 +34,6 @@ pub async fn index_playground() -> HttpResponse {
         .body(source)
 }
 
-
 pub struct GraphQlApp;
 
 impl GraphQlApp {

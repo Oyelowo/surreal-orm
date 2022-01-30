@@ -45,7 +45,7 @@ impl PostMutationRoot {
         let db = ctx.data_unchecked::<PgPool>();
         // TODO: validate using async-graphql guard that the updater is the authenticated user i.e post.user_id === session/jwt.user_id
         let mut post = Post::by_id(db, &id).await?;
-        
+
         log::info!("update a single field");
         post.updated_at = Utc::now();
         post.title = post_input.title;
