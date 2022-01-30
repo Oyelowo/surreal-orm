@@ -1,25 +1,12 @@
-use std::time::Duration;
-
 use actix_web::{guard, web, App, HttpServer};
-use chrono::Utc;
 use configs::{index, index_playground, Configs, GraphQlApp};
 pub mod configs;
 pub mod post;
 pub mod user;
 
-use dotenv::dotenv;
-use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
-    ConnectOptions,
-};
-
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
-    let Configs {
-        application_settings: application,
-        database_settings: database,
-    } = Configs::init();
-    let app_url = &application.get_url();
+    let app_url = &Configs::init().application_settings.get_url();
 
     println!("Playground: {}", app_url);
 
@@ -33,7 +20,7 @@ async fn main() -> anyhow::Result<()> {
             .service(web::resource("/").guard(guard::Post()).to(index))
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
     })
-    .bind("localhost:8000")?
+    .bind(app_url)?
     .run()
     .await?;
 
