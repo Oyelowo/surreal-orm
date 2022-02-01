@@ -1,6 +1,5 @@
 use super::{CreatePostInput, InsertPost, Post, UpdatePostInput};
 use async_graphql::*;
-use chrono::Utc;
 use ormx::{Insert, Table};
 use sqlx::{types::Uuid, PgPool};
 use validator::Validate;
@@ -23,9 +22,6 @@ impl PostMutationRoot {
 
         let new_post = InsertPost {
             user_id,
-            id: Uuid::new_v4(),
-            created_at: Utc::now(),
-            updated_at: Utc::now(),
             title: post_input.title,
             content: post_input.content,
         }
@@ -47,7 +43,6 @@ impl PostMutationRoot {
         let mut post = Post::by_id(db, &id).await?;
 
         log::info!("update a single field");
-        post.updated_at = Utc::now();
         post.title = post_input.title;
         post.content = post_input.content;
 

@@ -1,5 +1,45 @@
 {
   "db": "PostgreSQL",
+  "25089b3ea32f19a5c40cab9eaa7646d8fe86b87e31a3ef430dc9e6aa13011158": {
+    "query": "INSERT INTO posts (user_id, title, content) VALUES ($1, $2, $3) RETURNING id, created_at, updated_at, deleted_at",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        true
+      ]
+    }
+  },
   "289e39d5a53efe09a782bc887f226d478867d9031398981f325ded21285fb6a0": {
     "query": "SELECT id, created_at, updated_at, deleted_at, username, first_name, last_name, email, age, role AS \"role: _\", disabled, last_login FROM users WHERE id = $1",
     "describe": {
@@ -27,22 +67,22 @@
         {
           "ordinal": 4,
           "name": "username",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 5,
           "name": "first_name",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 6,
           "name": "last_name",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 7,
           "name": "email",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 8,
@@ -83,7 +123,7 @@
       "nullable": [
         false,
         false,
-        false,
+        true,
         true,
         false,
         false,
@@ -123,22 +163,22 @@
         {
           "ordinal": 4,
           "name": "username",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 5,
           "name": "first_name",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 6,
           "name": "last_name",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 7,
           "name": "email",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 8,
@@ -177,7 +217,7 @@
       "nullable": [
         false,
         false,
-        false,
+        true,
         true,
         false,
         false,
@@ -197,7 +237,7 @@
         {
           "ordinal": 0,
           "name": "first_name",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 1,
@@ -222,17 +262,17 @@
         {
           "ordinal": 5,
           "name": "username",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 6,
           "name": "last_name",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 7,
           "name": "email",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 8,
@@ -272,7 +312,7 @@
         false,
         false,
         false,
-        false,
+        true,
         true,
         false,
         false,
@@ -311,22 +351,22 @@
         {
           "ordinal": 4,
           "name": "username",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 5,
           "name": "first_name",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 6,
           "name": "last_name",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 7,
           "name": "email",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 8,
@@ -368,7 +408,7 @@
       "nullable": [
         false,
         false,
-        false,
+        true,
         true,
         false,
         false,
@@ -428,55 +468,10 @@
         false,
         false,
         false,
-        false,
+        true,
         true,
         false,
         false
-      ]
-    }
-  },
-  "500fbbe61c07954b2afc58571bd439db8fe2bedf91e5acfb20f6948a8d728778": {
-    "query": "INSERT INTO users (id, created_at, updated_at, username, first_name, last_name, email, age, role, disabled) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING deleted_at, last_login",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "deleted_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 1,
-          "name": "last_login",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Timestamptz",
-          "Timestamptz",
-          "Varchar",
-          "Varchar",
-          "Varchar",
-          "Varchar",
-          "Int2",
-          {
-            "Custom": {
-              "name": "user_role",
-              "kind": {
-                "Enum": [
-                  "user",
-                  "admin"
-                ]
-              }
-            }
-          },
-          "Text"
-        ]
-      },
-      "nullable": [
-        true,
-        true
       ]
     }
   },
@@ -498,10 +493,10 @@
       "columns": [],
       "parameters": {
         "Left": [
-          "Varchar",
-          "Varchar",
-          "Varchar",
-          "Varchar",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
           "Text",
           "Int2",
           {
@@ -548,22 +543,22 @@
         {
           "ordinal": 4,
           "name": "username",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 5,
           "name": "first_name",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 6,
           "name": "last_name",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 7,
           "name": "email",
-          "type_info": "Varchar"
+          "type_info": "Text"
         },
         {
           "ordinal": 8,
@@ -604,7 +599,7 @@
       "nullable": [
         false,
         false,
-        false,
+        true,
         true,
         false,
         false,
@@ -664,7 +659,7 @@
         false,
         false,
         false,
-        false,
+        true,
         true,
         false,
         false
@@ -720,7 +715,7 @@
         false,
         false,
         false,
-        false,
+        true,
         true,
         false,
         false
@@ -776,7 +771,7 @@
         false,
         false,
         false,
-        false,
+        true,
         true,
         false,
         false
@@ -805,10 +800,10 @@
           "Timestamptz",
           "Timestamptz",
           "Timestamptz",
-          "Varchar",
-          "Varchar",
-          "Varchar",
-          "Varchar",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
           "Int2",
           {
             "Custom": {
@@ -827,31 +822,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "b2b6583456bc988125d5f2fae04a3fc3d84fe86688080eff061baed995fd84cb": {
-    "query": "INSERT INTO posts (id, user_id, created_at, updated_at, title, content) VALUES ($1, $2, $3, $4, $5, $6) RETURNING deleted_at",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "deleted_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Timestamptz",
-          "Timestamptz",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        true
-      ]
     }
   },
   "c7609edc661fb07278fabee376b1ab05188369318ae898729662e26ce2fd2143": {
@@ -931,10 +901,70 @@
         false,
         false,
         false,
-        false,
+        true,
         true,
         false,
         false
+      ]
+    }
+  },
+  "ea472d06e7069b0d44de8b287e340c1d42a67fa151943d0d2a48257940bb33a0": {
+    "query": "INSERT INTO users (username, first_name, last_name, email, age, role, disabled) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at, updated_at, deleted_at, last_login",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "deleted_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "last_login",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Int2",
+          {
+            "Custom": {
+              "name": "user_role",
+              "kind": {
+                "Enum": [
+                  "user",
+                  "admin"
+                ]
+              }
+            }
+          },
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true
       ]
     }
   },

@@ -20,9 +20,6 @@ impl UserMutationRoot {
         let db = ctx.data_unchecked::<PgPool>();
 
         let new_user = InsertUser {
-            id: Uuid::new_v4(),
-            created_at: Utc::now(),
-            updated_at: Utc::now(),
             username: user_input.username,
             first_name: user_input.first_name,
             last_name: user_input.last_name,

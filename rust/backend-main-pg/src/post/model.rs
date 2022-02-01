@@ -18,15 +18,18 @@ use crate::user::User;
 pub struct Post {
     #[ormx(column = "id")]
     #[ormx(get_one)]
+    #[ormx(default)]
     pub id: Uuid,
-
+    
     // FK -> poster
     #[ormx(get_many)]
     pub user_id: Uuid,
-
+    
+    #[ormx(default)]
     pub created_at: DateTime<Utc>,
-
-    pub updated_at: DateTime<Utc>,
+    
+    #[ormx(default)]
+    pub updated_at: Option<DateTime<Utc>>,
 
     #[ormx(default, set)]
     pub deleted_at: Option<DateTime<Utc>>,

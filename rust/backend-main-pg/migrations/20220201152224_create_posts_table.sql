@@ -1,20 +1,23 @@
 -- Add migration script here
+-- Add migration script here
 
-CREATE TABLE IF NOT EXISTS posts
+create table if not exists posts
 (
-    id          uuid PRIMARY KEY NOT NULL,
-    user_id     uuid NOT NULL,
-    created_at  TIMESTAMPTZ NOT NULL,
-    updated_at  TIMESTAMPTZ DEFAULT timezone('utc', now()) NOT NULL,
-    deleted_at  TIMESTAMPTZ DEFAULT NULL,
-    title       TEXT NOT NULL,
-    content     TEXT NOT NULL
+    id          uuid primary key default uuid_generate_v1mc(),
+    user_id     uuid not null,
+    created_at  timestamptz default timezone('utc', now()) not null,
+    updated_at  timestamptz,
+    deleted_at  timestamptz default null,
+    title       text not null,
+    content     text not null
 );
+
+SELECT trigger_updated_at('"posts"');
 
 /* 
      // CONSTRAINT CREATION APPROACH THAT SHOULD BE USED EVERYWHERE FOR CONSISTENCY
 
-This is the approach that should be followed throughout this codebase for creating FOREIGN KEY CONSTRAINT,
+This is the approach that should be followed throughout this codebase for creating FOREIGN key CONSTRAINT,
 for the sake of consistency. 
 
 There are other approaches for creating foreign keys in postgres. It's a matter of 
@@ -30,7 +33,7 @@ This is not possible with inline foreign key constraint creation
 foreign keys.
  */
 
-ALTER TABLE posts
-    ADD CONSTRAINT fk_posts_users
-    FOREIGN KEY (user_id)
-    REFERENCES users (id)
+alter table posts
+    add constraint fk_posts_users
+    foreign key (user_id)
+    references users (id)
