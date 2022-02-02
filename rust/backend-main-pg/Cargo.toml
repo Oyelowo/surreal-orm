@@ -9,7 +9,7 @@ version = "0.1.0"
 # common = {path = "../common"}
 actix-rt = {version = "2.4.0", default-features = false, optional = true}
 actix-web = {version = "4.0.0-rc.2", default-features = false}
-async-graphql = {version = "3.0.27", features = [
+async-graphql = {version = "3.0.28", features = [
   "apollo_tracing",
   "apollo_persisted_queries",
   "bson",
@@ -28,7 +28,7 @@ async-graphql = {version = "3.0.27", features = [
   "decimal",
   "smol_str",
 ]}
-async-graphql-actix-web = "3.0.27"
+async-graphql-actix-web = "3.0.28"
 tokio = {version = "1.16.1", features = ["full"]}
 
 bson = "2.1.0"
