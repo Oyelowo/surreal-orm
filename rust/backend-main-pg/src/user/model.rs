@@ -16,18 +16,18 @@ use crate::post::Post;
 #[graphql(complex)]
 #[ormx(table = "users", id = id, insertable, deletable)]
 pub struct User {
-    #[ormx(column = "id")]
-    #[ormx(get_one)]
-    #[ormx(default)]
+    #[ormx(column = "id", get_one, default)]
     pub id: Uuid,
-    
+
     #[ormx(default)]
     pub created_at: DateTime<Utc>,
-    
+
     #[ormx(default)]
+    #[graphql(skip)]
     pub updated_at: Option<DateTime<Utc>>,
 
     #[ormx(default)]
+    #[graphql(skip)]
     pub deleted_at: Option<DateTime<Utc>>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]

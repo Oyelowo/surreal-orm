@@ -16,22 +16,22 @@ use crate::user::User;
 #[graphql(complex)]
 #[ormx(table = "posts", id = id, insertable, deletable)]
 pub struct Post {
-    #[ormx(column = "id")]
-    #[ormx(get_one)]
-    #[ormx(default)]
+    #[ormx(column = "id", get_one, default)]
     pub id: Uuid,
-    
+
     // FK -> poster
     #[ormx(get_many)]
     pub user_id: Uuid,
-    
+
     #[ormx(default)]
     pub created_at: DateTime<Utc>,
-    
+
     #[ormx(default)]
+    #[graphql(skip)]
     pub updated_at: Option<DateTime<Utc>>,
 
     #[ormx(default, set)]
+    #[graphql(skip)]
     pub deleted_at: Option<DateTime<Utc>>,
 
     pub title: String,
