@@ -4,7 +4,7 @@ pub mod configs;
 pub mod post;
 pub mod user;
 
-#[actix_web::main]
+#[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let app_url = &Configs::init().application_settings.get_url();
 
