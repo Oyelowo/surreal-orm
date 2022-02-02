@@ -1,0 +1,23 @@
+name: cleanup old images
+
+on:
+  push:
+    branches: [master]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check_and_test_rust_monorepo:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/delete-package-versions@v2
+      with: 
+        package-name: 'backendm-main'
+        min-versions-to-keep: 3
+
+    - uses: actions/delete-package-versions@v2
+      with: 
+        package-name: 'backendm-second'
+        min-versions-to-keep: 3
