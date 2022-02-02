@@ -10,7 +10,7 @@ async-graphql = {version = "3.0.21", features = ["apollo_tracing", "apollo_persi
 common = {path = "../common"}
 # async-graphql = "3.0.21"
 actix-rt = "2.4.0"
-actix-web = {version = "4.0.0-beta.19", default-features = false}
+actix-web = {version = "4.0.0-rc.2", default-features = false}
 async-graphql-actix-web = "3.0.21"
 bson = "2.1.0"
 # chrono = "0.4.19"
