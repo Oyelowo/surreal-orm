@@ -6,6 +6,8 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+common = {path = "../common"}
+
 actix-rt = {version = "2.4.0", default-features = false, optional = true}
 actix-web = {version = "4.0.0-rc.2", default-features = false}
 async-graphql = {version = "3.0.28", features = [
@@ -28,29 +30,30 @@ async-graphql = {version = "3.0.28", features = [
   "smol_str",
 ]}
 async-graphql-actix-web = "3.0.28"
-bson = "2.1.0"
-common = {path = "../common"}
 tokio = {version = "1.16.1", features = ["full"]}
+futures = "0.3"
+
+mongodb = {version = "2.1.0", features = ["bson-chrono-0_4"]}
+bson = "2.1.0"
 # chrono = "0.4.19"
 chrono = {version = "0.4.19", features = ["serde"]}
 chrono-tz = "0.6.1"
-futures = "0.3"
-mongodb = {version = "2.1.0", features = ["bson-chrono-0_4"]}
 # mongodb = "2.1.0"
-anyhow = "1.0.49"
-envy = "0.4.2"
-secrecy = "0.8.0"
 serde = {version = "1.0", features = ["derive"]}
 serde_json = "1.0"
 slab = "0.4.5"
-thiserror = "1.0.30"
 typed-builder = "0.9.1"
 url = "2.2.2"
-urlencoding = "2.1.0"
 uuid = "0.8.2"
 validator = {version = "0.12", features = ["derive"]}
 wither = {git = "https://github.com/thedodd/wither", branch = "master"}
 # wither = "0.9.0"
+
+urlencoding = "2.1.0"
+anyhow = "1.0.49"
+envy = "0.4.2"
+secrecy = "0.8.0"
+thiserror = "1.0.30"
 
 async-trait = "0.1.52"
 config = "0.11.0"

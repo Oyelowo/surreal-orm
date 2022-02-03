@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 fn main() -> Result<()> {
-    let files = &["helloworld.proto", "music.proto"];
+    let files = &["helloworld.proto", "music.proto", "app_analytics.proto"];
     let dirs = &["protobuf"];
 
     tonic_build::configure()
