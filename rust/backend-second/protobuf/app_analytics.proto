@@ -6,13 +6,13 @@ service app_analytics {
     // Request message contains the name to be greeted
     rpc GetUserAppEvent (GetUserAppEventRequest) returns (UserAppEventResponse);
 
-    rpc GetAllUserAppEvents (Empty) returns (GetAllUserAppEventsResponse);
+    rpc GetAllUserAppEvents (GetAllUserAppEventsRequest) returns (GetAllUserAppEventsResponse);
 
     rpc CreateUserAppEvent (CreateUserAppEventRequest) returns (UserAppEventResponse);
 }
 
-message Empty {
-
+message GetAllUserAppEventsRequest {
+    string user_id = 1;
 }
 
 message GetUserAppEventRequest {

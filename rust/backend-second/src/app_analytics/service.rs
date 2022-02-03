@@ -8,8 +8,8 @@ pub mod app_analytics {
 
 use app_analytics::{
     app_analytics_server::{AppAnalytics, AppAnalyticsServer},
-    CreateUserAppEventRequest, GetAllUserAppEventsResponse, GetUserAppEventRequest,
-    UserAppEventResponse,
+    CreateUserAppEventRequest, GetAllUserAppEventsRequest, GetAllUserAppEventsResponse,
+    GetUserAppEventRequest, UserAppEventResponse,
 };
 use validator::Validate;
 use wither::Model;
@@ -98,14 +98,14 @@ impl AppAnalytics for AnalyticsService {
 
     async fn get_all_user_app_events(
         &self,
-        _request: tonic::Request<app_analytics::Empty>,
+        request: tonic::Request<app_analytics::GetAllUserAppEventsRequest>,
     ) -> anyhow::Result<tonic::Response<app_analytics::GetAllUserAppEventsResponse>, tonic::Status>
     {
-        // let Empty {  } = request.into_inner();
+        let GetAllUserAppEventsRequest { user_id } = request.into_inner();
 
         let db = establish_connection().await;
 
-        let user_app_event_found = UserAppEvent::find(&db, doc! {"user_id": ""}, None)
+        let user_app_event_found = UserAppEvent::find(&db, doc! {"user_id": user_id}, None)
             .await
             .map_err(|_| Status::not_found("User data not found"))
             .expect("Problem finding user");

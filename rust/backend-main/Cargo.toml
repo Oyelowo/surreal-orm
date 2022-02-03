@@ -63,3 +63,5 @@ parking_lot = "0.11.2"
 rayon = "1.5.1"
 ron = "0.7.0"
 serde-aux = "3.0.1"
+# ts-rs = "6.1"
+ts-rs = {version = "6.1", features = ["uuid-impl", "chrono-impl", "serde-compat"]}

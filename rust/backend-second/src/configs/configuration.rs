@@ -27,11 +27,13 @@ pub struct ApplicationConfigs {
 
 impl ApplicationConfigs {
     pub fn get_url(&self) -> SocketAddr {
-        // let Self { host, port, .. } = self;
+        let Self { host, port, .. } = self;
         // Url::parse(format!("http://{host}:{port}").as_ref()).expect("Problem parsing application uri")
         // "[::1]:50051"
-        // format!("{host}:{port}")
-        "[::1]:50051".parse().expect("Problem parsing address")
+        format!("{host}:{port}")
+            .parse()
+            .expect("Problem parsing address")
+        //"[::1]:50051".parse().expect("Problem parsing address")
     }
 }
 
