@@ -21,39 +21,39 @@ COPY . .
 COPY --from=cacher /app/target target
 COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
-## FIRST BACKEND SERVICE
-FROM base AS builder-backend-main 
-RUN cargo build --release -p backend-main
+## GRAPHQL-MONGO BACKEND SERVICE
+FROM base AS builder-graphql-mongo 
+RUN cargo build --release -p graphql-mongo
 
 # We do not need the Rust toolchain to run the binary!
-FROM gcr.io/distroless/cc AS backend-main
+FROM gcr.io/distroless/cc AS graphql-mongo
 WORKDIR /app
 EXPOSE 8000
 
-COPY --from=builder-backend-main /app/target/release/backend-main /usr/local/bin/backend-main
-ENTRYPOINT ["/usr/local/bin/backend-main"]
+COPY --from=builder-graphql-mongo /app/target/release/graphql-mongo /usr/local/bin/graphql-mongo
+ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
 
-## FIRST BACKEND PG SERVICE
-FROM base AS builder-backend-main-pg 
+## GRAPHQL-POSTGRES BACKEND PG SERVICE
+FROM base AS builder-graphql-postgres 
 ENV SQLX_OFFLINE=true
-RUN cargo build --release -p backend-main-pg
+RUN cargo build --release -p graphql-postgres
 
 # We do not need the Rust toolchain to run the binary!
-FROM gcr.io/distroless/cc AS backend-main-pg
+FROM gcr.io/distroless/cc AS graphql-postgres
 WORKDIR /app
 EXPOSE 8000
 
-COPY --from=builder-backend-main-pg /app/target/release/backend-main-pg /usr/local/bin/backend-main-pg
-ENTRYPOINT ["/usr/local/bin/backend-main-pg"]
+COPY --from=builder-graphql-postgres /app/target/release/graphql-postgres /usr/local/bin/graphql-postgres
+ENTRYPOINT ["/usr/local/bin/graphql-postgres"]
 
-## SECOND BACKEND SERVICE
+## GRPC-MONGO BACKEND SERVICE
 FROM base AS builder-second
 RUN rustup component add rustfmt
-RUN cargo build --release -p backend-second
+RUN cargo build --release -p grpc-mongo
 
 # We do not need the Rust toolchain to run the binary!
-FROM gcr.io/distroless/cc AS backend-second
+FROM gcr.io/distroless/cc AS grpc-mongo
 WORKDIR /app
 EXPOSE 50051
-COPY --from=builder-second app/target/release/backend-second /usr/local/bin/backend-second
-ENTRYPOINT ["/usr/local/bin/backend-second"]
+COPY --from=builder-second app/target/release/grpc-mongo /usr/local/bin/grpc-mongo
+ENTRYPOINT ["/usr/local/bin/grpc-mongo"]

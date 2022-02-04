@@ -6,9 +6,9 @@ migrate:
 	sqlx migrate add
 
 migrate_clean:
-	docker-compose down db, backend-main-pg
-	#docker-compose up --build  backend-main-pg
-	# docker-compose up --build backend-main-pg
+	docker-compose down db, graphql-postgres
+	#docker-compose up --build  graphql-postgres
+	# docker-compose up --build graphql-postgres
 
 	# sqlx migrate run
 

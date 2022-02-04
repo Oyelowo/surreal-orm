@@ -1,16 +1,16 @@
-# Build backend-main
+# Build graphql-mongo
 ```bash
-docker build . --target backend-main  -t oyelowo/backend-main
+docker build . --target graphql-mongo  -t oyelowo/graphql-mongo
 
 ## Run
-docker run -p 8000:8000 -e RUST_ENV=local oyelowo/backend-main
+docker run -p 8000:8000 -e RUST_ENV=local oyelowo/graphql-mongo
 ```
 
 
-# Build backend-second
+# Build grpc-mongo
 ```bash
-docker build . --target backend-second  -t oyelowo/backend-second
+docker build . --target grpc-mongo  -t oyelowo/grpc-mongo
 
 ## Run
-docker run -p 50051:50051 oyelowo/backend-second
+docker run -p 50051:50051 oyelowo/grpc-mongo
 ```bash

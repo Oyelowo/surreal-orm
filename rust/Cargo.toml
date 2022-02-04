@@ -1,9 +1,9 @@
 [workspace]
 
 members = [
-    "backend-main",
-    "backend-main-pg",
-    "backend-second",
+    "graphql-mongo",
+    "graphql-postgres",
+    "grpc-mongo",
     "common",
     # "my-macros",
 ]

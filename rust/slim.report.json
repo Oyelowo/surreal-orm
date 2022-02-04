@@ -9,7 +9,7 @@
   },
   "type": "build",
   "state": "done",
-  "target_reference": "oyelowo/backend-main-prod2",
+  "target_reference": "oyelowo/graphql-mongo-prod2",
   "system": {
     "type": "Linux",
     "release": "5.10.76-linuxkit",
@@ -22,21 +22,15 @@
   "source_image": {
     "identity": {
       "id": "sha256:fb30558e1ed3debe1b3460bd054ea1193e69f8c0332ec7cd1a2a6d264124c49b",
-      "tags": [
-        "latest"
-      ],
-      "names": [
-        "oyelowo/backend-main-prod2:latest"
-      ]
+      "tags": ["latest"],
+      "names": ["oyelowo/graphql-mongo-prod2:latest"]
     },
     "size": 1282386512,
     "size_human": "1.3 GB",
     "create_time": "2021-12-29T15:14:30Z",
     "docker_version": "",
     "architecture": "amd64",
-    "exposed_ports": [
-      "8000/tcp"
-    ],
+    "exposed_ports": ["8000/tcp"],
     "os": "linux",
     "env_vars": [
       "PATH=/usr/local/cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
@@ -53,23 +47,21 @@
   },
   "minified_image_size": 15888880,
   "minified_image_size_human": "16 MB",
-  "minified_image": "oyelowo/backend-main-prod2.slim",
+  "minified_image": "oyelowo/graphql-mongo-prod2.slim",
   "minified_image_has_data": true,
   "minified_by": 80.70968576765637,
   "artifact_location": "/tmp/docker-slim-state/.docker-slim-state/images/fb30558e1ed3debe1b3460bd054ea1193e69f8c0332ec7cd1a2a6d264124c49b/artifacts",
   "container_report_name": "creport.json",
-  "seccomp_profile_name": "oyelowo-backend-main-prod2-seccomp.json",
-  "apparmor_profile_name": "oyelowo-backend-main-prod2-apparmor-profile",
+  "seccomp_profile_name": "oyelowo-graphql-mongo-prod2-seccomp.json",
+  "apparmor_profile_name": "oyelowo-graphql-mongo-prod2-apparmor-profile",
   "image_stack": [
     {
       "is_top_image": true,
       "id": "sha256:fb30558e1ed3debe1b3460bd054ea1193e69f8c0332ec7cd1a2a6d264124c49b",
-      "full_name": "oyelowo/backend-main-prod2:latest",
-      "repo_name": "oyelowo/backend-main-prod2",
+      "full_name": "oyelowo/graphql-mongo-prod2:latest",
+      "repo_name": "oyelowo/graphql-mongo-prod2",
       "version_tag": "latest",
-      "raw_tags": [
-        "oyelowo/backend-main-prod2:latest"
-      ],
+      "raw_tags": ["oyelowo/graphql-mongo-prod2:latest"],
       "create_time": "2021-12-29T15:14:30Z",
       "new_size": 1282386512,
       "new_size_human": "1.3 GB",
@@ -235,9 +227,7 @@
           "size": 0,
           "command_snippet": "RUN [\"WORKDIR\",\"/app\"]",
           "command_all": "RUN [\"WORKDIR\",\"/app\"]",
-          "system_commands": [
-            "[\"WORKDIR\",\"/app\"]"
-          ],
+          "system_commands": ["[\"WORKDIR\",\"/app\"]"],
           "comment": "buildkit.dockerfile.v0"
         },
         {
@@ -250,9 +240,7 @@
           "size": 0,
           "command_snippet": "RUN [\"EXPOSE\",\"map[8000/tcp:{}]\"]",
           "command_all": "RUN [\"EXPOSE\",\"map[8000/tcp:{}]\"]",
-          "system_commands": [
-            "[\"EXPOSE\",\"map[8000/tcp:{}]\"]"
-          ],
+          "system_commands": ["[\"EXPOSE\",\"map[8000/tcp:{}]\"]"],
           "comment": "buildkit.dockerfile.v0"
         },
         {
@@ -265,9 +253,9 @@
           "size": 12250080,
           "size_human": "12 MB",
           "command_snippet": "RUN [\"COPY\",\"/app/target/release/backend-mai...",
-          "command_all": "RUN [\"COPY\",\"/app/target/release/backend-main\",\"/usr/local/bin/backend-main\"]",
+          "command_all": "RUN [\"COPY\",\"/app/target/release/graphql-mongo\",\"/usr/local/bin/graphql-mongo\"]",
           "system_commands": [
-            "[\"COPY\",\"/app/target/release/backend-main\",\"/usr/local/bin/backend-main\"]"
+            "[\"COPY\",\"/app/target/release/graphql-mongo\",\"/usr/local/bin/graphql-mongo\"]"
           ],
           "comment": "buildkit.dockerfile.v0"
         },
@@ -281,9 +269,7 @@
           "size": 0,
           "command_snippet": "RUN [\"ENV\",\"ENVIRONMENT=local\"]",
           "command_all": "RUN [\"ENV\",\"ENVIRONMENT=local\"]",
-          "system_commands": [
-            "[\"ENV\",\"ENVIRONMENT=local\"]"
-          ],
+          "system_commands": ["[\"ENV\",\"ENVIRONMENT=local\"]"],
           "comment": "buildkit.dockerfile.v0"
         },
         {
@@ -296,9 +282,7 @@
           "size": 0,
           "command_snippet": "RUN [\"ENV\",\"HOST=0.0.0.0\"]",
           "command_all": "RUN [\"ENV\",\"HOST=0.0.0.0\"]",
-          "system_commands": [
-            "[\"ENV\",\"HOST=0.0.0.0\"]"
-          ],
+          "system_commands": ["[\"ENV\",\"HOST=0.0.0.0\"]"],
           "comment": "buildkit.dockerfile.v0"
         },
         {
@@ -311,9 +295,7 @@
           "size": 0,
           "command_snippet": "RUN [\"ENV\",\"PORT=8000\"]",
           "command_all": "RUN [\"ENV\",\"PORT=8000\"]",
-          "system_commands": [
-            "[\"ENV\",\"PORT=8000\"]"
-          ],
+          "system_commands": ["[\"ENV\",\"PORT=8000\"]"],
           "comment": "buildkit.dockerfile.v0"
         },
         {
@@ -326,14 +308,12 @@
           "layer_index": 0,
           "size": 0,
           "command_snippet": "RUN [\"ENTRYPOINT\",\"[/usr/local/bin/backend-m...",
-          "command_all": "RUN [\"ENTRYPOINT\",\"[/usr/local/bin/backend-main]\"]",
+          "command_all": "RUN [\"ENTRYPOINT\",\"[/usr/local/bin/graphql-mongo]\"]",
           "system_commands": [
-            "[\"ENTRYPOINT\",\"[/usr/local/bin/backend-main]\"]"
+            "[\"ENTRYPOINT\",\"[/usr/local/bin/graphql-mongo]\"]"
           ],
           "comment": "buildkit.dockerfile.v0",
-          "raw_tags": [
-            "oyelowo/backend-main-prod2:latest"
-          ]
+          "raw_tags": ["oyelowo/graphql-mongo-prod2:latest"]
         }
       ]
     }

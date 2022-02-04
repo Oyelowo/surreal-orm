@@ -35,15 +35,15 @@ services:
     #     source: ./sqlx-data.json
     #     target: /sqlx-data.json
 
-  backend-main-pg:
+  graphql-postgres:
     build:
       context: ../
       dockerfile: Dockerfile.prod
       # args:
       #   - name=value
-      target: backend-main-pg
-    # container_name: backend-main-pg
-    # hostname: backend-main-pg
+      target: graphql-postgres
+    # container_name: graphql-postgres
+    # hostname: graphql-postgres
     depends_on:
       - db
       #- migrations

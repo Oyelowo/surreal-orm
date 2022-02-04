@@ -1,13 +1,13 @@
 version: '3.8'
 services:
-  # backend-main:
+  # graphql-mongo:
   #   build:
   #     context: .
   #     dockerfile: Dockerfile.prod
   #     # args:
   #     #   - name=value
-  #     target: backend-main
-  #   container_name: backend-main
+  #     target: graphql-mongo
+  #   container_name: graphql-mongo
   #   # hostname: mongodb
   #   depends_on:
   #     - mongodb
@@ -23,14 +23,14 @@ services:
   #     MONGODB_HOST: mongodb
   #     MONGODB_PORT: 27017
 
-  backend-main:
+  graphql-mongo:
     build:
       context: .
       dockerfile: Dockerfile.prod
       # args:
       #   - name=value
-      target: backend-main
-    # container_name: backend-main
+      target: graphql-mongo
+    # container_name: graphql-mongo
     # hostname: mongodb
     depends_on:
       - mongodb
