@@ -1,5 +1,5 @@
 use anyhow::Result;
-use bson::doc;
+use bson::{doc, oid::ObjectId};
 use mongodb::options::{FindOneOptions, ReadConcern};
 use tonic::{Response, Status};
 pub mod app_analytics {
@@ -77,23 +77,29 @@ impl AppAnalytics for AnalyticsService {
 
         let user_found = UserAppEvent::find_one(
             &db,
-            doc! {"_id": event_id, "user_id": user_id},
+            doc! {"_id": ObjectId::parse_str(event_id).expect("problem parsing id"), "userId": user_id},
             find_one_options,
         )
         .await
-        .map_err(|_| Status::not_found("User event not found"))?
-        .expect("Id not found");
+        .map_err(|_| Status::not_found("User event not found"))?;
+        // .unwrap_or(Err(Status::not_found("user app event not found")));
+        // .expect("Id not found");
 
-        let id = user_found.id.expect("id not found").to_string();
-
-        let user_app_event_response = UserAppEventResponse {
-            id,
-            user_id: user_found.user_id,
-            event_name: user_found.event_name,
-            page: user_found.page,
-            description: user_found.description,
-        };
-        Ok(Response::new(user_app_event_response))
+        match user_found {
+            Some(user) => {
+                let id = user.id.expect("Problem getting user event id").to_string();
+                // let k = ObjectId::parse_str(id);
+                let user_app_event_response = UserAppEventResponse {
+                    id,
+                    user_id: user.user_id,
+                    event_name: user.event_name,
+                    page: user.page,
+                    description: user.description,
+                };
+                return Ok(Response::new(user_app_event_response));
+            }
+            None => return Err(Status::not_found("message")),
+        }
     }
 
     async fn get_all_user_app_events(
@@ -105,7 +111,7 @@ impl AppAnalytics for AnalyticsService {
 
         let db = establish_connection().await;
 
-        let user_app_event_found = UserAppEvent::find(&db, doc! {"user_id": user_id}, None)
+        let user_app_event_found = UserAppEvent::find(&db, doc! {"userId": user_id}, None)
             .await
             .map_err(|_| Status::not_found("User data not found"))
             .expect("Problem finding user");
@@ -115,7 +121,7 @@ impl AppAnalytics for AnalyticsService {
             .map_err(|_| Status::aborted("problem converting"))?
             .into_iter()
             .map(|event| {
-                let id = event.id.expect("Id not found").to_string();
+                let id = event.id.expect("Problem getting event id").to_string();
                 UserAppEventResponse {
                     id,
                     user_id: event.user_id,

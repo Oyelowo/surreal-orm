@@ -1,8 +1,9 @@
 use anyhow::Result;
 use app_analytics::{
     app_analytics_client::AppAnalyticsClient, CreateUserAppEventRequest,
-    GetAllUserAppEventsRequest, GetAllUserAppEventsResponse, GetUserAppEventRequest,
+    GetAllUserAppEventsRequest, GetUserAppEventRequest,
 };
+
 pub mod app_analytics {
     tonic::include_proto!("app_analytics");
 }
@@ -11,6 +12,7 @@ pub mod app_analytics {
 async fn main() -> Result<()> {
     let mut client = AppAnalyticsClient::connect("http://[::1]:50051").await?;
 
+
     let response_create = client
         .create_user_app_event(tonic::Request::new(CreateUserAppEventRequest {
             user_id: "1".into(),
@@ -18,7 +20,8 @@ async fn main() -> Result<()> {
             page: "/charts".into(),
             description: "dashboard page".into(),
         }))
-        .await?;
+        .await?
+        .into_inner();
 
     println!("\n CREATE NEW USER EVENT={:?}", response_create);
 
@@ -26,9 +29,10 @@ async fn main() -> Result<()> {
 
     let response_get_all = client
         .get_all_user_app_events(tonic::Request::new(GetAllUserAppEventsRequest {
-            user_id: "1".into(),
+            user_id: response_create.user_id.clone(),
         }))
-        .await?;
+        .await?
+        .into_inner();
 
     println!("\nRESPONSE ALL USER APP EVENT={:?}", response_get_all);
 
@@ -36,10 +40,11 @@ async fn main() -> Result<()> {
 
     let get_one = client
         .get_user_app_event(tonic::Request::new(GetUserAppEventRequest {
-            user_id: "1".into(),
-            event_id: response_create.into_inner().id,
+            event_id: response_create.id.clone(),
+            user_id: response_create.user_id.clone(),
         }))
-        .await?;
+        .await?
+        .into_inner();
 
     println!("RESPONSE USER APP EVENT={:?}", get_one);
     Ok(())
