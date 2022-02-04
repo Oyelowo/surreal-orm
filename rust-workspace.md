@@ -2,11 +2,11 @@
 .
 ├── Cargo.lock
 ├── Cargo.toml
-├── backend-main
+├── graphql-mongo
 │   ├── Cargo.toml
 │   └── src
 │       └── main.rs
-├── backend-second
+├── grpc-mongo
 │   ├── Cargo.toml
 │   └── src
 │       └── main.rs
@@ -24,8 +24,8 @@ From the root
 Build all
 `cargo build`
 
-Build backend-main
-`cargo build -p backend-main`
+Build graphql-mongo
+`cargo build -p graphql-mongo`
 
-Run backend-main alone
-`cargo run -p backend-main`
+Run graphql-mongo alone
+`cargo run -p graphql-mongo`

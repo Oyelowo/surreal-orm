@@ -14,10 +14,10 @@ jobs:
 
     - uses: actions/delete-package-versions@v2
       with: 
-        package-name: 'backendm-main'
+        package-name: 'graphql-mongo'
         min-versions-to-keep: 3
 
     - uses: actions/delete-package-versions@v2
       with: 
-        package-name: 'backendm-second'
+        package-name: 'grpc-mongo'
         min-versions-to-keep: 3

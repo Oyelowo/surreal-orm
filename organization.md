@@ -5,11 +5,11 @@
 ├── README.md
 ├── organization.md
 ├── rust
-│   ├── backend-main
+│   ├── graphql-mongo
 │   │   ├── Cargo.toml
 │   │   └── src
 │   │       └── main.rs
-│   ├── backend-second
+│   ├── grpc-mongo
 │   │   ├── Cargo.toml
 │   │   └── src
 │   │       └── main.rs

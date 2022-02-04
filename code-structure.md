@@ -6,7 +6,7 @@
 ├── rust
 │   ├── Cargo.lock
 │   ├── Cargo.toml
-│   ├── backend-main
+│   ├── graphql-mongo
 │   │   ├── Cargo.toml
 │   │   ├── gql_test.graphql
 │   │   ├── src
@@ -50,7 +50,7 @@
 │   │                   ├── libsocket2-045297572854df4c.rmeta
 │   │                   └── save-analysis
 │   │                       └── libsocket2-045297572854df4c.json
-│   ├── backend-second
+│   ├── grpc-mongo
 │   │   ├── Cargo.toml
 │   │   └── src
 │   │       └── main.rs

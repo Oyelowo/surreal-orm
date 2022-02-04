@@ -99,9 +99,9 @@ jobs:
       # for consistency sake.
       - name: Set environment variables
         run: |
-          echo "BACKEND_MAIN_IMAGE_WITH_TAG=ghcr.io/oyelowo/template-app-backend-main:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          echo "BACKEND_MAIN_IMAGE_WITH_TAG=ghcr.io/oyelowo/template-app-graphql-mongo:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
           
-          echo "BACKEND_SECOND_IMAGE_WITH_TAG=ghcr.io/oyelowo/template-app-backend-second:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          echo "BACKEND_SECOND_IMAGE_WITH_TAG=ghcr.io/oyelowo/template-app-grpc-mongo:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
 
           
       - name: Login to GitHub Container Registry
@@ -118,65 +118,65 @@ jobs:
         uses: docker/setup-buildx-action@v1
       
 
-      - name: Build and cache backend-main image
+      - name: Build and cache graphql-mongo image
         uses: docker/build-push-action@v2
         with:
           context: rust
           file: rust/Dockerfile.prod
-          target: backend-main
+          target: graphql-mongo
           tags: ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
           push: true
           cache-from: |
-            type=gha,scope=backend-main
+            type=gha,scope=graphql-mongo
           cache-to: |
-            type=gha,scope=backend-main,mode=max
+            type=gha,scope=graphql-mongo,mode=max
 
-      - name: Build and cache backend-main-pg image
+      - name: Build and cache graphql-postgres image
         uses: docker/build-push-action@v2
         with:
           context: rust
           file: rust/Dockerfile.prod
-          target: backend-main-pg
+          target: graphql-postgres
           tags: ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
           push: true
           cache-from: |
-            type=gha,scope=backend-main-pg
+            type=gha,scope=graphql-postgres
           cache-to: |
-            type=gha,scope=backend-main-pg,mode=max
+            type=gha,scope=graphql-postgres,mode=max
 
-      - name: Build and cache backend-second image
+      - name: Build and cache grpc-mongo image
         uses: docker/build-push-action@v2
         with:
           context: rust
           file: rust/Dockerfile.prod
-          target: backend-second
+          target: grpc-mongo
           tags: ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }}
           push: true
           cache-from: |
-            type=gha,scope=backend-second
+            type=gha,scope=grpc-mongo
           cache-to: |
-            type=gha,scope=backend-second,mode=max
+            type=gha,scope=grpc-mongo,mode=max
 
 
       # - name: Check out code
       #   uses: actions/checkout@v2
 
-      # # 1. APPLICATION 1: Build and push image for backend-main
-      # - name: build backend-main docker image
-      #   run:  docker build -f Dockerfile.prod --target backend-main  -t ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }} .
+      # # 1. APPLICATION 1: Build and push image for graphql-mongo
+      # - name: build graphql-mongo docker image
+      #   run:  docker build -f Dockerfile.prod --target graphql-mongo  -t ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }} .
 
       # # This step can be removed if I decide I dont want to slimdown the image further anymore or if docker-slim starts to become problematic
-      # - name: Slim down backend-main docker image
+      # - name: Slim down graphql-mongo docker image
       #   run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }} --tag ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
 
-      # - name: Push backend-main docker image
+      # - name: Push graphql-mongo docker image
       #   run: docker push  ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
 
-      # # 2. APPLICATION 2: Build and push image for backend-second
-      # - name: build backend-second docker image
-      #   run:  docker build -f Dockerfile.prod --target backend-second  -t ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }} .
+      # # 2. APPLICATION 2: Build and push image for grpc-mongo
+      # - name: build grpc-mongo docker image
+      #   run:  docker build -f Dockerfile.prod --target grpc-mongo  -t ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }} .
 
-      # - name: Push backend-second docker image
+      # - name: Push grpc-mongo docker image
       #   run: docker push  ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }}
         
       # - name: Image digest
