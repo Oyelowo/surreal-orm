@@ -1,28 +1,5 @@
 version: '3.8'
 services:
-  # graphql-mongo:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.prod
-  #     # args:
-  #     #   - name=value
-  #     target: graphql-mongo
-  #   container_name: graphql-mongo
-  #   # hostname: mongodb
-  #   depends_on:
-  #     - mongodb
-  #   ports:
-  #     - 8000:8000
-  #   environment:
-  #     APP_ENVIRONMENT: local
-  #     APP_HOST: 0.0.0.0
-  #     APP_PORT: 8000
-  #     MONGODB_NAME: mydb
-  #     MONGODB_USERNAME: mongo
-  #     MONGODB_PASSWORD: fakepassword
-  #     MONGODB_HOST: mongodb
-  #     MONGODB_PORT: 27017
-
   graphql-mongo:
     build:
       context: .
@@ -33,13 +10,12 @@ services:
     # container_name: graphql-mongo
     # hostname: mongodb
     depends_on:
-      - mongodb
+      - mongodb-graphql-mongo
     ports:
       - 8000:8000
     environment:
       APP_ENVIRONMENT: local
       APP_HOST: 0.0.0.0
-      # APP_PORT: 50051
       APP_PORT: 8000
       MONGODB_NAME: mydb
       MONGODB_USERNAME: mongo
@@ -47,17 +23,85 @@ services:
       MONGODB_HOST: mongodb
       MONGODB_PORT: 27017
 
-  mongodb:
+  mongodb-graphql-mongo:
     image: mongo:latest
-    container_name: mongodb
+    #container_name: mongodb
     hostname: mongodb
     ports:
       - 27017:27017
-    # environment:
-    #   - MONGO_INITDB_ROOT_USERNAME=admin
-    #   - MONGO_INITDB_ROOT_PASSWORD=password
+
+
+  grpc-mongo:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      # args:
+      #   - name=value
+      target: grpc-mongo
+    # container_name: grpc-mongo
+    # hostname: mongodb
+    depends_on:
+      - mongodb-grpc-mongo
+    ports:
+      - 50051:50051
+    environment:
+      APP_ENVIRONMENT: local
+      APP_HOST: 0.0.0.0
+      APP_PORT: 50051
+      MONGODB_NAME: mydb
+      MONGODB_USERNAME: mongo
+      MONGODB_PASSWORD: fakepassword
+      MONGODB_HOST: mongodb
+      MONGODB_PORT: 27018
+
+  mongodb-grpc-mongo:
+    image: mongo:latest
+    #container_name: mongodb
+    hostname: mongodb
+    ports:
+      - 27018:27017
+
+  graphql-postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      # args:
+      #   - name=value
+      target: graphql-postgres
+    # container_name: graphql-postgres
+    # hostname: graphql-postgres
+    depends_on:
+      - postgres-graphql-postgres
+      #- migrations
+    ports:
+       - 8001:8000
+    environment:
+      APP_ENVIRONMENT: local
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      POSTGRES_NAME: mydb
+      POSTGRES_DATABASE_NAME: mydb
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      DATABASE_URL: postgres://postgres:1234@postgres-graphql-postgres:5432/my_db
+
+  postgres-graphql-postgres:
+    image: postgres
+    restart: always
+    container_name: postgres
+    ports:
+      - 5432:5432/tcp
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: mydb
     # volumes:
-    #   - mongodb_data_container:/data/db
+      # - /var/lib/postgres
+      # - ./dbscripts/postgres:/docker-entrypoint-initdb.d
+      # - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+
 
   # mongo-express:
   #   image: mongo-express
@@ -83,22 +127,6 @@ services:
       - mongodb
     ports:
       - 3300:3000
-
-
-
-  # postgres-service:
-  #   image: postgres:latest
-  #   container_name: postgres-container
-  #   ports:
-  #     - 55432:5432/tcp
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_DB: pg_db
-  #     POSTGRES_PASSWORD: appdbpassword
-  #   volumes:
-  #     - /var/lib/postgres
-  #     - ./dbscripts/postgres:/docker-entrypoint-initdb.d
-  #     # - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
   # pgadmin:
   #   container_name: demo_pgadmin
