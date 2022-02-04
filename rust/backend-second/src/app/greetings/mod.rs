@@ -1,4 +1,4 @@
-mod hello;
+pub(in crate::app) mod hello;
 
 //pub use hello::{getGreeterServer};
 // pub mod grr {

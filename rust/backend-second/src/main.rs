@@ -1,13 +1,9 @@
-mod app_analytics;
+mod app;
 mod configs;
-mod greetings;
-mod music;
 
 use anyhow::Result;
-use app_analytics::AnalyticsApp;
+use app::{app_analytics::AnalyticsApp, greetings::GreeterApp, music::MusicFanApp};
 use configs::Configs;
-use greetings::GreeterApp;
-use music::MusicFanApp;
 use tonic::transport::Server;
 
 #[tokio::main]

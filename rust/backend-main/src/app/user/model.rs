@@ -1,5 +1,4 @@
 use async_graphql::*;
-
 use chrono::{
     serde::{ts_nanoseconds, ts_nanoseconds_option},
     DateTime, Utc,
@@ -13,8 +12,8 @@ use wither::{
     prelude::Model,
 };
 // use bson::DateTime;
-use crate::{app::post::Post, configs::model_cursor_to_vec};
 
+use crate::{app::post::Post, configs::model_cursor_to_vec};
 
 #[derive(Model, SimpleObject, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
 // #[derive(InputObject)]
