@@ -10,7 +10,7 @@ use sqlx::{
 };
 use validator::Validate;
 
-use crate::user::User;
+use crate::app::user::User;
 
 #[derive(Table, SimpleObject, Validate, Debug)]
 #[graphql(complex)]

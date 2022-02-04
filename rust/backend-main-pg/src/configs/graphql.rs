@@ -6,9 +6,13 @@ use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 use super::configuration::Environemnt;
-use crate::configs::Configs;
-use crate::post::{PostMutationRoot, PostQueryRoot};
-use crate::user::{UserMutationRoot, UserQueryRoot};
+use crate::{
+    app::{
+        post::{PostMutationRoot, PostQueryRoot},
+        user::{UserMutationRoot, UserQueryRoot},
+    },
+    configs::Configs,
+};
 use sqlx::postgres::PgPoolOptions;
 
 #[derive(MergedObject, Default)]
