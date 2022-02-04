@@ -13,7 +13,7 @@ use wither::{
     prelude::Model,
 };
 // use bson::DateTime;
-use crate::{configs::model_cursor_to_vec, post::Post};
+use crate::{app::post::Post, configs::model_cursor_to_vec};
 
 #[derive(Model, SimpleObject, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
 // #[derive(InputObject)]

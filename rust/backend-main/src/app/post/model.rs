@@ -9,7 +9,7 @@ use wither::{
     prelude::Model,
 };
 
-use crate::user::User;
+use crate::app::user::User;
 
 #[derive(Model, SimpleObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
 #[serde(rename_all = "camelCase")]

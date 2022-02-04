@@ -12,7 +12,6 @@ pub mod app_analytics {
 async fn main() -> Result<()> {
     let mut client = AppAnalyticsClient::connect("http://[::1]:50051").await?;
 
-
     let response_create = client
         .create_user_app_event(tonic::Request::new(CreateUserAppEventRequest {
             user_id: "1".into(),

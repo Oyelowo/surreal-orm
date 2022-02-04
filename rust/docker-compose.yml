@@ -23,23 +23,24 @@ services:
   #     MONGODB_HOST: mongodb
   #     MONGODB_PORT: 27017
 
-  backend-main-pg:
+  backend-second:
     build:
       context: .
       dockerfile: Dockerfile.prod
       # args:
       #   - name=value
-      target: backend-main-pg
-    container_name: backend-main-pg
+      target: backend-second
+    # container_name: backend-second
     # hostname: mongodb
     depends_on:
       - mongodb
     ports:
-      - 8000:8000
+      - 50051:50051
     environment:
       APP_ENVIRONMENT: local
       APP_HOST: 0.0.0.0
-      APP_PORT: 8000
+      APP_PORT: 50051
+      # APP_PORT: 8000
       MONGODB_NAME: mydb
       MONGODB_USERNAME: mongo
       MONGODB_PASSWORD: fakepassword

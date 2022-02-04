@@ -35,7 +35,7 @@ impl UserQueryRoot {
 
         let mut users = vec![];
         while let Some(user) = cursor.next().await {
-            users.push(user.unwrap());
+            users.push(user?);
         }
 
         Ok(users)

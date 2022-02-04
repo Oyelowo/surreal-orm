@@ -5,9 +5,10 @@ use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 use super::configuration::Environemnt;
+use crate::app::post::{Post, PostMutationRoot, PostQueryRoot};
+use crate::app::user::{User, UserMutationRoot, UserQueryRoot};
 use crate::configs::Configs;
-use crate::post::{Post, PostMutationRoot, PostQueryRoot};
-use crate::user::{User, UserMutationRoot, UserQueryRoot};
+
 use wither::{mongodb::Client, prelude::Model};
 
 #[derive(MergedObject, Default)]

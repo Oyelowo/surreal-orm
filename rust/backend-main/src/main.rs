@@ -1,8 +1,9 @@
 use actix_web::{guard, web, App, HttpServer};
 use configs::{index, index_playground, Configs, GraphQlApp};
 pub mod configs;
-pub mod post;
-pub mod user;
+// pub mod post;
+// pub mod user;
+pub mod app;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
