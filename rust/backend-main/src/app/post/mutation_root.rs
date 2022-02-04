@@ -1,4 +1,4 @@
-use super::{Post, PostInput};
+use super::model::{Post, PostInput};
 use async_graphql::*;
 use mongodb::Database;
 use validator::Validate;
