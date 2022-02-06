@@ -39,8 +39,8 @@ async fn main() -> Result<()> {
 
     let get_one = client
         .get_user_app_event(tonic::Request::new(GetUserAppEventRequest {
-            event_id: response_create.id.clone(),
-            user_id: response_create.user_id.clone(),
+            event_id: "61fda82206cb096659bd294b".into(),
+            user_id: "1".into(),
         }))
         .await?
         .into_inner();

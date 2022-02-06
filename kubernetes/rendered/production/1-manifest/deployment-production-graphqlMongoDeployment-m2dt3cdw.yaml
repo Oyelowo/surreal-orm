@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"pulumi.com/autonamed":"true"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"graphqlMongoDeployment-m2dt3cdw","namespace":"production"},"spec":{"replicas":3,"selector":{"matchLabels":{"app":"graphql"}},"template":{"metadata":{"labels":{"app":"graphql"}},"spec":{"containers":[{"env":[{"name":"CONFIG","valueFrom":{"configMapKeyRef":{"key":"config","name":"graphqlMongoConfigMap-1i15troa"}}},{"name":"PASSWORD","valueFrom":{"secretKeyRef":{"key":"password","name":"graphqlMongoSecret-xbbynf9x"}}},{"name":"HOST","value":""},{"name":"PORT","value":""}],"image":"graphql-mongo","name":"graphql","ports":[{"containerPort":8080,"name":"http"}],"resources":{"limits":{"cpu":"100m","memory":"1G"},"requests":{"cpu":"100m","memory":"1G"}},"volumeMounts":[]}],"initContainers":[],"volumes":[]}}}}
+    pulumi.com/autonamed: "true"
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: graphqlMongoDeployment-m2dt3cdw
+  namespace: production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: graphql
+  template:
+    metadata:
+      labels:
+        app: graphql
+    spec:
+      containers:
+      - env:
+        - name: CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: config
+              name: graphqlMongoConfigMap-1i15troa
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: graphqlMongoSecret-xbbynf9x
+        - name: HOST
+          value: ""
+        - name: PORT
+          value: ""
+        image: graphql-mongo
+        name: graphql
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          limits:
+            cpu: 100m
+            memory: 1G
+          requests:
+            cpu: 100m
+            memory: 1G
+        volumeMounts: []
+      initContainers: []
+      volumes: []
