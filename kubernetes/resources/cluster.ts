@@ -27,7 +27,7 @@ export const provider = new k8s.Provider("render-yaml", {
 });
 
 export const devNamespace = new k8s.core.v1.Namespace(
-  "devv",
+  "local",
   {
     metadata: { name: nameSpaceName, namespace: nameSpaceName },
   },

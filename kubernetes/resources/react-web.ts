@@ -43,7 +43,7 @@ export const reactWebPodBuilder = new kx.PodBuilder({
         PORT: "",
       },
       image: "oyelowo/web",
-      ports: { http: 8080 },
+      ports: { http: 3000 },
       volumeMounts: [],
       resources: {
         limits: {
