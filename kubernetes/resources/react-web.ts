@@ -13,7 +13,7 @@ export const reactWebSettings: Settings = {
 
 // Create a Kubernetes ConfigMap.
 export const reactWebConfigMap = new kx.ConfigMap(
-  "react-web-configMap",
+  "react-web-configmap",
   {
     data: { config: "very important data" },
   },
@@ -63,7 +63,7 @@ export const reactWebPodBuilder = new kx.PodBuilder({
 export const reactWebDeployment = new kx.Deployment(
   "react-web-deployment",
   {
-    spec: reactWebPodBuilder.asDeploymentSpec({ replicas: 3 }),
+    spec: reactWebPodBuilder.asDeploymentSpec({ replicas: 2 }),
   },
   { provider }
 );

@@ -8,7 +8,7 @@ build:
     context: ../typescript
     docker:
       dockerfile: Dockerfile.prod
-      target: web
+      target: web-dev
       noCache: false
       squash: false
   #   requires:
@@ -24,7 +24,7 @@ deploy:
     manifests:
     - rendered/**/1-manifest/*
 portForward:
-  - resourceType: deployment
-    resourceName: leeroy-web
+  - resourceType: service
+    resourceName: react-web-deployment-z5ri8ivw
     port: 3000
     localPort: 3001

@@ -1,5 +1,5 @@
 gen:
-	export ENVIRONMENT="development" && pulumi update --yes --skip-preview
+	export ENVIRONMENT="development" && pulumi update --yes --skip-preview --stack dev
 	# export ENVIRONMENT="staging" && pulumi update --yes --skip-preview
 	# export ENVIRONMENT="production" && pulumi update --yes --skip-preview
 	

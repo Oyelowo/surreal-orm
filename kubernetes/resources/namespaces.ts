@@ -4,6 +4,6 @@ import * as kx from "@pulumi/kubernetesx";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
 // import * as eks from "@pulumi/eks";
 
-// export const devNamespace = new k8s.core.v1.Namespace("dev", undefined, {
-//   provider: undefined,
-// });
+export const namespace = new k8s.core.v1.Namespace("development", undefined, {
+  provider,
+});
