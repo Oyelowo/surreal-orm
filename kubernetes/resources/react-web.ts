@@ -13,7 +13,7 @@ export const reactWebSettings: Settings = {
 
 // Create a Kubernetes ConfigMap.
 export const reactWebConfigMap = new kx.ConfigMap(
-  "reactWebConfigMap",
+  "react-web-configMap",
   {
     data: { config: "very important data" },
   },
@@ -22,7 +22,7 @@ export const reactWebConfigMap = new kx.ConfigMap(
 
 // Create a Kubernetes Secret.
 export const reactWebSecret = new kx.Secret(
-  "reactWebSecret",
+  "react-web-secret",
   {
     stringData: {
       password: "very-weak-password",
@@ -42,7 +42,7 @@ export const reactWebPodBuilder = new kx.PodBuilder({
         HOST: "",
         PORT: "",
       },
-      image: "graphql-mongo",
+      image: "oyelowo/web",
       ports: { http: 8080 },
       volumeMounts: [],
       resources: {
@@ -61,7 +61,7 @@ export const reactWebPodBuilder = new kx.PodBuilder({
 
 // Create a Kubernetes Deployment.
 export const reactWebDeployment = new kx.Deployment(
-  "reactWebDeployment",
+  "react-web-deployment",
   {
     spec: reactWebPodBuilder.asDeploymentSpec({ replicas: 3 }),
   },
