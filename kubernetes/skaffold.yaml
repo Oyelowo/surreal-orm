@@ -22,7 +22,7 @@ build:
 deploy:
   kubectl:
     manifests:
-    - rendered/production/1-manifest/*
+    - rendered/**/1-manifest/*
 portForward:
   - resourceType: deployment
     resourceName: leeroy-web
