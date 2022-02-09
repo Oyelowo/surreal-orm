@@ -15,27 +15,33 @@ use wither::{
 
 use crate::{app::post::Post, configs::model_cursor_to_vec};
 
-#[derive(Model, SimpleObject, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
-// #[derive(InputObject)]
+#[derive(Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate)]
 #[serde(rename_all = "camelCase")]
-// #[graphql(input_name = "UserInput")]
 #[graphql(complex)]
+#[graphql(input_name = "UserInput")]
 #[model(index(keys = r#"doc!{"email": 1}"#, options = r#"doc!{"unique": true}"#))]
 pub struct User {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
+    #[graphql(skip_input)]
     pub id: Option<ObjectId>,
 
+    // Created_at should only be set once when creating the field, it should be ignored at other times
     #[serde(with = "ts_nanoseconds_option")] // not really necessary
     #[builder(default, setter(strip_option))]
+    // make it possible do just do created_at(value) instead of created_at(Some(value)) at the call site
+    #[graphql(skip_input)]
+    // Skip only from input but available for output. Can be useful for sorting on the client side
     pub created_at: Option<DateTime<Utc>>,
 
-    #[serde(with = "ts_nanoseconds")]
-    #[builder(default=Utc::now())]
-    pub updated_at: DateTime<Utc>,
+    #[serde(with = "ts_nanoseconds_option")]
+    #[builder(default=Some(Utc::now()), setter(strip_option))]
+    #[graphql(skip)] // skip from noth input and output. Mainly for business logic stuff
+    pub updated_at: Option<DateTime<Utc>>,
 
     #[serde(with = "ts_nanoseconds_option")]
-    #[builder(default)]
+    #[builder(default, setter(strip_option))]
+    #[graphql(skip)] // skip from both input and output. Mainly for business logic stuff
     pub deleted_at: Option<DateTime<Utc>>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
@@ -69,15 +75,16 @@ impl User {
     }
 }
 
-// pub type UserInput = User;
-#[derive(InputObject, TypedBuilder)]
-pub struct UserInput {
-    pub last_name: String,
-    pub first_name: String,
-    pub email: String,
-    pub social_media: Vec<String>,
-    pub age: u8,
-}
+// No need to redefine. The simpleobject doubles as InputObject. This can still be used for other inputs if need be.
+// // pub type UserInput = User;
+// #[derive(InputObject, TypedBuilder)]
+// pub struct UserInput {
+//     pub last_name: String,
+//     pub first_name: String,
+//     pub email: String,
+//     pub social_media: Vec<String>,
+//     pub age: u8,
+// }
 
 /*
 
