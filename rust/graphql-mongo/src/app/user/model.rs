@@ -1,6 +1,6 @@
 use async_graphql::*;
 use chrono::{
-    serde::{ts_nanoseconds, ts_nanoseconds_option},
+    serde::{/* ts_nanoseconds */ ts_nanoseconds_option},
     DateTime, Utc,
 };
 use mongodb::Database;

@@ -11,15 +11,17 @@ use wither::{
 
 use crate::app::user::User;
 
-#[derive(Model, SimpleObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
+#[derive(Model, SimpleObject, InputObject ,Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
 #[serde(rename_all = "camelCase")]
-//#[graphql(input_name = "PostInput")]
+#[graphql(input_name = "PostInput")]
 #[graphql(complex)]
 pub struct Post {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
+    #[graphql(skip_input)]
     pub id: Option<ObjectId>,
-
+    
+    // #[graphql(skip_input)] This will usually come from session/jwt token / oauth token but making it inputable in graphql for testing purposes in the meantime.
     pub poster_id: ObjectId,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
@@ -40,12 +42,12 @@ impl Post {
 }
 
 // pub type PostInput = Post;
-#[derive(InputObject, TypedBuilder)]
-pub struct PostInput {
-    pub poster_id: ObjectId,
-    pub title: String,
-    pub content: String,
-}
+// #[derive(InputObject, TypedBuilder)]
+// pub struct PostInput {
+//     pub poster_id: ObjectId,
+//     pub title: String,
+//     pub content: String,
+// }
 
 /*
 
