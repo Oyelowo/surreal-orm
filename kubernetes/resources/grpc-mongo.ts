@@ -1,11 +1,11 @@
-import { Settings } from "./types";
+import { Settings } from './types';
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
 import { provider } from "./cluster";
 
 // Prefix by the name of deployment to make them unique across stack
 
-export const graphqlMongoSettings: Settings = {
+export const grpcMongoSettings: Settings = {
   requestMemory: "1G",
   requestCpu: "100m",
   limitMemory: "1G",
@@ -14,8 +14,8 @@ export const graphqlMongoSettings: Settings = {
 };
 
 // Create a Kubernetes ConfigMap.
-export const graphqlMongoConfigMap = new kx.ConfigMap(
-  "graphql-mongo-configMap",
+export const grpcMongoConfigMap = new kx.ConfigMap(
+  "grpc-mongo-configMap",
   {
     data: { config: "very important data" },
   },
@@ -23,8 +23,8 @@ export const graphqlMongoConfigMap = new kx.ConfigMap(
 );
 
 // Create a Kubernetes Secret.
-export const graphqlMongoSecret = new kx.Secret(
-  "graphql-mongo-secret",
+export const grpcMongoSecret = new kx.Secret(
+  "grpc-mongo-secret",
   {
     stringData: {
       password: "very-weak-password",
@@ -34,27 +34,27 @@ export const graphqlMongoSecret = new kx.Secret(
 );
 
 // Define a Pod.
-export const graphqlMongoPodBuilder = new kx.PodBuilder({
+export const grpcMongoPodBuilder = new kx.PodBuilder({
   initContainers: [],
   containers: [
     {
       env: {
-        CONFIG: graphqlMongoConfigMap.asEnvValue("config"),
-        PASSWORD: graphqlMongoSecret.asEnvValue("password"),
+        CONFIG: grpcMongoConfigMap.asEnvValue("config"),
+        PASSWORD: grpcMongoSecret.asEnvValue("password"),
         HOST: "",
         PORT: "",
       },
-      image: "graphql-mongo",
+      image: "grpc-mongo",
       ports: { http: 8080 },
       volumeMounts: [],
       resources: {
         limits: {
-          memory: graphqlMongoSettings.limitMemory,
-          cpu: graphqlMongoSettings.limitCpu,
+          memory: grpcMongoSettings.limitMemory,
+          cpu: grpcMongoSettings.limitCpu,
         },
         requests: {
-          memory: graphqlMongoSettings.requestMemory,
-          cpu: graphqlMongoSettings.requestCpu,
+          memory: grpcMongoSettings.requestMemory,
+          cpu: grpcMongoSettings.requestCpu,
         },
       },
     },
@@ -62,17 +62,17 @@ export const graphqlMongoPodBuilder = new kx.PodBuilder({
 });
 
 // Create a Kubernetes Deployment.
-export const graphqlMongoDeployment = new kx.Deployment(
-  "graphql-mongo-deployment",
+export const grpcMongoDeployment = new kx.Deployment(
+  "grpc-mongo-deployment",
   {
-    spec: graphqlMongoPodBuilder.asDeploymentSpec({ replicas: 3 }),
+    spec: grpcMongoPodBuilder.asDeploymentSpec({ replicas: 3 }),
   },
   { provider }
 );
 
 // // Create a Kubernetes Service.
-export const graphqlMongoService = graphqlMongoDeployment.createService({
+export const grpcMongoService = grpcMongoDeployment.createService({
   type: kx.types.ServiceType.ClusterIP,
 });
 
-console.log("rerekrekrek", graphqlMongoService.urn);
+console.log("rerekrekrek", grpcMongoService.urn);

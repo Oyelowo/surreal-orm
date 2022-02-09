@@ -7,7 +7,7 @@ services:
       # args:
       #   - name=value
       target: graphql-mongo
-    # container_name: graphql-mongo
+    # # container_name: graphql-mongo
     # hostname: mongodb
     depends_on:
       - mongodb-graphql-mongo
@@ -20,13 +20,13 @@ services:
       MONGODB_NAME: mydb
       MONGODB_USERNAME: mongo
       MONGODB_PASSWORD: fakepassword
-      MONGODB_HOST: mongodb
+      MONGODB_HOST: mongodb-graphql
       MONGODB_PORT: 27017
 
   mongodb-graphql-mongo:
     image: mongo:latest
-    #container_name: mongodb
-    hostname: mongodb
+    # #container_name: mongodb
+    hostname: mongodb-graphql
     ports:
       - 27017:27017
 
@@ -38,7 +38,7 @@ services:
       # args:
       #   - name=value
       target: grpc-mongo
-    # container_name: grpc-mongo
+    # # container_name: grpc-mongo
     # hostname: mongodb
     depends_on:
       - mongodb-grpc-mongo
@@ -51,13 +51,13 @@ services:
       MONGODB_NAME: mydb
       MONGODB_USERNAME: mongo
       MONGODB_PASSWORD: fakepassword
-      MONGODB_HOST: mongodb
+      MONGODB_HOST: mongodb-grpc
       MONGODB_PORT: 27017
 
   mongodb-grpc-mongo:
     image: mongo:latest
-    #container_name: mongodb
-    hostname: mongodb
+    # #container_name: mongodb
+    hostname: mongodb-grpc
     ports:
       - 27018:27017
 
@@ -68,7 +68,7 @@ services:
       # args:
       #   - name=value
       target: graphql-postgres
-    # container_name: graphql-postgres
+    # # container_name: graphql-postgres
     # hostname: graphql-postgres
     depends_on:
       - postgres-graphql-postgres
@@ -78,7 +78,7 @@ services:
     environment:
       APP_ENVIRONMENT: local
       APP_HOST: 0.0.0.0
-      APP_PORT: 8000
+      APP_PORT: 8001
       POSTGRES_NAME: mydb
       POSTGRES_DATABASE_NAME: mydb
       POSTGRES_USERNAME: postgres
@@ -90,7 +90,7 @@ services:
   postgres-graphql-postgres:
     image: postgres
     restart: always
-    container_name: postgres
+    # container_name: postgres
     ports:
       - 5432:5432/tcp
     environment:
@@ -105,7 +105,7 @@ services:
 
   # mongo-express:
   #   image: mongo-express
-  #   container_name: mongo-express
+  # #   container_name: mongo-express
   #   restart: unless-stopped
   #   depends_on:
   #     - mongodb
@@ -121,7 +121,7 @@ services:
 
   mongoclient:
     image: mongoclient/mongoclient:latest
-    container_name: mongoclient
+    # container_name: mongoclient
     hostname: mongoclient
     depends_on:
       - mongodb
@@ -129,7 +129,7 @@ services:
       - 3300:3000
 
   # pgadmin:
-  #   container_name: demo_pgadmin
+  # #   container_name: demo_pgadmin
   #   image: "dpage/pgadmin4:4.24"
   #   environment:
   #     PGADMIN_DEFAULT_EMAIL: admin

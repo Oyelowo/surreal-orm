@@ -8,7 +8,7 @@ build:
     context: ../typescript
     docker:
       dockerfile: Dockerfile.prod
-      target: web-dev
+      target: web
       noCache: false
       squash: false
   #   requires:
