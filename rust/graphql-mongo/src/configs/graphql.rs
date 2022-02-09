@@ -1,27 +1,14 @@
 use actix_web::{web, HttpResponse};
-use anyhow::Context;
+
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
-use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 use super::configuration::Environemnt;
-use crate::app::post::{Post, PostMutationRoot, PostQueryRoot};
-use crate::app::user::{User, UserMutationRoot, UserQueryRoot};
+use crate::app::sync_mongo_models;
+use crate::app::{get_graphql_schema, GraphQLSchema};
 use crate::configs::Configs;
 
-use wither::{mongodb::Client, prelude::Model};
-
-#[derive(MergedObject, Default)]
-pub struct Query(UserQueryRoot, PostQueryRoot);
-
-#[derive(MergedObject, Default)]
-pub struct Mutation(UserMutationRoot, PostMutationRoot);
-
-pub type GraphQLSchema = Schema<Query, Mutation, EmptySubscription>;
-
-pub fn get_graphql_schema() -> SchemaBuilder<Query, Mutation, EmptySubscription> {
-    Schema::build(Query::default(), Mutation::default(), EmptySubscription)
-}
+use wither::mongodb::Client;
 
 pub async fn index(schema: web::Data<GraphQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
@@ -34,14 +21,10 @@ pub async fn index_playground() -> HttpResponse {
         .body(source)
 }
 
-fn get_error_message<T: Model>() -> String {
-    format!("problem syncing {:?}", T::COLLECTION_NAME)
-}
-
 pub struct GraphQlApp;
 
 impl GraphQlApp {
-    pub async fn setup() -> anyhow::Result<Schema<Query, Mutation, EmptySubscription>> {
+    pub async fn setup() -> anyhow::Result<GraphQLSchema> {
         let Configs {
             ref application,
             database,
@@ -57,9 +40,7 @@ impl GraphQlApp {
             .await?
             .database(database.name.as_str());
 
-        User::sync(&db).await.expect("Problem syncing users");
-        // Post::sync(&db).await.context("problem syncing post")?;
-        Post::sync(&db).await.context(get_error_message::<Post>())?;
+        sync_mongo_models(&db).await?;
 
         let schema = get_graphql_schema()
             .data(db)

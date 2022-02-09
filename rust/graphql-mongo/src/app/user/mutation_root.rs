@@ -19,14 +19,14 @@ impl UserMutationRoot {
         let db = ctx.data_unchecked::<Database>();
 
         let mut user = User::builder()
-        .created_at(Utc::now())
-        .first_name(user_input.first_name)
-        .last_name(user_input.last_name)
-        .email(user_input.email)
-        .age(user_input.age)
-        .social_media(user_input.social_media)
-        .build();
-        
+            .created_at(Utc::now())
+            .first_name(user_input.first_name)
+            .last_name(user_input.last_name)
+            .email(user_input.email)
+            .age(user_input.age)
+            .social_media(user_input.social_media)
+            .build();
+
         user.save(db, None).await?;
 
         Ok(user)

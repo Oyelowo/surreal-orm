@@ -1,8 +1,5 @@
 use async_graphql::*;
-use chrono::{
-    serde::{/* ts_nanoseconds */ ts_nanoseconds_option},
-    DateTime, Utc,
-};
+use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;

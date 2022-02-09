@@ -1,4 +1,4 @@
-use super::model::{Post};
+use super::model::Post;
 use async_graphql::*;
 use mongodb::Database;
 use validator::Validate;
@@ -15,7 +15,7 @@ impl PostMutationRoot {
         #[graphql(desc = "user data")] post_input: Post,
     ) -> anyhow::Result<Post> {
         post_input.validate()?;
-        
+
         let db = ctx.data_unchecked::<Database>();
         let mut post = Post::builder()
             .poster_id(post_input.poster_id)
