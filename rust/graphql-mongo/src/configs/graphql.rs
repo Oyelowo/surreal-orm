@@ -4,13 +4,12 @@ use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
 use super::configuration::Environemnt;
-use crate::app::sync_mongo_models;
-use crate::app::{get_graphql_schema, GraphQLSchema};
+use crate::app::{get_my_graphql_schema, sync_mongo_models, MyGraphQLSchema};
 use crate::configs::Configs;
 
 use wither::mongodb::Client;
 
-pub async fn index(schema: web::Data<GraphQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
+pub async fn index(schema: web::Data<MyGraphQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
 }
 
@@ -24,7 +23,7 @@ pub async fn index_playground() -> HttpResponse {
 pub struct GraphQlApp;
 
 impl GraphQlApp {
-    pub async fn setup() -> anyhow::Result<GraphQLSchema> {
+    pub async fn setup() -> anyhow::Result<MyGraphQLSchema> {
         let Configs {
             ref application,
             database,
@@ -42,7 +41,7 @@ impl GraphQlApp {
 
         sync_mongo_models(&db).await?;
 
-        let schema = get_graphql_schema()
+        let schema = get_my_graphql_schema()
             .data(db)
             .limit_depth(limit_depth) // This and also limi_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
             .limit_complexity(limit_complexity)

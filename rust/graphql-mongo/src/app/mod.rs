@@ -25,10 +25,9 @@ pub struct Query(UserQueryRoot, PostQueryRoot);
 #[derive(MergedObject, Default)]
 pub struct Mutation(UserMutationRoot, PostMutationRoot);
 
-pub type GraphQLSchema = Schema<Query, Mutation, EmptySubscription>;
-
-pub fn get_graphql_schema() -> SchemaBuilder<Query, Mutation, EmptySubscription> {
-    Schema::build(Query::default(), Mutation::default(), EmptySubscription)
+pub type MyGraphQLSchema = Schema<Query, Mutation, EmptySubscription>;
+pub fn get_my_graphql_schema() -> SchemaBuilder<Query, Mutation, EmptySubscription> {
+    MyGraphQLSchema::build(Query::default(), Mutation::default(), EmptySubscription)
 }
 
 fn get_error_message<T: Model>() -> String {

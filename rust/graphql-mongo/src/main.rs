@@ -1,5 +1,7 @@
 use actix_web::{guard, web, App, HttpServer};
 use configs::{index, index_playground, Configs, GraphQlApp};
+use log::info;
+
 pub mod configs;
 // pub mod post;
 // pub mod user;
@@ -10,7 +12,7 @@ async fn main() -> anyhow::Result<()> {
     let Configs { application, .. } = Configs::init();
     let app_url = &application.get_url();
 
-    println!("Playground: {}", app_url);
+    info!("Playground: {}", app_url);
 
     let schema = GraphQlApp::setup()
         .await
