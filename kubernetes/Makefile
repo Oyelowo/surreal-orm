@@ -1,10 +1,10 @@
 gen:
 
-	# pulumi destroy --stack dev  --yes --skip-preview
+	pulumi destroy --stack dev  --yes --skip-preview
 	# pulumi stack init --stack dev   
-	export ENVIRONMENT="development" && pulumi up --yes --skip-preview --stack dev
-	# export ENVIRONMENT="staging" && pulumi up --yes --skip-preview
-	# export ENVIRONMENT="production" && pulumi up --yes --skip-preview
+	export ENVIRONMENT="development" && pulumi update --yes --skip-preview --stack dev
+	# export ENVIRONMENT="staging" && pulumi update --yes --skip-preview
+	# export ENVIRONMENT="production" && pulumi update --yes --skip-preview
 	
 dev:
 	pulumi update --yes --skip-preview

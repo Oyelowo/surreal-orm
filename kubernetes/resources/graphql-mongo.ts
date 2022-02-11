@@ -1,8 +1,9 @@
-import { Settings } from "./types";
+import { MongodbHelmValuesBitnami } from "./shared/MongodbBitnami";
+import { RecursivePartial, Settings } from "./shared/types";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
-import { provider } from "./cluster";
-import { devNamespace } from "./namespaces";
+import { provider } from "./shared/cluster";
+import { devNamespace, devNamespaceName } from "./shared/namespaces";
 import * as random from "@pulumi/random";
 import * as pulumi from "@pulumi/pulumi";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
@@ -21,6 +22,9 @@ export const graphqlMongoConfigMap = new kx.ConfigMap(
   "graphql-mongo-configMap",
   {
     data: { config: "very important data" },
+    metadata: {
+      namespace: devNamespaceName,
+    },
   },
   { provider }
 );
@@ -31,6 +35,9 @@ export const graphqlMongoSecret = new kx.Secret(
   {
     stringData: {
       password: "very-weak-password",
+    },
+    metadata: {
+      namespace: devNamespaceName,
     },
   },
   { provider }
@@ -80,7 +87,9 @@ export const graphqlMongoDeployment = new kx.Deployment(
   "graphql-mongo-deployment",
   {
     spec: graphqlMongoPodBuilder.asDeploymentSpec({ replicas: 3 }),
-    metadata: {namespace: "xxx"}
+    metadata: {
+      namespace: devNamespaceName,
+    },
   },
   { provider }
 );
@@ -92,12 +101,21 @@ export const graphqlMongoService = graphqlMongoDeployment.createService({
     {
       port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
       protocol: "TCP",
-      name: "graphql-mongo-http"
+      name: "graphql-mongo-http",
       //targetPort: 434,
-    }
-  ]
+    },
+  ],
 });
 
+/* MONGODB STATEFULSET */
+const mongoValues: RecursivePartial<MongodbHelmValuesBitnami> = {
+  useStatefulSet: true,
+  architecture: "replicaset",
+  replicaCount: 3,
+  global: {
+    namespaceOverride: devNamespaceName,
+  },
+};
 
 export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
   "mongodb-helm",
@@ -107,12 +125,7 @@ export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
       repo: "https://charts.bitnami.com/bitnami",
     },
     version: "11.0.0",
-    values: {
-      useStatefulSet: true,
-      global: {
-        namespaceOverride: devNamespace.metadata.name,
-      },
-    },
+    values: mongoValues,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being
     // available.

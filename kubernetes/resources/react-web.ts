@@ -1,7 +1,7 @@
-import { Settings } from "./types";
+import { Settings } from "./shared/types";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
-import { provider } from "./cluster";
+import { provider } from "./shared/cluster";
 
 export const reactWebSettings: Settings = {
   requestMemory: "1G",
