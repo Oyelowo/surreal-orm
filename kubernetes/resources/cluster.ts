@@ -23,13 +23,13 @@ const nameSpaceName = environment;
 
 export const provider = new k8s.Provider("render-yaml", {
   renderYamlToDirectory: `rendered/${nameSpaceName}`,
-  namespace: nameSpaceName,
+  namespace: "nana",
 });
 
-export const devNamespace = new k8s.core.v1.Namespace(
-  "local",
-  {
-    metadata: { name: nameSpaceName, namespace: nameSpaceName },
-  },
-  { provider }
-);
+// export const devNamespace = new k8s.core.v1.Namespace(
+//   "local",
+//   {
+//     metadata: { name: nameSpaceName, namespace: nameSpaceName },
+//   },
+//   { provider }
+// );
