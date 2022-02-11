@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"StatefulSet","metadata":{"labels":{"app.kubernetes.io/component":"arbiter","app.kubernetes.io/instance":"mongodb-helm","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"mongodb","helm.sh/chart":"mongodb-11.0.0"},"name":"mongodb-helm-arbiter","namespace":"development"},"spec":{"selector":{"matchLabels":{"app.kubernetes.io/component":"arbiter","app.kubernetes.io/instance":"mongodb-helm","app.kubernetes.io/name":"mongodb"}},"serviceName":"mongodb-helm-arbiter-headless","template":{"metadata":{"labels":{"app.kubernetes.io/component":"arbiter","app.kubernetes.io/instance":"mongodb-helm","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"mongodb","helm.sh/chart":"mongodb-11.0.0"}},"spec":{"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"podAffinityTerm":{"labelSelector":{"matchLabels":{"app.kubernetes.io/component":"arbiter","app.kubernetes.io/instance":"mongodb-helm","app.kubernetes.io/name":"mongodb"}},"namespaces":["default"],"topologyKey":"kubernetes.io/hostname"},"weight":1}]}},"containers":[{"env":[{"name":"BITNAMI_DEBUG","value":"false"},{"name":"MY_POD_NAME","valueFrom":{"fieldRef":{"fieldPath":"metadata.name"}}},{"name":"MY_POD_NAMESPACE","valueFrom":{"fieldRef":{"fieldPath":"metadata.namespace"}}},{"name":"K8S_SERVICE_NAME","value":"mongodb-helm-arbiter-headless"},{"name":"MONGODB_REPLICA_SET_MODE","value":"arbiter"},{"name":"MONGODB_INITIAL_PRIMARY_HOST","value":"mongodb-helm-0.mongodb-helm-headless.$(MY_POD_NAMESPACE).svc.cluster.local"},{"name":"MONGODB_REPLICA_SET_NAME","value":"rs0"},{"name":"MONGODB_ADVERTISED_HOSTNAME","value":"$(MY_POD_NAME).$(K8S_SERVICE_NAME).$(MY_POD_NAMESPACE).svc.cluster.local"},{"name":"MONGODB_INITIAL_PRIMARY_ROOT_USER","value":"root"},{"name":"MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD","valueFrom":{"secretKeyRef":{"key":"mongodb-root-password","name":"mongodb-helm"}}},{"name":"MONGODB_REPLICA_SET_KEY","valueFrom":{"secretKeyRef":{"key":"mongodb-replica-set-key","name":"mongodb-helm"}}},{"name":"ALLOW_EMPTY_PASSWORD","value":"no"}],"image":"docker.io/bitnami/mongodb:4.4.12-debian-10-r7","imagePullPolicy":"IfNotPresent","livenessProbe":{"failureThreshold":6,"initialDelaySeconds":30,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":"mongodb"},"timeoutSeconds":5},"name":"mongodb-arbiter","ports":[{"containerPort":27017,"name":"mongodb"}],"readinessProbe":{"failureThreshold":6,"initialDelaySeconds":5,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":"mongodb"},"timeoutSeconds":5},"resources":{"limits":{},"requests":{}},"securityContext":{"runAsUser":1001}}],"securityContext":{"fsGroup":1001,"sysctls":[]},"serviceAccountName":"mongodb-helm"}}}}
+  labels:
+    app.kubernetes.io/component: arbiter
+    app.kubernetes.io/instance: mongodb-helm
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: mongodb
+    helm.sh/chart: mongodb-11.0.0
+  name: mongodb-helm-arbiter
+  namespace: development
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: arbiter
+      app.kubernetes.io/instance: mongodb-helm
+      app.kubernetes.io/name: mongodb
+  serviceName: mongodb-helm-arbiter-headless
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: arbiter
+        app.kubernetes.io/instance: mongodb-helm
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: mongodb
+        helm.sh/chart: mongodb-11.0.0
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: arbiter
+                  app.kubernetes.io/instance: mongodb-helm
+                  app.kubernetes.io/name: mongodb
+              namespaces:
+              - default
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+      containers:
+      - env:
+        - name: BITNAMI_DEBUG
+          value: "false"
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: MY_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: K8S_SERVICE_NAME
+          value: mongodb-helm-arbiter-headless
+        - name: MONGODB_REPLICA_SET_MODE
+          value: arbiter
+        - name: MONGODB_INITIAL_PRIMARY_HOST
+          value: mongodb-helm-0.mongodb-helm-headless.$(MY_POD_NAMESPACE).svc.cluster.local
+        - name: MONGODB_REPLICA_SET_NAME
+          value: rs0
+        - name: MONGODB_ADVERTISED_HOSTNAME
+          value: $(MY_POD_NAME).$(K8S_SERVICE_NAME).$(MY_POD_NAMESPACE).svc.cluster.local
+        - name: MONGODB_INITIAL_PRIMARY_ROOT_USER
+          value: root
+        - name: MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: mongodb-root-password
+              name: mongodb-helm
+        - name: MONGODB_REPLICA_SET_KEY
+          valueFrom:
+            secretKeyRef:
+              key: mongodb-replica-set-key
+              name: mongodb-helm
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "no"
+        image: docker.io/bitnami/mongodb:4.4.12-debian-10-r7
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 6
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: mongodb
+          timeoutSeconds: 5
+        name: mongodb-arbiter
+        ports:
+        - containerPort: 27017
+          name: mongodb
+        readinessProbe:
+          failureThreshold: 6
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: mongodb
+          timeoutSeconds: 5
+        resources:
+          limits: {}
+          requests: {}
+        securityContext:
+          runAsUser: 1001
+      securityContext:
+        fsGroup: 1001
+        sysctls: []
+      serviceAccountName: mongodb-helm
