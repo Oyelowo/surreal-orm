@@ -54,20 +54,20 @@ const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   architecture: "replicaset",
   replicaCount: 3,
   // nameOverride: "mongodb-graphql",
-  fullnameOverride: "graphql-mongod",
+  fullnameOverride: "graphql-mongodb",
   global: {
     namespaceOverride: devNamespaceName,
   },
   auth: {
-    enabled: false,
+    enabled: true,
+    rootUser: graphqlMongoEnvironmentVariables.MONGODB_USERNAME,
+    rootPassword: graphqlMongoEnvironmentVariables.MONGODB_PASSWORD,
     // array of
     ...mappedCredentials,
     // usernames: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],
     // passwords: [graphqlMongoEnvironmentVariables.MONGODB_PASSWORD],
     // databases: [graphqlMongoEnvironmentVariables.MONGODB_NAME],
     // users: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],
-    rootUser: graphqlMongoEnvironmentVariables.MONGODB_USERNAME,
-    rootPassword: graphqlMongoEnvironmentVariables.MONGODB_PASSWORD,
   },
   service: {
     type: "ClusterIP",

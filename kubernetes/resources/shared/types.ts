@@ -16,6 +16,7 @@ export type Memory = `${number}${
 export type CPU = `${number}${"m"}`;
 
 export interface Settings {
+  resourceName: string;
   requestMemory: Memory;
   requestCpu: CPU;
   limitMemory: Memory;
