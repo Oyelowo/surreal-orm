@@ -2,4 +2,6 @@
 // export * from "./resources/cluster";
 
 
-export * from "./resources";
+// export * from "./resources/shared";
+export * from "./resources/graphql-mongo";
+// export * from "./resources";

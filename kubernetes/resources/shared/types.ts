@@ -21,13 +21,24 @@ export interface Settings {
   limitMemory: Memory;
   limitCpu: CPU;
   host: string;
+  image: `oyelowo/${string}`
 }
 
 
 export type RecursivePartial<T> = {
   [P in keyof T]?: T[P] extends (infer U)[]
     ? RecursivePartial<U>[]
-    : T[P] extends object
+    : T[P] extends object | undefined
     ? RecursivePartial<T[P]>
     : T[P];
+};
+
+
+// make all properties optional recursively including nested objects.
+// keep in mind that this should be used on json / plain objects only.
+// otherwise, it will make class methods optional as well.
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer I>
+    ? Array<DeepPartial<I>>
+    : DeepPartial<T[P]>;
 };

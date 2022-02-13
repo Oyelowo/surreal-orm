@@ -184,11 +184,14 @@ export interface Auth {
   enabled: boolean;
   rootUser: string;
   rootPassword: string;
-  usernames: any[];
-  passwords: any[];
-  databases: any[];
+  usernames: string[];
+  passwords: string[];
+  databases: string[];
+  /* @deprecated */
   username: string;
+  /* @deprecated */
   password: string;
+  /* @deprecated */
   database: string;
   replicaSetKey: string;
   existingSecret: string;
