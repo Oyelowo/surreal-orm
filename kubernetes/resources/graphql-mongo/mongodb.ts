@@ -73,6 +73,7 @@ const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
     type: "ClusterIP",
     port: Number(graphqlMongoEnvironmentVariables.MONGODB_PORT),
     portName: "mongo-graphql",
+    nameOverride: "mongo-graphql",
   },
 };
 

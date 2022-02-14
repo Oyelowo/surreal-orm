@@ -52,7 +52,7 @@ export const graphqlMongoPodBuilder = new kx.PodBuilder({
         ...graphqlMongoEnvironmentVariables,
       },
       image: graphqlMongoSettings.image,
-      ports: { http: 8080 },
+      ports: { http: 8000 },
       volumeMounts: [],
       resources: {
         limits: {
@@ -91,6 +91,7 @@ export const graphqlMongoService = new kx.Service(
       ports: [
         {
           port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
+          targetPort: Number(graphqlMongoEnvironmentVariables.APP_PORT),
           protocol: "TCP",
           name: `${resourceName}-http`,
           // targetPort: 434,
