@@ -1,17 +1,22 @@
-import { Settings } from './types';
+import { graphqlMongoSettings } from './graphql-mongo/settings';
+import { Settings } from './shared/types';
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
-import { provider } from "./cluster";
+import { provider } from "./shared/cluster";
 
 // Prefix by the name of deployment to make them unique across stack
 
-export const graphqlPostgresSettings: Settings = {
+const graphqlPostgresSettings: Settings = {
+  resourceName: "graphql-postgres",
   requestMemory: "1G",
   requestCpu: "100m",
   limitMemory: "1G",
   limitCpu: "100m",
   host: "0.0.0.0",
+  image: "oyelowo/graphql-postgres"
 };
+
+const {resourceName} = graphqlMongoSettings
 
 // Create a Kubernetes ConfigMap.
 export const graphqlPostgresConfigMap = new kx.ConfigMap(

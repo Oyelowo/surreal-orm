@@ -14,6 +14,7 @@ import {
 // Prefix by the name of deployment to make them unique across stack
 
 const { resourceName } = graphqlMongoSettings;
+
 // Create a Kubernetes ConfigMap.
 export const graphqlMongoConfigMap = new kx.ConfigMap(
   `${resourceName}-configmap`,

@@ -32,7 +32,7 @@ impl GraphQlApp {
         use Environemnt::*;
         let (limit_depth, limit_complexity) = match application.environment {
             Local | Development | Staging => (usize::max_value(), usize::max_value()),
-            _ => (5, 7),
+            Production => (5, 7),
         };
 
         let db = Client::with_uri_str(database.get_url())

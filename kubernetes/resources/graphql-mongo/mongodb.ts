@@ -54,7 +54,7 @@ const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   architecture: "replicaset",
   replicaCount: 3,
   // nameOverride: "mongodb-graphql",
-  fullnameOverride: "graphql-mongodb",
+  fullnameOverride: "graphql-mongo",
   global: {
     namespaceOverride: devNamespaceName,
   },
@@ -72,7 +72,7 @@ const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   service: {
     type: "ClusterIP",
     port: Number(graphqlMongoEnvironmentVariables.MONGODB_PORT),
-    portName: "mongodb-graphql",
+    portName: "mongo-graphql",
   },
 };
 

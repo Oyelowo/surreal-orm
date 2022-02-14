@@ -1,13 +1,13 @@
 import { Settings } from '../shared/types';
 
 export const graphqlMongoSettings: Settings = {
-  resourceName: "graphql-mongodb",
+  resourceName: "graphql-mongo",
   requestMemory: "1G",
   requestCpu: "100m",
   limitMemory: "1G",
   limitCpu: "100m",
   host: "0.0.0.0",
-  image: "oyelowo/graphql-mongodb",
+  image: "oyelowo/graphql-mongo",
 };
 
 type AppEnvironmentVariables = {

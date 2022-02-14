@@ -15,14 +15,16 @@ export type Memory = `${number}${
 
 export type CPU = `${number}${"m"}`;
 
+export type App = "graphql-mongo" | "graphql-postgres" | "grpc-mongo" | "web"
+
 export interface Settings {
-  resourceName: string;
+  resourceName: App;
   requestMemory: Memory;
   requestCpu: CPU;
   limitMemory: Memory;
   limitCpu: CPU;
   host: string;
-  image: `oyelowo/${string}`
+  image: `oyelowo/${App}`
 }
 
 

@@ -1,11 +1,13 @@
-import { Settings } from './types';
+import { Settings } from "./shared/types";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
-import { provider } from "./cluster";
+import { provider } from "./shared/cluster";
 
 // Prefix by the name of deployment to make them unique across stack
 
-export const grpcMongoSettings: Settings = {
+const grpcMongoSettings: Settings = {
+  resourceName: "graphql-mongo",
+  image: "oyelowo/graphql-mongo",
   requestMemory: "1G",
   requestCpu: "100m",
   limitMemory: "1G",
@@ -13,9 +15,11 @@ export const grpcMongoSettings: Settings = {
   host: "0.0.0.0",
 };
 
+const { resourceName, image } = grpcMongoSettings;
+
 // Create a Kubernetes ConfigMap.
 export const grpcMongoConfigMap = new kx.ConfigMap(
-  "grpc-mongo-configMap",
+  `${resourceName}-configMap`,
   {
     data: { config: "very important data" },
   },
@@ -24,7 +28,7 @@ export const grpcMongoConfigMap = new kx.ConfigMap(
 
 // Create a Kubernetes Secret.
 export const grpcMongoSecret = new kx.Secret(
-  "grpc-mongo-secret",
+  `${resourceName}-secret`,
   {
     stringData: {
       password: "very-weak-password",
@@ -44,7 +48,7 @@ export const grpcMongoPodBuilder = new kx.PodBuilder({
         HOST: "",
         PORT: "",
       },
-      image: "grpc-mongo",
+      image,
       ports: { http: 8080 },
       volumeMounts: [],
       resources: {
@@ -63,7 +67,7 @@ export const grpcMongoPodBuilder = new kx.PodBuilder({
 
 // Create a Kubernetes Deployment.
 export const grpcMongoDeployment = new kx.Deployment(
-  "grpc-mongo-deployment",
+  `${resourceName}-deployment`,
   {
     spec: grpcMongoPodBuilder.asDeploymentSpec({ replicas: 3 }),
   },
