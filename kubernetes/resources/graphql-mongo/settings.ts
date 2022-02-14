@@ -30,7 +30,7 @@ export const graphqlMongoEnvironmentVariables: AppEnvironmentVariables = {
   MONGODB_NAME: "mydb",
   MONGODB_USERNAME: "root_user",
   MONGODB_PASSWORD: "root_password",
-  MONGODB_HOST: "graphql-mongodb-headless.development",
+  MONGODB_HOST: "mongo-graphql.development",
   // MONGODB_HOST: "graphql-mongod-0.graphql-mongod-headless.development.svc.cluster.local",
   MONGODB_PORT: "27017",
 };

@@ -5,7 +5,7 @@ gen:
 	mkdir ./login
 	rm -rf ./rendered
 	pulumi login file://login 
-	pulumi stack init --stack dev   
+	pulumi stack init --stack dev --yes --skip-preview
 	# pulumi destroy --stack dev  --yes --skip-preview
 	export ENVIRONMENT="development" && pulumi update --yes --skip-preview --stack dev
 

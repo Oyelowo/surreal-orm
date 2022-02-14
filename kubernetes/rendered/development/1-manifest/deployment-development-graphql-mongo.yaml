@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"graphql-mongo","namespace":"development"},"spec":{"replicas":3,"selector":{"matchLabels":{"app":"graphql"}},"template":{"metadata":{"labels":{"app":"graphql"}},"spec":{"containers":[{"env":[{"name":"CONFIG","valueFrom":{"configMapKeyRef":{"key":"config","name":"graphql-mongo-configmap-5pjeyq42"}}},{"name":"PASSWORD","valueFrom":{"secretKeyRef":{"key":"password","name":"graphql-mongo-secret-4seu29yv"}}},{"name":"APP_ENVIRONMENT","value":"local"},{"name":"APP_HOST","value":"0.0.0.0"},{"name":"APP_PORT","value":"8000"},{"name":"MONGODB_NAME","value":"mydb"},{"name":"MONGODB_USERNAME","value":"root_user"},{"name":"MONGODB_PASSWORD","value":"root_password"},{"name":"MONGODB_HOST","value":"graphql-mongodb-headless.development"},{"name":"MONGODB_PORT","value":"27017"}],"image":"oyelowo/graphql-mongo","name":"graphql","ports":[{"containerPort":8080,"name":"http"}],"resources":{"limits":{"cpu":"100m","memory":"1G"},"requests":{"cpu":"100m","memory":"1G"}},"volumeMounts":[]}],"initContainers":[],"volumes":[]}}}}
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"graphql-mongo","namespace":"development"},"spec":{"replicas":3,"selector":{"matchLabels":{"app":"graphql"}},"template":{"metadata":{"labels":{"app":"graphql"}},"spec":{"containers":[{"env":[{"name":"CONFIG","valueFrom":{"configMapKeyRef":{"key":"config","name":"graphql-mongo-configmap-whz35oxv"}}},{"name":"PASSWORD","valueFrom":{"secretKeyRef":{"key":"password","name":"graphql-mongo-secret-yxhk8h51"}}},{"name":"APP_ENVIRONMENT","value":"local"},{"name":"APP_HOST","value":"0.0.0.0"},{"name":"APP_PORT","value":"8000"},{"name":"MONGODB_NAME","value":"mydb"},{"name":"MONGODB_USERNAME","value":"root_user"},{"name":"MONGODB_PASSWORD","value":"root_password"},{"name":"MONGODB_HOST","value":"mongo-graphql.development"},{"name":"MONGODB_PORT","value":"27017"}],"image":"oyelowo/graphql-mongo","name":"graphql","ports":[{"containerPort":8000,"name":"http"}],"resources":{"limits":{"cpu":"100m","memory":"1G"},"requests":{"cpu":"100m","memory":"1G"}},"volumeMounts":[]}],"initContainers":[],"volumes":[]}}}}
   labels:
     app.kubernetes.io/managed-by: pulumi
   name: graphql-mongo
@@ -24,12 +24,12 @@ spec:
           valueFrom:
             configMapKeyRef:
               key: config
-              name: graphql-mongo-configmap-5pjeyq42
+              name: graphql-mongo-configmap-whz35oxv
         - name: PASSWORD
           valueFrom:
             secretKeyRef:
               key: password
-              name: graphql-mongo-secret-4seu29yv
+              name: graphql-mongo-secret-yxhk8h51
         - name: APP_ENVIRONMENT
           value: local
         - name: APP_HOST
@@ -43,13 +43,13 @@ spec:
         - name: MONGODB_PASSWORD
           value: root_password
         - name: MONGODB_HOST
-          value: graphql-mongodb-headless.development
+          value: mongo-graphql.development
         - name: MONGODB_PORT
           value: "27017"
         image: oyelowo/graphql-mongo
         name: graphql
         ports:
-        - containerPort: 8080
+        - containerPort: 8000
           name: http
         resources:
           limits:
