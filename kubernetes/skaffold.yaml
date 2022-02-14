@@ -4,13 +4,13 @@ metadata:
   name: kubernetes
 build:
   artifacts:
-  - image: oyelowo/web
-    context: ../typescript
-    docker:
-      dockerfile: Dockerfile.prod
-      target: web
-      noCache: false
-      squash: false
+  # - image: oyelowo/web
+  #   context: ../typescript
+  #   docker:
+  #     dockerfile: Dockerfile.prod
+  #     target: web
+  #     noCache: false
+  #     squash: false
 
   - image: oyelowo/graphql-mongo
     context: ../rust
@@ -20,21 +20,21 @@ build:
       noCache: false
       squash: false
 
-  - image: oyelowo/graphql-postgres
-    context: ../rust
-    docker:
-      dockerfile: Dockerfile.prod
-      target: graphql-postgres
-      noCache: false
-      squash: false
+  # - image: oyelowo/graphql-postgres
+  #   context: ../rust
+  #   docker:
+  #     dockerfile: Dockerfile.prod
+  #     target: graphql-postgres
+  #     noCache: false
+  #     squash: false
       
-  - image: oyelowo/grpc-mongo
-    context: ../rust
-    docker:
-      dockerfile: Dockerfile.prod
-      target: grpc-mongo
-      noCache: false
-      squash: false
+  # - image: oyelowo/grpc-mongo
+  #   context: ../rust
+  #   docker:
+  #     dockerfile: Dockerfile.prod
+  #     target: grpc-mongo
+  #     noCache: false
+  #     squash: false
   #   requires:
   #     - image: base
   #       alias: BASE
@@ -46,25 +46,26 @@ build:
 deploy:
   kubectl:
     manifests:
-    - rendered/**/1-manifest/*
+    - rendered/namespaces/1-manifest/*
+    - rendered/development/1-manifest/*
 
 portForward:
-  - resourceType: service
-    resourceName: react-web-deployment-z5ri8ivw
-    port: 3000
-    localPort: 3001
+  # - resourceType: service
+  #   resourceName: react-web-deployment-z5ri8ivw
+  #   port: 3000
+  #   localPort: 3001
 
   - resourceType: service
-    resourceName: graphql-mongo-deployment-<todo>
+    resourceName: graphql-mongo
     port: 8000
     localPort: 8001
 
-  - resourceType: service
-    resourceName: graphql-postgres-deployment-<todo>
-    port: 8000
-    localPort: 8002
+  # - resourceType: service
+  #   resourceName: graphql-postgres-deployment-<todo>
+  #   port: 8000
+  #   localPort: 8002
 
-  - resourceType: service
-    resourceName: grpc-mongo-deployment-<todo>
-    port: 50051
-    localPort: 8003
+  # - resourceType: service
+  #   resourceName: grpc-mongo-deployment-<todo>
+  #   port: 50051
+  #   localPort: 8003

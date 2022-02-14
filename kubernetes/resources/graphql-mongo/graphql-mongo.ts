@@ -68,13 +68,13 @@ export const graphqlMongoPodBuilder = new kx.PodBuilder({
   ],
 });
 
-
 // Create a Kubernetes Deployment.
 export const graphqlMongoDeployment = new kx.Deployment(
   `${resourceName}-deployment`,
   {
     spec: graphqlMongoPodBuilder.asDeploymentSpec({ replicas: 3 }),
     metadata: {
+      name: resourceName,
       namespace: devNamespaceName,
     },
   },
@@ -82,17 +82,35 @@ export const graphqlMongoDeployment = new kx.Deployment(
 );
 
 // Create a Kubernetes Service.
-export const graphqlMongoService = graphqlMongoDeployment.createService({
-  type: kx.types.ServiceType.ClusterIP,
-  ports: [
-    {
-      port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
-      protocol: "TCP",
-      name: `${resourceName}-http`,
-      // targetPort: 434,
+export const graphqlMongoService = new kx.Service(
+  `${resourceName}-service`,
+  {
+    metadata: {name: resourceName, namespace: devNamespaceName},
+    spec: {
+      type: kx.types.ServiceType.ClusterIP,
+      ports: [
+        {
+          port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
+          protocol: "TCP",
+          name: `${resourceName}-http`,
+          // targetPort: 434,
+        },
+      ],
     },
-  ],
-});
+  }
+  , {provider}
+);
+// export const graphqlMongoService = graphqlMongoDeployment.createService({
+//   type: kx.types.ServiceType.ClusterIP,
+//   ports: [
+//     {
+//       port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
+//       protocol: "TCP",
+//       name: `${resourceName}-http`,
+//       // targetPort: 434,
+//     },
+//   ],
+// });
 
 // Export the public IP for WordPress.
 // const frontend2 = mongodb2.getResource("v1/Service", "mongodbdev-mongodb");
@@ -103,7 +121,7 @@ export const graphqlMongoService = graphqlMongoDeployment.createService({
 const useLoadBalancer = new pulumi.Config("useLoadBalancer") ?? false;
 export let graphqlMongoAppIp: pulumi.Output<string>;
 if (useLoadBalancer) {
-    graphqlMongoAppIp = graphqlMongoService.status.loadBalancer.ingress[0].ip;
+  graphqlMongoAppIp = graphqlMongoService.status.loadBalancer.ingress[0].ip;
 } else {
-    graphqlMongoAppIp = graphqlMongoService.spec.clusterIP;
+  graphqlMongoAppIp = graphqlMongoService.spec.clusterIP;
 }

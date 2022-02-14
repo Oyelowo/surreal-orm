@@ -1,4 +1,4 @@
-import { provider } from "./cluster";
+import { provider, providerNameSpace } from "./cluster";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
@@ -7,6 +7,8 @@ import { Namespace } from "@pulumi/kubernetes/core/v1";
 export const devNamespaceName = "development";
 export const devNamespace = new Namespace(
   devNamespaceName,
-  { metadata: { name: devNamespaceName, namespace: devNamespaceName } },
-  { provider }
+  {
+    metadata: { name: `${devNamespaceName}`, namespace: devNamespaceName },
+  },
+  { provider: providerNameSpace }
 );

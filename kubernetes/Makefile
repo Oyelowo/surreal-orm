@@ -1,14 +1,19 @@
 gen:
 
 	export PULUMI_CONFIG_PASSPHRASE="" 
-	pulumi destroy --stack dev  --yes --skip-preview
-	# pulumi stack init --stack dev   
+	rm -rf ./login
+	mkdir ./login
+	rm -rf ./rendered
+	pulumi login file://login 
+	pulumi stack init --stack dev   
+	# pulumi destroy --stack dev  --yes --skip-preview
 	export ENVIRONMENT="development" && pulumi update --yes --skip-preview --stack dev
+
 	# export ENVIRONMENT="staging" && pulumi update --yes --skip-preview
 	# export ENVIRONMENT="production" && pulumi update --yes --skip-preview
 
-	kubectl apply -f rendered/development/1-manifest/namespace-*
-	kubectl apply -f rendered/development/1-manifest/
+	# kubectl apply -f rendered/development/1-manifest/namespace-*
+	# kubectl apply -f rendered/development/1-manifest/
 	
 dev:
 	pulumi update --yes --skip-preview
