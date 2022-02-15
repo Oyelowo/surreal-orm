@@ -13,6 +13,11 @@ COPY --from=planner /app/recipe.json recipe.json
 # Build dependencies - this is the caching Docker layer!
 RUN cargo chef cook --release --recipe-path recipe.json
 
+FROM rust-with-chef as cacher-dev
+COPY --from=planner /app/recipe.json recipe.json
+# Build dependencies - this is the caching Docker layer!
+RUN cargo chef cook --recipe-path recipe.json
+
 
 FROM $BASE_IMAGE AS base
 WORKDIR /app
@@ -21,7 +26,17 @@ COPY . .
 COPY --from=cacher /app/target target
 COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
-## GRAPHQL-MONGO BACKEND SERVICE
+
+FROM $BASE_IMAGE AS base-dev
+WORKDIR /app
+COPY . .
+# Copy over the cached dependencies
+COPY --from=cacher-dev /app/target target
+COPY --from=cacher-dev $CARGO_HOME $CARGO_HOME
+
+######### GRAPHQL-MONGO BACKEND SERVICE  #################
+##########################################################
+# PRODUCTION BUILD
 FROM base AS builder-graphql-mongo 
 RUN cargo build --release -p graphql-mongo
 
@@ -33,7 +48,17 @@ EXPOSE 8000
 COPY --from=builder-graphql-mongo /app/target/release/graphql-mongo /usr/local/bin/graphql-mongo
 ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
 
-## GRAPHQL-POSTGRES BACKEND PG SERVICE
+# DEVELOPMENT BUILD
+FROM base-dev AS graphql-mongo-dev
+WORKDIR /app
+EXPOSE 8000
+COPY . .
+CMD ["cargo", "run", "-p", "graphql-mongo", "--bin", "graphql-mongo"]
+
+
+########## GRAPHQL-POSTGRES BACKEND PG SERVICE ###########
+##########################################################
+## PRODUCTION BUILD
 FROM base AS builder-graphql-postgres 
 ENV SQLX_OFFLINE=true
 RUN cargo build --release -p graphql-postgres
@@ -46,7 +71,17 @@ EXPOSE 8000
 COPY --from=builder-graphql-postgres /app/target/release/graphql-postgres /usr/local/bin/graphql-postgres
 ENTRYPOINT ["/usr/local/bin/graphql-postgres"]
 
-## GRPC-MONGO BACKEND SERVICE
+## DEVELOPMENT BUILD
+FROM base AS graphql-postgres-dev
+ENV SQLX_OFFLINE=true
+WORKDIR /app
+EXPOSE 8000
+CMD ["cargo" "run" "-p" "graphql-postgres"]
+
+
+
+############# GRPC-MONGO BACKEND SERVICE  ################
+##########################################################
 FROM base AS builder-second
 RUN rustup component add rustfmt
 RUN cargo build --release -p grpc-mongo
@@ -57,3 +92,10 @@ WORKDIR /app
 EXPOSE 50051
 COPY --from=builder-second app/target/release/grpc-mongo /usr/local/bin/grpc-mongo
 ENTRYPOINT ["/usr/local/bin/grpc-mongo"]
+
+
+## DEVELOPMENT BUILD
+FROM base AS grpc-mongo-dev
+WORKDIR /app
+EXPOSE 50051
+CMD ["cargo", "run", "-p", "grpc-mongo"]

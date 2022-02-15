@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile.prod
       # args:
       #   - name=value
-      target: graphql-mongo
+      target: graphql-mongo-dev
     # # container_name: graphql-mongo
     # hostname: mongodb
     depends_on:

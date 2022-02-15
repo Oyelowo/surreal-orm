@@ -52,9 +52,16 @@ fn default_require_ssl() -> Option<bool> {
 
 impl DatabaseConfigs {
     pub fn get_url(&self) -> String {
-        let Self { host, port, .. } = self;
-        Url::parse(format!("mongodb://{host}:{port}/").as_str())
-            .expect("Problem pasing mongodb uri")
+        let Self {
+            host,
+            port,
+            username,
+            password,
+            ..
+        } = self;
+
+        Url::parse(format!("mongodb://{username}:{password}@{host}:{port}/").as_str())
+            .expect("Problem passing mongodb uri")
             .into()
     }
 }
