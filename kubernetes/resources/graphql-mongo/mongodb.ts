@@ -14,6 +14,11 @@ type Credentials = {
 };
 const credentials = [
   {
+    username: graphqlMongoEnvironmentVariables.MONGODB_USERNAME,
+    password: graphqlMongoEnvironmentVariables.MONGODB_PASSWORD,
+    database: graphqlMongoEnvironmentVariables.MONGODB_NAME,
+  },
+  {
     username: "username1",
     password: "password1",
     database: "database1",
@@ -60,8 +65,8 @@ const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   },
   auth: {
     enabled: true,
-    rootUser: graphqlMongoEnvironmentVariables.MONGODB_USERNAME,
-    rootPassword: graphqlMongoEnvironmentVariables.MONGODB_PASSWORD,
+    rootUser: "root_user",
+    rootPassword: "root_password",
     // array of
     ...mappedCredentials,
     // usernames: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],
