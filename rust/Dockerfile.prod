@@ -48,12 +48,18 @@ EXPOSE 8000
 COPY --from=builder-graphql-mongo /app/target/release/graphql-mongo /usr/local/bin/graphql-mongo
 ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
 
-# DEVELOPMENT BUILD
+# DEV BUILD
+FROM base-dev AS builder-graphql-mongo-dev
+RUN cargo build -p graphql-mongo
+
+# DEVELOPMENT RUN
 FROM base-dev AS graphql-mongo-dev
 WORKDIR /app
 EXPOSE 8000
 COPY . .
-CMD ["cargo", "run", "-p", "graphql-mongo", "--bin", "graphql-mongo"]
+COPY --from=builder-graphql-mongo-dev /app/target/debug/graphql-mongo /usr/local/bin/graphql-mongo
+ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
+# CMD ["cargo", "run", "-p", "graphql-mongo", "--bin", "graphql-mongo"]
 
 
 ########## GRAPHQL-POSTGRES BACKEND PG SERVICE ###########
