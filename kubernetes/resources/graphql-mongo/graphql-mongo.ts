@@ -21,6 +21,7 @@ export const graphqlMongoConfigMap = new kx.ConfigMap(
   {
     data: { config: "very important data" },
     metadata: {
+      name: resourceName,
       namespace: devNamespaceName,
     },
   },
@@ -35,6 +36,7 @@ export const graphqlMongoSecret = new kx.Secret(
       password: "fakepassword",
     },
     metadata: {
+      name: resourceName,
       namespace: devNamespaceName,
     },
   },
@@ -102,36 +104,38 @@ export const graphqlMongoDeployment = new kx.Deployment(
 //   }
 //   , {provider}
 // );
-import { generateService } from "../shared/helpers";
-export const graphqlMongoService = generateService({
-  serviceName: `${resourceName}-service`,
-  deployment: graphqlMongoDeployment,
-  args: {
-    type: kx.types.ServiceType.ClusterIP,
-    // name: `${resourceName}-service`,
-    ports: [
-      {
-        port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
-        protocol: "TCP",
-        name: `${resourceName}-http`,
-        // targetPort: 434,
-      },
-    ],
-  },
-});
-
-// export const graphqlMongoService = graphqlMongoDeployment.createService({
-//   type: kx.types.ServiceType.ClusterIP,
-//   name: `${resourceName}-service`,
-//   ports: [
-//     {
-//       port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
-//       protocol: "TCP",
-//       name: `${resourceName}-http`,
-//       // targetPort: 434,
-//     },
-//   ],
+// import { generateService } from "../shared/helpers";
+// export const graphqlMongoService2 = generateService({
+//   serviceName: `${resourceName}-service`,
+//   deployment: graphqlMongoDeployment,
+//   args: {
+//     type: kx.types.ServiceType.ClusterIP,
+//     // name: `${resourceName}-service`,
+//     ports: [
+//       {
+//         port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
+//         protocol: "TCP",
+//         name: `${resourceName}-http`,
+//         // targetPort: 434,
+//       },
+//     ],
+//   },
 // });
+
+export const graphqlMongoService = graphqlMongoDeployment.createService({
+  type: kx.types.ServiceType.ClusterIP,
+  metadata: {
+    name: resourceName,
+  },
+  ports: [
+    {
+      port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
+      protocol: "TCP",
+      name: `${resourceName}-http`,
+      // targetPort: 434,
+    },
+  ],
+});
 
 // Export the public IP for WordPress.
 // const frontend2 = mongodb2.getResource("v1/Service", "mongodbdev-mongodb");

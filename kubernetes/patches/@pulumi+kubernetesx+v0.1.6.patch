@@ -1,0 +1,39 @@
+diff --git a/node_modules/@pulumi/kubernetesx/kx.d.ts b/node_modules/@pulumi/kubernetesx/kx.d.ts
+index 2bbe265..4b677ea 100644
+--- a/node_modules/@pulumi/kubernetesx/kx.d.ts
++++ b/node_modules/@pulumi/kubernetesx/kx.d.ts
+@@ -35,6 +35,9 @@ export declare namespace types {
+         ports?: pulumi.Input<pulumi.Input<k8s.types.input.core.v1.ServicePort>[] | PortMap>;
+         type?: pulumi.Input<ServiceType | string>;
+     };
++    type CreateServiceArgs = types.ServiceSpec & {
++        metadata?: pulumi.Input<k8s.types.input.meta.v1.ObjectMeta>;
++    };
+     type Service = Omit<k8s.types.input.core.v1.Service, "spec"> & {
+         spec: pulumi.Input<ServiceSpec>;
+     };
+@@ -70,7 +73,7 @@ export declare class Deployment extends k8s.apps.v1.Deployment {
+     private readonly name;
+     private readonly opts?;
+     constructor(name: string, args: types.Deployment, opts?: pulumi.CustomResourceOptions);
+-    createService(args?: types.ServiceSpec): Service;
++    createService(args?: types.CreateServiceArgs): Service;
+ }
+ export declare class Service extends k8s.core.v1.Service {
+     constructor(name: string, args: types.Service, opts?: pulumi.CustomResourceOptions);
+diff --git a/node_modules/@pulumi/kubernetesx/kx.js b/node_modules/@pulumi/kubernetesx/kx.js
+index 4aa2874..f59bc73 100644
+--- a/node_modules/@pulumi/kubernetesx/kx.js
++++ b/node_modules/@pulumi/kubernetesx/kx.js
+@@ -186,8 +186,9 @@ class Deployment extends k8s.apps.v1.Deployment {
+                 // TODO: probably need to unwrap args.type in case it's a computed value
+                 type: args && args.type });
+         });
+-        return new Service(this.name, {
+-            metadata: { namespace: this.metadata.namespace },
++        const name = args?.metadata?.name ?? this.name;
++        return new Service(name, {
++            metadata: { namespace: this.metadata.namespace, ...args?.metadata },
+             spec: serviceSpec,
+         }, Object.assign(Object.assign({}, this.opts), { parent: this }));
+     }
