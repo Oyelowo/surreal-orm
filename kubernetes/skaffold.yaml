@@ -57,10 +57,10 @@ portForward:
 
   - resourceType: service
     # resourceName: graphql-mongo
-    resourceName: graphql-mongo-service
+    resourceName: graphql-mongo
     namespace: development
     port: 8000
-    localPort: 8001
+    localPort: 8000
 
   # - resourceType: service
   #   resourceName: graphql-postgres-deployment-<todo>

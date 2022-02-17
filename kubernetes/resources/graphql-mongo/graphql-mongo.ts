@@ -124,15 +124,12 @@ export const graphqlMongoDeployment = new kx.Deployment(
 
 export const graphqlMongoService = graphqlMongoDeployment.createService({
   type: kx.types.ServiceType.ClusterIP,
-  metadata: {
-    name: resourceName,
-  },
   ports: [
     {
       port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
       protocol: "TCP",
       name: `${resourceName}-http`,
-      // targetPort: 434,
+      targetPort: 8000,
     },
   ],
 });

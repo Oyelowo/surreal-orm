@@ -54,17 +54,17 @@ const mappedCredentials = credentials.reduce<Credentials>(
   }
 );
 
-const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
+export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   useStatefulSet: true,
   architecture: "replicaset",
   replicaCount: 3,
   // nameOverride: "mongodb-graphql",
-  fullnameOverride: "graphql-mongo",
+  fullnameOverride: graphqlMongoEnvironmentVariables.MONGODB_SERVICE_NAME,
   global: {
     namespaceOverride: devNamespaceName,
   },
   auth: {
-    enabled: true,
+    enabled: false,
     rootUser: "root_user",
     rootPassword: "root_password",
     // array of
@@ -78,7 +78,7 @@ const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
     type: "ClusterIP",
     port: Number(graphqlMongoEnvironmentVariables.MONGODB_PORT),
     // portName: "mongo-graphql",
-    nameOverride: "mongo-graphql",
+    nameOverride: graphqlMongoEnvironmentVariables.MONGODB_SERVICE_NAME,
   },
 };
 
@@ -91,7 +91,7 @@ export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
     fetchOpts: {
       repo: "https://charts.bitnami.com/bitnami",
     },
-    version: "11.0.0",
+    version: "11.0.3",
     values: mongoValues,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being

@@ -1,18 +1,19 @@
 diff --git a/node_modules/@pulumi/kubernetesx/kx.d.ts b/node_modules/@pulumi/kubernetesx/kx.d.ts
-index 2bbe265..4b677ea 100644
+index 2bbe265..84a4e39 100644
 --- a/node_modules/@pulumi/kubernetesx/kx.d.ts
 +++ b/node_modules/@pulumi/kubernetesx/kx.d.ts
-@@ -35,6 +35,9 @@ export declare namespace types {
+@@ -35,6 +35,10 @@ export declare namespace types {
          ports?: pulumi.Input<pulumi.Input<k8s.types.input.core.v1.ServicePort>[] | PortMap>;
          type?: pulumi.Input<ServiceType | string>;
      };
-+    type CreateServiceArgs = types.ServiceSpec & {
++    type CreateServiceArgs = ServiceSpec & {
 +        metadata?: pulumi.Input<k8s.types.input.meta.v1.ObjectMeta>;
++        spec?: ServiceSpec;
 +    };
      type Service = Omit<k8s.types.input.core.v1.Service, "spec"> & {
          spec: pulumi.Input<ServiceSpec>;
      };
-@@ -70,7 +73,7 @@ export declare class Deployment extends k8s.apps.v1.Deployment {
+@@ -70,7 +74,7 @@ export declare class Deployment extends k8s.apps.v1.Deployment {
      private readonly name;
      private readonly opts?;
      constructor(name: string, args: types.Deployment, opts?: pulumi.CustomResourceOptions);
@@ -22,18 +23,41 @@ index 2bbe265..4b677ea 100644
  export declare class Service extends k8s.core.v1.Service {
      constructor(name: string, args: types.Service, opts?: pulumi.CustomResourceOptions);
 diff --git a/node_modules/@pulumi/kubernetesx/kx.js b/node_modules/@pulumi/kubernetesx/kx.js
-index 4aa2874..f59bc73 100644
+index 4aa2874..7723f64 100644
 --- a/node_modules/@pulumi/kubernetesx/kx.js
 +++ b/node_modules/@pulumi/kubernetesx/kx.js
-@@ -186,8 +186,9 @@ class Deployment extends k8s.apps.v1.Deployment {
+@@ -170,9 +170,10 @@ class Deployment extends k8s.apps.v1.Deployment {
+         this.opts = opts;
+     }
+     createService(args = {}) {
++        const { metadata, ...spec } = args;
+         const serviceSpec = pulumi
+-            .all([this.spec.template.spec.containers, args])
+-            .apply(([containers, args]) => {
++            .all([this.spec.template.spec.containers, spec])
++            .apply(([containers, spec]) => {
+             // TODO: handle merging ports from args
+             const ports = {};
+             containers.forEach(container => {
+@@ -182,12 +183,17 @@ class Deployment extends k8s.apps.v1.Deployment {
+                     });
+                 }
+             });
+-            return Object.assign(Object.assign({}, args), { ports: args.ports || ports, selector: this.spec.selector.matchLabels, 
++            return Object.assign(Object.assign({}, spec), { ports: spec.ports || ports, selector: this.spec.selector.matchLabels, 
                  // TODO: probably need to unwrap args.type in case it's a computed value
-                 type: args && args.type });
+-                type: args && args.type });
++                type: spec && spec.type });
          });
 -        return new Service(this.name, {
 -            metadata: { namespace: this.metadata.namespace },
 +        const name = args?.metadata?.name ?? this.name;
 +        return new Service(name, {
-+            metadata: { namespace: this.metadata.namespace, ...args?.metadata },
++            metadata: {
++                namespace: this.metadata.namespace,
++                name: args?.metadata?.name ?? this.metadata.name,
++                ...metadata
++            },
              spec: serviceSpec,
          }, Object.assign(Object.assign({}, this.opts), { parent: this }));
      }

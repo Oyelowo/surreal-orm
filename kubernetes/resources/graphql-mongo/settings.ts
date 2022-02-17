@@ -1,3 +1,4 @@
+import { devNamespaceName } from './../shared/namespaces';
 import { Settings } from '../shared/types';
 
 export const graphqlMongoSettings: Settings = {
@@ -10,8 +11,10 @@ export const graphqlMongoSettings: Settings = {
   image: "oyelowo/graphql-mongo",
 };
 
+type Environemt = "local" | "development" | "staging" | "production";
+
 type AppEnvironmentVariables = {
-  APP_ENVIRONMENT: "local" | "development" | "staging" | "production";
+  APP_ENVIRONMENT: Environemt;
   APP_HOST: "0.0.0.0" | string;
   APP_PORT: "8000" | `${number}`;
   MONGODB_NAME: string;
@@ -19,6 +22,7 @@ type AppEnvironmentVariables = {
   MONGODB_PASSWORD: string;
   MONGODB_HOST: string;
   MONGODB_PORT: "27017";
+  MONGODB_SERVICE_NAME: string;
 };
 
  // `http://${name}.${namespace}:${port}`;
@@ -34,13 +38,14 @@ export const graphqlMongoEnvironmentVariables: AppEnvironmentVariables = {
   MONGODB_NAME: "db0",
   MONGODB_USERNAME: "username0",
   MONGODB_PASSWORD: "password0",
-  MONGODB_HOST: "mongo-graphql.development",
+  MONGODB_HOST: `mongo-database.${devNamespaceName}`,
+  MONGODB_SERVICE_NAME: "mongo-database",
   // hostAndPort":"graphql-mongo-0.mongo-graphql.development.svc.cluster.local:27017
   // MONGODB_HOST: "graphql-mongod-0.graphql-mongod-headless.development.svc.cluster.local",
   // const url = 'mongodb://username1:$[password]@mongo-graphql.development:27017/db1?authSource=$[authSource]';
 
   MONGODB_PORT: "27017",
-};
+} as const;
 // const graphqlMongoEnvironmentVariables: AppEnvironmentVariables = {
 //   APP_ENVIRONMENT: "local",
 //   APP_HOST: "0.0.0.0",
