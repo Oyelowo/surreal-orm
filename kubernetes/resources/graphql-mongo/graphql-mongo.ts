@@ -82,27 +82,47 @@ export const graphqlMongoDeployment = new kx.Deployment(
 );
 
 // Create a Kubernetes Service.
-export const graphqlMongoService = new kx.Service(
-  `${resourceName}-service`,
-  {
-    metadata: {name: resourceName, namespace: devNamespaceName},
-    spec: {
-      type: kx.types.ServiceType.ClusterIP,
-      ports: [
-        {
-          port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
-          targetPort: Number(graphqlMongoEnvironmentVariables.APP_PORT),
-          protocol: "TCP",
-          name: `${resourceName}-http`,
-          // targetPort: 434,
-        },
-      ],
-    },
-  }
-  , {provider}
-);
+// export const graphqlMongoService2 = new kx.Service(
+//   `${resourceName}-service`,
+//   {
+//     metadata: {name: resourceName, namespace: devNamespaceName},
+//     spec: {
+//       type: kx.types.ServiceType.ClusterIP,
+//       ports: [
+//         {
+//           port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
+//           targetPort: Number(graphqlMongoEnvironmentVariables.APP_PORT),
+//           protocol: "TCP",
+//           name: `${resourceName}-http`,
+//           // targetPort: 434,
+//         },
+//       ],
+//       selector: {}
+//     },
+//   }
+//   , {provider}
+// );
+import { generateService } from "../shared/helpers";
+export const graphqlMongoService = generateService({
+  serviceName: `${resourceName}-service`,
+  deployment: graphqlMongoDeployment,
+  args: {
+    type: kx.types.ServiceType.ClusterIP,
+    // name: `${resourceName}-service`,
+    ports: [
+      {
+        port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
+        protocol: "TCP",
+        name: `${resourceName}-http`,
+        // targetPort: 434,
+      },
+    ],
+  },
+});
+
 // export const graphqlMongoService = graphqlMongoDeployment.createService({
 //   type: kx.types.ServiceType.ClusterIP,
+//   name: `${resourceName}-service`,
 //   ports: [
 //     {
 //       port: Number(graphqlMongoEnvironmentVariables.APP_PORT),

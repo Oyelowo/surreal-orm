@@ -20,15 +20,20 @@ services:
       MONGODB_NAME: mydb
       MONGODB_USERNAME: mongo
       MONGODB_PASSWORD: fakepassword
-      MONGODB_HOST: mongodb-graphql
+      MONGODB_HOST: mongodb-graphql-mongo
       MONGODB_PORT: 27017
 
   mongodb-graphql-mongo:
     image: mongo:latest
     # #container_name: mongodb
-    hostname: mongodb-graphql
+    hostname:  mongodb-graphql-mongo
     ports:
       - 27017:27017
+    environment:
+      MONGODB_NAME: mydb
+      MONGO_INITDB_ROOT_USERNAME_USERNAME: mongo
+      MONGO_INITDB_ROOT_USERNAME_PASSWORD: fakepassword
+      MONGO_INITDB_ROOT_USERNAME_PORT: 27017
 
 
   grpc-mongo:

@@ -16,7 +16,7 @@ build:
     context: ../rust
     docker:
       dockerfile: Dockerfile.prod
-      target: graphql-mongo
+      target: graphql-mongo-dev
       noCache: false
       squash: false
 
@@ -56,7 +56,9 @@ portForward:
   #   localPort: 3001
 
   - resourceType: service
-    resourceName: graphql-mongo
+    # resourceName: graphql-mongo
+    resourceName: graphql-mongo-service
+    namespace: development
     port: 8000
     localPort: 8001
 
