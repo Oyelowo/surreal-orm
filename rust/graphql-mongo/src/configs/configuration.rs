@@ -60,8 +60,7 @@ impl DatabaseConfigs {
             ..
         } = self;
 
-        // Url::parse(format!("mongodb://{username}:{password}@{host}:{port}/").as_str())
-        Url::parse(format!("mongodb://{host}:{port}/").as_str())
+        Url::parse(format!("mongodb://{username}:{password}@{host}:{port}/").as_str())
             .expect("Problem passing mongodb uri")
             .into()
     }

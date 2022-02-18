@@ -64,7 +64,7 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
     namespaceOverride: devNamespaceName,
   },
   auth: {
-    enabled: false,
+    enabled: true,
     rootUser: "root_user",
     rootPassword: "root_password",
     // array of
