@@ -1,3 +1,8 @@
+use anyhow::Context;
+use mongodb::{
+    options::{ClientOptions, Credential, ServerAddress},
+    Client, Database,
+};
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 use url::Url;
@@ -51,19 +56,43 @@ fn default_require_ssl() -> Option<bool> {
 }
 
 impl DatabaseConfigs {
-    pub fn get_url(&self) -> String {
-        let Self {
-            host,
-            port,
-            username,
-            password,
-            ..
-        } = self;
+    pub fn get_database(self) -> anyhow::Result<Database> {
+        let credential = Credential::builder()
+            .username(self.username)
+            .password(self.password)
+            .source(self.name.clone())
+            .build();
 
-        Url::parse(format!("mongodb://{username}:{password}@{host}:{port}/").as_str())
-            .expect("Problem passing mongodb uri")
-            .into()
+        let hosts = vec![ServerAddress::Tcp {
+            host: self.host,
+            port: Some(self.port),
+        }];
+
+        let options = ClientOptions::builder()
+            .app_name(Some("graphql-mongo".into()))
+            .hosts(hosts)
+            .credential(credential)
+            .build();
+
+        let db = Client::with_options(options)
+            .context("Faulty db option")?
+            .database(&self.name);
+        Ok(db)
     }
+
+    // pub fn get_url(&self) -> String {
+    //     let Self {
+    //         host,
+    //         port,
+    //         username,
+    //         password,
+    //         ..
+    //     } = self;
+
+    //     Url::parse(format!("mongodb://{username}:{password}@{host}:{port}/").as_str())
+    //         .expect("Problem passing mongodb uri")
+    //         .into()
+    // }
 }
 
 #[derive(Debug)]

@@ -7,7 +7,11 @@ use super::configuration::Environemnt;
 use crate::app::{get_my_graphql_schema, sync_mongo_models, MyGraphQLSchema};
 use crate::configs::Configs;
 
-use wither::mongodb::Client;
+use wither::mongodb::{
+    options::{ClientOptions, Credential, ServerAddress},
+    Client,
+};
+// use mongodb::options::ClientOptions;
 
 pub async fn index(schema: web::Data<MyGraphQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
@@ -35,9 +39,11 @@ impl GraphQlApp {
             Production => (5, 7),
         };
 
-        let db = Client::with_uri_str(database.get_url())
-            .await?
-            .database(database.name.as_str());
+        let db = database.get_database()?;
+
+        // let db = Client::with_uri_str(database.get_url())
+        //     .await?
+        //     .database(database.name.as_str());
 
         sync_mongo_models(&db).await?;
 
