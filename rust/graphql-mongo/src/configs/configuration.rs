@@ -5,7 +5,6 @@ use mongodb::{
 };
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
-use url::Url;
 
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
