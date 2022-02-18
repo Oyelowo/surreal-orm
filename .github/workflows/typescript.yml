@@ -82,7 +82,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: typescript
-          file: typescript/Dockerfile.prod
+          file: typescript/Dockerfile.production
           target: web
           tags: ${{env.WEB_IMAGE_WITH_TAG}}
           push: true
@@ -93,7 +93,7 @@ jobs:
 
 
       # - name: build web docker image
-      #   run: docker build -f Dockerfile.prod --target web  -t ${{ env.WEB_IMAGE_WITH_TAG }}  .
+      #   run: docker build -f Dockerfile.production --target web  -t ${{ env.WEB_IMAGE_WITH_TAG }}  .
 
       # - name: Slim down web docker image
       #   run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  ${{ env.WEB_IMAGE_WITH_TAG }} --tag ${{ env.WEB_IMAGE_WITH_TAG }}

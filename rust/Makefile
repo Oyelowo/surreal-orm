@@ -19,11 +19,11 @@ build-graphql-mongo:
 	docker build . --target graphql-mongo  -t oyelowo/graphql-mongo
 
 deploy-graphql-mongo:
-	docker build -f Dockerfile.prod --target graphql-mongo  -t oyelowo/graphql-mongo .
+	docker build -f Dockerfile.development --target graphql-mongo  -t oyelowo/graphql-mongo .
 	docker run -p 8000:8000 oyelowo/graphql-mongo 
 
 deploy-graphql-mongo-slim:
-	docker build -f Dockerfile.prod --target graphql-mongo  -t oyelowo/graphql-mongo .
+	docker build -f Dockerfile.development --target graphql-mongo  -t oyelowo/graphql-mongo .
 	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  oyelowo/graphql-mongo --tag oyelowo/graphql-mongo.slim
 	docker run -p 3000:3000 oyelowo/graphql-mongo.slim
 
@@ -36,11 +36,11 @@ build-grpc-mongo:
 	docker build . --target grpc-mongo  -t oyelowo/grpc-mongo
 
 deploy-grpc-mongo:
-	docker build -f Dockerfile.prod --tar-grpc-mongoget grpc-mongo  -t oyelowo/grpc-mongo .
+	docker build -f Dockerfile.development --tar-grpc-mongoget grpc-mongo  -t oyelowo/grpc-mongo .
 	docker run -p 3000:3000 oyelowo/grpc-mongo 
 
 deploy-grpc-mongo-slim:
-	docker build -f Dockerfile.prod --target grpc-mongo  -t oyelowo/grpc-mongo .
+	docker build -f Dockerfile.development --target grpc-mongo  -t oyelowo/grpc-mongo .
 	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  oyelowo/grpc-mongo --tag oyelowo/grpc-mongo.slim
 	docker run -p 3000:3000 oyelowo/grpc-mongo.slim
 

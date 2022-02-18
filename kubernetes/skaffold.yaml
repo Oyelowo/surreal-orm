@@ -7,7 +7,7 @@ build:
   # - image: oyelowo/web
   #   context: ../typescript
   #   docker:
-  #     dockerfile: Dockerfile.prod
+  #     dockerfile: Dockerfile.development
   #     target: web
   #     noCache: false
   #     squash: false
@@ -15,15 +15,18 @@ build:
   - image: oyelowo/graphql-mongo
     context: ../rust
     docker:
-      dockerfile: Dockerfile.prod
-      target: graphql-mongo-dev
+      dockerfile: Dockerfile.development
+      target: graphql-mongo
       noCache: false
       squash: false
+    # requires:
+    #   - image: base
+    #     alias: BASE
 
   # - image: oyelowo/graphql-postgres
   #   context: ../rust
   #   docker:
-  #     dockerfile: Dockerfile.prod
+  #     dockerfile: Dockerfile.development
   #     target: graphql-postgres
   #     noCache: false
   #     squash: false
@@ -31,17 +34,23 @@ build:
   # - image: oyelowo/grpc-mongo
   #   context: ../rust
   #   docker:
-  #     dockerfile: Dockerfile.prod
+  #     dockerfile: Dockerfile.development
   #     target: grpc-mongo
   #     noCache: false
   #     squash: false
   #   requires:
   #     - image: base
   #       alias: BASE
+  
   # - image: base
-  #   context: BASE
-  #   buildpacks:
-  #     builder: gcr.io/buildpacks/builder:v1
+  #   context: ../rust
+  #   docker:
+  #     dockerfile: Dockerfile.development
+  #     target: base
+  #     noCache: false
+  #     squash: false
+    # buildpacks:
+    #   builder: gcr.io/buildpacks/builder:v1
 
 deploy:
   kubectl:
@@ -51,12 +60,11 @@ deploy:
 
 portForward:
   # - resourceType: service
-  #   resourceName: react-web-deployment-z5ri8ivw
+  #   resourceName: react-web
   #   port: 3000
   #   localPort: 3001
 
   - resourceType: service
-    # resourceName: graphql-mongo
     resourceName: graphql-mongo
     namespace: development
     port: 8000

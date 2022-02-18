@@ -21,7 +21,9 @@ COPY . .
 COPY --from=cacher /app/target target
 COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
-## GRAPHQL-MONGO BACKEND SERVICE
+
+######### START GRAPHQL-MONGO BACKEND SERVICE  #################
+################################################################
 FROM base AS builder-graphql-mongo 
 RUN cargo build --release -p graphql-mongo
 
@@ -32,8 +34,13 @@ EXPOSE 8000
 
 COPY --from=builder-graphql-mongo /app/target/release/graphql-mongo /usr/local/bin/graphql-mongo
 ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
+######### END GRAPHQL-MONGO BACKEND SERVICE  #################
+##############################################################
 
-## GRAPHQL-POSTGRES BACKEND PG SERVICE
+
+########## START GRAPHQL-POSTGRES BACKEND PG SERVICE ###########
+################################################################
+## PRODUCTION BUILD
 FROM base AS builder-graphql-postgres 
 ENV SQLX_OFFLINE=true
 RUN cargo build --release -p graphql-postgres
@@ -45,8 +52,12 @@ EXPOSE 8000
 
 COPY --from=builder-graphql-postgres /app/target/release/graphql-postgres /usr/local/bin/graphql-postgres
 ENTRYPOINT ["/usr/local/bin/graphql-postgres"]
+########## END GRAPHQL-POSTGRES BACKEND PG SERVICE #############
+################################################################
 
-## GRPC-MONGO BACKEND SERVICE
+
+############# START GRPC-MONGO BACKEND SERVICE  ##################
+##################################################################
 FROM base AS builder-second
 RUN rustup component add rustfmt
 RUN cargo build --release -p grpc-mongo
@@ -57,3 +68,5 @@ WORKDIR /app
 EXPOSE 50051
 COPY --from=builder-second app/target/release/grpc-mongo /usr/local/bin/grpc-mongo
 ENTRYPOINT ["/usr/local/bin/grpc-mongo"]
+############# END GRPC-MONGO BACKEND SERVICE  ######################
+####################################################################

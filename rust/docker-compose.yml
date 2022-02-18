@@ -3,10 +3,10 @@ services:
   graphql-mongo:
     build:
       context: .
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile.development
       # args:
       #   - name=value
-      target: graphql-mongo-dev
+      target: graphql-mongo
     # # container_name: graphql-mongo
     # hostname: mongodb
     depends_on:
@@ -39,7 +39,7 @@ services:
   grpc-mongo:
     build:
       context: .
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile.development
       # args:
       #   - name=value
       target: grpc-mongo
@@ -69,7 +69,7 @@ services:
   graphql-postgres:
     build:
       context: .
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile.development
       # args:
       #   - name=value
       target: graphql-postgres
