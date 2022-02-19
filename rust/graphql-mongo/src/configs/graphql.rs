@@ -7,7 +7,6 @@ use super::configuration::Environemnt;
 use crate::app::{get_my_graphql_schema, sync_mongo_models, MyGraphQLSchema};
 use crate::configs::Configs;
 
-
 pub async fn index(schema: web::Data<MyGraphQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
 }

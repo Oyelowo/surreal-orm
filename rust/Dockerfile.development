@@ -1,39 +1,33 @@
 ARG BASE_IMAGE=rust:1.58
 
-FROM $BASE_IMAGE as rust-with-chef
-WORKDIR /app
+FROM $BASE_IMAGE as chef
 RUN cargo install cargo-chef --version 0.1.33
+WORKDIR /app
 
 
-FROM rust-with-chef as planner
+FROM chef as planner
 COPY . .
 RUN cargo chef prepare  --recipe-path recipe.json
 
 
-FROM rust-with-chef as cacher
+FROM chef as  builder-graphql-mongo 
 COPY --from=planner /app/recipe.json recipe.json
 # Build dependencies - this is the caching Docker layer! Don't build in release mode for development
 RUN cargo chef cook --recipe-path recipe.json 
 
-
-FROM $BASE_IMAGE AS base
-WORKDIR /app
 COPY . .
 # Copy over the cached dependencies
-COPY --from=cacher /app/target target
-COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
 
 ######### START GRAPHQL-MONGO BACKEND SERVICE  #################
 ################################################################
-FROM base AS builder-graphql-mongo 
-RUN cargo build -p graphql-mongo
+RUN cargo build -p graphql-mongo --bin graphql-mongo
 
 # Although, we do not need the Rust toolchain to run the binary!
 # Not using distroless in dev so that we can get extra toolchain for debugging containers in pods
 # To test distroless in dev, uncomment the below and comment out the next baseline, of course!
-# FROM gcr.io/distroless/cc AS graphql-mongo
-FROM $BASE_IMAGE AS graphql-mongo
+FROM gcr.io/distroless/cc AS graphql-mongo
+# FROM $BASE_IMAGE AS graphql-mongo
 WORKDIR /app
 EXPOSE 8000
 COPY . .
@@ -45,37 +39,3 @@ ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
 # CMD ["cargo", "run", "-p", "graphql-mongo", "--bin", "graphql-mongo"]
 ######### END GRAPHQL-MONGO BACKEND SERVICE  #################
 ##############################################################
-
-
-########## START GRAPHQL-POSTGRES BACKEND PG SERVICE ###########
-################################################################
-FROM $BASE_IMAGE AS builder-graphql-postgres 
-ENV SQLX_OFFLINE=true
-RUN cargo build -p graphql-postgres
-
-
-FROM $BASE_IMAGE AS graphql-postgres
-WORKDIR /app
-EXPOSE 8000
-COPY --from=builder-graphql-postgres /app/target/debug/graphql-postgres /usr/local/bin/graphql-postgres
-ENTRYPOINT ["/usr/local/bin/graphql-postgres"]
-# CMD ["cargo" "run" "-p" "graphql-postgres"]
-########## END GRAPHQL-POSTGRES BACKEND PG SERVICE #############
-################################################################
-
-
-############# START GRPC-MONGO BACKEND SERVICE  ##################
-##################################################################
-FROM base AS builder-second
-RUN rustup component add rustfmt
-RUN cargo build -p grpc-mongo
-
-
-FROM $BASE_IMAGE AS grpc-mongo
-WORKDIR /app
-EXPOSE 50051
-COPY --from=builder-second app/target/debug/grpc-mongo /usr/local/bin/grpc-mongo
-ENTRYPOINT ["/usr/local/bin/grpc-mongo"]
-# CMD ["cargo", "run", "-p", "grpc-mongo"]
-############# END GRPC-MONGO BACKEND SERVICE  ######################
-####################################################################
