@@ -1,7 +1,8 @@
-import { Settings } from "./shared/types";
+import { Settings } from "../shared/types";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
-import { provider } from "./shared/cluster";
+import { provider } from "../shared/cluster";
+import { reactWebEnvVars } from "./settings";
 
 export const reactWebSettings: Settings = {
   requestMemory: "1G",
@@ -9,6 +10,8 @@ export const reactWebSettings: Settings = {
   limitMemory: "1G",
   limitCpu: "100m",
   host: "0.0.0.0",
+  resourceName: "react-web",
+  image: "oyelowo/react-web",
 };
 
 // Create a Kubernetes ConfigMap.
@@ -42,8 +45,8 @@ export const reactWebPodBuilder = new kx.PodBuilder({
         HOST: "",
         PORT: "",
       },
-      image: "oyelowo/web",
-      ports: { http: 3000 },
+      image: reactWebSettings.resourceName,
+      ports: { http: Number(reactWebEnvVars.APP_PORT) },
       volumeMounts: [],
       resources: {
         limits: {

@@ -17,7 +17,7 @@ export type Memory = `${number}${
 
 export type CPU = `${number}${"m"}`;
 
-export type App = "graphql-mongo" | "graphql-postgres" | "grpc-mongo" | "web";
+export type App = "graphql-mongo" | "graphql-postgres" | "grpc-mongo" | "react-web";
 
 export interface Settings {
   resourceName: App;
