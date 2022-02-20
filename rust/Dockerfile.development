@@ -26,7 +26,7 @@ WORKDIR /app
 COPY . .
 COPY --from=cacher /app/target target
 COPY --from=cacher $CARGO_HOME $CARGO_HOME
-RUN cargo build -p graphql-mongo --bin graphql-mongo
+RUN cargo build --bin graphql-mongo
 
 # Although, we do not need the Rust toolchain to run the binary!
 # Not using distroless in dev so that we can get extra toolchain for debugging containers in pods
