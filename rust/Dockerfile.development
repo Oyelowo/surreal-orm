@@ -21,11 +21,15 @@ RUN cargo chef cook --recipe-path recipe.json
 
 ######### START GRAPHQL-MONGO BACKEND SERVICE  #################
 ################################################################
-FROM $BASE_IMAGE as builder
+FROM $BASE_IMAGE as builder-base
 WORKDIR /app
 COPY . .
+# Copy over the cached dependencies
 COPY --from=cacher /app/target target
 COPY --from=cacher $CARGO_HOME $CARGO_HOME
+
+
+FROM builder-base as builder-grapqh-mongo
 RUN cargo build --bin graphql-mongo
 
 # Although, we do not need the Rust toolchain to run the binary!
@@ -37,7 +41,7 @@ WORKDIR /app
 EXPOSE 8000
 # COPY . .
 # We are building in debug mode
-COPY --from=builder /app/target/debug/graphql-mongo /usr/local/bin/graphql-mongo
+COPY --from=builder-grapqh-mongo /app/target/debug/graphql-mongo /usr/local/bin/graphql-mongo
 ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
 # This is in case you want to build with cargo run or cargo watch. But kubernetes skaffold already watches our app
 # so, it may be unnecessary.
