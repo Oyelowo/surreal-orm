@@ -1,26 +1,31 @@
 ARG BASE_IMAGE=rust:1.58
 
-FROM $BASE_IMAGE as chef
-RUN cargo install cargo-chef --version 0.1.33
+FROM $BASE_IMAGE as planner
 WORKDIR /app
-
-
-FROM chef as planner
+# We only pay the installation cost once,
+# it will be cached from the second build onwards
+RUN cargo install cargo-chef --version 0.1.33
 COPY . .
 RUN cargo chef prepare  --recipe-path recipe.json
 
 
-FROM chef as  builder-graphql-mongo 
+FROM $BASE_IMAGE as  cacher
+WORKDIR /app
+RUN cargo install cargo-chef --version 0.1.33
 COPY --from=planner /app/recipe.json recipe.json
 # Build dependencies - this is the caching Docker layer! Don't build in release mode for development
 RUN cargo chef cook --recipe-path recipe.json 
 
-COPY . .
-# Copy over the cached dependencies
 
+# Copy over the cached dependencies
 
 ######### START GRAPHQL-MONGO BACKEND SERVICE  #################
 ################################################################
+FROM $BASE_IMAGE as builder
+WORKDIR /app
+COPY . .
+COPY --from=cacher /app/target target
+COPY --from=cacher $CARGO_HOME $CARGO_HOME
 RUN cargo build -p graphql-mongo --bin graphql-mongo
 
 # Although, we do not need the Rust toolchain to run the binary!
@@ -30,9 +35,9 @@ FROM gcr.io/distroless/cc AS graphql-mongo
 # FROM $BASE_IMAGE AS graphql-mongo
 WORKDIR /app
 EXPOSE 8000
-COPY . .
+# COPY . .
 # We are building in debug mode
-COPY --from=builder-graphql-mongo /app/target/debug/graphql-mongo /usr/local/bin/graphql-mongo
+COPY --from=builder /app/target/debug/graphql-mongo /usr/local/bin/graphql-mongo
 ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
 # This is in case you want to build with cargo run or cargo watch. But kubernetes skaffold already watches our app
 # so, it may be unnecessary.
