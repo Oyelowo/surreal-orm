@@ -17,10 +17,6 @@ COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --recipe-path recipe.json 
 
 
-# Copy over the cached dependencies
-
-######### START GRAPHQL-MONGO BACKEND SERVICE  #################
-################################################################
 FROM $BASE_IMAGE as builder-base
 WORKDIR /app
 COPY . .
@@ -29,22 +25,64 @@ COPY --from=cacher /app/target target
 COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
 
-FROM builder-base as builder-grapqh-mongo
-RUN cargo build --bin graphql-mongo
 
+######### START GRAPHQL-MONGO BACKEND SERVICE  #################
+################################################################
+FROM builder-base as builder-graphql-mongo
+RUN cargo build --bin graphql-mongo
 # Although, we do not need the Rust toolchain to run the binary!
 # Not using distroless in dev so that we can get extra toolchain for debugging containers in pods
 # To test distroless in dev, uncomment the below and comment out the next baseline, of course!
 FROM gcr.io/distroless/cc AS graphql-mongo
-# FROM $BASE_IMAGE AS graphql-mongo
+# FROM alpine AS graphql-mongo
 WORKDIR /app
 EXPOSE 8000
-# COPY . .
 # We are building in debug mode
-COPY --from=builder-grapqh-mongo /app/target/debug/graphql-mongo /usr/local/bin/graphql-mongo
+COPY --from=builder-graphql-mongo /app/target/debug/graphql-mongo /usr/local/bin/graphql-mongo
 ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
-# This is in case you want to build with cargo run or cargo watch. But kubernetes skaffold already watches our app
-# so, it may be unnecessary.
-# CMD ["cargo", "run", "-p", "graphql-mongo", "--bin", "graphql-mongo"]
 ######### END GRAPHQL-MONGO BACKEND SERVICE  #################
 ##############################################################
+
+
+
+##############################################################
+######### START GRAPHQL-POSTGRES BACKEND SERVICE  #############
+################################################################
+FROM builder-base as builder-graphql-postgres
+# This is necessary to for sqlx to build the app in offline mode without being connected to DB.
+ENV SQLX_OFFLINE=true
+RUN cargo build --bin graphql-postgres
+
+
+FROM gcr.io/distroless/cc AS graphql-postgres
+WORKDIR /app
+EXPOSE 8000
+# We are building in debug mode
+COPY --from=builder-graphql-postgres /app/target/debug/graphql-postgres /usr/local/bin/graphql-postgres
+ENTRYPOINT ["/usr/local/bin/graphql-postgres"]
+######### END GRAPHQL-POSTGRES BACKEND SERVICE  ##############
+##############################################################
+
+
+
+
+##############################################################
+######### START GRPC-MONGO BACKEND SERVICE  #################
+################################################################
+FROM builder-base as builder-grpc-mongo
+# Necessary for tonic when building grpc protobuf
+RUN rustup component add rustfmt
+RUN cargo build --bin grpc-mongo
+
+
+FROM gcr.io/distroless/cc AS grpc-mongo
+WORKDIR /app
+EXPOSE 8000
+COPY --from=builder-grpc-mongo /app/target/debug/grpc-mongo /usr/local/bin/grpc-mongo
+ENTRYPOINT ["/usr/local/bin/grpc-mongo"]
+######### END GRPC-MONGO BACKEND SERVICE  #################
+##############################################################
+
+
+
+
