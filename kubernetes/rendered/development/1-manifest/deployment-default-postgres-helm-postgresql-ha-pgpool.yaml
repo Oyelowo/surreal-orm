@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/component":"pgpool","app.kubernetes.io/instance":"postgres-helm","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"postgresql-ha","helm.sh/chart":"postgresql-ha-8.4.0"},"name":"postgres-helm-postgresql-ha-pgpool"},"spec":{"replicas":1,"selector":{"matchLabels":{"app.kubernetes.io/component":"pgpool","app.kubernetes.io/instance":"postgres-helm","app.kubernetes.io/name":"postgresql-ha"}},"template":{"metadata":{"labels":{"app.kubernetes.io/component":"pgpool","app.kubernetes.io/instance":"postgres-helm","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"postgresql-ha","helm.sh/chart":"postgresql-ha-8.4.0"}},"spec":{"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"podAffinityTerm":{"labelSelector":{"matchLabels":{"app.kubernetes.io/component":"pgpool","app.kubernetes.io/instance":"postgres-helm","app.kubernetes.io/name":"postgresql-ha"}},"namespaces":["default"],"topologyKey":"kubernetes.io/hostname"},"weight":1}]}},"containers":[{"env":[{"name":"BITNAMI_DEBUG","value":"false"},{"name":"PGPOOL_BACKEND_NODES","value":"0:postgres-helm-postgresql-ha-postgresql-0.postgres-helm-postgresql-ha-postgresql-headless:5432,1:postgres-helm-postgresql-ha-postgresql-1.postgres-helm-postgresql-ha-postgresql-headless:5432,"},{"name":"PGPOOL_SR_CHECK_USER","value":"repmgr"},{"name":"PGPOOL_SR_CHECK_PASSWORD","valueFrom":{"secretKeyRef":{"key":"repmgr-password","name":"postgres-helm-postgresql-ha-postgresql"}}},{"name":"PGPOOL_SR_CHECK_DATABASE","value":"postgres"},{"name":"PGPOOL_ENABLE_LDAP","value":"no"},{"name":"PGPOOL_POSTGRES_USERNAME","value":"postgres"},{"name":"PGPOOL_POSTGRES_PASSWORD","valueFrom":{"secretKeyRef":{"key":"postgresql-password","name":"postgres-helm-postgresql-ha-postgresql"}}},{"name":"PGPOOL_ADMIN_USERNAME","value":"admin"},{"name":"PGPOOL_ADMIN_PASSWORD","valueFrom":{"secretKeyRef":{"key":"admin-password","name":"postgres-helm-postgresql-ha-pgpool"}}},{"name":"PGPOOL_ENABLE_LOAD_BALANCING","value":"yes"},{"name":"PGPOOL_DISABLE_LOAD_BALANCE_ON_WRITE","value":"transaction"},{"name":"PGPOOL_ENABLE_LOG_CONNECTIONS","value":"no"},{"name":"PGPOOL_ENABLE_LOG_HOSTNAME","value":"yes"},{"name":"PGPOOL_ENABLE_LOG_PER_NODE_STATEMENT","value":"no"},{"name":"PGPOOL_RESERVED_CONNECTIONS","value":"1"},{"name":"PGPOOL_CHILD_LIFE_TIME","value":""},{"name":"PGPOOL_ENABLE_TLS","value":"no"}],"image":"docker.io/bitnami/pgpool:4.3.0-debian-10-r27","imagePullPolicy":"IfNotPresent","livenessProbe":{"exec":{"command":["/opt/bitnami/scripts/pgpool/healthcheck.sh"]},"failureThreshold":5,"initialDelaySeconds":30,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"name":"pgpool","ports":[{"containerPort":5432,"name":"postgresql","protocol":"TCP"}],"readinessProbe":{"exec":{"command":["bash","-ec","PGPASSWORD=${PGPOOL_POSTGRES_PASSWORD} psql -U \"postgres\" -d \"postgres\" -h /opt/bitnami/pgpool/tmp -tA -c \"SELECT 1\" \u003e/dev/null"]},"failureThreshold":5,"initialDelaySeconds":5,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":5},"resources":{"limits":{},"requests":{}},"securityContext":{"runAsUser":1001}}],"securityContext":{"fsGroup":1001}}}}}
+  labels:
+    app.kubernetes.io/component: pgpool
+    app.kubernetes.io/instance: postgres-helm
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: postgresql-ha
+    helm.sh/chart: postgresql-ha-8.4.0
+  name: postgres-helm-postgresql-ha-pgpool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: pgpool
+      app.kubernetes.io/instance: postgres-helm
+      app.kubernetes.io/name: postgresql-ha
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: pgpool
+        app.kubernetes.io/instance: postgres-helm
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: postgresql-ha
+        helm.sh/chart: postgresql-ha-8.4.0
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: pgpool
+                  app.kubernetes.io/instance: postgres-helm
+                  app.kubernetes.io/name: postgresql-ha
+              namespaces:
+              - default
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+      containers:
+      - env:
+        - name: BITNAMI_DEBUG
+          value: "false"
+        - name: PGPOOL_BACKEND_NODES
+          value: 0:postgres-helm-postgresql-ha-postgresql-0.postgres-helm-postgresql-ha-postgresql-headless:5432,1:postgres-helm-postgresql-ha-postgresql-1.postgres-helm-postgresql-ha-postgresql-headless:5432,
+        - name: PGPOOL_SR_CHECK_USER
+          value: repmgr
+        - name: PGPOOL_SR_CHECK_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: repmgr-password
+              name: postgres-helm-postgresql-ha-postgresql
+        - name: PGPOOL_SR_CHECK_DATABASE
+          value: postgres
+        - name: PGPOOL_ENABLE_LDAP
+          value: "no"
+        - name: PGPOOL_POSTGRES_USERNAME
+          value: postgres
+        - name: PGPOOL_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: postgresql-password
+              name: postgres-helm-postgresql-ha-postgresql
+        - name: PGPOOL_ADMIN_USERNAME
+          value: admin
+        - name: PGPOOL_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: admin-password
+              name: postgres-helm-postgresql-ha-pgpool
+        - name: PGPOOL_ENABLE_LOAD_BALANCING
+          value: "yes"
+        - name: PGPOOL_DISABLE_LOAD_BALANCE_ON_WRITE
+          value: transaction
+        - name: PGPOOL_ENABLE_LOG_CONNECTIONS
+          value: "no"
+        - name: PGPOOL_ENABLE_LOG_HOSTNAME
+          value: "yes"
+        - name: PGPOOL_ENABLE_LOG_PER_NODE_STATEMENT
+          value: "no"
+        - name: PGPOOL_RESERVED_CONNECTIONS
+          value: "1"
+        - name: PGPOOL_CHILD_LIFE_TIME
+          value: ""
+        - name: PGPOOL_ENABLE_TLS
+          value: "no"
+        image: docker.io/bitnami/pgpool:4.3.0-debian-10-r27
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - /opt/bitnami/scripts/pgpool/healthcheck.sh
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: pgpool
+        ports:
+        - containerPort: 5432
+          name: postgresql
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - bash
+            - -ec
+            - PGPASSWORD=${PGPOOL_POSTGRES_PASSWORD} psql -U "postgres" -d "postgres"
+              -h /opt/bitnami/pgpool/tmp -tA -c "SELECT 1" >/dev/null
+          failureThreshold: 5
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          limits: {}
+          requests: {}
+        securityContext:
+          runAsUser: 1001
+      securityContext:
+        fsGroup: 1001

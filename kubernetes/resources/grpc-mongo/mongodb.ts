@@ -1,6 +1,6 @@
 import { graphqlMongoEnvironmentVariables } from "./settings";
 
-import { MongodbHelmValuesBitnami } from "../shared/MongodbHelmValuesBitnami";
+import { MongodbHelmValuesBitnami } from "../shared/MongodbBitnami";
 import { devNamespaceName } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types";
 import * as k8s from "@pulumi/kubernetes";

@@ -1,3 +1,5 @@
+export type Environemt = "local" | "development" | "staging" | "production";
+
 export type Memory = `${number}${
   | "E"
   | "P"
@@ -15,7 +17,7 @@ export type Memory = `${number}${
 
 export type CPU = `${number}${"m"}`;
 
-export type App = "graphql-mongo" | "graphql-postgres" | "grpc-mongo" | "web"
+export type App = "graphql-mongo" | "graphql-postgres" | "grpc-mongo" | "web";
 
 export interface Settings {
   resourceName: App;
@@ -24,9 +26,8 @@ export interface Settings {
   limitMemory: Memory;
   limitCpu: CPU;
   host: string;
-  image: `oyelowo/${App}`
+  image: `oyelowo/${App}`;
 }
-
 
 export type RecursivePartial<T> = {
   [P in keyof T]?: T[P] extends (infer U)[]
@@ -35,7 +36,6 @@ export type RecursivePartial<T> = {
     ? RecursivePartial<T[P]>
     : T[P];
 };
-
 
 // make all properties optional recursively including nested objects.
 // keep in mind that this should be used on json / plain objects only.

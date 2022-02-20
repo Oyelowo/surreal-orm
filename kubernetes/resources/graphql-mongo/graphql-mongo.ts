@@ -1,4 +1,4 @@
-import { MongodbHelmValuesBitnami } from "../shared/MongodbBitnami";
+import { MongodbHelmValuesBitnami } from "../shared/MongodbHelmValuesBitnami";
 import { RecursivePartial, Settings } from "../shared/types";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
