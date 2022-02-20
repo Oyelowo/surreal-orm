@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/component":"pgpool","app.kubernetes.io/instance":"postgres-ha-helm","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"postgresql-ha","helm.sh/chart":"postgresql-ha-8.4.0"},"name":"postgres-database-pgpool","namespace":"development"},"spec":{"ports":[{"name":"postgresql","port":5432,"protocol":"TCP","targetPort":"postgresql"}],"selector":{"app.kubernetes.io/component":"pgpool","app.kubernetes.io/instance":"postgres-ha-helm","app.kubernetes.io/name":"postgresql-ha"},"sessionAffinity":"None","type":"ClusterIP"}}
+  labels:
+    app.kubernetes.io/component: pgpool
+    app.kubernetes.io/instance: postgres-ha-helm
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: postgresql-ha
+    helm.sh/chart: postgresql-ha-8.4.0
+  name: postgres-database-pgpool
+  namespace: development
+spec:
+  ports:
+  - name: postgresql
+    port: 5432
+    protocol: TCP
+    targetPort: postgresql
+  selector:
+    app.kubernetes.io/component: pgpool
+    app.kubernetes.io/instance: postgres-ha-helm
+    app.kubernetes.io/name: postgresql-ha
+  sessionAffinity: None
+  type: ClusterIP

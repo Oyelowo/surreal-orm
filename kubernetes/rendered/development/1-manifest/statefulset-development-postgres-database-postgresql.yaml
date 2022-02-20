@@ -1,0 +1,180 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"StatefulSet","metadata":{"labels":{"app.kubernetes.io/component":"postgresql","app.kubernetes.io/instance":"postgres-ha-helm","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"postgresql-ha","helm.sh/chart":"postgresql-ha-8.4.0"},"name":"postgres-database-postgresql","namespace":"development"},"spec":{"podManagementPolicy":"Parallel","replicas":2,"selector":{"matchLabels":{"app.kubernetes.io/component":"postgresql","app.kubernetes.io/instance":"postgres-ha-helm","app.kubernetes.io/name":"postgresql-ha"}},"serviceName":"postgres-database-postgresql-headless","template":{"metadata":{"labels":{"app.kubernetes.io/component":"postgresql","app.kubernetes.io/instance":"postgres-ha-helm","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"postgresql-ha","helm.sh/chart":"postgresql-ha-8.4.0"}},"spec":{"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"podAffinityTerm":{"labelSelector":{"matchLabels":{"app.kubernetes.io/component":"postgresql","app.kubernetes.io/instance":"postgres-ha-helm","app.kubernetes.io/name":"postgresql-ha"}},"namespaces":["development"],"topologyKey":"kubernetes.io/hostname"},"weight":1}]}},"containers":[{"env":[{"name":"BITNAMI_DEBUG","value":"false"},{"name":"POSTGRESQL_VOLUME_DIR","value":"/bitnami/postgresql"},{"name":"PGDATA","value":"/bitnami/postgresql/data"},{"name":"POSTGRES_USER","value":"postgres"},{"name":"POSTGRES_PASSWORD","valueFrom":{"secretKeyRef":{"key":"postgresql-password","name":"postgres-database-postgresql"}}},{"name":"POSTGRES_DB","value":"db0"},{"name":"POSTGRESQL_LOG_HOSTNAME","value":"true"},{"name":"POSTGRESQL_LOG_CONNECTIONS","value":"false"},{"name":"POSTGRESQL_LOG_DISCONNECTIONS","value":"false"},{"name":"POSTGRESQL_PGAUDIT_LOG_CATALOG","value":"off"},{"name":"POSTGRESQL_CLIENT_MIN_MESSAGES","value":"error"},{"name":"POSTGRESQL_SHARED_PRELOAD_LIBRARIES","value":"pgaudit, repmgr"},{"name":"POSTGRESQL_ENABLE_TLS","value":"no"},{"name":"MY_POD_NAME","valueFrom":{"fieldRef":{"fieldPath":"metadata.name"}}},{"name":"REPMGR_UPGRADE_EXTENSION","value":"no"},{"name":"REPMGR_PGHBA_TRUST_ALL","value":"no"},{"name":"REPMGR_MOUNTED_CONF_DIR","value":"/bitnami/repmgr/conf"},{"name":"REPMGR_NAMESPACE","valueFrom":{"fieldRef":{"fieldPath":"metadata.namespace"}}},{"name":"REPMGR_PARTNER_NODES","value":"postgres-database-postgresql-0.postgres-database-postgresql-headless.$(REPMGR_NAMESPACE).svc.cluster.local,postgres-database-postgresql-1.postgres-database-postgresql-headless.$(REPMGR_NAMESPACE).svc.cluster.local,"},{"name":"REPMGR_PRIMARY_HOST","value":"postgres-database-postgresql-0.postgres-database-postgresql-headless.$(REPMGR_NAMESPACE).svc.cluster.local"},{"name":"REPMGR_NODE_NAME","value":"$(MY_POD_NAME)"},{"name":"REPMGR_NODE_NETWORK_NAME","value":"$(MY_POD_NAME).postgres-database-postgresql-headless.$(REPMGR_NAMESPACE).svc.cluster.local"},{"name":"REPMGR_LOG_LEVEL","value":"NOTICE"},{"name":"REPMGR_CONNECT_TIMEOUT","value":"5"},{"name":"REPMGR_RECONNECT_ATTEMPTS","value":"2"},{"name":"REPMGR_RECONNECT_INTERVAL","value":"3"},{"name":"REPMGR_USERNAME","value":"repmgr"},{"name":"REPMGR_PASSWORD","valueFrom":{"secretKeyRef":{"key":"repmgr-password","name":"postgres-database-postgresql"}}},{"name":"REPMGR_DATABASE","value":"repmgr"}],"image":"docker.io/bitnami/postgresql-repmgr:11.14.0-debian-10-r86","imagePullPolicy":"IfNotPresent","lifecycle":{"preStop":{"exec":{"command":["/pre-stop.sh"]}}},"livenessProbe":{"exec":{"command":["bash","-ec","PGPASSWORD=$POSTGRES_PASSWORD psql -w -U \"postgres\" -d \"db0\"  -h 127.0.0.1 -c \"SELECT 1\""]},"failureThreshold":6,"initialDelaySeconds":30,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"name":"postgresql","ports":[{"containerPort":5432,"name":"postgresql","protocol":"TCP"}],"readinessProbe":{"exec":{"command":["bash","-ec","PGPASSWORD=$POSTGRES_PASSWORD psql -w -U \"postgres\" -d \"db0\"  -h 127.0.0.1 -c \"SELECT 1\""]},"failureThreshold":6,"initialDelaySeconds":5,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"resources":{"limits":{},"requests":{}},"securityContext":{"runAsUser":1001},"volumeMounts":[{"mountPath":"/bitnami/postgresql","name":"data"},{"mountPath":"/pre-stop.sh","name":"hooks-scripts","subPath":"pre-stop.sh"}]}],"securityContext":{"fsGroup":1001},"volumes":[{"configMap":{"defaultMode":493,"name":"postgres-database-postgresql-hooks-scripts"},"name":"hooks-scripts"}]}},"updateStrategy":{"type":"RollingUpdate"},"volumeClaimTemplates":[{"metadata":{"name":"data"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"8Gi"}}}}]}}
+  labels:
+    app.kubernetes.io/component: postgresql
+    app.kubernetes.io/instance: postgres-ha-helm
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: postgresql-ha
+    helm.sh/chart: postgresql-ha-8.4.0
+  name: postgres-database-postgresql
+  namespace: development
+spec:
+  podManagementPolicy: Parallel
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: postgresql
+      app.kubernetes.io/instance: postgres-ha-helm
+      app.kubernetes.io/name: postgresql-ha
+  serviceName: postgres-database-postgresql-headless
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: postgresql
+        app.kubernetes.io/instance: postgres-ha-helm
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: postgresql-ha
+        helm.sh/chart: postgresql-ha-8.4.0
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: postgresql
+                  app.kubernetes.io/instance: postgres-ha-helm
+                  app.kubernetes.io/name: postgresql-ha
+              namespaces:
+              - development
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+      containers:
+      - env:
+        - name: BITNAMI_DEBUG
+          value: "false"
+        - name: POSTGRESQL_VOLUME_DIR
+          value: /bitnami/postgresql
+        - name: PGDATA
+          value: /bitnami/postgresql/data
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: postgresql-password
+              name: postgres-database-postgresql
+        - name: POSTGRES_DB
+          value: db0
+        - name: POSTGRESQL_LOG_HOSTNAME
+          value: "true"
+        - name: POSTGRESQL_LOG_CONNECTIONS
+          value: "false"
+        - name: POSTGRESQL_LOG_DISCONNECTIONS
+          value: "false"
+        - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
+          value: "off"
+        - name: POSTGRESQL_CLIENT_MIN_MESSAGES
+          value: error
+        - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
+          value: pgaudit, repmgr
+        - name: POSTGRESQL_ENABLE_TLS
+          value: "no"
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: REPMGR_UPGRADE_EXTENSION
+          value: "no"
+        - name: REPMGR_PGHBA_TRUST_ALL
+          value: "no"
+        - name: REPMGR_MOUNTED_CONF_DIR
+          value: /bitnami/repmgr/conf
+        - name: REPMGR_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: REPMGR_PARTNER_NODES
+          value: postgres-database-postgresql-0.postgres-database-postgresql-headless.$(REPMGR_NAMESPACE).svc.cluster.local,postgres-database-postgresql-1.postgres-database-postgresql-headless.$(REPMGR_NAMESPACE).svc.cluster.local,
+        - name: REPMGR_PRIMARY_HOST
+          value: postgres-database-postgresql-0.postgres-database-postgresql-headless.$(REPMGR_NAMESPACE).svc.cluster.local
+        - name: REPMGR_NODE_NAME
+          value: $(MY_POD_NAME)
+        - name: REPMGR_NODE_NETWORK_NAME
+          value: $(MY_POD_NAME).postgres-database-postgresql-headless.$(REPMGR_NAMESPACE).svc.cluster.local
+        - name: REPMGR_LOG_LEVEL
+          value: NOTICE
+        - name: REPMGR_CONNECT_TIMEOUT
+          value: "5"
+        - name: REPMGR_RECONNECT_ATTEMPTS
+          value: "2"
+        - name: REPMGR_RECONNECT_INTERVAL
+          value: "3"
+        - name: REPMGR_USERNAME
+          value: repmgr
+        - name: REPMGR_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: repmgr-password
+              name: postgres-database-postgresql
+        - name: REPMGR_DATABASE
+          value: repmgr
+        image: docker.io/bitnami/postgresql-repmgr:11.14.0-debian-10-r86
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /pre-stop.sh
+        livenessProbe:
+          exec:
+            command:
+            - bash
+            - -ec
+            - PGPASSWORD=$POSTGRES_PASSWORD psql -w -U "postgres" -d "db0"  -h 127.0.0.1
+              -c "SELECT 1"
+          failureThreshold: 6
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: postgresql
+        ports:
+        - containerPort: 5432
+          name: postgresql
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - bash
+            - -ec
+            - PGPASSWORD=$POSTGRES_PASSWORD psql -w -U "postgres" -d "db0"  -h 127.0.0.1
+              -c "SELECT 1"
+          failureThreshold: 6
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          limits: {}
+          requests: {}
+        securityContext:
+          runAsUser: 1001
+        volumeMounts:
+        - mountPath: /bitnami/postgresql
+          name: data
+        - mountPath: /pre-stop.sh
+          name: hooks-scripts
+          subPath: pre-stop.sh
+      securityContext:
+        fsGroup: 1001
+      volumes:
+      - configMap:
+          defaultMode: 493
+          name: postgres-database-postgresql-hooks-scripts
+        name: hooks-scripts
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi

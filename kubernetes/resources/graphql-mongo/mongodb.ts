@@ -60,9 +60,9 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   replicaCount: 3,
   // nameOverride: "mongodb-graphql",
   fullnameOverride: graphqlMongoEnvironmentVariables.MONGODB_SERVICE_NAME,
-  global: {
-    namespaceOverride: devNamespaceName,
-  },
+  // global: {
+  //   namespaceOverride: devNamespaceName,
+  // },
   auth: {
     enabled: true,
     rootUser: "root_user",
@@ -93,6 +93,7 @@ export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
     },
     version: "11.0.3",
     values: mongoValues,
+    namespace: devNamespaceName,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being
     // available.

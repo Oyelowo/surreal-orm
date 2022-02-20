@@ -1,6 +1,6 @@
 import { graphqlPostgresEnvironmentVariables } from "./settings";
 
-import { postgresdbHelmValuesBitnami } from "../shared/postgresdbHelmValuesBitnami";
+import { postgresdbHaHelmValuesBitnami } from "../shared/postgresdbHAHelmValuesBitnami";
 import { devNamespaceName } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types";
 import * as k8s from "@pulumi/kubernetes";
@@ -53,56 +53,71 @@ const mappedCredentials = credentials.reduce<Credentials>(
   }
 );
 
-const postgresValues: DeepPartial<postgresdbHelmValuesBitnami> = {
+const postgresValues: DeepPartial<postgresdbHaHelmValuesBitnami> = {
   // useStatefulSet: true,
-  architecture: "replication",
+  // architecture: "replicaset",
   // replicaCount: 3,
   // nameOverride: "postgres-database",
+  // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
   fullnameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
+  postgresql: {
+    // replicaCount: 3,
+    // containerPort,
+    username: graphqlPostgresEnvironmentVariables.POSTGRES_USERNAME,
+    //pgHbaConfiguration: "",
+    postgresPassword: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
+    database: graphqlPostgresEnvironmentVariables.POSTGRES_DATABASE_NAME,
+    password: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
+   // repmgrPassword: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
+   // repmgrDatabase: graphqlPostgresEnvironmentVariables.POSTGRES_DATABASE_NAME,
+    // existingSecret: "",
+  },
+  pgpool: {
+    // existingSecret: "",
+    // customUsers: "",
+    // usernames: "",
+    // passwords: "",
+    // adminPassword: "",
+    // adminUsername: "",
+    replicaCount: 2,
+  },
   global: {
     // namespaceOverride: devNamespaceName,
-    imagePullSecrets: [],
-    storageClass: "",
-    postgresql: {
-      auth: {
-        username: graphqlPostgresEnvironmentVariables.POSTGRES_USERNAME,
-        password: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
-        database: graphqlPostgresEnvironmentVariables.POSTGRES_DATABASE_NAME,
-        postgresPassword: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
-        // existingSecret: "",
-      },
-      service: {
-        ports: {
-          postgresql: graphqlPostgresEnvironmentVariables.POSTGRES_PORT,
-        },
-      },
+    // imagePullSecrets: [],
+    //storageClass: "",
+    pgpool: {
+      // adminUsername: "",
+      // adminPassword: "",
+      // existingSecret: "",
     },
+    postgresql: {
+      // username: "",
+      // password: "",
+      // database: "",
+      // repmgrUsername: "",
+      // repmgrPassword: "",
+      // repmgrDatabase: "",
+      // existingSecret: "",
+    },
+    ldap: {},
   },
-//   primary: {
-//     service: {
-//       type: "ClusterIP",
-//       ports: {
-//         postgresql: Number(graphqlPostgresEnvironmentVariables.POSTGRES_PORT),
-//       },
-//     },
-//   },
-
-  //   service: {
-  //     type: "ClusterIP",
-  //     port: Number(graphqlPostgresEnvironmentVariables.POSTGRES_PORT),
-  //     // portName: "mongo-graphql",
-  //     // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
-  //   },
+  service: {
+    type: "ClusterIP",
+    port: Number(graphqlPostgresEnvironmentVariables.POSTGRES_PORT),
+    // portName: "mongo-graphql",
+    // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
+  },
 };
 
-export const graphqlPostgresPostgresdb = new k8s.helm.v3.Chart(
-  "postgres-helm",
+// `http://${name}.${namespace}:${port}`;
+export const graphqlPostgresPostgresdbHA = new k8s.helm.v3.Chart(
+  "postgres-ha-helm",
   {
-    chart: "postgresql",
+    chart: "postgresql-ha",
     fetchOpts: {
       repo: "https://charts.bitnami.com/bitnami",
     },
-    version: "11.0.6",
+    version: "8.4.0",
     values: postgresValues,
     namespace: devNamespaceName,
     // By default Release resource will wait till all created resources
