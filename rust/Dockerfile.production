@@ -1,21 +1,23 @@
 ARG BASE_IMAGE=rust:1.58
 
-FROM $BASE_IMAGE as rust-with-chef
+FROM $BASE_IMAGE as planner
 WORKDIR /app
+# We only pay the installation cost once,
+# it will be cached from the second build onwards
 RUN cargo install cargo-chef --version 0.1.33
-
-FROM rust-with-chef as planner
 COPY . .
 RUN cargo chef prepare  --recipe-path recipe.json
 
-FROM rust-with-chef as cacher
+
+FROM $BASE_IMAGE as  cacher
 WORKDIR /app
+RUN cargo install cargo-chef --version 0.1.33
 COPY --from=planner /app/recipe.json recipe.json
-# Build dependencies - this is the caching Docker layer!
-RUN cargo chef cook --release --recipe-path recipe.json
+# Build dependencies - this is the caching Docker layer! Don't build in release mode for development
+RUN cargo chef cook --release --recipe-path recipe.json 
 
 
-FROM $BASE_IMAGE AS base
+FROM $BASE_IMAGE as builder-base
 WORKDIR /app
 COPY . .
 # Copy over the cached dependencies
@@ -23,51 +25,59 @@ COPY --from=cacher /app/target target
 COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
 
+
 ######### START GRAPHQL-MONGO BACKEND SERVICE  #################
 ################################################################
-FROM base AS builder-graphql-mongo 
-RUN cargo build --release -p graphql-mongo
-
-# We do not need the Rust toolchain to run the binary!
+FROM builder-base as builder-graphql-mongo
+RUN cargo build --release --bin graphql-mongo
 FROM gcr.io/distroless/cc AS graphql-mongo
 WORKDIR /app
 EXPOSE 8000
-
 COPY --from=builder-graphql-mongo /app/target/release/graphql-mongo /usr/local/bin/graphql-mongo
 ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
 ######### END GRAPHQL-MONGO BACKEND SERVICE  #################
 ##############################################################
 
 
-########## START GRAPHQL-POSTGRES BACKEND PG SERVICE ###########
-################################################################
-## PRODUCTION BUILD
-FROM base AS builder-graphql-postgres 
-ENV SQLX_OFFLINE=true
-RUN cargo build --release -p graphql-postgres
 
-# We do not need the Rust toolchain to run the binary!
+##############################################################
+######### START GRAPHQL-POSTGRES BACKEND SERVICE  #############
+################################################################
+FROM builder-base as builder-graphql-postgres
+# This is necessary to for sqlx to build the app in offline mode without being connected to DB.
+ENV SQLX_OFFLINE=true
+RUN cargo build --release --bin graphql-postgres
+
+
 FROM gcr.io/distroless/cc AS graphql-postgres
 WORKDIR /app
 EXPOSE 8000
-
+# We are building in release mode
 COPY --from=builder-graphql-postgres /app/target/release/graphql-postgres /usr/local/bin/graphql-postgres
 ENTRYPOINT ["/usr/local/bin/graphql-postgres"]
-########## END GRAPHQL-POSTGRES BACKEND PG SERVICE #############
+######### END GRAPHQL-POSTGRES BACKEND SERVICE  ##############
+##############################################################
+
+
+
+
+##############################################################
+######### START GRPC-MONGO BACKEND SERVICE  #################
 ################################################################
-
-
-############# START GRPC-MONGO BACKEND SERVICE  ##################
-##################################################################
-FROM base AS builder-second
+FROM builder-base as builder-grpc-mongo
+# Necessary for tonic when building grpc protobuf
 RUN rustup component add rustfmt
-RUN cargo build --release -p grpc-mongo
+RUN cargo build --release --bin grpc-mongo
 
-# We do not need the Rust toolchain to run the binary!
+
 FROM gcr.io/distroless/cc AS grpc-mongo
 WORKDIR /app
-EXPOSE 50051
-COPY --from=builder-second app/target/release/grpc-mongo /usr/local/bin/grpc-mongo
+EXPOSE 8000
+COPY --from=builder-grpc-mongo /app/target/release/grpc-mongo /usr/local/bin/grpc-mongo
 ENTRYPOINT ["/usr/local/bin/grpc-mongo"]
-############# END GRPC-MONGO BACKEND SERVICE  ######################
-####################################################################
+######### END GRPC-MONGO BACKEND SERVICE  #################
+##############################################################
+
+
+
+
