@@ -4,7 +4,7 @@ metadata:
   name: kubernetes
 build:
   artifacts:
-  - image: oyelowo/web
+  - image: oyelowo/react-web
     context: ../typescript
     docker:
       dockerfile: Dockerfile.development
