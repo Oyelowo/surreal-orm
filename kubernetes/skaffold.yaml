@@ -19,9 +19,9 @@ build:
       target: graphql-mongo
       noCache: false
       squash: false
-    # requires:
-    #   - image: base
-    #     alias: BASE
+    requires:
+      - image: builder-base
+        alias: BASE
 
   - image: oyelowo/graphql-postgres
     context: ../rust
@@ -30,6 +30,9 @@ build:
       target: graphql-postgres
       noCache: false
       squash: false
+    requires:
+      - image: builder-base
+        alias: BASE
       
   - image: oyelowo/grpc-mongo
     context: ../rust
@@ -38,17 +41,17 @@ build:
       target: grpc-mongo
       noCache: false
       squash: false
-  #   requires:
-  #     - image: base
-  #       alias: BASE
+    requires:
+      - image: builder-base
+        alias: BASE
   
-  # - image: base
-  #   context: ../rust
-  #   docker:
-  #     dockerfile: Dockerfile.development
-  #     target: base
-  #     noCache: false
-  #     squash: false
+  - image: builder-base
+    context: ../rust
+    docker:
+      dockerfile: Dockerfile.development
+      target: builder-base
+      noCache: false
+      squash: false
     # buildpacks:
     #   builder: gcr.io/buildpacks/builder:v1
 
