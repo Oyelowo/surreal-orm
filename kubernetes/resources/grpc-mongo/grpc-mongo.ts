@@ -7,63 +7,61 @@ import { devNamespace, devNamespaceName } from "../shared/namespaces";
 import * as random from "@pulumi/random";
 import * as pulumi from "@pulumi/pulumi";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
-import {
-  graphqlMongoEnvVars,
-  graphqlMongoSettings,
-} from "./settings";
+import { grpcMongoEnvVars, grpcMongoSettings } from "./settings";
 // Prefix by the name of deployment to make them unique across stack
 
-const { resourceName } = graphqlMongoSettings;
+const { resourceName } = grpcMongoSettings;
+
+const metadataObject = {
+  metadata: {
+    name: resourceName,
+    namespace: devNamespaceName,
+  },
+};
 
 // Create a Kubernetes ConfigMap.
-export const graphqlMongoConfigMap = new kx.ConfigMap(
+export const grpcMongoConfigMap = new kx.ConfigMap(
   `${resourceName}-configmap`,
   {
     data: { config: "very important data" },
-    metadata: {
-      name: resourceName,
-      namespace: devNamespaceName,
-    },
+    ...metadataObject,
   },
   { provider }
 );
 
 // Create a Kubernetes Secret.
-export const graphqlMongoSecret = new kx.Secret(
+export const grpcMongoSecret = new kx.Secret(
   `${resourceName}-secret`,
   {
     stringData: {
       password: "fakepassword",
     },
-    metadata: {
-      name: resourceName,
-      namespace: devNamespaceName,
-    },
+    ...metadataObject,
   },
   { provider }
 );
 
 // Define a Pod.
-export const graphqlMongoPodBuilder = new kx.PodBuilder({
+export const grpcMongoPodBuilder = new kx.PodBuilder({
   initContainers: [],
   containers: [
     {
       env: {
-        CONFIG: graphqlMongoConfigMap.asEnvValue("config"),
-        PASSWORD: graphqlMongoSecret.asEnvValue("password"),
-        ...graphqlMongoEnvVars,
+        CONFIG: grpcMongoConfigMap.asEnvValue("config"),
+        PASSWORD: grpcMongoSecret.asEnvValue("password"),
+        ...grpcMongoEnvVars,
       },
-      image: graphqlMongoSettings.image,
+      image: grpcMongoSettings.image,
       ports: { http: 8000 },
       volumeMounts: [],
       resources: {
         limits: {
-          memory: graphqlMongoSettings.limitMemory,
-          cpu: graphqlMongoSettings.limitCpu,
+          memory: grpcMongoSettings.limitMemory,
+          cpu: grpcMongoSettings.limitCpu,
         },
         requests: {
-          memory: graphqlMongoSettings.requestMemory,
-          cpu: graphqlMongoSettings.requestCpu,
+          memory: grpcMongoSettings.requestMemory,
+          cpu: grpcMongoSettings.requestCpu,
         },
       },
     },
@@ -71,20 +69,17 @@ export const graphqlMongoPodBuilder = new kx.PodBuilder({
 });
 
 // Create a Kubernetes Deployment.
-export const graphqlMongoDeployment = new kx.Deployment(
+export const grpcMongoDeployment = new kx.Deployment(
   `${resourceName}-deployment`,
   {
-    spec: graphqlMongoPodBuilder.asDeploymentSpec({ replicas: 3 }),
-    metadata: {
-      name: resourceName,
-      namespace: devNamespaceName,
-    },
+    spec: grpcMongoPodBuilder.asDeploymentSpec({ replicas: 3 }),
+    ...metadataObject,
   },
   { provider }
 );
 
 // Create a Kubernetes Service.
-// export const graphqlMongoService2 = new kx.Service(
+// export const grpcMongoService2 = new kx.Service(
 //   `${resourceName}-service`,
 //   {
 //     metadata: {name: resourceName, namespace: devNamespaceName},
@@ -92,8 +87,8 @@ export const graphqlMongoDeployment = new kx.Deployment(
 //       type: kx.types.ServiceType.ClusterIP,
 //       ports: [
 //         {
-//           port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
-//           targetPort: Number(graphqlMongoEnvironmentVariables.APP_PORT),
+//           port: Number(grpcMongoEnvironmentVariables.APP_PORT),
+//           targetPort: Number(grpcMongoEnvironmentVariables.APP_PORT),
 //           protocol: "TCP",
 //           name: `${resourceName}-http`,
 //           // targetPort: 434,
@@ -105,15 +100,15 @@ export const graphqlMongoDeployment = new kx.Deployment(
 //   , {provider}
 // );
 // import { generateService } from "../shared/helpers";
-// export const graphqlMongoService2 = generateService({
+// export const grpcMongoService2 = generateService({
 //   serviceName: `${resourceName}-service`,
-//   deployment: graphqlMongoDeployment,
+//   deployment: grpcMongoDeployment,
 //   args: {
 //     type: kx.types.ServiceType.ClusterIP,
 //     // name: `${resourceName}-service`,
 //     ports: [
 //       {
-//         port: Number(graphqlMongoEnvironmentVariables.APP_PORT),
+//         port: Number(grpcMongoEnvironmentVariables.APP_PORT),
 //         protocol: "TCP",
 //         name: `${resourceName}-http`,
 //         // targetPort: 434,
@@ -122,11 +117,11 @@ export const graphqlMongoDeployment = new kx.Deployment(
 //   },
 // });
 
-export const graphqlMongoService = graphqlMongoDeployment.createService({
+export const grpcMongoService = grpcMongoDeployment.createService({
   type: kx.types.ServiceType.ClusterIP,
   ports: [
     {
-      port: Number(graphqlMongoEnvVars.APP_PORT),
+      port: Number(grpcMongoEnvVars.APP_PORT),
       protocol: "TCP",
       name: `${resourceName}-http`,
       targetPort: 8000,
@@ -138,12 +133,12 @@ export const graphqlMongoService = graphqlMongoDeployment.createService({
 // const frontend2 = mongodb2.getResource("v1/Service", "mongodbdev-mongodb");
 // export const frontendIp2 = frontend2.status.loadBalancer.ingress[0].ip;
 
-// const frontend2 = graphqlMongoService.spec.clusterIP;
+// const frontend2 = grpcMongoService.spec.clusterIP;
 // Export the frontend IP.
 const useLoadBalancer = new pulumi.Config("useLoadBalancer") ?? false;
-export let graphqlMongoAppIp: pulumi.Output<string>;
+export let grpcMongoAppIp: pulumi.Output<string>;
 if (useLoadBalancer) {
-  graphqlMongoAppIp = graphqlMongoService.status.loadBalancer.ingress[0].ip;
+  grpcMongoAppIp = grpcMongoService.status.loadBalancer.ingress[0].ip;
 } else {
-  graphqlMongoAppIp = graphqlMongoService.spec.clusterIP;
+  grpcMongoAppIp = grpcMongoService.spec.clusterIP;
 }

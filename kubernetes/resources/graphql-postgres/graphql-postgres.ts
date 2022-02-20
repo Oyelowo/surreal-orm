@@ -7,7 +7,7 @@ import * as random from "@pulumi/random";
 import * as pulumi from "@pulumi/pulumi";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
 import {
-  graphqlPostgresEnvironmentVariables,
+  graphqlPostgresEnvVars,
   graphqlPostgresSettings,
 } from "./settings";
 // Prefix by the name of deployment to make them unique across stack
@@ -52,7 +52,7 @@ const graphqlPostgresPodBuilder = new kx.PodBuilder({
       env: {
         CONFIG: graphqlPostgresConfigMap.asEnvValue("config"),
         PASSWORD: graphqlPostgresSecret.asEnvValue("password"),
-        ...graphqlPostgresEnvironmentVariables,
+        ...graphqlPostgresEnvVars,
       },
       image: graphqlPostgresSettings.image,
       ports: { http: 8000 },
@@ -85,7 +85,7 @@ export const graphqlPostgresService = graphqlPostgresDeployment.createService({
   type: kx.types.ServiceType.ClusterIP,
   ports: [
     {
-      port: Number(graphqlPostgresEnvironmentVariables.APP_PORT),
+      port: Number(graphqlPostgresEnvVars.APP_PORT),
       protocol: "TCP",
       name: `${resourceName}-http`,
       targetPort: 8000,

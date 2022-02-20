@@ -1,6 +1,6 @@
-import { graphqlMongoEnvironmentVariables } from "./settings";
+import { MongodbHelmValuesBitnami } from "../shared/MongodbHelmValuesBitnami";
+import { grpcMongoEnvVars } from "./settings";
 
-import { MongodbHelmValuesBitnami } from "../shared/MongodbBitnami";
 import { devNamespaceName } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types";
 import * as k8s from "@pulumi/kubernetes";
@@ -14,9 +14,9 @@ type Credentials = {
 };
 const credentials = [
   {
-    username: graphqlMongoEnvironmentVariables.MONGODB_USERNAME,
-    password: graphqlMongoEnvironmentVariables.MONGODB_PASSWORD,
-    database: graphqlMongoEnvironmentVariables.MONGODB_NAME,
+    username: grpcMongoEnvVars.MONGODB_USERNAME,
+    password: grpcMongoEnvVars.MONGODB_PASSWORD,
+    database: grpcMongoEnvVars.MONGODB_NAME,
   },
   {
     username: "username1",
@@ -54,15 +54,15 @@ const mappedCredentials = credentials.reduce<Credentials>(
   }
 );
 
-export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
+const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   useStatefulSet: true,
   architecture: "replicaset",
   replicaCount: 3,
   // nameOverride: "mongodb-graphql",
-  fullnameOverride: graphqlMongoEnvironmentVariables.MONGODB_SERVICE_NAME,
-  global: {
-    namespaceOverride: devNamespaceName,
-  },
+  fullnameOverride: grpcMongoEnvVars.MONGODB_SERVICE_NAME,
+  // global: {
+  //   namespaceOverride: devNamespaceName,
+  // },
   auth: {
     enabled: true,
     rootUser: "root_user",
@@ -76,16 +76,15 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   },
   service: {
     type: "ClusterIP",
-    port: Number(graphqlMongoEnvironmentVariables.MONGODB_PORT),
+    port: Number(grpcMongoEnvVars.MONGODB_PORT),
     // portName: "mongo-graphql",
-    nameOverride: graphqlMongoEnvironmentVariables.MONGODB_SERVICE_NAME,
+    nameOverride: grpcMongoEnvVars.MONGODB_SERVICE_NAME,
   },
 };
 
-
 // `http://${name}.${namespace}:${port}`;
-export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
-  "mongodb-helm",
+export const grpcMongoMongodb = new k8s.helm.v3.Chart(
+  "grpc-mongodb-helm",
   {
     chart: "mongodb",
     fetchOpts: {
@@ -93,6 +92,7 @@ export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
     },
     version: "11.0.3",
     values: mongoValues,
+    namespace: devNamespaceName,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being
     // available.

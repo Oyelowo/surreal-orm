@@ -1,4 +1,4 @@
-import { graphqlMongoEnvironmentVariables } from "./settings";
+import { graphqlMongoEnvVars } from "./settings";
 
 import { MongodbHelmValuesBitnami } from "../shared/MongodbHelmValuesBitnami";
 import { devNamespaceName } from "../shared/namespaces";
@@ -14,9 +14,9 @@ type Credentials = {
 };
 const credentials = [
   {
-    username: graphqlMongoEnvironmentVariables.MONGODB_USERNAME,
-    password: graphqlMongoEnvironmentVariables.MONGODB_PASSWORD,
-    database: graphqlMongoEnvironmentVariables.MONGODB_NAME,
+    username: graphqlMongoEnvVars.MONGODB_USERNAME,
+    password: graphqlMongoEnvVars.MONGODB_PASSWORD,
+    database: graphqlMongoEnvVars.MONGODB_NAME,
   },
   {
     username: "username1",
@@ -59,7 +59,7 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   architecture: "replicaset",
   replicaCount: 3,
   // nameOverride: "mongodb-graphql",
-  fullnameOverride: graphqlMongoEnvironmentVariables.MONGODB_SERVICE_NAME,
+  fullnameOverride: graphqlMongoEnvVars.MONGODB_SERVICE_NAME,
   // global: {
   //   namespaceOverride: devNamespaceName,
   // },
@@ -76,16 +76,16 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   },
   service: {
     type: "ClusterIP",
-    port: Number(graphqlMongoEnvironmentVariables.MONGODB_PORT),
+    port: Number(graphqlMongoEnvVars.MONGODB_PORT),
     // portName: "mongo-graphql",
-    nameOverride: graphqlMongoEnvironmentVariables.MONGODB_SERVICE_NAME,
+    nameOverride: graphqlMongoEnvVars.MONGODB_SERVICE_NAME,
   },
 };
 
 
 // `http://${name}.${namespace}:${port}`;
 export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
-  "mongodb-helm",
+  "graphql-mongodb-helm",
   {
     chart: "mongodb",
     fetchOpts: {

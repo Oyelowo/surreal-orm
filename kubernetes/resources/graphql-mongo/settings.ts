@@ -13,7 +13,7 @@ export const graphqlMongoSettings: Settings = {
 
 type Environemt = "local" | "development" | "staging" | "production";
 
-type AppEnvironmentVariables = {
+type AppEnvVars = {
   APP_ENVIRONMENT: Environemt;
   APP_HOST: "0.0.0.0" | string;
   APP_PORT: "8000" | `${number}`;
@@ -31,7 +31,7 @@ type AppEnvironmentVariables = {
  mongodb://username0@localhost:27017/?connectTimeoutMS=10000&authSource=db0&authMechanism=SCRAM-SHA-256&3t.uriVersion=3&3t.connection.name=db0&3t.alwaysShowAuthDB=true&3t.alwaysShowDBFromUserRole=true
  */
 
-export const graphqlMongoEnvironmentVariables: AppEnvironmentVariables = {
+export const graphqlMongoEnvVars: AppEnvVars = {
   APP_ENVIRONMENT: "local",
   APP_HOST: "0.0.0.0",
   APP_PORT: "8000",
@@ -46,13 +46,3 @@ export const graphqlMongoEnvironmentVariables: AppEnvironmentVariables = {
 
   MONGODB_PORT: "27017",
 } as const;
-// const graphqlMongoEnvironmentVariables: AppEnvironmentVariables = {
-//   APP_ENVIRONMENT: "local",
-//   APP_HOST: "0.0.0.0",
-//   APP_PORT: "8000",
-//   MONGODB_NAME: "mydb",
-//   MONGODB_USERNAME: "mongo",
-//   MONGODB_PASSWORD: "fakepassword",
-//   MONGODB_HOST: "mongodb-graphql",
-//   MONGODB_PORT: "27017",
-// };

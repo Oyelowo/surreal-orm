@@ -11,7 +11,7 @@ export const graphqlPostgresSettings: Settings = {
   image: "oyelowo/graphql-postgres",
 } as const;
 
-type AppEnvironmentVariables = {
+type AppEnvVars = {
   APP_ENVIRONMENT: Environemt;
   APP_HOST: "0.0.0.0" | string;
   APP_PORT: "8000" | `${number}`;
@@ -26,7 +26,7 @@ type AppEnvironmentVariables = {
   // DATABASE_URL: postgres://postgres:1234@postgres-graphql-postgres:5432/my_db
 };
 
-export const graphqlPostgresEnvironmentVariables: AppEnvironmentVariables = {
+export const graphqlPostgresEnvVars: AppEnvVars = {
   APP_ENVIRONMENT: "local",
   APP_HOST: "0.0.0.0",
   APP_PORT: "8000",

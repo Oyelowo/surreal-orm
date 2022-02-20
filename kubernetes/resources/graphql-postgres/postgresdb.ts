@@ -1,4 +1,4 @@
-import { graphqlPostgresEnvironmentVariables } from "./settings";
+import { graphqlPostgresEnvVars } from "./settings";
 
 import { postgresdbHelmValuesBitnami } from "../shared/postgresdbHelmValuesBitnami";
 import { devNamespaceName } from "../shared/namespaces";
@@ -13,9 +13,9 @@ type Credentials = {
 };
 const credentials = [
   {
-    username: graphqlPostgresEnvironmentVariables.POSTGRES_USERNAME,
-    password: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
-    database: graphqlPostgresEnvironmentVariables.POSTGRES_NAME,
+    username: graphqlPostgresEnvVars.POSTGRES_USERNAME,
+    password: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
+    database: graphqlPostgresEnvVars.POSTGRES_NAME,
   },
   {
     username: "username1",
@@ -58,22 +58,22 @@ const postgresValues: DeepPartial<postgresdbHelmValuesBitnami> = {
   architecture: "replication",
   // replicaCount: 3,
   // nameOverride: "postgres-database",
-  fullnameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
+  fullnameOverride: graphqlPostgresEnvVars.POSTGRES_SERVICE_NAME,
   global: {
     // namespaceOverride: devNamespaceName,
     imagePullSecrets: [],
     storageClass: "",
     postgresql: {
       auth: {
-        username: graphqlPostgresEnvironmentVariables.POSTGRES_USERNAME,
-        password: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
-        database: graphqlPostgresEnvironmentVariables.POSTGRES_DATABASE_NAME,
-        postgresPassword: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
+        username: graphqlPostgresEnvVars.POSTGRES_USERNAME,
+        password: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
+        database: graphqlPostgresEnvVars.POSTGRES_DATABASE_NAME,
+        postgresPassword: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
         // existingSecret: "",
       },
       service: {
         ports: {
-          postgresql: graphqlPostgresEnvironmentVariables.POSTGRES_PORT,
+          postgresql: graphqlPostgresEnvVars.POSTGRES_PORT,
         },
       },
     },

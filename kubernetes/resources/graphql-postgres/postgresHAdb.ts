@@ -1,4 +1,4 @@
-import { graphqlPostgresEnvironmentVariables } from "./settings";
+import { graphqlPostgresEnvVars } from "./settings";
 
 import { postgresdbHaHelmValuesBitnami } from "../shared/postgresdbHAHelmValuesBitnami";
 import { devNamespaceName } from "../shared/namespaces";
@@ -13,9 +13,9 @@ type Credentials = {
 };
 const credentials = [
   {
-    username: graphqlPostgresEnvironmentVariables.POSTGRES_USERNAME,
-    password: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
-    database: graphqlPostgresEnvironmentVariables.POSTGRES_NAME,
+    username: graphqlPostgresEnvVars.POSTGRES_USERNAME,
+    password: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
+    database: graphqlPostgresEnvVars.POSTGRES_NAME,
   },
   {
     username: "username1",
@@ -59,15 +59,15 @@ const postgresValues: DeepPartial<postgresdbHaHelmValuesBitnami> = {
   // replicaCount: 3,
   // nameOverride: "postgres-database",
   // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
-  fullnameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
+  fullnameOverride: graphqlPostgresEnvVars.POSTGRES_SERVICE_NAME,
   postgresql: {
     // replicaCount: 3,
     // containerPort,
-    username: graphqlPostgresEnvironmentVariables.POSTGRES_USERNAME,
+    username: graphqlPostgresEnvVars.POSTGRES_USERNAME,
     //pgHbaConfiguration: "",
-    postgresPassword: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
-    database: graphqlPostgresEnvironmentVariables.POSTGRES_DATABASE_NAME,
-    password: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
+    postgresPassword: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
+    database: graphqlPostgresEnvVars.POSTGRES_DATABASE_NAME,
+    password: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
    // repmgrPassword: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
    // repmgrDatabase: graphqlPostgresEnvironmentVariables.POSTGRES_DATABASE_NAME,
     // existingSecret: "",
@@ -103,7 +103,7 @@ const postgresValues: DeepPartial<postgresdbHaHelmValuesBitnami> = {
   },
   service: {
     type: "ClusterIP",
-    port: Number(graphqlPostgresEnvironmentVariables.POSTGRES_PORT),
+    port: Number(graphqlPostgresEnvVars.POSTGRES_PORT),
     // portName: "mongo-graphql",
     // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
   },
