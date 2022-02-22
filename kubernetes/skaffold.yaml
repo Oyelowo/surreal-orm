@@ -12,13 +12,13 @@ build:
       noCache: false
       squash: false
 
-  # - image: oyelowo/graphql-mongo
-  #   context: ../rust
-  #   docker:
-  #     dockerfile: Dockerfile.development
-  #     target: graphql-mongo
-  #     noCache: false
-  #     squash: false
+  - image: oyelowo/graphql-mongo
+    context: ../rust
+    docker:
+      dockerfile: Dockerfile.development
+      target: graphql-mongo
+      noCache: false
+      squash: false
   #   requires:
   #     - image: builder-base
   #       alias: BASE
@@ -67,11 +67,11 @@ portForward:
     port: 3000
     localPort: 3001
 
-  # - resourceType: service
-  #   resourceName: graphql-mongo
-  #   namespace: development
-  #   port: 8000
-  #   localPort: 8000
+  - resourceType: service
+    resourceName: graphql-mongo
+    namespace: development
+    port: 8000
+    localPort: 8000
 
   # - resourceType: service
   #   resourceName: graphql-postgres

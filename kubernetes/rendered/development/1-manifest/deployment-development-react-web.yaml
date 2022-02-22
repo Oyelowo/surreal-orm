@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"react-web","namespace":"development"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"react"}},"template":{"metadata":{"labels":{"app":"react"}},"spec":{"containers":[{"env":[{"name":"CONFIG","valueFrom":{"configMapKeyRef":{"key":"config","name":"react-web"}}},{"name":"PASSWORD","valueFrom":{"secretKeyRef":{"key":"password","name":"react-web"}}},{"name":"HOST","value":""},{"name":"PORT","value":""}],"image":"oyelowo/react-web","name":"react","ports":[{"containerPort":3000,"name":"http"}],"resources":{"limits":{"cpu":"100m","memory":"1G"},"requests":{"cpu":"100m","memory":"1G"}},"volumeMounts":[]}],"initContainers":[],"volumes":[]}}}}
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"react-web","namespace":"development"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"react"}},"template":{"metadata":{"labels":{"app":"react"}},"spec":{"containers":[{"env":[{"name":"CONFIG","valueFrom":{"configMapKeyRef":{"key":"config","name":"react-web"}}},{"name":"PASSWORD","valueFrom":{"secretKeyRef":{"key":"password","name":"react-web"}}},{"name":"HOST","value":""},{"name":"PORT","value":""}],"image":"oyelowo/react-web","name":"react","ports":[{"containerPort":3000,"name":"http"}],"resources":{"limits":{"cpu":"250m","memory":"250Mi"},"requests":{"cpu":"100m","memory":"100Mi"}},"volumeMounts":[]}],"initContainers":[],"volumes":[]}}}}
   labels:
     app.kubernetes.io/managed-by: pulumi
   name: react-web
@@ -41,11 +41,11 @@ spec:
           name: http
         resources:
           limits:
-            cpu: 100m
-            memory: 1G
+            cpu: 250m
+            memory: 250Mi
           requests:
             cpu: 100m
-            memory: 1G
+            memory: 100Mi
         volumeMounts: []
       initContainers: []
       volumes: []

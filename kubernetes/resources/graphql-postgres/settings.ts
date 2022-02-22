@@ -3,9 +3,9 @@ import { Environemt, Settings } from "../shared/types";
 
 export const graphqlPostgresSettings: Settings = {
   resourceName: "graphql-postgres",
-  requestMemory: "1G",
+  requestMemory: "70Mi",
   requestCpu: "100m",
-  limitMemory: "1G",
+  limitMemory: "200Mi",
   limitCpu: "100m",
   host: "0.0.0.0",
   image: "oyelowo/graphql-postgres",
