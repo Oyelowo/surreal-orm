@@ -1,5 +1,16 @@
 import { devNamespaceName } from "../shared/namespaces";
-import { Environemt } from "../shared/types";
+import { Environemt, Settings } from "../shared/types";
+
+export const reactWebSettings: Settings = {
+  resourceName: "react-web",
+  requestMemory: "1G",
+  requestCpu: "100m",
+  limitMemory: "1G",
+  limitCpu: "100m",
+  host: "0.0.0.0",
+  image: "oyelowo/react-web",
+};
+
 
 type AppEnvVars = {
   APP_ENVIRONMENT: Environemt;
