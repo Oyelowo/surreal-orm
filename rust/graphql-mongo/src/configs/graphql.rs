@@ -49,4 +49,16 @@ impl GraphQlApp {
 
         Ok(schema)
     }
+
+    pub fn generate_scheme() {
+        use std::io::{BufWriter,Write};
+        use std::fs::OpenOptions;
+
+        let data = &get_my_graphql_schema().finish().sdl();
+        let f  = OpenOptions::new().append(false).create(true).open("../gpl").expect("unable to open file");
+
+        let mut f = BufWriter::new(f);
+        f.write_all(data.as_bytes()).expect("Unable to write data");
+
+    }
 }
