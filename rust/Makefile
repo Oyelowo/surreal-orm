@@ -12,6 +12,9 @@ test:
 	SQLX_OFFLINE=true cargo test
 
 # 1. graphql-mongo
+generate-graphql-mongo-graphql-schema:
+	cargo run -p graphql-mongo --bin graphql-generator
+
 run-graphql-mongo:
 	cargo run -p graphql-mongo --bin graphql-mongo
 

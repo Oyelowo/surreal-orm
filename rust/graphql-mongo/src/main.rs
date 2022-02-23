@@ -1,11 +1,6 @@
 use actix_web::{guard, web, App, HttpServer};
-use configs::{index, index_playground, Configs, GraphQlApp};
+use graphql_mongo::configs::{index, index_playground, Configs, GraphQlApp};
 use log::info;
-
-pub mod configs;
-// pub mod post;
-// pub mod user;
-pub mod app;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

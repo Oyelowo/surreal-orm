@@ -1,0 +1,51 @@
+"""
+Implement the DateTime<Utc> scalar
+
+The input/output is a string in RFC3339 format.
+"""
+scalar DateTime
+type Mutation {
+	createUser(userInput: UserInput!): User!
+	createPost(postInput: PostInput!): Post!
+}
+scalar ObjectId
+type Post {
+	id: ObjectId
+	posterId: ObjectId!
+	title: String!
+	content: String!
+	poster: User
+}
+input PostInput {
+	posterId: ObjectId!
+	title: String!
+	content: String!
+}
+type Query {
+	user(id: ObjectId!): User
+	users: [User!]!
+	post(id: ObjectId!): Post
+	posts: [Post!]!
+}
+type User {
+	id: ObjectId
+	createdAt: DateTime
+	firstName: String!
+	lastName: String!
+	email: String!
+	age: Int!
+	socialMedia: [String!]!
+	posts: [Post!]!
+	postCount: Int!
+}
+input UserInput {
+	firstName: String!
+	lastName: String!
+	email: String!
+	age: Int!
+	socialMedia: [String!]!
+}
+schema {
+	query: Query
+	mutation: Mutation
+}
