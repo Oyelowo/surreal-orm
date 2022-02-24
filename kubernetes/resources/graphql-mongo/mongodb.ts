@@ -63,6 +63,10 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   // global: {
   //   namespaceOverride: devNamespaceName,
   // },
+  persistence: {
+    size: "0.1Gi",
+  },
+
   auth: {
     enabled: true,
     rootUser: "root_user",
