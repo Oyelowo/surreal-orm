@@ -6,13 +6,9 @@ use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use super::configuration::Environemnt;
 use crate::app::{get_my_graphql_schema, sync_mongo_models, MyGraphQLSchema};
 use crate::configs::Configs;
+use common::utils;
 
-use std::fs::create_dir_all;
-use std::{
-    fs::OpenOptions,
-    io::{BufWriter, Write},
-    path::Path,
-};
+use std::path::Path;
 
 pub async fn index(schema: web::Data<MyGraphQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
@@ -58,18 +54,7 @@ impl GraphQlApp {
     }
 
     pub fn generate_schema(path: impl AsRef<Path>) {
-        let path_prefix = path.as_ref().parent().expect("Couldnt get parent path");
-        create_dir_all(path_prefix).expect("Problem creaging directory for graphql");
-
         let data = &get_my_graphql_schema().finish().sdl();
-        let f = OpenOptions::new()
-            .write(true)
-            .append(false)
-            .create(true)
-            .open(path)
-            .expect("unable to open file");
-
-        let mut f = BufWriter::new(f);
-        f.write_all(data.as_bytes()).expect("Unable to write data");
+        utils::write_data_to_path(data, path);
     }
 }

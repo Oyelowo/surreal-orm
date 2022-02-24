@@ -1,5 +1,8 @@
 pub mod greet;
 pub mod maths;
+mod export_data;
+
+pub use  export_data::*;
 
 pub fn local_function() {
     greet::good_morning();
