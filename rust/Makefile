@@ -1,3 +1,7 @@
+gen:
+	make generate-graphql-mongo-graphql-schema
+	# cargo run -p graphql-mongo --bin graphql-generator
+
 fmt:
 	SQLX_OFFLINE=true cargo fmt --all -- --check
 	# SQLX_OFFLINE=true cargo clippy -fix
