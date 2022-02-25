@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=rust:1.58
+ARG BASE_IMAGE=rust:1.59.0
 
 FROM $BASE_IMAGE as planner
 WORKDIR /app
