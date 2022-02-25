@@ -4,7 +4,7 @@ use async_graphql::*;
 use futures::stream::StreamExt;
 use mongodb::{
     bson::oid::ObjectId,
-    options::{FindOneOptions, ReadConcern},
+    options::{FindOneOptions, FindOptions, ReadConcern},
     Database,
 };
 use wither::{bson::doc, prelude::Model};
@@ -31,7 +31,31 @@ impl UserQueryRoot {
 
     async fn users(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<User>> {
         let db = ctx.data_unchecked::<Database>();
-        let mut cursor = User::find(db, None, None).await?;
+        // let pipeline = vec![
+        //     //    doc! {
+        //     //       // filter on movie title:
+        //     //       "$match": {
+        //     //          "title": "A Star Is Born"
+        //     //       }
+        //     //    },
+        //     doc! {
+        //        // sort by year, ascending:
+        //        "$sort": {
+        //           "createdAt": -1
+        //        }
+        //     },
+        // ];
+        // let mut cursor = User::collection(db).aggregate(pipeline, None).await?;
+
+        // let users = User::find(db, None, None)
+        //     .await?
+        //     .map(|u| u.expect("coulnd not get user") )
+        //     .collect::<Vec<User>>()
+        //     .await;
+
+        let find_option = FindOptions::builder().sort(doc! {"createdAt": -1}).build();
+
+        let mut cursor = User::find(db, None, find_option).await?;
 
         let mut users = vec![];
         while let Some(user) = cursor.next().await {
