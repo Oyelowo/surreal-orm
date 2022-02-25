@@ -5,7 +5,6 @@ use std::{
     path::Path,
 };
 
-
 pub fn write_data_to_path(data: &String, path: impl AsRef<Path>) {
     let path_prefix = path.as_ref().parent().expect("Couldnt get parent path");
     create_dir_all(path_prefix).expect("Problem creaging directory for graphql");

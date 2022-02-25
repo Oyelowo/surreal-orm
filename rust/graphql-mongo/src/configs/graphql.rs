@@ -1,4 +1,4 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{get, post, web, HttpResponse};
 
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
@@ -10,10 +10,12 @@ use common::utils;
 
 use std::path::Path;
 
+#[post("/")]
 pub async fn index(schema: web::Data<MyGraphQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
 }
 
+#[get("/")]
 pub async fn index_playground() -> HttpResponse {
     let source = playground_source(GraphQLPlaygroundConfig::new("/").subscription_endpoint("/"));
     HttpResponse::Ok()
