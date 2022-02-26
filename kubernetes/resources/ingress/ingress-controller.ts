@@ -1,3 +1,5 @@
+import { devNamespaceName } from './../shared/namespaces';
+import { provider } from "./../shared/cluster";
 import {
   graphqlPostgresSettings,
   graphqlPostgresEnvVars,
@@ -8,72 +10,99 @@ import {
 } from "./../graphql-mongo/settings";
 import * as k8s from "@pulumi/kubernetes";
 import * as nginx from "@pulumi/kubernetes-ingress-nginx";
+import { devNamespace } from "../shared/namespaces";
 
 // Install the NGINX ingress controller to our cluster. The controller
 // consists of a Pod and a Service. Install it and configure the controller
 // to publish the load balancer IP address on each Ingress so that
 // applications can depend on the IP address of the load balancer if needed.
-const ctrl = new nginx.IngressController("myctrl", {
-    controller: {
-        
-        publishService: {
-            enabled: true,
-        
+// export const ctrl = new nginx.IngressController(
+//   "myctrl",
+//   {
+//     controller: {
+//       publishService: {
+//         enabled: true,
+//       },
+//     },
+//   },
+//   { provider: provider }
+// );
+
+// nginx-ingress-controller
+export const ingressNginx = new k8s.helm.v3.Chart(
+  "nginx-ingress-controller-helm",
+  {
+    chart: "nginx-ingress-controller",
+    fetchOpts: {
+      repo: "https://charts.bitnami.com/bitnami",
     },
+    version: "9.1.8",
+    values: {},
+    namespace: devNamespaceName,
+    // By default Release resource will wait till all created resources
+    // are available. Set this to true to skip waiting on resources being
+    // available.
+    skipAwait: false,
   },
-});
+  { provider }
+);
 
 const appBase = "oyelowo";
 // Next, expose the app using an Ingress.
-const appIngress = new k8s.networking.v1.Ingress(`${appBase}-ingress`, {
-  metadata: {
-    name: "hello-k8s-ingress",
-    annotations: {
-      "kubernetes.io/ingress.class": "nginx",
+export const appIngress = new k8s.networking.v1.Ingress(
+  `${appBase}-ingress`,
+  {
+    metadata: {
+      name: "hello-k8s-ingress",
+      namespace: devNamespaceName,
+      annotations: {
+        "kubernetes.io/ingress.class": "nginx",
+      },
+    },
+    spec: {
+      rules: [
+        {
+          // Replace this with your own domain!
+          // host: "myservicea.foo.org",
+          host: "/app",
+          http: {
+            paths: [
+              {
+                pathType: "Prefix",
+                path: "/",
+                backend: {
+                  service: {
+                    name: graphqlMongoSettings.resourceName,
+                    port: { number: Number(graphqlMongoEnvVars.APP_PORT) },
+                  },
+                },
+              },
+            ],
+          },
+        },
+        {
+          // Replace this with your own domain!
+          host: "myserviceb.foo.org",
+          http: {
+            paths: [
+              {
+                pathType: "Prefix",
+                path: "/",
+                backend: {
+                  service: {
+                    name: graphqlPostgresSettings.resourceName,
+                    port: { number: Number(graphqlPostgresEnvVars.APP_PORT) },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
     },
   },
-  spec: {
-    rules: [
-      {
-        // Replace this with your own domain!
-        // host: "myservicea.foo.org",
-        host: "/app",
-        http: {
-          paths: [
-            {
-              pathType: "Prefix",
-              path: "/",
-              backend: {
-                service: {
-                  name: graphqlMongoSettings.resourceName,
-                  port: { number: Number(graphqlMongoEnvVars.APP_PORT) },
-                },
-              },
-            },
-          ],
-        },
-      },
-      {
-        // Replace this with your own domain!
-        host: "myserviceb.foo.org",
-        http: {
-          paths: [
-            {
-              pathType: "Prefix",
-              path: "/",
-              backend: {
-                service: {
-                  name: graphqlPostgresSettings.resourceName,
-                  port: { number: Number(graphqlPostgresEnvVars.APP_PORT) },
-                },
-              },
-            },
-          ],
-        },
-      },
-    ],
-  },
-});
+  { provider: provider }
+);
 
 // export const appStatuses = apps;
-export const controllerStatus = ctrl.status;
+// export const controllerStatus = ctrl.status;

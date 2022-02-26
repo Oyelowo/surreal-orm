@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"kubernetes.io/ingress.class":"nginx"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"hello-k8s-ingress","namespace":"development"},"spec":{"rules":[{"host":"/app","http":{"paths":[{"backend":{"service":{"name":"graphql-mongo","port":{"number":8000}}},"path":"/","pathType":"Prefix"}]}},{"host":"myserviceb.foo.org","http":{"paths":[{"backend":{"service":{"name":"graphql-postgres","port":{"number":8000}}},"path":"/","pathType":"Prefix"}]}}]}}
+    kubernetes.io/ingress.class: nginx
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: hello-k8s-ingress
+  namespace: development
+spec:
+  rules:
+  - host: /app
+    http:
+      paths:
+      - backend:
+          service:
+            name: graphql-mongo
+            port:
+              number: 8000
+        path: /
+        pathType: Prefix
+  - host: myserviceb.foo.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: graphql-postgres
+            port:
+              number: 8000
+        path: /
+        pathType: Prefix

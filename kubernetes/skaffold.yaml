@@ -3,11 +3,11 @@ kind: Config
 metadata:
   name: kubernetes
 build:
-  # local:
-  #   concurrency: 0
-  #   tryImportMissing: false
-  #   useDockerCLI: false
-  #   useBuildkit: false
+  local:
+    concurrency: 0
+    tryImportMissing: false
+    useDockerCLI: false
+    useBuildkit: true
   artifacts:
   - image: oyelowo/react-web
     context: ../typescript
