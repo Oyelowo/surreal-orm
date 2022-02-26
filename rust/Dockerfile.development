@@ -19,10 +19,14 @@ RUN cargo chef cook --recipe-path recipe.json
 
 FROM $BASE_IMAGE as builder-base
 WORKDIR /app
-COPY . .
-# Copy over the cached dependencies
+# Copy over the cached dependencies 
 COPY --from=cacher /app/target target
 COPY --from=cacher $CARGO_HOME $CARGO_HOME
+
+#others 
+COPY . .
+
+
 
 
 
