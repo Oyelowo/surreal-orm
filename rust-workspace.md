@@ -6,6 +6,10 @@
 │   ├── Cargo.toml
 │   └── src
 │       └── main.rs
+├── graphql-postgres
+│   ├── Cargo.toml
+│   └── src
+│       └── main.rs
 ├── grpc-mongo
 │   ├── Cargo.toml
 │   └── src

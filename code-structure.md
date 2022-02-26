@@ -116,3 +116,156 @@
 └── usful.md
 
 32 directories, 82 files
+
+
+Rust backend
+
+❯ tree -I "target"         
+.
+├── Cargo.lock
+├── Cargo.toml
+├── Dockerfile.development
+├── Dockerfile.production
+├── Makefile
+├── README.md
+├── common
+│   ├── Cargo.toml
+│   └── src
+│       ├── lib.rs
+│       ├── macros
+│       │   ├── calculator.rs
+│       │   ├── helpers.rs
+│       │   └── mod.rs
+│       ├── util.rs
+│       ├── util_module_alternative
+│       │   └── greeter_alt.rs
+│       ├── util_module_alternative.rs
+│       └── utils
+│           ├── export_data.rs
+│           ├── greet.rs
+│           ├── maths.rs
+│           └── mod.rs
+├── docker-compose.yml
+├── examplequery.graphql
+├── graphql-mongo
+│   ├── Cargo.toml
+│   ├── generated
+│   │   └── schema.graphql
+│   ├── gql_test.graphql
+│   └── src
+│       ├── app
+│       │   ├── mod.rs
+│       │   ├── post
+│       │   │   ├── migration.rs
+│       │   │   ├── mod.rs
+│       │   │   ├── model.rs
+│       │   │   ├── mutation_root.rs
+│       │   │   └── query_root.rs
+│       │   └── user
+│       │       ├── mod.rs
+│       │       ├── model.rs
+│       │       ├── mutation_root.rs
+│       │       └── query_root.rs
+│       ├── bin
+│       │   ├── graphql-generator.rs
+│       │   ├── hello.rs
+│       │   └── hello_shared_sdk.rs
+│       ├── configs
+│       │   ├── configuration.rs
+│       │   ├── graphql.rs
+│       │   ├── mod.rs
+│       │   └── utils.rs
+│       ├── lib.rs
+│       ├── main.rs
+│       ├── services
+│       └── utils
+├── graphql-postgres
+│   ├── Cargo.toml
+│   ├── Dockerfile.migrations
+│   ├── Makefile
+│   ├── README.md
+│   ├── dbscripts
+│   │   └── postgres
+│   ├── docker-compose.yml
+│   ├── env.sample
+│   ├── gql_test.graphql
+│   ├── migrations
+│   │   ├── 20220201151946_setup.sql
+│   │   ├── 20220201152218_create_users_table.sql
+│   │   └── 20220201152224_create_posts_table.sql
+│   ├── sqlx-data.json
+│   ├── src
+│   │   ├── app
+│   │   │   ├── mod.rs
+│   │   │   ├── post
+│   │   │   │   ├── mod.rs
+│   │   │   │   ├── model.rs
+│   │   │   │   ├── mutation_root.rs
+│   │   │   │   └── query_root.rs
+│   │   │   └── user
+│   │   │       ├── mod.rs
+│   │   │       ├── model.rs
+│   │   │       ├── mutation_root.rs
+│   │   │       └── query_root.rs
+│   │   ├── configs
+│   │   │   ├── configuration.rs
+│   │   │   ├── graphql.rs
+│   │   │   └── mod.rs
+│   │   ├── dataloaders
+│   │   ├── main.rs
+│   │   ├── services
+│   │   ├── tests
+│   │   │   └── health_check.rs
+│   │   └── utils
+│   └── update-sqlx-data.sh
+├── grpc-mongo
+│   ├── Cargo.toml
+│   ├── Helloworld.md
+│   ├── SQLx_Migration.md
+│   ├── build.rs
+│   ├── grpc_setting_started.md
+│   ├── grpc_setting_started.readme
+│   ├── grpccurl.sh
+│   ├── protobuf
+│   │   ├── app_analytics.proto
+│   │   ├── helloworld.proto
+│   │   └── music.proto
+│   └── src
+│       ├── app
+│       │   ├── app_analytics
+│       │   │   ├── mod.rs
+│       │   │   ├── model.rs
+│       │   │   └── service.rs
+│       │   ├── greetings
+│       │   │   ├── hello.rs
+│       │   │   └── mod.rs
+│       │   ├── mod.rs
+│       │   └── music
+│       │       ├── fan.rs
+│       │       └── mod.rs
+│       ├── bin
+│       │   ├── analytics.rs
+│       │   ├── client.rs
+│       │   └── client_music.rs
+│       ├── configs
+│       │   ├── configuration.rs
+│       │   ├── connection.rs
+│       │   ├── mod.rs
+│       │   └── utils.rs
+│       └── main.rs
+├── my-macros
+│   ├── Cargo.toml
+│   ├── derive
+│   │   ├── Cargo.toml
+│   │   └── src
+│   │       ├── lib.rs
+│   │       └── mongo-orm
+│   │           ├── foo_bar.rs
+│   │           ├── hello.rs
+│   │           └── mod.rs
+│   └── src
+│       ├── lib.rs
+│       └── main.rs
+└── slim.report.json
+
+42 directories, 103 files
