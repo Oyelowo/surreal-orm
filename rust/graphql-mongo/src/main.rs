@@ -25,7 +25,7 @@ async fn main() -> anyhow::Result<()> {
             // .allowed_origin_fn(|origin, _req_head| origin.as_bytes().ends_with(b".localhost:3001"))
             // .allowed_origin_fn(|origin, _req_head| origin.as_bytes().ends_with(b".localhost:8000"))
             // .send_wildcard()
-            .allow_any_origin() // FIXME: // remove after testing
+            .allow_any_origin() // FIXME: // remove after testing.
             .allowed_methods(vec!["GET", "POST"])
             .allowed_headers(vec![
                 /* http::header::AUTHORIZATION, */ http::header::ACCEPT,
