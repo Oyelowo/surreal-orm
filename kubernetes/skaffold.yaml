@@ -39,13 +39,13 @@ build:
   #     - image: builder-base
   #       alias: BASE
       
-  # - image: oyelowo/grpc-mongo
-  #   context: ../rust
-  #   docker:
-  #     dockerfile: Dockerfile.development
-  #     target: grpc-mongo
-  #     noCache: false
-  #     squash: false
+  - image: oyelowo/grpc-mongo
+    context: ../rust
+    docker:
+      dockerfile: Dockerfile.development
+      target: grpc-mongo
+      noCache: false
+      squash: false
   #   requires:
   #     - image: builder-base
   #       alias: BASE
@@ -72,18 +72,18 @@ portForward:
     port: 3000
     localPort: 3000
 
-  # - resourceType: service
-  #   resourceName: graphql-mongo
-  #   namespace: development
-  #   port: 8000
-  #   localPort: 8000
+  - resourceType: service
+    resourceName: graphql-mongo
+    namespace: development
+    port: 8000
+    localPort: 8000
 
   - resourceType: service
     resourceName: graphql-postgres
     port: 8000
-    localPort: 8000
+    localPort: 8001
 
-  # - resourceType: service
-  #   resourceName: grpc-mongo
-  #   port: 50051
-  #   localPort: 50051
+  - resourceType: service
+    resourceName: grpc-mongo
+    port: 50051
+    localPort: 50051

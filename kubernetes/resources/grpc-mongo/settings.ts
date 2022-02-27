@@ -11,10 +11,11 @@ export const grpcMongoSettings: Settings = {
   image: "oyelowo/grpc-mongo",
 };
 
+type Number = "1" | "2"
 type AppEnvVars = {
   APP_ENVIRONMENT: Environemt;
   APP_HOST: "0.0.0.0" | string;
-  APP_PORT: "50051" | `${number}`;
+  APP_PORT: "50051" | `5005${Number}`;
   MONGODB_NAME: string;
   MONGODB_USERNAME: string;
   MONGODB_PASSWORD: string;
@@ -32,7 +33,7 @@ type AppEnvVars = {
 export const grpcMongoEnvVars: AppEnvVars = {
   APP_ENVIRONMENT: "local",
   APP_HOST: "0.0.0.0",
-  APP_PORT: "50051",
+  APP_PORT: "50052",
   MONGODB_NAME: "db0",
   MONGODB_USERNAME: "username0",
   MONGODB_PASSWORD: "password0",
