@@ -33,7 +33,7 @@ type AppEnvVars = {
 export const grpcMongoEnvVars: AppEnvVars = {
   APP_ENVIRONMENT: "local",
   APP_HOST: "0.0.0.0",
-  APP_PORT: "50052",
+  APP_PORT: "50051",
   MONGODB_NAME: "db0",
   MONGODB_USERNAME: "username0",
   MONGODB_PASSWORD: "password0",
