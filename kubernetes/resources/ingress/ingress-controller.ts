@@ -1,3 +1,4 @@
+import { reactWebSettings, reactWebEnvVars } from './../react-web/settings';
 import { IngressControllerValuesBitnami } from "./../shared/ingressControllerValuesBitnami";
 import { RecursivePartial } from "./../shared/types";
 import { devNamespaceName } from "./../shared/namespaces";
@@ -38,23 +39,24 @@ const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> 
   };
 // nginx-ingress-controller
 // K3s also comes with a traefik ingress controoler. Disable that if using this
-// export const ingressNginx = new k8s.helm.v3.Chart(
-//   "nginx-ingress-controller-helm",
-//   {
-//     chart: "nginx-ingress-controller",
-//     fetchOpts: {
-//       repo: "https://charts.bitnami.com/bitnami",
-//     },
-//     version: "9.1.8",
-//     values: ingressControllerValues,
-//     namespace: devNamespaceName,
-//     // By default Release resource will wait till all created resources
-//     // are available. Set this to true to skip waiting on resources being
-//     // available.
-//     skipAwait: false,
-//   },
-//   { provider }
-// );
+export const ingressNginx = new k8s.helm.v3.Chart(
+  "nginx-ingress-controller-helm",
+  {
+    chart: "nginx-ingress-controller",
+    fetchOpts: {
+      repo: "https://charts.bitnami.com/bitnami",
+    },
+    version: "9.1.8",
+    values: ingressControllerValues,
+    namespace: "default",
+    // namespace: devNamespaceName,
+    // By default Release resource will wait till all created resources
+    // are available. Set this to true to skip waiting on resources being
+    // available.
+    skipAwait: false,
+  },
+  { provider }
+);
 
 const appBase = "oyelowo";
 // // Next, expose the app using an Ingress.
@@ -66,6 +68,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
       namespace: devNamespaceName,
       annotations: {
         "kubernetes.io/ingress.class": "nginx",
+        // "kubernetes.io/ingress.class": "traefik",
       },
     },
     spec: {
@@ -73,12 +76,22 @@ export const appIngress = new k8s.networking.v1.Ingress(
         {
           // Replace this with your own domain!
           // host: "myservicea.foo.org",
-          host: "localhost",
+          host: "foobar.com",
           http: {
             paths: [
               {
                 pathType: "Prefix",
                 path: "/",
+                backend: {
+                  service: {
+                    name: reactWebSettings.resourceName,
+                    port: { number: Number(reactWebEnvVars.APP_PORT) },
+                  },
+                },
+              },
+              {
+                pathType: "Prefix",
+                path: "/graphql",
                 backend: {
                   service: {
                     name: graphqlMongoSettings.resourceName,
@@ -89,24 +102,24 @@ export const appIngress = new k8s.networking.v1.Ingress(
             ],
           },
         },
-        {
-          // Replace this with your own domain!
-          host: "myserviceb.foo.org",
-          http: {
-            paths: [
-              {
-                pathType: "Prefix",
-                path: "/",
-                backend: {
-                  service: {
-                    name: graphqlPostgresSettings.resourceName,
-                    port: { number: Number(graphqlPostgresEnvVars.APP_PORT) },
-                  },
-                },
-              },
-            ],
-          },
-        },
+        // {
+        //   // Replace this with your own domain!
+        //   host: "myserviceb.foo.org",
+        //   http: {
+        //     paths: [
+        //       {
+        //         pathType: "Prefix",
+        //         path: "/",
+        //         backend: {
+        //           service: {
+        //             name: graphqlPostgresSettings.resourceName,
+        //             port: { number: Number(graphqlPostgresEnvVars.APP_PORT) },
+        //           },
+        //         },
+        //       },
+        //     ],
+        //   },
+        // },
       ],
     },
   },
