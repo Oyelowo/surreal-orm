@@ -124,7 +124,7 @@ export const grpcMongoService = grpcMongoDeployment.createService({
       port: Number(grpcMongoEnvVars.APP_PORT),
       protocol: "TCP",
       name: `${resourceName}-http`,
-      targetPort: 8000,
+      targetPort: 50051,
     },
   ],
 });

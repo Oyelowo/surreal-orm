@@ -15,6 +15,10 @@ gen:
 	# kubectl apply -f rendered/development/1-manifest/namespace-*
 	# kubectl apply -f rendered/development/1-manifest/
 	
+
+dev-manual:
+	skaffold dev --build-concurrency=0 --trigger="manual"
+
 dev:
 	pulumi update --yes --skip-preview
 
