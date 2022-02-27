@@ -12,7 +12,7 @@ kind: ConfigMap
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","data":{"defaultBackend.conf":"location /healthz {\n  return 200;\n}\n\nlocation / {\n  return 404;\n}"},"kind":"ConfigMap","metadata":{"labels":{"app.kubernetes.io/component":"default-backend","app.kubernetes.io/instance":"nginx-ingress-controller-helm","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"nginx-ingress-controller","helm.sh/chart":"nginx-ingress-controller-9.1.8"},"name":"nginx-ingress-controller-helm-default-backend","namespace":"development"}}
+      {"apiVersion":"v1","data":{"defaultBackend.conf":"location /healthz {\n  return 200;\n}\n\nlocation / {\n  return 404;\n}"},"kind":"ConfigMap","metadata":{"labels":{"app.kubernetes.io/component":"default-backend","app.kubernetes.io/instance":"nginx-ingress-controller-helm","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"nginx-ingress-controller","helm.sh/chart":"nginx-ingress-controller-9.1.8"},"name":"nginx-ingress-controller-helm-default-backend","namespace":"default"}}
   labels:
     app.kubernetes.io/component: default-backend
     app.kubernetes.io/instance: nginx-ingress-controller-helm
@@ -20,4 +20,4 @@ metadata:
     app.kubernetes.io/name: nginx-ingress-controller
     helm.sh/chart: nginx-ingress-controller-9.1.8
   name: nginx-ingress-controller-helm-default-backend
-  namespace: development
+  namespace: default
