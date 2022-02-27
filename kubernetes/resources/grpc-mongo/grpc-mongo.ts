@@ -52,7 +52,7 @@ export const grpcMongoPodBuilder = new kx.PodBuilder({
         ...grpcMongoEnvVars,
       },
       image: grpcMongoSettings.image,
-      ports: { http: 8000 },
+      ports: { http: Number(grpcMongoEnvVars.APP_PORT) },
       volumeMounts: [],
       resources: {
         limits: {
@@ -124,7 +124,7 @@ export const grpcMongoService = grpcMongoDeployment.createService({
       port: Number(grpcMongoEnvVars.APP_PORT),
       protocol: "TCP",
       name: `${resourceName}-http`,
-      targetPort: 50051,
+      targetPort: Number(grpcMongoEnvVars.APP_PORT),
     },
   ],
 });

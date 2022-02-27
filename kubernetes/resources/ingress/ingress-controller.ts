@@ -1,4 +1,6 @@
-import { devNamespaceName } from './../shared/namespaces';
+import { IngressControllerValuesBitnami } from "./../shared/ingressControllerValuesBitnami";
+import { RecursivePartial } from "./../shared/types";
+import { devNamespaceName } from "./../shared/namespaces";
 import { provider } from "./../shared/cluster";
 import {
   graphqlPostgresSettings,
@@ -16,8 +18,8 @@ import { devNamespace } from "../shared/namespaces";
 // consists of a Pod and a Service. Install it and configure the controller
 // to publish the load balancer IP address on each Ingress so that
 // applications can depend on the IP address of the load balancer if needed.
-// export const ctrl = new nginx.IngressController(
-//   "myctrl",
+// export const ingressNginx = new nginx.IngressController(
+//   "nginx-ingress-controller",
 //   {
 //     controller: {
 //       publishService: {
@@ -27,33 +29,40 @@ import { devNamespace } from "../shared/namespaces";
 //   },
 //   { provider: provider }
 // );
-
-// nginx-ingress-controller
-export const ingressNginx = new k8s.helm.v3.Chart(
-  "nginx-ingress-controller-helm",
+const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> =
   {
-    chart: "nginx-ingress-controller",
-    fetchOpts: {
-      repo: "https://charts.bitnami.com/bitnami",
+    containerPorts: {
+      http: 8000,
+      https: 443,
     },
-    version: "9.1.8",
-    values: {},
-    namespace: devNamespaceName,
-    // By default Release resource will wait till all created resources
-    // are available. Set this to true to skip waiting on resources being
-    // available.
-    skipAwait: false,
-  },
-  { provider }
-);
+  };
+// nginx-ingress-controller
+// K3s also comes with a traefik ingress controoler. Disable that if using this
+// export const ingressNginx = new k8s.helm.v3.Chart(
+//   "nginx-ingress-controller-helm",
+//   {
+//     chart: "nginx-ingress-controller",
+//     fetchOpts: {
+//       repo: "https://charts.bitnami.com/bitnami",
+//     },
+//     version: "9.1.8",
+//     values: ingressControllerValues,
+//     namespace: devNamespaceName,
+//     // By default Release resource will wait till all created resources
+//     // are available. Set this to true to skip waiting on resources being
+//     // available.
+//     skipAwait: false,
+//   },
+//   { provider }
+// );
 
 const appBase = "oyelowo";
-// Next, expose the app using an Ingress.
+// // Next, expose the app using an Ingress.
 export const appIngress = new k8s.networking.v1.Ingress(
   `${appBase}-ingress`,
   {
     metadata: {
-      name: "hello-k8s-ingress",
+      name: "nginx-ingress",
       namespace: devNamespaceName,
       annotations: {
         "kubernetes.io/ingress.class": "nginx",
@@ -64,7 +73,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
         {
           // Replace this with your own domain!
           // host: "myservicea.foo.org",
-          host: "/app",
+          host: "localhost",
           http: {
             paths: [
               {
@@ -104,5 +113,5 @@ export const appIngress = new k8s.networking.v1.Ingress(
   { provider: provider }
 );
 
-// export const appStatuses = apps;
-// export const controllerStatus = ctrl.status;
+// // export const appStatuses = apps;
+// // export const controllerStatus = ctrl.status;
