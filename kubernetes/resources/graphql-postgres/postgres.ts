@@ -55,7 +55,7 @@ const mappedCredentials = credentials.reduce<Credentials>(
 
 const postgresValues: DeepPartial<postgresdbHelmValuesBitnami> = {
   // useStatefulSet: true,
-  architecture: "replication",
+  architecture: "standalone", //  "replication" | "standalone"
   // replicaCount: 3,
   // nameOverride: "postgres-database",
   fullnameOverride: graphqlPostgresEnvVars.POSTGRES_SERVICE_NAME,
