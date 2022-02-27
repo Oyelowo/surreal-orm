@@ -1,3 +1,3 @@
 export * from "./graphql-postgres";
-export * from "./postgresHAdb";
-// export * from "./postgresdb";
+// export * from "./postgresHAdb";
+export * from "./postgres";

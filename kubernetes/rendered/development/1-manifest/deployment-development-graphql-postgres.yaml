@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"graphql-postgres","namespace":"development"},"spec":{"replicas":3,"selector":{"matchLabels":{"app":"graphql"}},"template":{"metadata":{"labels":{"app":"graphql"}},"spec":{"containers":[{"env":[{"name":"CONFIG","valueFrom":{"configMapKeyRef":{"key":"config","name":"graphql-postgres"}}},{"name":"PASSWORD","valueFrom":{"secretKeyRef":{"key":"password","name":"graphql-postgres"}}},{"name":"APP_ENVIRONMENT","value":"local"},{"name":"APP_HOST","value":"0.0.0.0"},{"name":"APP_PORT","value":"8000"},{"name":"POSTGRES_DATABASE_NAME","value":"db0"},{"name":"POSTGRES_NAME","value":"db0"},{"name":"POSTGRES_USERNAME","value":"postgres"},{"name":"POSTGRES_PASSWORD","value":"1234"},{"name":"POSTGRES_HOST","value":"postgres-database-primary.development"},{"name":"POSTGRES_PORT","value":"5432"},{"name":"POSTGRES_SERVICE_NAME","value":"postgres-database"}],"image":"oyelowo/graphql-postgres","name":"graphql","ports":[{"containerPort":8000,"name":"http"}],"resources":{"limits":{"cpu":"100m","memory":"200Mi"},"requests":{"cpu":"100m","memory":"70Mi"}},"volumeMounts":[]}],"initContainers":[],"volumes":[]}}}}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: graphql-postgres
+  namespace: development
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: graphql
+  template:
+    metadata:
+      labels:
+        app: graphql
+    spec:
+      containers:
+      - env:
+        - name: CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: config
+              name: graphql-postgres
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: graphql-postgres
+        - name: APP_ENVIRONMENT
+          value: local
+        - name: APP_HOST
+          value: 0.0.0.0
+        - name: APP_PORT
+          value: "8000"
+        - name: POSTGRES_DATABASE_NAME
+          value: db0
+        - name: POSTGRES_NAME
+          value: db0
+        - name: POSTGRES_USERNAME
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: "1234"
+        - name: POSTGRES_HOST
+          value: postgres-database-primary.development
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_SERVICE_NAME
+          value: postgres-database
+        image: oyelowo/graphql-postgres
+        name: graphql
+        ports:
+        - containerPort: 8000
+          name: http
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 70Mi
+        volumeMounts: []
+      initContainers: []
+      volumes: []

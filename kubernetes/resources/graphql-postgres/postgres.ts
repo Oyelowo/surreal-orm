@@ -59,10 +59,16 @@ const postgresValues: DeepPartial<postgresdbHelmValuesBitnami> = {
   // replicaCount: 3,
   // nameOverride: "postgres-database",
   fullnameOverride: graphqlPostgresEnvVars.POSTGRES_SERVICE_NAME,
+  auth: {
+    database: graphqlPostgresEnvVars.POSTGRES_DATABASE_NAME,
+    postgresPassword: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
+    password: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
+    username: graphqlPostgresEnvVars.POSTGRES_USERNAME,
+  },
   global: {
     // namespaceOverride: devNamespaceName,
-    imagePullSecrets: [],
-    storageClass: "",
+    // imagePullSecrets: [],
+    // storageClass: "",
     postgresql: {
       auth: {
         username: graphqlPostgresEnvVars.POSTGRES_USERNAME,

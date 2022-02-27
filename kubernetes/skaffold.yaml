@@ -28,13 +28,13 @@ build:
   #     - image: builder-base
   #       alias: BASE
 
-  # - image: oyelowo/graphql-postgres
-  #   context: ../rust
-  #   docker:
-  #     dockerfile: Dockerfile.development
-  #     target: graphql-postgres
-  #     noCache: false
-  #     squash: false
+  - image: oyelowo/graphql-postgres
+    context: ../rust
+    docker:
+      dockerfile: Dockerfile.development
+      target: graphql-postgres
+      noCache: false
+      squash: false
   #   requires:
   #     - image: builder-base
   #       alias: BASE
@@ -70,18 +70,18 @@ portForward:
   - resourceType: service
     resourceName: react-web
     port: 3000
-    localPort: 3001
-
-  - resourceType: service
-    resourceName: graphql-mongo
-    namespace: development
-    port: 8000
-    localPort: 8000
+    localPort: 3000
 
   # - resourceType: service
-  #   resourceName: graphql-postgres
+  #   resourceName: graphql-mongo
+  #   namespace: development
   #   port: 8000
-  #   localPort: 8001
+  #   localPort: 8000
+
+  - resourceType: service
+    resourceName: graphql-postgres
+    port: 8000
+    localPort: 8000
 
   # - resourceType: service
   #   resourceName: grpc-mongo
