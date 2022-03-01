@@ -16,10 +16,12 @@ gen:
 	# kubectl apply -f rendered/development/1-manifest/
 
 start cluster:
-	k3d cluster create local --k3s-arg "--no-deploy=traefik@server:*"
+    # if you wan to disable traefik as the default ingress controller for the cluster
+	k3d cluster create local-test --k3s-arg "--no-deploy=traefik@server:*"
+	# k3d cluster create local-test
 
 delete cluster:
-	k3d cluster delete local
+	k3d cluster delete local-test
 
 dev-manual:
 	skaffold dev --build-concurrency=0 --trigger="manual"
