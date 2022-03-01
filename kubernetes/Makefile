@@ -14,7 +14,12 @@ gen:
 
 	# kubectl apply -f rendered/development/1-manifest/namespace-*
 	# kubectl apply -f rendered/development/1-manifest/
-	
+
+start cluster:
+	k3d cluster create local --k3s-arg "--no-deploy=traefik@server:*"
+
+delete cluster:
+	k3d cluster delete local
 
 dev-manual:
 	skaffold dev --build-concurrency=0 --trigger="manual"
