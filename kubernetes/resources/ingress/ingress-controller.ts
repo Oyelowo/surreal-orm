@@ -1,4 +1,4 @@
-import { reactWebSettings, reactWebEnvVars } from './../react-web/settings';
+import { reactWebSettings, reactWebEnvVars } from "./../react-web/settings";
 import { IngressControllerValuesBitnami } from "./../shared/ingressControllerValuesBitnami";
 import { RecursivePartial } from "./../shared/types";
 import { devNamespaceName } from "./../shared/namespaces";
@@ -30,13 +30,12 @@ import { devNamespace } from "../shared/namespaces";
 //   },
 //   { provider: provider }
 // );
-const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> =
-  {
-    containerPorts: {
-      http: 8000,
-      https: 443,
-    },
-  };
+const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> = {
+  containerPorts: {
+    http: 8000,
+    https: 443,
+  },
+};
 // nginx-ingress-controller
 // K3s also comes with a traefik ingress controoler. Disable that if using this
 export const ingressNginx = new k8s.helm.v3.Chart(
@@ -67,7 +66,9 @@ export const appIngress = new k8s.networking.v1.Ingress(
       name: "nginx-ingress",
       namespace: devNamespaceName,
       annotations: {
-        "kubernetes.io/ingress.class": "nginx",
+        // # Route all traffic to pod, but don't keep subpath (!)
+        "nginx.ingress.kubernetes.io/rewrite-target": "/",
+        // "kubernetes.io/ingress.class": "nginx",
         // "kubernetes.io/ingress.class": "traefik",
       },
     },
@@ -76,12 +77,12 @@ export const appIngress = new k8s.networking.v1.Ingress(
         {
           // Replace this with your own domain!
           // host: "myservicea.foo.org",
-          host: "foobar.com",
+          host: "localhost",
           http: {
             paths: [
               {
                 pathType: "Prefix",
-                path: "/",
+                path: "/app",
                 backend: {
                   service: {
                     name: reactWebSettings.resourceName,

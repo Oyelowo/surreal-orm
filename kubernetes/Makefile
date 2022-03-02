@@ -1,5 +1,4 @@
 gen:
-
 	export PULUMI_CONFIG_PASSPHRASE="" 
 	rm -rf ./login
 	mkdir ./login
@@ -18,10 +17,32 @@ gen:
 start-cluster:
     # if you wan to disable traefik as the default ingress controller for the cluster
 	k3d cluster create local --k3s-arg "--no-deploy=traefik@server:*"
+	# k3d cluster create local --api-port 6550 -p "8081:80@loadbalancer" --agents 2 --k3s-arg "--no-deploy=traefik@server:*"
 	# k3d cluster create local
+	k3d cluster create localcluster \
+		--api-port 127.0.0.1:6443 \
+		-p 80:80@loadbalancer \
+		-p 443:443@loadbalancer \
+		--k3s-server-arg "--no-deploy=traefik"
+
+		# k3d cluster create local --api-port 127.0.0.1:6443 -p 80:80@loadbalancer -p 443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+		# k3d cluster create local --api-port 6550 -p 80:80@loadbalancer -p 443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+		# k3d cluster create dev --port 8080:80@loadbalancer --port 8443:443@loadbalancer
+		# k3d cluster create dev --port 8080:80@loadbalancer --port 8443:443@loadbalancer
+# kubectl port-forward $(kubectl get pods --selector "app.kubernetes.io/name=traefik" --output=name) 9000:9000
+
+# k3d cluster create nginx --k3s-server-arg '--no-deploy=traefik' --volume "$(pwd)/helm-ingress-nginx.yaml:/var/lib/rancher/k3s/server/manifests/helm-ingress-nginx.yaml"
+# k3d cluster create local --k3s-arg '--no-deploy=traefik@server:*' --volume "$(pwd)/rendered/development/1-manifest/ingress-development-nginx-ingress.yaml:/var/lib/rancher/k3s/server/manifests/ingress-development-nginx-ingress.yaml"
+
+# with 3 master(servers) and 3 worker(agent) nodes
+# k3d cluster create test --port 8080:80@loadbalancer --port 8443:443@loadbalancer --api-port 6443 --servers 3 --agents 3
+	skaffold dev
 
 delete-cluster:
 	k3d cluster delete local
+
+start:
+	skaffold dev
 
 dev-manual:
 	skaffold dev --build-concurrency=0 --trigger="manual"
