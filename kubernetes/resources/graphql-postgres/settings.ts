@@ -1,7 +1,7 @@
 import { devNamespaceName } from "./../shared/namespaces";
 import { Environemt, Settings } from "../shared/types";
 
-export const graphqlPostgresSettings: Settings = {
+export const graphqlPostgresSettings: Settings<'graphql-postgres'> = {
   resourceName: "graphql-postgres",
   requestMemory: "70Mi",
   requestCpu: "100m",
@@ -22,7 +22,7 @@ type AppEnvVars = {
   POSTGRES_PASSWORD: string;
   POSTGRES_HOST: string;
   POSTGRES_PORT: "5432";
-  POSTGRES_SERVICE_NAME: `postgres-database`;
+  POSTGRES_SERVICE_NAME: `graphql-postgres-database`;
   // DATABASE_URL: postgres://postgres:1234@postgres-graphql-postgres:5432/my_db
 };
 
@@ -36,5 +36,5 @@ export const graphqlPostgresEnvVars: AppEnvVars = {
   POSTGRES_PASSWORD: "1234",
   POSTGRES_HOST: `postgres-database.${devNamespaceName}`, // the name of the postgres service being connected to. The name has suffices(primary|read etc) if using replcated architecture
   POSTGRES_PORT: "5432",
-  POSTGRES_SERVICE_NAME: "postgres-database",
+  POSTGRES_SERVICE_NAME: "graphql-postgres-database",
 } as const;

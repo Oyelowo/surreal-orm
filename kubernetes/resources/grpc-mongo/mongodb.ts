@@ -67,6 +67,7 @@ const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
     enabled: true,
     rootUser: "root_user",
     rootPassword: "root_password",
+    replicaSetKey: "replica_key",
     // array of
     ...mappedCredentials,
     // usernames: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],

@@ -1,7 +1,7 @@
 import { devNamespaceName } from './../shared/namespaces';
 import { Environemt, Settings } from "../shared/types";
 
-export const grpcMongoSettings: Settings = {
+export const grpcMongoSettings: Settings<'grpc-mongo'> = {
   resourceName: "grpc-mongo",
   requestMemory: "70Mi",
   requestCpu: "100m",
@@ -21,7 +21,7 @@ type AppEnvVars = {
   MONGODB_PASSWORD: string;
   MONGODB_HOST: string;
   MONGODB_PORT: "27017";
-  MONGODB_SERVICE_NAME: string;
+  MONGODB_SERVICE_NAME: "grpc-mongo-database";
 };
 
  // `http://${name}.${namespace}:${port}`;

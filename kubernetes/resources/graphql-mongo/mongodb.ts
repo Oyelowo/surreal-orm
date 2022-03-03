@@ -71,6 +71,7 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
     enabled: true,
     rootUser: "root_user",
     rootPassword: "root_password",
+    replicaSetKey: "replica_key",
     // array of
     ...mappedCredentials,
     // usernames: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],
@@ -86,10 +87,9 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   },
 };
 
-
 // `http://${name}.${namespace}:${port}`;
 export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
-  "graphql-mongodb-helm",
+  graphqlMongoEnvVars.MONGODB_SERVICE_NAME,
   {
     chart: "mongodb",
     fetchOpts: {

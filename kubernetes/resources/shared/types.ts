@@ -19,14 +19,14 @@ export type CPU = `${number}${"m"}`;
 
 export type App = "graphql-mongo" | "graphql-postgres" | "grpc-mongo" | "react-web";
 
-export interface Settings {
-  resourceName: App;
+export interface Settings<AppName extends App> {
+  resourceName: AppName;
   requestMemory: Memory;
   requestCpu: CPU;
   limitMemory: Memory;
   limitCpu: CPU;
   host: string;
-  image: `oyelowo/${App}`;
+  image: `oyelowo/${AppName}`;
 }
 
 export type RecursivePartial<T> = {

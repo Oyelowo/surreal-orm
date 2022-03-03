@@ -1,7 +1,7 @@
 import { devNamespaceName } from './../shared/namespaces';
-import { Settings } from '../shared/types';
+import { Environemt, Settings } from '../shared/types';
 
-export const graphqlMongoSettings: Settings = {
+export const graphqlMongoSettings: Settings<'graphql-mongo'> = {
   resourceName: "graphql-mongo",
   requestMemory: "70Mi",
   requestCpu: "100m",
@@ -11,7 +11,8 @@ export const graphqlMongoSettings: Settings = {
   image: "oyelowo/graphql-mongo",
 };
 
-type Environemt = "local" | "development" | "staging" | "production";
+
+const DB_NAME = `${graphqlMongoSettings.resourceName}-database` as const;
 
 type AppEnvVars = {
   APP_ENVIRONMENT: Environemt;
@@ -20,9 +21,9 @@ type AppEnvVars = {
   MONGODB_NAME: string;
   MONGODB_USERNAME: string;
   MONGODB_PASSWORD: string;
-  MONGODB_HOST: string;
+  MONGODB_HOST: `${typeof DB_NAME}.${typeof devNamespaceName}`;
   MONGODB_PORT: "27017";
-  MONGODB_SERVICE_NAME: string;
+  MONGODB_SERVICE_NAME: typeof DB_NAME;
 };
 
  // `http://${name}.${namespace}:${port}`;
@@ -38,8 +39,8 @@ export const graphqlMongoEnvVars: AppEnvVars = {
   MONGODB_NAME: "db0",
   MONGODB_USERNAME: "username0",
   MONGODB_PASSWORD: "password0",
-  MONGODB_HOST: `mongo-database.${devNamespaceName}`,
-  MONGODB_SERVICE_NAME: "mongo-database",
+  MONGODB_HOST: "graphql-mongo-database.development",
+  MONGODB_SERVICE_NAME: "graphql-mongo-database",
   // hostAndPort":"graphql-mongo-0.mongo-graphql.development.svc.cluster.local:27017
   // MONGODB_HOST: "graphql-mongod-0.graphql-mongod-headless.development.svc.cluster.local",
   // const url = 'mongodb://username1:$[password]@mongo-graphql.development:27017/db1?authSource=$[authSource]';

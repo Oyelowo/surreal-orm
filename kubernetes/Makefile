@@ -14,6 +14,15 @@ gen:
 	# kubectl apply -f rendered/development/1-manifest/namespace-*
 	# kubectl apply -f rendered/development/1-manifest/
 
+start-app-build:
+	make gen
+	k3d cluster delete local
+	k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+	skaffold dev
+
+start-app:
+	skaffold dev
+
 start-cluster:
     # if you wan to disable traefik as the default ingress controller for the cluster
 	 k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
