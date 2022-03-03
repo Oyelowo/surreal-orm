@@ -30,16 +30,19 @@ import { devNamespace } from "../shared/namespaces";
 //   },
 //   { provider: provider }
 // );
+
+const controllerName = "nginx-ingress-controller";
 const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> = {
-  containerPorts: {
-    http: 8000,
-    https: 443,
-  },
+  // containerPorts: {
+  //   http: 8000,
+  //   https: 443,
+  // },
+  fullnameOverride: controllerName,
 };
 // nginx-ingress-controller
 // K3s also comes with a traefik ingress controoler. Disable that if using this
 export const ingressNginx = new k8s.helm.v3.Chart(
-  "nginx-ingress-controller-helm",
+  controllerName,
   {
     chart: "nginx-ingress-controller",
     fetchOpts: {
@@ -47,7 +50,7 @@ export const ingressNginx = new k8s.helm.v3.Chart(
     },
     version: "9.1.8",
     values: ingressControllerValues,
-    namespace: "default",
+    // namespace: "nginx-ingress",
     // namespace: devNamespaceName,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being
@@ -67,12 +70,14 @@ export const appIngress = new k8s.networking.v1.Ingress(
       namespace: devNamespaceName,
       annotations: {
         // # Route all traffic to pod, but don't keep subpath (!)
-        "nginx.ingress.kubernetes.io/rewrite-target": "/",
-        // "kubernetes.io/ingress.class": "nginx",
-        // "kubernetes.io/ingress.class": "traefik",
+        // "nginx.ingress.kubernetes.io/rewrite-target": "/",
+        "nginx.ingress.kubernetes.io/rewrite-target": "/$1",
+        "nginx.ingress.kubernetes.io/ssl-redirect": "false",
+        "nginx.ingress.kubernetes.io/use-regex": "true",
       },
     },
     spec: {
+      ingressClassName: "nginx",
       rules: [
         {
           // Replace this with your own domain!
@@ -82,7 +87,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
             paths: [
               {
                 pathType: "Prefix",
-                path: "/app",
+                path: "/",
                 backend: {
                   service: {
                     name: reactWebSettings.resourceName,

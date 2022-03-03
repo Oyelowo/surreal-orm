@@ -17,7 +17,7 @@ pub async fn index(schema: web::Data<MyGraphQLSchema>, req: GraphQLRequest) -> G
 
 #[get("/")]
 pub async fn index_playground() -> HttpResponse {
-    let source = playground_source(GraphQLPlaygroundConfig::new("/").subscription_endpoint("/"));
+    let source = playground_source(GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"));
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(source)
