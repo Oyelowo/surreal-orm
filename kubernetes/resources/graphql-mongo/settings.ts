@@ -1,4 +1,4 @@
-import { AppConfigs, AppEnvVars, MongoDbEnvVars } from '../shared/types';
+import { AppConfigs } from "../shared/types";
 
 export const graphqlMongoSettings: AppConfigs<
   "graphql-mongo",
@@ -31,12 +31,3 @@ export const graphqlMongoSettings: AppConfigs<
     MONGODB_PORT: "27017",
   },
 };
-
-// const kk: Extract<
-//   AppEnvVars1<"graphql-mongo", "development">,
-//   { dbType: "mongodb" }
-// > = {
-
-// };
-// export const graphqlMongoEnvVars =
-//   graphqlMongoSettings.envVars as MongoDbEnvVars;

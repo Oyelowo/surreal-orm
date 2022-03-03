@@ -4,10 +4,7 @@ import { NginxConfiguration } from "./../shared/nginxConfigurations";
 import { RecursivePartial } from "./../shared/types";
 import { devNamespaceName } from "./../shared/namespaces";
 import { provider } from "./../shared/cluster";
-import {
-  graphqlPostgresSettings,
-  graphqlPostgresEnvVars,
-} from "./../graphql-postgres/settings";
+import { graphqlPostgresSettings } from "./../graphql-postgres/settings";
 import { graphqlMongoSettings } from "./../graphql-mongo/settings";
 import * as k8s from "@pulumi/kubernetes";
 import * as nginx from "@pulumi/kubernetes-ingress-nginx";

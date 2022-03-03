@@ -1,4 +1,4 @@
-import { graphqlPostgresEnvVars } from "./settings";
+import { graphqlPostgresSettings } from "./settings";
 
 import { postgresdbHaHelmValuesBitnami } from "../shared/postgresdbHAHelmValuesBitnami";
 import { devNamespaceName } from "../shared/namespaces";
@@ -6,6 +6,7 @@ import { DeepPartial, RecursivePartial } from "../shared/types";
 import * as k8s from "@pulumi/kubernetes";
 import { provider } from "../shared/cluster";
 
+const { envVars } = graphqlPostgresSettings;
 type Credentials = {
   usernames: string[];
   passwords: string[];
@@ -13,9 +14,9 @@ type Credentials = {
 };
 const credentials = [
   {
-    username: graphqlPostgresEnvVars.POSTGRES_USERNAME,
-    password: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
-    database: graphqlPostgresEnvVars.POSTGRES_NAME,
+    username: envVars.POSTGRES_USERNAME,
+    password: envVars.POSTGRES_PASSWORD,
+    database: envVars.POSTGRES_NAME,
   },
   {
     username: "username1",
@@ -59,17 +60,17 @@ const postgresValues: DeepPartial<postgresdbHaHelmValuesBitnami> = {
   // replicaCount: 3,
   // nameOverride: "postgres-database",
   // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
-  fullnameOverride: graphqlPostgresEnvVars.POSTGRES_SERVICE_NAME,
+  fullnameOverride: envVars.POSTGRES_SERVICE_NAME,
   postgresql: {
     // replicaCount: 3,
     // containerPort,
-    username: graphqlPostgresEnvVars.POSTGRES_USERNAME,
+    username: envVars.POSTGRES_USERNAME,
     //pgHbaConfiguration: "",
-    postgresPassword: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
-    database: graphqlPostgresEnvVars.POSTGRES_DATABASE_NAME,
-    password: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
-   // repmgrPassword: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
-   // repmgrDatabase: graphqlPostgresEnvironmentVariables.POSTGRES_DATABASE_NAME,
+    postgresPassword: envVars.POSTGRES_PASSWORD,
+    database: envVars.POSTGRES_DATABASE_NAME,
+    password: envVars.POSTGRES_PASSWORD,
+    // repmgrPassword: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
+    // repmgrDatabase: graphqlPostgresEnvironmentVariables.POSTGRES_DATABASE_NAME,
     // existingSecret: "",
   },
   pgpool: {
@@ -103,7 +104,7 @@ const postgresValues: DeepPartial<postgresdbHaHelmValuesBitnami> = {
   },
   service: {
     type: "ClusterIP",
-    port: Number(graphqlPostgresEnvVars.POSTGRES_PORT),
+    port: Number(envVars.POSTGRES_PORT),
     // portName: "mongo-graphql",
     // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
   },

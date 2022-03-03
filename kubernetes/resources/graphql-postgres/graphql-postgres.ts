@@ -6,14 +6,12 @@ import { devNamespace, devNamespaceName } from "../shared/namespaces";
 import * as random from "@pulumi/random";
 import * as pulumi from "@pulumi/pulumi";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
-import {
-  graphqlPostgresEnvVars,
-  graphqlPostgresSettings,
-} from "./settings";
+import { graphqlPostgresSettings } from "./settings";
 // Prefix by the name of deployment to make them unique across stack
 
 // const { resourceName } = graphqlPostgresSettings;
-const { resourceName } = graphqlPostgresSettings;
+const { kubeConfig, envVars } = graphqlPostgresSettings;
+const resourceName = kubeConfig.resourceName;
 
 const metadataObject = {
   metadata: {
@@ -52,19 +50,19 @@ const graphqlPostgresPodBuilder = new kx.PodBuilder({
       env: {
         CONFIG: graphqlPostgresConfigMap.asEnvValue("config"),
         PASSWORD: graphqlPostgresSecret.asEnvValue("password"),
-        ...graphqlPostgresEnvVars,
+        ...envVars,
       },
-      image: graphqlPostgresSettings.image,
+      image: kubeConfig.image,
       ports: { http: 8000 },
       volumeMounts: [],
       resources: {
         limits: {
-          memory: graphqlPostgresSettings.limitMemory,
-          cpu: graphqlPostgresSettings.limitCpu,
+          memory: kubeConfig.limitMemory,
+          cpu: kubeConfig.limitCpu,
         },
         requests: {
-          memory: graphqlPostgresSettings.requestMemory,
-          cpu: graphqlPostgresSettings.requestCpu,
+          memory: kubeConfig.requestMemory,
+          cpu: kubeConfig.requestCpu,
         },
       },
     },
@@ -85,7 +83,7 @@ export const graphqlPostgresService = graphqlPostgresDeployment.createService({
   type: kx.types.ServiceType.ClusterIP,
   ports: [
     {
-      port: Number(graphqlPostgresEnvVars.APP_PORT),
+      port: Number(envVars.APP_PORT),
       protocol: "TCP",
       name: `${resourceName}-http`,
       targetPort: 8000,

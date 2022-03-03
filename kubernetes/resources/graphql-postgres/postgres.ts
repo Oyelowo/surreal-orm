@@ -1,10 +1,12 @@
-import { graphqlPostgresEnvVars } from "./settings";
+import { graphqlPostgresSettings } from "./settings";
 
 import { postgresdbHelmValuesBitnami } from "../shared/postgresdbHelmValuesBitnami";
 import { devNamespaceName } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types";
 import * as k8s from "@pulumi/kubernetes";
 import { provider } from "../shared/cluster";
+
+const { envVars } = graphqlPostgresSettings;
 
 type Credentials = {
   usernames: string[];
@@ -13,9 +15,9 @@ type Credentials = {
 };
 const credentials = [
   {
-    username: graphqlPostgresEnvVars.POSTGRES_USERNAME,
-    password: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
-    database: graphqlPostgresEnvVars.POSTGRES_NAME,
+    username: envVars.POSTGRES_USERNAME,
+    password: envVars.POSTGRES_PASSWORD,
+    database: envVars.POSTGRES_NAME,
   },
   {
     username: "username1",
@@ -58,12 +60,12 @@ const postgresValues: DeepPartial<postgresdbHelmValuesBitnami> = {
   architecture: "standalone", //  "replication" | "standalone"
   // replicaCount: 3,
   // nameOverride: "postgres-database",
-  fullnameOverride: graphqlPostgresEnvVars.POSTGRES_SERVICE_NAME,
+  fullnameOverride: envVars.POSTGRES_SERVICE_NAME,
   auth: {
-    database: graphqlPostgresEnvVars.POSTGRES_DATABASE_NAME,
-    postgresPassword: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
-    password: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
-    username: graphqlPostgresEnvVars.POSTGRES_USERNAME,
+    database: envVars.POSTGRES_DATABASE_NAME,
+    postgresPassword: envVars.POSTGRES_PASSWORD,
+    password: envVars.POSTGRES_PASSWORD,
+    username: envVars.POSTGRES_USERNAME,
   },
   global: {
     // namespaceOverride: devNamespaceName,
@@ -71,27 +73,27 @@ const postgresValues: DeepPartial<postgresdbHelmValuesBitnami> = {
     // storageClass: "",
     postgresql: {
       auth: {
-        username: graphqlPostgresEnvVars.POSTGRES_USERNAME,
-        password: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
-        database: graphqlPostgresEnvVars.POSTGRES_DATABASE_NAME,
-        postgresPassword: graphqlPostgresEnvVars.POSTGRES_PASSWORD,
+        username: envVars.POSTGRES_USERNAME,
+        password: envVars.POSTGRES_PASSWORD,
+        database: envVars.POSTGRES_DATABASE_NAME,
+        postgresPassword: envVars.POSTGRES_PASSWORD,
         // existingSecret: "",
       },
       service: {
         ports: {
-          postgresql: graphqlPostgresEnvVars.POSTGRES_PORT,
+          postgresql: envVars.POSTGRES_PORT,
         },
       },
     },
   },
-//   primary: {
-//     service: {
-//       type: "ClusterIP",
-//       ports: {
-//         postgresql: Number(graphqlPostgresEnvironmentVariables.POSTGRES_PORT),
-//       },
-//     },
-//   },
+  //   primary: {
+  //     service: {
+  //       type: "ClusterIP",
+  //       ports: {
+  //         postgresql: Number(graphqlPostgresEnvironmentVariables.POSTGRES_PORT),
+  //       },
+  //     },
+  //   },
 
   //   service: {
   //     type: "ClusterIP",

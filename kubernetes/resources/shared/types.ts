@@ -76,8 +76,8 @@ export type PostgresDbEnvVars<
 > = {
   dbType: PostgresDb;
   POSTGRES_NAME: DbName;
-  POSTGRES_DATABASE_NAME: string;
-  POSTGRES_USERNAME: string;
+  POSTGRES_DATABASE_NAME: DbName;
+  POSTGRES_USERNAME: "postgres";
   POSTGRES_PASSWORD: string;
   POSTGRES_HOST: `${DbName}.${TNamespace}`;
   POSTGRES_PORT: "5432";

@@ -1,5 +1,5 @@
 import { MongodbHelmValuesBitnami } from "../shared/MongodbHelmValuesBitnami";
-import { grpcMongoEnvVars } from "./settings";
+import { grpcMongoSettings } from "./settings";
 
 import { devNamespaceName } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types";
@@ -14,9 +14,9 @@ type Credentials = {
 };
 const credentials = [
   {
-    username: grpcMongoEnvVars.MONGODB_USERNAME,
-    password: grpcMongoEnvVars.MONGODB_PASSWORD,
-    database: grpcMongoEnvVars.MONGODB_NAME,
+    username: grpcMongoSettings.envVars.MONGODB_USERNAME,
+    password: grpcMongoSettings.envVars.MONGODB_PASSWORD,
+    database: grpcMongoSettings.envVars.MONGODB_NAME,
   },
   {
     username: "username1",
@@ -59,7 +59,7 @@ const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   architecture: "replicaset",
   replicaCount: 3,
   // nameOverride: "mongodb-graphql",
-  fullnameOverride: grpcMongoEnvVars.MONGODB_SERVICE_NAME,
+  fullnameOverride: grpcMongoSettings.envVars.MONGODB_SERVICE_NAME,
   // global: {
   //   namespaceOverride: devNamespaceName,
   // },
@@ -77,9 +77,9 @@ const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   },
   service: {
     type: "ClusterIP",
-    port: Number(grpcMongoEnvVars.MONGODB_PORT),
+    port: Number(grpcMongoSettings.envVars.MONGODB_PORT),
     // portName: "mongo-graphql",
-    nameOverride: grpcMongoEnvVars.MONGODB_SERVICE_NAME,
+    nameOverride: grpcMongoSettings.envVars.MONGODB_SERVICE_NAME,
   },
 };
 
