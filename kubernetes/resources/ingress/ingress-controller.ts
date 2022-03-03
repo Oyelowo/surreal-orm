@@ -87,7 +87,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
             paths: [
               {
                 pathType: "Prefix",
-                path: "/",
+                path: "/?(.*)",
                 backend: {
                   service: {
                     name: reactWebSettings.resourceName,
