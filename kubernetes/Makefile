@@ -21,7 +21,8 @@ start-app-build:
 	skaffold dev
 
 start-app:
-	skaffold dev
+	skaffold dev --trigger="manual"
+	# skaffold dev
 
 start-cluster:
     # if you wan to disable traefik as the default ingress controller for the cluster

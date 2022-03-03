@@ -10,14 +10,16 @@ use common::utils;
 
 use std::path::Path;
 
-#[post("/")]
+#[post("/graphql")]
 pub async fn index(schema: web::Data<MyGraphQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
 }
 
-#[get("/")]
+#[get("/graphql")]
 pub async fn index_playground() -> HttpResponse {
-    let source = playground_source(GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"));
+    let source = playground_source(
+        GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"),
+    );
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(source)
