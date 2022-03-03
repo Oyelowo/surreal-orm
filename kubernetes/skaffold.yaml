@@ -89,6 +89,7 @@ portForward:
 #     localPort: 50051
 
   - resourceType: service
+    # namespace: default
     resourceName: nginx-ingress-controller
     port: 80
     localPort: 8080

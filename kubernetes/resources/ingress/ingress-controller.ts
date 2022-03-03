@@ -1,5 +1,6 @@
 import { reactWebSettings, reactWebEnvVars } from "./../react-web/settings";
 import { IngressControllerValuesBitnami } from "./../shared/ingressControllerValuesBitnami";
+import { NginxConfiguration } from "./../shared/nginxConfigurations";
 import { RecursivePartial } from "./../shared/types";
 import { devNamespaceName } from "./../shared/namespaces";
 import { provider } from "./../shared/cluster";
@@ -60,24 +61,27 @@ export const ingressNginx = new k8s.helm.v3.Chart(
   { provider }
 );
 
+type IngressClassName = "nginx" | "traefik";
+const ingressClassName: IngressClassName = "nginx";
+
 const appBase = "oyelowo";
 // // Next, expose the app using an Ingress.
+
+const annotations: Partial<NginxConfiguration> = {
+  "nginx.ingress.kubernetes.io/rewrite-target": "/$1",
+  "nginx.ingress.kubernetes.io/ssl-redirect": "false",
+  "nginx.ingress.kubernetes.io/use-regex": "true",
+};
 export const appIngress = new k8s.networking.v1.Ingress(
   `${appBase}-ingress`,
   {
     metadata: {
       name: "nginx-ingress",
       namespace: devNamespaceName,
-      annotations: {
-        // # Route all traffic to pod, but don't keep subpath (!)
-        // "nginx.ingress.kubernetes.io/rewrite-target": "/",
-        "nginx.ingress.kubernetes.io/rewrite-target": "/$1",
-        "nginx.ingress.kubernetes.io/ssl-redirect": "false",
-        "nginx.ingress.kubernetes.io/use-regex": "true",
-      },
+      annotations: annotations as any,
     },
     spec: {
-      ingressClassName: "nginx",
+      ingressClassName,
       rules: [
         {
           // Replace this with your own domain!
