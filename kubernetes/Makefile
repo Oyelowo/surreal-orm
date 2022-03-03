@@ -16,6 +16,7 @@ gen:
 
 start-cluster:
     # if you wan to disable traefik as the default ingress controller for the cluster
+	 k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
 	# k3d cluster create local --k3s-arg "--no-deploy=traefik@server:*"
 	# k3d cluster create local --k3s-arg '--flannel-backend=none@server:*' '--disable-network-policy'
 	# k3d cluster create local --k3s-arg '--flannel-backend=none@server:*' '--no-deploy=network-policy@server:*'
@@ -27,7 +28,7 @@ start-cluster:
 	# 	-p 443:443@loadbalancer \
 	# 	--k3s-server-arg "--no-deploy=traefik"
 
-	 k3d cluster create local --api-port 127.0.0.1:6443 -p 8080:80@loadbalancer -p 443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+	#  k3d cluster create local --api-port 127.0.0.1:6443 -p 8080:80@loadbalancer -p 443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
 	# k3d cluster create local --api-port 6550 -p 80:80@loadbalancer -p 443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
 	# k3d cluster create local --api-port 6550 --k3s-arg "--no-deploy=traefik@server:*" --k3s-arg "--disable=servicelb@server:*" --no-lb --wait
 	# k3d cluster create local --api-port 6550  -p 8080:80@agent:* --k3s-arg "--no-deploy=traefik@server:*" --k3s-arg "--disable=servicelb@server:*" --no-lb --wait
