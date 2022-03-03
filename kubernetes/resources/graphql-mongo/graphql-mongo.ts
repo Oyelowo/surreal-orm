@@ -1,21 +1,21 @@
-import { MongodbHelmValuesBitnami } from "../shared/MongodbHelmValuesBitnami";
-import { RecursivePartial, Settings } from "../shared/types";
-import * as k8s from "@pulumi/kubernetes";
-import * as kx from "@pulumi/kubernetesx";
-import { provider } from "../shared/cluster";
-import { devNamespace, devNamespaceName } from "../shared/namespaces";
-import * as random from "@pulumi/random";
-import * as pulumi from "@pulumi/pulumi";
-import { Namespace } from "@pulumi/kubernetes/core/v1";
-import {
-  graphqlMongoEnvVars,
-  graphqlMongoSettings,
-} from "./settings";
+import * as k8s from '@pulumi/kubernetes';
+import { Namespace } from '@pulumi/kubernetes/core/v1';
+import * as kx from '@pulumi/kubernetesx';
+import * as pulumi from '@pulumi/pulumi';
+import * as random from '@pulumi/random';
+
+import { provider } from '../shared/cluster';
+import { MongodbHelmValuesBitnami } from '../shared/MongodbHelmValuesBitnami';
+import { devNamespace, devNamespaceName } from '../shared/namespaces';
+import { RecursivePartial, Settings } from '../shared/types';
+import { graphqlMongoSettings } from './settings';
+
 // Prefix by the name of deployment to make them unique across stack
 
-const { resourceName } = graphqlMongoSettings;
+const { kubeConfig, envVars } = graphqlMongoSettings;
+const resourceName = kubeConfig.resourceName;
 
-// Create a Kubernetes ConfigMap.
+// Create a Kubernetes ConfigMap.F
 export const graphqlMongoConfigMap = new kx.ConfigMap(
   `${resourceName}-configmap`,
   {
@@ -51,19 +51,19 @@ export const graphqlMongoPodBuilder = new kx.PodBuilder({
       env: {
         CONFIG: graphqlMongoConfigMap.asEnvValue("config"),
         PASSWORD: graphqlMongoSecret.asEnvValue("password"),
-        ...graphqlMongoEnvVars,
+        ...envVars,
       },
-      image: graphqlMongoSettings.image,
+      image: kubeConfig.image,
       ports: { http: 8000 },
       volumeMounts: [],
       resources: {
         limits: {
-          memory: graphqlMongoSettings.limitMemory,
-          cpu: graphqlMongoSettings.limitCpu,
+          memory: kubeConfig.limitMemory,
+          cpu: kubeConfig.limitCpu,
         },
         requests: {
-          memory: graphqlMongoSettings.requestMemory,
-          cpu: graphqlMongoSettings.requestCpu,
+          memory: kubeConfig.requestMemory,
+          cpu: kubeConfig.requestCpu,
         },
       },
     },
@@ -126,7 +126,7 @@ export const graphqlMongoService = graphqlMongoDeployment.createService({
   type: kx.types.ServiceType.ClusterIP,
   ports: [
     {
-      port: Number(graphqlMongoEnvVars.APP_PORT),
+      port: Number(envVars.APP_PORT),
       protocol: "TCP",
       name: `${resourceName}-http`,
       targetPort: 8000,

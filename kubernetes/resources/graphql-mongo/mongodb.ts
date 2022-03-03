@@ -1,10 +1,12 @@
-import { graphqlMongoEnvVars } from "./settings";
+import * as k8s from '@pulumi/kubernetes';
 
-import { MongodbHelmValuesBitnami } from "../shared/MongodbHelmValuesBitnami";
-import { devNamespaceName } from "../shared/namespaces";
-import { DeepPartial, RecursivePartial } from "../shared/types";
-import * as k8s from "@pulumi/kubernetes";
-import { provider } from "../shared/cluster";
+import { provider } from '../shared/cluster';
+import { MongodbHelmValuesBitnami } from '../shared/MongodbHelmValuesBitnami';
+import { devNamespaceName } from '../shared/namespaces';
+import { DeepPartial } from '../shared/types';
+import { graphqlMongoSettings } from './settings';
+
+const { envVars } = graphqlMongoSettings;
 
 /* MONGODB STATEFULSET */
 type Credentials = {
@@ -14,9 +16,9 @@ type Credentials = {
 };
 const credentials = [
   {
-    username: graphqlMongoEnvVars.MONGODB_USERNAME,
-    password: graphqlMongoEnvVars.MONGODB_PASSWORD,
-    database: graphqlMongoEnvVars.MONGODB_NAME,
+    username: envVars.MONGODB_USERNAME,
+    password: envVars.MONGODB_PASSWORD,
+    database: envVars.MONGODB_NAME,
   },
   {
     username: "username1",
@@ -59,7 +61,7 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   architecture: "replicaset",
   replicaCount: 3,
   // nameOverride: "mongodb-graphql",
-  fullnameOverride: graphqlMongoEnvVars.MONGODB_SERVICE_NAME,
+  fullnameOverride: envVars.MONGODB_SERVICE_NAME,
   // global: {
   //   namespaceOverride: devNamespaceName,
   // },
@@ -71,7 +73,7 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
     enabled: true,
     rootUser: "root_user",
     rootPassword: "root_password",
-    replicaSetKey: "replica_key",
+    // replicaSetKey: "replica_key",
     // array of
     ...mappedCredentials,
     // usernames: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],
@@ -81,15 +83,15 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   },
   service: {
     type: "ClusterIP",
-    port: Number(graphqlMongoEnvVars.MONGODB_PORT),
+    port: Number(envVars.MONGODB_PORT),
     // portName: "mongo-graphql",
-    nameOverride: graphqlMongoEnvVars.MONGODB_SERVICE_NAME,
+    nameOverride: envVars.MONGODB_SERVICE_NAME,
   },
 };
 
 // `http://${name}.${namespace}:${port}`;
 export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
-  graphqlMongoEnvVars.MONGODB_SERVICE_NAME,
+  envVars.MONGODB_SERVICE_NAME,
   {
     chart: "mongodb",
     fetchOpts: {

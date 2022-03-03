@@ -8,10 +8,7 @@ import {
   graphqlPostgresSettings,
   graphqlPostgresEnvVars,
 } from "./../graphql-postgres/settings";
-import {
-  graphqlMongoSettings,
-  graphqlMongoEnvVars,
-} from "./../graphql-mongo/settings";
+import { graphqlMongoSettings } from "./../graphql-mongo/settings";
 import * as k8s from "@pulumi/kubernetes";
 import * as nginx from "@pulumi/kubernetes-ingress-nginx";
 import { devNamespace } from "../shared/namespaces";
@@ -33,13 +30,14 @@ import { devNamespace } from "../shared/namespaces";
 // );
 
 const controllerName = "nginx-ingress-controller";
-const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> = {
-  // containerPorts: {
-  //   http: 8000,
-  //   https: 443,
-  // },
-  fullnameOverride: controllerName,
-};
+const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> =
+  {
+    // containerPorts: {
+    //   http: 8000,
+    //   https: 443,
+    // },
+    fullnameOverride: controllerName,
+  };
 // nginx-ingress-controller
 // K3s also comes with a traefik ingress controoler. Disable that if using this
 export const ingressNginx = new k8s.helm.v3.Chart(
@@ -104,8 +102,10 @@ export const appIngress = new k8s.networking.v1.Ingress(
                 path: "/graphql",
                 backend: {
                   service: {
-                    name: graphqlMongoSettings.resourceName,
-                    port: { number: Number(graphqlMongoEnvVars.APP_PORT) },
+                    name: graphqlMongoSettings.kubeConfig.resourceName,
+                    port: {
+                      number: Number(graphqlMongoSettings.envVars.APP_PORT),
+                    },
                   },
                 },
               },
