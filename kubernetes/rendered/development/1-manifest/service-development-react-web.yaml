@@ -3,7 +3,7 @@ kind: Service
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"react-web","namespace":"development"},"spec":{"ports":[{"name":"http","port":3000}],"selector":{"app":"react"},"type":"ClusterIP"}}
+      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"react-web","namespace":"development"},"spec":{"ports":[{"name":"http","port":8000}],"selector":{"app":"react"},"type":"ClusterIP"}}
   labels:
     app.kubernetes.io/managed-by: pulumi
   name: react-web
@@ -11,7 +11,7 @@ metadata:
 spec:
   ports:
   - name: http
-    port: 3000
+    port: 8000
   selector:
     app: react
   type: ClusterIP

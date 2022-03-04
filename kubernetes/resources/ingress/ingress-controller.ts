@@ -63,7 +63,7 @@ const appBase = "oyelowo";
 // // Next, expose the app using an Ingress.
 
 const annotations: Partial<NginxConfiguration> = {
-  "nginx.ingress.kubernetes.io/rewrite-target": "/$1",
+  // "nginx.ingress.kubernetes.io/rewrite-target": "/$1",
   "nginx.ingress.kubernetes.io/ssl-redirect": "false",
   "nginx.ingress.kubernetes.io/use-regex": "true",
 };
@@ -86,7 +86,8 @@ export const appIngress = new k8s.networking.v1.Ingress(
             paths: [
               {
                 pathType: "Prefix",
-                path: "/?(.*)",
+                // path: "/?(.*)",
+                path: "/",
                 backend: {
                   service: {
                     name: reactWebSettings.kubeConfig.resourceName,

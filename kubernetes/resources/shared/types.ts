@@ -99,7 +99,7 @@ export type AppEnvVars<
 > = {
   APP_ENVIRONMENT: Environemt;
   APP_HOST: "0.0.0.0";
-  APP_PORT: "8000" | `50051`;
+  APP_PORT: "8000" | "50051" | "3000";
 } & DatabaseEnvVars<`${TAppName}-database`, TNamespace>;
 
 type EnvironmentVariables<
