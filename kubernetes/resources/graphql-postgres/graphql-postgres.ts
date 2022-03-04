@@ -10,22 +10,14 @@ import { graphqlPostgresSettings } from "./settings";
 // Prefix by the name of deployment to make them unique across stack
 
 // const { resourceName } = graphqlPostgresSettings;
-const { kubeConfig, envVars } = graphqlPostgresSettings;
+const { kubeConfig, envVars, metadata } = graphqlPostgresSettings;
 const resourceName = kubeConfig.resourceName;
-
-const metadataObject = {
-  metadata: {
-    name: resourceName,
-    namespace: devNamespaceName,
-  },
-};
-
 // Create a Kubernetes ConfigMap.
 export const graphqlPostgresConfigMap = new kx.ConfigMap(
   `${resourceName}-configmap`,
   {
     data: { config: "very important data" },
-    ...metadataObject,
+    metadata,
   },
   { provider }
 );
@@ -37,7 +29,7 @@ export const graphqlPostgresSecret = new kx.Secret(
     stringData: {
       password: "fakepassword",
     },
-    ...metadataObject,
+    metadata,
   },
   { provider }
 );
@@ -74,7 +66,7 @@ export const graphqlPostgresDeployment = new kx.Deployment(
   `${resourceName}-deployment`,
   {
     spec: graphqlPostgresPodBuilder.asDeploymentSpec({ replicas: 3 }),
-    ...metadataObject,
+    metadata,
   },
   { provider }
 );

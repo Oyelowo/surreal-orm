@@ -27,4 +27,8 @@ export const graphqlPostgresSettings: AppConfigs<
     POSTGRES_PORT: "5432",
     POSTGRES_SERVICE_NAME: "graphql-mongo-database",
   },
+  metadata: {
+    name: "graphql-mongo",
+    namespace: "development",
+  },
 };

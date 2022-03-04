@@ -20,4 +20,8 @@ export const reactWebSettings: AppConfigs<
     APP_HOST: "0.0.0.0",
     APP_PORT: "3000",
   },
+  metadata: {
+    name: "react-web",
+    namespace: "development",
+  },
 };

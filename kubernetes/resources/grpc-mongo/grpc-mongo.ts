@@ -10,22 +10,15 @@ import { Namespace } from "@pulumi/kubernetes/core/v1";
 import { grpcMongoSettings } from "./settings";
 // Prefix by the name of deployment to make them unique across stack
 
-const { envVars, kubeConfig } = grpcMongoSettings;
+const { envVars, kubeConfig, metadata } = grpcMongoSettings;
 const resourceName = kubeConfig.resourceName;
-
-const metadataObject = {
-  metadata: {
-    name: resourceName,
-    namespace: devNamespaceName,
-  },
-};
 
 // Create a Kubernetes ConfigMap.
 export const grpcMongoConfigMap = new kx.ConfigMap(
   `${resourceName}-configmap`,
   {
     data: { config: "very important data" },
-    ...metadataObject,
+    metadata,
   },
   { provider }
 );
@@ -37,7 +30,7 @@ export const grpcMongoSecret = new kx.Secret(
     stringData: {
       password: "fakepassword",
     },
-    ...metadataObject,
+    metadata,
   },
   { provider }
 );
@@ -74,7 +67,7 @@ export const grpcMongoDeployment = new kx.Deployment(
   `${resourceName}-deployment`,
   {
     spec: grpcMongoPodBuilder.asDeploymentSpec({ replicas: 3 }),
-    ...metadataObject,
+    metadata,
   },
   { provider }
 );

@@ -1,18 +1,18 @@
-import * as k8s from '@pulumi/kubernetes';
-import { Namespace } from '@pulumi/kubernetes/core/v1';
-import * as kx from '@pulumi/kubernetesx';
-import * as pulumi from '@pulumi/pulumi';
-import * as random from '@pulumi/random';
+import * as k8s from "@pulumi/kubernetes";
+import { Namespace } from "@pulumi/kubernetes/core/v1";
+import * as kx from "@pulumi/kubernetesx";
+import * as pulumi from "@pulumi/pulumi";
+import * as random from "@pulumi/random";
 
-import { provider } from '../shared/cluster';
-import { MongodbHelmValuesBitnami } from '../shared/MongodbHelmValuesBitnami';
-import { devNamespace, devNamespaceName } from '../shared/namespaces';
-import { RecursivePartial, Settings } from '../shared/types';
-import { graphqlMongoSettings } from './settings';
+import { provider } from "../shared/cluster";
+import { MongodbHelmValuesBitnami } from "../shared/MongodbHelmValuesBitnami";
+import { devNamespace, devNamespaceName } from "../shared/namespaces";
+import { RecursivePartial, Settings } from "../shared/types";
+import { graphqlMongoSettings } from "./settings";
 
 // Prefix by the name of deployment to make them unique across stack
 
-const { kubeConfig, envVars } = graphqlMongoSettings;
+const { kubeConfig, envVars, metadata } = graphqlMongoSettings;
 const resourceName = kubeConfig.resourceName;
 
 // Create a Kubernetes ConfigMap.F
@@ -20,10 +20,7 @@ export const graphqlMongoConfigMap = new kx.ConfigMap(
   `${resourceName}-configmap`,
   {
     data: { config: "very important data" },
-    metadata: {
-      name: resourceName,
-      namespace: devNamespaceName,
-    },
+    metadata,
   },
   { provider }
 );
@@ -35,10 +32,7 @@ export const graphqlMongoSecret = new kx.Secret(
     stringData: {
       password: "fakepassword",
     },
-    metadata: {
-      name: resourceName,
-      namespace: devNamespaceName,
-    },
+    metadata,
   },
   { provider }
 );
@@ -75,10 +69,7 @@ export const graphqlMongoDeployment = new kx.Deployment(
   `${resourceName}-deployment`,
   {
     spec: graphqlMongoPodBuilder.asDeploymentSpec({ replicas: 3 }),
-    metadata: {
-      name: resourceName,
-      namespace: devNamespaceName,
-    },
+    metadata,
   },
   { provider }
 );

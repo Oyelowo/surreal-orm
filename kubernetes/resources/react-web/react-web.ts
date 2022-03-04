@@ -14,7 +14,7 @@ const metadataObject = {
     name: resourceName,
     namespace: devNamespaceName,
   },
-};
+} as const;
 
 // Create a Kubernetes ConfigMap.
 export const reactWebConfigMap = new kx.ConfigMap(

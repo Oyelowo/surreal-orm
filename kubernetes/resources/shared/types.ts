@@ -59,60 +59,58 @@ type DoesNotHaveDb = "doesNotHaveDb";
 type DBType = MongoDb | PostgresDb | DoesNotHaveDb;
 
 export type MongoDbEnvVars<
-  DbName extends `${AppName}-database`,
-  TNamespace extends Namespace
+  DBN extends `${AppName}-database`,
+  NS extends Namespace
 > = {
   dbType: MongoDb;
-  MONGODB_NAME: DbName;
+  MONGODB_NAME: DBN;
   MONGODB_USERNAME: string;
   MONGODB_PASSWORD: string;
-  MONGODB_HOST: `${DbName}.${TNamespace}`;
+  MONGODB_HOST: `${DBN}.${NS}`;
   MONGODB_PORT: "27017";
-  MONGODB_SERVICE_NAME: DbName;
+  MONGODB_SERVICE_NAME: DBN;
 };
 
 export type PostgresDbEnvVars<
-  DbName extends `${AppName}-database`,
-  TNamespace extends Namespace
+  DBN extends `${AppName}-database`,
+  NS extends Namespace
 > = {
   dbType: PostgresDb;
-  POSTGRES_NAME: DbName;
-  POSTGRES_DATABASE_NAME: DbName;
+  POSTGRES_NAME: DBN;
+  POSTGRES_DATABASE_NAME: DBN;
   POSTGRES_USERNAME: "postgres";
   POSTGRES_PASSWORD: string;
-  POSTGRES_HOST: `${DbName}.${TNamespace}`;
+  POSTGRES_HOST: `${DBN}.${NS}`;
   POSTGRES_PORT: "5432";
-  POSTGRES_SERVICE_NAME: DbName;
+  POSTGRES_SERVICE_NAME: DBN;
 };
 
-type DatabaseEnvVars<
-  DbName extends `${AppName}-database`,
-  TNamespace extends Namespace
-> =
-  | MongoDbEnvVars<DbName, TNamespace>
-  | PostgresDbEnvVars<DbName, TNamespace>
+type DatabaseEnvVars<DBN extends `${AppName}-database`, NS extends Namespace> =
+  | MongoDbEnvVars<DBN, NS>
+  | PostgresDbEnvVars<DBN, NS>
   | { dbType: DoesNotHaveDb };
 
-export type AppEnvVars<
-  TAppName extends AppName,
-  TNamespace extends Namespace
-> = {
+export type AppEnvVars<AN extends AppName, NS extends Namespace> = {
   APP_ENVIRONMENT: Environemt;
   APP_HOST: "0.0.0.0";
   APP_PORT: "8000" | "50051" | "3000";
-} & DatabaseEnvVars<`${TAppName}-database`, TNamespace>;
+} & DatabaseEnvVars<`${AN}-database`, NS>;
 
 type EnvironmentVariables<
-  TAppName extends AppName,
-  TNamespace extends Namespace,
-  TDBType extends DBType
-> = Extract<AppEnvVars<TAppName, TNamespace>, { dbType: TDBType }>;
+  AN extends AppName,
+  NS extends Namespace,
+  DBT extends DBType
+> = Extract<AppEnvVars<AN, NS>, { dbType: DBT }>;
 
 export type AppConfigs<
-  TAppName extends AppName,
-  TDBType extends DBType,
-  TNamespace extends Namespace
+  AN extends AppName,
+  DBT extends DBType,
+  NS extends Namespace
 > = {
-  kubeConfig: Settings<TAppName>;
-  envVars: Omit<EnvironmentVariables<TAppName, TNamespace, TDBType>, "dbType">;
+  kubeConfig: Settings<AN>;
+  envVars: Omit<EnvironmentVariables<AN, NS, DBT>, "dbType">;
+  metadata: {
+    name: AN;
+    namespace: NS;
+  };
 };

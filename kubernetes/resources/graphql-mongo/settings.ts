@@ -30,4 +30,8 @@ export const graphqlMongoSettings: AppConfigs<
 
     MONGODB_PORT: "27017",
   },
+  metadata: {
+    name: "graphql-mongo",
+    namespace: "development",
+  },
 };

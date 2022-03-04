@@ -30,4 +30,8 @@ export const grpcMongoSettings: AppConfigs<
 
     MONGODB_PORT: "27017",
   },
+  metadata: {
+    name: "grpc-mongo",
+    namespace: "development",
+  },
 };
