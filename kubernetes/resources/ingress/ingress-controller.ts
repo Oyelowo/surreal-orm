@@ -1,4 +1,4 @@
-import { reactWebSettings, reactWebEnvVars } from "./../react-web/settings";
+import { reactWebSettings } from "./../react-web/settings";
 import { IngressControllerValuesBitnami } from "./../shared/ingressControllerValuesBitnami";
 import { NginxConfiguration } from "./../shared/nginxConfigurations";
 import { RecursivePartial } from "./../shared/types";
@@ -89,8 +89,8 @@ export const appIngress = new k8s.networking.v1.Ingress(
                 path: "/?(.*)",
                 backend: {
                   service: {
-                    name: reactWebSettings.resourceName,
-                    port: { number: Number(reactWebEnvVars.APP_PORT) },
+                    name: reactWebSettings.kubeConfig.resourceName,
+                    port: { number: Number(reactWebSettings.envVars.APP_PORT) },
                   },
                 },
               },
