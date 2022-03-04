@@ -6,7 +6,6 @@ export const graphqlMongoSettings: AppConfigs<
   "development"
 > = {
   kubeConfig: {
-    resourceName: "graphql-mongo",
     requestMemory: "70Mi",
     requestCpu: "100m",
     limitMemory: "200Mi",
