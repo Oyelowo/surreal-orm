@@ -30,6 +30,7 @@ export interface Settings<TAppName extends AppName> {
   requestCpu: CPU;
   limitMemory: Memory;
   limitCpu: CPU;
+  replicaCount: number;
   host: string;
   image: `oyelowo/${TAppName}`;
 }

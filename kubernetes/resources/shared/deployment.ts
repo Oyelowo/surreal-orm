@@ -1,8 +1,8 @@
-import * as kx from '@pulumi/kubernetesx';
-import * as pulumi from '@pulumi/pulumi';
+import * as kx from "@pulumi/kubernetesx";
+import * as pulumi from "@pulumi/pulumi";
 
-import { NoUnion } from '../shared/types';
-import { AppConfigs, AppName, DBType, NamespaceOfApps } from './types';
+import { NoUnion } from "../shared/types";
+import { AppConfigs, AppName, DBType, NamespaceOfApps } from "./types";
 
 export class ServiceDeployment<
   AN extends AppName,
@@ -58,7 +58,7 @@ export class ServiceDeployment<
             ...envVars,
           },
           image: kubeConfig.image,
-          ports: { http: 8000 },
+          ports: { http: Number(envVars.APP_PORT) },
           volumeMounts: [],
           resources: {
             limits: {
@@ -78,7 +78,9 @@ export class ServiceDeployment<
     this.deployment = new kx.Deployment(
       `${resourceName}-deployment`,
       {
-        spec: podBuilder.asDeploymentSpec({ replicas: 3 }),
+        spec: podBuilder.asDeploymentSpec({
+          replicas: kubeConfig.replicaCount,
+        }),
         metadata,
       },
       { provider, parent: this }
@@ -91,7 +93,7 @@ export class ServiceDeployment<
           port: Number(envVars.APP_PORT),
           protocol: "TCP",
           name: `${resourceName}-http`,
-          targetPort: 8000,
+          targetPort: Number(envVars.APP_PORT),
         },
       ],
     });

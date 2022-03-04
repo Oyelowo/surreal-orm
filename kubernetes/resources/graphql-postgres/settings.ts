@@ -10,6 +10,7 @@ export const graphqlPostgresSettings: AppConfigs<
     requestCpu: "100m",
     limitMemory: "200Mi",
     limitCpu: "100m",
+    replicaCount: 3,
     host: "0.0.0.0",
     image: "oyelowo/graphql-postgres",
   },

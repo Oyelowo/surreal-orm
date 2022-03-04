@@ -10,6 +10,7 @@ export const reactWebSettings: AppConfigs<
     requestCpu: "100m",
     limitMemory: "200Mi",
     limitCpu: "100m",
+    replicaCount: 2,
     host: "0.0.0.0",
     image: "oyelowo/react-web",
   },

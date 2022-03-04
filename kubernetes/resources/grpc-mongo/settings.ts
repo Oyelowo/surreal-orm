@@ -1,4 +1,4 @@
-import { AppConfigs } from '../shared/types';
+import { AppConfigs } from "../shared/types";
 
 export const grpcMongoSettings: AppConfigs<
   "grpc-mongo",
@@ -6,11 +6,11 @@ export const grpcMongoSettings: AppConfigs<
   "development"
 > = {
   kubeConfig: {
-    resourceName: "grpc-mongo",
     requestMemory: "70Mi",
     requestCpu: "100m",
     limitMemory: "200Mi",
     limitCpu: "100m",
+    replicaCount: 3,
     host: "0.0.0.0",
     image: "oyelowo/grpc-mongo",
   },
@@ -18,7 +18,7 @@ export const grpcMongoSettings: AppConfigs<
   envVars: {
     APP_ENVIRONMENT: "development",
     APP_HOST: "0.0.0.0",
-    APP_PORT: "8000",
+    APP_PORT: "50051",
     MONGODB_NAME: "grpc-mongo-database",
     MONGODB_USERNAME: "username0",
     MONGODB_PASSWORD: "password0",
