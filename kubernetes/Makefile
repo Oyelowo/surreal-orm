@@ -23,8 +23,9 @@ start-k8s-apps:
 	k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
 	skaffold dev --trigger="manual"
 	# skaffold dev
+	
 start-app-build:
-	make start-web & start-k8s-apps
+	sh -c 'make start-web & make start-k8s-apps & wait'
 
 start-app:
 	skaffold dev --trigger="manual"
