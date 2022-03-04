@@ -14,12 +14,17 @@ gen:
 	# kubectl apply -f rendered/development/1-manifest/namespace-*
 	# kubectl apply -f rendered/development/1-manifest/
 
-start-app-build:
+start-web:
+	(cd ../typescript && make dev)
+
+start-k8s-apps:
 	make gen
 	k3d cluster delete local
 	k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
-	skaffold dev
-	(cd ../typescript && make dev)
+	skaffold dev --trigger="manual"
+	# skaffold dev
+start-app-build:
+	make start-web & start-k8s-apps
 
 start-app:
 	skaffold dev --trigger="manual"

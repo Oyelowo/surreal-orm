@@ -5,22 +5,15 @@ import { provider } from "../shared/cluster";
 import { reactWebSettings } from "./settings";
 import { devNamespaceName } from "../shared/namespaces";
 
-const { envVars, kubeConfig } = reactWebSettings;
+const { envVars, kubeConfig, metadata } = reactWebSettings;
 
 const resourceName = kubeConfig.resourceName;
-
-const metadataObject = {
-  metadata: {
-    name: resourceName,
-    namespace: devNamespaceName,
-  },
-} as const;
 
 // Create a Kubernetes ConfigMap.
 export const reactWebConfigMap = new kx.ConfigMap(
   `${resourceName}-configmap`,
   {
-    ...metadataObject,
+    metadata,
     data: { config: "very important data" },
   },
   { provider }
@@ -30,7 +23,7 @@ export const reactWebConfigMap = new kx.ConfigMap(
 export const reactWebSecret = new kx.Secret(
   `${resourceName}-secret`,
   {
-    ...metadataObject,
+    metadata,
     stringData: {
       password: "very-weak-password",
     },
@@ -69,7 +62,7 @@ export const reactWebPodBuilder = new kx.PodBuilder({
 export const reactWebDeployment = new kx.Deployment(
   `${resourceName}-deployment`,
   {
-    ...metadataObject,
+    metadata,
     spec: reactWebPodBuilder.asDeploymentSpec({ replicas: 2 }),
   },
   { provider }
