@@ -1,10 +1,10 @@
-import { graphqlPostgresSettings } from "./settings";
+import * as k8s from '@pulumi/kubernetes';
 
-import { postgresdbHaHelmValuesBitnami } from "../shared/postgresdbHAHelmValuesBitnami";
-import { devNamespaceName } from "../shared/namespaces";
-import { DeepPartial, RecursivePartial } from "../shared/types";
-import * as k8s from "@pulumi/kubernetes";
-import { provider } from "../shared/cluster";
+import { provider } from '../shared/cluster';
+import { devNamespaceName } from '../shared/namespaces';
+import { postgresdbHaHelmValuesBitnami } from '../shared/postgresdbHAHelmValuesBitnami';
+import { DeepPartial, RecursivePartial } from '../shared/types';
+import { graphqlPostgresSettings } from './settings';
 
 const { envVars } = graphqlPostgresSettings;
 type Credentials = {
@@ -112,7 +112,7 @@ const postgresValues: DeepPartial<postgresdbHaHelmValuesBitnami> = {
 
 // `http://${name}.${namespace}:${port}`;
 export const graphqlPostgresPostgresdbHA = new k8s.helm.v3.Chart(
-  "postgres-ha-helm",
+  "postgres-ha",
   {
     chart: "postgresql-ha",
     fetchOpts: {

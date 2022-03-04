@@ -1,7 +1,6 @@
 
-import * as pulumi from "@pulumi/pulumi";
-import * as kx from "@pulumi/kubernetesx";
-import { types } from "@pulumi/kubernetesx";
+import * as kx from '@pulumi/kubernetesx';
+import * as pulumi from '@pulumi/pulumi';
 
 interface ServiceProps {
     serviceName: string;

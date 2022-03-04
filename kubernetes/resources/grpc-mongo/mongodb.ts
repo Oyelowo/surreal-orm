@@ -1,10 +1,10 @@
-import { MongodbHelmValuesBitnami } from "../shared/MongodbHelmValuesBitnami";
-import { grpcMongoSettings } from "./settings";
+import * as k8s from '@pulumi/kubernetes';
 
-import { devNamespaceName } from "../shared/namespaces";
-import { DeepPartial, RecursivePartial } from "../shared/types";
-import * as k8s from "@pulumi/kubernetes";
-import { provider } from "../shared/cluster";
+import { provider } from '../shared/cluster';
+import { MongodbHelmValuesBitnami } from '../shared/MongodbHelmValuesBitnami';
+import { devNamespaceName } from '../shared/namespaces';
+import { DeepPartial, RecursivePartial } from '../shared/types';
+import { grpcMongoSettings } from './settings';
 
 /* MONGODB STATEFULSET */
 type Credentials = {

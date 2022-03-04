@@ -1,4 +1,4 @@
-import { AppConfigs } from "../shared/types";
+import { AppConfigs } from '../shared/types';
 
 export const reactWebSettings: AppConfigs<
   "react-web",

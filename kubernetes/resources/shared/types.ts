@@ -1,6 +1,6 @@
 export type Environemt = "local" | "development" | "staging" | "production";
 // This might change but make it the environment for now.
-export type Namespace = Environemt;
+export type NamespaceOfApps = Environemt;
 
 export type Memory = `${number}${
   | "E"
@@ -56,11 +56,11 @@ type MongoDb = "mongodb";
 type PostgresDb = "postgresdb";
 type DoesNotHaveDb = "doesNotHaveDb";
 
-type DBType = MongoDb | PostgresDb | DoesNotHaveDb;
+export type DBType = MongoDb | PostgresDb | DoesNotHaveDb;
 
 export type MongoDbEnvVars<
   DBN extends `${AppName}-database`,
-  NS extends Namespace
+  NS extends NamespaceOfApps
 > = {
   dbType: MongoDb;
   MONGODB_NAME: DBN;
@@ -73,7 +73,7 @@ export type MongoDbEnvVars<
 
 export type PostgresDbEnvVars<
   DBN extends `${AppName}-database`,
-  NS extends Namespace
+  NS extends NamespaceOfApps
 > = {
   dbType: PostgresDb;
   POSTGRES_NAME: DBN;
@@ -85,12 +85,15 @@ export type PostgresDbEnvVars<
   POSTGRES_SERVICE_NAME: DBN;
 };
 
-type DatabaseEnvVars<DBN extends `${AppName}-database`, NS extends Namespace> =
+type DatabaseEnvVars<
+  DBN extends `${AppName}-database`,
+  NS extends NamespaceOfApps
+> =
   | MongoDbEnvVars<DBN, NS>
   | PostgresDbEnvVars<DBN, NS>
   | { dbType: DoesNotHaveDb };
 
-export type AppEnvVars<AN extends AppName, NS extends Namespace> = {
+export type AppEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
   APP_ENVIRONMENT: Environemt;
   APP_HOST: "0.0.0.0";
   APP_PORT: "8000" | "50051" | "3000";
@@ -98,19 +101,25 @@ export type AppEnvVars<AN extends AppName, NS extends Namespace> = {
 
 type EnvironmentVariables<
   AN extends AppName,
-  NS extends Namespace,
+  NS extends NamespaceOfApps,
   DBT extends DBType
 > = Extract<AppEnvVars<AN, NS>, { dbType: DBT }>;
 
 export type AppConfigs<
   AN extends AppName,
   DBT extends DBType,
-  NS extends Namespace
+  NS extends NamespaceOfApps
 > = {
-  kubeConfig: Settings<AN>;
+  kubeConfig: Settings<NoUnion<AN>>;
   envVars: Omit<EnvironmentVariables<AN, NS, DBT>, "dbType">;
   metadata: {
     name: AN;
     namespace: NS;
   };
 };
+
+export type NoUnion<T, U = T> = T extends U
+  ? [U] extends [T]
+    ? T
+    : never
+  : never;

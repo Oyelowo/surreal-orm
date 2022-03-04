@@ -1,10 +1,10 @@
-import { graphqlPostgresSettings } from "./settings";
+import * as k8s from '@pulumi/kubernetes';
 
-import { postgresdbHelmValuesBitnami } from "../shared/postgresdbHelmValuesBitnami";
-import { devNamespaceName } from "../shared/namespaces";
-import { DeepPartial, RecursivePartial } from "../shared/types";
-import * as k8s from "@pulumi/kubernetes";
-import { provider } from "../shared/cluster";
+import { provider } from '../shared/cluster';
+import { devNamespaceName } from '../shared/namespaces';
+import { postgresdbHelmValuesBitnami } from '../shared/postgresdbHelmValuesBitnami';
+import { DeepPartial, RecursivePartial } from '../shared/types';
+import { graphqlPostgresSettings } from './settings';
 
 const { envVars } = graphqlPostgresSettings;
 

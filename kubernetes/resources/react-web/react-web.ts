@@ -1,9 +1,10 @@
-import { Settings } from "../shared/types";
-import * as k8s from "@pulumi/kubernetes";
-import * as kx from "@pulumi/kubernetesx";
-import { provider } from "../shared/cluster";
-import { reactWebSettings } from "./settings";
-import { devNamespaceName } from "../shared/namespaces";
+import * as k8s from '@pulumi/kubernetes';
+import * as kx from '@pulumi/kubernetesx';
+
+import { provider } from '../shared/cluster';
+import { devNamespaceName } from '../shared/namespaces';
+import { Settings } from '../shared/types';
+import { reactWebSettings } from './settings';
 
 const { envVars, kubeConfig, metadata } = reactWebSettings;
 

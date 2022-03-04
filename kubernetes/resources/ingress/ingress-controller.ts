@@ -1,14 +1,14 @@
-import { reactWebSettings } from "./../react-web/settings";
-import { IngressControllerValuesBitnami } from "./../shared/ingressControllerValuesBitnami";
-import { NginxConfiguration } from "./../shared/nginxConfigurations";
-import { RecursivePartial } from "./../shared/types";
-import { devNamespaceName } from "./../shared/namespaces";
-import { provider } from "./../shared/cluster";
-import { graphqlPostgresSettings } from "./../graphql-postgres/settings";
-import { graphqlMongoSettings } from "./../graphql-mongo/settings";
-import * as k8s from "@pulumi/kubernetes";
-import * as nginx from "@pulumi/kubernetes-ingress-nginx";
-import { devNamespace } from "../shared/namespaces";
+import * as k8s from '@pulumi/kubernetes';
+import * as nginx from '@pulumi/kubernetes-ingress-nginx';
+
+import { graphqlMongoSettings } from '../graphql-mongo/settings';
+import { graphqlPostgresSettings } from '../graphql-postgres/settings';
+import { reactWebSettings } from '../react-web/settings';
+import { provider } from '../shared/cluster';
+import { IngressControllerValuesBitnami } from '../shared/ingressControllerValuesBitnami';
+import { devNamespace, devNamespaceName } from '../shared/namespaces';
+import { NginxConfiguration } from '../shared/nginxConfigurations';
+import { RecursivePartial } from '../shared/types';
 
 // Install the NGINX ingress controller to our cluster. The controller
 // consists of a Pod and a Service. Install it and configure the controller

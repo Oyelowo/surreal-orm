@@ -1,6 +1,6 @@
-import * as k8s from "@pulumi/kubernetes";
-import * as kx from "@pulumi/kubernetesx";
-import { Namespace } from "@pulumi/kubernetes/core/v1";
+import * as k8s from '@pulumi/kubernetes';
+import { Namespace } from '@pulumi/kubernetes/core/v1';
+import * as kx from '@pulumi/kubernetesx';
 
 // import { devNamespace } from "./namespaces";
 
