@@ -54,8 +54,9 @@ export type DeepPartial<T> = {
 
 type MongoDb = "mongodb";
 type PostgresDb = "postgresdb";
+type DoesNotHaveDb = "doesNotHaveDb";
 
-type DBType = MongoDb | PostgresDb;
+type DBType = MongoDb | PostgresDb | DoesNotHaveDb;
 
 export type MongoDbEnvVars<
   DbName extends `${AppName}-database`,
@@ -87,7 +88,10 @@ export type PostgresDbEnvVars<
 type DatabaseEnvVars<
   DbName extends `${AppName}-database`,
   TNamespace extends Namespace
-> = MongoDbEnvVars<DbName, TNamespace> | PostgresDbEnvVars<DbName, TNamespace>;
+> =
+  | MongoDbEnvVars<DbName, TNamespace>
+  | PostgresDbEnvVars<DbName, TNamespace>
+  | { dbType: DoesNotHaveDb };
 
 export type AppEnvVars<
   TAppName extends AppName,

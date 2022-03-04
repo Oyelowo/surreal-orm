@@ -2,20 +2,12 @@ import { Settings } from "../shared/types";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
 import { provider } from "../shared/cluster";
-import { reactWebEnvVars } from "./settings";
+import { reactWebSettings } from "./settings";
 import { devNamespaceName } from "../shared/namespaces";
 
-export const reactWebSettings: Settings = {
-  requestMemory: "100Mi",
-  requestCpu: "100m",
-  limitMemory: "250Mi",
-  limitCpu: "250m",
-  host: "0.0.0.0",
-  resourceName: "react-web",
-  image: "oyelowo/react-web",
-};
+const { envVars, kubeConfig } = reactWebSettings;
 
-const { resourceName } = reactWebSettings;
+const resourceName = kubeConfig.resourceName;
 
 const metadataObject = {
   metadata: {
@@ -26,7 +18,7 @@ const metadataObject = {
 
 // Create a Kubernetes ConfigMap.
 export const reactWebConfigMap = new kx.ConfigMap(
-  "react-web-configmap",
+  `${resourceName}-configmap`,
   {
     ...metadataObject,
     data: { config: "very important data" },
@@ -36,7 +28,7 @@ export const reactWebConfigMap = new kx.ConfigMap(
 
 // Create a Kubernetes Secret.
 export const reactWebSecret = new kx.Secret(
-  "react-web-secret",
+  `${resourceName}-secret`,
   {
     ...metadataObject,
     stringData: {
@@ -54,20 +46,19 @@ export const reactWebPodBuilder = new kx.PodBuilder({
       env: {
         CONFIG: reactWebConfigMap.asEnvValue("config"),
         PASSWORD: reactWebSecret.asEnvValue("password"),
-        HOST: "",
-        PORT: "",
+        ...envVars,
       },
-      image: reactWebSettings.image,
-      ports: { http: Number(reactWebEnvVars.APP_PORT) },
+      image: kubeConfig.image,
+      ports: { http: Number(envVars.APP_PORT) },
       volumeMounts: [],
       resources: {
         limits: {
-          memory: reactWebSettings.limitMemory,
-          cpu: reactWebSettings.limitCpu,
+          memory: kubeConfig.limitMemory,
+          cpu: kubeConfig.limitCpu,
         },
         requests: {
-          memory: reactWebSettings.requestMemory,
-          cpu: reactWebSettings.requestCpu,
+          memory: kubeConfig.requestMemory,
+          cpu: kubeConfig.requestCpu,
         },
       },
     },
@@ -76,7 +67,7 @@ export const reactWebPodBuilder = new kx.PodBuilder({
 
 // Create a Kubernetes Deployment.
 export const reactWebDeployment = new kx.Deployment(
-  "react-web-deployment",
+  `${resourceName}-deployment`,
   {
     ...metadataObject,
     spec: reactWebPodBuilder.asDeploymentSpec({ replicas: 2 }),

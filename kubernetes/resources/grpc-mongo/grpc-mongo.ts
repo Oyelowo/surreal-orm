@@ -7,10 +7,11 @@ import { devNamespace, devNamespaceName } from "../shared/namespaces";
 import * as random from "@pulumi/random";
 import * as pulumi from "@pulumi/pulumi";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
-import { grpcMongoEnvVars, grpcMongoSettings } from "./settings";
+import { grpcMongoSettings } from "./settings";
 // Prefix by the name of deployment to make them unique across stack
 
-const { resourceName } = grpcMongoSettings;
+const { envVars, kubeConfig } = grpcMongoSettings;
+const resourceName = kubeConfig.resourceName;
 
 const metadataObject = {
   metadata: {
@@ -49,19 +50,19 @@ export const grpcMongoPodBuilder = new kx.PodBuilder({
       env: {
         CONFIG: grpcMongoConfigMap.asEnvValue("config"),
         PASSWORD: grpcMongoSecret.asEnvValue("password"),
-        ...grpcMongoEnvVars,
+        ...envVars,
       },
-      image: grpcMongoSettings.image,
-      ports: { http: Number(grpcMongoEnvVars.APP_PORT) },
+      image: kubeConfig.image,
+      ports: { http: Number(envVars.APP_PORT) },
       volumeMounts: [],
       resources: {
         limits: {
-          memory: grpcMongoSettings.limitMemory,
-          cpu: grpcMongoSettings.limitCpu,
+          memory: kubeConfig.limitMemory,
+          cpu: kubeConfig.limitCpu,
         },
         requests: {
-          memory: grpcMongoSettings.requestMemory,
-          cpu: grpcMongoSettings.requestCpu,
+          memory: kubeConfig.requestMemory,
+          cpu: kubeConfig.requestCpu,
         },
       },
     },
@@ -121,10 +122,10 @@ export const grpcMongoService = grpcMongoDeployment.createService({
   type: kx.types.ServiceType.ClusterIP,
   ports: [
     {
-      port: Number(grpcMongoEnvVars.APP_PORT),
+      port: Number(envVars.APP_PORT),
       protocol: "TCP",
       name: `${resourceName}-http`,
-      targetPort: Number(grpcMongoEnvVars.APP_PORT),
+      targetPort: Number(envVars.APP_PORT),
     },
   ],
 });
