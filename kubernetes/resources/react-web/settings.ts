@@ -6,7 +6,6 @@ export const reactWebSettings: AppConfigs<
   "development"
 > = {
   kubeConfig: {
-    resourceName: "react-web",
     requestMemory: "70Mi",
     requestCpu: "100m",
     limitMemory: "200Mi",

@@ -1,4 +1,4 @@
-import { AppConfigs } from "../shared/types";
+import { AppConfigs } from '../shared/types';
 
 export const graphqlPostgresSettings: AppConfigs<
   "graphql-postgres",
@@ -6,7 +6,6 @@ export const graphqlPostgresSettings: AppConfigs<
   "development"
 > = {
   kubeConfig: {
-    resourceName: "graphql-postgres",
     requestMemory: "70Mi",
     requestCpu: "100m",
     limitMemory: "200Mi",

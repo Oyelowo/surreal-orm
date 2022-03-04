@@ -1,4 +1,4 @@
-import { AppConfigs } from "../shared/types";
+import { AppConfigs } from '../shared/types';
 
 export const graphqlMongoSettings: AppConfigs<
   "graphql-mongo",

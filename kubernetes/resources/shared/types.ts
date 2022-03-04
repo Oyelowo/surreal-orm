@@ -26,7 +26,6 @@ export type AppName =
   | "react-web";
 
 export interface Settings<TAppName extends AppName> {
-  resourceName: TAppName;
   requestMemory: Memory;
   requestCpu: CPU;
   limitMemory: Memory;
@@ -101,9 +100,9 @@ export type AppEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
 
 type EnvironmentVariables<
   AN extends AppName,
-  NS extends NamespaceOfApps,
+  ENV extends Environemt,
   DBT extends DBType
-> = Extract<AppEnvVars<AN, NS>, { dbType: DBT }>;
+> = Extract<AppEnvVars<AN, ENV>, { dbType: DBT }>;
 
 export type AppConfigs<
   AN extends AppName,

@@ -1,7 +1,6 @@
-import { provider } from "./../shared/cluster";
-import { ServiceDeployment } from "../shared/deployment";
-
-import { graphqlPostgresSettings } from "./settings";
+import { provider } from '../shared/cluster';
+import { ServiceDeployment } from '../shared/deployment';
+import { graphqlPostgresSettings } from './settings';
 
 export const graphqlPostgres = new ServiceDeployment(
   "graphql-postgres",
