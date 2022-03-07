@@ -6,7 +6,9 @@ gen:
 	pulumi login file://login 
 	pulumi stack init --stack dev
 	# pulumi destroy --stack dev  --yes --skip-preview
-	export ENVIRONMENT="development" && pulumi update --yes --skip-preview --stack dev
+	export PULUMI_CONFIG_PASSPHRASE="" 
+	export ENVIRONMENT="development"
+	pulumi update --yes --skip-preview --stack dev
 
 	# export ENVIRONMENT="staging" && pulumi update --yes --skip-preview
 	# export ENVIRONMENT="production" && pulumi update --yes --skip-preview
