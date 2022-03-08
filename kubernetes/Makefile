@@ -19,7 +19,8 @@ start-k8s-apps:
 	make gen
 	k3d cluster delete local
 	k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
-	skaffold dev --trigger="manual"
+	skaffold dev --trigger="manual" --no-prune=true --no-prune-children=true
+	# skaffold dev --trigger="manual"
 	# skaffold dev
 	
 start-app-build:
