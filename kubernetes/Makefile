@@ -1,20 +1,16 @@
+
+install:
+	npm i
+
 gen:
-	export PULUMI_CONFIG_PASSPHRASE="" 
+	make install
 	rm -rf ./login
 	mkdir ./login
 	rm -rf ./rendered
 	pulumi login file://login 
-	pulumi stack init --stack dev
+	export PULUMI_CONFIG_PASSPHRASE="" && pulumi stack init --stack dev
 	# pulumi destroy --stack dev  --yes --skip-preview
-	export PULUMI_CONFIG_PASSPHRASE="" 
-	export ENVIRONMENT="development"
-	pulumi update --yes --skip-preview --stack dev
-
-	# export ENVIRONMENT="staging" && pulumi update --yes --skip-preview
-	# export ENVIRONMENT="production" && pulumi update --yes --skip-preview
-
-	# kubectl apply -f rendered/development/1-manifest/namespace-*
-	# kubectl apply -f rendered/development/1-manifest/
+	export ENVIRONMENT="development" && export PULUMI_CONFIG_PASSPHRASE="" && pulumi update --yes --skip-preview --stack dev
 
 start-web:
 	(cd ../typescript && make dev)
