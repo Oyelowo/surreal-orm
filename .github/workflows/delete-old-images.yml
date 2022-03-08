@@ -24,10 +24,11 @@ jobs:
 
     - uses: actions/delete-package-versions@v2
       with: 
-        package-name: 'grpc-mongo'
+        package-name: 'graphql-postgres'
         min-versions-to-keep: 3
 
     - uses: actions/delete-package-versions@v2
       with: 
-        package-name: 'graphql-postgres'
+        package-name: 'grpc-mongo'
         min-versions-to-keep: 3
+

@@ -29,7 +29,6 @@ COPY . .
 
 
 
-
 ######### START GRAPHQL-MONGO BACKEND SERVICE  #################
 ################################################################
 FROM builder-base as builder-graphql-mongo
