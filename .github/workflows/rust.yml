@@ -99,9 +99,9 @@ jobs:
       # for consistency sake.
       - name: Set environment variables
         run: |
-          echo "BACKEND_MAIN_IMAGE_WITH_TAG=ghcr.io/oyelowo/template-app-graphql-mongo:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          echo "BACKEND_MAIN_IMAGE_WITH_TAG=ghcr.io/oyelowo/graphql-mongo:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
           
-          echo "BACKEND_SECOND_IMAGE_WITH_TAG=ghcr.io/oyelowo/template-app-grpc-mongo:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          echo "BACKEND_SECOND_IMAGE_WITH_TAG=ghcr.io/oyelowo/grpc-mongo:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
 
           
       - name: Login to GitHub Container Registry

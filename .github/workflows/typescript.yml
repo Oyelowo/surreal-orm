@@ -64,7 +64,7 @@ jobs:
       # for consistency sake.
       - name: Set environment variables
         run: |
-          echo "WEB_IMAGE_WITH_TAG=ghcr.io/oyelowo/template-app-web:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          echo "WEB_IMAGE_WITH_TAG=ghcr.io/oyelowo/web:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
       
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
