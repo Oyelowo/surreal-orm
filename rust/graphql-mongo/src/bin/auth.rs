@@ -1,65 +1,131 @@
-fn main() -> anyhow::Result<()> {
-    let credentials = Credentials {
-        password: Secret::new("12345".into()),
-        username: "oyelowo".into(),
-    };
+use std::os::unix::prelude::OsStrExt;
 
+use tracing;
+use tracing_subscriber;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     // let p = store_password(credentials.clone()).unwrap();
-    validate_credentials(credentials.clone()).unwrap();
+    let pass = create_password_hash(PlainPassword::new("Oyelowo".into()))?;
+    println!("HGRGHJG: {:?}", pass.0.expose_secret());
+
+    validate_credentials(PlainPassword::new("Oyelowo".into()), pass)
+        .await
+        .unwrap();
+
     Ok(())
 }
 
+struct PlainPassword(Secret<String>);
+impl PlainPassword {
+    fn new(pass: String) -> Self {
+        Self(Secret::new(pass))
+    }
+
+    fn to_bytes(&self) -> &[u8] {
+        self.0.expose_secret().as_bytes()
+    }
+}
+
+// impl From<PlainPassword> for String {
+//     fn from(p: PlainPassword) -> String {
+//         let k = p.0.expose_secret().to_owned();
+//         k
+//     }
+// }
+
+struct PasswordHashPHC(Secret<String>);
+impl PasswordHashPHC {
+    fn new(pass: String) -> Self {
+        Self(Secret::new(pass))
+    }
+
+    fn as_str(&self) -> &str {
+        self.0.expose_secret().as_str()
+    }
+}
+
+// impl From<PasswordHashPHC> for &str {
+//     fn from(_: PasswordHashPHC) -> Self {
+//         todo!()
+//     }
+// }
 use anyhow::Context;
 use argon2::{Algorithm, Argon2, Params, PasswordHash, PasswordVerifier, Version};
 use secrecy::{ExposeSecret, Secret};
 use thiserror;
 
-#[derive(Clone)]
-struct Credentials {
-    username: String,
-    password: Secret<String>,
-}
-
 #[derive(thiserror::Error, Debug)]
 enum PasswordError {
     #[error("Authentication failed.")]
-    AuthError,
+    AuthError(#[source] anyhow::Error),
 
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
 
-fn validate_credentials(credentials: Credentials) -> anyhow::Result<(), PasswordError> {
+use tokio::task::JoinHandle;
+
+pub fn spawn_blocking_with_tracing<F, R>(f: F) -> JoinHandle<R>
+where
+    F: FnOnce() -> R + Send + 'static,
+    R: Send + 'static,
+{
+    let current_span = tracing::Span::current();
+    tokio::task::spawn_blocking(move || current_span.in_scope(f))
+}
+
+// #[tracing::instrument(name = "Validate credentials", skip(credentials, pool))]
+// #[tracing::instrument(
+//     name = "Verify password hash",
+//     skip(expected_password_hash, password_candidate)
+// )]
+async fn validate_credentials(
+    plain_password: PlainPassword,
+    expected_password_hash: PasswordHashPHC,
+) -> anyhow::Result<bool, PasswordError> {
+    // This executes before spawning the new thread
+    spawn_blocking_with_tracing(move || {
+        verify_password_hash(plain_password, expected_password_hash)
+    })
+    .await
+    .context("Failed to spawn blocking task.")
+    .map_err(PasswordError::UnexpectedError)??;
+
+    println!("Yaay! Password successfully validated!!!!");
+    // let password_hash = hasher.hash_password_into(credentials.password.expose_secret().as_bytes(), salt, out)
+    Ok(true)
+}
+
+#[tracing::instrument(
+    name = "Verify password hash",
+    skip(expected_password_hash, password_candidate)
+)]
+fn verify_password_hash(
+    password_candidate: PlainPassword,
+    expected_password_hash: PasswordHashPHC,
+) -> Result<(), PasswordError> {
     /*
     PHC String Format
     # ${algorithm}${algorithm version}${$-separated algorithm parameters}${hash}${salt}
     $argon2id$v=19$m=65536,t=2,p=1$gZiV/M1gPc22ElAH/Jh1Hw$CWOrkoo7oJBQ/iyh7uJ0LO2aLEfrHwTWllSAxT0zRno
     */
-    let expected_password_hash = "$argon2id$v=19$m=15000,t=2,p=1$1H39qaqJ+MP5M/yetv8SMg$9H1CT8EZZkMm1zVKd9t4PFUUZ5OyfOZE2fat88Y0rbc";
-    let expected_password_hash = PasswordHash::new(&expected_password_hash)
+    let k = expected_password_hash.0.expose_secret();
+    let expected_password_hash = PasswordHash::new(expected_password_hash.as_str())
         .context("Failed to parse hash in PHC string format.")
         .map_err(PasswordError::UnexpectedError)?;
 
-    println!(
-        "Expected password hash: {:?}",
-        expected_password_hash.to_string()
-    );
-
     Argon2::default()
-        .verify_password(
-            credentials.password.expose_secret().as_bytes(),
-            &expected_password_hash,
-        )
-        .context("Invalid password")?;
-    // .map_err( PasswordError::AuthError)?;
-
-    println!("Yaay! Password successfully validated!!!!");
-    // let password_hash = hasher.hash_password_into(credentials.password.expose_secret().as_bytes(), salt, out)
-    Ok(())
+        .verify_password(password_candidate.to_bytes(), &expected_password_hash)
+        .context("Invalid password.")
+        .map_err(PasswordError::AuthError)
 }
+
 use argon2::{password_hash::SaltString, PasswordHasher};
-use rand::Rng;
-fn store_password(credentials: Credentials) -> anyhow::Result<String, PasswordError> {
+
+fn create_password_hash<'a>(
+    password: PlainPassword,
+) -> anyhow::Result<PasswordHashPHC, PasswordError> {
     let salt = SaltString::generate(&mut rand::thread_rng());
     // We don't care about the exact Argon2 parameters here
     // given that it's for testing purposes!
@@ -72,12 +138,10 @@ fn store_password(credentials: Credentials) -> anyhow::Result<String, PasswordEr
     let params = Params::new(15000, 2, 1, None).context("Error building Argon2 paramters")?;
     let hasher = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
     let password_hash = hasher
-        .hash_password(credentials.password.expose_secret().as_bytes(), &salt)
+        .hash_password(password.0.expose_secret().as_bytes(), &salt)
         .context("Failed to hash password")
         .map_err(PasswordError::UnexpectedError)?;
-    let password_hash_str = password_hash.to_string();
 
-    println!("password_hash: {:?}", password_hash);
-    println!("password_hash_str: {:?}", password_hash_str);
-    Ok(password_hash_str)
+    println!("fdefdf: {:?}", password_hash);
+    Ok(PasswordHashPHC::new(password_hash.to_string()))
 }
