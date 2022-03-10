@@ -1,5 +1,3 @@
-use std::os::unix::prelude::OsStrExt;
-
 use tracing;
 use tracing_subscriber;
 
@@ -56,9 +54,9 @@ use secrecy::{ExposeSecret, Secret};
 use thiserror;
 
 #[derive(thiserror::Error, Debug)]
-enum PasswordError {
+enum AuthError {
     #[error("Authentication failed.")]
-    AuthError(#[source] anyhow::Error),
+    InvalidCredentials(#[source] anyhow::Error),
 
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
@@ -83,14 +81,14 @@ where
 async fn validate_credentials(
     plain_password: PlainPassword,
     expected_password_hash: PasswordHashPHC,
-) -> anyhow::Result<bool, PasswordError> {
+) -> anyhow::Result<bool, AuthError> {
     // This executes before spawning the new thread
     spawn_blocking_with_tracing(move || {
         verify_password_hash(plain_password, expected_password_hash)
     })
     .await
     .context("Failed to spawn blocking task.")
-    .map_err(PasswordError::UnexpectedError)??;
+    .map_err(AuthError::UnexpectedError)??;
 
     println!("Yaay! Password successfully validated!!!!");
     // let password_hash = hasher.hash_password_into(credentials.password.expose_secret().as_bytes(), salt, out)
@@ -104,28 +102,25 @@ async fn validate_credentials(
 fn verify_password_hash(
     password_candidate: PlainPassword,
     expected_password_hash: PasswordHashPHC,
-) -> Result<(), PasswordError> {
+) -> Result<(), AuthError> {
     /*
     PHC String Format
     # ${algorithm}${algorithm version}${$-separated algorithm parameters}${hash}${salt}
     $argon2id$v=19$m=65536,t=2,p=1$gZiV/M1gPc22ElAH/Jh1Hw$CWOrkoo7oJBQ/iyh7uJ0LO2aLEfrHwTWllSAxT0zRno
     */
-    let k = expected_password_hash.0.expose_secret();
     let expected_password_hash = PasswordHash::new(expected_password_hash.as_str())
         .context("Failed to parse hash in PHC string format.")
-        .map_err(PasswordError::UnexpectedError)?;
+        .map_err(AuthError::UnexpectedError)?;
 
     Argon2::default()
         .verify_password(password_candidate.to_bytes(), &expected_password_hash)
         .context("Invalid password.")
-        .map_err(PasswordError::AuthError)
+        .map_err(AuthError::InvalidCredentials)
 }
 
 use argon2::{password_hash::SaltString, PasswordHasher};
 
-fn create_password_hash<'a>(
-    password: PlainPassword,
-) -> anyhow::Result<PasswordHashPHC, PasswordError> {
+fn create_password_hash<'a>(password: PlainPassword) -> anyhow::Result<PasswordHashPHC, AuthError> {
     let salt = SaltString::generate(&mut rand::thread_rng());
     // We don't care about the exact Argon2 parameters here
     // given that it's for testing purposes!
@@ -140,7 +135,7 @@ fn create_password_hash<'a>(
     let password_hash = hasher
         .hash_password(password.0.expose_secret().as_bytes(), &salt)
         .context("Failed to hash password")
-        .map_err(PasswordError::UnexpectedError)?;
+        .map_err(AuthError::UnexpectedError)?;
 
     println!("fdefdf: {:?}", password_hash);
     Ok(PasswordHashPHC::new(password_hash.to_string()))
