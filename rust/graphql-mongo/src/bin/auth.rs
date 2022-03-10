@@ -4,7 +4,13 @@ use tracing_subscriber;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // let p = store_password(credentials.clone()).unwrap();
-    let pass = create_password_hash(PlainPassword::new("Oyelowo".into()))?;
+    let pass = spawn_blocking_with_tracing(move || {
+        create_password_hash(PlainPassword::new("Oyelowo".into()))
+    })
+    .await?
+    .context("Faailed to hash passwor")?;
+
+    // let pass = create_password_hash(PlainPassword::new("Oyelowo".into()))?;
     println!("HGRGHJG: {:?}", pass.0.expose_secret());
 
     validate_credentials(PlainPassword::new("Oyelowo".into()), pass)
@@ -14,7 +20,7 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-struct PlainPassword(Secret<String>);
+pub struct PlainPassword(Secret<String>);
 impl PlainPassword {
     fn new(pass: String) -> Self {
         Self(Secret::new(pass))
@@ -32,7 +38,7 @@ impl PlainPassword {
 //     }
 // }
 
-struct PasswordHashPHC(Secret<String>);
+pub struct PasswordHashPHC(Secret<String>);
 impl PasswordHashPHC {
     fn new(pass: String) -> Self {
         Self(Secret::new(pass))
@@ -53,8 +59,9 @@ use argon2::{Algorithm, Argon2, Params, PasswordHash, PasswordVerifier, Version}
 use secrecy::{ExposeSecret, Secret};
 use thiserror;
 
+//  return a 500 for UnexpectedError, while AuthErrors should result into a 401.
 #[derive(thiserror::Error, Debug)]
-enum AuthError {
+pub enum AuthError {
     #[error("Authentication failed.")]
     InvalidCredentials(#[source] anyhow::Error),
 
