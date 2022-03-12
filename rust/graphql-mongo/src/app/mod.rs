@@ -3,11 +3,12 @@ pub(crate) mod user;
 
 use anyhow::Context;
 use mongodb::Database;
-use post::{Post, PostMutationRoot, PostQueryRoot};
-use user::{User, UserMutationRoot, UserQueryRoot};
+use post::{Post, PostMutationRoot, PostQueryRoot, PostSubscriptionRoot};
+use user::{User, UserMutationRoot, UserQueryRoot, UserSubscriptionRoot};
 
-use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
+use async_graphql::{MergedObject, MergedSubscription, Schema, SchemaBuilder};
 use wither::Model;
+
 //pub use crate::app;
 
 // Add new models here
@@ -19,15 +20,26 @@ pub async fn sync_mongo_models(db: &Database) -> anyhow::Result<()> {
     Ok(())
 }
 
+// Merged Queries
 #[derive(MergedObject, Default)]
 pub struct Query(UserQueryRoot, PostQueryRoot);
 
+// Merged Mutations
 #[derive(MergedObject, Default)]
 pub struct Mutation(UserMutationRoot, PostMutationRoot);
 
-pub type MyGraphQLSchema = Schema<Query, Mutation, EmptySubscription>;
-pub fn get_my_graphql_schema() -> SchemaBuilder<Query, Mutation, EmptySubscription> {
-    MyGraphQLSchema::build(Query::default(), Mutation::default(), EmptySubscription)
+// Merged Subscription
+#[derive(MergedSubscription, Default)]
+pub struct Subscription(UserSubscriptionRoot, PostSubscriptionRoot);
+
+pub type MyGraphQLSchema = Schema<Query, Mutation, Subscription>;
+
+pub fn get_my_graphql_schema() -> SchemaBuilder<Query, Mutation, Subscription> {
+    MyGraphQLSchema::build(
+        Query::default(),
+        Mutation::default(),
+        Subscription::default(),
+    )
 }
 
 fn get_error_message<T: Model>() -> String {

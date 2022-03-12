@@ -3,10 +3,12 @@
 mod macros;
 mod util_module_alternative;
 pub mod utils;
+pub mod authentication;
 
 pub use macros::{calculator, helpers};
 pub use util_module_alternative::greeter_alt::alt_good_morning;
 pub use utils::{greet::good_morning, local_function, maths};
+// pub use authentication;
 
 #[macro_use]
 // extern crate ;
