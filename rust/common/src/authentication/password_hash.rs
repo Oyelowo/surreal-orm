@@ -1,0 +1,169 @@
+use anyhow::Context;
+use argon2::{Algorithm, Argon2, Params, PasswordHash, PasswordVerifier, Version};
+use secrecy::{ExposeSecret, Secret};
+use thiserror;
+use tokio::task::JoinHandle;
+use tracing;
+use tracing_subscriber;
+
+// #[tokio::main]
+// async fn main() -> anyhow::Result<()> {
+//     // let p = store_password(credentials.clone()).unwrap();
+//     let pass = create_password_hash(PlainPassword::new("Oyelowo"))?;
+
+//     // let pass = create_password_hash(PlainPassword::new("Oyelowo".into()))?;
+//     println!("HGRGHJG: {:?}", pass.0.expose_secret());
+
+//     validate_password(PlainPassword::new("Oyelowo"), pass)
+//         .await
+//         .unwrap();
+
+//     Ok(())
+// }
+
+pub struct PasswordPlain(Secret<String>);
+impl PasswordPlain {
+    fn new(pass: impl Into<String>) -> Self {
+        Self(Secret::new(pass.into()))
+    }
+
+    fn to_bytes(&self) -> &[u8] {
+        self.0.expose_secret().as_bytes()
+    }
+}
+
+// impl From<PlainPassword> for String {
+//     fn from(p: PlainPassword) -> String {
+//         let k = p.0.expose_secret().to_owned();
+//         k
+//     }
+// }
+
+pub struct PasswordHashPHC(Secret<String>);
+impl PasswordHashPHC {
+    fn new(pass: String) -> Self {
+        Self(Secret::new(pass))
+    }
+
+    fn as_str(&self) -> &str {
+        self.0.expose_secret().as_str()
+    }
+}
+
+// impl From<PasswordHashPHC> for &str {
+//     fn from(_: PasswordHashPHC) -> Self {
+//         todo!()
+//     }
+// }
+
+//  return a 500 for UnexpectedError, while AuthErrors should result into a 401.
+#[derive(thiserror::Error, Debug)]
+pub enum PasswordError {
+    #[error("Authentication failed.")]
+    InvalidPassword(#[source] anyhow::Error),
+
+    #[error(transparent)]
+    UnexpectedError(#[from] anyhow::Error),
+}
+
+fn spawn_blocking_with_tracing<F, R>(f: F) -> JoinHandle<R>
+where
+    F: FnOnce() -> R + Send + 'static,
+    R: Send + 'static,
+{
+    let current_span = tracing::Span::current();
+    tokio::task::spawn_blocking(move || current_span.in_scope(f))
+}
+
+pub async fn generate_password_hash(
+    password: impl Into<String>,
+) -> anyhow::Result<PasswordHashPHC> {
+    let password: String = password.into();
+    let pass =
+        spawn_blocking_with_tracing(move || create_password_hash(PasswordPlain::new(password)))
+            .await?
+            .context("Faailed to hash passwor")?;
+
+    Ok(pass)
+}
+
+fn create_password_hash<'a>(
+    password: PasswordPlain,
+) -> anyhow::Result<PasswordHashPHC, PasswordError> {
+    let salt = SaltString::generate(&mut rand::thread_rng());
+    // We don't care about the exact Argon2 parameters here
+    // given that it's for testing purposes!
+    // let password_hash = Argon2::default()
+    //     .hash_password("pass".as_bytes(), &salt)
+    //     .unwrap()
+    //     .to_string();
+    // println!("password_hash11111: {:?}", password_hash);
+
+    let params = Params::new(15000, 2, 1, None).context("Error building Argon2 paramters")?;
+    let hasher = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
+    let password_hash = hasher
+        .hash_password(password.0.expose_secret().as_bytes(), &salt)
+        .context("Failed to hash password")
+        .map_err(PasswordError::UnexpectedError)?;
+
+    println!("fdefdf: {:?}", password_hash);
+    Ok(PasswordHashPHC::new(password_hash.to_string()))
+}
+
+// #[tracing::instrument(name = "Validate credentials", skip(credentials, pool))]
+// #[tracing::instrument(
+//     name = "Verify password hash",
+//     skip(expected_password_hash, password_candidate)
+// )]
+async fn validate_password(
+    plain_password: PasswordPlain,
+    expected_password_hash: PasswordHashPHC,
+) -> anyhow::Result<bool, PasswordError> {
+    // This executes before spawning the new thread
+    spawn_blocking_with_tracing(move || {
+        verify_password_hash(plain_password, expected_password_hash)
+    })
+    .await
+    .context("Failed to spawn blocking task.")
+    .map_err(PasswordError::UnexpectedError)??;
+
+    println!("Yaay! Password successfully validated!!!!");
+    // let password_hash = hasher.hash_password_into(credentials.password.expose_secret().as_bytes(), salt, out)
+    Ok(true)
+}
+
+#[tracing::instrument(
+    name = "Verify password hash",
+    skip(expected_password_hash, password_candidate)
+)]
+fn verify_password_hash(
+    password_candidate: PasswordPlain,
+    expected_password_hash: PasswordHashPHC,
+) -> Result<(), PasswordError> {
+    /*
+    PHC String Format
+    # ${algorithm}${algorithm version}${$-separated algorithm parameters}${hash}${salt}
+    $argon2id$v=19$m=65536,t=2,p=1$gZiV/M1gPc22ElAH/Jh1Hw$CWOrkoo7oJBQ/iyh7uJ0LO2aLEfrHwTWllSAxT0zRno
+    */
+    let expected_password_hash = PasswordHash::new(expected_password_hash.as_str())
+        .context("Failed to parse hash in PHC string format.")
+        .map_err(PasswordError::UnexpectedError)?;
+
+    Argon2::default()
+        .verify_password(password_candidate.to_bytes(), &expected_password_hash)
+        .context("Invalid password.")
+        .map_err(PasswordError::InvalidPassword)
+}
+
+use argon2::{password_hash::SaltString, PasswordHasher};
+
+/*
+session + cookie, jwt + localstorage/cookie, oauth + localstorage/cookie, metamask etc wallet signup + signin
+
+sign_up
+sign_in
+sign_out
+change_password
+forgotten_password
+revoke_access?
+*/
