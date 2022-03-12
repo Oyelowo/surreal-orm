@@ -45,3 +45,15 @@ pub fn get_my_graphql_schema() -> SchemaBuilder<Query, Mutation, Subscription> {
 fn get_error_message<T: Model>() -> String {
     format!("problem syncing {:?}", T::COLLECTION_NAME)
 }
+
+#[derive(thiserror::Error, Debug)]
+pub enum AppError {
+    #[error("Authentication failed.")]
+    InvalidPassword(#[source] anyhow::Error),
+
+    #[error("Forbidden failed.")]
+    Forbidden(#[source] anyhow::Error),
+
+    #[error(transparent)]
+    UnexpectedError(#[from] anyhow::Error),
+}

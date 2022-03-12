@@ -1,4 +1,4 @@
-use super::User;
+use super::{Role, User};
 use async_graphql::*;
 use chrono::Utc;
 use mongodb::Database;
@@ -25,6 +25,7 @@ impl UserMutationRoot {
             .email(user_input.email)
             .age(user_input.age)
             .social_media(user_input.social_media)
+            .roles(vec![Role::User])
             .build();
 
         user.save(db, None).await?;

@@ -1,7 +1,15 @@
-use actix_web::{get, post, web, HttpResponse};
+use actix_session::{CookieSession, Session};
+use actix_web::http::header::HeaderMap;
+use actix_web::{get, post, web, HttpRequest, HttpResponse};
 
-use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
-use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
+use anyhow::Context;
+use async_graphql::Schema;
+use async_graphql::{
+    http::{playground_source, GraphQLPlaygroundConfig},
+    Data,
+};
+use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
+use serde::Deserialize;
 
 use super::configuration::Environemnt;
 use crate::app::{get_my_graphql_schema, sync_mongo_models, MyGraphQLSchema};
@@ -10,13 +18,60 @@ use common::utils;
 
 use std::path::Path;
 
+pub struct Token(pub String);
+
+fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
+    headers
+        .get("Token")
+        .and_then(|value| value.to_str().map(|s| Token(s.to_string())).ok())
+}
+
 #[post("/graphql")]
-pub async fn index(schema: web::Data<MyGraphQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
-    schema.execute(req.into_inner()).await.into()
+pub async fn index(
+    schema: web::Data<MyGraphQLSchema>,
+    req: HttpRequest,
+    gql_request: GraphQLRequest,
+) -> GraphQLResponse {
+    let mut request = gql_request.into_inner();
+    if let Some(token) = get_token_from_headers(req.headers()) {
+        request = request.data(token);
+    }
+    schema.execute(request).await.into()
+}
+
+pub async fn on_connection_init(value: serde_json::Value) -> async_graphql::Result<Data> {
+    #[derive(Deserialize)]
+    struct Payload {
+        token: String,
+    }
+
+    if let Ok(payload) = serde_json::from_value::<Payload>(value) {
+        let mut data = Data::default();
+        data.insert(Token(payload.token));
+        Ok(data)
+    } else {
+        Err("Token is required".into())
+    }
+}
+
+pub async fn index_ws(
+    schema: web::Data<MyGraphQLSchema>,
+    req: HttpRequest,
+    payload: web::Payload,
+) -> actix_web::Result<HttpResponse> {
+    let mut data = Data::default();
+    if let Some(token) = get_token_from_headers(req.headers()) {
+        data.insert(token)
+    }
+
+    GraphQLSubscription::new(Schema::clone(&*schema))
+        .with_data(data)
+        .on_connection_init(on_connection_init)
+        .start(&req, payload)
 }
 
 #[get("/graphql")]
-pub async fn index_playground() -> HttpResponse {
+pub async fn gql_playground() -> HttpResponse {
     let source = playground_source(
         GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"),
     );

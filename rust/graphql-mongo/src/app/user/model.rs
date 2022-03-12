@@ -10,7 +10,10 @@ use wither::{
 };
 // use bson::DateTime;
 
-use crate::{app::post::Post, configs::model_cursor_to_vec};
+use crate::{
+    app::{post::Post, AppError},
+    configs::model_cursor_to_vec,
+};
 
 #[derive(Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate)]
 #[serde(rename_all = "camelCase")]
@@ -56,11 +59,17 @@ pub struct User {
 
     #[serde(default)]
     pub social_media: Vec<String>,
+
+    // #[serde(default)]
+    #[graphql(skip_input)]
+    pub roles: Vec<Role>,
 }
 
 #[ComplexObject]
 impl User {
     async fn posts(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<Post>> {
+        // AuthGuard
+        // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = ctx.data_unchecked::<Database>();
         let cursor = Post::find(db, doc! {"posterId": self.id}, None).await?;
         Ok(model_cursor_to_vec(cursor).await?)
@@ -69,6 +78,30 @@ impl User {
     async fn post_count(&self, ctx: &Context<'_>) -> anyhow::Result<usize> {
         let post_count = self.posts(ctx).await?.len();
         Ok(post_count)
+    }
+}
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub enum Role {
+    Admin,
+    User,
+}
+
+impl User {
+    pub fn and_has_role(&self, scope: Role) -> anyhow::Result<&Self, AppError> {
+        if !self.roles.contains(&scope) {
+            return Err(AppError::Forbidden(anyhow::anyhow!(
+                "Does not have required permissin"
+            )));
+        }
+        Ok(self)
+    }
+
+    pub fn from_ctx<'a>(ctx: &'a Context) -> anyhow::Result<&'a Self, AppError> {
+        let k = ctx
+            .data::<User>()
+            .map_err(|e| AppError::Forbidden(anyhow::anyhow!(e.message)));
+        k
     }
 }
 
