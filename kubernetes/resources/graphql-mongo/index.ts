@@ -9,3 +9,4 @@ export const graphqlMongop = new ServiceDeployment(
 );
 
 export * from "./mongodb";
+export * from "./redis";

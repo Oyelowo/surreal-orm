@@ -10,6 +10,7 @@ common = {path = "../common"}
 
 # actix-rt = {version = "2.6.0", default-features = false, optional = true}
 actix-cors = "0.6.0"
+actix-redis = "0.10"
 actix-session = "0.5.0"
 actix-web = {version = "4.0.1", default-features = false, features = ["macros"]}
 async-graphql = {version = "3.0.34", features = [

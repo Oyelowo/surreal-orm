@@ -1,11 +1,15 @@
 use actix_cors::Cors;
-use actix_web::{http, web, App, HttpServer};
-use graphql_mongo::configs::{index, index_playground, Configs, GraphQlApp};
+use actix_redis::RedisSession;
+use actix_web::{cookie::Key, http, middleware::Logger, web, App, HttpServer};
+use graphql_mongo::configs::{gql_playground, index, index_ws, Configs, GraphQlApp};
 use log::info;
+use secrecy::{ExposeSecret, Secret};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let Configs { application, .. } = Configs::init();
+    let Configs {
+        application, redis, ..
+    } = Configs::init();
     let app_url = &application.get_url();
 
     info!("Playground: {}", app_url);
@@ -33,11 +37,27 @@ async fn main() -> anyhow::Result<()> {
             .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);
 
+        // let secret_key = Key::from(hmac_secret.expose_secret().as_bytes());
+        // let message_store = CookieMessageStore::builder(secret_key.clone()).build();
+
+        // Generate a random 32 byte key. Note that it is important to use a unique
+        // private key for every project. Anyone with access to the key can generate
+        // authentication cookies for any user!
+        let hmac_secret_from_env_var = Secret::new("secret".to_string());
+        let redis_key = Key::from(hmac_secret_from_env_var.expose_secret().as_bytes());
+        // let private_key = actix_web::cookie::Key::generate();
+        // private_key.master()
         App::new()
             .wrap(cors)
+            //  .wrap(TracingLogger::default())
+            // cookie session middleware
+            .wrap(RedisSession::new(redis.get_url(), redis_key.master()))
+            // Enable logger
+            .wrap(Logger::default())
             .app_data(web::Data::new(schema.clone()))
+            .service(gql_playground)
             .service(index)
-            .service(index_playground)
+            .service(web::resource("/ws").to(index_ws))
     })
     .bind(app_url)?
     .run()
