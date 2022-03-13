@@ -8,7 +8,8 @@ import { DeepPartial } from "../shared/types";
 // const { envVars } = graphqlMongoSettings;
 
 export const redisValues: DeepPartial<RedisHelmValuesBitnami> = {
-  architecture: "replication",
+  //   architecture: "replication",
+  architecture: "standalone",
 
   // nameOverride: "redis-graphql",
   fullnameOverride: "redis-database",
