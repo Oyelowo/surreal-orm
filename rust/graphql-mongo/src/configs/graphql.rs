@@ -39,10 +39,10 @@ fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
 #[post("/graphql")]
 pub async fn index(
     schema: web::Data<MyGraphQLSchema>,
-    _req: HttpRequest,
+    req: HttpRequest,
     // db: actix_web::web::Data<Database>,
     gql_request: GraphQLRequest,
-    session: Session,
+    // _session: Session,
 ) -> GraphQLResponse {
     let mut request = gql_request.into_inner();
 
@@ -56,7 +56,7 @@ pub async fn index(
     // }
 
     // let k = req.get_session().get::<i32>("user_id");
-    let session = Shared::new(session);
+    let session = Shared::new(req.get_session());
     // let session = req.get_session();
     // let cookier: Arc<Mutex<Option<String>>> = Default::default();
 
