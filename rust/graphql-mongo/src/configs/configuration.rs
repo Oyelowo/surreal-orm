@@ -8,7 +8,7 @@ use serde_aux::prelude::deserialize_number_from_string;
 
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-pub enum Environemnt {
+pub enum Environment {
     Local,
     Development,
     Staging,
@@ -21,7 +21,7 @@ pub struct ApplicationConfigs {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
-    pub environment: Environemnt,
+    pub environment: Environment,
 }
 
 impl ApplicationConfigs {

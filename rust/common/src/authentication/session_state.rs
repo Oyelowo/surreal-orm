@@ -3,7 +3,6 @@ use std::ops::Deref;
 use actix_session::Session;
 use actix_web::Error;
 use send_wrapper::SendWrapper;
-// use std::ops::Deref;
 
 #[derive(Clone, Debug)]
 struct Shared<T>(pub Option<SendWrapper<T>>);
@@ -24,6 +23,13 @@ impl<T> Deref for Shared<T> {
 
 type SessionShared = Shared<actix_session::Session>;
 
+/*
+TODO:
+This is somewhat like a hack: https://github.com/async-graphql/async-graphql/issues/426
+Session is  Session(Rc<RefCell<SessionInner>>) and probably okay to use
+SendWrapper for now but having it implement Send would allow
+using Arc/Mutex
+*/
 pub struct TypedSession(SessionShared);
 
 impl TypedSession {
@@ -38,7 +44,6 @@ impl TypedSession {
         Ok(())
     }
 
-    // pub fn insert_user_id(&self, user_id: impl Into<UserId>) -> Result<(), Error> {
     pub fn insert_user_id(&self, user_id: impl Into<String>) -> Result<(), Error> {
         self.0.insert(Self::USER_ID_KEY, user_id.into())
     }

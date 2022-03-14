@@ -1,32 +1,22 @@
-use actix_session::{CookieSession, Session, UserSession};
+use actix_session::UserSession;
 use actix_web::http::header::HeaderMap;
-use actix_web::{
-    get, post,
-    web::{self},
-    FromRequest, HttpRequest, HttpResponse,
-};
+use actix_web::{get, post, web, HttpRequest, HttpResponse};
 
-use anyhow::Context;
 use async_graphql::Schema;
 use async_graphql::{
     http::{playground_source, GraphQLPlaygroundConfig},
     Data,
 };
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
-use bson::oid::ObjectId;
 use common::authentication::session_state::TypedSession;
-use mongodb::Database;
 use serde::Deserialize;
 
-use super::configuration::Environemnt;
-use crate::app::user::User;
+use super::configuration::Environment;
 use crate::app::{get_my_graphql_schema, sync_mongo_models, MyGraphQLSchema};
 use crate::configs::Configs;
 use common::utils;
 
-use std::default;
 use std::path::Path;
-use std::sync::{Arc, Mutex};
 
 pub struct Token(pub String);
 
@@ -137,7 +127,7 @@ impl GraphQlApp {
             ..
         } = Configs::init();
 
-        use Environemnt::*;
+        use Environment::*;
         let (limit_depth, limit_complexity) = match application.environment {
             Local | Development | Staging => (usize::max_value(), usize::max_value()),
             Production => (5, 7),

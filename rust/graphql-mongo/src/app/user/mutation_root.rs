@@ -1,4 +1,5 @@
-use common::authentication::session_state::{SessionShared, TypedSession};
+use anyhow::Context;
+use common::authentication::session_state::TypedSession;
 
 use super::{Role, User};
 use async_graphql::*;
@@ -17,7 +18,7 @@ pub struct UserMutationRoot;
 impl UserMutationRoot {
     async fn create_user(
         &self,
-        ctx: &Context<'_>,
+        ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "user data")] user_input: User,
     ) -> anyhow::Result<User> {
         user_input.validate()?;
@@ -39,35 +40,23 @@ impl UserMutationRoot {
         Ok(user)
     }
 
-    async fn sign_in(&self, ctx: &Context<'_>) -> anyhow::Result<Something> {
+    async fn sign_in(&self, ctx: &async_graphql::Context<'_>) -> async_graphql::Result<Something> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
         let session = ctx
             .data::<TypedSession>()
             .expect("Failed to get actix session Object");
-        // let session = ctx
-        //     .data::<SessionShared>()
-        //     .expect("Failed to get actix session Object");
 
-        session.insert_user_id("12345ggg");
-        // session
-        //     .insert("user_id", "1234567890")
-        //     .expect("Failed insertion");
-        // let uid = session
-        //     .get::<String>("user_id")
-        //     .expect("Failed to get user_id session")
-        //     .expect("Failed to get user_id session value");
+        session
+            .insert_user_id("12345ggg")
+            .expect("Failed to insert");
         let uid = session.get_user_id().expect("failed1").expect("Failed2");
-        // session.get::<UserId>(Self);
-        // let db = ctx.data_unchecked::<Database>();
-        // let cursor = Post::find(db, doc! {"posterId": self.id}, None).await?;
-        // Ok(model_cursor_to_vec(cursor).await?)
         Ok(Something {
             name: "rust love".into(),
             user_id: uid,
         })
     }
-    async fn get_session(&self, ctx: &Context<'_>) -> anyhow::Result<Something> {
+    async fn get_session(&self, ctx: &async_graphql::Context<'_>) -> anyhow::Result<Something> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
         let session = ctx.data::<TypedSession>().expect("run it");
@@ -75,10 +64,6 @@ impl UserMutationRoot {
             .get_user_id()
             .expect("Failed to get user_id session")
             .expect("Failed to get user_id session value");
-        // session.get::<UserId>(Self);
-        // let db = ctx.data_unchecked::<Database>();
-        // let cursor = Post::find(db, doc! {"posterId": self.id}, None).await?;
-        // Ok(model_cursor_to_vec(cursor).await?)
         Ok(Something {
             name: "good guy".into(),
             user_id: uid,

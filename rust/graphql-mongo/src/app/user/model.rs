@@ -1,4 +1,3 @@
-use actix_session::Session;
 use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use mongodb::Database;
