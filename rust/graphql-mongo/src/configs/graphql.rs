@@ -56,7 +56,8 @@ pub async fn index(
     // }
 
     // let k = req.get_session().get::<i32>("user_id");
-    let session = SessionShared::new(req.get_session());
+    let session = Arc::new(Mutex::new(req.get_session()));
+    // let session = SessionShared::new(req.get_session());
     // let session = req.get_session();
     // let cookier: Arc<Mutex<Option<String>>> = Default::default();
 
