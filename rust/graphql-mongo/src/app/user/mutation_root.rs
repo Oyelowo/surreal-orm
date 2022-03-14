@@ -1,4 +1,4 @@
-use crate::configs::Shared;
+use crate::configs::{SessionShared, Shared};
 
 use super::{Role, User};
 use async_graphql::*;
@@ -42,10 +42,10 @@ impl UserMutationRoot {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
         let session = ctx
-            .data::<Shared<actix_session::Session>>()
+            .data::<SessionShared>()
             .expect("Failed to get actix session Object");
 
-        session.insert("user_id", "id1234").expect("poor insertion");
+        session.insert("user_id", "1234567890").expect("Failed insertion");
         let uid = session
             .get::<String>("user_id")
             .expect("Failed to get user_id session")
@@ -55,16 +55,14 @@ impl UserMutationRoot {
         // let cursor = Post::find(db, doc! {"posterId": self.id}, None).await?;
         // Ok(model_cursor_to_vec(cursor).await?)
         Ok(Something {
-            name: "good guy".into(),
+            name: "rust love".into(),
             user_id: uid,
         })
     }
     async fn get_session(&self, ctx: &Context<'_>) -> anyhow::Result<Something> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
-        let session = ctx
-            .data::<Shared<actix_session::Session>>()
-            .expect("run it");
+        let session = ctx.data::<SessionShared>().expect("run it");
         let uid = session
             .get::<String>("user_id")
             .expect("Failed to get user_id session")

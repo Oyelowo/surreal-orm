@@ -56,7 +56,7 @@ pub async fn index(
     // }
 
     // let k = req.get_session().get::<i32>("user_id");
-    let session = Shared::new(req.get_session());
+    let session = SessionShared::new(req.get_session());
     // let session = req.get_session();
     // let cookier: Arc<Mutex<Option<String>>> = Default::default();
 
@@ -184,3 +184,6 @@ impl<T> Deref for Shared<T> {
         &*self.0.as_deref().clone().unwrap()
     }
 }
+
+pub type SessionShared = Shared<actix_session::Session>;
+
