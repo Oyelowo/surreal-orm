@@ -23,33 +23,34 @@ start-k8s-apps:
 	# skaffold dev --trigger="manual"
 	# skaffold dev
 	
-start-app-build:
+# start-app-build:
+dev:
 	sh -c 'make start-web & make start-k8s-apps & wait'
 
-start-app:
-	skaffold dev --trigger="manual"
-	# skaffold dev
+# start-app:
+# 	skaffold dev --trigger="manual"
+# 	# skaffold dev
 
-start-cluster:
-    # if you wan to disable traefik as the default ingress controller for the cluster
-	 k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
-	# k3d cluster create local --k3s-arg "--no-deploy=traefik@server:*"
-	# k3d cluster create local --k3s-arg '--flannel-backend=none@server:*' '--disable-network-policy'
-	# k3d cluster create local --k3s-arg '--flannel-backend=none@server:*' '--no-deploy=network-policy@server:*'
-	# k3d cluster create local --api-port 6550 -p "8081:80@loadbalancer" --agents 2 --k3s-arg "--no-deploy=traefik@server:*"
-	# k3d cluster create local
-	# k3d cluster create localcluster \
-	# 	--api-port 127.0.0.1:6443 \
-	# 	-p 80:80@loadbalancer \
-	# 	-p 443:443@loadbalancer \
-	# 	--k3s-server-arg "--no-deploy=traefik"
+# start-cluster:
+#     # if you wan to disable traefik as the default ingress controller for the cluster
+# 	 k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+# 	# k3d cluster create local --k3s-arg "--no-deploy=traefik@server:*"
+# 	# k3d cluster create local --k3s-arg '--flannel-backend=none@server:*' '--disable-network-policy'
+# 	# k3d cluster create local --k3s-arg '--flannel-backend=none@server:*' '--no-deploy=network-policy@server:*'
+# 	# k3d cluster create local --api-port 6550 -p "8081:80@loadbalancer" --agents 2 --k3s-arg "--no-deploy=traefik@server:*"
+# 	# k3d cluster create local
+# 	# k3d cluster create localcluster \
+# 	# 	--api-port 127.0.0.1:6443 \
+# 	# 	-p 80:80@loadbalancer \
+# 	# 	-p 443:443@loadbalancer \
+# 	# 	--k3s-server-arg "--no-deploy=traefik"
 
-	#  k3d cluster create local --api-port 127.0.0.1:6443 -p 8080:80@loadbalancer -p 443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
-	# k3d cluster create local --api-port 6550 -p 80:80@loadbalancer -p 443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
-	# k3d cluster create local --api-port 6550 --k3s-arg "--no-deploy=traefik@server:*" --k3s-arg "--disable=servicelb@server:*" --no-lb --wait
-	# k3d cluster create local --api-port 6550  -p 8080:80@agent:* --k3s-arg "--no-deploy=traefik@server:*" --k3s-arg "--disable=servicelb@server:*" --no-lb --wait
-	# k3d cluster create dev --port 8080:80@loadbalancer --port 8443:443@loadbalancer
-	# k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer 
+# 	#  k3d cluster create local --api-port 127.0.0.1:6443 -p 8080:80@loadbalancer -p 443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+# 	# k3d cluster create local --api-port 6550 -p 80:80@loadbalancer -p 443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+# 	# k3d cluster create local --api-port 6550 --k3s-arg "--no-deploy=traefik@server:*" --k3s-arg "--disable=servicelb@server:*" --no-lb --wait
+# 	# k3d cluster create local --api-port 6550  -p 8080:80@agent:* --k3s-arg "--no-deploy=traefik@server:*" --k3s-arg "--disable=servicelb@server:*" --no-lb --wait
+# 	# k3d cluster create dev --port 8080:80@loadbalancer --port 8443:443@loadbalancer
+# 	# k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer 
 # kubectl port-forward $(kubectl get pods --selector "app.kubernetes.io/name=traefik" --output=name) 9000:9000
 
 # k3d cluster create nginx --k3s-server-arg '--no-deploy=traefik' --volume "$(pwd)/helm-ingress-nginx.yaml:/var/lib/rancher/k3s/server/manifests/helm-ingress-nginx.yaml"
@@ -64,21 +65,21 @@ start-cluster:
 delete-cluster:
 	k3d cluster delete local
 
-start:
-	skaffold dev
+# start:
+# 	skaffold dev
 
-dev-manual:
-	skaffold dev --build-concurrency=0 --trigger="manual"
+# dev-manual:
+# 	skaffold dev --build-concurrency=0 --trigger="manual"
 
-dev:
-	pulumi update --yes --skip-preview
+# dev:
+# 	pulumi update --yes --skip-preview
 
-devv:
-	pulumi login --local
-	pulumi stack rm --stack dev --force --yes
-	pulumi stack init --stack dev
-	pulumi update --logtostderr --stack dev --yes
-	pulumi stack rm --stack dev --force --yes
+# devv:
+# 	pulumi login --local
+# 	pulumi stack rm --stack dev --force --yes
+# 	pulumi stack init --stack dev
+# 	pulumi update --logtostderr --stack dev --yes
+# 	pulumi stack rm --stack dev --force --yes
 
 # build:
 # 	yarn run tsc

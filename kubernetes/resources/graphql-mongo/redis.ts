@@ -21,7 +21,7 @@ export const redisValues: DeepPartial<RedisHelmValuesBitnami> = {
   // },
 
   auth: {
-    enabled: true,
+    enabled: false,
   },
   master: {
     service: {

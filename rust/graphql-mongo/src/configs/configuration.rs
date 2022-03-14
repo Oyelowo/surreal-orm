@@ -16,9 +16,6 @@ pub enum Environemnt {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct AppUrl {}
-
-#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
 pub struct ApplicationConfigs {
     #[serde(deserialize_with = "deserialize_number_from_string")]
@@ -94,10 +91,32 @@ impl DatabaseConfigs {
     // }
 }
 
+#[derive(Deserialize, Debug, Default, Clone)]
+#[serde(rename_all = "lowercase")]
+pub struct RedisConfigs {
+    // pub name: String,
+    // pub username: String,
+    // pub password: String,
+    pub host: String,
+
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub port: u16,
+}
+
+impl RedisConfigs {
+    pub fn get_url(&self) -> String {
+        // let Self { host, port, .. } = self;
+        // Url::parse(format!("http://{host}:{port}").as_ref()).expect("Problem parsing application uri")
+        // format!("{host}:{port}")
+        format!("redis-database-master.development:6379")
+    }
+}
+
 #[derive(Debug)]
 pub struct Configs {
     pub application: ApplicationConfigs,
     pub database: DatabaseConfigs,
+    pub redis: RedisConfigs,
 }
 
 impl Configs {
@@ -110,9 +129,18 @@ impl Configs {
             .from_env::<DatabaseConfigs>()
             .expect("problem with mongo db environment variables(s)");
 
+        // let redis = envy::prefixed("REDIS")
+        //     .from_env::<RedisConfigs>()
+        //     .expect("problem with redis environment variables(s)");
+
         Self {
             application,
             database,
+            redis: RedisConfigs {
+                // TODO: change
+                host: "redis".into(),
+                port: 6370,
+            },
         }
     }
 }

@@ -1,3 +1,4 @@
+use actix_session::Session;
 use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use mongodb::Database;
@@ -12,14 +13,14 @@ use wither::{
 
 use crate::{
     app::{post::Post, AppError},
-    configs::model_cursor_to_vec,
+    configs::{model_cursor_to_vec, Shared},
 };
 
 #[derive(Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate)]
 #[serde(rename_all = "camelCase")]
 #[graphql(complex)]
 #[graphql(input_name = "UserInput")]
-#[model(index(keys = r#"doc!{"email": 1}"#, options = r#"doc!{"unique": true}"#))]
+#[model(index(keys = r#"doc!{"username": 1}"#, options = r#"doc!{"unique": true}"#))]
 pub struct User {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
@@ -45,6 +46,9 @@ pub struct User {
     pub deleted_at: Option<DateTime<Utc>>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    pub username: String,
+
+    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub first_name: String,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
@@ -67,6 +71,7 @@ pub struct User {
 
 #[ComplexObject]
 impl User {
+
     async fn posts(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<Post>> {
         // AuthGuard
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
@@ -74,7 +79,6 @@ impl User {
         let cursor = Post::find(db, doc! {"posterId": self.id}, None).await?;
         Ok(model_cursor_to_vec(cursor).await?)
     }
-
     async fn post_count(&self, ctx: &Context<'_>) -> anyhow::Result<usize> {
         let post_count = self.posts(ctx).await?.len();
         Ok(post_count)
@@ -102,6 +106,10 @@ impl User {
             .data::<User>()
             .map_err(|e| AppError::Forbidden(anyhow::anyhow!(e.message)));
         k
+    }
+
+    pub async fn find_by_id(db: &Database, id: &ObjectId) -> Option<Self> {
+        User::find_one(&db, doc! { "_id": id }, None).await.unwrap()
     }
 }
 

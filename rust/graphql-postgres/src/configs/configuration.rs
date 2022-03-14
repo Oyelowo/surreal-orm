@@ -1,8 +1,9 @@
+use secrecy::Secret;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
 
-#[derive(PartialEq, Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Environemnt {
     Local,
@@ -14,7 +15,7 @@ pub enum Environemnt {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AppUrl {}
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
@@ -31,7 +32,7 @@ impl ApplicationSettings {
     }
 }
 
-#[derive(Deserialize, Debug, Default)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub struct DatabaseSettings {
     pub name: String,
@@ -72,10 +73,20 @@ impl DatabaseSettings {
     }
 }
 
-#[derive(Debug)]
+#[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub struct RedisSettings {
+    // We have not created a stand-alone settings struct for Redis,
+    // let's see if we need more than the uri first!
+    // The URI is marked as secret because it may embed a password.
+    pub redis_uri: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct Configs {
     pub application_settings: ApplicationSettings,
     pub database_settings: DatabaseSettings,
+    pub redis_settings: RedisSettings,
 }
 
 impl Configs {
@@ -92,6 +103,9 @@ impl Configs {
         Self {
             application_settings,
             database_settings,
+            redis_settings: RedisSettings {
+                redis_uri: "re".into(),
+            },
         }
     }
 }

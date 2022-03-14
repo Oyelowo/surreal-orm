@@ -62,6 +62,7 @@ envy = "0.4.2"
 log = "0.4.14"
 rand = "0.8.5"
 secrecy = "0.8.0"
+send_wrapper = {version = "0.5", features = ["futures"]}
 thiserror = "1.0.30"
 urlencoding = "2.1.0"
 

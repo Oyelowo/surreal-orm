@@ -6,6 +6,8 @@ The input/output is a string in RFC3339 format.
 scalar DateTime
 type Mutation {
 	createUser(userInput: UserInput!): User!
+	signin: Something!
+	getSession: Something!
 	createPost(postInput: PostInput!): Post!
 }
 scalar ObjectId
@@ -27,18 +29,32 @@ type Query {
 	post(id: ObjectId!): Post
 	posts: [Post!]!
 }
+enum Role {
+	ADMIN
+	USER
+}
+type Something {
+	userId: String!
+	name: String!
+}
+type Subscription {
+	values: Int!
+}
 type User {
 	id: ObjectId
 	createdAt: DateTime
+	username: String!
 	firstName: String!
 	lastName: String!
 	email: String!
 	age: Int!
 	socialMedia: [String!]!
+	roles: [Role!]!
 	posts: [Post!]!
 	postCount: Int!
 }
 input UserInput {
+	username: String!
 	firstName: String!
 	lastName: String!
 	email: String!
@@ -48,4 +64,5 @@ input UserInput {
 schema {
 	query: Query
 	mutation: Mutation
+	subscription: Subscription
 }

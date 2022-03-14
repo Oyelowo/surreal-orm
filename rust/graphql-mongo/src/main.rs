@@ -1,6 +1,12 @@
 use actix_cors::Cors;
 use actix_redis::RedisSession;
-use actix_web::{cookie::Key, http, middleware::Logger, web, App, HttpServer};
+use actix_web::{
+    cookie::{self, time::Duration, Key},
+    http,
+    middleware::Logger,
+    web::{self, scope},
+    App, HttpServer,
+};
 use graphql_mongo::configs::{gql_playground, index, index_ws, Configs, GraphQlApp};
 use log::info;
 use secrecy::{ExposeSecret, Secret};
@@ -36,6 +42,12 @@ async fn main() -> anyhow::Result<()> {
             ])
             .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);
+        // let k = RedisSession::new(redis.get_url(), redis_key.master())
+        //     .cookie_name("test-session")
+        //     .cookie_http_only(true)
+        //     .cookie_max_age(Duration::MAX)
+        //     // allow the cookie only from the current domain
+        //     .cookie_same_site(cookie::SameSite::Lax);
 
         // let secret_key = Key::from(hmac_secret.expose_secret().as_bytes());
         // let message_store = CookieMessageStore::builder(secret_key.clone()).build();
@@ -44,20 +56,35 @@ async fn main() -> anyhow::Result<()> {
         // private key for every project. Anyone with access to the key can generate
         // authentication cookies for any user!
         let hmac_secret_from_env_var = Secret::new("secret".to_string());
-        let redis_key = Key::from(hmac_secret_from_env_var.expose_secret().as_bytes());
-        // let private_key = actix_web::cookie::Key::generate();
+        // let redis_key = Key::from(hmac_secret_from_env_var.expose_secret().as_bytes());
+        let redis_key = actix_web::cookie::Key::generate();
         // private_key.master()
         App::new()
-            .wrap(cors)
-            //  .wrap(TracingLogger::default())
-            // cookie session middleware
-            .wrap(RedisSession::new(redis.get_url(), redis_key.master()))
+        .wrap(cors)
+        //  .wrap(TracingLogger::default())
+        // cookie session middleware
+        .wrap(Logger::default())
+        .wrap(
+            RedisSession::new(redis.get_url(), redis_key.master())
+            .cookie_name("test-session")
+            .cookie_http_only(true)
+            // allow the cookie only from the current domain
+            // .cookie_same_site(cookie::SameSite::Lax),
+        )
             // Enable logger
-            .wrap(Logger::default())
             .app_data(web::Data::new(schema.clone()))
             .service(gql_playground)
             .service(index)
-            .service(web::resource("/ws").to(index_ws))
+            .service(web::resource("/graphql/ws").to(index_ws))
+        // .service(
+        //     scope("/api").service(
+        //         scope("/v1")
+        //             .route("/signup", post().to(index)) // change index to signup
+        //             .route("/login", post().to(index)) // change index to signin
+        //             .route("/user-info", post().to(index)) // change index to user-info
+        //             .route("/logout", post().to(index)), // change index to signgout
+        //     ),
+        // )
     })
     .bind(app_url)?
     .run()

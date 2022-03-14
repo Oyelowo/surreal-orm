@@ -1,22 +1,32 @@
-use actix_session::{CookieSession, Session};
+use actix_session::{CookieSession, Session, UserSession};
 use actix_web::http::header::HeaderMap;
-use actix_web::{get, post, web, HttpRequest, HttpResponse};
+use actix_web::{
+    get, post,
+    web::{self},
+    FromRequest, HttpRequest, HttpResponse,
+};
 
 use anyhow::Context;
-use async_graphql::Schema;
 use async_graphql::{
     http::{playground_source, GraphQLPlaygroundConfig},
     Data,
 };
+use async_graphql::{DataContext, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
+use bson::oid::ObjectId;
+use common::authentication::session_state::TypedSession;
+use mongodb::Database;
 use serde::Deserialize;
 
 use super::configuration::Environemnt;
+use crate::app::user::User;
 use crate::app::{get_my_graphql_schema, sync_mongo_models, MyGraphQLSchema};
 use crate::configs::Configs;
 use common::utils;
 
+use std::default;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
 
 pub struct Token(pub String);
 
@@ -29,13 +39,48 @@ fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
 #[post("/graphql")]
 pub async fn index(
     schema: web::Data<MyGraphQLSchema>,
-    req: HttpRequest,
+    _req: HttpRequest,
+    // db: actix_web::web::Data<Database>,
     gql_request: GraphQLRequest,
+    session: Session,
 ) -> GraphQLResponse {
     let mut request = gql_request.into_inner();
-    if let Some(token) = get_token_from_headers(req.headers()) {
-        request = request.data(token);
-    }
+
+    // let session = TypedSession(req.get_session());
+    // access session data
+    // if let Some(count) = req.get_session().get::<i32>("user_id").unwrap() {
+    //     println!("get_session value: {}", count);
+    //     req.get_session().insert("user_id", "23213");
+    // } else {
+    //     req.get_session().set("user_id", "rere")?;
+    // }
+
+    // let k = req.get_session().get::<i32>("user_id");
+    let session = Shared::new(session);
+    // let session = req.get_session();
+    // let cookier: Arc<Mutex<Option<String>>> = Default::default();
+
+    // cookier.lock().
+    // let p = Arc::new(Mutex::new(req.get_session()));
+    // if let Some(id) = session.get::<ObjectId>("user_id").unwrap_or(None) {
+    //     // let user = User::find_by_id(&db, &id).await.unwrap();
+    //     if let Some(user) = User::find_by_id(&db, &id).await {
+    //         request = request.data(user);
+    //     }
+    // }
+    // if let Some(token) = get_token_from_headers(req.headers()) {
+    //     request = request.data(token);
+    // }
+    // request = request.data(session);
+
+    // let session = Shared::new(session);
+    // //  cookier.lock().await = Some(session);
+    // let sess = req.get_session();
+    // let k = Arc::new(Mutex::new(sess));
+    // let p = k.clone().lock().as_deref().unwrap();
+    request = request.data(session);
+    // request = request.data(req.get_session());
+
     schema.execute(request).await.into()
 }
 
@@ -87,6 +132,7 @@ impl GraphQlApp {
         let Configs {
             ref application,
             database,
+            ..
         } = Configs::init();
 
         use Environemnt::*;
@@ -115,5 +161,26 @@ impl GraphQlApp {
     pub fn generate_schema(path: impl AsRef<Path>) {
         let data = &get_my_graphql_schema().finish().sdl();
         utils::write_data_to_path(data, path);
+    }
+}
+// TEsTING for session
+
+use send_wrapper::SendWrapper;
+use std::ops::Deref;
+
+#[derive(Clone, Debug)]
+pub struct Shared<T>(pub Option<SendWrapper<T>>);
+
+impl<T> Shared<T> {
+    pub fn new(v: T) -> Self {
+        Self(Some(SendWrapper::new(v)))
+    }
+}
+
+impl<T> Deref for Shared<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &*self.0.as_deref().clone().unwrap()
     }
 }

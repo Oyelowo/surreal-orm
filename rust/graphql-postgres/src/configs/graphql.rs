@@ -45,6 +45,7 @@ impl GraphQlApp {
         let Configs {
             application_settings: ref application,
             database_settings: database,
+            ..
         } = Configs::init();
 
         use Environemnt::*;
