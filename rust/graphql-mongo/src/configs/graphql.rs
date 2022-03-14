@@ -7,11 +7,11 @@ use actix_web::{
 };
 
 use anyhow::Context;
+use async_graphql::Schema;
 use async_graphql::{
     http::{playground_source, GraphQLPlaygroundConfig},
     Data,
 };
-use async_graphql::{DataContext, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 use bson::oid::ObjectId;
 use common::authentication::session_state::TypedSession;
@@ -56,7 +56,8 @@ pub async fn index(
     // }
 
     // let k = req.get_session().get::<i32>("user_id");
-    let session = SessionShared::new(req.get_session());
+    // let session = SessionShared::new(req.get_session());
+
     // let session = req.get_session();
     // let cookier: Arc<Mutex<Option<String>>> = Default::default();
 
@@ -78,6 +79,7 @@ pub async fn index(
     // let sess = req.get_session();
     // let k = Arc::new(Mutex::new(sess));
     // let p = k.clone().lock().as_deref().unwrap();
+    let session = TypedSession::new(req.get_session());
     request = request.data(session);
     // request = request.data(req.get_session());
 
@@ -164,26 +166,3 @@ impl GraphQlApp {
     }
 }
 // TEsTING for session
-
-use send_wrapper::SendWrapper;
-use std::ops::Deref;
-
-#[derive(Clone, Debug)]
-pub struct Shared<T>(pub Option<SendWrapper<T>>);
-
-impl<T> Shared<T> {
-    pub fn new(v: T) -> Self {
-        Self(Some(SendWrapper::new(v)))
-    }
-}
-
-impl<T> Deref for Shared<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &*self.0.as_deref().clone().unwrap()
-    }
-}
-
-pub type SessionShared = Shared<actix_session::Session>;
-

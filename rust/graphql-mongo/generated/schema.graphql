@@ -6,7 +6,7 @@ The input/output is a string in RFC3339 format.
 scalar DateTime
 type Mutation {
 	createUser(userInput: UserInput!): User!
-	signin: Something!
+	signIn: Something!
 	getSession: Something!
 	createPost(postInput: PostInput!): Post!
 }

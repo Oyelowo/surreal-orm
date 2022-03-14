@@ -23,6 +23,7 @@ thiserror = "1.0.30"
 tokio = {version = "1.16.1", features = ["full"]}
 uuid = {version = "0.8.1", features = ["v4", "serde"]}
 # Observability
+send_wrapper = {version = "0.5", features = ["futures"]}
 tracing = "0.1.31"
 tracing-subscriber = "0.3.9"
 

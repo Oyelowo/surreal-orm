@@ -13,7 +13,7 @@ use wither::{
 
 use crate::{
     app::{post::Post, AppError},
-    configs::{model_cursor_to_vec, Shared},
+    configs::model_cursor_to_vec,
 };
 
 #[derive(Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate)]
@@ -71,7 +71,6 @@ pub struct User {
 
 #[ComplexObject]
 impl User {
-
     async fn posts(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<Post>> {
         // AuthGuard
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
