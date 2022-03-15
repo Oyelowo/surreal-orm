@@ -46,7 +46,11 @@ impl TypedSession {
         Ok(())
     }
 
-    pub fn insert_user_object_id(&self, user_id: ObjectId) -> Result<(), Error> {
+    // fn from_ctx(ctx: Context) -> Self {
+    //
+    // }
+
+    pub fn insert_user_object_id(&self, user_id: &ObjectId) -> Result<(), Error> {
         self.0.insert(Self::USER_ID_KEY, user_id)
     }
 

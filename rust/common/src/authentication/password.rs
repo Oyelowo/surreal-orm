@@ -23,12 +23,18 @@ impl PasswordPlain {
 
 pub struct PasswordHashPHC(Secret<String>);
 impl PasswordHashPHC {
-    pub fn new(pass: String) -> Self {
-        Self(Secret::new(pass))
+    pub fn new(pass: impl Into<String>) -> Self {
+        Self(Secret::new(pass.into()))
     }
 
     pub fn as_str(&self) -> &str {
         self.0.expose_secret().as_str()
+    }
+}
+
+impl Into<String> for PasswordHashPHC {
+    fn into(self) -> String {
+        self.as_str().into()
     }
 }
 

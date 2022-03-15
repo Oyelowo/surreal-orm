@@ -6,7 +6,12 @@ The input/output is a string in RFC3339 format.
 scalar DateTime
 type Mutation {
 	createUser(userInput: UserInput!): User!
-	signIn: Something!
+	"""
+	Creates a new user but doesn't log in the user
+	Currently like this because of future developments
+	"""
+	signup(userInput: UserInput!): User!
+	signIn(userInput: SignInInput!): User!
 	getSession: Something!
 	createPost(postInput: PostInput!): Post!
 }
@@ -33,6 +38,10 @@ enum Role {
 	ADMIN
 	USER
 }
+input SignInInput {
+	username: String!
+	password: String!
+}
 type Something {
 	userId: String!
 	name: String!
@@ -55,6 +64,7 @@ type User {
 }
 input UserInput {
 	username: String!
+	password: String!
 	firstName: String!
 	lastName: String!
 	email: String!

@@ -48,6 +48,10 @@ pub struct User {
     pub username: String,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    #[graphql(skip_output)]
+    pub password: String,
+
+    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub first_name: String,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
@@ -83,6 +87,12 @@ impl User {
     }
 }
 
+#[derive(InputObject, TypedBuilder)]
+pub struct SignInInput {
+    pub username: String,
+    pub password: String,
+}
+
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum Role {
     Admin,
@@ -93,7 +103,7 @@ impl User {
     pub fn and_has_role(&self, scope: Role) -> anyhow::Result<&Self, AppError> {
         if !self.roles.contains(&scope) {
             return Err(AppError::Forbidden(anyhow::anyhow!(
-                "Does not have required permissin"
+                "Does not have required permission"
             )));
         }
         Ok(self)
@@ -106,8 +116,17 @@ impl User {
         k
     }
 
+    //TODO: Better error handling
     pub async fn find_by_id(db: &Database, id: &ObjectId) -> Option<Self> {
-        User::find_one(&db, doc! { "_id": id }, None).await.unwrap()
+        User::find_one(&db, doc! { "_id": id }, None)
+            .await
+            .expect("Failed to find user by id")
+    }
+
+    pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Option<Self> {
+        User::find_one(&db, doc! { "username": username.into() }, None)
+            .await
+            .expect("Failed to find user by username")
     }
 }
 
