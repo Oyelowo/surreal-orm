@@ -9,12 +9,11 @@ use actix_web::{
 };
 use graphql_mongo::configs::{gql_playground, index, index_ws, Configs, GraphQlApp};
 use log::info;
-use secrecy::{ExposeSecret, Secret};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     env_logger::init();
-    
+
     let Configs {
         application, redis, ..
     } = Configs::init();
@@ -44,37 +43,25 @@ async fn main() -> anyhow::Result<()> {
             ])
             .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);
-        // let k = RedisSession::new(redis.get_url(), redis_key.master())
-        //     .cookie_name("test-session")
-        //     .cookie_http_only(true)
-        //     .cookie_max_age(Duration::MAX)
-        //     // allow the cookie only from the current domain
-        //     .cookie_same_site(cookie::SameSite::Lax);
-
-        // let secret_key = Key::from(hmac_secret.expose_secret().as_bytes());
-        // let message_store = CookieMessageStore::builder(secret_key.clone()).build();
 
         // Generate a random 32 byte key. Note that it is important to use a unique
         // private key for every project. Anyone with access to the key can generate
         // authentication cookies for any user!
-        let hmac_secret_from_env_var = Secret::new("secret".to_string());
-        // let redis_key = Key::from(hmac_secret_from_env_var.expose_secret().as_bytes());
-        let redis_key = actix_web::cookie::Key::generate();
-        // private_key.master()
+        let redis_key = Key::from("string".to_string().repeat(5).as_bytes());
         App::new()
-        .wrap(cors)
-        //  .wrap(TracingLogger::default())
-        // cookie session middleware
-        .wrap(Logger::default())
-        .wrap(
-            RedisSession::new(redis.get_url(), &[0; 32])
-            // RedisSession::new(redis.get_url(), redis_key.master())
-            .cookie_name("test-session")
-            .cookie_http_only(true)
-            // allow the cookie only from the current domain
-            // .cookie_same_site(cookie::SameSite::Lax),
-        )
+            .wrap(cors)
+            // .wrap(TracingLogger::default())
             // Enable logger
+            .wrap(Logger::default())
+            .wrap(
+                // RedisSession::new(redis.get_url(), &[0; 32])
+                RedisSession::new(redis.get_url(), redis_key.master())
+                    .cookie_name("oyelowo-session")
+                    .cookie_max_age(Duration::days(180))
+                    .cookie_http_only(true)
+                    // allow the cookie only from the current domain
+                    .cookie_same_site(cookie::SameSite::Lax),
+            )
             .app_data(web::Data::new(schema.clone()))
             .service(gql_playground)
             .service(index)
