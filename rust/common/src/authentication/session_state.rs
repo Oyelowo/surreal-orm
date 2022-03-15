@@ -3,6 +3,8 @@ use std::ops::Deref;
 use actix_session::Session;
 use actix_web::Error;
 use send_wrapper::SendWrapper;
+use uuid::Uuid;
+use wither::bson::oid::ObjectId;
 
 #[derive(Clone, Debug)]
 struct Shared<T>(pub Option<SendWrapper<T>>);
@@ -44,11 +46,19 @@ impl TypedSession {
         Ok(())
     }
 
-    pub fn insert_user_id(&self, user_id: impl Into<String>) -> Result<(), Error> {
-        self.0.insert(Self::USER_ID_KEY, user_id.into())
+    pub fn insert_user_object_id(&self, user_id: ObjectId) -> Result<(), Error> {
+        self.0.insert(Self::USER_ID_KEY, user_id)
     }
 
-    pub fn get_user_id(&self) -> Result<Option<String>, Error> {
-        self.0.get::<String>(Self::USER_ID_KEY)
+    pub fn get_user_object_id(&self) -> Result<Option<ObjectId>, Error> {
+        self.0.get::<ObjectId>(Self::USER_ID_KEY)
+    }
+
+    pub fn insert_user_uuid(&self, user_id: Uuid) -> Result<(), Error> {
+        self.0.insert(Self::USER_ID_KEY, user_id)
+    }
+
+    pub fn get_user_uuid(&self) -> Result<Option<Uuid>, Error> {
+        self.0.get::<Uuid>(Self::USER_ID_KEY)
     }
 }
