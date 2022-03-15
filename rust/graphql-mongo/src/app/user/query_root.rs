@@ -1,4 +1,4 @@
-use super::model::User;
+use super::{model::User, AuthGuard};
 
 use async_graphql::*;
 use futures::stream::StreamExt;
@@ -29,6 +29,7 @@ impl UserQueryRoot {
         Ok(user)
     }
 
+    #[graphql(guard = "AuthGuard")]
     async fn users(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<User>> {
         let db = ctx.data_unchecked::<Database>();
         // let pipeline = vec![

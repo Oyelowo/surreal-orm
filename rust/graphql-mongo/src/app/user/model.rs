@@ -1,5 +1,6 @@
 use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
+use common::authentication::session_state::TypedSession;
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -97,6 +98,45 @@ pub struct SignInInput {
 pub enum Role {
     Admin,
     User,
+}
+
+struct RoleGuard {
+    role: Role,
+}
+
+#[async_trait::async_trait]
+impl Guard for RoleGuard {
+    async fn check(&self, ctx: &Context<'_>) -> Result<()> {
+        if ctx.data_opt::<Role>() == Some(&self.role) {
+            Ok(())
+        } else {
+            Err("Forbidden".into())
+        }
+    }
+}
+
+impl RoleGuard {
+    fn new(role: Role) -> Self {
+        Self { role }
+    }
+}
+
+pub struct AuthGuard;
+
+#[async_trait::async_trait]
+impl Guard for AuthGuard {
+    async fn check(&self, ctx: &Context<'_>) -> Result<()> {
+        let session = ctx
+            .data::<TypedSession>()
+            .expect("Failed to get actix session Object");
+
+        let maybe_user_id = session.get_user_object_id().expect("failed1");
+        if maybe_user_id.is_some() {
+            Ok(())
+        } else {
+            Err("Forbidden".into())
+        }
+    }
 }
 
 impl User {
