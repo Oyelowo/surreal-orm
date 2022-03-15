@@ -10,8 +10,9 @@ type Mutation {
 	Creates a new user but doesn't log in the user
 	Currently like this because of future developments
 	"""
-	signup(userInput: UserInput!): User!
+	signUp(userInput: UserInput!): User!
 	signIn(userInput: SignInInput!): User!
+	signOut: SignOutMessage!
 	getSession: Something!
 	createPost(postInput: PostInput!): Post!
 }
@@ -41,6 +42,10 @@ enum Role {
 input SignInInput {
 	username: String!
 	password: String!
+}
+type SignOutMessage {
+	message: String!
+	userId: ObjectId!
 }
 type Something {
 	userId: String!

@@ -194,3 +194,9 @@ fn validate_unique_username(username: &str) -> std::result::Result<(), Validatio
     Ok(())
 }
 */
+
+#[derive(SimpleObject)]
+pub struct SignOutMessage {
+    pub message: String,
+    pub user_id: ObjectId,
+}

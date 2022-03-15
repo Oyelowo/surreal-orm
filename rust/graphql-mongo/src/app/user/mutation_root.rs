@@ -6,7 +6,7 @@ use common::authentication::{
     session_state::TypedSession,
 };
 
-use super::{Role, SignInInput, User};
+use super::{Role, SignInInput, SignOutMessage, User};
 use async_graphql::*;
 use chrono::Utc;
 
@@ -48,7 +48,7 @@ impl UserMutationRoot {
 
     /// Creates a new user but doesn't log in the user
     /// Currently like this because of future developments
-    async fn signup(
+    async fn sign_up(
         &self,
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "user data")] user_input: User,
@@ -120,25 +120,34 @@ impl UserMutationRoot {
         let p = k.expect("trttrtrt");
         Ok(p)
     }
-    // async fn sign_in(&self, ctx: &async_graphql::Context<'_>) -> anyhow::Result<Something> {
-    //     // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
-    //     // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
-    //     let session = ctx
-    //         .data::<TypedSession>()
-    //         .expect("Failed to get actix session Object");
 
-    //     session
-    //         .insert_user_object_id(ObjectId::new())
-    //         .expect("Failed to insert");
-    //     let uid = session
-    //         .get_user_object_id()
-    //         .expect("failed1")
-    //         .expect("Failed2");
-    //     Ok(Something {
-    //         name: "rust love".to_string(),
-    //         user_id: uid.to_string(),
-    //     })
-    // }
+    async fn sign_out(
+        &self,
+        ctx: &async_graphql::Context<'_>,
+    ) -> anyhow::Result<SignOutMessage, anyhow::Error> {
+        // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
+        // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
+        // let db = ctx.data_unchecked::<Database>();
+        let session = ctx
+            .data::<TypedSession>()
+            .expect("Failed to get actix session Object");
+
+        let maybe_user = session
+            .get_user_object_id()
+            .expect("Failed to get user session. Improve error handling later");
+
+        match maybe_user {
+            Some(user_id) => {
+                session.clear();
+                Ok(SignOutMessage {
+                    message: "successfully signed out".into(),
+                    user_id,
+                })
+            }
+            None => Err(anyhow::anyhow!("Already logged out")),
+        }
+    }
+
     async fn get_session(&self, ctx: &async_graphql::Context<'_>) -> anyhow::Result<Something> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);

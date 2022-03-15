@@ -65,4 +65,8 @@ impl TypedSession {
     pub fn get_user_uuid(&self) -> Result<Option<Uuid>, Error> {
         self.0.get::<Uuid>(Self::USER_ID_KEY)
     }
+
+    pub fn clear(&self) {
+        self.0.clear()
+    }
 }

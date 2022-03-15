@@ -47,7 +47,7 @@ async fn main() -> anyhow::Result<()> {
         // Generate a random 32 byte key. Note that it is important to use a unique
         // private key for every project. Anyone with access to the key can generate
         // authentication cookies for any user!
-        let redis_key = Key::from("string".to_string().repeat(5).as_bytes());
+        let redis_key = Key::from("string".to_string().repeat(256).as_bytes());
         App::new()
             .wrap(cors)
             // .wrap(TracingLogger::default())
