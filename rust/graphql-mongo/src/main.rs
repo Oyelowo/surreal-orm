@@ -13,6 +13,8 @@ use secrecy::{ExposeSecret, Secret};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    env_logger::init();
+    
     let Configs {
         application, redis, ..
     } = Configs::init();
@@ -65,7 +67,8 @@ async fn main() -> anyhow::Result<()> {
         // cookie session middleware
         .wrap(Logger::default())
         .wrap(
-            RedisSession::new(redis.get_url(), redis_key.master())
+            RedisSession::new(redis.get_url(), &[0; 32])
+            // RedisSession::new(redis.get_url(), redis_key.master())
             .cookie_name("test-session")
             .cookie_http_only(true)
             // allow the cookie only from the current domain

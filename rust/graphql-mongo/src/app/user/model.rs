@@ -1,6 +1,7 @@
 use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::authentication::session_state::TypedSession;
+use log::info;
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -132,6 +133,7 @@ impl Guard for AuthGuard {
 
         let maybe_user_id = session.get_user_object_id().expect("failed1");
         if maybe_user_id.is_some() {
+            info!("Successfully authenticated: {:?}", maybe_user_id);
             Ok(())
         } else {
             Err("Forbidden".into())
