@@ -92,7 +92,7 @@ impl User {
 }
 
 #[derive(InputObject, TypedBuilder)]
-pub struct SignInInput {
+pub struct SignInCredentials {
     pub username: String,
     pub password: String,
 }

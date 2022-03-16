@@ -1,12 +1,11 @@
 use anyhow::{Context, Ok};
-use bson::oid::ObjectId;
 use common::authentication::{
     self,
-    password::{PasswordHashPHC, PasswordPlain},
+    password::{generate_password_hash, PasswordHashPHC, PasswordPlain},
     session_state::TypedSession,
 };
 
-use super::{Role, SignInInput, SignOutMessage, User};
+use super::{Role, SignInCredentials, SignOutMessage, User};
 use async_graphql::*;
 use chrono::Utc;
 
@@ -51,21 +50,20 @@ impl UserMutationRoot {
     async fn sign_up(
         &self,
         ctx: &async_graphql::Context<'_>,
-        #[graphql(desc = "user data")] user_input: User,
+        #[graphql(desc = "Sign Up credentials")] user: User,
     ) -> anyhow::Result<User> {
-        user_input.validate()?;
+        user.validate()?;
         let db = ctx.data_unchecked::<Database>();
-        let password_hash =
-            authentication::password::generate_password_hash(user_input.password).await?;
+        let password_hash = generate_password_hash(user.password).await?;
 
         let mut user = User::builder()
             .created_at(Utc::now())
-            .username(user_input.username)
-            .first_name(user_input.first_name)
-            .last_name(user_input.last_name)
-            .email(user_input.email)
-            .age(user_input.age)
-            .social_media(user_input.social_media)
+            .username(user.username)
+            .first_name(user.first_name)
+            .last_name(user.last_name)
+            .email(user.email)
+            .age(user.age)
+            .social_media(user.social_media)
             .roles(vec![Role::User])
             .password(password_hash.into())
             .build();
@@ -79,7 +77,7 @@ impl UserMutationRoot {
     async fn sign_in(
         &self,
         ctx: &async_graphql::Context<'_>,
-        #[graphql(desc = "user data")] user_input: SignInInput,
+        #[graphql(desc = "sign in credentials")] sign_in_credentials: SignInCredentials,
     ) -> anyhow::Result<User> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
@@ -96,10 +94,10 @@ impl UserMutationRoot {
                 user
             }
             None => {
-                let user = User::find_by_username(db, user_input.username)
+                let user = User::find_by_username(db, sign_in_credentials.username)
                     .await
                     .context("User not found")?;
-                let plain_password = PasswordPlain::new(user_input.password);
+                let plain_password = PasswordPlain::new(sign_in_credentials.password);
                 let hashed_password = PasswordHashPHC::new(&user.password);
 
                 let password_verified =
