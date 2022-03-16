@@ -41,9 +41,8 @@ impl TypedSession {
         Self(Shared::new(session))
     }
 
-    pub fn renew(&self) -> anyhow::Result<()> {
+    pub fn renew(&self) {
         self.0.renew();
-        Ok(())
     }
 
     // fn from_ctx(ctx: Context) -> Self {

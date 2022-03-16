@@ -75,6 +75,7 @@ impl UserMutationRoot {
         Ok(user)
     }
 
+    // TODO: Improve all errors using error extension
     async fn sign_in(
         &self,
         ctx: &async_graphql::Context<'_>,
@@ -91,7 +92,7 @@ impl UserMutationRoot {
         let k = match maybe_user_id {
             Some(ref user_id) => {
                 let user = User::find_by_id(db, user_id).await;
-                session.renew().expect("cant renew");
+                session.renew();
                 user
             }
             None => {

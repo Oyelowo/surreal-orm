@@ -1,4 +1,6 @@
-use async_graphql::*;
+use async_graphql::{
+    ComplexObject, Context, Enum, ErrorExtensions, FieldResult, Guard, InputObject, SimpleObject,
+};
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::authentication::session_state::TypedSession;
 use log::info;
@@ -13,7 +15,7 @@ use wither::{
 // use bson::DateTime;
 
 use crate::{
-    app::{post::Post, AppError},
+    app::{error::ResolverError, post::Post, AppError},
     configs::model_cursor_to_vec,
 };
 
@@ -76,14 +78,14 @@ pub struct User {
 
 #[ComplexObject]
 impl User {
-    async fn posts(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<Post>> {
+    async fn posts(&self, ctx: &Context<'_>) -> FieldResult<Vec<Post>> {
         // AuthGuard
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = ctx.data_unchecked::<Database>();
         let cursor = Post::find(db, doc! {"posterId": self.id}, None).await?;
         Ok(model_cursor_to_vec(cursor).await?)
     }
-    async fn post_count(&self, ctx: &Context<'_>) -> anyhow::Result<usize> {
+    async fn post_count(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let post_count = self.posts(ctx).await?.len();
         Ok(post_count)
     }
@@ -107,7 +109,7 @@ struct RoleGuard {
 
 #[async_trait::async_trait]
 impl Guard for RoleGuard {
-    async fn check(&self, ctx: &Context<'_>) -> Result<()> {
+    async fn check(&self, ctx: &Context<'_>) -> FieldResult<()> {
         if ctx.data_opt::<Role>() == Some(&self.role) {
             Ok(())
         } else {
@@ -126,12 +128,13 @@ pub struct AuthGuard;
 
 #[async_trait::async_trait]
 impl Guard for AuthGuard {
-    async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-        let session = ctx
-            .data::<TypedSession>()
-            .expect("Failed to get actix session Object");
+    async fn check(&self, ctx: &Context<'_>) -> FieldResult<()> {
+        let session = ctx.data::<TypedSession>()?;
 
-        let maybe_user_id = session.get_user_object_id().expect("failed1");
+        let maybe_user_id = session
+            .get_user_object_id()
+            .map_err(|e| ResolverError::NotFound.extend())?;
+
         if maybe_user_id.is_some() {
             info!("Successfully authenticated: {:?}", maybe_user_id);
             Ok(())
@@ -142,6 +145,18 @@ impl Guard for AuthGuard {
 }
 
 impl User {
+    async fn get_current_user(&self, ctx: &Context<'_>) -> FieldResult<Option<User>> {
+        let session = ctx.data::<TypedSession>()?;
+        let db = ctx.data::<Database>()?;
+
+        let user_id = session
+            .get_user_object_id()
+            .map_err(|_| ResolverError::NotFound.extend())?
+            .ok_or(ResolverError::NotFound.extend())?;
+
+        let user = Self::find_by_id(db, &user_id).await;
+        Ok(user)
+    }
     pub fn and_has_role(&self, scope: Role) -> anyhow::Result<&Self, AppError> {
         if !self.roles.contains(&scope) {
             return Err(AppError::Forbidden(anyhow::anyhow!(

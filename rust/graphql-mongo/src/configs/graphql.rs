@@ -110,7 +110,9 @@ pub async fn index_ws(
 #[get("/graphql")]
 pub async fn gql_playground() -> HttpResponse {
     let source = playground_source(
-        GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"),
+        GraphQLPlaygroundConfig::new("/graphql")
+            .subscription_endpoint("/graphql")
+            .with_setting("credentials", "include"), // e.g allow cookies
     );
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
