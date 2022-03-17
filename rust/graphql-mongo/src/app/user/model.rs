@@ -1,3 +1,4 @@
+use anyhow::Context as ErrorContext;
 use async_graphql::{
     ComplexObject, Context, Enum, ErrorExtensions, FieldResult, Guard, InputObject, SimpleObject,
 };
@@ -133,19 +134,19 @@ impl Guard for AuthGuard {
 
         let maybe_user_id = session
             .get_user_object_id()
-            .map_err(|e| ResolverError::NotFound.extend())?;
+            .map_err(|e| ResolverError::InvalidCredentials.extend())?;
 
         if maybe_user_id.is_some() {
             info!("Successfully authenticated: {:?}", maybe_user_id);
             Ok(())
         } else {
-            Err("Forbidden".into())
+            Err(ResolverError::Forbidden.extend())
         }
     }
 }
 
 impl User {
-    async fn get_current_user(&self, ctx: &Context<'_>) -> FieldResult<Option<User>> {
+    async fn get_current_user(&self, ctx: &Context<'_>) -> FieldResult<User> {
         let session = ctx.data::<TypedSession>()?;
         let db = ctx.data::<Database>()?;
 
@@ -155,29 +156,26 @@ impl User {
             .ok_or(ResolverError::NotFound.extend())?;
 
         let user = Self::find_by_id(db, &user_id).await;
-        Ok(user)
+        user
     }
-    pub fn and_has_role(&self, scope: Role) -> anyhow::Result<&Self, AppError> {
+    pub fn and_has_role(&self, scope: Role) -> FieldResult<&Self> {
         if !self.roles.contains(&scope) {
-            return Err(AppError::Forbidden(anyhow::anyhow!(
-                "Does not have required permission"
-            )));
+            return Err(ResolverError::Unauthorized.extend());
         }
         Ok(self)
     }
 
-    pub fn from_ctx<'a>(ctx: &'a Context) -> anyhow::Result<&'a Self, AppError> {
-        let k = ctx
-            .data::<User>()
-            .map_err(|e| AppError::Forbidden(anyhow::anyhow!(e.message)));
-        k
+    pub fn from_ctx<'a>(ctx: &'a Context) -> FieldResult<&'a Self> {
+        ctx.data::<User>()
+        // .map_err(|_| ResolverError::ServerError("cant ger user".into()).extend())?;
     }
 
     //TODO: Better error handling
-    pub async fn find_by_id(db: &Database, id: &ObjectId) -> Option<Self> {
+    pub async fn find_by_id(db: &Database, id: &ObjectId) -> FieldResult<Self> {
         User::find_one(&db, doc! { "_id": id }, None)
-            .await
-            .expect("Failed to find user by id")
+            .await?
+            .context("Failed to find user")
+            .map_err(|_e| ResolverError::NotFound.extend())
     }
 
     pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Option<Self> {

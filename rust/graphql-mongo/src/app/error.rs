@@ -9,6 +9,15 @@ pub enum ResolverError {
     #[error("Username or password is invalid")]
     InvalidCredentials,
 
+    #[error("Unauthorized: The client must authenticate itself to get the requested response")]
+    Unauthorized,
+
+    #[error("Forbidden")]
+    Forbidden,
+
+    #[error("Bad Request. Something went wrong")]
+    BadRequest,
+
     #[error("ServerError")]
     ServerError(String),
 
@@ -22,6 +31,9 @@ impl ErrorExtensions for ResolverError {
         self.extend_with(|err, e| match err {
             ResolverError::NotFound => e.set("code", "NOT_FOUND"),
             ResolverError::InvalidCredentials => e.set("code", "INVALID_CREDENTIALS"),
+            ResolverError::Unauthorized => e.set("code", "UNAUTHORIZED"),
+            ResolverError::Forbidden => e.set("code", "401"),
+            ResolverError::BadRequest => e.set("code", "400: BAD_REQUEST"),
             ResolverError::ServerError(reason) => e.set("reason", reason.to_string()),
             ResolverError::ErrorWithoutExtensions => {}
         })

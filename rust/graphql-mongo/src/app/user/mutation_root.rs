@@ -1,9 +1,11 @@
-use anyhow::{Context, Ok};
+use anyhow::Context as ContextAnyhow;
 use common::authentication::{
     self,
     password::{generate_password_hash, PasswordHashPHC, PasswordPlain},
     session_state::TypedSession,
 };
+
+use crate::app::error::ResolverError;
 
 use super::{Role, SignInCredentials, SignOutMessage, User};
 use async_graphql::*;
@@ -78,15 +80,15 @@ impl UserMutationRoot {
         &self,
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "sign in credentials")] sign_in_credentials: SignInCredentials,
-    ) -> anyhow::Result<User> {
+    ) -> FieldResult<User> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = ctx.data_unchecked::<Database>();
-        let session = ctx
-            .data::<TypedSession>()
-            .expect("Failed to get actix session Object");
+        let session = ctx.data::<TypedSession>()?;
 
-        let maybe_user_id = session.get_user_object_id().expect("failed1");
+        let maybe_user_id = session
+            .get_user_object_id()
+            .map_err(|_| ResolverError::NotFound.extend())?;
         let k = match maybe_user_id {
             Some(ref user_id) => {
                 let user = User::find_by_id(db, user_id).await;
@@ -96,7 +98,7 @@ impl UserMutationRoot {
             None => {
                 let user = User::find_by_username(db, sign_in_credentials.username)
                     .await
-                    .context("User not found")?;
+                    .context("Failed to find user")?;
                 let plain_password = PasswordPlain::new(sign_in_credentials.password);
                 let hashed_password = PasswordHashPHC::new(&user.password);
 
@@ -109,9 +111,9 @@ impl UserMutationRoot {
                     let id = user.id.expect("no");
                     session.insert_user_object_id(&id).expect("Failed");
                     // session.insert_user_role(user.roles).expect("Failed");
-                    Some(user)
+                    Ok(user)
                 } else {
-                    None
+                    Err(ResolverError::Unauthorized.extend())
                 }
             }
         };
@@ -120,20 +122,15 @@ impl UserMutationRoot {
         Ok(p)
     }
 
-    async fn sign_out(
-        &self,
-        ctx: &async_graphql::Context<'_>,
-    ) -> anyhow::Result<SignOutMessage, anyhow::Error> {
+    async fn sign_out(&self, ctx: &async_graphql::Context<'_>) -> FieldResult<SignOutMessage> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
         // let db = ctx.data_unchecked::<Database>();
-        let session = ctx
-            .data::<TypedSession>()
-            .expect("Failed to get actix session Object");
+        let session = ctx.data::<TypedSession>()?;
 
         let maybe_user = session
             .get_user_object_id()
-            .expect("Failed to get user session. Improve error handling later");
+            .map_err(|_| ResolverError::NotFound.extend())?;
 
         match maybe_user {
             Some(user_id) => {
@@ -143,18 +140,20 @@ impl UserMutationRoot {
                     user_id,
                 })
             }
-            None => Err(anyhow::anyhow!("Already logged out")),
+            None => Err(ResolverError::BadRequest)
+                .extend_err(|_, e| e.set("reason", "Already Logged out")),
         }
     }
 
-    async fn get_session(&self, ctx: &async_graphql::Context<'_>) -> anyhow::Result<Something> {
+    async fn get_session(&self, ctx: &async_graphql::Context<'_>) -> FieldResult<Something> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
         let session = ctx.data::<TypedSession>().expect("run it");
         let uid = session
             .get_user_object_id()
-            .expect("Failed to get user_id session")
-            .expect("Failed to get user_id session value");
+            .expect("Failed to get id")
+            .expect("Failed to get id");
+
         Ok(Something {
             name: "good guy".into(),
             user_id: uid.to_string(),
