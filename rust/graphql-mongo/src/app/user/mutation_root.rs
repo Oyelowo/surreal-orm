@@ -75,7 +75,6 @@ impl UserMutationRoot {
         user.save(db, None)
             .await
             .map_err(|_| ResolverError::BadRequest.extend())?;
-
         Ok(user)
     }
 
@@ -148,28 +147,4 @@ impl UserMutationRoot {
                 .extend_err(|_, e| e.set("reason", "Already Logged out")),
         }
     }
-
-    async fn get_session(&self, ctx: &async_graphql::Context<'_>) -> FieldResult<Something> {
-        // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
-        // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
-        let session = ctx.data::<TypedSession>().expect("run it");
-        let uid = session
-            .get_user_object_id()
-            .expect("Failed to get id")
-            .expect("Failed to get id");
-
-        Ok(Something {
-            name: "good guy".into(),
-            user_id: uid.to_string(),
-        })
-    }
-}
-
-// #[serde(rename_all = "camelCase")]
-// #[graphql(complex)]
-// #[graphql(input_name = "UserInput")]
-#[derive(SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder)]
-struct Something {
-    user_id: String,
-    name: String,
 }

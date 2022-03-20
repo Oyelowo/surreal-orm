@@ -134,7 +134,7 @@ impl Guard for AuthGuard {
 
         let maybe_user_id = session
             .get_user_object_id()
-            .map_err(|e| ResolverError::InvalidCredentials.extend())?;
+            .map_err(|_e| ResolverError::InvalidCredentials.extend())?;
 
         if maybe_user_id.is_some() {
             info!("Successfully authenticated: {:?}", maybe_user_id);
@@ -146,7 +146,7 @@ impl Guard for AuthGuard {
 }
 
 impl User {
-    async fn get_current_user(&self, ctx: &Context<'_>) -> FieldResult<User> {
+    pub async fn get_current_user(ctx: &Context<'_>) -> FieldResult<User> {
         let session = ctx.data::<TypedSession>()?;
         let db = ctx.data::<Database>()?;
 
@@ -165,10 +165,10 @@ impl User {
         Ok(self)
     }
 
-    pub fn from_ctx<'a>(ctx: &'a Context) -> FieldResult<&'a Self> {
-        ctx.data::<User>()
-        // .map_err(|_| ResolverError::ServerError("cant ger user".into()).extend())?;
-    }
+    // pub fn from_ctx<'a>(ctx: &'a Context) -> FieldResult<&'a Self> {
+    //     ctx.data::<User>()
+    //         .map_err(|_| ResolverError::NotFound.extend())
+    // }
 
     //TODO: Better error handling
     pub async fn find_by_id(db: &Database, id: &ObjectId) -> FieldResult<Self> {

@@ -13,7 +13,7 @@ gen:
 	export ENVIRONMENT="development" && export PULUMI_CONFIG_PASSPHRASE="" && pulumi update --yes --skip-preview --stack dev
 
 start-web:
-	(cd ../typescript && make dev)
+	# (cd ../typescript && make dev)
 
 start-k8s-apps:
 	make gen

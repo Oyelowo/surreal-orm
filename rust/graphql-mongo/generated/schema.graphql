@@ -13,7 +13,6 @@ type Mutation {
 	signUp(user: UserInput!): User!
 	signIn(signInCredentials: SignInCredentials!): User!
 	signOut: SignOutMessage!
-	getSession: Something!
 	createPost(postInput: PostInput!): Post!
 }
 scalar ObjectId
@@ -30,14 +29,24 @@ input PostInput {
 	content: String!
 }
 type Query {
-	user(id: ObjectId!): User
+	user(id: ObjectId!): User!
 	users: [User!]!
+	session: Session!
 	post(id: ObjectId!): Post
 	posts: [Post!]!
 }
 enum Role {
 	ADMIN
 	USER
+}
+type Session {
+	user: SessionUser!
+	expiresIn: String!
+}
+type SessionUser {
+	name: String!
+	email: String!
+	image: String!
 }
 input SignInCredentials {
 	username: String!
@@ -46,10 +55,6 @@ input SignInCredentials {
 type SignOutMessage {
 	message: String!
 	userId: ObjectId!
-}
-type Something {
-	userId: String!
-	name: String!
 }
 type Subscription {
 	values: Int!

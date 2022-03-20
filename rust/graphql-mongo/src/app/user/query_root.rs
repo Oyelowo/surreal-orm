@@ -1,5 +1,8 @@
+use crate::app::error::ResolverError;
+
 use super::{model::User, AuthGuard};
 
+use anyhow::Context as ContextAnyhow;
 use async_graphql::*;
 use futures::stream::StreamExt;
 use mongodb::{
@@ -18,15 +21,18 @@ impl UserQueryRoot {
         &self,
         ctx: &Context<'_>,
         #[graphql(desc = "id of the User")] id: ObjectId,
-    ) -> anyhow::Result<Option<User>> {
+    ) -> FieldResult<User> {
         let db = ctx.data_unchecked::<Database>();
         let find_one_options = FindOneOptions::builder()
             .read_concern(ReadConcern::majority())
             .build();
 
-        let user = User::find_one(db, doc! {"_id": id}, find_one_options).await?;
+        let user = User::find_one(db, doc! {"_id": id}, find_one_options)
+            .await?
+            .context("User not found")
+            .map_err(|e| ResolverError::NotFound.extend());
 
-        Ok(user)
+        user
     }
 
     #[graphql(guard = "AuthGuard")]
@@ -65,4 +71,55 @@ impl UserQueryRoot {
 
         Ok(users)
     }
+
+    #[graphql(guard = "AuthGuard")]
+    async fn session(&self, ctx: &Context<'_>) -> FieldResult<Session> {
+        // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
+        // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
+        // let session = ctx
+        //     .data::<TypedSession>()
+        //     .map_err(|_| ResolverError::ServerError("Failed to get session".into()))?;
+        // let uid = User::from_ctx(ctx);
+
+        let User {
+            username, email, ..
+        } = User::get_current_user(ctx).await?;
+        // let user = User::from_ctx(ctx)?;
+        // let username = user.username.clone();
+        // let email = user.email.clone();
+        Ok(Session {
+            expires_in: "uid".to_string(),
+            user: SessionUser {
+                name: username.into(),
+                email: email.into(),
+                image: "imageurl.com".into(),
+            },
+        })
+    }
 }
+
+// #[serde(rename_all = "camelCase")]
+// #[graphql(complex)]
+// #[graphql(input_name = "UserInput")]
+#[derive(SimpleObject, InputObject)]
+struct Session {
+    user: SessionUser,
+    expires_in: String,
+}
+#[derive(SimpleObject, InputObject)]
+struct SessionUser {
+    name: String,
+    email: String,
+    image: String,
+}
+
+/*
+{
+    user?: {
+        name?: string | null;
+        email?: string | null;
+        image?: string | null;
+    };
+    expires: ISODateString;
+}
+*/

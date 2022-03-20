@@ -7,6 +7,7 @@ use actix_web::{
     web::{self, scope},
     App, HttpServer,
 };
+
 use graphql_mongo::configs::{gql_playground, index, index_ws, Configs, GraphQlApp};
 use log::info;
 
@@ -33,8 +34,8 @@ async fn main() -> anyhow::Result<()> {
         let cors = Cors::default() // allowed_origin return access-control-allow-origin: * by default
             // .allowed_origin("http://localhost:3001/")
             // .allowed_origin("http://localhost:8000/")
-            // .allowed_origin_fn(|origin, _req_head| origin.as_bytes().ends_with(b".localhost:3001"))
-            // .allowed_origin_fn(|origin, _req_head| origin.as_bytes().ends_with(b".localhost:8000"))
+            // .allowed_origin_fn(|origin, _req_head| origin.as_bytes().ends_with(b".localhost:3000"))
+            // .allowed_origin_fn(|origin, _req_head| origin.as_bytes().ends_with(b".localhost:8080"))
             // .send_wildcard()
             .allow_any_origin() // FIXME: // remove after testing.
             .allowed_methods(vec!["GET", "POST"])
@@ -42,6 +43,7 @@ async fn main() -> anyhow::Result<()> {
                 /* http::header::AUTHORIZATION, */ http::header::ACCEPT,
             ])
             .allowed_header(http::header::CONTENT_TYPE)
+            // .supports_credentials()
             .max_age(3600);
 
         // Generate a random 32 byte key. Note that it is important to use a unique
@@ -54,11 +56,14 @@ async fn main() -> anyhow::Result<()> {
             // Enable logger
             .wrap(Logger::default())
             .wrap(
+                // https://javascript.info/cookie#:~:text=Cookies%20are%20usually%20set%20by,using%20the%20Cookie%20HTTP%2Dheader.
                 // RedisSession::new(redis.get_url(), &[0; 32])
                 RedisSession::new(redis.get_url(), redis_key.master())
                     .cookie_name("oyelowo-session")
                     .cookie_max_age(Duration::days(180))
                     .cookie_http_only(true)
+                    // .cookie_domain(domain)
+                    // .cookie_secure()
                     // allow the cookie only from the current domain
                     .cookie_same_site(cookie::SameSite::Lax),
             )
