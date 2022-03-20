@@ -49,6 +49,7 @@ async fn main() -> anyhow::Result<()> {
         // Generate a random 32 byte key. Note that it is important to use a unique
         // private key for every project. Anyone with access to the key can generate
         // authentication cookies for any user!
+        // Generate key with the command `openssl rand -base64 32`
         let redis_key = Key::from("string".to_string().repeat(256).as_bytes());
         App::new()
             .wrap(cors)
@@ -62,8 +63,9 @@ async fn main() -> anyhow::Result<()> {
                     .cookie_name("oyelowo-session")
                     .cookie_max_age(Duration::days(180))
                     .cookie_http_only(true)
+                    .cookie_path("/")
                     // .cookie_domain(domain)
-                    // .cookie_secure()
+                    // .cookie_secure() // Enable in prod only
                     // allow the cookie only from the current domain
                     .cookie_same_site(cookie::SameSite::Lax),
             )
