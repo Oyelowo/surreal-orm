@@ -64,7 +64,7 @@ pub async fn generate_password_hash(
     let password_hash =
         spawn_blocking_with_tracing(move || create_password_hash(PasswordPlain::new(password)))
             .await?
-            .context("Faailed to hash password")?;
+            .context("Failed to hash password")?;
 
     Ok(password_hash)
 }
@@ -74,15 +74,14 @@ fn create_password_hash<'a>(
 ) -> anyhow::Result<PasswordHashPHC, PasswordError> {
     let salt = SaltString::generate(&mut rand::thread_rng());
 
-    let params = Params::new(15000, 2, 1, None).context("Error building Argon2 paramters")?;
+    let params = Params::new(15000, 2, 1, None).context("Error building Argon2 parameters")?;
     // let hasher = Argon2::default();
     let hasher = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
     let password_hash = hasher
-        .hash_password(password.0.expose_secret().as_bytes(), &salt)
+        .hash_password(password.to_bytes(), &salt)
         .context("Failed to hash password")
         .map_err(PasswordError::UnexpectedError)?;
 
-    println!("fdefdf: {:?}", password_hash);
     Ok(PasswordHashPHC::new(password_hash.to_string()))
 }
 
@@ -102,7 +101,6 @@ pub async fn validate_password(
     .context("Failed to spawn blocking task.")
     .map_err(PasswordError::UnexpectedError)??;
 
-    println!("Yaay! Password successfully validated!!!!");
     Ok(true)
 }
 

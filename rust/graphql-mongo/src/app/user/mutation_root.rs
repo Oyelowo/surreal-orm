@@ -53,10 +53,12 @@ impl UserMutationRoot {
         &self,
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "Sign Up credentials")] user: User,
-    ) -> anyhow::Result<User> {
+    ) -> FieldResult<User> {
         user.validate()?;
         let db = ctx.data_unchecked::<Database>();
-        let password_hash = generate_password_hash(user.password).await?;
+        let password_hash = generate_password_hash(user.password)
+            .await
+            .map_err(|_| ResolverError::ServerError("Something went wrong".into()))?;
 
         let mut user = User::builder()
             .created_at(Utc::now())
@@ -70,7 +72,9 @@ impl UserMutationRoot {
             .password(password_hash.into())
             .build();
 
-        user.save(db, None).await?;
+        user.save(db, None)
+            .await
+            .map_err(|_| ResolverError::BadRequest.extend())?;
 
         Ok(user)
     }
