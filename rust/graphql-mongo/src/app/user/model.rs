@@ -80,7 +80,7 @@ pub struct User {
     // #[serde(default)]
     #[graphql(skip_input)]
     pub roles: Vec<Role>,
-    
+
     #[graphql(skip_input)]
     pub accounts: Vec<AccountOauth>,
 }
@@ -238,6 +238,15 @@ impl User {
 
     pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Option<Self> {
         User::find_one(&db, doc! { "username": username.into() }, None)
+            .await
+            .expect("Failed to find user by username")
+    }
+    pub async fn find_by_account_oauth(
+        db: &Database,
+        provider: impl Into<String>,
+        provider_account_id: impl Into<String>,
+    ) -> Option<Self> {
+        User::find_one(&db, doc! { "accounts": {"$elemMatch": {"provider": provider.into(), "provider_account_id": provider_account_id.into()}} }, None)
             .await
             .expect("Failed to find user by username")
     }

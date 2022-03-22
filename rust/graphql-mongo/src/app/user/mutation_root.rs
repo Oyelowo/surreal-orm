@@ -155,37 +155,55 @@ impl UserMutationRoot {
         let k = match maybe_user_id {
             Some(ref user_id) => {
                 let user = User::find_by_id(db, user_id).await;
+                // Found from session, so, renew
                 session.renew();
                 user
             }
 
             None => {
-                let mut user = User::builder()
-                    .created_at(Utc::now())
-                    .username(format!(
-                        "{}-{}",
-                        &account.provider, &account.provider_account_id
-                    ))
-                    .first_name(profile.first_name)
-                    .last_name(profile.last_name)
-                    .email(profile.email)
-                    .social_media(vec![])
-                    .roles(vec![Role::User])
-                    .age(None)
-                    .accounts(vec![account])
-                    .email_verified_at(None)
-                    .password_hash(None)
-                    .build();
+                let user_by_account = User::find_by_account_oauth(
+                    db,
+                    &account.provider,
+                    &account.provider_account_id,
+                )
+                .await;
+                if let Some(user) = user_by_account {
+                    let id = user.id.expect("no");
+                    session.insert_user_object_id(&id);
+                    return Ok(user);
+                } else {
+                    // match user_by_account {
+                    //     Some(user) => Ok(user),
+                    //     None=>
+                    // }
 
-                user.save(db, None)
-                    .await
-                    .map_err(|_| ResolverError::BadRequest.extend())?;
-                // Ok(user)
+                    let mut user = User::builder()
+                        .created_at(Utc::now())
+                        .username(format!(
+                            "{}-{}",
+                            &account.provider, &account.provider_account_id
+                        ))
+                        .first_name(profile.first_name)
+                        .last_name(profile.last_name)
+                        .email(profile.email)
+                        .social_media(vec![])
+                        .roles(vec![Role::User])
+                        .age(None)
+                        .accounts(vec![account])
+                        .email_verified_at(None)
+                        .password_hash(None)
+                        .build();
 
-                let id = user.id.expect("no");
-                session.insert_user_object_id(&id).expect("Failed");
-                // session.insert_user_role(user.roles).expect("Failed");
-                Ok(user)
+                    user.save(db, None)
+                        .await
+                        .map_err(|_| ResolverError::BadRequest.extend())?;
+                    // Ok(user)
+
+                    let id = user.id.expect("no");
+                    session.insert_user_object_id(&id).expect("Failed");
+                    // session.insert_user_role(user.roles).expect("Failed");
+                    Ok(user)
+                }
             }
         };
 
