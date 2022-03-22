@@ -1,3 +1,29 @@
+type AccountOauth {
+	id: String!
+	userId: String!
+	accountType: String!
+	provider: String!
+	providerAccountId: String!
+	refreshToken: String!
+	accessToken: String!
+	expiresAt: DateTime!
+	tokenType: String!
+	scope: String!
+	idToken: String!
+	sessionState: String!
+}
+input AccountOauthInput {
+	accountType: String!
+	provider: String!
+	providerAccountId: String!
+	refreshToken: String!
+	accessToken: String!
+	expiresAt: DateTime!
+	tokenType: String!
+	scope: String!
+	idToken: String!
+	sessionState: String!
+}
 """
 Implement the DateTime<Utc> scalar
 
@@ -12,6 +38,7 @@ type Mutation {
 	"""
 	signUp(user: UserInput!): User!
 	signIn(signInCredentials: SignInCredentials!): User!
+	createOrUpdateUserOauth(account: AccountOauthInput!, profile: ProfileOauth!): User!
 	signOut: SignOutMessage!
 	createPost(postInput: PostInput!): Post!
 }
@@ -27,6 +54,13 @@ input PostInput {
 	posterId: ObjectId!
 	title: String!
 	content: String!
+}
+input ProfileOauth {
+	firstName: String!
+	lastName: String!
+	username: String!
+	email: String!
+	emailVerified: Boolean!
 }
 type Query {
 	user(id: ObjectId!): User!
@@ -66,19 +100,21 @@ type User {
 	firstName: String!
 	lastName: String!
 	email: String!
-	age: Int!
+	emailVerifiedAt: DateTime
+	age: Int
 	socialMedia: [String!]!
 	roles: [Role!]!
+	accounts: [AccountOauth!]!
 	posts: [Post!]!
 	postCount: Int!
 }
 input UserInput {
 	username: String!
-	password: String!
+	password: String
 	firstName: String!
 	lastName: String!
 	email: String!
-	age: Int!
+	age: Int
 	socialMedia: [String!]!
 }
 schema {

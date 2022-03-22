@@ -40,7 +40,7 @@ impl UserMutationRoot {
             .age(user_input.age)
             .social_media(user_input.social_media)
             .roles(vec![Role::User])
-            .password_hash(user_input.password_hash)
+            .password(user_input.password)
             .accounts(vec![])
             .build();
 
@@ -59,7 +59,7 @@ impl UserMutationRoot {
         user.validate()?;
 
         let db = ctx.data_unchecked::<Database>();
-        let password_hash = generate_password_hash(user.password_hash.context("Invalid password")?)
+        let password_hash = generate_password_hash(user.password.context("Invalid password")?)
             .await
             .map_err(|_| ResolverError::ServerError("Something went wrong".into()))?;
 
@@ -74,7 +74,7 @@ impl UserMutationRoot {
             .social_media(user.social_media)
             .roles(vec![Role::User])
             .accounts(vec![])
-            .password_hash(Some(password_hash.into()))
+            .password(Some(password_hash.into()))
             .build();
 
         user.save(db, None)
@@ -110,7 +110,7 @@ impl UserMutationRoot {
                     .await
                     .context("Failed to find user")?;
                 let password_hash = &user
-                    .password_hash
+                    .password
                     .clone()
                     .context("Unauthenticated")
                     .map_err(|_| ResolverError::Unauthorized.extend())?;
@@ -169,7 +169,9 @@ impl UserMutationRoot {
                 .await;
                 if let Some(user) = user_by_account {
                     let id = user.id.expect("no");
-                    session.insert_user_object_id(&id);
+                    session
+                        .insert_user_object_id(&id)
+                        .map_err(|_| ResolverError::ServerError("Failed to create session".into()))?;
                     return Ok(user);
                 } else {
                     // match user_by_account {
@@ -191,7 +193,7 @@ impl UserMutationRoot {
                         .age(None)
                         .accounts(vec![account])
                         .email_verified_at(None)
-                        .password_hash(None)
+                        .password(None)
                         .build();
 
                     user.save(db, None)

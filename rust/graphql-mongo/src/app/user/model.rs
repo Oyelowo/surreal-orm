@@ -55,7 +55,7 @@ pub struct User {
     // I intentionally not strip option here because I want it to be explicit that user is not specifying password
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     #[graphql(skip_output)]
-    pub password_hash: Option<String>,
+    pub password: Option<String>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub first_name: String,
@@ -86,6 +86,8 @@ pub struct User {
 }
 
 #[derive(InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[graphql(input_name = "AccountOauthInput")]
 pub struct AccountOauth {
     #[graphql(skip_input)]
     pub id: String,
