@@ -52,9 +52,10 @@ pub struct User {
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub username: String,
 
+    // I intentionally not strip option here because I want it to be explicit that user is not specifying password
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     #[graphql(skip_output)]
-    pub password: String,
+    pub password_hash: Option<String>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub first_name: String,
@@ -66,8 +67,12 @@ pub struct User {
     #[validate(email)]
     pub email: String,
 
+    // #[builder(default, setter(strip_option))]
+    #[graphql(skip_input)]
+    pub email_verified_at: Option<DateTime<Utc>>,
+
     #[validate(range(min = 18, max = 160))]
-    pub age: u8,
+    pub age: Option<u8>,
 
     #[serde(default)]
     pub social_media: Vec<String>,
@@ -75,8 +80,61 @@ pub struct User {
     // #[serde(default)]
     #[graphql(skip_input)]
     pub roles: Vec<Role>,
+    
+    #[graphql(skip_input)]
+    pub accounts: Vec<AccountOauth>,
 }
 
+#[derive(InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize)]
+pub struct AccountOauth {
+    #[graphql(skip_input)]
+    pub id: String,
+    #[graphql(skip_input)]
+    pub user_id: String,
+    pub account_type: String,
+    pub provider: String,
+    pub provider_account_id: String,
+    pub refresh_token: String,
+    pub access_token: String,
+    pub expires_at: DateTime<Utc>,
+    pub token_type: String,
+    pub scope: String,
+    pub id_token: String,
+    pub session_state: String,
+}
+
+#[derive(InputObject)]
+pub struct ProfileOauth {
+    pub first_name: String,
+    pub last_name: String,
+    pub username: String,
+    pub email: String,
+    pub email_verified: bool,
+}
+
+/*
+
+https://docs.mongodb.com/manual/tutorial/query-documents/
+{ status: "D" }
+SELECT * FROM inventory WHERE status = "D"
+
+{ status: { $in: [ "A", "D" ] } }
+SELECT * FROM inventory WHERE status in ("A", "D")
+
+{ status: "A", qty: { $lt: 30 } }
+SELECT * FROM inventory WHERE status = "A" AND qty < 30
+
+
+{ $or: [ { status: "A" }, { qty: { $lt: 30 } } ] }
+SELECT * FROM inventory WHERE status = "A" AND qty < 30
+
+
+
+Specify AND as well as OR Conditions
+In the following example, the compound query document selects all documents in the collection where the status equals "A" and either qty is less than ($lt) 30 or item starts with the character p:
+{ status: "A", $or: [ { qty: { $lt: 30 } }, { item: /^p/ } ] }
+SELECT * FROM inventory WHERE status = "A" AND ( qty < 30 OR item LIKE "p%")
+*/
 #[ComplexObject]
 impl User {
     async fn posts(&self, ctx: &Context<'_>) -> FieldResult<Vec<Post>> {
@@ -213,3 +271,61 @@ pub struct SignOutMessage {
     pub message: String,
     pub user_id: ObjectId,
 }
+
+/*
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL") // Only needed when using a cloud provider that doesn't support the creation of new databases, like Heroku. Learn more: https://pris.ly/migrate-shadow
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialActions"] // You won't need this in Prisma 3.X or higher.
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+*/

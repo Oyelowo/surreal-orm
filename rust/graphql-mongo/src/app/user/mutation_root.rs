@@ -1,13 +1,13 @@
 use anyhow::Context as ContextAnyhow;
 use common::authentication::{
     self,
-    password::{generate_password_hash, PasswordHashPHC, PasswordPlain},
+    password::{generate_password_hash, validate_password, PasswordHashPHC, PasswordPlain},
     session_state::TypedSession,
 };
 
 use crate::app::error::ResolverError;
 
-use super::{Role, SignInCredentials, SignOutMessage, User};
+use super::{AccountOauth, ProfileOauth, Role, SignInCredentials, SignOutMessage, User};
 use async_graphql::*;
 use chrono::Utc;
 
@@ -36,10 +36,12 @@ impl UserMutationRoot {
             .first_name(user_input.first_name)
             .last_name(user_input.last_name)
             .email(user_input.email)
+            .email_verified_at(None)
             .age(user_input.age)
             .social_media(user_input.social_media)
             .roles(vec![Role::User])
-            .password(user_input.password)
+            .password_hash(user_input.password_hash)
+            .accounts(vec![])
             .build();
 
         user.save(db, None).await?;
@@ -55,8 +57,9 @@ impl UserMutationRoot {
         #[graphql(desc = "Sign Up credentials")] user: User,
     ) -> FieldResult<User> {
         user.validate()?;
+
         let db = ctx.data_unchecked::<Database>();
-        let password_hash = generate_password_hash(user.password)
+        let password_hash = generate_password_hash(user.password_hash.context("Invalid password")?)
             .await
             .map_err(|_| ResolverError::ServerError("Something went wrong".into()))?;
 
@@ -66,10 +69,12 @@ impl UserMutationRoot {
             .first_name(user.first_name)
             .last_name(user.last_name)
             .email(user.email)
+            .email_verified_at(None)
             .age(user.age)
             .social_media(user.social_media)
             .roles(vec![Role::User])
-            .password(password_hash.into())
+            .accounts(vec![])
+            .password_hash(Some(password_hash.into()))
             .build();
 
         user.save(db, None)
@@ -92,22 +97,27 @@ impl UserMutationRoot {
         let maybe_user_id = session
             .get_user_object_id()
             .map_err(|_| ResolverError::NotFound.extend())?;
+        // Return user if found from session
         let k = match maybe_user_id {
             Some(ref user_id) => {
                 let user = User::find_by_id(db, user_id).await;
                 session.renew();
                 user
             }
+            // If not found from session, handle fresg signin flow
             None => {
                 let user = User::find_by_username(db, sign_in_credentials.username)
                     .await
                     .context("Failed to find user")?;
-                let plain_password = PasswordPlain::new(sign_in_credentials.password);
-                let hashed_password = PasswordHashPHC::new(&user.password);
+                let password_hash = &user
+                    .password_hash
+                    .clone()
+                    .context("Unauthenticated")
+                    .map_err(|_| ResolverError::Unauthorized.extend())?;
 
-                let password_verified =
-                    authentication::password::validate_password(plain_password, hashed_password)
-                        .await?;
+                let plain_password = PasswordPlain::new(sign_in_credentials.password);
+                let hashed_password = PasswordHashPHC::new(password_hash);
+                let password_verified = validate_password(plain_password, hashed_password).await?;
 
                 if password_verified {
                     // let k = user.id?;
@@ -118,6 +128,64 @@ impl UserMutationRoot {
                 } else {
                     Err(ResolverError::Unauthorized.extend())
                 }
+            }
+        };
+
+        let p = k.expect("trttrtrt");
+        Ok(p)
+    }
+
+    // TODO: Improve all errors using error extension
+    async fn create_or_update_user_oauth(
+        &self,
+        ctx: &async_graphql::Context<'_>,
+        #[graphql(desc = "user account credentials")] account: AccountOauth,
+        #[graphql(desc = "Additional information about profile of oauth user")]
+        profile: ProfileOauth,
+    ) -> FieldResult<User> {
+        // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
+        // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
+        let db = ctx.data_unchecked::<Database>();
+        let session = ctx.data::<TypedSession>()?;
+
+        let maybe_user_id = session
+            .get_user_object_id()
+            .map_err(|_| ResolverError::NotFound.extend())?;
+        // Return user if found from session
+        let k = match maybe_user_id {
+            Some(ref user_id) => {
+                let user = User::find_by_id(db, user_id).await;
+                session.renew();
+                user
+            }
+
+            None => {
+                let mut user = User::builder()
+                    .created_at(Utc::now())
+                    .username(format!(
+                        "{}-{}",
+                        &account.provider, &account.provider_account_id
+                    ))
+                    .first_name(profile.first_name)
+                    .last_name(profile.last_name)
+                    .email(profile.email)
+                    .social_media(vec![])
+                    .roles(vec![Role::User])
+                    .age(None)
+                    .accounts(vec![account])
+                    .email_verified_at(None)
+                    .password_hash(None)
+                    .build();
+
+                user.save(db, None)
+                    .await
+                    .map_err(|_| ResolverError::BadRequest.extend())?;
+                // Ok(user)
+
+                let id = user.id.expect("no");
+                session.insert_user_object_id(&id).expect("Failed");
+                // session.insert_user_role(user.roles).expect("Failed");
+                Ok(user)
             }
         };
 
