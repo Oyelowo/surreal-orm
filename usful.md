@@ -1,2 +1,31 @@
 # Update gitignore
 npx goops
+
+mongo
+use graphql-mongo-database
+db.auth("username1","password1")
+
+db.users.find({ "accounts": {"$elemMatch": {"provider": "name", "providerAccountId": "name"}} })
+
+
+{
+  "account": {
+    "provider": "name",
+    "providerAccountId": "name",
+    "accessToken": "name",
+    "accountType": "name",
+    "expiresAt": "2022-03-22T05:21:50.091Z",
+    "idToken": "name",
+    "refreshToken": "name",
+    "scope": "name",
+    "sessionState": "name",
+    "tokenType": "name"
+  },
+  "profile": {
+    "email": "y@gmail.com",
+    "emailVerified": false,
+    "firstName": "oyel",
+    "lastName": "lowo",
+    "username": "kdkd"
+  }
+}

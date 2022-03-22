@@ -169,15 +169,18 @@ impl UserMutationRoot {
                 .await;
                 if let Some(user) = user_by_account {
                     let id = user.id.expect("no");
-                    session
-                        .insert_user_object_id(&id)
-                        .map_err(|_| ResolverError::ServerError("Failed to create session".into()))?;
+                    session.insert_user_object_id(&id).map_err(|_| {
+                        ResolverError::ServerError("Failed to create session".into())
+                    })?;
+                    println!("USER stored user={:?}, id={:#}", user, id);
                     return Ok(user);
                 } else {
                     // match user_by_account {
                     //     Some(user) => Ok(user),
                     //     None=>
-                    // }
+                    // }\\
+
+                    // let acc = AccountOauth::builder().access_token(account.access_token).provider(account.provider).
 
                     let mut user = User::builder()
                         .created_at(Utc::now())
@@ -196,9 +199,10 @@ impl UserMutationRoot {
                         .password(None)
                         .build();
 
-                    user.save(db, None)
-                        .await
-                        .map_err(|_| ResolverError::BadRequest.extend())?;
+                    user.save(db, None).await.map_err(|_| {
+                        ResolverError::BadRequest
+                            .extend_with(|_, e| e.set("reason", "User Already Exists"))
+                    })?;
                     // Ok(user)
 
                     let id = user.id.expect("no");

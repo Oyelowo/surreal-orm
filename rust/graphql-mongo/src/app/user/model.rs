@@ -20,7 +20,7 @@ use crate::{
     configs::model_cursor_to_vec,
 };
 
-#[derive(Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate)]
+#[derive(Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
 #[serde(rename_all = "camelCase")]
 #[graphql(complex)]
 #[graphql(input_name = "UserInput")]
@@ -85,7 +85,7 @@ pub struct User {
     pub accounts: Vec<AccountOauth>,
 }
 
-#[derive(InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize)]
+#[derive(InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 #[graphql(input_name = "AccountOauthInput")]
 pub struct AccountOauth {
@@ -96,13 +96,13 @@ pub struct AccountOauth {
     pub account_type: String,
     pub provider: String,
     pub provider_account_id: String,
-    pub refresh_token: String,
     pub access_token: String,
-    pub expires_at: DateTime<Utc>,
-    pub token_type: String,
-    pub scope: String,
-    pub id_token: String,
-    pub session_state: String,
+    pub refresh_token: Option<String>,
+    pub expires_at: Option<DateTime<Utc>>,
+    pub token_type: Option<String>, // Should probably be changed to an enum. i.e oauth | anything else?
+    pub scope: Option<String>,
+    pub id_token: Option<String>,
+    pub session_state: Option<String>,
 }
 
 #[derive(InputObject)]
@@ -158,7 +158,7 @@ pub struct SignInCredentials {
     pub password: String,
 }
 
-#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 pub enum Role {
     Admin,
     User,
@@ -248,7 +248,7 @@ impl User {
         provider: impl Into<String>,
         provider_account_id: impl Into<String>,
     ) -> Option<Self> {
-        User::find_one(&db, doc! { "accounts": {"$elemMatch": {"provider": provider.into(), "provider_account_id": provider_account_id.into()}} }, None)
+        User::find_one(&db, doc! { "accounts": {"$elemMatch": {"provider": provider.into(), "providerAccountId": provider_account_id.into()}} }, None)
             .await
             .expect("Failed to find user by username")
     }
