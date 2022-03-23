@@ -3,7 +3,7 @@ npx goops
 
 mongo
 use graphql-mongo-database
-db.auth("username1","password1")
+db.auth("username0","password0")
 
 db.users.find({ "accounts": {"$elemMatch": {"provider": "name", "providerAccountId": "name"}} })
 

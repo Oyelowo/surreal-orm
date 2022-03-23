@@ -96,6 +96,7 @@ pub async fn index_ws(
     req: HttpRequest,
     payload: web::Payload,
 ) -> actix_web::Result<HttpResponse> {
+    // TODO: Add session here
     let mut data = Data::default();
     if let Some(token) = get_token_from_headers(req.headers()) {
         data.insert(token)

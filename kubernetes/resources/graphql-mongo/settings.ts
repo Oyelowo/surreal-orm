@@ -19,6 +19,9 @@ export const graphqlMongoSettings: AppConfigs<
     APP_ENVIRONMENT: "development",
     APP_HOST: "0.0.0.0",
     APP_PORT: "8000",
+
+
+
     MONGODB_NAME: "graphql-mongo-database",
     MONGODB_USERNAME: "username0",
     MONGODB_PASSWORD: "password0",

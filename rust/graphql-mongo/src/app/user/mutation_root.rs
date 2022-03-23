@@ -143,11 +143,16 @@ impl UserMutationRoot {
         #[graphql(desc = "Additional information about profile of oauth user")]
         profile: ProfileOauth,
     ) -> FieldResult<User> {
+        // TODO: Limit this call to only server. Our nextjs server will call this during oauth flow and the relay
+        // our cookie session to the client
+        // let was_in_headers = ctx.insert_http_header(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = ctx.data_unchecked::<Database>();
         let session = ctx.data::<TypedSession>()?;
 
+        // ALREADY LOGGED IN OAUTH USER
         let maybe_user_id = session
             .get_user_object_id()
             .map_err(|_| ResolverError::NotFound.extend())?;
@@ -167,12 +172,15 @@ impl UserMutationRoot {
                     &account.provider_account_id,
                 )
                 .await;
+                // REVISITING OAUTH USER
+                // TODO: Update user data here if account payload is provided, to ensure user data is up-to-date
                 if let Some(user) = user_by_account {
                     let id = user.id.expect("no");
                     session.insert_user_object_id(&id).map_err(|_| {
                         ResolverError::ServerError("Failed to create session".into())
                     })?;
                     println!("USER stored user={:?}, id={:#}", user, id);
+                    // session.renew();
                     return Ok(user);
                 } else {
                     // match user_by_account {
@@ -182,6 +190,7 @@ impl UserMutationRoot {
 
                     // let acc = AccountOauth::builder().access_token(account.access_token).provider(account.provider).
 
+                    // FIRST TIME OAUTH USER
                     let mut user = User::builder()
                         .created_at(Utc::now())
                         .username(format!(
@@ -208,6 +217,7 @@ impl UserMutationRoot {
                     let id = user.id.expect("no");
                     session.insert_user_object_id(&id).expect("Failed");
                     // session.insert_user_role(user.roles).expect("Failed");
+                    // session.renew();
                     Ok(user)
                 }
             }
