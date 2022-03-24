@@ -5,6 +5,7 @@ mongo
 use graphql-mongo-database
 db.auth("username0","password0")
 
+db.users.find({})
 db.users.find({ "accounts": {"$elemMatch": {"provider": "name", "providerAccountId": "name"}} })
 
 
