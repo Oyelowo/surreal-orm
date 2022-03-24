@@ -195,7 +195,10 @@ impl UserMutationRoot {
                     .await
                     .expect("bad")
                     .ok_or(ResolverError::BadRequest.extend())?;
-                session.insert_user_object_id(&user_id).expect("Bad things happen");
+
+                session
+                    .insert_user_object_id(&user_id)
+                    .expect("Bad things happen");
                 Ok(user)
 
                 /*                 let user_by_account = User::find_by_account_oauth(
