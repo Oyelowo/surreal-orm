@@ -67,7 +67,7 @@ async fn main() -> anyhow::Result<()> {
                     // .cookie_domain(domain)
                     // .cookie_secure() // Enable in prod only
                     // allow the cookie only from the current domain
-                    .cookie_same_site(cookie::SameSite::Lax),
+                    .cookie_same_site(cookie::SameSite::Strict),
             )
             .app_data(web::Data::new(schema.clone()))
             .service(gql_playground)

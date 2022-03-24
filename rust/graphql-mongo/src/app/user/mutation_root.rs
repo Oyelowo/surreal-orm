@@ -157,7 +157,7 @@ impl UserMutationRoot {
             .get_user_object_id()
             .map_err(|_| ResolverError::NotFound.extend())?;
         // Return user if found from session
-        let k = match maybe_user_id {
+        let user = match maybe_user_id {
             Some(ref user_id) => {
                 let user = User::find_by_id(db, user_id).await;
                 // Found from session, so, renew
@@ -166,65 +166,98 @@ impl UserMutationRoot {
             }
 
             None => {
-                let user_by_account = User::find_by_account_oauth(
-                    db,
-                    &account.provider,
-                    &account.provider_account_id,
-                )
-                .await;
-                // REVISITING OAUTH USER
-                // TODO: Update user data here if account payload is provided, to ensure user data is up-to-date
-                if let Some(user) = user_by_account {
-                    let id = user.id.expect("no");
-                    session.insert_user_object_id(&id).map_err(|_| {
-                        ResolverError::ServerError("Failed to create session".into())
-                    })?;
-                    println!("USER stored user={:?}, id={:#}", user, id);
-                    // session.renew();
-                    return Ok(user);
-                } else {
-                    // match user_by_account {
-                    //     Some(user) => Ok(user),
-                    //     None=>
-                    // }\\
+                // This should upsert user based on if they have been created by their oauth credentials or not.
+                // If they already have an id based on the filter, it will update their data, otherwise, it will
+                // create a new record
+                let account_clone = account.clone();
+                let provider = account_clone.provider.as_str();
+                let provider_account_id = account_clone.provider_account_id.as_str();
+                let user = User::builder()
+                    .created_at(Utc::now())
+                    .username(format!("{}-{}", provider, provider_account_id))
+                    .first_name(profile.first_name)
+                    .last_name(profile.last_name)
+                    .email(profile.email)
+                    .social_media(vec![])
+                    .roles(vec![Role::User])
+                    .age(None)
+                    .accounts(vec![account])
+                    .email_verified_at(None)
+                    .password(None)
+                    .build();
 
-                    // let acc = AccountOauth::builder().access_token(account.access_token).provider(account.provider).
+                let user = user
+                    .find_or_replace_account_oauth(db, provider, provider_account_id)
+                    .await
+                    .map_err(|_| ResolverError::BadRequest.extend())?;
+                let user_id = user
+                    .id(ctx)
+                    .await
+                    .expect("bad")
+                    .ok_or(ResolverError::BadRequest.extend())?;
+                session.insert_user_object_id(&user_id).expect("Bad things happen");
+                Ok(user)
 
-                    // FIRST TIME OAUTH USER
-                    let mut user = User::builder()
-                        .created_at(Utc::now())
-                        .username(format!(
-                            "{}-{}",
-                            &account.provider, &account.provider_account_id
-                        ))
-                        .first_name(profile.first_name)
-                        .last_name(profile.last_name)
-                        .email(profile.email)
-                        .social_media(vec![])
-                        .roles(vec![Role::User])
-                        .age(None)
-                        .accounts(vec![account])
-                        .email_verified_at(None)
-                        .password(None)
-                        .build();
+                /*                 let user_by_account = User::find_by_account_oauth(
+                                   db,
+                                   &account.provider,
+                                   &account.provider_account_id,
+                               )
+                               .await;
+                               // REVISITING OAUTH USER
+                               // TODO: Update user data here if account payload is provided, to ensure user data is up-to-date
+                               if let Some(user) = user_by_account {
+                                   let id = user.id.expect("no");
+                                   session.insert_user_object_id(&id).map_err(|_| {
+                                       ResolverError::ServerError("Failed to create session".into())
+                                   })?;
+                                   println!("USER stored user={:?}, id={:#}", user, id);
+                                   // session.renew();
+                                   return Ok(user);
+                               } else {
+                                   // match user_by_account {
+                                   //     Some(user) => Ok(user),
+                                   //     None=>
+                                   // }\\
 
-                    user.save(db, None).await.map_err(|_| {
-                        ResolverError::BadRequest
-                            .extend_with(|_, e| e.set("reason", "User Already Exists"))
-                    })?;
-                    // Ok(user)
+                                   // let acc = AccountOauth::builder().access_token(account.access_token).provider(account.provider).
 
-                    let id = user.id.expect("no");
-                    session.insert_user_object_id(&id).expect("Failed");
-                    // session.insert_user_role(user.roles).expect("Failed");
-                    // session.renew();
-                    Ok(user)
-                }
+                                   // FIRST TIME OAUTH USER
+                                   let mut user = User::builder()
+                                       .created_at(Utc::now())
+                                       .username(format!(
+                                           "{}-{}",
+                                           &account.provider, &account.provider_account_id
+                                       ))
+                                       .first_name(profile.first_name)
+                                       .last_name(profile.last_name)
+                                       .email(profile.email)
+                                       .social_media(vec![])
+                                       .roles(vec![Role::User])
+                                       .age(None)
+                                       .accounts(vec![account])
+                                       .email_verified_at(None)
+                                       .password(None)
+                                       .build();
+
+                                   user.save(db, None).await.map_err(|_| {
+                                       ResolverError::BadRequest
+                                           .extend_with(|_, e| e.set("reason", "User Already Exists"))
+                                   })?;
+                                   // Ok(user)
+
+                                   let id = user.id.expect("no");
+                                   session.insert_user_object_id(&id).expect("Failed");
+                                   // session.insert_user_role(user.roles).expect("Failed");
+                                   // session.renew();
+                                   Ok(user)
+                               }
+                */
             }
         };
 
-        let p = k.expect("trttrtrt");
-        Ok(p)
+        // let p = k.expect("trttrtrt");
+        user
     }
 
     async fn sign_out(&self, ctx: &async_graphql::Context<'_>) -> FieldResult<SignOutMessage> {

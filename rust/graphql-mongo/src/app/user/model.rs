@@ -12,6 +12,7 @@ use validator::Validate;
 use wither::{
     bson::{doc, oid::ObjectId},
     prelude::Model,
+    WitherError,
 };
 // use bson::DateTime;
 
@@ -20,7 +21,9 @@ use crate::{
     configs::model_cursor_to_vec,
 };
 
-#[derive(Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate, Debug)]
+#[derive(
+    Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate, Debug,
+)]
 #[serde(rename_all = "camelCase")]
 #[graphql(complex)]
 #[graphql(input_name = "UserInput")]
@@ -85,7 +88,7 @@ pub struct User {
     pub accounts: Vec<AccountOauth>,
 }
 
-#[derive(InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug)]
+#[derive(InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[graphql(input_name = "AccountOauthInput")]
 pub struct AccountOauth {
@@ -251,6 +254,18 @@ impl User {
         User::find_one(&db, doc! { "accounts": {"$elemMatch": {"provider": provider.into(), "providerAccountId": provider_account_id.into()}} }, None)
             .await
             .expect("Failed to find user by username")
+    }
+
+    pub async fn find_or_replace_account_oauth(
+        mut self,
+        db: &Database,
+        provider: impl Into<String>,
+        provider_account_id: impl Into<String>,
+    ) -> Result<Self, WitherError> {
+        let filter = doc! { "accounts": {"$elemMatch": {"provider": provider.into(), "providerAccountId": provider_account_id.into()}}};
+        User::save(&mut self, db, Some(filter)).await?;
+
+        Ok(self)
     }
 }
 
