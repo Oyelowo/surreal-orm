@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"react-web","namespace":"development"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"react"}},"template":{"metadata":{"labels":{"app":"react"}},"spec":{"containers":[{"env":[{"name":"CONFIG","valueFrom":{"configMapKeyRef":{"key":"config","name":"react-web"}}},{"name":"PASSWORD","valueFrom":{"secretKeyRef":{"key":"password","name":"react-web"}}},{"name":"APP_ENVIRONMENT","value":"development"},{"name":"APP_HOST","value":"0.0.0.0"},{"name":"APP_PORT","value":"3000"},{"name":"GITHUB_ID","value":"89c19374f7e7b5b35164"},{"name":"GITHUB_SECRET","value":"129488cc92e2d2f91e3a5a024086396c48c65339"},{"name":"GOOGLE_ID","value":"855174209543-6m0f088e55d3mevhnr8bs0qjap8j6g0g.apps.googleusercontent.com"},{"name":"GOOGLE_SECRET","value":"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"},{"name":"NEXTAUTH_URL","value":"http://localhost:8080"}],"image":"oyelowo/react-web","name":"react","ports":[{"containerPort":3000,"name":"http"}],"resources":{"limits":{"cpu":"100m","memory":"200Mi"},"requests":{"cpu":"100m","memory":"70Mi"}},"volumeMounts":[]}],"initContainers":[],"volumes":[]}}}}
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"react-web","namespace":"development"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"react"}},"template":{"metadata":{"labels":{"app":"react"}},"spec":{"containers":[{"env":[{"name":"CONFIG","valueFrom":{"configMapKeyRef":{"key":"config","name":"react-web"}}},{"name":"PASSWORD","valueFrom":{"secretKeyRef":{"key":"password","name":"react-web"}}},{"name":"APP_ENVIRONMENT","value":"development"},{"name":"APP_HOST","value":"0.0.0.0"},{"name":"APP_PORT","value":"3000"},{"name":"GITHUB_CLIENT_ID","value":"89c19374f7e7b5b35164"},{"name":"GITHUB_CLIENT_SECRET","value":"129488cc92e2d2f91e3a5a024086396c48c65339"},{"name":"GOOGLE_CLIENT_ID","value":"855174209543-6m0f088e55d3mevhnr8bs0qjap8j6g0g.apps.googleusercontent.com"},{"name":"GOOGLE_CLIENT_SECRET","value":"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"},{"name":"NEXTAUTH_URL","value":"http://localhost:8080"}],"image":"oyelowo/react-web","name":"react","ports":[{"containerPort":3000,"name":"http"}],"resources":{"limits":{"cpu":"100m","memory":"200Mi"},"requests":{"cpu":"100m","memory":"70Mi"}},"volumeMounts":[]}],"initContainers":[],"volumes":[]}}}}
   labels:
     app.kubernetes.io/managed-by: pulumi
   name: react-web
@@ -36,9 +36,9 @@ spec:
           value: 0.0.0.0
         - name: APP_PORT
           value: "3000"
-        - name: GITHUB_ID
+        - name: GITHUB_CLIENT_ID
           value: 89c19374f7e7b5b35164
-        - name: GITHUB_SECRET
+        - name: GITHUB_CLIENT_SECRET
           value: 129488cc92e2d2f91e3a5a024086396c48c65339
         - name: GOOGLE_CLIENT_ID
           value: 855174209543-6m0f088e55d3mevhnr8bs0qjap8j6g0g.apps.googleusercontent.com
