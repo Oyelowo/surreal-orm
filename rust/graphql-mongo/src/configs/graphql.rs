@@ -26,7 +26,7 @@ fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
         .and_then(|value| value.to_str().map(|s| Token(s.to_string())).ok())
 }
 
-#[post("/graphql")]
+#[post("/graphql-mongo")]
 pub async fn index(
     schema: web::Data<MyGraphQLSchema>,
     req: HttpRequest,
@@ -108,11 +108,11 @@ pub async fn index_ws(
         .start(&req, payload)
 }
 
-#[get("/graphql")]
+#[get("/graphql-mongo")]
 pub async fn gql_playground() -> HttpResponse {
     let source = playground_source(
-        GraphQLPlaygroundConfig::new("/graphql")
-            .subscription_endpoint("/graphql")
+        GraphQLPlaygroundConfig::new("/graphql-mongo")
+            .subscription_endpoint("/graphql-mongo")
             .with_setting("credentials", "include"), // e.g allow cookies
     );
     HttpResponse::Ok()

@@ -72,16 +72,16 @@ portForward:
 #     port: 3000
 #     localPort: 3000
 
-  - resourceType: service
-    resourceName: graphql-mongo
-    namespace: development
-    port: 8000
-    localPort: 8000
+  # - resourceType: service
+  #   resourceName: graphql-mongo
+  #   namespace: development
+  #   port: 8000
+  #   localPort: 800
 
   - resourceType: service
     resourceName: graphql-postgres
     port: 8000
-    localPort: 8001
+    localPort: 8000
 
   - resourceType: service
     resourceName: grpc-mongo

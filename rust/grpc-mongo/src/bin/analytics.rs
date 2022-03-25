@@ -37,14 +37,14 @@ async fn main() -> Result<()> {
 
     ////////////////////////////////////////////////////////////
 
-    let get_one = client
-        .get_user_app_event(tonic::Request::new(GetUserAppEventRequest {
-            event_id: "61fda82206cb096659bd294b".into(),
-            user_id: "1".into(),
-        }))
-        .await?
-        .into_inner();
+    // let get_one = client
+    //     .get_user_app_event(tonic::Request::new(GetUserAppEventRequest {
+    //         event_id: "61fda82206cb096659bd294b".into(),
+    //         user_id: "1".into(),
+    //     }))
+    //     .await?
+    //     .into_inner();
 
-    println!("RESPONSE USER APP EVENT={:?}", get_one);
+    // println!("RESPONSE USER APP EVENT={:?}", get_one);
     Ok(())
 }

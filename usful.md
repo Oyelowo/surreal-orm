@@ -8,6 +8,12 @@ db.auth("username0","password0")
 db.users.find({})
 db.users.find({ "accounts": {"$elemMatch": {"provider": "name", "providerAccountId": "name"}} })
 
+mongo
+use grpc-mongo-database
+db.auth("username0","password0")
+
+db.users.find({})
+
 
 {
   "account": {

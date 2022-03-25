@@ -32,7 +32,10 @@ pub async fn index(schema: web::Data<GraphQLSchema>, req: GraphQLRequest) -> Gra
 }
 
 pub async fn index_playground() -> HttpResponse {
-    let source = playground_source(GraphQLPlaygroundConfig::new("/").subscription_endpoint("/"));
+    let source = playground_source(
+        GraphQLPlaygroundConfig::new("/graphql-postgres")
+            .subscription_endpoint("/graphql-postgres"),
+    );
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(source)
@@ -55,7 +58,7 @@ impl GraphQlApp {
         };
 
         let connection_pool = PgPoolOptions::new()
-            .connect_timeout(Duration::from_secs(5))
+            .connect_timeout(Duration::from_secs(15))
             .connect_lazy_with(database.with_db());
 
         sqlx::migrate!("./migrations").run(&connection_pool).await?;
