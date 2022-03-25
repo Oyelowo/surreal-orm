@@ -66,27 +66,27 @@ deploy:
     - rendered/namespaces/1-manifest/*
     - rendered/development/1-manifest/*
 
-# portForward:
+portForward:
 #   - resourceType: service
 #     resourceName: react-web
 #     port: 3000
 #     localPort: 3000
 
-#   - resourceType: service
-#     resourceName: graphql-mongo
-#     namespace: development
-#     port: 8000
-#     localPort: 8000
+  - resourceType: service
+    resourceName: graphql-mongo
+    namespace: development
+    port: 8000
+    localPort: 8000
 
-#   - resourceType: service
-#     resourceName: graphql-postgres
-#     port: 8000
-#     localPort: 8001
+  - resourceType: service
+    resourceName: graphql-postgres
+    port: 8000
+    localPort: 8001
 
-#   - resourceType: service
-#     resourceName: grpc-mongo
-#     port: 50051
-#     localPort: 50051
+  - resourceType: service
+    resourceName: grpc-mongo
+    port: 50051
+    localPort: 50051
 
   # - resourceType: service
   #   # namespace: default

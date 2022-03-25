@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"nginx.ingress.kubernetes.io/ssl-redirect":"false","nginx.ingress.kubernetes.io/use-regex":"true"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"nginx-ingress","namespace":"development"},"spec":{"ingressClassName":"nginx","rules":[{"host":"localhost","http":{"paths":[{"backend":{"service":{"name":"react-web","port":{"number":3000}}},"path":"/","pathType":"Prefix"},{"backend":{"service":{"name":"graphql-mongo","port":{"number":8000}}},"path":"/graphql","pathType":"Prefix"}]}}]}}
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"nginx.ingress.kubernetes.io/ssl-redirect":"false","nginx.ingress.kubernetes.io/use-regex":"true"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"nginx-ingress","namespace":"development"},"spec":{"ingressClassName":"nginx","rules":[{"host":"localhost","http":{"paths":[{"backend":{"service":{"name":"react-web","port":{"number":3000}}},"path":"/","pathType":"Prefix"},{"backend":{"service":{"name":"graphql-mongo","port":{"number":8000}}},"path":"/graphql","pathType":"Exact"},{"backend":{"service":{"name":"graphql-postgres","port":{"number":8000}}},"path":"/graphql-postgres","pathType":"Exact"}]}}]}}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/use-regex: "true"
   labels:
@@ -29,4 +29,11 @@ spec:
             port:
               number: 8000
         path: /graphql
-        pathType: Prefix
+        pathType: Exact
+      - backend:
+          service:
+            name: graphql-postgres
+            port:
+              number: 8000
+        path: /graphql-postgres
+        pathType: Exact

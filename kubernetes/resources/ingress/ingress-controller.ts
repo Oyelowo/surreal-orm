@@ -96,13 +96,26 @@ export const appIngress = new k8s.networking.v1.Ingress(
                 },
               },
               {
-                pathType: "Prefix",
+                // pathType: "Prefix",
+                pathType: "Exact",
                 path: "/graphql",
                 backend: {
                   service: {
                     name: graphqlMongoSettings.metadata.name,
                     port: {
                       number: Number(graphqlMongoSettings.envVars.APP_PORT),
+                    },
+                  },
+                },
+              },
+              {
+                pathType: "Exact",
+                path: "/graphql-postgres",
+                backend: {
+                  service: {
+                    name: graphqlPostgresSettings.metadata.name,
+                    port: {
+                      number: Number(graphqlPostgresSettings.envVars.APP_PORT),
                     },
                   },
                 },
