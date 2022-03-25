@@ -140,8 +140,6 @@ impl UserMutationRoot {
         &self,
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "user account credentials")] account: AccountOauth,
-        #[graphql(desc = "Additional information about profile of oauth user")]
-        profile: ProfileOauth,
     ) -> FieldResult<User> {
         // TODO: Limit this call to only server. Our nextjs server will call this during oauth flow and the relay
         // our cookie session to the client
@@ -175,9 +173,12 @@ impl UserMutationRoot {
                 let user = User::builder()
                     .created_at(Utc::now())
                     .username(format!("{}-{}", provider, provider_account_id))
-                    .first_name(profile.first_name)
-                    .last_name(profile.last_name)
-                    .email(profile.email)
+                    .first_name(account_clone.profile.first_name)
+                    .last_name(account_clone.profile.last_name)
+                    .email(account_clone.profile.email)
+                    // .first_name(account.profile.first_name)
+                    // .last_name(account.profile.last_name)
+                    // .email(account.profile.email)
                     .social_media(vec![])
                     .roles(vec![Role::User])
                     .age(None)

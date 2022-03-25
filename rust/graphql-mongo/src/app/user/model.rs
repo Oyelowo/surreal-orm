@@ -60,9 +60,11 @@ pub struct User {
     #[graphql(skip_output)]
     pub password: Option<String>,
 
+    // #[builder(default, setter(strip_option))]
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub first_name: String,
 
+    // #[builder(default, setter(strip_option))]
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub last_name: String,
 
@@ -106,9 +108,12 @@ pub struct AccountOauth {
     pub scope: Option<String>,
     pub id_token: Option<String>,
     pub session_state: Option<String>,
+    pub profile: ProfileOauth,
 }
 
-#[derive(InputObject)]
+#[derive(InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[graphql(input_name = "ProfileOauthInput")]
 pub struct ProfileOauth {
     pub first_name: String,
     pub last_name: String,

@@ -4,25 +4,27 @@ type AccountOauth {
 	accountType: String!
 	provider: String!
 	providerAccountId: String!
-	refreshToken: String!
 	accessToken: String!
-	expiresAt: DateTime!
-	tokenType: String!
-	scope: String!
-	idToken: String!
-	sessionState: String!
+	refreshToken: String
+	expiresAt: DateTime
+	tokenType: String
+	scope: String
+	idToken: String
+	sessionState: String
+	profile: ProfileOauth!
 }
 input AccountOauthInput {
 	accountType: String!
 	provider: String!
 	providerAccountId: String!
-	refreshToken: String!
 	accessToken: String!
-	expiresAt: DateTime!
-	tokenType: String!
-	scope: String!
-	idToken: String!
-	sessionState: String!
+	refreshToken: String
+	expiresAt: DateTime
+	tokenType: String
+	scope: String
+	idToken: String
+	sessionState: String
+	profile: ProfileOauthInput!
 }
 """
 Implement the DateTime<Utc> scalar
@@ -38,7 +40,7 @@ type Mutation {
 	"""
 	signUp(user: UserInput!): User!
 	signIn(signInCredentials: SignInCredentials!): User!
-	createOrUpdateUserOauth(account: AccountOauthInput!, profile: ProfileOauth!): User!
+	createOrUpdateUserOauth(account: AccountOauthInput!): User!
 	signOut: SignOutMessage!
 	createPost(postInput: PostInput!): Post!
 }
@@ -55,7 +57,14 @@ input PostInput {
 	title: String!
 	content: String!
 }
-input ProfileOauth {
+type ProfileOauth {
+	firstName: String!
+	lastName: String!
+	username: String!
+	email: String!
+	emailVerified: Boolean!
+}
+input ProfileOauthInput {
 	firstName: String!
 	lastName: String!
 	username: String!
