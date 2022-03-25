@@ -97,10 +97,10 @@ export type AppEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
   APP_ENVIRONMENT: Environemt;
   APP_HOST: "0.0.0.0";
   APP_PORT: "8000" | "50051" | "3000";
-  GITHUB_ID?: string,
-  GITHUB_SECRET?: string,
-  GOOGLE_ID?: string,
-  GOOGLE_SECRET?: string,
+  GITHUB_CLIENT_ID?: string,
+  GITHUB_CLIENT_SECRET?: string,
+  GOOGLE_CLIENT_ID?: string,
+  GOOGLE_CLIENT_SECRET?: string,
   NEXTAUTH_URL?: string,
 } & DatabaseEnvVars<`${AN}-database`, NS>;
 
