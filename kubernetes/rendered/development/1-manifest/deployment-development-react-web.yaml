@@ -40,9 +40,9 @@ spec:
           value: 89c19374f7e7b5b35164
         - name: GITHUB_SECRET
           value: 129488cc92e2d2f91e3a5a024086396c48c65339
-        - name: GOOGLE_ID
+        - name: GOOGLE_CLIENT_ID
           value: 855174209543-6m0f088e55d3mevhnr8bs0qjap8j6g0g.apps.googleusercontent.com
-        - name: GOOGLE_SECRET
+        - name: GOOGLE_CLIENT_SECRET
           value: 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
         - name: NEXTAUTH_URL
           value: http://localhost:8080
