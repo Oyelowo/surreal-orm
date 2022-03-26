@@ -26,7 +26,7 @@ fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
         .and_then(|value| value.to_str().map(|s| Token(s.to_string())).ok())
 }
 
-#[post("/graphql-mongo")]
+#[post("/graphql")]
 pub async fn index(
     schema: web::Data<MyGraphQLSchema>,
     req: HttpRequest,
@@ -108,11 +108,11 @@ pub async fn index_ws(
         .start(&req, payload)
 }
 
-#[get("/graphql-mongo")]
+#[get("/graphql")]
 pub async fn gql_playground() -> HttpResponse {
     let source = playground_source(
-        GraphQLPlaygroundConfig::new("/graphql-mongo")
-            .subscription_endpoint("/graphql-mongo")
+        GraphQLPlaygroundConfig::new("/graphql")
+            .subscription_endpoint("/graphql")
             .with_setting("credentials", "include"), // e.g allow cookies
     );
     HttpResponse::Ok()
@@ -146,7 +146,7 @@ impl GraphQlApp {
 
         let schema = get_my_graphql_schema()
             .data(db)
-            .limit_depth(limit_depth) // This and also limi_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
+            .limit_depth(limit_depth) // This and also limit_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
             .limit_complexity(limit_complexity)
             .finish();
 

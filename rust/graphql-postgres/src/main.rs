@@ -16,8 +16,8 @@ async fn main() -> anyhow::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(schema.clone()))
-            .service(web::resource("/graphql-postgres").guard(guard::Post()).to(index))
-            .service(web::resource("/graphql-postgres").guard(guard::Get()).to(index_playground))
+            .service(web::resource("/graphql").guard(guard::Post()).to(index))
+            .service(web::resource("/graphql").guard(guard::Get()).to(index_playground))
     })
     .bind(app_url)?
     .run()

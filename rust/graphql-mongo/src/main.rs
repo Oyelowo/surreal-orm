@@ -72,7 +72,7 @@ async fn main() -> anyhow::Result<()> {
             .app_data(web::Data::new(schema.clone()))
             .service(gql_playground)
             .service(index)
-            .service(web::resource("/graphql-mongo/ws").to(index_ws))
+            .service(web::resource("/graphql/ws").to(index_ws))
         // .service(
         //     scope("/api").service(
         //         scope("/v1")

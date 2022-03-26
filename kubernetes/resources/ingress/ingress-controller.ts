@@ -63,8 +63,8 @@ const appBase = "oyelowo";
 // // Next, expose the app using an Ingress.
 
 const annotations: Partial<NginxConfiguration> = {
-  "nginx.ingress.kubernetes.io/ssl-redirect": "false",
-  "nginx.ingress.kubernetes.io/use-regex": "true",
+  // "nginx.ingress.kubernetes.io/ssl-redirect": "false",
+  // "nginx.ingress.kubernetes.io/use-regex": "true",
 };
 export const appIngress = new k8s.networking.v1.Ingress(
   `${appBase}-ingress`,
@@ -96,7 +96,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
               },
               {
                 pathType: "Prefix",
-                path: "/graphql-mongo",
+                path: "/graphql",
                 backend: {
                   service: {
                     name: graphqlMongoSettings.metadata.name,
@@ -108,7 +108,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
               },
               // {
               //   pathType: "Prefix",
-              //   path: "/graphql-postgres",
+              //   path: "/graphql",
               //   backend: {
               //     service: {
               //       name: graphqlPostgresSettings.metadata.name,
