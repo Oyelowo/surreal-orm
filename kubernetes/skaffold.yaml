@@ -64,7 +64,9 @@ deploy:
   kubectl:
     manifests:
     - rendered/namespaces/1-manifest/*
-    - rendered/development/1-manifest/*
+    - rendered/development/**/*
+    # - rendered/development/0-crd/*
+    # - rendered/development/1-manifest/*
 
 # portForward:
 #   - resourceType: service
