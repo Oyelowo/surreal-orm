@@ -1,0 +1,47 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"Role","metadata":{"labels":{"app.kubernetes.io/instance":"argo-cd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argo-cd","helm.sh/chart":"argo-cd-2.0.4"},"name":"argo-cd-server","namespace":"argocd"},"rules":[{"apiGroups":[""],"resources":["secrets","configmaps"],"verbs":["create","get","list","watch","update","patch","delete"]},{"apiGroups":["argoproj.io"],"resources":["applications","appprojects"],"verbs":["create","get","list","watch","update","delete","patch"]},{"apiGroups":[""],"resources":["events"],"verbs":["create","list"]}]}
+  labels:
+    app.kubernetes.io/instance: argo-cd
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: argo-cd
+    helm.sh/chart: argo-cd-2.0.4
+  name: argo-cd-server
+  namespace: argocd
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  - configmaps
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - argoproj.io
+  resources:
+  - applications
+  - appprojects
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - delete
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - list

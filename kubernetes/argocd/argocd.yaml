@@ -1,0 +1,25 @@
+
+# TODO: UNDONE/  POTENTIAL WAY TO MANAGE ARGO LOGIN DECLARATIVELY
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-deploy-secret
+  namespace: argocd
+type: Opaque
+data:
+  privateKey: LS0tLS1CRU...
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  repositories: |
+    - url: git@github.com:Oyelowo/modern-distributed-app-template.git
+      sshPrivateKeySecret:
+        name: my-deploy-secret
+        key: privateKey
