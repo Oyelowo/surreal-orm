@@ -148,6 +148,66 @@ jobs:
           cache-to: |
             type=gha,scope=grpc-mongo,mode=max
 
+  # ############## CONTINUOUS DEPLOYMENT #################
+  # deploy_rust_app:
+  #   name: "Generate manifests"
+  #   if: github.event.pull_request.merged ||  ${{ github.ref == 'refs/heads/master' }}
+  #   needs: [check_and_test_rust_monorepo, format, clippy]
+  #   runs-on: ubuntu-latest
+
+  #   # defaults:
+  #     # run:
+  #       # working-directory: kubernetes
+        
+    # steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - run: npm install
+      - name: Install pulumi
+        uses: pulumi/setup-pulumi@v2
+        with:
+          pulumi-version: 3.27.0
+      - run: make gen
+
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
+          fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
+      - name: Create local changes
+        run: |
+          ...
+      - name: Commit files
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -m "Add changes" -a
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+      # - name: Prepare for pulumi
+      #   run: |
+      #     make install
+      #     rm -rf ./login
+      #     mkdir ./login
+      #     rm -rf ./rendered
+      #     export ENVIRONMENT="development" && export PULUMI_CONFIG_PASSPHRASE=""
+      # - uses: pulumi/actions@v3
+      #   with:
+      #     command: up
+      #     stack-name: dev
+      #     cloud-url: file://~
+
+      # - uses: pulumi/actions@v3
+      #   with:
+      #     command: preview
+      #     stack-name: dev
+      #   env:
+      #     PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
       # - name: Check out code
       #   uses: actions/checkout@v2

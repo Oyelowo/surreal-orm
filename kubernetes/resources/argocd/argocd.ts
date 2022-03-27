@@ -31,7 +31,7 @@ export const argocd = new k8s.helm.v3.Chart(
     },
     version: "2.0.4",
     values: argocdValues,
-    namespace: "argocd",
+    // namespace: "argocd",
     // namespace: devNamespaceName,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being

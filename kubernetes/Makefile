@@ -12,6 +12,16 @@ gen:
 	# pulumi destroy --stack dev  --yes --skip-preview
 	export ENVIRONMENT="development" && export PULUMI_CONFIG_PASSPHRASE="" && pulumi update --yes --skip-preview --stack dev
 
+generate:
+	make install
+	rm -rf ./login
+	mkdir ./login
+	rm -rf ./rendered
+	pulumi login file://login 
+	export PULUMI_CONFIG_PASSPHRASE="" && pulumi stack init --stack dev
+	# pulumi destroy --stack dev  --yes --skip-preview
+	export ENVIRONMENT="development" && export PULUMI_CONFIG_PASSPHRASE="" && pulumi update --yes --skip-preview --stack dev
+
 start-web:
 	# (cd ../typescript && make dev)
 
