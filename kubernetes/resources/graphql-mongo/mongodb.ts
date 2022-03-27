@@ -1,10 +1,10 @@
-import * as k8s from '@pulumi/kubernetes';
+import * as k8s from "@pulumi/kubernetes";
 
-import { provider } from '../shared/cluster';
-import { MongodbHelmValuesBitnami } from '../shared/MongodbHelmValuesBitnami';
-import { devNamespaceName } from '../shared/namespaces';
-import { DeepPartial } from '../shared/types';
-import { graphqlMongoSettings } from './settings';
+import { provider } from "../shared/cluster";
+import { MongodbHelmValuesBitnami } from "../shared/MongodbHelmValuesBitnami";
+import { devNamespaceName } from "../shared/namespaces";
+import { DeepPartial } from "../shared/types";
+import { graphqlMongoSettings } from "./settings";
 
 const { envVars } = graphqlMongoSettings;
 
@@ -65,8 +65,14 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   // global: {
   //   namespaceOverride: devNamespaceName,
   // },
+
   persistence: {
-    size: "0.1Gi",
+    size: "0.1Gi", // Default is 8Gi. // TODO: Confirm: This can be increased from initial but not decreased // TODO: Unset this or increase the capacity.
+    /* 
+    Note
+In order to retain your Block Storage Volume and its data, even after the associated PVC is deleted, you must use the linode-block-storage-retain StorageClass. If, instead, you prefer to have your Block Storage Volume and its data deleted along with its PVC, use the linode-block-storage StorageClass. See the Delete a Persistent Volume Claim for steps on deleting a PVC.
+    */
+    storageClass: "linode-block-storage-retain",
   },
 
   auth: {
