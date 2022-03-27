@@ -1,6 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 
-import { provider } from "../shared/cluster";
+import { providerApplication } from "../shared/cluster";
 import { MongodbHelmValuesBitnami } from "../shared/MongodbHelmValuesBitnami";
 import { devNamespaceName } from "../shared/namespaces";
 import { DeepPartial } from "../shared/types";
@@ -116,5 +116,5 @@ export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider }
+  { provider: providerApplication }
 );

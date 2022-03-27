@@ -1,10 +1,11 @@
+import { clusterSetupProvider } from './../shared/cluster';
 import * as k8s from "@pulumi/kubernetes";
 import * as nginx from "@pulumi/kubernetes-ingress-nginx";
 
 import { graphqlMongoSettings } from "../graphql-mongo/settings";
 import { graphqlPostgresSettings } from "../graphql-postgres/settings";
 import { reactWebSettings } from "../react-web/settings";
-import { provider } from "../shared/cluster";
+import { providerApplication } from "../shared/cluster";
 import { IngressControllerValuesBitnami } from "../shared/ingressControllerValuesBitnami";
 import { devNamespace, devNamespaceName } from "../shared/namespaces";
 import { NginxConfiguration } from "../shared/nginxConfigurations";
@@ -53,7 +54,8 @@ export const ingressNginx = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider }
+  { provider: clusterSetupProvider }
+  // { provider }
 );
 
 type IngressClassName = "nginx" | "traefik";
@@ -142,7 +144,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
       ],
     },
   },
-  { provider: provider }
+  { provider: providerApplication }
 );
 
 // // export const appStatuses = apps;

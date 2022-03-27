@@ -32,7 +32,7 @@ export interface Settings<TAppName extends AppName> {
   limitCpu: CPU;
   replicaCount: number;
   host: string;
-  image: `oyelowo/${TAppName}`;
+  image: `ghcr.io/oyelowo/${TAppName}:${string}`;
 }
 
 export type RecursivePartial<T> = {
@@ -42,6 +42,14 @@ export type RecursivePartial<T> = {
     ? RecursivePartial<T[P]>
     : T[P];
 };
+
+import * as z from "zod";
+export const NODE_ENVIRONMENT_VARS = z.object({
+  // TAG_REACT_WEB: z.string().nonempty().or(z.undefined()),
+  TAG_REACT_WEB: z.string().nonempty(),
+  TAG_GRAPHQL_MONGO: z.string().nonempty(),
+  TAG_GRAPHQL_POSTGRES: z.string().nonempty(),
+});
 
 // make all properties optional recursively including nested objects.
 // keep in mind that this should be used on json / plain objects only.
@@ -97,11 +105,11 @@ export type AppEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
   APP_ENVIRONMENT: Environemt;
   APP_HOST: "0.0.0.0";
   APP_PORT: "8000" | "50051" | "3000";
-  GITHUB_CLIENT_ID?: string,
-  GITHUB_CLIENT_SECRET?: string,
-  GOOGLE_CLIENT_ID?: string,
-  GOOGLE_CLIENT_SECRET?: string,
-  NEXTAUTH_URL?: string,
+  GITHUB_CLIENT_ID?: string;
+  GITHUB_CLIENT_SECRET?: string;
+  GOOGLE_CLIENT_ID?: string;
+  GOOGLE_CLIENT_SECRET?: string;
+  NEXTAUTH_URL?: string;
 } & DatabaseEnvVars<`${AN}-database`, NS>;
 
 type EnvironmentVariables<

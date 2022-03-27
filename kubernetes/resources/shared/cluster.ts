@@ -21,13 +21,19 @@ const nameSpaceName = environment;
 // type Namespace = "team-a" | "workers" | "web" | "jobs"
 
 
-export const provider = new k8s.Provider("render-yaml", {
-  renderYamlToDirectory: `rendered/${nameSpaceName}`,
+export const providerApplication = new k8s.Provider("render-yaml", {
+  renderYamlToDirectory: `rendered/applications`,
+  // renderYamlToDirectory: `rendered/${nameSpaceName}`,
   // namespace: "nana",
 });
 
-export const providerNameSpace = new k8s.Provider("render-yaml2", {
+export const providerNameSpacesProvider = new k8s.Provider("render-yaml2", {
   renderYamlToDirectory: `rendered/namespaces`,
+  // namespace: "nana",
+});
+
+export const clusterSetupProvider = new k8s.Provider("cluster-setup", {
+  renderYamlToDirectory: `rendered/cluster-setup`,
   // namespace: "nana",
 });
 

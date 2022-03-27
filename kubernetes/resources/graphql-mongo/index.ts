@@ -1,11 +1,11 @@
-import { provider } from '../shared/cluster';
+import { providerApplication } from '../shared/cluster';
 import { ServiceDeployment } from '../shared/deployment';
 import { graphqlMongoSettings } from './settings';
 
 export const graphqlMongo = new ServiceDeployment(
   "graphql-mongo",
   graphqlMongoSettings,
-  { provider }
+  { provider: providerApplication }
 );
 
 export * from "./mongodb";
