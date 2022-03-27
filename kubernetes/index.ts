@@ -15,4 +15,6 @@ export * from "./resources/ingress";
 
 export * from "./resources/secrets";
 
+export * from "./resources/argocd";
+
 // export * from "./resources";

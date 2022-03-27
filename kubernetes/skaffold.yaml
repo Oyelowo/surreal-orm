@@ -1,4 +1,4 @@
-apiVersion: skaffold/v2beta26
+apiVersion: skaffold/v2beta27
 kind: Config
 metadata:
   name: kubernetes
@@ -8,6 +8,8 @@ build:
     tryImportMissing: false
     useDockerCLI: false
     useBuildkit: true
+  # platforms: ["linux/amd64"]
+  # platforms: ["linux/amd64", "linux/arm64"]
   artifacts:
   - image: oyelowo/react-web
     context: ../typescript

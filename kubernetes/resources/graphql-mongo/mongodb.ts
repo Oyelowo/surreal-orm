@@ -67,6 +67,11 @@ export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   // },
 
   persistence: {
+    /* 
+     Linode: This PVC represents a Block Storage Volume. Because Block Storage Volumes have a minimum size of 10 gigabytes, the storage has been set to 10Gi. If you choose a size smaller than 10 gigabytes, the PVC will default to 10 gigabytes.
+
+Currently the only mode supported by the Linode Block Storage CSI driver is ReadWriteOnce, meaning that it can only be connected to one Kubernetes node at a time.
+    */
     size: "0.1Gi", // Default is 8Gi. // TODO: Confirm: This can be increased from initial but not decreased // TODO: Unset this or increase the capacity.
     /* 
     Note
