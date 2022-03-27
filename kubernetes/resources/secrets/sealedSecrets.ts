@@ -18,7 +18,7 @@ Alternatively, you can override fullnameOverride on the helm chart install.
 
 // `http://${name}.${namespace}:${port}`;
 export const sealedSecret = new k8s.helm.v3.Chart(
-  "sealed-secrets-helm",
+  "sealed-secrets-controller",
   {
     chart: "sealed-secrets",
     fetchOpts: {
@@ -26,7 +26,8 @@ export const sealedSecret = new k8s.helm.v3.Chart(
     },
     version: "2.1.4",
     values: sealedSecretsValues,
-    namespace: devNamespaceName,
+    namespace: "kube-system",
+    // namespace: devNamespaceName,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being
     // available.
@@ -34,3 +35,6 @@ export const sealedSecret = new k8s.helm.v3.Chart(
   },
   { provider }
 );
+
+
+
