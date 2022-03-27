@@ -17,7 +17,7 @@ use wither::{
 // use bson::DateTime;
 
 use crate::{
-    app::{error::ResolverError, post::Post, AppError},
+    app::{error::ResolverError, post::Post},
     configs::model_cursor_to_vec,
 };
 

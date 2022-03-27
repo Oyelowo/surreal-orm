@@ -12,7 +12,7 @@ export const reactWebSettings: AppConfigs<
     limitCpu: "100m",
     replicaCount: 2,
     host: "0.0.0.0",
-    image: "oyelowo/react-web",
+    image: "oyelowo/react-web" + ":" + process.env.WEB_IMAGE_WITH_TAG! as any ?? "",
   },
 
   envVars: {
