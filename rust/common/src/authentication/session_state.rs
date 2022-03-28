@@ -45,7 +45,6 @@ impl TypedSession {
         self.0.renew();
     }
 
-
     // fn from_ctx(ctx: Context) -> Self {
     //
     // }
