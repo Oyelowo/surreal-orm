@@ -1,6 +1,7 @@
 import * as k8s from "@pulumi/kubernetes";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
 import * as kx from "@pulumi/kubernetesx";
+import { environmentVariables } from "./validations";
 
 // import { devNamespace } from "./namespaces";
 
@@ -9,8 +10,7 @@ import * as kx from "@pulumi/kubernetesx";
 // export const namespace = new k8s.Name;
 
 // const nameSpaceName = "development";
-const environment = process.env.ENVIRONMENT;
-const nameSpaceName = environment;
+const { ENVIRONMENT, TEMPORARY_DIR } = environmentVariables;
 
 //  I am first putting all resources in a single cluster and allocating resources and envronment based on namespace rather than cluster.
 // i.e  type Namespace = "development" | "staging" | "production". And only a single cluster.
@@ -20,7 +20,9 @@ const nameSpaceName = environment;
 // while namespace can then be used for categorising resources based on logical grouping or team allocation. e.g
 // type Namespace = "team-a" | "workers" | "web" | "jobs"
 
-const rootDirectory = "manifests/generated";
+const rootDirectory = `manifests/${ENVIRONMENT}/${
+  TEMPORARY_DIR ?? "generated"
+}`;
 export const providerApplication = new k8s.Provider("render-yaml", {
   renderYamlToDirectory: `${rootDirectory}/applications`,
   // renderYamlToDirectory: `${rootDirectory}/${nameSpaceName}`,

@@ -1,5 +1,14 @@
-import { NamespaceName } from './../namespaces';
-export type Environment = "local" | "development" | "staging" | "production";
+import { NamespaceName } from "./../namespaces";
+
+import * as z from "zod";
+export const appEnvironmentsSchema = z.union([
+  z.literal("local"),
+  z.literal("development"),
+  z.literal("staging"),
+  z.literal("production"),
+]);
+
+export type Environment = z.infer<typeof appEnvironmentsSchema>;
 // This might change but make it the environment for now.
 export type NamespaceOfApps = NamespaceName;
 

@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { appEnvironmentsSchema } from "./types/own-types";
 
 // TODO: Move this into helpers
 const environmentVariablesValidator = z.object({
@@ -8,6 +9,8 @@ const environmentVariablesValidator = z.object({
   IMAGE_TAG_GRAPHQL_MONGO: z.string().nonempty(),
   IMAGE_TAG_GRPC_MONGO: z.string().nonempty(),
   IMAGE_TAG_GRAPHQL_POSTGRES: z.string().nonempty(),
+  ENVIRONMENT: appEnvironmentsSchema,
+  TEMPORARY_DIR: z.string().nonempty().optional(),
 });
 
 export const environmentVariables = environmentVariablesValidator.parse(

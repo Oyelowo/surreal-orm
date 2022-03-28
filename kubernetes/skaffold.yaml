@@ -11,7 +11,7 @@ build:
   # platforms: ["linux/amd64"]
   # platforms: ["linux/amd64", "linux/arm64"]
   artifacts:
-  - image: oyelowo/react-web
+  - image: ghcr.io/oyelowo/react-web
     context: ../typescript
     docker:
       dockerfile: Dockerfile.development
@@ -19,7 +19,7 @@ build:
       noCache: false
       squash: false
 
-  - image: oyelowo/graphql-mongo
+  - image: ghcr.io/oyelowo/graphql-mongo
     context: ../rust
     docker:
       dockerfile: Dockerfile.development
@@ -30,7 +30,7 @@ build:
   #     - image: builder-base
   #       alias: BASE
 
-  - image: oyelowo/graphql-postgres
+  - image: ghcr.io/oyelowo/graphql-postgres
     context: ../rust
     docker:
       dockerfile: Dockerfile.development
@@ -41,7 +41,7 @@ build:
   #     - image: builder-base
   #       alias: BASE
       
-  - image: oyelowo/grpc-mongo
+  - image: ghcr.io/oyelowo/grpc-mongo
     context: ../rust
     docker:
       dockerfile: Dockerfile.development
@@ -65,8 +65,12 @@ build:
 deploy:
   kubectl:
     manifests:
-    - rendered/namespaces/1-manifest/*
-    - rendered/development/**/*
+    # - manifests/local/generated/namespaces/**/*
+    # - manifests/local/generated/cluster-setup/**/*
+    # - manifests/local/secrets-encrypted/* ## MAy remove
+    # - manifests/local/generated/argocd/**/* ## MAy remove
+    - manifests/local/generated/applications/**/* ## MAy remove
+    # - manifests/local/generated/**/**/* ## MAy remove
     # - rendered/development/0-crd/*
     # - rendered/development/1-manifest/*
 

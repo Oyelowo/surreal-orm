@@ -16,7 +16,7 @@ generate_local:
 	make install
 	rm -rf ./login
 	mkdir ./login
-	# rm -rf ./rendered
+	# rm -rf ./manifests/local
 	pulumi login file://login 
 	export PULUMI_CONFIG_PASSPHRASE="" && pulumi stack init --stack dev
 	# pulumi destroy --stack dev  --yes --skip-preview
@@ -24,7 +24,21 @@ generate_local:
 	export IMAGE_TAG_GRAPHQL_MONGO="local" && \
 	export IMAGE_TAG_GRPC_MONGO="local" && \
 	export IMAGE_TAG_GRAPHQL_POSTGRES="local" && \
-	export ENVIRONMENT="development" && \
+	export ENVIRONMENT="local" && \
+	export PULUMI_CONFIG_PASSPHRASE="" && \
+	pulumi update --yes --skip-preview --stack dev
+
+generate_production:
+	make install
+	rm -rf ./login
+	mkdir ./login
+	pulumi login file://login 
+	export PULUMI_CONFIG_PASSPHRASE="" && pulumi stack init --stack dev
+	export IMAGE_TAG_REACT_WEB="local" && \
+	export IMAGE_TAG_GRAPHQL_MONGO="local" && \
+	export IMAGE_TAG_GRPC_MONGO="local" && \
+	export IMAGE_TAG_GRAPHQL_POSTGRES="local" && \
+	export ENVIRONMENT="production" && \
 	export PULUMI_CONFIG_PASSPHRASE="" && \
 	pulumi update --yes --skip-preview --stack dev
 
@@ -61,10 +75,28 @@ dev:
 
 # NOTE
 ####  ##*/ gets the file name out of the path;
-BASEDIR = ./manifests
-GENERATED_DIR = ${BASEDIR}/generated
-SECRETS_ENCRYPTED_DIR = ${BASEDIR}/secrets-encrypted
-rollout:
+
+generate_temporary:
+	make install
+	rm -rf ./login
+	mkdir ./login
+	pulumi login file://login 
+	export PULUMI_CONFIG_PASSPHRASE="" && pulumi stack init --stack dev
+	export IMAGE_TAG_REACT_WEB="local" && \
+	export IMAGE_TAG_GRAPHQL_MONGO="local" && \
+	export IMAGE_TAG_GRPC_MONGO="local" && \
+	export IMAGE_TAG_GRAPHQL_POSTGRES="local" && \
+	export ENVIRONMENT="production" && \
+	export TEMPORARY_DIR="generated-temporary" && \
+	export PULUMI_CONFIG_PASSPHRASE="" && \
+	pulumi update --yes --skip-preview --stack dev
+
+BASEDIR=./manifests/${ENVIRONMENT}
+GENERATED_DIR=${BASEDIR}/generated-temporary
+SECRETS_ENCRYPTED_DIR=${BASEDIR}/secrets-encrypted
+seal:
+	# Example usage: ENVIRONMENT="production" make seal
+	
 	# Apply namespace first
 	kubectl apply -R -f ${GENERATED_DIR}/namespaces
 
@@ -74,10 +106,64 @@ rollout:
 	# Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
 	kubectl rollout status deployment/sealed-secrets-controller -n=kube-system
 
-seal:
-	make generate_local
+
+	@for FILE in ${GENERATED_DIR}/**/**/secret-*ml; do \
+		kubeseal <$${FILE} -o yaml >${SECRETS_ENCRYPTED_DIR}/$${FILE##*/}; \
+		echo "REMOVING unsealed secret $${FILE}"; \
+		rm -rf $${FILE}; \
+	done
+
+	rm -rf ${GENERATED_DIR}
+# rm -rf ./shared/secrets-dont-push.json
+
+setup:
+	cp -R secrets.environment.example secrets.production.json
+	# Then edit the file
+
+# setup-cluster-production:	
+create-sealed-secrets:	
+	make generate_temporary
+	ENVIRONMENT=production make seal
+
+	# kubectl apply -R -f  ./manifests/local/secrets-encrypted
+
+
+
+# setup-cluster-production:	
+create-sealed-secrets:	
+	make generate_temporary
+	ENVIRONMENT=production make seal
+
+	# kubectl apply -R -f  ./manifests/local/secrets-encrypted
+
+# Does the generation and encryption
+rotate-secret-local:
+	# Example  usage: make setup ENVIRONMENT=production
+	# k3d cluster delete local
+	# k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+	
+	make generate_production
+	ENVIRONMENT=$(ENVIRONMENT) make seal
+
+start-dev:
 	k3d cluster delete local
 	k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+	
+	make generate_local
+	# ENVIRONMENT=$(ENVIRONMENT) make seal
+	ENVIRONMENT=local make seal
+
+	kubectl apply -R -f  ./manifests/local/secrets-encrypted
+	skaffold dev --trigger="manual" --no-prune=true --no-prune-children=true
+
+
+
+# TODO: Parameterise environment 
+seal_production:
+	export ENVIRONMENT=production && \
+	k3d cluster delete local
+	k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+	make generate_production
 	make rollout
 
 	@for FILE in ${GENERATED_DIR}/**/**/secret-*ml; do \
@@ -85,7 +171,6 @@ seal:
 		echo "REMOVING unsealed secret $${FILE}"; \
 		rm -rf $${FILE}; \
 	done
-# rm -rf ./shared/secrets-dont-push.json
 
 # @for FILE in ${BASEDIR}/argocd/1-manifest/secret-*ml; do \
 # 	echo "sealing secret: $${FILE} into ./outputs directory"; \

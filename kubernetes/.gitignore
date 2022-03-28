@@ -1,3 +1,6 @@
 /bin/
 /node_modules/
 /login
+secrets.production.json
+secrets.development.json
+secrets.staging.json
