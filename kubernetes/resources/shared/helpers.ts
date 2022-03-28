@@ -25,45 +25,17 @@ const secretsSchema = z.object({
   "react-web": z.object({}),
 });
 
-export const secretsJsonToBase64 = z
-  .function()
-  .args(secretsSchema)
-  .returns(secretsSchema)
-  .strictImplement((json) => {
-    const parsedSecrets = secretsSchema.parse(json);
-    const entries = Object.entries(parsedSecrets).map(([appName, appEnvVars]) => {
-      const appObjectToArraysEncodedValues = Object.entries(appEnvVars).map(
-        ([secretName, secretValue]) => [
-          secretName,
-          Buffer.from(secretValue).toString("base64"),
-        ]
-      );
-
-      return [appName, Object.fromEntries(appObjectToArraysEncodedValues)];
-      // Turn it back into an object
-    });
-
-    return Object.fromEntries(entries);
-  });
-// function getSecretForApp(appName: keyof z.infer<typeof secretsSchema>) {
+// NOTE: I initially was encoding the secrets in base64 but it turns out
+// that bitnami sealed secrets not only handles encryption but base64 encoding of the
+// secrets before encrypting them
 export function getSecretForApp<T extends AppName>(
   appName: AppName
 ): z.infer<typeof secretsSchema>[T] {
-  return secretsJsonToBase64(secretsJonFile)[appName] as z.infer<
-    typeof secretsSchema
-  >[T];
+  const parsedSecrets = secretsSchema.parse(secretsJonFile);
+
+  return parsedSecrets[appName] as z.infer<typeof secretsSchema>[T];
 }
 
-// const base64data = btoa("someText");
-// export function secretsJsonToBase642(json: RawJSON) {
-//   const parsedSecrets = secretsSchema.parse(json);
-
-//   const entries = Object.entries(parsedSecrets).map(([key, value]) => [
-//     key,
-//     btoa(value),
-//   ]);
-//   return Object.fromEntries(entries);
-// }
 interface ServiceProps {
   serviceName: string;
   deployment: kx.Deployment;
