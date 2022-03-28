@@ -2,11 +2,7 @@ import { namespaceNames } from './../shared/namespaces';
 import { environmentVariables } from "../shared/validations";
 import { AppConfigs } from "./../shared/types/own-types";
 
-export const grpcMongoSettings: AppConfigs<
-  "grpc-mongo",
-  "mongodb",
-  "applications"
-> = {
+export const grpcMongoSettings: AppConfigs<"grpc-mongo", "mongodb", "applications"> = {
   kubeConfig: {
     requestMemory: "70Mi",
     requestCpu: "100m",
@@ -14,7 +10,7 @@ export const grpcMongoSettings: AppConfigs<
     limitCpu: "100m",
     replicaCount: 3,
     host: "0.0.0.0",
-    image: `ghcr.io/oyelowo/grpc-mongo:${environmentVariables.TAG_GRPC_MONGO}`,
+    image: `ghcr.io/oyelowo/grpc-mongo:${environmentVariables.IMAGE_TAG_GRPC_MONGO}`,
   },
 
   envVars: {

@@ -14,7 +14,7 @@ export const reactWebSettings: AppConfigs<
     limitCpu: "100m",
     replicaCount: 2,
     host: "0.0.0.0",
-    image: `ghcr.io/oyelowo/react-web:${environmentVariables.TAG_REACT_WEB}`,
+    image: `ghcr.io/oyelowo/react-web:${environmentVariables.IMAGE_TAG_REACT_WEB}`,
   },
 
   envVars: {
