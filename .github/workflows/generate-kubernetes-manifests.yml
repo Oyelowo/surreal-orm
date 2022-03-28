@@ -34,9 +34,9 @@ jobs:
           export IMAGE_TAG_GRAPHQL_MONGO=${{ env.IMAGE_TAG }} && \
           export IMAGE_TAG_GRPC_MONGO=${{ env.IMAGE_TAG }} && \
           export IMAGE_TAG_GRAPHQL_POSTGRES=${{ env.IMAGE_TAG }} && \
-          export ENVIRONMENT="development" && \
+          export ENVIRONMENT="production" && \
           export PULUMI_CONFIG_PASSPHRASE="" && \
-          make gen
+          make generate_production
 
 
       - name: Commit files
