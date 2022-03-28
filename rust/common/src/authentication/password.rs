@@ -34,7 +34,7 @@ impl PasswordHashPHC {
 
 impl From<PasswordHashPHC> for String {
     fn from(password_phc: PasswordHashPHC) -> Self {
-       password_phc.0.expose_secret().into()
+        password_phc.0.expose_secret().into()
     }
 }
 

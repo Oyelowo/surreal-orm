@@ -4,8 +4,7 @@ use actix_web::{
     cookie::{self, time::Duration, Key},
     http,
     middleware::Logger,
-    web,
-    App, HttpServer,
+    web, App, HttpServer,
 };
 
 use graphql_mongo::configs::{gql_playground, index, index_ws, Configs, GraphQlApp};

@@ -20,7 +20,6 @@ pub enum ResolverError {
 
     #[error("ServerError")]
     ServerError(String),
-
     // #[error("No Extensions")]
     // ErrorWithoutExtensions,
 }
