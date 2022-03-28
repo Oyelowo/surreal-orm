@@ -1,10 +1,10 @@
-import * as k8s from '@pulumi/kubernetes';
+import { postgresdbHelmValuesBitnami } from "./../shared/types/helm-charts/postgresdbHelmValuesBitnami";
+import * as k8s from "@pulumi/kubernetes";
 
-import { provider } from '../shared/cluster';
-import { devNamespaceName } from '../shared/namespaces';
-import { postgresdbHelmValuesBitnami } from '../shared/postgresdbHelmValuesBitnami';
-import { DeepPartial, RecursivePartial } from '../shared/types';
-import { graphqlPostgresSettings } from './settings';
+import { providerApplication } from "../shared/cluster";
+import { namespaceNames } from "../shared/namespaces";
+import { DeepPartial } from "../shared/types/own-types";
+import { graphqlPostgresSettings } from "./settings";
 
 const { envVars } = graphqlPostgresSettings;
 
@@ -112,11 +112,12 @@ export const graphqlPostgresPostgresdb = new k8s.helm.v3.Chart(
     },
     version: "11.0.6",
     values: postgresValues,
-    namespace: devNamespaceName,
+    namespace: namespaceNames.applications,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being
     // available.
     skipAwait: false,
   },
-  { provider }
+  { provider: providerApplication }
+  // { provider }
 );

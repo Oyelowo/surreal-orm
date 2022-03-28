@@ -8,7 +8,7 @@ interface ServiceProps {
     args: kx.types.ServiceSpec;
 }
 
-
+// NOT USED FOR NOW. I went with directly patching the package instead. Keep for future purpose/reference
 export function generateService({ serviceName, deployment, args = {} }: ServiceProps): kx.Service{
   const serviceSpec = pulumi
     .all([deployment.spec.template.spec.containers, args])

@@ -1,8 +1,8 @@
+import { SealedSecretsHelmValuesBitnami } from "../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { clusterSetupProvider, providerApplication } from "../shared/cluster";
-import {  namespaceNames } from "../shared/namespaces";
-import { SealedSecretsHelmValuesBitnami } from "../shared/sealedSecretsHelmValuesBitnami";
+import { clusterSetupProvider } from "../shared/cluster";
+import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
 
 const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {

@@ -1,10 +1,10 @@
+import { postgresdbHaHelmValuesBitnami } from './../shared/types/helm-charts/postgresdbHaHelmValuesBitnami';
 import * as k8s from '@pulumi/kubernetes';
 
-import { provider } from '../shared/cluster';
-import { devNamespaceName } from '../shared/namespaces';
-import { postgresdbHaHelmValuesBitnami } from '../shared/postgresdbHAHelmValuesBitnami';
-import { DeepPartial, RecursivePartial } from '../shared/types';
+import { providerApplication } from '../shared/cluster';
+import { namespaceNames } from '../shared/namespaces';
 import { graphqlPostgresSettings } from './settings';
+import { DeepPartial } from '../shared/types/own-types';
 
 const { envVars } = graphqlPostgresSettings;
 type Credentials = {
@@ -120,11 +120,11 @@ export const graphqlPostgresPostgresdbHA = new k8s.helm.v3.Chart(
     },
     version: "8.4.0",
     values: postgresValues,
-    namespace: devNamespaceName,
+    namespace: namespaceNames.applications,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being
     // available.
     skipAwait: false,
   },
-  { provider }
+  { provider: providerApplication }
 );

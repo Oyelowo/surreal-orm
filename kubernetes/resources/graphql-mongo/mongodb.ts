@@ -1,8 +1,8 @@
+import { MongodbHelmValuesBitnami } from './../shared/types/helm-charts/MongodbHelmValuesBitnami';
 import * as k8s from "@pulumi/kubernetes";
 
 import { providerApplication } from "../shared/cluster";
-import { MongodbHelmValuesBitnami } from "../shared/MongodbHelmValuesBitnami";
-import { applicationsNamespaceName } from "../shared/namespaces";
+import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial } from "../shared/types/own-types";
 import { graphqlMongoSettings } from "./settings";
 
@@ -110,7 +110,7 @@ export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
     },
     version: "11.0.3",
     values: mongoValues,
-    namespace: applicationsNamespaceName,
+    namespace: namespaceNames.applications,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being
     // available.

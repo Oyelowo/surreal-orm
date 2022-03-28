@@ -1,10 +1,10 @@
-import * as k8s from '@pulumi/kubernetes';
+import { MongodbHelmValuesBitnami } from "./../shared/types/helm-charts/MongodbHelmValuesBitnami";
+import { namespaceNames } from "./../shared/namespaces";
+import * as k8s from "@pulumi/kubernetes";
 
-import { provider } from '../shared/cluster';
-import { MongodbHelmValuesBitnami } from '../shared/MongodbHelmValuesBitnami';
-import { devNamespaceName } from '../shared/namespaces';
-import { DeepPartial, RecursivePartial } from '../shared/types';
-import { grpcMongoSettings } from './settings';
+import { providerApplication } from "../shared/cluster";
+import { grpcMongoSettings } from "./settings";
+import { DeepPartial } from "../shared/types/own-types";
 
 /* MONGODB STATEFULSET */
 type Credentials = {
@@ -93,11 +93,11 @@ export const grpcMongoMongodb = new k8s.helm.v3.Chart(
     },
     version: "11.0.3",
     values: mongoValues,
-    namespace: devNamespaceName,
+    namespace: namespaceNames.applications,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being
     // available.
     skipAwait: false,
   },
-  { provider }
+  { provider: providerApplication }
 );
