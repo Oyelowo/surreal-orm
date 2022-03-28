@@ -1,0 +1,51 @@
+name: Generate Kubernetes manifests
+
+# Only trigger, when the rust and typescript workflow succeeded
+on:
+  workflow_run:
+  # This  must match with the other two workflows
+    workflows: ["rust", "typescript"]
+    types:
+      - completed
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
+          fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - run: npm install
+      - name: Install pulumi
+        uses: pulumi/setup-pulumi@v2
+        with:
+          pulumi-version: 3.27.0
+      - run: |
+          # They all use same image tag for now
+          echo "IMAGE_TAG=$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          # Tags
+          export IMAGE_TAG_REACT_WEB=${{ env.IMAGE_TAG }} && \
+          export IMAGE_TAG_GRAPHQL_MONGO=${{ env.IMAGE_TAG }} && \
+          export IMAGE_TAG_GRPC_MONGO=${{ env.IMAGE_TAG }} && \
+          export IMAGE_TAG_GRAPHQL_POSTGRES=${{ env.IMAGE_TAG }} && \
+          export ENVIRONMENT="development" && \
+          export PULUMI_CONFIG_PASSPHRASE="" && \
+          make gen
+
+
+      - name: Commit files
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -m "Add changes" -a
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}

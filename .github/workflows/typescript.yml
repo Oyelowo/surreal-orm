@@ -1,4 +1,4 @@
-name: Typescript monorepo applications CICD
+name: typescript
 
 on:
   push:
