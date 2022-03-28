@@ -3,7 +3,7 @@ kind: Service
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"redis","helm.sh/chart":"redis-16.4.5"},"name":"redis-database-master","namespace":"development"},"spec":{"ports":[{"name":"tcp-redis","port":6379,"targetPort":"redis"}],"selector":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/name":"redis"},"type":"ClusterIP"}}
+      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"redis","helm.sh/chart":"redis-16.4.5"},"name":"redis-database-master","namespace":"applications"},"spec":{"ports":[{"name":"tcp-redis","port":6379,"targetPort":"redis"}],"selector":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/name":"redis"},"type":"ClusterIP"}}
   labels:
     app.kubernetes.io/component: master
     app.kubernetes.io/instance: redis
@@ -11,7 +11,7 @@ metadata:
     app.kubernetes.io/name: redis
     helm.sh/chart: redis-16.4.5
   name: redis-database-master
-  namespace: development
+  namespace: applications
 spec:
   ports:
   - name: tcp-redis

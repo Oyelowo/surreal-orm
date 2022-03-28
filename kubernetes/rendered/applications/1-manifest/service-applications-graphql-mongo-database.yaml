@@ -3,7 +3,7 @@ kind: Service
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/component":"mongodb","app.kubernetes.io/instance":"graphql-mongo-database","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"mongodb","helm.sh/chart":"mongodb-11.0.3"},"name":"graphql-mongo-database","namespace":"development"},"spec":{"clusterIP":"None","ports":[{"name":"mongodb","port":27017,"targetPort":"mongodb"}],"publishNotReadyAddresses":true,"selector":{"app.kubernetes.io/component":"mongodb","app.kubernetes.io/instance":"graphql-mongo-database","app.kubernetes.io/name":"mongodb"},"type":"ClusterIP"}}
+      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/component":"mongodb","app.kubernetes.io/instance":"graphql-mongo-database","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"mongodb","helm.sh/chart":"mongodb-11.0.3"},"name":"graphql-mongo-database","namespace":"applications"},"spec":{"clusterIP":"None","ports":[{"name":"mongodb","port":27017,"targetPort":"mongodb"}],"publishNotReadyAddresses":true,"selector":{"app.kubernetes.io/component":"mongodb","app.kubernetes.io/instance":"graphql-mongo-database","app.kubernetes.io/name":"mongodb"},"type":"ClusterIP"}}
   labels:
     app.kubernetes.io/component: mongodb
     app.kubernetes.io/instance: graphql-mongo-database
@@ -11,7 +11,7 @@ metadata:
     app.kubernetes.io/name: mongodb
     helm.sh/chart: mongodb-11.0.3
   name: graphql-mongo-database
-  namespace: development
+  namespace: applications
 spec:
   clusterIP: None
   ports:
