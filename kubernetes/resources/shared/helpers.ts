@@ -5,7 +5,7 @@ import * as pulumi from '@pulumi/pulumi';
 interface ServiceProps {
     serviceName: string;
     deployment: kx.Deployment;
-    args: types.ServiceSpec;
+    args: kx.types.ServiceSpec;
 }
 
 

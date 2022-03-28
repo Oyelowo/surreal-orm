@@ -1,10 +1,8 @@
-import { argocdNamespaceName } from "./../shared/namespaces";
 import * as k8s from "@pulumi/kubernetes";
-
 import { clusterSetupProvider, providerApplication } from "../shared/cluster";
-import { devNamespaceName } from "../shared/namespaces";
-import { ArgocdHelmValuesBitnami } from "../shared/argocdHelmValuesBitnami";
-import { DeepPartial, RecursivePartial } from "../shared/types";
+import { namespaceNames } from "../shared/namespaces";
+import { ArgocdHelmValuesBitnami } from "../shared/types/helm-charts/argocdHelmValuesBitnami";
+import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
 
 const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
   // fullnameOverride: "argocd",
@@ -32,7 +30,7 @@ export const argocd = new k8s.helm.v3.Chart(
     },
     version: "2.0.4",
     values: argocdValues,
-    namespace: argocdNamespaceName,
+    namespace: namespaceNames.argocd,
     // namespace: devNamespaceName,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being

@@ -1,9 +1,9 @@
 import * as k8s from "@pulumi/kubernetes";
 
 import { providerApplication } from "../shared/cluster";
-import { devNamespaceName } from "../shared/namespaces";
+import { applicationsNamespaceName } from "../shared/namespaces";
 import { RedisHelmValuesBitnami } from "../shared/redisHelmValuesBitnami";
-import { DeepPartial } from "../shared/types";
+import { DeepPartial } from "../shared/types/own-types";
 
 // const { envVars } = graphqlMongoSettings;
 
@@ -46,7 +46,7 @@ export const graphqlMongoRedis = new k8s.helm.v3.Chart(
     },
     version: "16.4.5",
     values: redisValues,
-    namespace: devNamespaceName,
+    namespace: applicationsNamespaceName,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being
     // available.

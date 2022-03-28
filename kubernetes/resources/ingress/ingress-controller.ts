@@ -6,10 +6,10 @@ import { graphqlMongoSettings } from "../graphql-mongo/settings";
 import { graphqlPostgresSettings } from "../graphql-postgres/settings";
 import { reactWebSettings } from "../react-web/settings";
 import { providerApplication } from "../shared/cluster";
-import { IngressControllerValuesBitnami } from "../shared/ingressControllerValuesBitnami";
-import { devNamespace, devNamespaceName } from "../shared/namespaces";
-import { NginxConfiguration } from "../shared/nginxConfigurations";
-import { RecursivePartial } from "../shared/types";
+import { IngressControllerValuesBitnami } from "../shared/types/helm-charts/ingressControllerValuesBitnami";
+import { applicationsNamespace, namespaceNames } from "../shared/namespaces";
+import { NginxConfiguration } from "../shared/types/nginxConfigurations";
+import { RecursivePartial } from "../shared/types/own-types";
 
 // Install the NGINX ingress controller to our cluster. The controller
 // consists of a Pod and a Service. Install it and configure the controller
@@ -73,7 +73,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
   {
     metadata: {
       name: "nginx-ingress",
-      namespace: devNamespaceName,
+      namespace: namespaceNames.applications,
       annotations: annotations as any,
     },
     spec: {
@@ -82,6 +82,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
         {
           // Replace this with your own domain!
           // host: "myservicea.foo.org",
+          // TODO: Change to proper domain name for prod and other environments in case of necessity
           host: "localhost",
           http: {
             paths: [

@@ -1,8 +1,8 @@
 import * as kx from "@pulumi/kubernetesx";
 import * as pulumi from "@pulumi/pulumi";
 
-import { NoUnion } from "../shared/types";
-import { AppConfigs, AppName, DBType, NamespaceOfApps } from "./types";
+import { NoUnion } from "./types/own-types";
+import { AppConfigs, AppName, DBType, NamespaceOfApps } from "./types/own-types";
 
 export class ServiceDeployment<
   AN extends AppName,

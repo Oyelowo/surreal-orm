@@ -1,9 +1,11 @@
-import { AppConfigs } from "../shared/types";
+import { namespaceNames } from "../shared/namespaces";
+import { AppConfigs } from "../shared/types/own-types";
+import { environmentVariables } from "../shared/validations";
 
 export const reactWebSettings: AppConfigs<
   "react-web",
   "doesNotHaveDb",
-  "development"
+  "applications"
 > = {
   kubeConfig: {
     requestMemory: "70Mi",
@@ -12,7 +14,7 @@ export const reactWebSettings: AppConfigs<
     limitCpu: "100m",
     replicaCount: 2,
     host: "0.0.0.0",
-    image: "oyelowo/react-web" + ":" + process.env.WEB_IMAGE_WITH_TAG! as any ?? "",
+    image: `ghcr.io/oyelowo/react-web:${environmentVariables.TAG_REACT_WEB}`,
   },
 
   envVars: {
@@ -28,6 +30,6 @@ export const reactWebSettings: AppConfigs<
   },
   metadata: {
     name: "react-web",
-    namespace: "development",
+    namespace: namespaceNames.applications,
   },
 };

@@ -1,6 +1,7 @@
-export type Environemt = "local" | "development" | "staging" | "production";
+import { NamespaceName } from './../namespaces';
+export type Environment = "local" | "development" | "staging" | "production";
 // This might change but make it the environment for now.
-export type NamespaceOfApps = Environemt;
+export type NamespaceOfApps = NamespaceName;
 
 export type Memory = `${number}${
   | "E"
@@ -42,14 +43,6 @@ export type RecursivePartial<T> = {
     ? RecursivePartial<T[P]>
     : T[P];
 };
-
-import * as z from "zod";
-export const NODE_ENVIRONMENT_VARS = z.object({
-  // TAG_REACT_WEB: z.string().nonempty().or(z.undefined()),
-  TAG_REACT_WEB: z.string().nonempty(),
-  TAG_GRAPHQL_MONGO: z.string().nonempty(),
-  TAG_GRAPHQL_POSTGRES: z.string().nonempty(),
-});
 
 // make all properties optional recursively including nested objects.
 // keep in mind that this should be used on json / plain objects only.
@@ -102,7 +95,7 @@ type DatabaseEnvVars<
   | { dbType: DoesNotHaveDb };
 
 export type AppEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
-  APP_ENVIRONMENT: Environemt;
+  APP_ENVIRONMENT: Environment;
   APP_HOST: "0.0.0.0";
   APP_PORT: "8000" | "50051" | "3000";
   GITHUB_CLIENT_ID?: string;
@@ -114,9 +107,9 @@ export type AppEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
 
 type EnvironmentVariables<
   AN extends AppName,
-  ENV extends Environemt,
+  NS extends NamespaceOfApps,
   DBT extends DBType
-> = Extract<AppEnvVars<AN, ENV>, { dbType: DBT }>;
+> = Extract<AppEnvVars<AN, NS>, { dbType: DBT }>;
 
 export type AppConfigs<
   AN extends AppName,

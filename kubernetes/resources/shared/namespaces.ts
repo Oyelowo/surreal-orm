@@ -9,35 +9,47 @@ import {
 } from "./cluster";
 
 // export const devNamespaceName = devNamespace.metadata.name as unknown as string;
-export const devNamespaceName = "development";
-export const devNamespace = new Namespace(
-  devNamespaceName,
-  {
-    metadata: { name: `${devNamespaceName}`, namespace: devNamespaceName },
-  },
-  { provider: providerNameSpacesProvider }
-);
+export const namespaceNames = {
+  applications: "applications",
+  argocd: "argocd",
+  clusterSetup: "cluster-setup",
+  // Comes with the deployment
+  kubeSystem: "kube-system",
+} as const;
 
-export const argocdNamespaceName = "argocd";
-export const argocdNamespace = new Namespace(
-  argocdNamespaceName,
+type Keys = keyof typeof namespaceNames;
+export type NamespaceName = typeof namespaceNames[Keys];
+
+export const applicationsNamespace = new Namespace(
+  namespaceNames.applications,
   {
     metadata: {
-      name: `${argocdNamespaceName}`,
-      namespace: argocdNamespaceName,
+      name: `${namespaceNames.applications}`,
+      namespace: namespaceNames.applications,
     },
   },
   { provider: providerNameSpacesProvider }
 );
 
-export const clusterSetupNamespaceName = "clusterSetup";
-export const clusterSetupNamespace = new Namespace(
-  clusterSetupNamespaceName,
+export const argocdNamespace = new Namespace(
+  namespaceNames.argocd,
   {
     metadata: {
-      name: `${clusterSetupNamespaceName}`,
-      // namespace: clusterSetupNamespaceName,
+      name: `${namespaceNames.argocd}`,
+      namespace: namespaceNames.argocd,
+    },
+  },
+  { provider: providerNameSpacesProvider }
+);
+
+export const clusterSetupNamespace = new Namespace(
+  namespaceNames.clusterSetup,
+  {
+    metadata: {
+      name: `${namespaceNames.clusterSetup}`,
+      namespace: namespaceNames.clusterSetup,
     },
   },
   { provider: clusterSetupProvider }
 );
+clusterSetupNamespace.metadata.name

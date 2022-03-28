@@ -1,9 +1,11 @@
-import { AppConfigs } from '../shared/types';
+import { namespaceNames } from './../shared/namespaces';
+import { environmentVariables } from './../shared/validations';
+import { AppConfigs } from '../shared/types/own-types';
 
 export const graphqlPostgresSettings: AppConfigs<
   "graphql-postgres",
   "postgresdb",
-  "development"
+  "applications"
 > = {
   kubeConfig: {
     requestMemory: "70Mi",
@@ -12,7 +14,7 @@ export const graphqlPostgresSettings: AppConfigs<
     limitCpu: "100m",
     replicaCount: 3,
     host: "0.0.0.0",
-    image: "oyelowo/graphql-postgres",
+    image: `ghcr.io/oyelowo/graphql-postgres:${environmentVariables.TAG_GRAPHQL_POSTGRES}`,
   },
 
   envVars: {
@@ -23,12 +25,12 @@ export const graphqlPostgresSettings: AppConfigs<
     POSTGRES_NAME: "graphql-postgres-database",
     POSTGRES_USERNAME: "postgres",
     POSTGRES_PASSWORD: "1234",
-    POSTGRES_HOST: "graphql-postgres-database.development", // the name of the postgres service being connected to. The name has suffices(primary|read etc) if using replcated architecture
+    POSTGRES_HOST: "graphql-postgres-database.applications", // the name of the postgres service being connected to. The name has suffices(primary|read etc) if using replcated architecture
     POSTGRES_PORT: "5432",
     POSTGRES_SERVICE_NAME: "graphql-postgres-database",
   },
   metadata: {
     name: "graphql-postgres",
-    namespace: "development",
+    namespace: namespaceNames.applications,
   },
 };

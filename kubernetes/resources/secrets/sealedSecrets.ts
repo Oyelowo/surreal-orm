@@ -1,9 +1,9 @@
 import * as k8s from "@pulumi/kubernetes";
 
 import { clusterSetupProvider, providerApplication } from "../shared/cluster";
-import { devNamespaceName } from "../shared/namespaces";
+import {  namespaceNames } from "../shared/namespaces";
 import { SealedSecretsHelmValuesBitnami } from "../shared/sealedSecretsHelmValuesBitnami";
-import { DeepPartial, RecursivePartial } from "../shared/types";
+import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
 
 const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {
   // nameOverride: "mongodb-graphql",
@@ -26,7 +26,7 @@ export const sealedSecret = new k8s.helm.v3.Chart(
     },
     version: "2.1.4",
     values: sealedSecretsValues,
-    namespace: "kube-system",
+    namespace: namespaceNames.kubeSystem,
     // namespace: devNamespaceName,
     // By default Release resource will wait till all created resources
     // are available. Set this to true to skip waiting on resources being

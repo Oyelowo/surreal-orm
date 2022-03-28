@@ -1,9 +1,11 @@
-import { AppConfigs } from "../shared/types";
+import { namespaceNames } from './../shared/namespaces';
+import { environmentVariables } from "../shared/validations";
+import { AppConfigs } from "./../shared/types/own-types";
 
 export const grpcMongoSettings: AppConfigs<
   "grpc-mongo",
   "mongodb",
-  "development"
+  "applications"
 > = {
   kubeConfig: {
     requestMemory: "70Mi",
@@ -12,7 +14,7 @@ export const grpcMongoSettings: AppConfigs<
     limitCpu: "100m",
     replicaCount: 3,
     host: "0.0.0.0",
-    image: "oyelowo/grpc-mongo",
+    image: `ghcr.io/oyelowo/grpc-mongo:${environmentVariables.TAG_GRPC_MONGO}`,
   },
 
   envVars: {
@@ -22,7 +24,7 @@ export const grpcMongoSettings: AppConfigs<
     MONGODB_NAME: "grpc-mongo-database",
     MONGODB_USERNAME: "username0",
     MONGODB_PASSWORD: "password0",
-    MONGODB_HOST: "grpc-mongo-database.development",
+    MONGODB_HOST: "grpc-mongo-database.applications",
     MONGODB_SERVICE_NAME: "grpc-mongo-database",
     // hostAndPort":"grpc-mongo-0.mongo-graphql.development.svc.cluster.local:27017
     // MONGODB_HOST: "grpc-mongod-0.grpc-mongod-headless.development.svc.cluster.local",
@@ -32,6 +34,6 @@ export const grpcMongoSettings: AppConfigs<
   },
   metadata: {
     name: "grpc-mongo",
-    namespace: "development",
+    namespace: namespaceNames.applications,
   },
 };
