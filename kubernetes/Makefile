@@ -20,10 +20,10 @@ generate_local:
 	pulumi login file://login 
 	export PULUMI_CONFIG_PASSPHRASE="" && pulumi stack init --stack dev
 	# pulumi destroy --stack dev  --yes --skip-preview
-	export TAG_REACT_WEB="local" && \
-	export TAG_GRAPHQL_MONGO="local" && \
-	export TAG_GRPC_MONGO="local" && \
-	export TAG_GRAPHQL_POSTGRES="local" && \
+	export IMAGE_TAG_REACT_WEB="local" && \
+	export IMAGE_TAG_GRAPHQL_MONGO="local" && \
+	export IMAGE_TAG_GRPC_MONGO="local" && \
+	export IMAGE_TAG_GRAPHQL_POSTGRES="local" && \
 	export ENVIRONMENT="development" && \
 	export PULUMI_CONFIG_PASSPHRASE="" && \
 	pulumi update --yes --skip-preview --stack dev
