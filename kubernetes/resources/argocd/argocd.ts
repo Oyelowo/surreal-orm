@@ -1,5 +1,5 @@
 import * as k8s from "@pulumi/kubernetes";
-import { clusterSetupProvider, providerApplication } from "../shared/cluster";
+import { argoCDProvider } from "../shared/cluster";
 import { namespaceNames } from "../shared/namespaces";
 import { ArgocdHelmValuesBitnami } from "../shared/types/helm-charts/argocdHelmValuesBitnami";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
@@ -37,6 +37,6 @@ export const argocd = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: clusterSetupProvider }
+  { provider: argoCDProvider }
   // { provider }
 );

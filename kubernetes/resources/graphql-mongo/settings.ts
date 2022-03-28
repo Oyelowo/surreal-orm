@@ -23,14 +23,13 @@ export const graphqlMongoSettings: AppConfigs<
     APP_PORT: "8000",
 
     MONGODB_NAME: "graphql-mongo-database",
-    MONGODB_USERNAME: "username0",
+    MONGODB_USERNAME: "usernarme0",
     MONGODB_PASSWORD: "password0",
     MONGODB_HOST: "graphql-mongo-database.applications",
     MONGODB_SERVICE_NAME: "graphql-mongo-database",
     // hostAndPort":"graphql-mongo-0.mongo-graphql.development.svc.cluster.local:27017
     // MONGODB_HOST: "graphql-mongod-0.graphql-mongod-headless.development.svc.cluster.local",
     // const url = 'mongodb://username1:$[password]@mongo-graphql.development:27017/db1?authSource=$[authSource]';
-
     MONGODB_PORT: "27017",
   },
   metadata: {

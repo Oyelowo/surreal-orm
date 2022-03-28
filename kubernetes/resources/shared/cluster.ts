@@ -27,6 +27,12 @@ export const providerApplication = new k8s.Provider("render-yaml", {
   // namespace: "nana",
 });
 
+export const providerSecrets = new k8s.Provider("render-yaml-secrets", {
+  renderYamlToDirectory: `rendered/secrets`,
+  // renderYamlToDirectory: `rendered/${nameSpaceName}`,
+  // namespace: "nana",
+});
+
 export const providerNameSpacesProvider = new k8s.Provider("render-yaml2", {
   renderYamlToDirectory: `rendered/namespaces`,
   // namespace: "nana",
@@ -34,6 +40,11 @@ export const providerNameSpacesProvider = new k8s.Provider("render-yaml2", {
 
 export const clusterSetupProvider = new k8s.Provider("cluster-setup", {
   renderYamlToDirectory: `rendered/cluster-setup`,
+  // namespace: "nana",
+});
+
+export const argoCDProvider = new k8s.Provider("cluster-setup", {
+  renderYamlToDirectory: `rendered/argocd`,
   // namespace: "nana",
 });
 

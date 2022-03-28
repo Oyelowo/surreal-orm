@@ -1,15 +1,81 @@
+import { AppName } from "./types/own-types";
 
-import * as kx from '@pulumi/kubernetesx';
-import * as pulumi from '@pulumi/pulumi';
+import * as kx from "@pulumi/kubernetesx";
+import * as pulumi from "@pulumi/pulumi";
+import { RawJSON } from "@pulumi/pulumi/automation";
+import secretsJonFile from "./secrets-dont-push.json";
 
+import * as z from "zod";
+
+const secretsSchema = z.object({
+  "graphql-mongo": z.object({
+    MONGODB_USERNAME: z.string().nonempty(),
+    MONGODB_PASSWORD: z.string().nonempty(),
+    REDIS_USERNAME: z.string().nonempty(),
+    REDIS_PASSWORD: z.string().nonempty(),
+  }),
+  "grpc-mongo": z.object({
+    MONGODB_USERNAME: z.string().nonempty(),
+    MONGODB_PASSWORD: z.string().nonempty(),
+  }),
+  "graphql-postgres": z.object({
+    POSTGRES_USERNAME: z.string().nonempty(),
+    POSTGRES_PASSWORD: z.string().nonempty(),
+  }),
+  "react-web": z.object({}),
+});
+
+export const secretsJsonToBase64 = z
+  .function()
+  .args(secretsSchema)
+  .returns(secretsSchema)
+  .strictImplement((json) => {
+    const parsedSecrets = secretsSchema.parse(json);
+    const entries = Object.entries(parsedSecrets).map(([appName, appEnvVars]) => {
+      const appObjectToArraysEncodedValues = Object.entries(appEnvVars).map(
+        ([secretName, secretValue]) => [
+          secretName,
+          Buffer.from(secretValue).toString("base64"),
+        ]
+      );
+
+      return [appName, Object.fromEntries(appObjectToArraysEncodedValues)];
+      // Turn it back into an object
+    });
+
+    return Object.fromEntries(entries);
+  });
+// function getSecretForApp(appName: keyof z.infer<typeof secretsSchema>) {
+export function getSecretForApp<T extends AppName>(
+  appName: AppName
+): z.infer<typeof secretsSchema>[T] {
+  return secretsJsonToBase64(secretsJonFile)[appName] as z.infer<
+    typeof secretsSchema
+  >[T];
+}
+
+// const base64data = btoa("someText");
+// export function secretsJsonToBase642(json: RawJSON) {
+//   const parsedSecrets = secretsSchema.parse(json);
+
+//   const entries = Object.entries(parsedSecrets).map(([key, value]) => [
+//     key,
+//     btoa(value),
+//   ]);
+//   return Object.fromEntries(entries);
+// }
 interface ServiceProps {
-    serviceName: string;
-    deployment: kx.Deployment;
-    args: kx.types.ServiceSpec;
+  serviceName: string;
+  deployment: kx.Deployment;
+  args: kx.types.ServiceSpec;
 }
 
 // NOT USED FOR NOW. I went with directly patching the package instead. Keep for future purpose/reference
-export function generateService({ serviceName, deployment, args = {} }: ServiceProps): kx.Service{
+export function generateService({
+  serviceName,
+  deployment,
+  args = {},
+}: ServiceProps): kx.Service {
   const serviceSpec = pulumi
     .all([deployment.spec.template.spec.containers, args])
     .apply(([containers, args]) => {
@@ -62,7 +128,7 @@ export function generateService({ serviceName, deployment, args = {} }: ServiceP
 //         type: args && args.type,
 //       });
 //     });
-    
+
 //   return new kx.Service(
 //     serviceName,
 //     {
@@ -73,9 +139,7 @@ export function generateService({ serviceName, deployment, args = {} }: ServiceP
 //   );
 // }
 
-
 // // class WrappedDeployment extends kx.Deployment {
-
 
 // //     createService(args?: types.ServiceSpec): kx.Service {
 // //           const serviceSpec = pulumi

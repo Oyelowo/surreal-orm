@@ -1,5 +1,6 @@
 import * as z from "zod";
 
+// TODO: Move this into helpers
 const environmentVariablesValidator = z.object({
   // TAG_REACT_WEB: z.string().nonempty().or(z.undefined()),
   // This is provided fro, within the CI pipeline where the manifests are generated and pushed to the repo

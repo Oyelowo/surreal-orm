@@ -1,8 +1,21 @@
 import * as kx from "@pulumi/kubernetesx";
 import * as pulumi from "@pulumi/pulumi";
-
+import { getSecretForApp } from "./helpers";
 import { NoUnion } from "./types/own-types";
-import { AppConfigs, AppName, DBType, NamespaceOfApps } from "./types/own-types";
+import {
+  AppConfigs,
+  AppName,
+  DBType,
+  NamespaceOfApps,
+} from "./types/own-types";
+
+import * as z from "zod";
+const secretsSchema = z.object({
+  USERNAME: z.string().nonempty(),
+  PASSWORD: z.string().nonempty(),
+});
+
+type MySecret = z.infer<typeof secretsSchema>;
 
 export class ServiceDeployment<
   AN extends AppName,
@@ -14,6 +27,8 @@ export class ServiceDeployment<
   public readonly secret: kx.Secret;
   public readonly service: kx.Service;
   public readonly ipAddress?: pulumi.Output<string>;
+  public readonly secretProvider?: pulumi.ProviderResource;
+  public readonly appName: AN;
 
   constructor(
     name: NoUnion<AN>,
@@ -22,7 +37,7 @@ export class ServiceDeployment<
   ) {
     super("k8sjs:service:ServiceDeployment", name, {}, opts);
     const provider = opts?.provider;
-
+    this.appName = name;
     const { envVars, kubeConfig, metadata } = args;
     const resourceName = metadata.name;
 
@@ -35,16 +50,18 @@ export class ServiceDeployment<
       { provider, parent: this }
     );
 
+    const secrets = getSecretForApp<AN>(this.appName);
     // Create a Kubernetes Secret.
     this.secret = new kx.Secret(
       `${resourceName}-secret`,
       {
         stringData: {
-          password: "fakepassword",
+          // password: "fakepassword",
+          ...secrets,
         },
         metadata,
       },
-      { provider, parent: this }
+      { provider: this.secretProvider, parent: this }
     );
 
     // Define a Pod.
@@ -53,9 +70,10 @@ export class ServiceDeployment<
       containers: [
         {
           env: {
-            CONFIG: this.configMaps.asEnvValue("config"),
-            PASSWORD: this.secret.asEnvValue("password"),
+            // CONFIG: this.configMaps.asEnvValue("config"),
+            // PASSWORD: this.secret.asEnvValue("password"),
             ...envVars,
+            ...this.#secretsObjectToEnv(this.secret),
           },
           image: kubeConfig.image,
           ports: { http: Number(envVars.APP_PORT) },
@@ -105,4 +123,16 @@ export class ServiceDeployment<
       this.ipAddress = this.service.spec.clusterIP;
     }
   }
+
+  /** 
+     Maps secret object to what kx can understand to produce secretRef automagically
+   */
+  #secretsObjectToEnv = (secretInstance: kx.Secret) => {
+    const secretObject = getSecretForApp(this.appName);
+    const keyValueEntries = Object.keys(secretObject).map((key) => [
+      key,
+      secretInstance.asEnvValue(key),
+    ]);
+    return Object.fromEntries(keyValueEntries);
+  };
 }

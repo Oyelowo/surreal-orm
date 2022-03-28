@@ -1,11 +1,11 @@
-import { provider } from '../shared/cluster';
+import { providerApplication } from '../shared/cluster';
 import { ServiceDeployment } from '../shared/deployment';
 import { graphqlPostgresSettings } from './settings';
 
 export const graphqlPostgres = new ServiceDeployment(
   "graphql-postgres",
   graphqlPostgresSettings,
-  { provider }
+  { provider: providerApplication }
 );
 
 // export * from "./postgresHAdb";
