@@ -19,7 +19,7 @@ impl<T> Deref for Shared<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        &*self.0.as_deref().clone().unwrap()
+        &*self.0.as_deref().unwrap()
     }
 }
 

@@ -4,7 +4,7 @@ use actix_web::{
     cookie::{self, time::Duration, Key},
     http,
     middleware::Logger,
-    web::{self, scope},
+    web,
     App, HttpServer,
 };
 

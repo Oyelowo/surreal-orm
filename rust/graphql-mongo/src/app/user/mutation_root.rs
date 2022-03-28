@@ -1,19 +1,16 @@
 use anyhow::Context as ContextAnyhow;
 use common::authentication::{
-    self,
     password::{generate_password_hash, validate_password, PasswordHashPHC, PasswordPlain},
     session_state::TypedSession,
 };
 
 use crate::app::error::ResolverError;
 
-use super::{AccountOauth, ProfileOauth, Role, SignInCredentials, SignOutMessage, User};
+use super::{AccountOauth, Role, SignInCredentials, SignOutMessage, User};
 use async_graphql::*;
 use chrono::Utc;
 
 use mongodb::Database;
-use serde::{Deserialize, Serialize};
-use typed_builder::TypedBuilder;
 use validator::Validate;
 use wither::Model;
 

@@ -108,7 +108,7 @@ impl RedisConfigs {
         // let Self { host, port, .. } = self;
         // Url::parse(format!("http://{host}:{port}").as_ref()).expect("Problem parsing application uri")
         // format!("{host}:{port}")
-        format!("redis-database-master.development:6379")
+        "redis-database-master.development:6379".into()
     }
 }
 

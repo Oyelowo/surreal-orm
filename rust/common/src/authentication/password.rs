@@ -32,9 +32,9 @@ impl PasswordHashPHC {
     }
 }
 
-impl Into<String> for PasswordHashPHC {
-    fn into(self) -> String {
-        self.as_str().into()
+impl From<PasswordHashPHC> for String {
+    fn from(password_phc: PasswordHashPHC) -> Self {
+       password_phc.0.expose_secret().into()
     }
 }
 
@@ -69,9 +69,7 @@ pub async fn generate_password_hash(
     Ok(password_hash)
 }
 
-fn create_password_hash<'a>(
-    password: PasswordPlain,
-) -> anyhow::Result<PasswordHashPHC, PasswordError> {
+fn create_password_hash(password: PasswordPlain) -> anyhow::Result<PasswordHashPHC, PasswordError> {
     let salt = SaltString::generate(&mut rand::thread_rng());
 
     let params = Params::new(15000, 2, 1, None).context("Error building Argon2 parameters")?;

@@ -188,9 +188,9 @@ impl Guard for RoleGuard {
 }
 
 impl RoleGuard {
-    fn new(role: Role) -> Self {
-        Self { role }
-    }
+    // fn new(role: Role) -> Self {
+    //     Self { role }
+    // }
 }
 
 pub struct AuthGuard;
@@ -221,17 +221,17 @@ impl User {
         let user_id = session
             .get_user_object_id()
             .map_err(|_| ResolverError::NotFound.extend())?
-            .ok_or(ResolverError::NotFound.extend())?;
+            .ok_or_else(|| ResolverError::NotFound.extend())?;
 
         let user = Self::find_by_id(db, &user_id).await;
         user
     }
-    pub fn and_has_role(&self, scope: Role) -> FieldResult<&Self> {
-        if !self.roles.contains(&scope) {
-            return Err(ResolverError::Unauthorized.extend());
-        }
-        Ok(self)
-    }
+    // pub fn and_has_role(&self, scope: Role) -> FieldResult<&Self> {
+    //     if !self.roles.contains(&scope) {
+    //         return Err(ResolverError::Unauthorized.extend());
+    //     }
+    //     Ok(self)
+    // }
 
     // pub fn from_ctx<'a>(ctx: &'a Context) -> FieldResult<&'a Self> {
     //     ctx.data::<User>()
@@ -240,26 +240,26 @@ impl User {
 
     //TODO: Better error handling
     pub async fn find_by_id(db: &Database, id: &ObjectId) -> FieldResult<Self> {
-        User::find_one(&db, doc! { "_id": id }, None)
+        User::find_one(db, doc! { "_id": id }, None)
             .await?
             .context("Failed to find user")
             .map_err(|_e| ResolverError::NotFound.extend())
     }
 
     pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Option<Self> {
-        User::find_one(&db, doc! { "username": username.into() }, None)
+        User::find_one(db, doc! { "username": username.into() }, None)
             .await
             .expect("Failed to find user by username")
     }
-    pub async fn find_by_account_oauth(
-        db: &Database,
-        provider: impl Into<String>,
-        provider_account_id: impl Into<String>,
-    ) -> Option<Self> {
-        User::find_one(&db, doc! { "accounts": {"$elemMatch": {"provider": provider.into(), "providerAccountId": provider_account_id.into()}} }, None)
-            .await
-            .expect("Failed to find user by username")
-    }
+    // pub async fn find_by_account_oauth(
+    //     db: &Database,
+    //     provider: impl Into<String>,
+    //     provider_account_id: impl Into<String>,
+    // ) -> Option<Self> {
+    //     User::find_one(db, doc! { "accounts": {"$elemMatch": {"provider": provider.into(), "providerAccountId": provider_account_id.into()}} }, None)
+    //         .await
+    //         .expect("Failed to find user by username")
+    // }
 
     pub async fn find_or_replace_account_oauth(
         mut self,

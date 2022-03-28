@@ -1,11 +1,11 @@
 use actix_redis::SameSite;
 use actix_web::cookie::{
-    time::{macros::offset, Date, Duration, OffsetDateTime},
+    time::{Duration, OffsetDateTime},
     Cookie,
 };
 
 fn main() {
-    let datetime = Date::MAX.midnight();
+    // let datetime = Date::MAX.midnight();
 
     let cookie = Cookie::build("user_id", "1234555")
         .domain("www.oyelowo.com")

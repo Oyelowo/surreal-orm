@@ -21,8 +21,8 @@ pub enum ResolverError {
     #[error("ServerError")]
     ServerError(String),
 
-    #[error("No Extensions")]
-    ErrorWithoutExtensions,
+    // #[error("No Extensions")]
+    // ErrorWithoutExtensions,
 }
 
 impl ErrorExtensions for ResolverError {
@@ -35,7 +35,7 @@ impl ErrorExtensions for ResolverError {
             ResolverError::Forbidden => e.set("code", "401"),
             ResolverError::BadRequest => e.set("code", "400: BAD_REQUEST"),
             ResolverError::ServerError(reason) => e.set("reason", reason.to_string()),
-            ResolverError::ErrorWithoutExtensions => {}
+            // ResolverError::ErrorWithoutExtensions => {}
         })
     }
 }

@@ -1,10 +1,6 @@
-use anyhow::Context;
-use argon2::{Algorithm, Argon2, Params, PasswordHash, PasswordVerifier, Version};
 use common::authentication::password::{generate_password_hash, validate_password, PasswordPlain};
-use secrecy::{ExposeSecret, Secret};
-use thiserror;
-use tracing;
-use tracing_subscriber;
+// use tracing;
+// use tracing_subscriber;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

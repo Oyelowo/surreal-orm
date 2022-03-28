@@ -1,7 +1,7 @@
 use anyhow::Result;
 use app_analytics::{
     app_analytics_client::AppAnalyticsClient, CreateUserAppEventRequest,
-    GetAllUserAppEventsRequest, GetUserAppEventRequest,
+    GetAllUserAppEventsRequest,
 };
 
 pub mod app_analytics {

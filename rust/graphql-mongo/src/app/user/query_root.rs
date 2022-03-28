@@ -30,7 +30,7 @@ impl UserQueryRoot {
         let user = User::find_one(db, doc! {"_id": id}, find_one_options)
             .await?
             .context("User not found")
-            .map_err(|e| ResolverError::NotFound.extend());
+            .map_err(|_| ResolverError::NotFound.extend());
 
         user
     }
@@ -90,8 +90,8 @@ impl UserQueryRoot {
         Ok(Session {
             expires_in: "uid".to_string(),
             user: SessionUser {
-                name: username.into(),
-                email: email.into(),
+                name: username,
+                email,
                 image: "imageurl.com".into(),
             },
         })
