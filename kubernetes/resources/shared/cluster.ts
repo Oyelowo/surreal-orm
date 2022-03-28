@@ -1,6 +1,6 @@
-import * as k8s from '@pulumi/kubernetes';
-import { Namespace } from '@pulumi/kubernetes/core/v1';
-import * as kx from '@pulumi/kubernetesx';
+import * as k8s from "@pulumi/kubernetes";
+import { Namespace } from "@pulumi/kubernetes/core/v1";
+import * as kx from "@pulumi/kubernetesx";
 
 // import { devNamespace } from "./namespaces";
 
@@ -15,36 +15,36 @@ const nameSpaceName = environment;
 //  I am first putting all resources in a single cluster and allocating resources and envronment based on namespace rather than cluster.
 // i.e  type Namespace = "development" | "staging" | "production". And only a single cluster.
 
-// If need be, in the future, we can have three providers(clusters): 
+// If need be, in the future, we can have three providers(clusters):
 // type Cluster = "development" | "staging" | "production".
-// while namespace can then be used for categorising resources based on logical grouping or team allocation. e.g 
+// while namespace can then be used for categorising resources based on logical grouping or team allocation. e.g
 // type Namespace = "team-a" | "workers" | "web" | "jobs"
 
-
+const rootDirectory = "manifests/generated";
 export const providerApplication = new k8s.Provider("render-yaml", {
-  renderYamlToDirectory: `rendered/applications`,
-  // renderYamlToDirectory: `rendered/${nameSpaceName}`,
+  renderYamlToDirectory: `${rootDirectory}/applications`,
+  // renderYamlToDirectory: `${rootDirectory}/${nameSpaceName}`,
   // namespace: "nana",
 });
 
 export const providerSecrets = new k8s.Provider("render-yaml-secrets", {
-  renderYamlToDirectory: `rendered/secrets`,
-  // renderYamlToDirectory: `rendered/${nameSpaceName}`,
+  renderYamlToDirectory: `${rootDirectory}/secrets`,
+  // renderYamlToDirectory: `${rootDirectory}/${nameSpaceName}`,
   // namespace: "nana",
 });
 
 export const providerNameSpacesProvider = new k8s.Provider("render-yaml2", {
-  renderYamlToDirectory: `rendered/namespaces`,
+  renderYamlToDirectory: `${rootDirectory}/namespaces`,
   // namespace: "nana",
 });
 
 export const clusterSetupProvider = new k8s.Provider("cluster-setup", {
-  renderYamlToDirectory: `rendered/cluster-setup`,
+  renderYamlToDirectory: `${rootDirectory}/cluster-setup`,
   // namespace: "nana",
 });
 
-export const argoCDProvider = new k8s.Provider("cluster-setup", {
-  renderYamlToDirectory: `rendered/argocd`,
+export const argoCDProvider = new k8s.Provider("render-argocd", {
+  renderYamlToDirectory: `${rootDirectory}/argocd`,
   // namespace: "nana",
 });
 

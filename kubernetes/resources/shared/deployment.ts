@@ -56,7 +56,7 @@ export class ServiceDeployment<
       `${resourceName}-secret`,
       {
         stringData: {
-          // password: "fakepassword",
+             password: "fakepassword",
           ...secrets,
         },
         metadata,
