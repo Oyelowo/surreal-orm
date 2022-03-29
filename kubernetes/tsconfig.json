@@ -3,7 +3,7 @@
         "strict": true,
         "outDir": "bin",
         "target": "es2016",
-        "lib": ["ES2021"],
+        "lib": ["ESNext"],
         "module": "commonjs",
         "moduleResolution": "node",
         "sourceMap": true,
@@ -20,6 +20,6 @@
         ]
     },
     "files": [
-        "index.ts"
+        "index.ts", "./secretsManagement/secretsSample.ts"
     ]
 }

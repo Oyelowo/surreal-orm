@@ -1,31 +1,47 @@
 import * as z from "zod";
 
-// interface Secrets {
-//   "graphql-mongo": {
-//     MONGODB_USERNAME: string;
-//     MONGODB_PASSWORD: string;
-//     REDIS_USERNAME: string;
-//     REDIS_PASSWORD: string;
-//   };
-//   "grpc-mongo": {
-//     MONGODB_USERNAME: string;
-//     MONGODB_PASSWORD: string;
-//   };
-//   "graphql-postgres": {
-//     POSTGRES_USERNAME: string;
-//     POSTGRES_PASSWORD: string;
-//   };
-//   "react-web": {
-//     GITHUB_ID: string;
-//     GITHUB_SECRET: string;
-//     GOOGLE_ID: string;
-//     GOOGLE_SECRET: string;
-//   };
-//   argocd: {
-//     ADMIN_PASSWORD: string;
-//   };
-// }
+export type Secrets = z.infer<typeof secretsSchema>;
 
+import fs from "fs";
+import path from "path";
+import { Environment } from "../resources/shared/types/own-types";
+import { secretsSample } from "./secretsSample";
+
+const ENVIRONMENTS: Environment[] = [
+  "local",
+  "development",
+  "staging",
+  "production",
+];
+const secretType = "Secrets" as const;
+const scriptName = path.basename(__filename).slice(0, -3);
+const SECRET_UNSEALED_DIRECTORY_NAME = "secrets-unsealed" as const;
+const UNSEALED_SECRETS_DIR = `${__dirname}/secrets-unsealed` as const;
+
+type SecretUnseatFilePath = `${typeof UNSEALED_SECRETS_DIR}/${Environment}.ts`;
+
+export function setupUnsealedSecretFiles() {
+  fs.mkdir(UNSEALED_SECRETS_DIR, (err) => {
+    console.info(
+      `Something went wrong creating unsealed secrets directory: Error: ${err}`
+    );
+  });
+  createGitIgnoreFile();
+  ENVIRONMENTS.forEach((env) => {
+    createSecretsConfigFile(env, false);
+  });
+}
+
+export function clearUnsealedSecretFilesContents() {
+  ENVIRONMENTS.forEach((env) => {
+    createSecretsConfigFile(env, true);
+  });
+}
+//
+setupUnsealedSecretFiles();
+// clearSecretFilesContents()
+
+// HELPERS
 const secretsSchema = z.object({
   "graphql-mongo": z.object({
     MONGODB_USERNAME: z.string().nonempty(),
@@ -52,59 +68,10 @@ const secretsSchema = z.object({
   }),
 });
 
-export type Secrets = z.infer<typeof secretsSchema>;
-
-// NOTE: I initially was encoding the secrets in base64 but it turns out
-// that bitnami sealed secrets not only handles encryption but base64 encoding of the
-// secrets before encrypting them
-const secretsSample: Secrets = {
-  "graphql-mongo": {
-    MONGODB_USERNAME: "",
-    MONGODB_PASSWORD: "",
-    REDIS_USERNAME: "",
-    REDIS_PASSWORD: "",
-  },
-  "grpc-mongo": {
-    MONGODB_USERNAME: "",
-    MONGODB_PASSWORD: "",
-  },
-  "graphql-postgres": {
-    POSTGRES_USERNAME: "",
-    POSTGRES_PASSWORD: "",
-  },
-  "react-web": {
-    GITHUB_ID: "",
-    GITHUB_SECRET: "",
-    GOOGLE_ID: "",
-    GOOGLE_SECRET: "",
-  },
-  argocd: {
-    ADMIN_PASSWORD: "",
-  },
-} as const;
-
-import fs from "fs";
-import path from "path";
-import { Environment } from "../resources/shared/types/own-types";
-
-// import { secretsLocalEnvironment } from "./local";
-
-// const filePath = "./local.ts";
-const secretType = "Secrets";
-const scriptName = path.basename(__filename).slice(0, -3);
-
-function getFilePath(
-  environment: Environment
-): `./secrets-unsealed-${Environment}.ts` {
-  return `./secrets-unsealed-${environment}.ts`;
+function getFilePath(environment: Environment): SecretUnseatFilePath {
+  return `${UNSEALED_SECRETS_DIR}/${environment}.ts`;
 }
 
-function getFileName(
-  environment: Environment
-): `secrets-unsealed-${Environment}.ts` {
-  const path = getFilePath(environment);
-  return path.split("/")[1] as `secrets-unsealed-${Environment}.ts`;
-}
 // import chalk from "chalk";
 
 async function createSecretsConfigFile(
@@ -112,8 +79,9 @@ async function createSecretsConfigFile(
   overwrite: boolean
 ) {
   const filePath = getFilePath(environment);
+
   const content = `
-    import {${secretType}} from "./${scriptName}"
+    import {${secretType}} from "../${scriptName}"
      export const SECRET_${environment.toUpperCase()}: ${secretType} = ${JSON.stringify(
     secretsSample
   )};
@@ -130,33 +98,12 @@ async function createSecretsConfigFile(
     );
   });
 }
-const ENVIRONMENTS: Environment[] = [
-  "local",
-  "development",
-  "staging",
-  "production",
-];
 
-function createSecretFiles() {
-  ENVIRONMENTS.forEach((env) => {
-    createSecretsConfigFile(env, false);
-  });
-}
+async function createGitIgnoreFile() {
+  const filePath = `${__dirname}/.gitignore`;
+  const content = SECRET_UNSEALED_DIRECTORY_NAME;
 
-createSecretFiles();
-
-export function clearSecretFilesContents() {
-  ENVIRONMENTS.forEach((env) => {
-    createSecretsConfigFile(env, true);
-  });
-}
-// clearSecretFilesContents()
-
-async function createGitIgnoreFile(filePath: string) {
-  const filePaths = ENVIRONMENTS.map(getFileName);
-  const content = filePaths.map((p) => `${p}\n`).join("");
-
-  fs.writeFile(filePath, content, { flag: "wx" }, async (err) => {
+  fs.writeFile(filePath, content, { flag: "" as "" | "ws" }, async (err) => {
     // if (err) throw err;
     if (err) {
       console.warn("err", err);
@@ -164,13 +111,3 @@ async function createGitIgnoreFile(filePath: string) {
     console.log("It's saved!");
   });
 }
-createGitIgnoreFile(".gitignore");
-
-// const secretRecord: Record<Environment, typeof secretsJonFileExample> = {
-//   production: secretsJonFile,
-//   development: secretsJonFile,
-//   staging: secretsJonFile,
-//   local: secretsJonFileExample,
-// };
-
-// const secretJson = secretRecord[environmentVariables.ENVIRONMENT];

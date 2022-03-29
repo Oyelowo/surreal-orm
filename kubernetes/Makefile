@@ -93,7 +93,7 @@ generate_temporary:
 
 BASEDIR=./manifests/${ENVIRONMENT}
 GENERATED_DIR=${BASEDIR}/generated-temporary
-SECRETS_ENCRYPTED_DIR=${BASEDIR}/secrets-encrypted
+SECRETS_ENCRYPTED_DIR=${BASEDIR}/sealed-secrets
 seal:
 	# Example usage: ENVIRONMENT="production" make seal
 	
@@ -106,6 +106,7 @@ seal:
 	# Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
 	kubectl rollout status deployment/sealed-secrets-controller -n=kube-system
 
+	mkdir -p ${SECRETS_ENCRYPTED_DIR}
 
 	@for FILE in ${GENERATED_DIR}/**/**/secret-*ml; do \
 		kubeseal <$${FILE} -o yaml >${SECRETS_ENCRYPTED_DIR}/$${FILE##*/}; \
