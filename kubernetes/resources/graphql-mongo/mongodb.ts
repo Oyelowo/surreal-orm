@@ -1,7 +1,7 @@
 import { MongodbHelmValuesBitnami } from './../shared/types/helm-charts/MongodbHelmValuesBitnami';
 import * as k8s from "@pulumi/kubernetes";
 
-import { providerApplication } from "../shared/cluster";
+import { applicationsDirectory } from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial } from "../shared/types/own-types";
 import { graphqlMongoSettings } from "./settings";
@@ -116,5 +116,5 @@ export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: providerApplication }
+  { provider: applicationsDirectory }
 );

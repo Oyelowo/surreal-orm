@@ -1,11 +1,11 @@
-import { clusterSetupProvider } from './../shared/cluster';
+import { clusterSetupDirectory } from '../shared/manifestsDirectory';
 import * as k8s from "@pulumi/kubernetes";
 import * as nginx from "@pulumi/kubernetes-ingress-nginx";
 
 import { graphqlMongoSettings } from "../graphql-mongo/settings";
 import { graphqlPostgresSettings } from "../graphql-postgres/settings";
 import { reactWebSettings } from "../react-web/settings";
-import { providerApplication } from "../shared/cluster";
+import { applicationsDirectory } from "../shared/manifestsDirectory";
 import { IngressControllerValuesBitnami } from "../shared/types/helm-charts/ingressControllerValuesBitnami";
 import { applicationsNamespace, namespaceNames } from "../shared/namespaces";
 import { NginxConfiguration } from "../shared/types/nginxConfigurations";
@@ -54,7 +54,7 @@ export const ingressNginx = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: clusterSetupProvider }
+  { provider: clusterSetupDirectory }
   // { provider }
 );
 
@@ -145,7 +145,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
       ],
     },
   },
-  { provider: providerApplication }
+  { provider: applicationsDirectory }
 );
 
 // // export const appStatuses = apps;

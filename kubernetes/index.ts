@@ -1,4 +1,7 @@
 // export * from "./resources/shared/namespaces";
+
+import { clearSecretFilesContents } from "./secretsManagement/setupSecrets";
+
 // export * from "./resources/shared/cluster";
 export * from "./resources/shared";
 
@@ -21,3 +24,8 @@ export * from "./resources/graphql-mongo";
 export * from "./resources/react-web";
 
 // export * from "./resources";
+
+export * from "./secretsManagement/setupSecrets";
+
+// Turn this on if you want secret files values to be empty e.g within ./secretsManagement/secrets-unsealed-development.ts
+// clearSecretFilesContents()

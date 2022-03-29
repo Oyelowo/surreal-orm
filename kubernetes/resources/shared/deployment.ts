@@ -1,6 +1,5 @@
 import * as kx from "@pulumi/kubernetesx";
 import * as pulumi from "@pulumi/pulumi";
-import { getSecretForApp } from "./helpers";
 import { NoUnion } from "./types/own-types";
 import {
   AppConfigs,
@@ -8,6 +7,7 @@ import {
   DBType,
   NamespaceOfApps,
 } from "./types/own-types";
+import { getEnvironmentSecretForApp } from "../../secretsManagement";
 
 import * as z from "zod";
 const secretsSchema = z.object({
@@ -50,13 +50,13 @@ export class ServiceDeployment<
       { provider, parent: this }
     );
 
-    const secrets = getSecretForApp<AN>(this.appName);
+    const secrets = getEnvironmentSecretForApp(this.appName);
     // Create a Kubernetes Secret.
     this.secret = new kx.Secret(
       `${resourceName}-secret`,
       {
         stringData: {
-             password: "fakepassword",
+            //  password: "fakepassword",
           ...secrets,
         },
         metadata,
@@ -128,7 +128,7 @@ export class ServiceDeployment<
      Maps secret object to what kx can understand to produce secretRef automagically
    */
   #secretsObjectToEnv = (secretInstance: kx.Secret) => {
-    const secretObject = getSecretForApp(this.appName);
+    const secretObject = getEnvironmentSecretForApp(this.appName);
     const keyValueEntries = Object.keys(secretObject).map((key) => [
       key,
       secretInstance.asEnvValue(key),

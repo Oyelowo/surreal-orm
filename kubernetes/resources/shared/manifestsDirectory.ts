@@ -23,29 +23,26 @@ const { ENVIRONMENT, TEMPORARY_DIR } = environmentVariables;
 const rootDirectory = `manifests/${ENVIRONMENT}/${
   TEMPORARY_DIR ?? "generated"
 }`;
-export const providerApplication = new k8s.Provider("render-yaml", {
+export const applicationsDirectory = new k8s.Provider("render-applications", {
   renderYamlToDirectory: `${rootDirectory}/applications`,
   // renderYamlToDirectory: `${rootDirectory}/${nameSpaceName}`,
   // namespace: "nana",
 });
 
-export const providerSecrets = new k8s.Provider("render-yaml-secrets", {
-  renderYamlToDirectory: `${rootDirectory}/secrets`,
-  // renderYamlToDirectory: `${rootDirectory}/${nameSpaceName}`,
-  // namespace: "nana",
-});
-
-export const providerNameSpacesProvider = new k8s.Provider("render-yaml2", {
+export const nameSpacesDirectory = new k8s.Provider("render-namespaces", {
   renderYamlToDirectory: `${rootDirectory}/namespaces`,
   // namespace: "nana",
 });
 
-export const clusterSetupProvider = new k8s.Provider("cluster-setup", {
+// Stores resources useful for starting a fresh cluster such as the
+// sealed secrets controller and ingress controller which are
+// fundamental for the applications that would run in the cluster
+export const clusterSetupDirectory = new k8s.Provider("render-cluster-setup", {
   renderYamlToDirectory: `${rootDirectory}/cluster-setup`,
   // namespace: "nana",
 });
 
-export const argoCDProvider = new k8s.Provider("render-argocd", {
+export const argocdDirectory = new k8s.Provider("render-argocd", {
   renderYamlToDirectory: `${rootDirectory}/argocd`,
   // namespace: "nana",
 });

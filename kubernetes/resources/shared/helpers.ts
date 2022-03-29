@@ -1,53 +1,5 @@
-import { AppName, Environment } from "./types/own-types";
-
 import * as kx from "@pulumi/kubernetesx";
 import * as pulumi from "@pulumi/pulumi";
-import { RawJSON } from "@pulumi/pulumi/automation";
-
-// This secret should only be updated when you want to generate new set of secrets for cluster
-import secretsJonFile from "../../secrets.production.json";
-import secretsJonFileExample from "../../secrets.environment.example.json";
-
-import * as z from "zod";
-import { environmentVariables } from "./validations";
-
-const secretRecord: Record<Environment, typeof secretsJonFileExample> = {
-  production: secretsJonFile,
-  development: secretsJonFile,
-  staging: secretsJonFile,
-  local: secretsJonFileExample,
-};
-
-const secretJson = secretRecord[environmentVariables.ENVIRONMENT];
-
-const secretsSchema = z.object({
-  "graphql-mongo": z.object({
-    MONGODB_USERNAME: z.string().nonempty(),
-    MONGODB_PASSWORD: z.string().nonempty(),
-    REDIS_USERNAME: z.string().nonempty(),
-    REDIS_PASSWORD: z.string().nonempty(),
-  }),
-  "grpc-mongo": z.object({
-    MONGODB_USERNAME: z.string().nonempty(),
-    MONGODB_PASSWORD: z.string().nonempty(),
-  }),
-  "graphql-postgres": z.object({
-    POSTGRES_USERNAME: z.string().nonempty(),
-    POSTGRES_PASSWORD: z.string().nonempty(),
-  }),
-  "react-web": z.object({}),
-});
-
-// NOTE: I initially was encoding the secrets in base64 but it turns out
-// that bitnami sealed secrets not only handles encryption but base64 encoding of the
-// secrets before encrypting them
-export function getSecretForApp<T extends AppName>(
-  appName: AppName
-): z.infer<typeof secretsSchema>[T] {
-  const parsedSecrets = secretsSchema.parse(secretJson);
-
-  return parsedSecrets[appName] as z.infer<typeof secretsSchema>[T];
-}
 
 interface ServiceProps {
   serviceName: string;

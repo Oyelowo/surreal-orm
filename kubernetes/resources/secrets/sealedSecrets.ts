@@ -1,7 +1,7 @@
 import { SealedSecretsHelmValuesBitnami } from "../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { clusterSetupProvider } from "../shared/cluster";
+import { clusterSetupDirectory } from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
 
@@ -33,6 +33,6 @@ export const sealedSecret = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: clusterSetupProvider }
+  { provider: clusterSetupDirectory }
   // { provider }
 );

@@ -3,17 +3,16 @@ import { Namespace } from "@pulumi/kubernetes/core/v1";
 import * as kx from "@pulumi/kubernetesx";
 
 import {
-  clusterSetupProvider,
-  providerApplication,
-  providerNameSpacesProvider,
-} from "./cluster";
+  clusterSetupDirectory,
+  applicationsDirectory,
+  nameSpacesDirectory,
+} from "./manifestsDirectory";
 
 // export const devNamespaceName = devNamespace.metadata.name as unknown as string;
 export const namespaceNames = {
   applications: "applications",
   argocd: "argocd",
-  clusterSetup: "cluster-setup",
-  // Comes with the deployment
+  // Default namespace that comes with the deployment
   kubeSystem: "kube-system",
 } as const;
 
@@ -28,7 +27,7 @@ export const applicationsNamespace = new Namespace(
       namespace: namespaceNames.applications,
     },
   },
-  { provider: providerNameSpacesProvider }
+  { provider: nameSpacesDirectory }
 );
 
 export const argocdNamespace = new Namespace(
@@ -39,17 +38,6 @@ export const argocdNamespace = new Namespace(
       namespace: namespaceNames.argocd,
     },
   },
-  { provider: providerNameSpacesProvider }
+  { provider: nameSpacesDirectory }
 );
 
-export const clusterSetupNamespace = new Namespace(
-  namespaceNames.clusterSetup,
-  {
-    metadata: {
-      name: `${namespaceNames.clusterSetup}`,
-      namespace: namespaceNames.clusterSetup,
-    },
-  },
-  { provider: clusterSetupProvider }
-);
-clusterSetupNamespace.metadata.name
