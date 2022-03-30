@@ -20,9 +20,8 @@ const { ENVIRONMENT, TEMPORARY_DIR } = environmentVariables;
 // while namespace can then be used for categorising resources based on logical grouping or team allocation. e.g
 // type Namespace = "team-a" | "workers" | "web" | "jobs"
 
-const rootDirectory = `manifests/${ENVIRONMENT}/${
-  TEMPORARY_DIR ?? "generated"
-}`;
+// TODO: probably use path and __dirname modules?
+const rootDirectory = `manifests/generated/${TEMPORARY_DIR ?? ENVIRONMENT}`;
 export const applicationsDirectory = new k8s.Provider("render-applications", {
   renderYamlToDirectory: `${rootDirectory}/applications`,
   // renderYamlToDirectory: `${rootDirectory}/${nameSpaceName}`,
