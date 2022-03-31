@@ -1,8 +1,8 @@
 // export * from "./resources/shared/namespaces";
 // export * from "./secretsManagement/setupSecrets";
 
-import { setupUnsealedSecretFiles } from "./secretsManagement/setupSecrets";
-setupUnsealedSecretFiles();
+// import { setupUnsealedSecretFiles } from "./secretsManagement/setupSecrets";
+// setupUnsealedSecretFiles();
 
 // export * from "./resources/shared/cluster";
 export * from "./resources/shared";

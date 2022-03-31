@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
+/* 
+TODO: ADD INSTRUCTION ON HOW THIS WORKS
+*/
+import { ArgumentTypes } from "./../../typescript/apps/web/utils/typescript";
+
 import path from "path";
 import glob from "glob";
 import prompt from "prompt";
@@ -10,6 +15,10 @@ import c from "chalk";
 
 import { Environment } from "./../resources/shared/types/own-types";
 import { environmentVariables } from "../resources/shared/validations";
+import {
+  clearUnsealedSecretFilesContents,
+  setupUnsealedSecretFiles,
+} from "../secretsManagement/setupSecrets";
 
 type EnvName = keyof typeof environmentVariables;
 const globAsync = util.promisify(glob);
@@ -50,12 +59,22 @@ const ARGV = yargs(process.argv.slice(2))
         "Generate sealed secrets manifests from generated plain secrets manifests",
       // demandOption: true,
     },
-    kus: {
+    duso: {
       alias: "keep-unsealed-secrets",
       type: "boolean",
       // default: false,
       describe:
-        "Keep the original unsealed secrets manifests from generated plain secrets manifests",
+        "Delete unsealed secrets output generated plain kubernetes manifests. (t/f)",
+
+      // demandOption: true,
+    },
+    dusi: {
+      alias: "keep-unsealed-secrets",
+      type: "boolean",
+      // default: false,
+      describe:
+        "Delete unsealed secrets inputs plain configs used to generate kubernetes secrets manifests. (t/f)",
+
       // demandOption: true,
     },
   })
@@ -64,20 +83,48 @@ const ARGV = yargs(process.argv.slice(2))
 prompt.override = ARGV;
 prompt.start();
 
+// TODO: Make type stronger
+type PromptArgvKeys = "gss" | "duso" | "dusi";
+type PromptArgv = Pick<typeof ARGV, PromptArgvKeys>;
+const promptA: ArgumentTypes<typeof promptGetAsync>[0] = [
+  {
+    name: "gss" as PromptArgvKeys,
+    required: true,
+    type: "boolean",
+    description: c.blueBright(
+      "Generate sealed secrets from plain secrets manifests. (t/f)"
+    ),
+  },
+  {
+    name: "duso" as PromptArgvKeys,
+    required: true,
+    type: "boolean",
+    description: c.redBright(
+      "Delete unsealed secrets output generated plain kubernetes manifests. (t/f)"
+    ),
+  },
+  {
+    name: "dusi" as PromptArgvKeys,
+    required: true,
+    type: "boolean",
+    description: c.redBright(
+      "Delete unsealed secrets inputs plain configs used to generate kubernetes secrets manifests. (t/f)"
+    ),
+  },
+];
+
+/* 
+GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
+*/
 async function generateManifests() {
-  const promptArgument: Pick<typeof ARGV, "gss"> = (await promptGetAsync([
-    {
-      name: "gss",
-      required: true,
-      type: "boolean",
-      description: c.blueBright(
-        "Generate sealed secrets from plain secrets manifests. (t/f)"
-      ),
-    },
-  ])) as Pick<typeof ARGV, "gss">;
+  const promptArgument: PromptArgv = (await promptGetAsync(
+    promptA
+  )) as PromptArgv;
 
   // sh.cd(__dirname);
   // sh.exec("npm i");
+  setupUnsealedSecretFiles();
+
   sh.exec("rm -rf ./login");
   sh.exec("npm i");
   sh.exec("mkdir ./login");
@@ -105,11 +152,12 @@ async function generateManifests() {
   generateSealedSecretsManifests(promptArgument);
 }
 
-generateManifests();
-
-async function generateSealedSecretsManifests(
-  promptArgument: Pick<typeof ARGV, "gss">
-) {
+/* 
+GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PULUMI.
+These secrets are encrypted using the bitnami sealed secret controller running in the cluster
+you are at present context
+*/
+async function generateSealedSecretsManifests(promptArgument: PromptArgv) {
   const SEALED_SECRETS_BASE_DIR = path.join(MANIFESTS_DIR, "sealed-secrets");
   const SEALED_SECRETS_DIR = `${SEALED_SECRETS_BASE_DIR}/${ARGV.e}`;
 
@@ -140,7 +188,7 @@ async function generateSealedSecretsManifests(
       sh.mkdir("-p", SEALED_SECRETS_DIR);
 
       const kubeSeal = sh.exec(
-        `kubeseal <${unsealedSecretPath} -o yaml >${sealedSecretFilePath}`,
+        `kubeseal <${unsealedSecretPath} -o yaml >${sealedSecretFilePath}`
         // { silent: true }
       );
 
@@ -160,6 +208,15 @@ async function generateSealedSecretsManifests(
         `Removing unsealed plain secret manifest ${unsealedSecretPath}`
       )
     );
-    sh.rm("-rf", unsealedSecretPath);
+
+    if (promptArgument.duso) {
+      sh.rm("-rf", unsealedSecretPath);
+    }
+
+    if (promptArgument.dusi) {
+      clearUnsealedSecretFilesContents();
+    }
   });
 }
+
+generateManifests();

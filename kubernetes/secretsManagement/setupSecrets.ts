@@ -1,3 +1,7 @@
+/* 
+ADD INSTRUCTION HERE
+ */
+
 import * as z from "zod";
 
 export type Secrets = z.infer<typeof secretsSchema>;
@@ -38,8 +42,7 @@ export function clearUnsealedSecretFilesContents() {
   });
 }
 //
-setupUnsealedSecretFiles();
-// clearSecretFilesContents()
+
 
 // HELPERS
 const secretsSchema = z.object({
