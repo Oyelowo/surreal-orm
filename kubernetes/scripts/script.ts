@@ -73,7 +73,8 @@ const ARGV = yargs(process.argv.slice(2))
   } as const)
   .parseSync();
 
-const manifestsDirForEnv = getManifestsOutputDirectory(ARGV.e);
+// const manifestsDirForEnv = getManifestsOutputDirectory(ARGV.e);
+const manifestsDirForEnv = path.join("manifests", "generated", ARGV.e);
 
 prompt.override = ARGV;
 prompt.start();
@@ -86,9 +87,10 @@ async function generateManifests() {
   // sh.exec("npm i");
   setupUnsealedSecretFiles();
 
-  sh.exec("rm -rf ./login");
   sh.exec("npm i");
-  sh.exec("mkdir ./login");
+  sh.rm("-rf", "./login");
+  sh.mkdir("mkdir ./login");
+  sh.rm("-rf", manifestsDirForEnv);
   sh.exec("pulumi login file://login");
   sh.exec("export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev");
 
@@ -119,9 +121,8 @@ GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PU
 These secrets are encrypted using the bitnami sealed secret controller running in the cluster
 you are at present context
 */
+const SEALED_SECRETS_DIR_FOR_ENV = `${SEALED_SECRETS_BASE_DIR}/${ARGV.e}`;
 async function generateSealedSecretsManifests() {
-  const SEALED_SECRETS_DIR = `${SEALED_SECRETS_BASE_DIR}/${ARGV.e}`;
-
   const UNSEALED_SECRETS_MANIFESTS_FOR_ENV = path.join(
     MANIFESTS_DIR,
     "generated",
@@ -138,10 +139,10 @@ async function generateSealedSecretsManifests() {
       sh.echo(c.blueBright("Generating sealed secret from", unsealedSecretPath));
 
       const secretName = path.basename(unsealedSecretPath);
-      const sealedSecretFilePath = `${SEALED_SECRETS_DIR}/${secretName}`;
+      const sealedSecretFilePath = `${SEALED_SECRETS_DIR_FOR_ENV}/${secretName}`;
 
-      sh.echo(c.greenBright(`Create ${SEALED_SECRETS_DIR} if not exists`));
-      sh.mkdir("-p", SEALED_SECRETS_DIR);
+      sh.echo(c.blueBright(`Create ${SEALED_SECRETS_DIR_FOR_ENV} if it does not exists`));
+      sh.mkdir("-p", SEALED_SECRETS_DIR_FOR_ENV);
 
       const kubeSeal = sh.exec(`kubeseal <${unsealedSecretPath} -o yaml >${sealedSecretFilePath}`, {
         silent: true,
@@ -149,7 +150,7 @@ async function generateSealedSecretsManifests() {
 
       sh.echo(c.greenBright(kubeSeal.stdout));
       if (kubeSeal.stderr) {
-        sh.echo(c.redBright(kubeSeal.stderr));
+        sh.echo(`Error sealing secrets: ${c.redBright(kubeSeal.stderr)}`);
         sh.exit(1);
         return;
       }
@@ -173,6 +174,7 @@ async function generateSealedSecretsManifests() {
 
 function doInitialClusterSetup() {
   // # Apply namespace first
+  // TODO: Use a function to get and share this with manifestDirectory.ts module
   sh.exec(`kubectl apply -R -f ${manifestsDirForEnv}/namespaces`);
 
   // # Apply setups with sealed secret controller
@@ -190,6 +192,7 @@ if (ARGV.gss) {
   doInitialClusterSetup();
 
   generateSealedSecretsManifests();
-  sh.exec(`kubectl apply -f ${SEALED_SECRETS_BASE_DIR}`);
-  sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd`);
+  sh.exec(`kubectl apply -f ${SEALED_SECRETS_DIR_FOR_ENV}`);
+  sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/0-crd`);
+  sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/1-manifest`);
 }

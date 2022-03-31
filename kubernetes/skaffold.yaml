@@ -41,13 +41,13 @@ build:
   #     - image: builder-base
   #       alias: BASE
       
-  - image: ghcr.io/oyelowo/grpc-mongo
-    context: ../rust
-    docker:
-      dockerfile: Dockerfile.development
-      target: grpc-mongo
-      noCache: false
-      squash: false
+  # - image: ghcr.io/oyelowo/grpc-mongo
+  #   context: ../rust
+  #   docker:
+  #     dockerfile: Dockerfile.development
+  #     target: grpc-mongo
+  #     noCache: false
+  #     squash: false
   #   requires:
   #     - image: builder-base
   #       alias: BASE
@@ -65,11 +65,12 @@ build:
 deploy:
   kubectl:
     manifests:
-    # - manifests/local/generated/namespaces/**/*
+    - manifests/generated/local/**/**/*
+    - manifests/sealed-secrets/local/*
     # - manifests/local/generated/cluster-setup/**/*
     # - manifests/local/secrets-encrypted/* ## MAy remove
     # - manifests/local/generated/argocd/**/* ## MAy remove
-    - manifests/local/generated/applications/**/* ## MAy remove
+    # - manifests/local/generated/applications/**/* ## MAy remove
     # - manifests/local/generated/**/**/* ## MAy remove
     # - rendered/development/0-crd/*
     # - rendered/development/1-manifest/*

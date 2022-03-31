@@ -100,17 +100,17 @@ const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
   //   existingSecretPasswordKey: "",
   //   existingSecret: "",
   // },
-  config: {
-    secret: {
-      argocdServerAdminPassword: "",
-    },
-  },
+  // config: {
+  //   secret: {
+  //     argocdServerAdminPassword: "",
+  //   },
+  // },
   redis: {
     architecture: "standalone",
     auth: {
       enabled: true,
-      existingSecret: "wert" ,
-      existingSecretPasswordKey: "1234",
+      // existingSecretPasswordKey: "1234",
+      // existingSecret: "wert" ,
     },
   },
   server: {
