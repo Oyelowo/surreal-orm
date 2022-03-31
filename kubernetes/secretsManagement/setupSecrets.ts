@@ -36,7 +36,7 @@ export function setupUnsealedSecretFiles() {
   });
 }
 
-export function clearUnsealedSecretFilesContents() {
+export function clearUnsealedInputTsSecretFilesContents() {
   ENVIRONMENTS.forEach((env) => {
     createSecretsConfigFile(env, true);
   });

@@ -11,8 +11,7 @@ import * as path from "path";
 import * as argocd from "../../crd2pulumi/argocd";
 import { getSecretForApp } from "../../secretsManagement";
 
-
-const secrets = getSecretForApp("argocd")
+const secrets = getSecretForApp("argocd");
 
 type Metadata = {
   name: string;
@@ -62,15 +61,13 @@ export const argocdOyelowoApplications =
     { provider: argocdDirectory }
   );
 
+
+  /* SECRET */
 export const argoCDApplicationsSecret = new kx.Secret(
   `${resourceName}-secret`,
   {
     stringData: {
-      type: "git",
-      url: "https://github.com/Oyelowo/modern-distributed-app-template",
-      username: "Oyelowo",
-      password: "my-password-or-personal-access-token",
-      
+      ...secrets
     },
     metadata,
   },
@@ -112,7 +109,7 @@ const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
     architecture: "standalone",
     auth: {
       enabled: true,
-      existingSecret: "wert",
+      existingSecret: "wert" ,
       existingSecretPasswordKey: "1234",
     },
   },
