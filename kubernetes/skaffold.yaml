@@ -65,8 +65,8 @@ build:
 deploy:
   kubectl:
     manifests:
-    - manifests/generated/local/**/**/*
     - manifests/sealed-secrets/local/*
+    - manifests/generated/local/**/**/*
     # - manifests/local/generated/cluster-setup/**/*
     # - manifests/local/secrets-encrypted/* ## MAy remove
     # - manifests/local/generated/argocd/**/* ## MAy remove
