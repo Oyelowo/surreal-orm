@@ -7,15 +7,7 @@ import {
   DBType,
   NamespaceOfApps,
 } from "./types/own-types";
-import { getEnvironmentSecretForApp } from "../../secretsManagement";
-
-import * as z from "zod";
-const secretsSchema = z.object({
-  USERNAME: z.string().nonempty(),
-  PASSWORD: z.string().nonempty(),
-});
-
-type MySecret = z.infer<typeof secretsSchema>;
+import { getSecretForApp } from "../../secretsManagement";
 
 export class ServiceDeployment<
   AN extends AppName,
@@ -50,7 +42,7 @@ export class ServiceDeployment<
       { provider, parent: this }
     );
 
-    const secrets = getEnvironmentSecretForApp(this.appName);
+    const secrets = getSecretForApp(this.appName);
     // Create a Kubernetes Secret.
     this.secret = new kx.Secret(
       `${resourceName}-secret`,
@@ -150,7 +142,7 @@ export class ServiceDeployment<
 
    */
   #secretsObjectToEnv = (secretInstance: kx.Secret) => {
-    const secretObject = getEnvironmentSecretForApp(this.appName);
+    const secretObject = getSecretForApp(this.appName);
     const keyValueEntries = Object.keys(secretObject).map((key) => [
       key,
       secretInstance.asEnvValue(key),

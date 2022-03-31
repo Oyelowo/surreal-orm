@@ -1,6 +1,2 @@
-/bin/
-/node_modules/
+/secrets-unsealed
 /login
-secrets.production.json
-secrets.development.json
-secrets.staging.json

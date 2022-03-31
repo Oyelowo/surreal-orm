@@ -26,5 +26,9 @@ export const secretsSample: Secrets = {
   },
   argocd: {
     ADMIN_PASSWORD: "",
+    type: "git",
+    url: "https://github.com/Oyelowo/modern-distributed-app-template",
+    username: "Oyelowo",
+    password: "my-password-or-personal-access-token",
   },
 } as const;

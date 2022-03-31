@@ -30,7 +30,7 @@ export function setupUnsealedSecretFiles() {
       `Something went wrong creating unsealed secrets directory: Error: ${err}`
     );
   });
-  createGitIgnoreFile();
+
   ENVIRONMENTS.forEach((env) => {
     createSecretsConfigFile(env, false);
   });
@@ -42,7 +42,6 @@ export function clearUnsealedSecretFilesContents() {
   });
 }
 //
-
 
 // HELPERS
 const secretsSchema = z.object({
@@ -68,6 +67,12 @@ const secretsSchema = z.object({
   }),
   argocd: z.object({
     ADMIN_PASSWORD: z.string().nonempty(),
+    type: z.literal("git"),
+    url: z.literal(
+      "https://github.com/Oyelowo/modern-distributed-app-template"
+    ),
+    username: z.literal("Oyelowo"),
+    password: z.string().nonempty(),
   }),
 });
 
@@ -99,18 +104,5 @@ async function createSecretsConfigFile(
       `Secret files created and gitignored!!! 🎉  
           Make sure you never push these secrets to git!🎉`
     );
-  });
-}
-
-async function createGitIgnoreFile() {
-  const filePath = `${__dirname}/.gitignore`;
-  const content = SECRET_UNSEALED_DIRECTORY_NAME;
-
-  fs.writeFile(filePath, content, { flag: "" as "" | "ws" }, async (err) => {
-    // if (err) throw err;
-    if (err) {
-      console.warn("err", err);
-    }
-    console.log("It's saved!");
   });
 }

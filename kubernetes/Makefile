@@ -2,7 +2,11 @@ install:
 	npm i
 
 manifests_local:
-	npx ts-node scripts/script.ts -e=local -t=latest --gss --kuso --kiso
+	npx ts-node scripts/script.ts -e=local -t=latest --gss
+
+	# If you want to keep unsealed secrets output(--kuso) or keep unsealed secrets input(--kiso).
+	# If you ever use these flags, make sure the files are cleared and sensitive secrets are not left behind
+	# npx ts-node scripts/script.ts -e=local -t=latest --gss --kuso --kiso
 	# npx ts-node scripts/script.ts -environment=local --tag=latest --generate-sealed-secrets --delete
 
 # make manifests_development tag=github-sha  

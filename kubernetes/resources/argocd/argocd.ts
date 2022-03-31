@@ -9,6 +9,10 @@ import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
 import * as kx from "@pulumi/kubernetesx";
 import * as path from "path";
 import * as argocd from "../../crd2pulumi/argocd";
+import { getSecretForApp } from "../../secretsManagement";
+
+
+const secrets = getSecretForApp("argocd")
 
 type Metadata = {
   name: string;
@@ -19,65 +23,44 @@ type Metadata = {
 };
 const metadata: Metadata = {
   name: "argocd-application-secret",
-  namespace: "argocd",
+  namespace: namespaceNames.argocd,
   labels: {
     "argocd.argoproj.io/secret-type": "repository",
   },
 };
 const resourceName = metadata.name;
-// Create resources from standard Kubernetes guestbook YAML example.
-// TODO: I have also generated typescript code interface from a crd yaml
-// They both work but I'll decide on which to go for eventually.
-// export const argocdApps = new k8s.yaml.ConfigGroup(
-//   "argocd-oyelowo-applications-all",
-//   {
-//     files: [path.join(__dirname, "applications", "application"), "*.yaml"],
-//   },
-//   { provider: applicationsDirectory }
-// );
-// const paths = path.join(__dirname, "applications", "application.yaml");
-// export const guestbookFile = new k8s.yaml.ConfigFile(
-//   "guestbook",
-//   {
-//     file: paths,
-//   },
-//   { provider: applicationsDirectory }
-// );
 
-export const guestbookFilezzz = new argocd.argoproj.v1alpha1.Application(
-  "rere",
-  {
-    // apiVersion: "argoproj.io/v1alpha1",
-    metadata: {
-      name: "oyelowo-apps",
-      namespace: namespaceNames.argocd,
-    },
-    spec: {
-      project: "oyelowo-project",
-      destination: {
-        server: "https://kubernetes.default.svc",
-        namespace: namespaceNames.applications,
-        name: "oyelowo",
-      },
-      source: {
-        repoURL: "https://github.com/Oyelowo/modern-distributed-app-template",
-        path: "kubernetes/manifests/generated",
-        targetRevision: "HEAD",
-        directory: {
-          recurse: true,
+export const argocdOyelowoApplications =
+  new argocd.argoproj.v1alpha1.Application(
+    "argocd-oyelowo-applications",
+    {
+      apiVersion: "argoproj.io/v1alpha1",
+      metadata,
+      spec: {
+        project: "oyelowo-project",
+        destination: {
+          server: "https://kubernetes.default.svc",
+          namespace: namespaceNames.applications,
+          name: "oyelowo-applications",
         },
-      },
-
-      syncPolicy: {
-        automated: {
-          prune: true,
-          selfHeal: true,
+        source: {
+          repoURL: "https://github.com/Oyelowo/modern-distributed-app-template",
+          path: "kubernetes/manifests/generated",
+          targetRevision: "HEAD",
+          directory: {
+            recurse: true,
+          },
+        },
+        syncPolicy: {
+          automated: {
+            prune: true,
+            selfHeal: true,
+          },
         },
       },
     },
-  },
-  { provider: argocdDirectory }
-);
+    { provider: argocdDirectory }
+  );
 
 export const argoCDApplicationsSecret = new kx.Secret(
   `${resourceName}-secret`,
@@ -87,6 +70,7 @@ export const argoCDApplicationsSecret = new kx.Secret(
       url: "https://github.com/Oyelowo/modern-distributed-app-template",
       username: "Oyelowo",
       password: "my-password-or-personal-access-token",
+      
     },
     metadata,
   },

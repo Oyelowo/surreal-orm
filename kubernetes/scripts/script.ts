@@ -62,26 +62,21 @@ const ARGV = yargs(process.argv.slice(2))
     kuso: {
       alias: "keep-unsealed-secrets",
       type: "boolean",
-      // choices: ["true", "t", "false", "f"],
       // default: true,
       describe:
-        "Delete unsealed secrets output generated plain kubernetes manifests. (t/f)",
-
-      demandOption: true,
+        "Keep unsealed secrets output generated plain kubernetes manifests",
+      // demandOption: true,
     },
     kusi: {
       alias: "keep-unsealed-secrets",
       type: "boolean",
-      // choices: ["true", "t", "false", "f"],
       // default: true,
       describe:
-        "Delete unsealed secrets inputs plain configs used to generate kubernetes secrets manifests. (t/f)",
-
-      demandOption: true,
+        "Keep unsealed secrets inputs plain configs used to generate kubernetes secrets manifests",
+      // demandOption: true,
     },
   } as const)
   .parseSync();
-
 
 prompt.override = ARGV;
 prompt.start();
@@ -115,9 +110,10 @@ async function generateManifests() {
       `,
     { silent: true }
   );
-  sh.echo(c.greenBright(shGenerateManifestsOutput.stdout));
+  // sh.echo(c.greenBright(shGenerateManifestsOutput.stdout));
   if (shGenerateManifestsOutput.stderr) {
     sh.echo(c.redBright(shGenerateManifestsOutput.stderr));
+    sh.exit(1);
   }
 
   generateSealedSecretsManifests();

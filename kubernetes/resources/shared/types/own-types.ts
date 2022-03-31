@@ -33,7 +33,8 @@ export type AppName =
   | "graphql-mongo"
   | "graphql-postgres"
   | "grpc-mongo"
-  | "react-web";
+  | "react-web"
+  | "argocd";
 
 export interface Settings<TAppName extends AppName> {
   requestMemory: Memory;
