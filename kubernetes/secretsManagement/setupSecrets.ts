@@ -9,7 +9,7 @@ export type Secrets = z.infer<typeof secretsSchema>;
 import fs from "fs";
 import path from "path";
 import { Environment } from "../resources/shared/types/own-types";
-import { secretsSample } from "./secretsSample";
+import { secretsLocalSample, secretsSample } from "./secretsSample";
 import c from "chalk";
 const ENVIRONMENTS: Environment[] = ["local", "development", "staging", "production"];
 const secretType = "Secrets" as const;
@@ -79,7 +79,7 @@ async function createSecretsConfigFile(environment: Environment, overwrite: bool
   const content = `
     import {${secretType}} from "../${scriptName}"
      export const SECRET_${environment.toUpperCase()}: ${secretType} = ${JSON.stringify(
-    secretsSample
+    environment === "local" ? secretsLocalSample : secretsSample
   )};
     `;
 

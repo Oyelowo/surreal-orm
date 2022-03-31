@@ -32,3 +32,33 @@ export const secretsSample: Secrets = {
     password: "my-password-or-personal-access-token",
   },
 } as const;
+
+export const secretsLocalSample: Secrets = {
+  "graphql-mongo": {
+    MONGODB_USERNAME: "username",
+    MONGODB_PASSWORD: "password",
+    REDIS_USERNAME: "username",
+    REDIS_PASSWORD: "password",
+  },
+  "grpc-mongo": {
+    MONGODB_USERNAME: "username",
+    MONGODB_PASSWORD: "password",
+  },
+  "graphql-postgres": {
+    POSTGRES_USERNAME: "username",
+    POSTGRES_PASSWORD: "password",
+  },
+  "react-web": {
+    GITHUB_ID: "",
+    GITHUB_SECRET: "",
+    GOOGLE_ID: "",
+    GOOGLE_SECRET: "",
+  },
+  argocd: {
+    ADMIN_PASSWORD: "12345",
+    type: "git",
+    url: "https://github.com/Oyelowo/modern-distributed-app-template",
+    username: "Oyelowo",
+    password: "my-password-or-personal-access-token",
+  },
+} as const;
