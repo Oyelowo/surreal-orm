@@ -1,8 +1,5 @@
 import * as k8s from "@pulumi/kubernetes";
-import {
-  applicationsDirectory,
-  argocdDirectory,
-} from "../shared/manifestsDirectory";
+import { applicationsDirectory, argocdDirectory } from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { ArgocdHelmValuesBitnami } from "../shared/types/helm-charts/argocdHelmValuesBitnami";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
@@ -29,40 +26,38 @@ const metadata: Metadata = {
 };
 const resourceName = metadata.name;
 
-export const argocdOyelowoApplications =
-  new argocd.argoproj.v1alpha1.Application(
-    "argocd-oyelowo-applications",
-    {
-      apiVersion: "argoproj.io/v1alpha1",
-      metadata,
-      spec: {
-        project: "oyelowo-project",
-        destination: {
-          server: "https://kubernetes.default.svc",
-          namespace: namespaceNames.applications,
-          name: "oyelowo-applications",
+export const argocdOyelowoApplications = new argocd.argoproj.v1alpha1.Application(
+  "argocd-oyelowo-applications",
+  {
+    apiVersion: "argoproj.io/v1alpha1",
+    metadata,
+    spec: {
+      project: "oyelowo-project",
+      destination: {
+        server: "https://kubernetes.default.svc",
+        namespace: namespaceNames.applications,
+        name: "oyelowo-applications",
+      },
+      source: {
+        repoURL: "https://github.com/Oyelowo/modern-distributed-app-template",
+        path: "kubernetes/manifests/generated",
+        targetRevision: "HEAD",
+        directory: {
+          recurse: true,
         },
-        source: {
-          repoURL: "https://github.com/Oyelowo/modern-distributed-app-template",
-          path: "kubernetes/manifests/generated",
-          targetRevision: "HEAD",
-          directory: {
-            recurse: true,
-          },
-        },
-        syncPolicy: {
-          automated: {
-            prune: true,
-            selfHeal: true,
-          },
+      },
+      syncPolicy: {
+        automated: {
+          prune: true,
+          selfHeal: true,
         },
       },
     },
-    { provider: argocdDirectory }
-  );
+  },
+  { provider: argocdDirectory }
+);
 
-
-  /* SECRET */
+/* SECRET */
 export const argoCDApplicationsSecret = new kx.Secret(
   `${resourceName}-secret`,
   {
@@ -118,7 +113,7 @@ const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
       enabled: true,
       hostname: "194-195-247-46.ip.linodeusercontent.com",
       path: "/tools/argocd",
-      pathType: "prefix",
+      pathType: "Prefix" as "Exact" | "ImplementationSpecific" | "Prefix",
       ingressClassName: "nginx",
     },
   },
