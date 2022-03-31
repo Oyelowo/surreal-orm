@@ -89,7 +89,7 @@ async function generateManifests() {
   sh.exec("npm i");
   sh.rm("-rf", "./login");
   sh.mkdir("./login");
-  // sh.rm("-rf", manifestsDirForEnv);
+  sh.rm("-rf", manifestsDirForEnv);
   sh.exec("pulumi login file://login");
   sh.exec("export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev");
 
@@ -183,21 +183,21 @@ function doInitialClusterSetup() {
   sh.exec(`kubectl rollout status deployment/sealed-secrets-controller -n=kube-system`);
 }
 async function someT() {
-  // setupUnsealedSecretFiles();
+  setupUnsealedSecretFiles();
 
   await generateManifests();
-  // if (ARGV.gss) {
-  //   /* 
-  //      This requires the above step with initial cluster setup making sure that the sealed secret controller is
-  //      running in the cluster */
-  //   doInitialClusterSetup();
+  if (ARGV.gss) {
+    /* 
+       This requires the above step with initial cluster setup making sure that the sealed secret controller is
+       running in the cluster */
+    doInitialClusterSetup();
 
-  //   await generateSealedSecretsManifests();
-  //   // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
-  //   sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/0-crd`);
-  //   sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/1-manifest`);
-  //   sh.exec(`kubectl apply -f ${SEALED_SECRETS_DIR_FOR_ENV}`);
-  // }
+    await generateSealedSecretsManifests();
+    // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
+    sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/0-crd`);
+    sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/1-manifest`);
+    sh.exec(`kubectl apply -f ${SEALED_SECRETS_DIR_FOR_ENV}`);
+  }
 }
 
 someT();

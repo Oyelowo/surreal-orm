@@ -10,7 +10,7 @@ import fs from "fs";
 import path from "path";
 import { Environment } from "../resources/shared/types/own-types";
 import { secretsSample } from "./secretsSample";
-
+import c from "chalk";
 const ENVIRONMENTS: Environment[] = ["local", "development", "staging", "production"];
 const secretType = "Secrets" as const;
 const scriptName = path.basename(__filename).slice(0, -3);
@@ -89,7 +89,9 @@ async function createSecretsConfigFile(environment: Environment, overwrite: bool
       console.warn("File already created previously!");
     }
     console.warn(
-      `Secret files created and gitignored! Make sure you never push these secrets to git!🎉`
+      c.greenBright(
+        `Secret files created and gitignored at ${filePath}! NEVER these secrets to git!🎉`
+      )
     );
   });
 }
