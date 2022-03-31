@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: oyelowo-apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Oyelowo/modern-distributed-app-template
+    targetRevision: HEAD
+    path: kubernetes/manifests/production
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: applications
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

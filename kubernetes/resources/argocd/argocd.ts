@@ -1,8 +1,52 @@
 import * as k8s from "@pulumi/kubernetes";
-import { argocdDirectory } from "../shared/manifestsDirectory";
+import {
+  applicationsDirectory,
+  argocdDirectory,
+} from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { ArgocdHelmValuesBitnami } from "../shared/types/helm-charts/argocdHelmValuesBitnami";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
+import kx from "@pulumi/kubernetesx";
+import * as path from "path";
+
+type Metadata = {
+  name: string;
+  namespace: string;
+  label: {
+    "argocd.argoproj.io/secret-type": "repository";
+  };
+};
+const metadata: Metadata = {
+  name: "argocd",
+  namespace: "argocd",
+  label: {
+    "argocd.argoproj.io/secret-type": "repository",
+  },
+};
+const resourceName = metadata.name;
+// Create resources from standard Kubernetes guestbook YAML example.
+export const argocdApps = new k8s.yaml.ConfigGroup("guestbook", {
+  files: [path.join("applications/application", "*.yaml")],
+});
+
+// const guestbookFile = new k8s.yaml.ConfigFile("guestbook", {
+//   file: "guestbook-all-in-one.yaml",
+// });
+export const argoCDApplicationsSecret = new kx.Secret(
+  `${resourceName}-secret`,
+  {
+    stringData: {
+      type: "git",
+      url: "https://github.com/Oyelowo/modern-distributed-app-template",
+      username: "Oyelowo",
+      password: "my-password-or-personal-access-token",
+    },
+    metadata,
+  },
+  { provider: applicationsDirectory }
+);
+
+// export const argoApplicationSecret = new k8s.
 
 const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
   // fullnameOverride: "argocd",
@@ -38,10 +82,8 @@ const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
     auth: {
       enabled: true,
       existingSecret: "wert",
-      existingSecretPasswordKey: "1234"
+      existingSecretPasswordKey: "1234",
     },
-    
-    
   },
   server: {
     ingress: {
