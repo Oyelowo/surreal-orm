@@ -89,7 +89,7 @@ async function generateManifests() {
 
   sh.exec("npm i");
   sh.rm("-rf", "./login");
-  sh.mkdir("mkdir ./login");
+  sh.mkdir("./login");
   sh.rm("-rf", manifestsDirForEnv);
   sh.exec("pulumi login file://login");
   sh.exec("export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev");
