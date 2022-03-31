@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "outDir": "bin",
+        "target": "es2016",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "declaration": true,
+        "sourceMap": true,
+        "stripInternal": true,
+        "experimentalDecorators": true,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true
+    },
+    "files": [
+        "argoproj/index.ts",
+        "argoproj/v1alpha1/appProject.ts",
+        "argoproj/v1alpha1/application.ts",
+        "argoproj/v1alpha1/applicationSet.ts",
+        "argoproj/v1alpha1/index.ts",
+        "index.ts",
+        "provider.ts",
+        "types/index.ts",
+        "types/input.ts",
+        "types/output.ts",
+        "utilities.ts"
+    ]
+}

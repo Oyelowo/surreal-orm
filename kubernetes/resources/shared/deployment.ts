@@ -56,11 +56,12 @@ export class ServiceDeployment<
       `${resourceName}-secret`,
       {
         stringData: {
-            //  password: "fakepassword",
+          //  password: "fakepassword",
           ...secrets,
         },
         metadata,
       },
+      //TODO: Confirm why secret has a separate provider
       { provider: this.secretProvider, parent: this }
     );
 
@@ -125,7 +126,28 @@ export class ServiceDeployment<
   }
 
   /** 
-     Maps secret object to what kx can understand to produce secretRef automagically
+     Maps custom secret object to what kx can understand to produce secretRef automagically
+     {
+        "graphql-mongo": {
+            MONGODB_USERNAME: "xxxx",
+            MONGODB_PASSWORD: "xxxx",
+            REDIS_USERNAME: "xxxx",
+            REDIS_PASSWORD: "xxxx",
+        };
+        "graphql-postgres": {
+            POSTGRES_USERNAME: "xxxx",
+            POSTGRES_PASSWORD: "xxxx",
+        };
+     }
+    
+     to
+     {
+        MONGODB_USERNAME:  
+            secretRef:
+              ... 
+      ...
+     }
+
    */
   #secretsObjectToEnv = (secretInstance: kx.Secret) => {
     const secretObject = getEnvironmentSecretForApp(this.appName);
