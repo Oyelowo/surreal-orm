@@ -111,6 +111,7 @@ async function generateManifests() {
   if (shGenerateManifestsOutput.stderr) {
     sh.echo(c.redBright(shGenerateManifestsOutput.stderr));
     sh.exit(1);
+    return
   }
 
   generateSealedSecretsManifests();
@@ -192,7 +193,8 @@ if (ARGV.gss) {
   doInitialClusterSetup();
 
   generateSealedSecretsManifests();
-  sh.exec(`kubectl apply -f ${SEALED_SECRETS_DIR_FOR_ENV}`);
+  // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
   sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/0-crd`);
   sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/1-manifest`);
+  sh.exec(`kubectl apply -f ${SEALED_SECRETS_DIR_FOR_ENV}`);
 }

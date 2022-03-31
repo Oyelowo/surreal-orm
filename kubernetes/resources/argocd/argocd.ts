@@ -67,11 +67,11 @@ export const argoCDApplicationsSecret = new kx.Secret(
   `${resourceName}-secret`,
   {
     stringData: {
-      ...secrets
+      ...secrets,
     },
     metadata,
   },
-  { provider: applicationsDirectory }
+  { provider: argocdDirectory }
 );
 
 // export const argoApplicationSecret = new k8s.
