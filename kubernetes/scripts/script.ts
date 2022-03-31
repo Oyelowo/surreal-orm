@@ -16,7 +16,7 @@ import c from "chalk";
 import { Environment } from "./../resources/shared/types/own-types";
 import { environmentVariables } from "../resources/shared/validations";
 import {
-  clearUnsealedSecretFilesContents,
+  clearUnsealedInputTsSecretFilesContents,
   setupUnsealedSecretFiles,
 } from "../secretsManagement/setupSecrets";
 
@@ -42,12 +42,7 @@ const ARGV = yargs(process.argv.slice(2))
     },
     e: {
       alias: "environment",
-      choices: [
-        "local",
-        "development",
-        "staging",
-        "production",
-      ] as Environment[],
+      choices: ["local", "development", "staging", "production"] as Environment[],
       describe: "The environment you're generating the manifests for.",
       demandOption: true,
     },
@@ -55,16 +50,14 @@ const ARGV = yargs(process.argv.slice(2))
       alias: "generate-sealed-secrets",
       type: "boolean",
       default: false,
-      describe:
-        "Generate sealed secrets manifests from generated plain secrets manifests",
+      describe: "Generate sealed secrets manifests from generated plain secrets manifests",
       demandOption: true,
     },
     kuso: {
       alias: "keep-unsealed-secrets",
       type: "boolean",
       // default: true,
-      describe:
-        "Keep unsealed secrets output generated plain kubernetes manifests",
+      describe: "Keep unsealed secrets output generated plain kubernetes manifests",
       // demandOption: true,
     },
     kusi: {
@@ -93,9 +86,7 @@ async function generateManifests() {
   sh.exec("npm i");
   sh.exec("mkdir ./login");
   sh.exec("pulumi login file://login");
-  sh.exec(
-    "export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev"
-  );
+  sh.exec("export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev");
 
   // image tag. All apps share same tag for now
   const shGenerateManifestsOutput = sh.exec(
@@ -135,18 +126,13 @@ async function generateSealedSecretsManifests() {
     "/**/**/**secret-*ml"
   );
 
-  const unsealedSecretsFilePathsForEnv = await globAsync(
-    UNSEALED_SECRETS_MANIFESTS_FOR_ENV,
-    {
-      dot: true,
-    }
-  );
+  const unsealedSecretsFilePathsForEnv = await globAsync(UNSEALED_SECRETS_MANIFESTS_FOR_ENV, {
+    dot: true,
+  });
 
   unsealedSecretsFilePathsForEnv.forEach((unsealedSecretPath) => {
     if (ARGV.gss) {
-      sh.echo(
-        c.blueBright("Generating sealed secret from", unsealedSecretPath)
-      );
+      sh.echo(c.blueBright("Generating sealed secret from", unsealedSecretPath));
 
       const secretName = path.basename(unsealedSecretPath);
       const sealedSecretFilePath = `${SEALED_SECRETS_DIR}/${secretName}`;
@@ -154,10 +140,9 @@ async function generateSealedSecretsManifests() {
       sh.echo(c.greenBright(`Create ${SEALED_SECRETS_DIR} if not exists`));
       sh.mkdir("-p", SEALED_SECRETS_DIR);
 
-      const kubeSeal = sh.exec(
-        `kubeseal <${unsealedSecretPath} -o yaml >${sealedSecretFilePath}`,
-        { silent: true }
-      );
+      const kubeSeal = sh.exec(`kubeseal <${unsealedSecretPath} -o yaml >${sealedSecretFilePath}`, {
+        silent: true,
+      });
 
       sh.echo(c.greenBright(kubeSeal.stdout));
       if (kubeSeal.stderr) {
@@ -166,19 +151,10 @@ async function generateSealedSecretsManifests() {
         return;
       }
 
-      sh.echo(
-        c.greenBright(
-          "Successfully generated sealed secret at",
-          unsealedSecretPath
-        )
-      );
+      sh.echo(c.greenBright("Successfully generated sealed secret at", unsealedSecretPath));
     }
 
-    sh.echo(
-      c.blueBright(
-        `Removing unsealed plain secret manifest ${unsealedSecretPath}`
-      )
-    );
+    sh.echo(c.blueBright(`Removing unsealed plain secret manifest ${unsealedSecretPath}`));
 
     const shouldKeepSecretOutputs = ARGV.kuso;
     if (!shouldKeepSecretOutputs) {
@@ -187,7 +163,7 @@ async function generateSealedSecretsManifests() {
 
     const shouldRemoveSecretInPuts = ARGV.kusi;
     if (!shouldRemoveSecretInPuts) {
-      clearUnsealedSecretFilesContents();
+      clearUnsealedInputTsSecretFilesContents();
     }
   });
 }

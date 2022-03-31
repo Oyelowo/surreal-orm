@@ -1,7 +1,7 @@
 {
   "name": "oye",
   "scripts": {
-    "postinstall": "patch-package"
+    "postinstall": "patch-package && make setup"
   },
   "devDependencies": {
     "@types/node": "^14.18.12",
