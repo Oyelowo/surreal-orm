@@ -53,7 +53,7 @@ export const guestbookFilezzz = new argocd.argoproj.v1alpha1.Application(
       namespace: namespaceNames.argocd,
     },
     spec: {
-      project: "default",
+      project: "oyelowo-project",
       destination: {
         server: "https://kubernetes.default.svc",
         namespace: namespaceNames.applications,
@@ -61,7 +61,7 @@ export const guestbookFilezzz = new argocd.argoproj.v1alpha1.Application(
       },
       source: {
         repoURL: "https://github.com/Oyelowo/modern-distributed-app-template",
-        path: "erere",
+        path: "kubernetes/manifests/generated",
         targetRevision: "HEAD",
         directory: {
           recurse: true,
