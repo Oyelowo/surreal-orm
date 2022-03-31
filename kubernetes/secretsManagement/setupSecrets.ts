@@ -11,12 +11,7 @@ import path from "path";
 import { Environment } from "../resources/shared/types/own-types";
 import { secretsSample } from "./secretsSample";
 
-const ENVIRONMENTS: Environment[] = [
-  "local",
-  "development",
-  "staging",
-  "production",
-];
+const ENVIRONMENTS: Environment[] = ["local", "development", "staging", "production"];
 const secretType = "Secrets" as const;
 const scriptName = path.basename(__filename).slice(0, -3);
 const SECRET_UNSEALED_DIRECTORY_NAME = "secrets-unsealed" as const;
@@ -26,9 +21,7 @@ type SecretUnseatFilePath = `${typeof UNSEALED_SECRETS_DIR}/${Environment}.ts`;
 
 export function setupUnsealedSecretFiles() {
   fs.mkdir(UNSEALED_SECRETS_DIR, (err) => {
-    console.info(
-      `Something went wrong creating unsealed secrets directory: Error: ${err}`
-    );
+    console.info(`Something went wrong creating unsealed secrets directory: Error: ${err}`);
   });
 
   ENVIRONMENTS.forEach((env) => {
@@ -68,9 +61,7 @@ const secretsSchema = z.object({
   argocd: z.object({
     ADMIN_PASSWORD: z.string().nonempty(),
     type: z.literal("git"),
-    url: z.literal(
-      "https://github.com/Oyelowo/modern-distributed-app-template"
-    ),
+    url: z.literal("https://github.com/Oyelowo/modern-distributed-app-template"),
     username: z.literal("Oyelowo"),
     password: z.string().nonempty(),
   }),
@@ -82,10 +73,7 @@ function getFilePath(environment: Environment): SecretUnseatFilePath {
 
 // import chalk from "chalk";
 
-async function createSecretsConfigFile(
-  environment: Environment,
-  overwrite: boolean
-) {
+async function createSecretsConfigFile(environment: Environment, overwrite: boolean) {
   const filePath = getFilePath(environment);
 
   const content = `
@@ -98,11 +86,10 @@ async function createSecretsConfigFile(
   fs.writeFile(filePath, content, { flag: overwrite ? "" : "wx" }, (error) => {
     // if (err) throw err;
     if (error) {
-      console.warn("File already created!🎉");
+      console.warn("File already created previously!");
     }
     console.warn(
-      `Secret files created and gitignored!!! 🎉  
-          Make sure you never push these secrets to git!🎉`
+      `Secret files created and gitignored! Make sure you never push these secrets to git!🎉`
     );
   });
 }

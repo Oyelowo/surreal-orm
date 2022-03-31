@@ -85,12 +85,11 @@ GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 async function generateManifests() {
   // sh.cd(__dirname);
   // sh.exec("npm i");
-  setupUnsealedSecretFiles();
 
   sh.exec("npm i");
   sh.rm("-rf", "./login");
   sh.mkdir("./login");
-  sh.rm("-rf", manifestsDirForEnv);
+  // sh.rm("-rf", manifestsDirForEnv);
   sh.exec("pulumi login file://login");
   sh.exec("export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev");
 
@@ -111,10 +110,9 @@ async function generateManifests() {
   if (shGenerateManifestsOutput.stderr) {
     sh.echo(c.redBright(shGenerateManifestsOutput.stderr));
     sh.exit(1);
-    return
   }
 
-  generateSealedSecretsManifests();
+  // generateSealedSecretsManifests();
 }
 
 /* 
@@ -184,17 +182,22 @@ function doInitialClusterSetup() {
   // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
   sh.exec(`kubectl rollout status deployment/sealed-secrets-controller -n=kube-system`);
 }
+async function someT() {
+  // setupUnsealedSecretFiles();
 
-generateManifests();
-if (ARGV.gss) {
-  /* 
-       This requires the above step with initial cluster setup making sure that the sealed secret controller is
-       running in the cluster */
-  doInitialClusterSetup();
+  await generateManifests();
+  // if (ARGV.gss) {
+  //   /* 
+  //      This requires the above step with initial cluster setup making sure that the sealed secret controller is
+  //      running in the cluster */
+  //   doInitialClusterSetup();
 
-  generateSealedSecretsManifests();
-  // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
-  sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/0-crd`);
-  sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/1-manifest`);
-  sh.exec(`kubectl apply -f ${SEALED_SECRETS_DIR_FOR_ENV}`);
+  //   await generateSealedSecretsManifests();
+  //   // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
+  //   sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/0-crd`);
+  //   sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/1-manifest`);
+  //   sh.exec(`kubectl apply -f ${SEALED_SECRETS_DIR_FOR_ENV}`);
+  // }
 }
+
+someT();
