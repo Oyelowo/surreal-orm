@@ -1,4 +1,5 @@
 import * as k8s from "@pulumi/kubernetes";
+import * as pulumi from "@pulumi/pulumi";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
 import * as kx from "@pulumi/kubernetesx";
 import { environmentVariables } from "./validations";
@@ -21,7 +22,7 @@ const { ENVIRONMENT, TEMPORARY_DIR } = environmentVariables;
 // type Namespace = "team-a" | "workers" | "web" | "jobs"
 
 // TODO: probably use path and __dirname modules?
-const rootDirectory = `manifests/generated/${TEMPORARY_DIR ?? ENVIRONMENT}`;
+export const rootDirectory = `manifests/generated/${TEMPORARY_DIR ?? ENVIRONMENT}`;
 export const applicationsDirectory = new k8s.Provider("render-applications", {
   renderYamlToDirectory: `${rootDirectory}/applications`,
   // renderYamlToDirectory: `${rootDirectory}/${nameSpaceName}`,

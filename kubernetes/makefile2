@@ -2,28 +2,111 @@ install:
 	npm i
 
 # Used as base function for other generator functions for various environments
-# Path where pulumi generates manifests for each environment <local, development, staging, production>
-MANIFESTS_BASE_DIR="./manifests"
-# Path where pulumi generates manifests for each environment <local, development, staging, production>
-ENVIRONMENT_MANIFESTS_DIR="${MANIFESTS_BASE_DIR}/generated/local"
-# Path where pulumi generates manifests for each environment <local, development, staging, production>
-ENVIRONMENT_SEALED_SECRETS_MANIFESTS_DIR="${MANIFESTS_BASE_DIR}/sealed-secrets/$(environment) "
+MANIFESTS_BASE_DIR=./manifests # Path where pulumi generates manifests for each environment <local, development, staging, production>
+ENVIRONMENT_MANIFESTS_DIR=${MANIFESTS_BASE_DIR}/generated/$(environement) # Path where pulumi generates manifests for each environment <local, development, staging, production>
+ENVIRONMENT_SEALED_SECRETS_MANIFESTS_DIR=${MANIFESTS_BASE_DIR}/sealed-secrets/$(environement) # Path where pulumi generates manifests for each environment <local, development, staging, production>
 manifests_generator:
+	make install
+	rm -rf ./login
+	mkdir ./login
+	pulumi login file://login 
 
-
-	@for FILE in ${ENVIRONMENT_MANIFESTS_DIR}/**/**/secret-*ml; do \
-		@if [ "true" = "true" ]; then \
-			echo "Removing unsealed plain secret manifest $${FILE}"; \
-		fi; \
-		echo "Removing unsealed plain secret manifest $${FILE}"; \
-	done
+	export PULUMI_CONFIG_PASSPHRASE="" && pulumi stack init --stack dev
 	
-# rm -rf $${FILE}; \
+	# Set environment variables for pulumi and applications for yaml files generation
+	export PULUMI_CONFIG_PASSPHRASE="" && \
+	export IMAGE_TAG_REACT_WEB="$(tag)" && \
+	export IMAGE_TAG_GRAPHQL_MONGO="$(tag)" && \
+	export IMAGE_TAG_GRPC_MONGO="$(tag)" && \
+	export IMAGE_TAG_GRAPHQL_POSTGRES="$(tag)" && \
+	export ENVIRONMENT="$(environment)" && \
+	pulumi update --yes --skip-preview --stack dev
+
+	# Remove plain secret and/or Generate sealed secrets
+	@if [ $(generate_sealed_secrets) ]; then \
+		echo "Hello world"; \
+		kubectl apply -R -f ${ENVIRONMENT_MANIFESTS_DIR}/namespaces; \
+		\
+		# Apply setups with sealed secret controller; \
+		kubectl apply -R -f  ${ENVIRONMENT_MANIFESTS_DIR}/cluster-setup; \
+		\
+		# Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets; \
+		kubectl rollout status deployment/sealed-secrets-controller -n=kube-system; \
+		\
+		mkdir -p ${ENVIRONMENT_SEALED_SECRETS_MANIFESTS_DIR};\
+	fi
+	
+
+
+	@for FILE in ${ENVIRONMENT_SEALED_SECRETS_MANIFESTS_DIR}/**/**/secret-*ml; do \
+		@if [ $(generate_sealed_secrets) ]; then \
+			kubeseal <$${FILE} -o yaml >${SECRETS_ENCRYPTED_DIR}/$${FILE##*/}; \
+		fi \
+		\
+		echo "Removing unsealed plain secret manifest $${FILE}"; \
+		rm -rf $${FILE}; \
+	done
+
+
+# Used as base function for other generator functions for various environments
+MANIFESTS_BASE_DIR=./manifests # Path where pulumi generates manifests for each environment <local, development, staging, production>
+ENVIRONMENT_MANIFESTS_DIR=${MANIFESTS_BASE_DIR}/generated/$(environement) # Path where pulumi generates manifests for each environment <local, development, staging, production>
+ENVIRONMENT_SEALED_SECRETS_MANIFESTS_DIR=${MANIFESTS_BASE_DIR}/sealed-secrets/$(environement) # Path where pulumi generates manifests for each environment <local, development, staging, production>
+manifests_generator:
+	# make install
+	# rm -rf ./login
+	# mkdir ./login
+	# pulumi login file://login 
+
+	# export PULUMI_CONFIG_PASSPHRASE="" && pulumi stack init --stack dev
+	
+	# # Set environment variables for pulumi and applications for yaml files generation
+	# export PULUMI_CONFIG_PASSPHRASE="" && \
+	# export IMAGE_TAG_REACT_WEB="$(tag)" && \
+	# export IMAGE_TAG_GRAPHQL_MONGO="$(tag)" && \
+	# export IMAGE_TAG_GRPC_MONGO="$(tag)" && \
+	# export IMAGE_TAG_GRAPHQL_POSTGRES="$(tag)" && \
+	# export ENVIRONMENT="$(environment)" && \
+	# pulumi update --yes --skip-preview --stack dev
+
+	echo "Remove plain secret and/or Generate sealed secrets"
+	@if [ $(generate_sealed_secrets) ]; then \
+		echo "Hello world"; \
+		kubectl apply -R -f ${ENVIRONMENT_MANIFESTS_DIR}/namespaces; \
+		\
+		echo "Apply setups with sealed secret controller"; \
+		kubectl apply -R -f  ${ENVIRONMENT_MANIFESTS_DIR}/cluster-setup; \
+		\
+		echo "Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets"; \
+		kubectl rollout status deployment/sealed-secrets-controller -n=kube-system; \
+		\
+		mkdir -p ${ENVIRONMENT_SEALED_SECRETS_MANIFESTS_DIR};\
+	fi
+	
+
+	@for FILE in ${ENVIRONMENT_SEALED_SECRETS_MANIFESTS_DIR}/**/**/secret-*ml; do \
+		@if [ $(generate_sealed_secrets) ]; then \
+			kubeseal <$${FILE} -o yaml >${SECRETS_ENCRYPTED_DIR}/$${FILE##*/}; \
+		fi \
+		\
+		echo "Removing unsealed plain secret manifest $${FILE}"; \
+		rm -rf $${FILE}; \
+	done
 
 
 
-
-
+# @if [ "test" = "test" ]; then \
+# 	echo "Hello world"; \
+# 	kubectl apply -R -f ${ENVIRONMENT_MANIFESTS_DIR}/namespaces; \
+# 	\
+# 	echo "Apply setups with sealed secret controller"; \
+# 	kubectl apply -R -f  ${ENVIRONMENT_MANIFESTS_DIR}/cluster-setup; \
+# 	\
+# 	echo "Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets"; \
+# 	kubectl rollout status deployment/sealed-secrets-controller -n=kube-system; \
+# 	\
+# 	mkdir -p ${ENVIRONMENT_SEALED_SECRETS_MANIFESTS_DIR};\
+# fi
 # make manifests_local tag=local
 manifests_local:
 	make manifests_generator tag=local environment=local
@@ -88,7 +171,7 @@ create-sealed-secrets:
 
 
 # setup-cluster-production:	
-create-sealed-secrets2:	
+create-sealed-secrets:	
 	make generate_temporary
 	ENVIRONMENT=production make seal
 
