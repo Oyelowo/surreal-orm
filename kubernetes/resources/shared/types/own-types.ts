@@ -29,12 +29,7 @@ export type Memory = `${number}${
 
 export type CPU = `${number}${"m"}`;
 
-export type AppName =
-  | "graphql-mongo"
-  | "graphql-postgres"
-  | "grpc-mongo"
-  | "react-web"
-  | "argocd";
+export type AppName = "graphql-mongo" | "graphql-postgres" | "grpc-mongo" | "react-web" | "argocd";
 
 export interface Settings<TAppName extends AppName> {
   requestMemory: Memory;
@@ -58,9 +53,7 @@ export type RecursivePartial<T> = {
 // keep in mind that this should be used on json / plain objects only.
 // otherwise, it will make class methods optional as well.
 export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends Array<infer I>
-    ? Array<DeepPartial<I>>
-    : DeepPartial<T[P]>;
+  [P in keyof T]?: T[P] extends Array<infer I> ? Array<DeepPartial<I>> : DeepPartial<T[P]>;
 };
 
 type MongoDb = "mongodb";
@@ -69,10 +62,7 @@ type DoesNotHaveDb = "doesNotHaveDb";
 
 export type DBType = MongoDb | PostgresDb | DoesNotHaveDb;
 
-export type MongoDbEnvVars<
-  DBN extends `${AppName}-database`,
-  NS extends NamespaceOfApps
-> = {
+export type MongoDbEnvVars<DBN extends `${AppName}-database`, NS extends NamespaceOfApps> = {
   dbType: MongoDb;
   MONGODB_NAME: DBN;
   MONGODB_USERNAME: string;
@@ -80,12 +70,10 @@ export type MongoDbEnvVars<
   MONGODB_HOST: `${DBN}.${NS}`;
   MONGODB_PORT: "27017";
   MONGODB_SERVICE_NAME: DBN;
+  MONGODB_STORAGE_CLASS: "linode-block-storage-retain"; // TODO: Do this properly
 };
 
-export type PostgresDbEnvVars<
-  DBN extends `${AppName}-database`,
-  NS extends NamespaceOfApps
-> = {
+export type PostgresDbEnvVars<DBN extends `${AppName}-database`, NS extends NamespaceOfApps> = {
   dbType: PostgresDb;
   POSTGRES_NAME: DBN;
   POSTGRES_DATABASE_NAME: DBN;
@@ -94,12 +82,10 @@ export type PostgresDbEnvVars<
   POSTGRES_HOST: `${DBN}.${NS}`;
   POSTGRES_PORT: "5432";
   POSTGRES_SERVICE_NAME: DBN;
+  POSTGRES_STORAGE_CLASS: string;
 };
 
-type DatabaseEnvVars<
-  DBN extends `${AppName}-database`,
-  NS extends NamespaceOfApps
-> =
+type DatabaseEnvVars<DBN extends `${AppName}-database`, NS extends NamespaceOfApps> =
   | MongoDbEnvVars<DBN, NS>
   | PostgresDbEnvVars<DBN, NS>
   | { dbType: DoesNotHaveDb };
@@ -121,11 +107,7 @@ type EnvironmentVariables<
   DBT extends DBType
 > = Extract<AppEnvVars<AN, NS>, { dbType: DBT }>;
 
-export type AppConfigs<
-  AN extends AppName,
-  DBT extends DBType,
-  NS extends NamespaceOfApps
-> = {
+export type AppConfigs<AN extends AppName, DBT extends DBType, NS extends NamespaceOfApps> = {
   kubeConfig: Settings<NoUnion<AN>>;
   envVars: Omit<EnvironmentVariables<AN, NS, DBT>, "dbType">;
   metadata: {
@@ -134,8 +116,4 @@ export type AppConfigs<
   };
 };
 
-export type NoUnion<T, U = T> = T extends U
-  ? [U] extends [T]
-    ? T
-    : never
-  : never;
+export type NoUnion<T, U = T> = T extends U ? ([U] extends [T] ? T : never) : never;

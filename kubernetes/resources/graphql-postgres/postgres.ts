@@ -1,7 +1,7 @@
 import { postgresdbHelmValuesBitnami } from "./../shared/types/helm-charts/postgresdbHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { providerApplication } from "../shared/cluster";
+import { applicationsDirectory } from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial } from "../shared/types/own-types";
 import { graphqlPostgresSettings } from "./settings";
@@ -85,7 +85,9 @@ const postgresValues: DeepPartial<postgresdbHelmValuesBitnami> = {
         },
       },
     },
+    storageClass: envVars.APP_ENVIRONMENT === "local" ? "" : "xxx", // FIXME TODO: Specify the storage class here
   },
+
   //   primary: {
   //     service: {
   //       type: "ClusterIP",
@@ -118,6 +120,6 @@ export const graphqlPostgresPostgresdb = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: providerApplication }
+  { provider: applicationsDirectory }
   // { provider }
 );

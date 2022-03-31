@@ -28,6 +28,7 @@ export const graphqlPostgresSettings: AppConfigs<
     POSTGRES_HOST: "graphql-postgres-database.applications", // the name of the postgres service being connected to. The name has suffices(primary|read etc) if using replcated architecture
     POSTGRES_PORT: "5432",
     POSTGRES_SERVICE_NAME: "graphql-postgres-database",
+    POSTGRES_STORAGE_CLASS: "xxxxx" // FIXME: Set a storage class here
   },
   metadata: {
     name: "graphql-postgres",

@@ -1,10 +1,10 @@
-import { postgresdbHaHelmValuesBitnami } from './../shared/types/helm-charts/postgresdbHaHelmValuesBitnami';
-import * as k8s from '@pulumi/kubernetes';
+import { postgresdbHaHelmValuesBitnami } from "./../shared/types/helm-charts/postgresdbHaHelmValuesBitnami";
+import * as k8s from "@pulumi/kubernetes";
 
-import { providerApplication } from '../shared/cluster';
-import { namespaceNames } from '../shared/namespaces';
-import { graphqlPostgresSettings } from './settings';
-import { DeepPartial } from '../shared/types/own-types';
+import { applicationsDirectory } from "../shared/manifestsDirectory";
+import { namespaceNames } from "../shared/namespaces";
+import { graphqlPostgresSettings } from "./settings";
+import { DeepPartial } from "../shared/types/own-types";
 
 const { envVars } = graphqlPostgresSettings;
 type Credentials = {
@@ -126,5 +126,5 @@ export const graphqlPostgresPostgresdbHA = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: providerApplication }
+  { provider: applicationsDirectory }
 );

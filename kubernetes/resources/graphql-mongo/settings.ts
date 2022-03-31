@@ -2,11 +2,7 @@ import { namespaceNames } from "./../shared/namespaces";
 import { environmentVariables } from "./../shared/validations";
 import { AppConfigs } from "../shared/types/own-types";
 
-export const graphqlMongoSettings: AppConfigs<
-  "graphql-mongo",
-  "mongodb",
-  "applications"
-> = {
+export const graphqlMongoSettings: AppConfigs<"graphql-mongo", "mongodb", "applications"> = {
   kubeConfig: {
     requestMemory: "70Mi",
     requestCpu: "100m",
@@ -27,6 +23,7 @@ export const graphqlMongoSettings: AppConfigs<
     MONGODB_PASSWORD: "password0",
     MONGODB_HOST: "graphql-mongo-database.applications",
     MONGODB_SERVICE_NAME: "graphql-mongo-database",
+    MONGODB_STORAGE_CLASS: "linode-block-storage-retain",
     // hostAndPort":"graphql-mongo-0.mongo-graphql.development.svc.cluster.local:27017
     // MONGODB_HOST: "graphql-mongod-0.graphql-mongod-headless.development.svc.cluster.local",
     // const url = 'mongodb://username1:$[password]@mongo-graphql.development:27017/db1?authSource=$[authSource]';

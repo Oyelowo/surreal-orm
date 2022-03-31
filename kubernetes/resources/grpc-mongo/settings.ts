@@ -22,6 +22,7 @@ export const grpcMongoSettings: AppConfigs<"grpc-mongo", "mongodb", "application
     MONGODB_PASSWORD: "password0",
     MONGODB_HOST: "grpc-mongo-database.applications",
     MONGODB_SERVICE_NAME: "grpc-mongo-database",
+    MONGODB_STORAGE_CLASS: "linode-block-storage-retain",
     // hostAndPort":"grpc-mongo-0.mongo-graphql.development.svc.cluster.local:27017
     // MONGODB_HOST: "grpc-mongod-0.grpc-mongod-headless.development.svc.cluster.local",
     // const url = 'mongodb://username1:$[password]@mongo-grpc.development:27017/db1?authSource=$[authSource]';

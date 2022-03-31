@@ -2,9 +2,10 @@ import { MongodbHelmValuesBitnami } from "./../shared/types/helm-charts/MongodbH
 import { namespaceNames } from "./../shared/namespaces";
 import * as k8s from "@pulumi/kubernetes";
 
-import { providerApplication } from "../shared/cluster";
+import { applicationsDirectory } from "../shared/manifestsDirectory";
 import { grpcMongoSettings } from "./settings";
 import { DeepPartial } from "../shared/types/own-types";
+import { environmentVariables } from "../shared/validations";
 
 /* MONGODB STATEFULSET */
 type Credentials = {
@@ -60,9 +61,13 @@ const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   replicaCount: 3,
   // nameOverride: "mongodb-graphql",
   fullnameOverride: grpcMongoSettings.envVars.MONGODB_SERVICE_NAME,
-  // global: {
-  //   namespaceOverride: devNamespaceName,
-  // },
+  global: {
+    // namespaceOverride: devNamespaceName,
+    storageClass:
+      environmentVariables.ENVIRONMENT === "local"
+        ? ""
+        : grpcMongoSettings.envVars.MONGODB_STORAGE_CLASS,
+  },
   auth: {
     enabled: true,
     rootUser: "root_user",
@@ -99,5 +104,5 @@ export const grpcMongoMongodb = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: providerApplication }
+  { provider: applicationsDirectory }
 );
