@@ -19,6 +19,7 @@ import {
   clearUnsealedInputTsSecretFilesContents,
   setupUnsealedSecretFiles,
 } from "../secretsManagement/setupSecrets";
+import { getManifestsOutputDirectory } from "../resources/shared";
 
 type EnvName = keyof typeof environmentVariables;
 const globAsync = util.promisify(glob);
@@ -30,6 +31,7 @@ const IMAGE_TAG_GRAPHQL_POSTGRES: EnvName = "IMAGE_TAG_GRAPHQL_POSTGRES";
 const ENVIRONMENT: EnvName = "ENVIRONMENT";
 const TEMPORARY_DIR: EnvName = "TEMPORARY_DIR";
 const MANIFESTS_DIR = "manifests";
+const SEALED_SECRETS_BASE_DIR = path.join(MANIFESTS_DIR, "sealed-secrets");
 
 const ARGV = yargs(process.argv.slice(2))
   .options({
@@ -70,6 +72,8 @@ const ARGV = yargs(process.argv.slice(2))
     },
   } as const)
   .parseSync();
+
+const manifestsDirForEnv = getManifestsOutputDirectory(ARGV.e);
 
 prompt.override = ARGV;
 prompt.start();
@@ -116,7 +120,6 @@ These secrets are encrypted using the bitnami sealed secret controller running i
 you are at present context
 */
 async function generateSealedSecretsManifests() {
-  const SEALED_SECRETS_BASE_DIR = path.join(MANIFESTS_DIR, "sealed-secrets");
   const SEALED_SECRETS_DIR = `${SEALED_SECRETS_BASE_DIR}/${ARGV.e}`;
 
   const UNSEALED_SECRETS_MANIFESTS_FOR_ENV = path.join(
@@ -168,4 +171,25 @@ async function generateSealedSecretsManifests() {
   });
 }
 
+function doInitialClusterSetup() {
+  // # Apply namespace first
+  sh.exec(`kubectl apply -R -f ${manifestsDirForEnv}/namespaces`);
+
+  // # Apply setups with sealed secret controller
+  sh.exec(`kubectl apply -R -f  ${manifestsDirForEnv}/cluster-setup`);
+
+  // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
+  sh.exec(`kubectl rollout status deployment/sealed-secrets-controller -n=kube-system`);
+}
+
 generateManifests();
+if (ARGV.gss) {
+  /* 
+       This requires the above step with initial cluster setup making sure that the sealed secret controller is
+       running in the cluster */
+  doInitialClusterSetup();
+
+  generateSealedSecretsManifests();
+  sh.exec(`kubectl apply -f ${SEALED_SECRETS_BASE_DIR}`);
+  sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd`);
+}

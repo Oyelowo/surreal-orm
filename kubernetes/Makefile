@@ -4,6 +4,11 @@ setup:
 install:
 	npm i
 
+##### NOTE: Commands related to generating sealed secrets requires that there is a running
+# cluster. The script will generate a bitnami sealed secret controller
+# and apply that automatically to the cluster if it does not yet exist
+# Make sure your branch is up to date with master before this
+
 # Generates sealed secrets from output plain unsealed kubernetes secretes which
 # is also generated from the config created by you, the user at e.g: kubernetes/secretsManagement/secrets-unsealed/production.ts
 manifests_local_with_sealed_secrets:
@@ -29,7 +34,7 @@ manifests_production_with_sealed_secrets:
 
 
 #####  NO SEALED OR PLAIN SECRETS GENERATED ####
-#  This is good for the CI where we dont want to store input secret Ts config
+#  This is good for the CI pipeline in github actions where we dont want to store input secret Ts config
 # found at kubernetes/secretsManagement/secrets-unsealed/local.ts
 manifests_development_no_sealed_secrets:
 # Example usage make manifests_development_no_sealed_secrets tag=github-sha  

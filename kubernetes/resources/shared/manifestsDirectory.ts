@@ -1,9 +1,10 @@
+import { Environment } from "./types/own-types";
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
 import * as kx from "@pulumi/kubernetesx";
 import { environmentVariables } from "./validations";
-
+import path from "path";
 // import { devNamespace } from "./namespaces";
 
 // import * as eks from "@pulumi/eks";
@@ -22,15 +23,18 @@ const { ENVIRONMENT, TEMPORARY_DIR } = environmentVariables;
 // type Namespace = "team-a" | "workers" | "web" | "jobs"
 
 // TODO: probably use path and __dirname modules?
-export const rootDirectory = `manifests/generated/${TEMPORARY_DIR ?? ENVIRONMENT}`;
+export const getManifestsOutputDirectory = (environment: Environment) =>
+  path.join("manifests", "generated", environment);
+
+const manifestsBaseDirForEnvironment = getManifestsOutputDirectory(ENVIRONMENT);
 export const applicationsDirectory = new k8s.Provider("render-applications", {
-  renderYamlToDirectory: `${rootDirectory}/applications`,
+  renderYamlToDirectory: `${manifestsBaseDirForEnvironment}/applications`,
   // renderYamlToDirectory: `${rootDirectory}/${nameSpaceName}`,
   // namespace: "nana",
 });
 
 export const nameSpacesDirectory = new k8s.Provider("render-namespaces", {
-  renderYamlToDirectory: `${rootDirectory}/namespaces`,
+  renderYamlToDirectory: `${manifestsBaseDirForEnvironment}/namespaces`,
   // namespace: "nana",
 });
 
@@ -38,12 +42,12 @@ export const nameSpacesDirectory = new k8s.Provider("render-namespaces", {
 // sealed secrets controller and ingress controller which are
 // fundamental for the applications that would run in the cluster
 export const clusterSetupDirectory = new k8s.Provider("render-cluster-setup", {
-  renderYamlToDirectory: `${rootDirectory}/cluster-setup`,
+  renderYamlToDirectory: `${manifestsBaseDirForEnvironment}/cluster-setup`,
   // namespace: "nana",
 });
 
 export const argocdDirectory = new k8s.Provider("render-argocd", {
-  renderYamlToDirectory: `${rootDirectory}/argocd`,
+  renderYamlToDirectory: `${manifestsBaseDirForEnvironment}/argocd`,
   // namespace: "nana",
 });
 
