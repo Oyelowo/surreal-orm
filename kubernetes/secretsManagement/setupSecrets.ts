@@ -90,7 +90,7 @@ async function createSecretsConfigFile(environment: Environment, overwrite: bool
     }
     console.warn(
       c.greenBright(
-        `Secret files created and gitignored at ${filePath}! NEVER these secrets to git!🎉`
+        `Secret files created and gitignored at ${filePath}! NEVER commit these secrets to git!🎉`
       )
     );
   });
