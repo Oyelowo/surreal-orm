@@ -1,32 +1,9 @@
 install:
 	npm i
 
-# Used as base function for other generator functions for various environments
-# Path where pulumi generates manifests for each environment <local, development, staging, production>
-MANIFESTS_BASE_DIR="./manifests"
-# Path where pulumi generates manifests for each environment <local, development, staging, production>
-ENVIRONMENT_MANIFESTS_DIR="${MANIFESTS_BASE_DIR}/generated/local"
-# Path where pulumi generates manifests for each environment <local, development, staging, production>
-ENVIRONMENT_SEALED_SECRETS_MANIFESTS_DIR="${MANIFESTS_BASE_DIR}/sealed-secrets/$(environment) "
-manifests_generator:
-
-
-	@for FILE in ${ENVIRONMENT_MANIFESTS_DIR}/**/**/secret-*ml; do \
-		@if [ "true" = "true" ]; then \
-			echo "Removing unsealed plain secret manifest $${FILE}"; \
-		fi; \
-		echo "Removing unsealed plain secret manifest $${FILE}"; \
-	done
-	
-# rm -rf $${FILE}; \
-
-
-
-
-
-# make manifests_local tag=local
 manifests_local:
-	make manifests_generator tag=local environment=local
+	npx ts-node scripts/script.ts -e=local -t=latest --gss --kuso --kiso
+	# npx ts-node scripts/script.ts -environment=local --tag=latest --generate-sealed-secrets --delete
 
 # make manifests_development tag=github-sha  
 manifests_development:

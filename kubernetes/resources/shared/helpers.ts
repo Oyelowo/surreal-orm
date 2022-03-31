@@ -1,6 +1,13 @@
 import * as kx from "@pulumi/kubernetesx";
 import * as pulumi from "@pulumi/pulumi";
 
+
+// TODO: Load values.yaml from helm bitnami repo
+// Convert yaml to json
+// Convert json to TS
+
+// Similar to https://jsonformatter.org/yaml-to-typescript
+
 interface ServiceProps {
   serviceName: string;
   deployment: kx.Deployment;

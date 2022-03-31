@@ -59,7 +59,7 @@ const ARGV = yargs(process.argv.slice(2))
         "Generate sealed secrets manifests from generated plain secrets manifests",
       demandOption: true,
     },
-    duso: {
+    kuso: {
       alias: "keep-unsealed-secrets",
       type: "boolean",
       // choices: ["true", "t", "false", "f"],
@@ -69,7 +69,7 @@ const ARGV = yargs(process.argv.slice(2))
 
       demandOption: true,
     },
-    dusi: {
+    kusi: {
       alias: "keep-unsealed-secrets",
       type: "boolean",
       // choices: ["true", "t", "false", "f"],
@@ -79,8 +79,9 @@ const ARGV = yargs(process.argv.slice(2))
 
       demandOption: true,
     },
-  })
+  } as const)
   .parseSync();
+
 
 prompt.override = ARGV;
 prompt.start();
@@ -183,12 +184,12 @@ async function generateSealedSecretsManifests() {
       )
     );
 
-    const shouldRemoveSecretOutPuts = ARGV.duso;
-    if (!shouldRemoveSecretOutPuts) {
+    const shouldKeepSecretOutputs = ARGV.kuso;
+    if (!shouldKeepSecretOutputs) {
       sh.rm("-rf", unsealedSecretPath);
     }
 
-    const shouldRemoveSecretInPuts = ARGV.dusi;
+    const shouldRemoveSecretInPuts = ARGV.kusi;
     if (!shouldRemoveSecretInPuts) {
       clearUnsealedSecretFilesContents();
     }
