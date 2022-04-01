@@ -124,7 +124,7 @@ const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
 
 // `http://${name}.${namespace}:${port}`;
 export const argocdHelm = new k8s.helm.v3.Chart(
-  "argo-cd",
+  "argocd",
   {
     chart: "argo-cd",
     fetchOpts: {

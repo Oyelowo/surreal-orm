@@ -13,11 +13,12 @@ install:
 # is also generated from the config created by you, the user at e.g: kubernetes/secretsManagement/secrets-unsealed/production.ts
 manifests_local_with_sealed_secrets:
 	npx ts-node scripts/script.ts -e=local -t=latest --gss
+# npx ts-node scripts/script.ts -e=local -t=latest --gss
 
-	# If you want to keep unsealed secrets output(--kuso) or keep unsealed secrets input(--kiso).
-	# If you ever use these flags, make sure the files are cleared and sensitive secrets are not left behind
-	# npx ts-node scripts/script.ts -e=local -t=latest --gss --kuso --kiso
-	# npx ts-node scripts/script.ts -environment=local --tag=latest --generate-sealed-secrets --delete
+# If you want to keep unsealed secrets output(--kuso) or keep unsealed secrets input(--kiso).
+# If you ever use these flags, make sure the files are cleared and sensitive secrets are not left behind
+# npx ts-node scripts/script.ts -e=local -t=latest --gss --kuso --kiso
+# npx ts-node scripts/script.ts -environment=local --tag=latest --generate-sealed-secrets --delete
 
 manifests_development_with_sealed_secrets:
 # Example usage: make manifests_development_with_sealed_secrets tag=github-sha  

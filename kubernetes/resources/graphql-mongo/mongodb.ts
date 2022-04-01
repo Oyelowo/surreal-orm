@@ -57,7 +57,7 @@ const mappedCredentials = credentials.reduce<Credentials>(
   }
 );
 
-export const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
+const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
   useStatefulSet: true,
   architecture: "replicaset",
   replicaCount: 3,
@@ -83,11 +83,13 @@ In order to retain your Block Storage Volume and its data, even after the associ
 
   auth: {
     enabled: true,
-    rootUser: "root_user",
+    rootUser: "root_user", // TODO: Cha ge
     rootPassword: "root_password",
     replicaSetKey: "Ld1My4Q1s4",
     // array of
-    ...mappedCredentials,
+    // ...mappedCredentials,
+    username: envVars.MONGODB_USERNAME,
+    password: envVars.MONGODB_PASSWORD,
     // usernames: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],
     // passwords: [graphqlMongoEnvironmentVariables.MONGODB_PASSWORD],
     // databases: [graphqlMongoEnvironmentVariables.MONGODB_NAME],
