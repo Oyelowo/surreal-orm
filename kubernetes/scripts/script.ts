@@ -104,8 +104,12 @@ async function generateManifests() {
       export PULUMI_CONFIG_PASSPHRASE=""
       pulumi update --yes --skip-preview --stack dev
       `,
-    { silent: true, fatal: true }
+    { silent: true /* fatal: true */ }
   );
+
+  // PULUMI unfortunately seems to push all the logs to stdout. Might patch it if need be
+  const stdout = shGenerateManifestsOutput.stdout;
+  sh.echo(c.greenBright(shGenerateManifestsOutput.stdout));
 
   // TODO: There has to be a better way. And open an issue/PR on pulumi repo or patch package locally
   // This would be sufficient if pulumi would just send error to stdout instead of sending all to stdout
@@ -114,16 +118,15 @@ async function generateManifests() {
     sh.exit(1);
   }
 
-  // PULUMI unfortunately seems to push all the logs to stdout. Might patch it if need be
-  const stdout = shGenerateManifestsOutput.stdout;
-  sh.echo(c.greenBright(shGenerateManifestsOutput.stdout));
   const errorText = sh.exec(c.redBright(`${stdout} | grep Error:`));
   if (errorText) {
-    sh.echo(c.redBright(errorText));
+    sh.echo(
+      c.redBright(stdout.split(/\r?\n/).find((l) => l.toLocaleLowerCase().includes("error")))
+    );
     // Get the error out. This is a little brittle but well, I need to raise an issue with pulumi
     // const err = stdout.substring(stdout.indexOf("Error:"));
     // sh.echo(c.redBright(err));
-    sh.exit(1);
+    // sh.exit(1);
   }
 
   // generateSealedSecretsManifests();
