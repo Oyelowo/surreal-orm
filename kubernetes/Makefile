@@ -12,7 +12,7 @@ install:
 # Generates sealed secrets from output plain unsealed kubernetes secretes which
 # is also generated from the config created by you, the user at e.g: kubernetes/secretsManagement/secrets-unsealed/production.ts
 manifests_local_with_sealed_secrets:
-	npx ts-node scripts/script.ts -e=local -t=latest --gss
+	npx ts-node scripts/script.ts -e=local -t=latest --gss --kiso
 # npx ts-node scripts/script.ts -e=local -t=latest --gss
 
 # If you want to keep unsealed secrets output(--kuso) or keep unsealed secrets input(--kiso).
