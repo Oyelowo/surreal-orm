@@ -3,6 +3,7 @@ use mongodb::{
     options::{ClientOptions, Credential, ServerAddress},
     Client, Database,
 };
+
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 
@@ -120,6 +121,11 @@ impl RedisConfigs {
         // format!("${username}:${password}@{host}:{port}")
         // Redis seem to not require username
 
+        println!(
+            "Redis URL =======>>>>>>>>>>: {}",
+            format!("redis://:{password}@{host}:{port}")
+        );
+        // format!(":{password}@{host}:{port}")
         format!("redis://:{password}@{host}:{port}")
     }
 }

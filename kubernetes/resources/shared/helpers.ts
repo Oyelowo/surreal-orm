@@ -1,12 +1,18 @@
+import { AppConfigs } from "./types/own-types";
 import * as kx from "@pulumi/kubernetesx";
 import * as pulumi from "@pulumi/pulumi";
-
 
 // TODO: Load values.yaml from helm bitnami repo
 // Convert yaml to json
 // Convert json to TS
 
 // Similar to https://jsonformatter.org/yaml-to-typescript
+
+export function getFQDNFromSettings(config: AppConfigs<any, any, any>) {
+  const { namespace, name } = config.metadata;
+  const host = config.envVars.APP_PORT;
+  return `${name}.${namespace}:${host}`;
+}
 
 interface ServiceProps {
   serviceName: string;
@@ -15,11 +21,7 @@ interface ServiceProps {
 }
 
 // NOT USED FOR NOW. I went with directly patching the package instead. Keep for future purpose/reference
-export function generateService({
-  serviceName,
-  deployment,
-  args = {},
-}: ServiceProps): kx.Service {
+export function generateService({ serviceName, deployment, args = {} }: ServiceProps): kx.Service {
   const serviceSpec = pulumi
     .all([deployment.spec.template.spec.containers, args])
     .apply(([containers, args]) => {

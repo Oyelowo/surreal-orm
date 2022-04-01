@@ -23,10 +23,10 @@ export const secretsSample: Secrets = {
     POSTGRES_PASSWORD: "",
   },
   "react-web": {
-    GITHUB_ID: "",
-    GITHUB_SECRET: "",
-    GOOGLE_ID: "",
-    GOOGLE_SECRET: "",
+    GITHUB_CLIENT_ID: "",
+    GITHUB_CLIENT_SECRET: "",
+    GOOGLE_CLIENT_ID: "",
+    GOOGLE_CLIENT_SECRET: "",
   },
   argocd: {
     ADMIN_PASSWORD: "",
@@ -57,10 +57,10 @@ export const secretsLocalSample: Secrets = {
     POSTGRES_PASSWORD: "password",
   },
   "react-web": {
-    GITHUB_ID: "",
-    GITHUB_SECRET: "",
-    GOOGLE_ID: "",
-    GOOGLE_SECRET: "",
+    GITHUB_CLIENT_ID: "",
+    GITHUB_CLIENT_SECRET: "",
+    GOOGLE_CLIENT_ID: "",
+    GOOGLE_CLIENT_SECRET: "",
   },
   argocd: {
     ADMIN_PASSWORD: "12345",

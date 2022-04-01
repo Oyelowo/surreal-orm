@@ -58,10 +58,10 @@ const secretsSchema = z.object({
     POSTGRES_PASSWORD: z.string().nonempty(),
   }),
   "react-web": z.object({
-    GITHUB_ID: z.string().nonempty(),
-    GITHUB_SECRET: z.string().nonempty(),
-    GOOGLE_ID: z.string().nonempty(),
-    GOOGLE_SECRET: z.string().nonempty(),
+    GITHUB_CLIENT_ID: z.string().nonempty(),
+    GITHUB_CLIENT_SECRET: z.string().nonempty(),
+    GOOGLE_CLIENT_ID: z.string().nonempty(),
+    GOOGLE_CLIENT_SECRET: z.string().nonempty(),
   }),
   argocd: z.object({
     ADMIN_PASSWORD: z.string().nonempty(),

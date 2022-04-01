@@ -120,6 +120,7 @@ export type AppEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   NEXTAUTH_URL?: string;
+  GRAPHQL_MONGO_URL?: string; // TODO: This could be make stronger typed
 } & DatabaseEnvVars<`${AN}-database`, NS> &
   RedisDbEnvVars<AN, NS>;
 
