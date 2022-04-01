@@ -39,15 +39,16 @@ manifests_production_with_sealed_secrets:
 # found at kubernetes/secretsManagement/secrets-unsealed/local.ts
 manifests_development_no_sealed_secrets:
 # Example usage make manifests_development_no_sealed_secrets tag=github-sha  
-	npx ts-node scripts/script.ts tag=$(tag) environment=development
+	npx ts-node scripts/script.ts --tag=$(tag) --environment=development
+# Short version: npx ts-node scripts/script.ts -t=$(tag) -e=development
 
 # make manifests_staging_no_sealed_secrets tag=github-sha  
 manifests_staging_no_sealed_secrets:
-	npx ts-node scripts/script.ts tag=$(tag) environment=staging
+	npx ts-node scripts/script.ts --tag=$(tag) --environment=staging
 
 # make manifests_production_with_sealed_secrets tag=github-sha  
 manifests_production_no_sealed_secrets:
-	npx ts-node scripts/script.ts tag=$(tag) environment=production
+	npx ts-node scripts/script.ts --tag=$(tag) --environment=production
 
 
 dev:
