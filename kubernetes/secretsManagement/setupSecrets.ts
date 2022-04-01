@@ -21,6 +21,7 @@ type SecretUnseatFilePath = `${typeof UNSEALED_SECRETS_DIR}/${Environment}.ts`;
 
 export function setupUnsealedSecretFiles() {
   fs.mkdir(UNSEALED_SECRETS_DIR, (err) => {
+    // TODO: this should not be an error
     console.info(`Something went wrong creating unsealed secrets directory: Error: ${err}`);
   });
 
@@ -41,12 +42,16 @@ const secretsSchema = z.object({
   "graphql-mongo": z.object({
     MONGODB_USERNAME: z.string().nonempty(),
     MONGODB_PASSWORD: z.string().nonempty(),
+    MONGODB_ROOT_USERNAME: z.string().nonempty(),
+    MONGODB_ROOT_PASSWORD: z.string().nonempty(),
     REDIS_USERNAME: z.string().nonempty(),
     REDIS_PASSWORD: z.string().nonempty(),
   }),
   "grpc-mongo": z.object({
     MONGODB_USERNAME: z.string().nonempty(),
     MONGODB_PASSWORD: z.string().nonempty(),
+    MONGODB_ROOT_USERNAME: z.string().nonempty(),
+    MONGODB_ROOT_PASSWORD: z.string().nonempty(),
   }),
   "graphql-postgres": z.object({
     POSTGRES_USERNAME: z.string().nonempty(),

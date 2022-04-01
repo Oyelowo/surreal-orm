@@ -1,6 +1,11 @@
-import { namespaceNames } from './../shared/namespaces';
+import { namespaceNames } from "./../shared/namespaces";
 import { environmentVariables } from "../shared/validations";
 import { AppConfigs } from "./../shared/types/own-types";
+import { getSecretForApp } from "../../secretsManagement";
+
+const environment = environmentVariables.ENVIRONMENT;
+// TODO: Rethink this abstraction for secret
+const secretsFromLocalConfigs = getSecretForApp("grpc-mongo");
 
 export const grpcMongoSettings: AppConfigs<"grpc-mongo", "mongodb", "applications"> = {
   kubeConfig: {
@@ -14,12 +19,14 @@ export const grpcMongoSettings: AppConfigs<"grpc-mongo", "mongodb", "application
   },
 
   envVars: {
-    APP_ENVIRONMENT: "development",
+    APP_ENVIRONMENT: environment,
     APP_HOST: "0.0.0.0",
     APP_PORT: "50051",
     MONGODB_NAME: "grpc-mongo-database",
-    MONGODB_USERNAME: "username0",
-    MONGODB_PASSWORD: "password0",
+    MONGODB_USERNAME: secretsFromLocalConfigs.MONGODB_USERNAME,
+    MONGODB_PASSWORD: secretsFromLocalConfigs.MONGODB_PASSWORD,
+    MONGODB_ROOT_USERNAME: secretsFromLocalConfigs.MONGODB_ROOT_USERNAME,
+    MONGODB_ROOT_PASSWORD: secretsFromLocalConfigs.MONGODB_ROOT_PASSWORD,
     MONGODB_HOST: "grpc-mongo-database.applications",
     MONGODB_SERVICE_NAME: "grpc-mongo-database",
     MONGODB_STORAGE_CLASS: "linode-block-storage-retain",

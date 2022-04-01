@@ -1,7 +1,12 @@
 import { namespaceNames } from "./../shared/namespaces";
 import { environmentVariables } from "./../shared/validations";
 import { AppConfigs } from "../shared/types/own-types";
+import { getSecretForApp } from "../../secretsManagement";
 
+const environment = environmentVariables.ENVIRONMENT;
+const secretsFromLocalConfigs = getSecretForApp("graphql-mongo");
+
+// TODO: ADD A NEW KEY - SECRETS TO THE config which would accept secrets from the global secrets config used to generate manifests
 export const graphqlMongoSettings: AppConfigs<"graphql-mongo", "mongodb", "applications"> = {
   kubeConfig: {
     requestMemory: "70Mi",
@@ -14,13 +19,16 @@ export const graphqlMongoSettings: AppConfigs<"graphql-mongo", "mongodb", "appli
   },
 
   envVars: {
-    APP_ENVIRONMENT: "development",
+    APP_ENVIRONMENT: environmentVariables.ENVIRONMENT,
     APP_HOST: "0.0.0.0",
     APP_PORT: "8000",
 
     MONGODB_NAME: "graphql-mongo-database",
-    MONGODB_USERNAME: "usernarme0",
-    MONGODB_PASSWORD: "password0",
+    // TODO: remove these two. now coming handled in the deployment abstraction and uses referenced secret
+    MONGODB_USERNAME: secretsFromLocalConfigs.MONGODB_USERNAME,
+    MONGODB_PASSWORD: secretsFromLocalConfigs.MONGODB_PASSWORD,
+    MONGODB_ROOT_USERNAME: secretsFromLocalConfigs.MONGODB_ROOT_USERNAME,
+    MONGODB_ROOT_PASSWORD: secretsFromLocalConfigs.MONGODB_ROOT_PASSWORD,
     MONGODB_HOST: "graphql-mongo-database.applications",
     MONGODB_SERVICE_NAME: "graphql-mongo-database",
     MONGODB_STORAGE_CLASS: "linode-block-storage-retain",

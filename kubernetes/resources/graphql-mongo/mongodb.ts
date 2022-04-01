@@ -83,11 +83,11 @@ In order to retain your Block Storage Volume and its data, even after the associ
 
   auth: {
     enabled: true,
-    rootUser: "root_user", // TODO: Cha ge
-    rootPassword: "root_password",
-    replicaSetKey: "Ld1My4Q1s4",
+    rootUser: envVars.MONGODB_ROOT_USERNAME,
+    rootPassword: envVars.MONGODB_ROOT_PASSWORD,
+    replicaSetKey: "Ld1My4Q1s4", // TODO
     // array of
-    // ...mappedCredentials,
+    ...mappedCredentials,
     username: envVars.MONGODB_USERNAME,
     password: envVars.MONGODB_PASSWORD,
     // usernames: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],

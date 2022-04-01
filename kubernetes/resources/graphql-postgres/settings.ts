@@ -1,12 +1,14 @@
 import { namespaceNames } from './../shared/namespaces';
 import { environmentVariables } from './../shared/validations';
 import { AppConfigs } from '../shared/types/own-types';
+import { getSecretForApp } from '../../secretsManagement';
 
-export const graphqlPostgresSettings: AppConfigs<
-  "graphql-postgres",
-  "postgresdb",
-  "applications"
-> = {
+
+const environment = environmentVariables.ENVIRONMENT;
+const secretsFromLocalConfigs = getSecretForApp("graphql-postgres");
+
+
+export const graphqlPostgresSettings: AppConfigs<"graphql-postgres", "postgresdb", "applications"> = {
   kubeConfig: {
     requestMemory: "70Mi",
     requestCpu: "100m",
@@ -18,17 +20,17 @@ export const graphqlPostgresSettings: AppConfigs<
   },
 
   envVars: {
-    APP_ENVIRONMENT: "local",
+    APP_ENVIRONMENT: environment,
     APP_HOST: "0.0.0.0",
     APP_PORT: "8000",
     POSTGRES_DATABASE_NAME: "graphql-postgres-database",
     POSTGRES_NAME: "graphql-postgres-database",
     POSTGRES_USERNAME: "postgres",
-    POSTGRES_PASSWORD: "1234",
+    POSTGRES_PASSWORD: "1234",  // TODO: Get from config above
     POSTGRES_HOST: "graphql-postgres-database.applications", // the name of the postgres service being connected to. The name has suffices(primary|read etc) if using replcated architecture
     POSTGRES_PORT: "5432",
     POSTGRES_SERVICE_NAME: "graphql-postgres-database",
-    POSTGRES_STORAGE_CLASS: "xxxxx" // FIXME: Set a storage class here
+    POSTGRES_STORAGE_CLASS: "xxxxx", // FIXME: Set a storage class here
   },
   metadata: {
     name: "graphql-postgres",

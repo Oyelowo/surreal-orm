@@ -71,6 +71,8 @@ export type MongoDbEnvVars<DBN extends `${AppName}-database`, NS extends Namespa
   MONGODB_PORT: "27017";
   MONGODB_SERVICE_NAME: DBN;
   MONGODB_STORAGE_CLASS: "linode-block-storage-retain"; // TODO: Do this properly
+  MONGODB_ROOT_USERNAME: string;
+  MONGODB_ROOT_PASSWORD: string;
 };
 
 export type PostgresDbEnvVars<DBN extends `${AppName}-database`, NS extends NamespaceOfApps> = {

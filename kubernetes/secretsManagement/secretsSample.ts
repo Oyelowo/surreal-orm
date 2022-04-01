@@ -7,12 +7,16 @@ export const secretsSample: Secrets = {
   "graphql-mongo": {
     MONGODB_USERNAME: "",
     MONGODB_PASSWORD: "",
+    MONGODB_ROOT_USERNAME: "",
+    MONGODB_ROOT_PASSWORD: "",
     REDIS_USERNAME: "",
     REDIS_PASSWORD: "",
   },
   "grpc-mongo": {
     MONGODB_USERNAME: "",
     MONGODB_PASSWORD: "",
+    MONGODB_ROOT_USERNAME: "",
+    MONGODB_ROOT_PASSWORD: "",
   },
   "graphql-postgres": {
     POSTGRES_USERNAME: "",
@@ -37,12 +41,16 @@ export const secretsLocalSample: Secrets = {
   "graphql-mongo": {
     MONGODB_USERNAME: "username",
     MONGODB_PASSWORD: "password",
+    MONGODB_ROOT_USERNAME: "root_username",
+    MONGODB_ROOT_PASSWORD: "root_password",
     REDIS_USERNAME: "username",
     REDIS_PASSWORD: "password",
   },
   "grpc-mongo": {
     MONGODB_USERNAME: "username",
     MONGODB_PASSWORD: "password",
+    MONGODB_ROOT_USERNAME: "root_username",
+    MONGODB_ROOT_PASSWORD: "root_password",
   },
   "graphql-postgres": {
     POSTGRES_USERNAME: "username",
