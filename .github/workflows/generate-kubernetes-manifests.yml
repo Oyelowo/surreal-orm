@@ -9,8 +9,13 @@ on:
       - completed
 
 jobs:
-  notify:
+  generate_kubernetes_manifests:
+    name: Run code checks for rust workspace
+    timeout-minutes: 10
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
 
     steps:
       - uses: actions/checkout@v2

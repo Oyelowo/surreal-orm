@@ -110,7 +110,7 @@ impl RedisConfigs {
             host,
             port,
             // username,
-            password,
+            // password,
             ..
         } = self;
         // protocol://[user]:[password]@host[:port]. https://github.com/mitsuhiko/redis-rs/issues/144
