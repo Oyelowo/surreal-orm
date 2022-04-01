@@ -27,15 +27,15 @@ export const redisValues: DeepPartial<RedisHelmValuesBitnami> = {
   },
 
   auth: {
-    enabled: true,
-    password: envVars.REDIS_PASSWORD,
+    enabled: false, // TODO:: auth. Figure out how to connect with the FQDNurl with password in rust app ; graphql-mongo
+    // password: envVars.REDIS_PASSWORD,
   },
   master: {
     service: {
       type: "ClusterIP",
       ports: {
         redis: 6379,
-        
+
         //    Number(envVars.REDIS_PORT),
         // nameOverride: envVars.REDIS_SERVICE_NAME,
       },

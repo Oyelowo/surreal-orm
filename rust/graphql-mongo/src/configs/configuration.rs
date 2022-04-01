@@ -121,12 +121,11 @@ impl RedisConfigs {
         // format!("${username}:${password}@{host}:{port}")
         // Redis seem to not require username
 
-        println!(
-            "Redis URL =======>>>>>>>>>>: {}",
-            format!("redis://:{password}@{host}:{port}")
-        );
+        let url = format!("{host}:{port}");
+        // let url = format!("redis://:{password}@graphql-mongo-redis-master.applications:6379");
+        println!("Redis URL =======>>>>>>>>>>: {}", url);
         // format!(":{password}@{host}:{port}")
-        format!("redis://:{password}@{host}:{port}")
+        url
     }
 }
 
