@@ -35,6 +35,7 @@ export const redisValues: DeepPartial<RedisHelmValuesBitnami> = {
       type: "ClusterIP",
       ports: {
         redis: 6379,
+        
         //    Number(envVars.REDIS_PORT),
         // nameOverride: envVars.REDIS_SERVICE_NAME,
       },

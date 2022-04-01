@@ -39,8 +39,9 @@ export const graphqlMongoSettings: AppConfigs<"graphql-mongo", "mongodb", "appli
     MONGODB_PORT: "27017",
     REDIS_USERNAME: secretsFromLocalConfigs.REDIS_USERNAME,
     REDIS_PASSWORD: secretsFromLocalConfigs.REDIS_PASSWORD,
-    REDIS_HOST: "graphql-mongo-redis.applications",
-    REDIS_SERVICE_NAME: "graphql-mongo-redis",
+    REDIS_HOST: "graphql-mongo-redis-master.applications",
+    REDIS_SERVICE_NAME: "graphql-mongo-redis", // helm chart adds suffix to the name e.g (master) which the rust application must use as above
+    REDIS_SERVICE_NAME_WITH_SUFFIX: "graphql-mongo-redis-master",
     REDIS_PORT: "6379",
   },
   metadata: {

@@ -119,7 +119,8 @@ impl RedisConfigs {
         // TODO: Add password auth
         // format!("${username}:${password}@{host}:{port}")
         // Redis seem to not require username
-        format!(":${password}@{host}:{port}")
+
+        format!("redis://:{password}@{host}:{port}")
     }
 }
 

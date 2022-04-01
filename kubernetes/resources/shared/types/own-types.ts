@@ -86,12 +86,18 @@ export type PostgresDbEnvVars<DBN extends `${AppName}-database`, NS extends Name
   POSTGRES_SERVICE_NAME: DBN;
   POSTGRES_STORAGE_CLASS: string;
 };
-// export type RedisDbEnvVars<DBN extends `${AppName}-database`, NS extends NamespaceOfApps> = {
-//   REDIS_USERNAME: string;
-//   REDIS_PASSWORD: string;
-//   REDIS_HOST: `${DBN}.${NS}`;
-//   REDIS_PORT: "6379";
-// };
+
+type ServiceName<AN extends AppName> = `${AN}-redis`;
+type ServiceNameWithSuffix<AN extends AppName> = `${ServiceName<AN>}-master`;
+
+export type RedisDbEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
+  REDIS_USERNAME?: string;
+  REDIS_PASSWORD?: string;
+  REDIS_HOST?: `${ServiceNameWithSuffix<AN>}.${NS}`; // The application will also need this
+  REDIS_SERVICE_NAME?: ServiceName<AN>; // THIS is used redis helm chart config itself which adds a suffix(e.g master)
+  REDIS_SERVICE_NAME_WITH_SUFFIX?: ServiceNameWithSuffix<AN>;
+  REDIS_PORT?: "6379";
+};
 
 type DatabaseEnvVars<DBN extends `${AppName}-database`, NS extends NamespaceOfApps> =
   | MongoDbEnvVars<DBN, NS>
@@ -102,17 +108,20 @@ export type AppEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
   APP_ENVIRONMENT: Environment;
   APP_HOST: "0.0.0.0";
   APP_PORT: "8000" | "50051" | "3000";
-  REDIS_USERNAME?: string;
-  REDIS_PASSWORD?: string;
-  REDIS_HOST?: `${AN}-redis.${NS}`;
-  REDIS_SERVICE_NAME: `${AN}-redis`; // TODO: Use a derivative approach for getting the host to prevent them from going out of sync
-  REDIS_PORT?: "6379";
+  // REDIS_USERNAME?: string;
+  // REDIS_PASSWORD?: string;
+  // // REDIS_HOST?: `${AN}-redis.${NS}`;
+  // REDIS_HOST?: `${AN}-redis-master.${NS}`;
+  // REDIS_SERVICE_NAME?: `${AN}-redis`; // TODO: Use a derivative approach for getting the host to prevent them from going out of sync
+  // REDIS_SERVICE_NAME_WITH_SUFFIX?: `${AN}-redis-master`; // TODO: Use a derivative approach for getting the host to prevent them from going out of sync
+  // REDIS_PORT?: "6379";
   GITHUB_CLIENT_ID?: string;
   GITHUB_CLIENT_SECRET?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   NEXTAUTH_URL?: string;
-} & DatabaseEnvVars<`${AN}-database`, NS>;
+} & DatabaseEnvVars<`${AN}-database`, NS> &
+  RedisDbEnvVars<AN, NS>;
 
 type EnvironmentVariables<
   AN extends AppName,
