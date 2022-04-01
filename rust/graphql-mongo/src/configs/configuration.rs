@@ -140,7 +140,7 @@ impl Configs {
             .from_env::<DatabaseConfigs>()
             .expect("problem with mongo db environment variables(s)");
 
-        let redis = envy::prefixed("REDIS")
+        let redis = envy::prefixed("REDIS_")
             .from_env::<RedisConfigs>()
             .expect("problem with redis environment variables(s)");
 
