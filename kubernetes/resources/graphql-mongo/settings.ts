@@ -32,10 +32,16 @@ export const graphqlMongoSettings: AppConfigs<"graphql-mongo", "mongodb", "appli
     MONGODB_HOST: "graphql-mongo-database.applications",
     MONGODB_SERVICE_NAME: "graphql-mongo-database",
     MONGODB_STORAGE_CLASS: "linode-block-storage-retain",
+    // TODO: ADD REDIS
     // hostAndPort":"graphql-mongo-0.mongo-graphql.development.svc.cluster.local:27017
     // MONGODB_HOST: "graphql-mongod-0.graphql-mongod-headless.development.svc.cluster.local",
     // const url = 'mongodb://username1:$[password]@mongo-graphql.development:27017/db1?authSource=$[authSource]';
     MONGODB_PORT: "27017",
+    REDIS_USERNAME: secretsFromLocalConfigs.REDIS_USERNAME,
+    REDIS_PASSWORD: secretsFromLocalConfigs.REDIS_PASSWORD,
+    REDIS_HOST: "graphql-mongo-redis.applications",
+    REDIS_SERVICE_NAME: "graphql-mongo-redis",
+    REDIS_PORT: "6379",
   },
   metadata: {
     name: "graphql-mongo",

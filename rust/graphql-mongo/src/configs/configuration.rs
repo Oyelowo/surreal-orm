@@ -95,8 +95,8 @@ impl DatabaseConfigs {
 #[serde(rename_all = "lowercase")]
 pub struct RedisConfigs {
     // pub name: String,
-    // pub username: String,
-    // pub password: String,
+    pub username: String,
+    pub password: String,
     pub host: String,
 
     #[serde(deserialize_with = "deserialize_number_from_string")]
@@ -105,10 +105,21 @@ pub struct RedisConfigs {
 
 impl RedisConfigs {
     pub fn get_url(&self) -> String {
-        // let Self { host, port, .. } = self;
+        let Self {
+            host,
+            port,
+            // username,
+            password,
+            ..
+        } = self;
+        // protocol://[user]:[password]@host[:port]. https://github.com/mitsuhiko/redis-rs/issues/144
+        // TODO: Try out including protocol
         // Url::parse(format!("http://{host}:{port}").as_ref()).expect("Problem parsing application uri")
-        // format!("{host}:{port}")
-        "redis-database-master.development:6379".into()
+        // "redis-database-master.development:6379".into()
+        // TODO: Add password auth
+        // format!("${username}:${password}@{host}:{port}")
+        // Redis seem to not require username
+        format!(":${password}@{host}:{port}")
     }
 }
 
@@ -129,18 +140,14 @@ impl Configs {
             .from_env::<DatabaseConfigs>()
             .expect("problem with mongo db environment variables(s)");
 
-        // let redis = envy::prefixed("REDIS")
-        //     .from_env::<RedisConfigs>()
-        //     .expect("problem with redis environment variables(s)");
+        let redis = envy::prefixed("REDIS")
+            .from_env::<RedisConfigs>()
+            .expect("problem with redis environment variables(s)");
 
         Self {
             application,
             database,
-            redis: RedisConfigs {
-                // TODO: change
-                host: "redis".into(),
-                port: 6370,
-            },
+            redis,
         }
     }
 }

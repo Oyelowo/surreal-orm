@@ -7,14 +7,14 @@ import { applicationsDirectory } from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial } from "../shared/types/own-types";
 
-// const { envVars } = graphqlMongoSettings;
+const { envVars } = graphqlMongoSettings;
 
 export const redisValues: DeepPartial<RedisHelmValuesBitnami> = {
   //   architecture: "replication",
   architecture: "standalone",
 
   // nameOverride: "redis-graphql",
-  fullnameOverride: "redis-database",
+  fullnameOverride: envVars.REDIS_SERVICE_NAME,
   replica: {
     replicaCount: 1,
   },
@@ -27,7 +27,8 @@ export const redisValues: DeepPartial<RedisHelmValuesBitnami> = {
   },
 
   auth: {
-    enabled: false,
+    enabled: true,
+    password: envVars.REDIS_PASSWORD,
   },
   master: {
     service: {

@@ -79,13 +79,19 @@ export type PostgresDbEnvVars<DBN extends `${AppName}-database`, NS extends Name
   dbType: PostgresDb;
   POSTGRES_NAME: DBN;
   POSTGRES_DATABASE_NAME: DBN;
-  POSTGRES_USERNAME: "postgres";
+  POSTGRES_USERNAME: string;
   POSTGRES_PASSWORD: string;
   POSTGRES_HOST: `${DBN}.${NS}`;
   POSTGRES_PORT: "5432";
   POSTGRES_SERVICE_NAME: DBN;
   POSTGRES_STORAGE_CLASS: string;
 };
+// export type RedisDbEnvVars<DBN extends `${AppName}-database`, NS extends NamespaceOfApps> = {
+//   REDIS_USERNAME: string;
+//   REDIS_PASSWORD: string;
+//   REDIS_HOST: `${DBN}.${NS}`;
+//   REDIS_PORT: "6379";
+// };
 
 type DatabaseEnvVars<DBN extends `${AppName}-database`, NS extends NamespaceOfApps> =
   | MongoDbEnvVars<DBN, NS>
@@ -96,6 +102,11 @@ export type AppEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
   APP_ENVIRONMENT: Environment;
   APP_HOST: "0.0.0.0";
   APP_PORT: "8000" | "50051" | "3000";
+  REDIS_USERNAME?: string;
+  REDIS_PASSWORD?: string;
+  REDIS_HOST?: `${AN}-redis.${NS}`;
+  REDIS_SERVICE_NAME: `${AN}-redis`; // TODO: Use a derivative approach for getting the host to prevent them from going out of sync
+  REDIS_PORT?: "6379";
   GITHUB_CLIENT_ID?: string;
   GITHUB_CLIENT_SECRET?: string;
   GOOGLE_CLIENT_ID?: string;
