@@ -12,7 +12,7 @@ import path from "path";
 // export const namespace = new k8s.Name;
 
 // const nameSpaceName = "development";
-const { ENVIRONMENT, TEMPORARY_DIR } = getEnvironmentVariables;
+const { ENVIRONMENT, TEMPORARY_DIR } = getEnvironmentVariables();
 
 //  I am first putting all resources in a single cluster and allocating resources and envronment based on namespace rather than cluster.
 // i.e  type Namespace = "development" | "staging" | "production". And only a single cluster.
