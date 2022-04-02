@@ -3,7 +3,7 @@
 /* 
 TODO: ADD INSTRUCTION ON HOW THIS WORKS
 */
-import { ArgumentTypes } from "./../../typescript/apps/web/utils/typescript";
+import { ArgumentTypes } from "../../typescript/apps/web/utils/typescript";
 
 import path from "path";
 import glob from "glob";
@@ -12,7 +12,7 @@ import sh from "shelljs";
 import util from "util";
 import yargs from "yargs/yargs";
 
-import { Environment } from "./../resources/shared/types/own-types";
+import { Environment } from "../resources/shared/types/own-types";
 import { getEnvironmentVariables } from "../resources/shared/validations";
 import { setupUnsealedSecretFiles } from "../secretsManagement/setupSecrets";
 import { getManifestsOutputDirectory } from "../resources/shared";

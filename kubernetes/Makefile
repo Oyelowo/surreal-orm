@@ -12,27 +12,27 @@ install:
 # Generates sealed secrets from output plain unsealed kubernetes secretes which
 # is also generated from the config created by you, the user at e.g: kubernetes/secretsManagement/secrets-unsealed/production.ts
 manifests_local_with_sealed_secrets:
-	npx ts-node scripts/script.ts --e=local --gss=yes --kusi=yes --kuso=no
-# npx ts-node scripts/script.ts --e=local --gss=yes
+	npx ts-node scripts/bootstrap.ts --e=local --gss=yes --kusi=yes --kuso=no
+# npx ts-node scripts/bootstrap.ts --e=local --gss=yes
 
 # If you want to keep unsealed secrets output(-kuso) or keep unsealed secrets input(--kiso).
 # If you ever use these flags, make sure the files are cleared and sensitive secrets are not left behind
-# npx ts-node scripts/script.ts --e=local -gss -kuso -kusi
-# npx ts-node scripts/script.ts -environment=local --generate-sealed-secrets --keep-unsealed-secrets-output --keep-unsealed-secrets-input
+# npx ts-node scripts/bootstrap.ts --e=local -gss -kuso -kusi
+# npx ts-node scripts/bootstrap.ts -environment=local --generate-sealed-secrets --keep-unsealed-secrets-output --keep-unsealed-secrets-input
 
 manifests_development_with_sealed_secrets:
 # Example usage: make manifests_development_with_sealed_secrets tag=github-sha  
 # Change to yes if you dont want the input plain secret typescript file to be cleared after the run
-	npx ts-node scripts/script.ts --e=development --gss=yes --kusi=no --kuso=no
-# npx ts-node scripts/script.ts --e=development --gss=yes --kusi=no --kuso=no
+	npx ts-node scripts/bootstrap.ts --e=development --gss=yes --kusi=no --kuso=no
+# npx ts-node scripts/bootstrap.ts --e=development --gss=yes --kusi=no --kuso=no
 
 manifests_staging_with_sealed_secrets:
 # make manifests_staging_with_sealed_secrets tag=github-sha  
-	npx ts-node scripts/script.ts --e=staging --gss=yes --kusi=no --kuso=no
+	npx ts-node scripts/bootstrap.ts --e=staging --gss=yes --kusi=no --kuso=no
 
 manifests_production_with_sealed_secrets:
 # make manifests_production_with_sealed_secrets tag=github-sha  
-	npx ts-node scripts/script.ts --e=production --gss=yes --kusi=no --kuso=no
+	npx ts-node scripts/bootstrap.ts --e=production --gss=yes --kusi=no --kuso=no
 
 
 #####  NO SEALED OR PLAIN SECRETS GENERATED ####
@@ -40,16 +40,16 @@ manifests_production_with_sealed_secrets:
 # found at kubernetes/secretsManagement/secrets-unsealed/local.ts
 manifests_development_no_sealed_secrets:
 # Example usage make manifests_development_no_sealed_secrets
-	npx ts-node scripts/script.ts --environment=development --gss=no --kusi=no
-# Short version: npx ts-node scripts/script.ts --e=development
+	npx ts-node scripts/bootstrap.ts --environment=development --gss=no --kusi=no
+# Short version: npx ts-node scripts/bootstrap.ts --e=development
 
 # make manifests_staging_no_sealed_secrets tag=github-sha  
 manifests_staging_no_sealed_secrets:
-	npx ts-node scripts/script.ts --environment=staging --gss=no --kusi=no
+	npx ts-node scripts/bootstrap.ts --environment=staging --gss=no --kusi=no
 
 # make manifests_production_with_sealed_secrets tag=github-sha  
 manifests_production_no_sealed_secrets:
-	npx ts-node scripts/script.ts --environment=production --gss=no --kusi=no
+	npx ts-node scripts/bootstrap.ts --environment=production --gss=no --kusi=no
 
 
 dev:

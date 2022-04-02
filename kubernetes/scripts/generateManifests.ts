@@ -2,7 +2,7 @@ import { ImageTags } from "./../resources/shared/validations";
 import sh from "shelljs";
 import { Environment } from "../resources/shared/types/own-types";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
-import { manifestsDirForEnv, ENVIRONMENT, ARGV } from "./script";
+import { manifestsDirForEnv, ENVIRONMENT, ARGV } from "./bootstrap";
 
 // function getImageTags() {
 //   sh.ls()
