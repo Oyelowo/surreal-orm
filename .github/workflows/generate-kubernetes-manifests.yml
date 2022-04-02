@@ -37,8 +37,8 @@ jobs:
         with:
           pulumi-version: 3.28.0
       - run: |
-          make manifests_development_no_sealed_secrets
-          make manifests_staging_no_sealed_secrets
+          # make manifests_development_no_sealed_secrets
+          # make manifests_staging_no_sealed_secrets
           make manifests_production_no_sealed_secrets
 
 
