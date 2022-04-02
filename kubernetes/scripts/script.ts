@@ -11,38 +11,30 @@ import prompt from "prompt";
 import sh from "shelljs";
 import util from "util";
 import yargs from "yargs/yargs";
-import c from "chalk";
 
 import { Environment } from "./../resources/shared/types/own-types";
 import { getEnvironmentVariables } from "../resources/shared/validations";
-import {
-  clearUnsealedInputTsSecretFilesContents,
-  setupUnsealedSecretFiles,
-} from "../secretsManagement/setupSecrets";
+import { setupUnsealedSecretFiles } from "../secretsManagement/setupSecrets";
+import { getManifestsOutputDirectory } from "../resources/shared";
+import { generateManifests } from "./generateManifests";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
+import {
+  generateSealedSecretsManifests,
+  getSecretDirForEnv,
+  SEALED_SECRETS_BASE_DIR,
+} from "./generateSealedSecretsManifests";
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
 // npm i inquirer
 type EnvName = keyof ReturnType<typeof getEnvironmentVariables>;
-const globAsync = util.promisify(glob);
+export const globAsync = util.promisify(glob);
 const promptGetAsync = util.promisify(prompt.get);
-
-const ENVIRONMENT: EnvName = "ENVIRONMENT";
-
-const MANIFESTS_DIR = path.join(__dirname, "manifests");
-const SEALED_SECRETS_BASE_DIR = path.join(MANIFESTS_DIR, "sealed-secrets");
+export const ENVIRONMENT: EnvName = "ENVIRONMENT";
 
 const yesOrNoOptions = ["y", "yes", "no", "n"] as const;
 type YesOrNoOptions = typeof yesOrNoOptions[number];
 
-const ARGV = yargs(process.argv.slice(2))
+export const ARGV = yargs(process.argv.slice(2))
   .options({
-    t: {
-      type: "string",
-      alias: "tag",
-      demandOption: true,
-      describe:
-        "The docker image tag. Right now, all apps share same image tag which should be local for local environment and github sha for other environments",
-    },
     e: {
       alias: "environment",
       choices: ["local", "development", "staging", "production"] as Environment[],
@@ -75,141 +67,10 @@ const ARGV = yargs(process.argv.slice(2))
   .parseSync();
 
 // const manifestsDirForEnv = getManifestsOutputDirectory(ARGV.e);
-const manifestsDirForEnv = path.join("manifests", "generated", ARGV.e);
+export const manifestsDirForEnv = path.join("manifests", "generated", ARGV.e);
 
 prompt.override = ARGV;
 prompt.start();
-
-// function getImageTags() {
-//   sh.ls()
-// }
-
-/* 
-GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
-*/
-async function generateManifests() {
-  // sh.cd(__dirname);
-  // sh.exec("npm i");
-
-  sh.exec("npm i");
-  sh.rm("-rf", "./login");
-  sh.mkdir("./login");
-  sh.rm("-rf", manifestsDirForEnv);
-  sh.exec("pulumi login file://login");
-  sh.exec("export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev");
-
-  // image tag. All apps share same tag for now
-  const imageTags = await getImageTagsFromDir();
-  // Pulumi needs some environment variables set for generating deployments with image tag
-  /* `export ${IMAGE_TAG_REACT_WEB}="${ARGV.t}" && \ `
-     `export ${IMAGE_TAG_REACT_WEB}="${ARGV.t}" && \ ` 
-     */
-  const imageEnvVarSetterForPulumi = Object.entries(imageTags)
-    .map(([k, v]) => `export ${k}=${v}`)
-    .join(" ");
-
-  const shGenerateManifestsOutput = sh.exec(
-    `
-      ${imageEnvVarSetterForPulumi} 
-      export ${ENVIRONMENT}=${ARGV.e}  
-      export PULUMI_CONFIG_PASSPHRASE="" 
-      pulumi update --yes --skip-preview --stack dev
-      `,
-    {
-      /* silent: true
-      /* fatal: true */
-    }
-  );
-
-  // Used this hack to
-  // PULUMI unfortunately seems to push all the logs to stdout. Might patch it if need be
-  // const stdout = shGenerateManifestsOutput.stdout;
-  // sh.echo(c.greenBright(shGenerateManifestsOutput.stdout));
-
-  // // TODO: There has to be a better way. And open an issue/PR on pulumi repo or patch package locally
-  // // This would be sufficient if pulumi would just send error to stdout instead of sending all to stdout
-  // if (shGenerateManifestsOutput.stderr) {
-  //   sh.echo(c.redBright(shGenerateManifestsOutput.stderr));
-  //   sh.exit(1);
-  // }
-
-  // const errorText = sh.exec(c.redBright(`${stdout} | grep Error:`));
-  // if (errorText) {
-  //   sh.echo(
-  //     c.redBright(stdout.split(/\r?\n/).find((l) => l.toLocaleLowerCase().includes("error")))
-  //   );
-  //   // Get the error out. This is a little brittle but well, I need to raise an issue with pulumi
-  //   // const err = stdout.substring(stdout.indexOf("Error:"));
-  //   // sh.echo(c.redBright(err));
-  //   // sh.exit(1);
-  // }
-}
-
-/* 
-GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PULUMI.
-These secrets are encrypted using the bitnami sealed secret controller running in the cluster
-you are at present context
-*/
-const SEALED_SECRETS_DIR_FOR_ENV = `${SEALED_SECRETS_BASE_DIR}/${ARGV.e}`;
-type GenSealedSecretsProps = {
-  environment: Environment;
-  keepSecretOutputs: boolean;
-  keepSecretInputs: boolean;
-  generateSealedSecrets: boolean;
-};
-
-async function generateSealedSecretsManifests({
-  environment,
-  keepSecretInputs: keepSecretInPuts,
-  keepSecretOutputs,
-  generateSealedSecrets,
-}: GenSealedSecretsProps) {
-  const UNSEALED_SECRETS_MANIFESTS_FOR_ENV = path.join(
-    MANIFESTS_DIR,
-    "generated",
-    environment,
-    "/**/**/**secret-*ml"
-  );
-
-  const unsealedSecretsFilePathsForEnv = await globAsync(UNSEALED_SECRETS_MANIFESTS_FOR_ENV, {
-    dot: true,
-  });
-
-  unsealedSecretsFilePathsForEnv.forEach((unsealedSecretPath) => {
-    if (generateSealedSecrets) {
-      sh.echo(c.blueBright("Generating sealed secret from", unsealedSecretPath));
-
-      const secretName = path.basename(unsealedSecretPath);
-      const sealedSecretFilePath = `${SEALED_SECRETS_DIR_FOR_ENV}/${secretName}`;
-
-      sh.echo(c.blueBright(`Create ${SEALED_SECRETS_DIR_FOR_ENV} if it does not exists`));
-      sh.mkdir("-p", SEALED_SECRETS_DIR_FOR_ENV);
-
-      const kubeSeal = sh.exec(`kubeseal <${unsealedSecretPath} -o yaml >${sealedSecretFilePath}`, {
-        silent: true,
-      });
-
-      sh.echo(c.greenBright(kubeSeal.stdout));
-      if (kubeSeal.stderr) {
-        sh.echo(`Error sealing secrets: ${c.redBright(kubeSeal.stderr)}`);
-        sh.exit(1);
-        return;
-      }
-
-      sh.echo(c.greenBright("Successfully generated sealed secret at", unsealedSecretPath));
-    }
-
-    sh.echo(c.blueBright(`Removing unsealed plain secret manifest ${unsealedSecretPath}`));
-
-    if (!keepSecretOutputs) {
-      sh.rm("-rf", unsealedSecretPath);
-    }
-
-    if (!keepSecretInPuts) {
-      clearUnsealedInputTsSecretFilesContents();
-    }
-  });
-}
 
 function doInitialClusterSetup() {
   // # Apply namespace first
@@ -225,8 +86,13 @@ function doInitialClusterSetup() {
 
 async function bootstrap() {
   setupUnsealedSecretFiles();
+  const SEALED_SECRETS_DIR_FOR_ENV = getSecretDirForEnv(ARGV.e);
+  const imageTags = await getImageTagsFromDir();
 
-  await generateManifests();
+  await generateManifests({
+    environment: ARGV.e,
+    imageTags,
+  });
 
   const yes: YesOrNoOptions[] = ["yes", "y"];
 

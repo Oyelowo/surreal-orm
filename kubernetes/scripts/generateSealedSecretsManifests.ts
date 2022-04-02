@@ -4,8 +4,9 @@ import sh from "shelljs";
 import c from "chalk";
 import { clearUnsealedInputTsSecretFilesContents } from "../secretsManagement/setupSecrets";
 
-import { MANIFESTS_DIR, globAsync } from "./script";
+import { globAsync } from "./script";
 
+export const MANIFESTS_DIR = path.join(__dirname, "manifests");
 export const SEALED_SECRETS_BASE_DIR = path.join(MANIFESTS_DIR, "sealed-secrets");
 
 export const getSecretDirForEnv = (environment: Environment) =>
