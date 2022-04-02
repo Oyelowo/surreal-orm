@@ -20,7 +20,8 @@ import {
   setupUnsealedSecretFiles,
 } from "../secretsManagement/setupSecrets";
 import { getManifestsOutputDirectory } from "../resources/shared";
-
+// TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
+// npm i inquirer
 type EnvName = keyof typeof environmentVariables;
 const globAsync = util.promisify(glob);
 const promptGetAsync = util.promisify(prompt.get);
@@ -32,6 +33,9 @@ const ENVIRONMENT: EnvName = "ENVIRONMENT";
 const TEMPORARY_DIR: EnvName = "TEMPORARY_DIR";
 const MANIFESTS_DIR = "manifests";
 const SEALED_SECRETS_BASE_DIR = path.join(MANIFESTS_DIR, "sealed-secrets");
+
+const yesOrNoOptions = ["y", "yes", "no", "n"] as const;
+type YesOrNoOptions = typeof yesOrNoOptions[number];
 
 const ARGV = yargs(process.argv.slice(2))
   .options({
@@ -50,25 +54,25 @@ const ARGV = yargs(process.argv.slice(2))
     },
     gss: {
       alias: "generate-sealed-secrets",
-      type: "boolean",
-      default: false,
+      choices: yesOrNoOptions,
+      // default: "no" as YesOrNoOptions,
       describe: "Generate sealed secrets manifests from generated plain secrets manifests",
       demandOption: true,
     },
     kuso: {
-      alias: "keep-unsealed-secrets",
-      type: "boolean",
-      // default: true,
+      alias: "keep-unsealed-secrets-output",
+      choices: yesOrNoOptions,
+      default: "no" as YesOrNoOptions,
       describe: "Keep unsealed secrets output generated plain kubernetes manifests",
       // demandOption: true,
     },
     kusi: {
-      alias: "keep-unsealed-secrets",
-      type: "boolean",
-      // default: true,
+      alias: "keep-unsealed-secrets-input",
+      choices: yesOrNoOptions,
+      // default: "no" as YesOrNoOptions,
       describe:
         "Keep unsealed secrets inputs plain configs used to generate kubernetes secrets manifests",
-      // demandOption: true,
+      demandOption: true,
     },
   } as const)
   .parseSync();
@@ -104,32 +108,34 @@ async function generateManifests() {
       export PULUMI_CONFIG_PASSPHRASE=""
       pulumi update --yes --skip-preview --stack dev
       `,
-    { silent: true /* fatal: true */ }
+    {
+      /* silent: true
+      /* fatal: true */
+    }
   );
 
+  // Used this hack to
   // PULUMI unfortunately seems to push all the logs to stdout. Might patch it if need be
-  const stdout = shGenerateManifestsOutput.stdout;
-  sh.echo(c.greenBright(shGenerateManifestsOutput.stdout));
+  // const stdout = shGenerateManifestsOutput.stdout;
+  // sh.echo(c.greenBright(shGenerateManifestsOutput.stdout));
 
-  // TODO: There has to be a better way. And open an issue/PR on pulumi repo or patch package locally
-  // This would be sufficient if pulumi would just send error to stdout instead of sending all to stdout
-  if (shGenerateManifestsOutput.stderr) {
-    sh.echo(c.redBright(shGenerateManifestsOutput.stderr));
-    sh.exit(1);
-  }
+  // // TODO: There has to be a better way. And open an issue/PR on pulumi repo or patch package locally
+  // // This would be sufficient if pulumi would just send error to stdout instead of sending all to stdout
+  // if (shGenerateManifestsOutput.stderr) {
+  //   sh.echo(c.redBright(shGenerateManifestsOutput.stderr));
+  //   sh.exit(1);
+  // }
 
-  const errorText = sh.exec(c.redBright(`${stdout} | grep Error:`));
-  if (errorText) {
-    sh.echo(
-      c.redBright(stdout.split(/\r?\n/).find((l) => l.toLocaleLowerCase().includes("error")))
-    );
-    // Get the error out. This is a little brittle but well, I need to raise an issue with pulumi
-    // const err = stdout.substring(stdout.indexOf("Error:"));
-    // sh.echo(c.redBright(err));
-    // sh.exit(1);
-  }
-
-  // generateSealedSecretsManifests();
+  // const errorText = sh.exec(c.redBright(`${stdout} | grep Error:`));
+  // if (errorText) {
+  //   sh.echo(
+  //     c.redBright(stdout.split(/\r?\n/).find((l) => l.toLocaleLowerCase().includes("error")))
+  //   );
+  //   // Get the error out. This is a little brittle but well, I need to raise an issue with pulumi
+  //   // const err = stdout.substring(stdout.indexOf("Error:"));
+  //   // sh.echo(c.redBright(err));
+  //   // sh.exit(1);
+  // }
 }
 
 /* 
@@ -138,11 +144,23 @@ These secrets are encrypted using the bitnami sealed secret controller running i
 you are at present context
 */
 const SEALED_SECRETS_DIR_FOR_ENV = `${SEALED_SECRETS_BASE_DIR}/${ARGV.e}`;
-async function generateSealedSecretsManifests() {
+type GenSealedSecretsProps = {
+  environment: Environment;
+  keepSecretOutputs: boolean;
+  keepSecretInputs: boolean;
+  generateSealedSecrets: boolean;
+};
+
+async function generateSealedSecretsManifests({
+  environment,
+  keepSecretInputs: keepSecretInPuts,
+  keepSecretOutputs,
+  generateSealedSecrets,
+}: GenSealedSecretsProps) {
   const UNSEALED_SECRETS_MANIFESTS_FOR_ENV = path.join(
     MANIFESTS_DIR,
     "generated",
-    ARGV.e,
+    environment,
     "/**/**/**secret-*ml"
   );
 
@@ -151,7 +169,7 @@ async function generateSealedSecretsManifests() {
   });
 
   unsealedSecretsFilePathsForEnv.forEach((unsealedSecretPath) => {
-    if (ARGV.gss) {
+    if (generateSealedSecrets) {
       sh.echo(c.blueBright("Generating sealed secret from", unsealedSecretPath));
 
       const secretName = path.basename(unsealedSecretPath);
@@ -176,13 +194,11 @@ async function generateSealedSecretsManifests() {
 
     sh.echo(c.blueBright(`Removing unsealed plain secret manifest ${unsealedSecretPath}`));
 
-    const shouldKeepSecretOutputs = ARGV.kuso;
-    if (!shouldKeepSecretOutputs) {
+    if (!keepSecretOutputs) {
       sh.rm("-rf", unsealedSecretPath);
     }
 
-    const shouldRemoveSecretInPuts = ARGV.kusi;
-    if (!shouldRemoveSecretInPuts) {
+    if (!keepSecretInPuts) {
       clearUnsealedInputTsSecretFilesContents();
     }
   });
@@ -199,17 +215,27 @@ function doInitialClusterSetup() {
   // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
   sh.exec(`kubectl rollout status deployment/sealed-secrets-controller -n=kube-system`);
 }
-async function someT() {
+
+async function bootstrap() {
   setupUnsealedSecretFiles();
 
   await generateManifests();
-  if (ARGV.gss) {
+
+  const yes: YesOrNoOptions[] = ["yes", "y"];
+
+  await generateSealedSecretsManifests({
+    keepSecretOutputs: yes.includes(ARGV.kuso),
+    keepSecretInputs: yes.includes(ARGV.kusi),
+    generateSealedSecrets: yes.includes(ARGV.gss),
+    environment: ARGV.e,
+  });
+
+  if (yes.includes(ARGV.gss)) {
     /* 
        This requires the above step with initial cluster setup making sure that the sealed secret controller is
        running in the cluster */
     doInitialClusterSetup();
 
-    await generateSealedSecretsManifests();
     // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
     sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/0-crd`);
     sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/1-manifest`);
@@ -217,4 +243,4 @@ async function someT() {
   }
 }
 
-someT();
+bootstrap();

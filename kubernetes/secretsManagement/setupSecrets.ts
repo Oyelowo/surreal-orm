@@ -22,7 +22,8 @@ type SecretUnseatFilePath = `${typeof UNSEALED_SECRETS_DIR}/${Environment}.ts`;
 export function setupUnsealedSecretFiles() {
   fs.mkdir(UNSEALED_SECRETS_DIR, (err) => {
     // TODO: this should not be an error
-    console.info(`Something went wrong creating unsealed secrets directory: Error: ${err}`);
+    console.info(`Unsealed secrets directory already created`);
+    // console.info(`Something went wrong creating unsealed secrets directory: Error: ${err}`);
   });
 
   ENVIRONMENTS.forEach((env) => {
@@ -91,10 +92,10 @@ async function createSecretsConfigFile(environment: Environment, overwrite: bool
   fs.writeFile(filePath, content, { flag: overwrite ? "" : "wx" }, (error) => {
     // if (err) throw err;
     if (error) {
-      console.warn("File already created previously!");
+      console.info("File already created previously!");
     }
-    console.warn(
-      c.greenBright(
+    console.info(
+      c.blueBright(
         `Secret files created and gitignored at ${filePath}! NEVER commit these secrets to git!🎉`
       )
     );
