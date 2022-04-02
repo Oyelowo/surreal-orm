@@ -19,14 +19,13 @@ const globAsync = util.promisify(glob);
 
 import z from "zod";
 const MANIFESTS_DIR = path.join(__dirname, "..", "manifests");
-const IMAGE_TAGS_DIR = path.join(MANIFESTS_DIR, "image-tags");
-const IMAGE_TAGS_FILES = path.join(IMAGE_TAGS_DIR, "image-tags", "*");
+const IMAGE_TAGS_FILES = path.join(MANIFESTS_DIR, "image-tags", "*");
 
 export async function getImageTagsFromDir(): Promise<ImageTags> {
   const imageTagsPaths = await globAsync(IMAGE_TAGS_FILES, {
     dot: true,
   });
-  //   const imageTags = sh.exec("ls" + IMAGE_TAGS_DIR);
+
   const imageTagsList = imageTagsPaths.map((x) => {
     const imageTagKey = path.basename(x);
     const imageTagValue = fs.readFileSync(x, { encoding: "utf-8" });

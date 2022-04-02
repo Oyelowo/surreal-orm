@@ -19,19 +19,15 @@ import {
   clearUnsealedInputTsSecretFilesContents,
   setupUnsealedSecretFiles,
 } from "../secretsManagement/setupSecrets";
-import { getImageTagsFromDir } from "./kk";
-import { getManifestsOutputDirectory } from "../resources/shared";
+import { getImageTagsFromDir } from "./getImageTagsFromDir";
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
 // npm i inquirer
 type EnvName = keyof ReturnType<typeof getEnvironmentVariables>;
 const globAsync = util.promisify(glob);
 const promptGetAsync = util.promisify(prompt.get);
-const IMAGE_TAG_REACT_WEB: EnvName = "IMAGE_TAG_REACT_WEB";
-const IMAGE_TAG_GRAPHQL_MONGO: EnvName = "IMAGE_TAG_GRAPHQL_MONGO";
-const IMAGE_TAG_GRPC_MONGO: EnvName = "IMAGE_TAG_GRPC_MONGO";
-const IMAGE_TAG_GRAPHQL_POSTGRES: EnvName = "IMAGE_TAG_GRAPHQL_POSTGRES";
+
 const ENVIRONMENT: EnvName = "ENVIRONMENT";
-const TEMPORARY_DIR: EnvName = "TEMPORARY_DIR";
+
 const MANIFESTS_DIR = path.join(__dirname, "manifests");
 const SEALED_SECRETS_BASE_DIR = path.join(MANIFESTS_DIR, "sealed-secrets");
 
