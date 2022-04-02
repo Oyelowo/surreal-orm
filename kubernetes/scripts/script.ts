@@ -19,7 +19,7 @@ import {
   clearUnsealedInputTsSecretFilesContents,
   setupUnsealedSecretFiles,
 } from "../secretsManagement/setupSecrets";
-import {getImageTagsFromDir} from "./kk"
+import { getImageTagsFromDir } from "./kk";
 import { getManifestsOutputDirectory } from "../resources/shared";
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
 // npm i inquirer
@@ -103,20 +103,20 @@ async function generateManifests() {
   sh.exec("export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev");
 
   // image tag. All apps share same tag for now
-  const imageTags = await getImageTagsFromDir()
-  // Pulumi needs some environment variables set for generating deployments with image tag 
+  const imageTags = await getImageTagsFromDir();
+  // Pulumi needs some environment variables set for generating deployments with image tag
   /* `export ${IMAGE_TAG_REACT_WEB}="${ARGV.t}" && \ `
      `export ${IMAGE_TAG_REACT_WEB}="${ARGV.t}" && \ ` 
      */
-  const imageSetterForPulumi = Object.entries(imageTags).map(([k,v]) => `export ${k}=${v} && '\'`) 
+  const imageEnvVarSetterForPulumi = Object.entries(imageTags)
+    .map(([k, v]) => `export ${k}=${v}`)
+    .join(" ");
+
   const shGenerateManifestsOutput = sh.exec(
     `
-      export ${IMAGE_TAG_REACT_WEB}="${ARGV.t}" && \
-      export ${IMAGE_TAG_GRAPHQL_MONGO}="${ARGV.t}" && \
-      export ${IMAGE_TAG_GRPC_MONGO}="${ARGV.t}" && \
-      export ${IMAGE_TAG_GRAPHQL_POSTGRES}="${ARGV.t}" && \
-      export ${ENVIRONMENT}="${ARGV.e}" && \
-      export PULUMI_CONFIG_PASSPHRASE=""
+      ${imageEnvVarSetterForPulumi} 
+      export ${ENVIRONMENT}=${ARGV.e}  
+      export PULUMI_CONFIG_PASSPHRASE="" 
       pulumi update --yes --skip-preview --stack dev
       `,
     {
