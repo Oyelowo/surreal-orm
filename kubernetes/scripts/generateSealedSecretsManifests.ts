@@ -6,7 +6,7 @@ import { clearUnsealedInputTsSecretFilesContents } from "../secretsManagement/se
 
 import { globAsync } from "./script";
 
-export const MANIFESTS_DIR = path.join(__dirname, "manifests");
+export const MANIFESTS_DIR = path.join(__dirname, "..", "manifests");
 export const SEALED_SECRETS_BASE_DIR = path.join(MANIFESTS_DIR, "sealed-secrets");
 
 export const getSecretDirForEnv = (environment: Environment) =>
@@ -25,7 +25,7 @@ type GenSealedSecretsProps = {
 
 export async function generateSealedSecretsManifests({
   environment,
-  keepSecretInputs: keepSecretInPuts,
+  keepSecretInputs: keepSecretInputs,
   keepSecretOutputs,
   generateSealedSecrets,
 }: GenSealedSecretsProps) {
@@ -46,7 +46,7 @@ export async function generateSealedSecretsManifests({
       sh.echo(c.blueBright("Generating sealed secret from", unsealedSecretPath));
 
       const secretName = path.basename(unsealedSecretPath);
-      const sealedSecretFilePath = `${SEALED_SECRETS_DIR_FOR_ENV}/${secretName}`;
+      const sealedSecretFilePath = path.join(SEALED_SECRETS_DIR_FOR_ENV, secretName);
 
       sh.echo(c.blueBright(`Create ${SEALED_SECRETS_DIR_FOR_ENV} if it does not exists`));
       sh.mkdir("-p", SEALED_SECRETS_DIR_FOR_ENV);
@@ -71,7 +71,7 @@ export async function generateSealedSecretsManifests({
       sh.rm("-rf", unsealedSecretPath);
     }
 
-    if (!keepSecretInPuts) {
+    if (!keepSecretInputs) {
       clearUnsealedInputTsSecretFilesContents();
     }
   });

@@ -18,6 +18,7 @@ import { setupUnsealedSecretFiles } from "../secretsManagement/setupSecrets";
 import { getManifestsOutputDirectory } from "../resources/shared";
 import { generateManifests } from "./generateManifests";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
+import { promptKubernetesClusterSwitch } from "./promptKubernetesClusterSwitch";
 import {
   generateSealedSecretsManifests,
   getSecretDirForEnv,
@@ -85,6 +86,13 @@ function doInitialClusterSetup() {
 }
 
 async function bootstrap() {
+  const yes: YesOrNoOptions[] = ["yes", "y"];
+
+  const shouldGenerateSealedSecrets = yes.includes(ARGV.gss);
+
+  if (shouldGenerateSealedSecrets) {
+    await promptKubernetesClusterSwitch();
+  }
   setupUnsealedSecretFiles();
   const SEALED_SECRETS_DIR_FOR_ENV = getSecretDirForEnv(ARGV.e);
   const imageTags = await getImageTagsFromDir();
@@ -94,12 +102,10 @@ async function bootstrap() {
     imageTags,
   });
 
-  const yes: YesOrNoOptions[] = ["yes", "y"];
-
   await generateSealedSecretsManifests({
     keepSecretOutputs: yes.includes(ARGV.kuso),
     keepSecretInputs: yes.includes(ARGV.kusi),
-    generateSealedSecrets: yes.includes(ARGV.gss),
+    generateSealedSecrets: shouldGenerateSealedSecrets,
     environment: ARGV.e,
   });
 
