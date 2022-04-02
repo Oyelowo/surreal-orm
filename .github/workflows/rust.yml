@@ -90,9 +90,14 @@ jobs:
       # for consistency sake.
       - name: Set environment variables
         run: |
-          echo "BACKEND_MAIN_IMAGE_WITH_TAG=ghcr.io/oyelowo/graphql-mongo:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          echo "IMAGE_TAG_GRAPHQL_MONGO=$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          echo "IMAGE_WITH_TAG_GRAPHQL_MONGO=ghcr.io/oyelowo/graphql-mongo:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
           
-          echo "BACKEND_SECOND_IMAGE_WITH_TAG=ghcr.io/oyelowo/grpc-mongo:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          echo "IMAGE_TAG_GRAPHQL_POSTGRES=$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          echo "IMAGE_WITH_TAG_GRAPHQL_POSTGRES=ghcr.io/oyelowo/graphql-postgres:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          
+          echo "IMAGE_TAG_GRPC_MONGO=$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          echo "IMAGE_WITH_TAG_GRPC_MONGO=ghcr.io/oyelowo/grpc-mongo:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
 
           
       - name: Login to GitHub Container Registry
@@ -115,7 +120,7 @@ jobs:
           context: rust
           file: rust/Dockerfile.production
           target: graphql-mongo
-          tags: ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
+          tags: ${{ env.IMAGE_WITH_TAG_GRAPHQL_MONGO }}
           push: true
           cache-from: |
             type=gha,scope=graphql-mongo
@@ -128,7 +133,7 @@ jobs:
           context: rust
           file: rust/Dockerfile.production
           target: graphql-postgres
-          tags: ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
+          tags: ${{ env.IMAGE_WITH_TAG_GRAPHQL_POSTGRES }}
           push: true
           cache-from: |
             type=gha,scope=graphql-postgres
@@ -141,12 +146,18 @@ jobs:
           context: rust
           file: rust/Dockerfile.production
           target: grpc-mongo
-          tags: ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }}
+          tags: ${{ env.IMAGE_WITH_TAG_GRPC_MONGO }}
           push: true
           cache-from: |
             type=gha,scope=grpc-mongo
           cache-to: |
             type=gha,scope=grpc-mongo,mode=max
+
+      - name: Update repo with image tags to /kubernetes/manifests/image-tags/*
+        run: |
+          echo ${{env.IMAGE_TAG_GRAPHQL_MONGO}} > ../kubernetes/manifests/image-tags/IMAGE_TAG_GRAPHQL_MONGO
+          echo ${{env.IMAGE_TAG_GRAPHQL_POSTGRES}} > ../kubernetes/manifests/image-tags/IMAGE_TAG_GRAPHQL_POSTGRES
+          echo ${{env.IMAGE_WITH_TAG_GRPC_MONGO}} > ../kubernetes/manifests/image-tags/IMAGE_WITH_TAG_GRPC_MONGO
 
   # ############## CONTINUOUS DEPLOYMENT #################
   # deploy_rust_app:
@@ -211,21 +222,21 @@ jobs:
 
       # # 1. APPLICATION 1: Build and push image for graphql-mongo
       # - name: build graphql-mongo docker image
-      #   run:  docker build -f Dockerfile.production --target graphql-mongo  -t ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }} .
+      #   run:  docker build -f Dockerfile.production --target graphql-mongo  -t ${{ env.IMAGE_WITH_TAG_GRAPHQL_MONGO }} .
 
       # # This step can be removed if I decide I dont want to slimdown the image further anymore or if docker-slim starts to become problematic
       # - name: Slim down graphql-mongo docker image
-      #   run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }} --tag ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
+      #   run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  ${{ env.IMAGE_WITH_TAG_GRAPHQL_MONGO }} --tag ${{ env.IMAGE_WITH_TAG_GRAPHQL_MONGO }}
 
       # - name: Push graphql-mongo docker image
-      #   run: docker push  ${{ env.BACKEND_MAIN_IMAGE_WITH_TAG }}
+      #   run: docker push  ${{ env.IMAGE_WITH_TAG_GRAPHQL_MONGO }}
 
       # # 2. APPLICATION 2: Build and push image for grpc-mongo
       # - name: build grpc-mongo docker image
-      #   run:  docker build -f Dockerfile.production --target grpc-mongo  -t ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }} .
+      #   run:  docker build -f Dockerfile.production --target grpc-mongo  -t ${{ env.IMAGE_WITH_TAG_GRPC_MONGO }} .
 
       # - name: Push grpc-mongo docker image
-      #   run: docker push  ${{ env.BACKEND_SECOND_IMAGE_WITH_TAG }}
+      #   run: docker push  ${{ env.IMAGE_WITH_TAG_GRPC_MONGO }}
         
       # - name: Image digest
       #   run: echo ${{ steps.docker_build.outputs.digest }}

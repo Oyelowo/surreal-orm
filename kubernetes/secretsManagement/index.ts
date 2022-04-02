@@ -5,7 +5,7 @@ import { SECRET_STAGING } from "./secrets-unsealed/staging";
 import { SECRET_PRODUCTION } from "./secrets-unsealed/production";
 import { Environment } from "../resources/shared/types/own-types";
 import { Secrets } from "./setupSecrets";
-import { environmentVariables } from "../resources/shared/validations";
+import { getEnvironmentVariables } from "../resources/shared/validations";
 
 const secretRecord: Record<Environment, Secrets> = {
   production: SECRET_PRODUCTION,
@@ -17,5 +17,5 @@ const secretRecord: Record<Environment, Secrets> = {
 export function getSecretForApp<App extends AppName>(
   appName: App
 ): typeof secretRecord[Environment][App] {
-  return secretRecord[environmentVariables.ENVIRONMENT][appName];
+  return secretRecord[getEnvironmentVariables().ENVIRONMENT][appName];
 }

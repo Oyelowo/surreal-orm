@@ -1,5 +1,5 @@
 import { graphqlMongoSettings } from "./settings";
-import { environmentVariables } from "./../shared/validations";
+import { getEnvironmentVariables } from "./../shared/validations";
 import { RedisHelmValuesBitnami } from "./../shared/types/helm-charts/redisHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
@@ -21,7 +21,7 @@ export const redisValues: DeepPartial<RedisHelmValuesBitnami> = {
   global: {
     // namespaceOverride: devNamespaceName,
     storageClass:
-      environmentVariables.ENVIRONMENT === "local"
+      getEnvironmentVariables().ENVIRONMENT === "local"
         ? ""
         : graphqlMongoSettings.envVars.MONGODB_STORAGE_CLASS,
   },

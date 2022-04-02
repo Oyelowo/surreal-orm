@@ -14,15 +14,16 @@ import yargs from "yargs/yargs";
 import c from "chalk";
 
 import { Environment } from "./../resources/shared/types/own-types";
-import { environmentVariables } from "../resources/shared/validations";
+import { getEnvironmentVariables } from "../resources/shared/validations";
 import {
   clearUnsealedInputTsSecretFilesContents,
   setupUnsealedSecretFiles,
 } from "../secretsManagement/setupSecrets";
+import {getImageTagsFromDir} from "./kk"
 import { getManifestsOutputDirectory } from "../resources/shared";
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
 // npm i inquirer
-type EnvName = keyof typeof environmentVariables;
+type EnvName = keyof ReturnType<typeof getEnvironmentVariables>;
 const globAsync = util.promisify(glob);
 const promptGetAsync = util.promisify(prompt.get);
 const IMAGE_TAG_REACT_WEB: EnvName = "IMAGE_TAG_REACT_WEB";
@@ -31,7 +32,7 @@ const IMAGE_TAG_GRPC_MONGO: EnvName = "IMAGE_TAG_GRPC_MONGO";
 const IMAGE_TAG_GRAPHQL_POSTGRES: EnvName = "IMAGE_TAG_GRAPHQL_POSTGRES";
 const ENVIRONMENT: EnvName = "ENVIRONMENT";
 const TEMPORARY_DIR: EnvName = "TEMPORARY_DIR";
-const MANIFESTS_DIR = "manifests";
+const MANIFESTS_DIR = path.join(__dirname, "manifests");
 const SEALED_SECRETS_BASE_DIR = path.join(MANIFESTS_DIR, "sealed-secrets");
 
 const yesOrNoOptions = ["y", "yes", "no", "n"] as const;
@@ -83,6 +84,10 @@ const manifestsDirForEnv = path.join("manifests", "generated", ARGV.e);
 prompt.override = ARGV;
 prompt.start();
 
+// function getImageTags() {
+//   sh.ls()
+// }
+
 /* 
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 */
@@ -98,6 +103,12 @@ async function generateManifests() {
   sh.exec("export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev");
 
   // image tag. All apps share same tag for now
+  const imageTags = await getImageTagsFromDir()
+  // Pulumi needs some environment variables set for generating deployments with image tag 
+  /* `export ${IMAGE_TAG_REACT_WEB}="${ARGV.t}" && \ `
+     `export ${IMAGE_TAG_REACT_WEB}="${ARGV.t}" && \ ` 
+     */
+  const imageSetterForPulumi = Object.entries(imageTags).map(([k,v]) => `export ${k}=${v} && '\'`) 
   const shGenerateManifestsOutput = sh.exec(
     `
       export ${IMAGE_TAG_REACT_WEB}="${ARGV.t}" && \

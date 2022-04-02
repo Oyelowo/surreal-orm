@@ -1,9 +1,9 @@
 import { namespaceNames } from "./../shared/namespaces";
-import { environmentVariables } from "./../shared/validations";
+import { getEnvironmentVariables } from "./../shared/validations";
 import { AppConfigs } from "../shared/types/own-types";
 import { getSecretForApp } from "../../secretsManagement";
 
-const environment = environmentVariables.ENVIRONMENT;
+const environment = getEnvironmentVariables().ENVIRONMENT;
 const secretsFromLocalConfigs = getSecretForApp("graphql-mongo");
 
 // TODO: ADD A NEW KEY - SECRETS TO THE config which would accept secrets from the global secrets config used to generate manifests
@@ -15,11 +15,11 @@ export const graphqlMongoSettings: AppConfigs<"graphql-mongo", "mongodb", "appli
     limitCpu: "100m",
     replicaCount: 3,
     host: "0.0.0.0",
-    image: `ghcr.io/oyelowo/graphql-mongo:${environmentVariables.IMAGE_TAG_GRAPHQL_MONGO}`,
+    image: `ghcr.io/oyelowo/graphql-mongo:${getEnvironmentVariables().IMAGE_TAG_GRAPHQL_MONGO}`,
   },
 
   envVars: {
-    APP_ENVIRONMENT: environmentVariables.ENVIRONMENT,
+    APP_ENVIRONMENT: getEnvironmentVariables().ENVIRONMENT,
     APP_HOST: "0.0.0.0",
     APP_PORT: "8000",
 

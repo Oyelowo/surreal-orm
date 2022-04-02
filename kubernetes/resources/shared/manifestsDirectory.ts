@@ -3,7 +3,7 @@ import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
 import * as kx from "@pulumi/kubernetesx";
-import { environmentVariables } from "./validations";
+import { getEnvironmentVariables } from "./validations";
 import path from "path";
 // import { devNamespace } from "./namespaces";
 
@@ -12,7 +12,7 @@ import path from "path";
 // export const namespace = new k8s.Name;
 
 // const nameSpaceName = "development";
-const { ENVIRONMENT, TEMPORARY_DIR } = environmentVariables;
+const { ENVIRONMENT, TEMPORARY_DIR } = getEnvironmentVariables;
 
 //  I am first putting all resources in a single cluster and allocating resources and envronment based on namespace rather than cluster.
 // i.e  type Namespace = "development" | "staging" | "production". And only a single cluster.

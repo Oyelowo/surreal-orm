@@ -5,7 +5,7 @@ import { applicationsDirectory } from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial } from "../shared/types/own-types";
 import { graphqlMongoSettings } from "./settings";
-import { environmentVariables } from "../shared/validations";
+import { getEnvironmentVariables } from "../shared/validations";
 
 const { envVars } = graphqlMongoSettings;
 
@@ -78,7 +78,8 @@ Currently the only mode supported by the Linode Block Storage CSI driver is Read
     Note
 In order to retain your Block Storage Volume and its data, even after the associated PVC is deleted, you must use the linode-block-storage-retain StorageClass. If, instead, you prefer to have your Block Storage Volume and its data deleted along with its PVC, use the linode-block-storage StorageClass. See the Delete a Persistent Volume Claim for steps on deleting a PVC.
     */
-    storageClass: environmentVariables.ENVIRONMENT === "local" ? "" : envVars.MONGODB_STORAGE_CLASS,
+    storageClass:
+      getEnvironmentVariables().ENVIRONMENT === "local" ? "" : envVars.MONGODB_STORAGE_CLASS,
   },
 
   auth: {

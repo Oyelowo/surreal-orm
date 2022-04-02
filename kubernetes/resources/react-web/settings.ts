@@ -1,8 +1,8 @@
 import { graphqlMongoSettings } from "../graphql-mongo/settings";
 import { namespaceNames } from "../shared/namespaces";
 import { AppConfigs } from "../shared/types/own-types";
-import { environmentVariables } from "../shared/validations";
-import {getFQDNFromSettings} from "../shared/helpers"
+import { getEnvironmentVariables } from "../shared/validations";
+import { getFQDNFromSettings } from "../shared/helpers";
 
 export const reactWebSettings: AppConfigs<"react-web", "doesNotHaveDb", "applications"> = {
   kubeConfig: {
@@ -12,11 +12,11 @@ export const reactWebSettings: AppConfigs<"react-web", "doesNotHaveDb", "applica
     limitCpu: "100m",
     replicaCount: 2,
     host: "0.0.0.0",
-    image: `ghcr.io/oyelowo/react-web:${environmentVariables.IMAGE_TAG_REACT_WEB}`,
+    image: `ghcr.io/oyelowo/react-web:${getEnvironmentVariables().IMAGE_TAG_REACT_WEB}`,
   },
 
   envVars: {
-    APP_ENVIRONMENT: environmentVariables.ENVIRONMENT,
+    APP_ENVIRONMENT: getEnvironmentVariables().ENVIRONMENT,
     APP_HOST: "0.0.0.0",
     APP_PORT: "3000",
     GITHUB_CLIENT_ID: "89c19374f7e7b5b35164",
@@ -31,5 +31,3 @@ export const reactWebSettings: AppConfigs<"react-web", "doesNotHaveDb", "applica
     namespace: namespaceNames.applications,
   },
 };
-
-

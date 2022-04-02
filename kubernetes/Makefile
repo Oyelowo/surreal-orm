@@ -61,5 +61,6 @@ dev:
 
 
 	# kubectl apply -R -f  ./manifests/local/secrets-encrypted
-	skaffold dev --trigger="manual" --no-prune=true --no-prune-children=true
+	skaffold dev --trigger="manual"
+	# skaffold dev --trigger="manual" --no-prune=true --no-prune-children=true
 
