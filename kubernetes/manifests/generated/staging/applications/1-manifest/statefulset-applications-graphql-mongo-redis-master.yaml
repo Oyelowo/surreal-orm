@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"StatefulSet","metadata":{"labels":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"redis","helm.sh/chart":"redis-16.4.5"},"name":"graphql-mongo-redis-master","namespace":"applications"},"spec":{"replicas":1,"selector":{"matchLabels":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/name":"redis"}},"serviceName":"graphql-mongo-redis-headless","template":{"metadata":{"annotations":{"checksum/configmap":"a85b5695bd7344fc2e3c83303c98595eef2a0a913179ea168c572ee7d81c1cc1","checksum/health":"5c6236c248cc9ccbc6ef6ea458a1838ff054ab1eeeae1ddf037edf487bee9892","checksum/scripts":"7b7df7740d9015c82c4e3402c78ec981ab18b4587be189665e2817203cffa7e2","checksum/secret":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},"labels":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"redis","helm.sh/chart":"redis-16.4.5"}},"spec":{"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"podAffinityTerm":{"labelSelector":{"matchLabels":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/name":"redis"}},"namespaces":["applications"],"topologyKey":"kubernetes.io/hostname"},"weight":1}]}},"containers":[{"args":["-c","/opt/bitnami/scripts/start-scripts/start-master.sh"],"command":["/bin/bash"],"env":[{"name":"BITNAMI_DEBUG","value":"false"},{"name":"REDIS_REPLICATION_MODE","value":"master"},{"name":"ALLOW_EMPTY_PASSWORD","value":"yes"},{"name":"REDIS_TLS_ENABLED","value":"no"},{"name":"REDIS_PORT","value":"6379"}],"image":"docker.io/bitnami/redis:6.2.6-debian-10-r142","imagePullPolicy":"IfNotPresent","livenessProbe":{"exec":{"command":["sh","-c","/health/ping_liveness_local.sh 5"]},"failureThreshold":5,"initialDelaySeconds":20,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":6},"name":"redis","ports":[{"containerPort":6379,"name":"redis"}],"readinessProbe":{"exec":{"command":["sh","-c","/health/ping_readiness_local.sh 1"]},"failureThreshold":5,"initialDelaySeconds":20,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":2},"resources":{"limits":{},"requests":{}},"securityContext":{"runAsUser":1001},"volumeMounts":[{"mountPath":"/opt/bitnami/scripts/start-scripts","name":"start-scripts"},{"mountPath":"/health","name":"health"},{"mountPath":"/data","name":"redis-data"},{"mountPath":"/opt/bitnami/redis/mounted-etc","name":"config"},{"mountPath":"/opt/bitnami/redis/etc/","name":"redis-tmp-conf"},{"mountPath":"/tmp","name":"tmp"}]}],"securityContext":{"fsGroup":1001},"serviceAccountName":"graphql-mongo-redis","terminationGracePeriodSeconds":30,"volumes":[{"configMap":{"defaultMode":493,"name":"graphql-mongo-redis-scripts"},"name":"start-scripts"},{"configMap":{"defaultMode":493,"name":"graphql-mongo-redis-health"},"name":"health"},{"configMap":{"name":"graphql-mongo-redis-configuration"},"name":"config"},{"emptyDir":{},"name":"redis-tmp-conf"},{"emptyDir":{},"name":"tmp"}]}},"updateStrategy":{"rollingUpdate":{},"type":"RollingUpdate"},"volumeClaimTemplates":[{"metadata":{"labels":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/name":"redis"},"name":"redis-data"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"8Gi"}},"storageClassName":"linode-block-storage-retain"}}]}}
+  labels:
+    app.kubernetes.io/component: master
+    app.kubernetes.io/instance: redis
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: redis
+    helm.sh/chart: redis-16.4.5
+  name: graphql-mongo-redis-master
+  namespace: applications
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: master
+      app.kubernetes.io/instance: redis
+      app.kubernetes.io/name: redis
+  serviceName: graphql-mongo-redis-headless
+  template:
+    metadata:
+      annotations:
+        checksum/configmap: a85b5695bd7344fc2e3c83303c98595eef2a0a913179ea168c572ee7d81c1cc1
+        checksum/health: 5c6236c248cc9ccbc6ef6ea458a1838ff054ab1eeeae1ddf037edf487bee9892
+        checksum/scripts: 7b7df7740d9015c82c4e3402c78ec981ab18b4587be189665e2817203cffa7e2
+        checksum/secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      labels:
+        app.kubernetes.io/component: master
+        app.kubernetes.io/instance: redis
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: redis
+        helm.sh/chart: redis-16.4.5
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: master
+                  app.kubernetes.io/instance: redis
+                  app.kubernetes.io/name: redis
+              namespaces:
+              - applications
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+      containers:
+      - args:
+        - -c
+        - /opt/bitnami/scripts/start-scripts/start-master.sh
+        command:
+        - /bin/bash
+        env:
+        - name: BITNAMI_DEBUG
+          value: "false"
+        - name: REDIS_REPLICATION_MODE
+          value: master
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "yes"
+        - name: REDIS_TLS_ENABLED
+          value: "no"
+        - name: REDIS_PORT
+          value: "6379"
+        image: docker.io/bitnami/redis:6.2.6-debian-10-r142
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - /health/ping_liveness_local.sh 5
+          failureThreshold: 5
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 6
+        name: redis
+        ports:
+        - containerPort: 6379
+          name: redis
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - /health/ping_readiness_local.sh 1
+          failureThreshold: 5
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 2
+        resources:
+          limits: {}
+          requests: {}
+        securityContext:
+          runAsUser: 1001
+        volumeMounts:
+        - mountPath: /opt/bitnami/scripts/start-scripts
+          name: start-scripts
+        - mountPath: /health
+          name: health
+        - mountPath: /data
+          name: redis-data
+        - mountPath: /opt/bitnami/redis/mounted-etc
+          name: config
+        - mountPath: /opt/bitnami/redis/etc/
+          name: redis-tmp-conf
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 1001
+      serviceAccountName: graphql-mongo-redis
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 493
+          name: graphql-mongo-redis-scripts
+        name: start-scripts
+      - configMap:
+          defaultMode: 493
+          name: graphql-mongo-redis-health
+        name: health
+      - configMap:
+          name: graphql-mongo-redis-configuration
+        name: config
+      - emptyDir: {}
+        name: redis-tmp-conf
+      - emptyDir: {}
+        name: tmp
+  updateStrategy:
+    rollingUpdate: {}
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        app.kubernetes.io/component: master
+        app.kubernetes.io/instance: redis
+        app.kubernetes.io/name: redis
+      name: redis-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
+      storageClassName: linode-block-storage-retain

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"graphql-mongo","namespace":"applications"},"spec":{"ports":[{"name":"graphql-mongo-http","port":8000,"protocol":"TCP","targetPort":8000}],"selector":{"app":"graphql"},"type":"ClusterIP"}}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: graphql-mongo
+  namespace: applications
+spec:
+  ports:
+  - name: graphql-mongo-http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: graphql
+  type: ClusterIP
