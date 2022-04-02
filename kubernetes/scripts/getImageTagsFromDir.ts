@@ -7,7 +7,11 @@ import path from "path";
 import fs from "fs";
 import glob from "glob";
 import util from "util";
-import { getEnvironmentVariables, imageTagsObjectValidator } from "../resources/shared/validations";
+import {
+  getEnvironmentVariables,
+  ImageTags,
+  imageTagsObjectValidator,
+} from "../resources/shared/validations";
 
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
 // npm i inquirer
@@ -18,7 +22,7 @@ const MANIFESTS_DIR = path.join(__dirname, "..", "manifests");
 const IMAGE_TAGS_DIR = path.join(MANIFESTS_DIR, "image-tags");
 const IMAGE_TAGS_FILES = path.join(IMAGE_TAGS_DIR, "image-tags", "*");
 
-export async function getImageTagsFromDir(): Promise<z.infer<typeof imageTagsObjectValidator>> {
+export async function getImageTagsFromDir(): Promise<ImageTags> {
   const imageTagsPaths = await globAsync(IMAGE_TAGS_FILES, {
     dot: true,
   });

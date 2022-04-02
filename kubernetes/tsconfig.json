@@ -20,6 +20,6 @@
         ]
     },
     "files": [
-        "index.ts", "./secretsManagement/secretsSample.ts", "scripts/script.ts"
+        "index.ts", "./secretsManagement/secretsSample.ts", "scripts/script.ts", "./scripts/generateSealedSecretsManifests.ts", "./scripts/generateManifests.ts"
     ]
 }
