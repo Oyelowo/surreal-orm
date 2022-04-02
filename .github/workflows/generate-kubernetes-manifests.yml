@@ -27,14 +27,16 @@ jobs:
         with:
           node-version: 14.x
       - run: npm install
+      - name: Set environment variables
+        run: |
+          # They all use same image tag for now
+          echo "IMAGE_TAG=$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+      
       - name: Install pulumi
         uses: pulumi/setup-pulumi@v2
         with:
-          pulumi-version: 3.27.0
+          pulumi-version: 3.28.0
       - run: |
-          # They all use same image tag for now
-          echo "IMAGE_TAG=$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
-          
           make manifests_development_no_sealed_secrets tag=${{ env.IMAGE_TAG }}
           make manifests_staging_no_sealed_secrets tag=${{ env.IMAGE_TAG }}
           make manifests_production_no_sealed_secrets tag=${{ env.IMAGE_TAG }}
@@ -44,6 +46,7 @@ jobs:
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          git add .
           git commit -m "Add changes" -a
       - name: Push changes
         uses: ad-m/github-push-action@master
