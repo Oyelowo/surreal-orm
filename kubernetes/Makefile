@@ -39,7 +39,7 @@ manifests_production_with_sealed_secrets:
 #  This is good for the CI pipeline in github actions where we dont want to store input secret Ts config
 # found at kubernetes/secretsManagement/secrets-unsealed/local.ts
 manifests_development_no_sealed_secrets:
-# Example usage make manifests_development_no_sealed_secrets tag=github-sha  
+# Example usage make manifests_development_no_sealed_secrets
 	npx ts-node scripts/script.ts --environment=development --gss=no --kusi=no
 # Short version: npx ts-node scripts/script.ts --e=development
 

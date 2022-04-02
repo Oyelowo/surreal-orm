@@ -96,6 +96,19 @@ jobs:
       - name: Update repo with IMAGE_TAG_REACT_WEB to /kubernetes/manifests/image-tags/IMAGE_TAG_REACT_WEB
         run: echo ${{env.IMAGE_TAG_REACT_WEB}} > ../kubernetes/manifests/image-tags/IMAGE_TAG_REACT_WEB
 
+      - name: Commit files
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git commit -m "Update image tags" -a
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
+
 
       # - name: build web docker image
       #   run: docker build -f Dockerfile.production --target web  -t ${{ env.IMAGE_WITH_TAG_REACT_WEB }}  .
