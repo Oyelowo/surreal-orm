@@ -1,3 +1,4 @@
+import { sealedSecretsProvider } from "./provider";
 import { SealedSecretsHelmValuesBitnami } from "../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
@@ -33,6 +34,6 @@ export const sealedSecret = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: clusterSetupDirectory }
+  { provider: sealedSecretsProvider }
   // { provider }
 );

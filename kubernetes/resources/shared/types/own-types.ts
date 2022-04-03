@@ -29,7 +29,14 @@ export type Memory = `${number}${
 
 export type CPU = `${number}${"m"}`;
 
-export type AppName = "graphql-mongo" | "graphql-postgres" | "grpc-mongo" | "react-web" | "argocd";
+export type AppName =
+  | "graphql-mongo"
+  | "graphql-postgres"
+  | "grpc-mongo"
+  | "react-web"
+  | "argocd"
+  | "ingress-controller"
+  | "sealed-secrets";
 
 export interface Settings<TAppName extends AppName> {
   requestMemory: Memory;

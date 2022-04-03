@@ -1,9 +1,9 @@
-import { applicationsDirectory } from "../shared/manifestsDirectory";
+import { grpcMongoProvider } from "./provider";
 import { ServiceDeployment } from "../shared/deployment";
 import { grpcMongoSettings } from "./settings";
 
 export const grpcMongo = new ServiceDeployment("grpc-mongo", grpcMongoSettings, {
-  provider: applicationsDirectory,
+  provider: grpcMongoProvider,
 });
 
 export * from "./mongodb";

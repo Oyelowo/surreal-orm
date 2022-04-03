@@ -1,4 +1,5 @@
-import { clusterSetupDirectory } from '../shared/manifestsDirectory';
+import { ingressControllerProvider } from "./provider";
+// import { clusterSetupDirectory } from "../shared/manifestsDirectory";
 import * as k8s from "@pulumi/kubernetes";
 import * as nginx from "@pulumi/kubernetes-ingress-nginx";
 
@@ -28,14 +29,13 @@ import { RecursivePartial } from "../shared/types/own-types";
 // );
 
 const controllerName = "nginx-ingress-controller";
-const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> =
-  {
-    // containerPorts: {
-    //   http: 8000,
-    //   https: 443,
-    // },
-    fullnameOverride: controllerName,
-  };
+const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> = {
+  // containerPorts: {
+  //   http: 8000,
+  //   https: 443,
+  // },
+  fullnameOverride: controllerName,
+};
 // nginx-ingress-controller
 // K3s also comes with a traefik ingress controoler. Disable that if using this
 export const ingressNginx = new k8s.helm.v3.Chart(
@@ -54,7 +54,7 @@ export const ingressNginx = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: clusterSetupDirectory }
+  { provider: ingressControllerProvider }
   // { provider }
 );
 
@@ -145,7 +145,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
       ],
     },
   },
-  { provider: applicationsDirectory }
+  { provider: ingressControllerProvider }
 );
 
 // // export const appStatuses = apps;

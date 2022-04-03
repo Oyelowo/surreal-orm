@@ -1,7 +1,7 @@
+import { graphqlPostgresProvider } from './provider';
 import { postgresdbHaHelmValuesBitnami } from "./../shared/types/helm-charts/postgresdbHaHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { applicationsDirectory } from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { graphqlPostgresSettings } from "./settings";
 import { DeepPartial } from "../shared/types/own-types";
@@ -126,5 +126,5 @@ export const graphqlPostgresPostgresdbHA = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: applicationsDirectory }
+  { provider: graphqlPostgresProvider }
 );

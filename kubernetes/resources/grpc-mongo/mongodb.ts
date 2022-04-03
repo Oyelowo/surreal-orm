@@ -1,11 +1,13 @@
+import { grpcMongoProvider } from "./provider";
 import { MongodbHelmValuesBitnami } from "./../shared/types/helm-charts/MongodbHelmValuesBitnami";
 import { namespaceNames } from "./../shared/namespaces";
 import * as k8s from "@pulumi/kubernetes";
 
-import { applicationsDirectory } from "../shared/manifestsDirectory";
 import { grpcMongoSettings } from "./settings";
 import { DeepPartial } from "../shared/types/own-types";
-import { environmentVariables } from "../shared/validations";
+import { getEnvironmentVariables } from "../shared/validations";
+
+const environmentVariables = getEnvironmentVariables();
 
 /* MONGODB STATEFULSET */
 type Credentials = {
@@ -104,5 +106,5 @@ export const grpcMongoMongodb = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: applicationsDirectory }
+  { provider: grpcMongoProvider }
 );
