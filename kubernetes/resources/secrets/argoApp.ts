@@ -8,7 +8,7 @@ type Metadata = {
 
 const metadataSealedSecretsController: Metadata = {
   name: controllerName,
-  namespace: namespaceNames.default,
+  namespace: namespaceNames.kubeSystem,
 };
 
 // App that deploys sealedSecretsController resources themselves
