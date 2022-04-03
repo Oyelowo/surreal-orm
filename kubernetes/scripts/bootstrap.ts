@@ -15,15 +15,10 @@ import yargs from "yargs/yargs";
 import { Environment } from "../resources/shared/types/own-types";
 import { getEnvironmentVariables } from "../resources/shared/validations";
 import { setupUnsealedSecretFiles } from "../secretsManagement/setupSecrets";
-import { getManifestsOutputDirectory } from "../resources/shared";
 import { generateManifests } from "./generateManifests";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
 import { promptKubernetesClusterSwitch } from "./promptKubernetesClusterSwitch";
-import {
-  generateSealedSecretsManifests,
-  getSecretDirForEnv,
-  SEALED_SECRETS_BASE_DIR,
-} from "./generateSealedSecretsManifests";
+import { generateSealedSecretsManifests } from "./generateSealedSecretsManifests";
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
 // npm i inquirer
 type EnvName = keyof ReturnType<typeof getEnvironmentVariables>;
@@ -79,7 +74,7 @@ function doInitialClusterSetup() {
   sh.exec(`kubectl apply -R -f ${manifestsDirForEnv}/namespaces`);
 
   // # Apply setups with sealed secret controller
-  sh.exec(`kubectl apply -R -f  ${manifestsDirForEnv}/cluster-setup`);
+  sh.exec(`kubectl apply -R -f  ${manifestsDirForEnv}/sealed-secret-controller`);
 
   // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
   sh.exec(`kubectl rollout status deployment/sealed-secrets-controller -n=kube-system`);
@@ -94,7 +89,6 @@ async function bootstrap() {
     await promptKubernetesClusterSwitch();
   }
   setupUnsealedSecretFiles();
-  const SEALED_SECRETS_DIR_FOR_ENV = getSecretDirForEnv(ARGV.e);
   const imageTags = await getImageTagsFromDir();
 
   await generateManifests({
@@ -110,15 +104,15 @@ async function bootstrap() {
   });
 
   if (yes.includes(ARGV.gss)) {
-    /* 
+    /*
        This requires the above step with initial cluster setup making sure that the sealed secret controller is
        running in the cluster */
     doInitialClusterSetup();
 
     // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
-    sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/0-crd`);
-    sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd/1-manifest`);
-    sh.exec(`kubectl apply -f ${SEALED_SECRETS_DIR_FOR_ENV}`);
+    sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd-controller/0-crd`);
+    sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd-controller/1-manifest`);
+    // sh.exec(`kubectl apply -f ${SEALED_SECRETS_DIR_FOR_ENV}`);
   }
 }
 

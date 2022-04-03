@@ -7,10 +7,7 @@ import { clearUnsealedInputTsSecretFilesContents } from "../secretsManagement/se
 import { globAsync } from "./bootstrap";
 
 export const MANIFESTS_DIR = path.join(__dirname, "..", "manifests");
-export const SEALED_SECRETS_BASE_DIR = path.join(MANIFESTS_DIR, "sealed-secrets");
 
-export const getSecretDirForEnv = (environment: Environment) =>
-  path.join(SEALED_SECRETS_BASE_DIR, environment);
 /* 
 GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PULUMI.
 These secrets are encrypted using the bitnami sealed secret controller running in the cluster
@@ -29,27 +26,25 @@ export async function generateSealedSecretsManifests({
   keepSecretOutputs,
   generateSealedSecrets,
 }: GenSealedSecretsProps) {
-  const SEALED_SECRETS_DIR_FOR_ENV = getSecretDirForEnv(environment);
-  const UNSEALED_SECRETS_MANIFESTS_FOR_ENV = path.join(
-    MANIFESTS_DIR,
-    "generated",
-    environment,
-    "/**/**/**secret-*ml"
-  );
-
-  const unsealedSecretsFilePathsForEnv = await globAsync(UNSEALED_SECRETS_MANIFESTS_FOR_ENV, {
-    dot: true,
+  const contextDir = path.join(__dirname, "..", "manifests", "generated", environment);
+  const unsealedSecretsFilePathsForEnv = getFilePathsThatMatch({
+    contextDir,
+    pattern: "secret-*ml",
   });
 
-  unsealedSecretsFilePathsForEnv.forEach((unsealedSecretPath) => {
+  for (const unsealedSecretPath of unsealedSecretsFilePathsForEnv) {
     if (generateSealedSecrets) {
-      sh.echo(c.blueBright("Generating sealed secret from", unsealedSecretPath));
+      const unsealedSecretDir = path.basename(unsealedSecretPath);
+      // Secrets are prefixed with "secret-"
+      const unsealedSecretFileName = path.basename(unsealedSecretPath);
+      const sealedSecretFileName = `sealed-s${unsealedSecretFileName}`;
+      const sealedSecretFilePath = path.join(unsealedSecretDir, sealedSecretFileName);
 
-      const secretName = path.basename(unsealedSecretPath);
-      const sealedSecretFilePath = path.join(SEALED_SECRETS_DIR_FOR_ENV, secretName);
-
-      sh.echo(c.blueBright(`Create ${SEALED_SECRETS_DIR_FOR_ENV} if it does not exists`));
-      sh.mkdir("-p", SEALED_SECRETS_DIR_FOR_ENV);
+      sh.echo(
+        c.blueBright(
+          `Generating sealed secret for ${unsealedSecretFileName} at ${unsealedSecretDir}`
+        )
+      );
 
       const kubeSeal = sh.exec(`kubeseal <${unsealedSecretPath} -o yaml >${sealedSecretFilePath}`, {
         silent: true,
@@ -67,6 +62,7 @@ export async function generateSealedSecretsManifests({
 
     sh.echo(c.blueBright(`Removing unsealed plain secret manifest ${unsealedSecretPath}`));
 
+    // Delete unsealed plain secret if specified
     if (!keepSecretOutputs) {
       sh.rm("-rf", unsealedSecretPath);
     }
@@ -74,5 +70,22 @@ export async function generateSealedSecretsManifests({
     if (!keepSecretInputs) {
       clearUnsealedInputTsSecretFilesContents();
     }
+  }
+}
+// const UNSEALED_SECRETS_MANIFESTS_FOR_ENV = sh.exec(`find ${contextDir} -name "secret-*ml"`, {
+export function getFilePathsThatMatch({
+  contextDir,
+  pattern,
+}: {
+  contextDir: string;
+  pattern: string;
+}) {
+  const UNSEALED_SECRETS_MANIFESTS_FOR_ENV = sh.exec(`find ${contextDir} -name "${pattern}"`, {
+    silent: true,
   });
+  const unsealedSecretsFilePathsForEnv = UNSEALED_SECRETS_MANIFESTS_FOR_ENV.stdout
+    .trim()
+    .split("\n")
+    .map((s) => s.trim());
+  return unsealedSecretsFilePathsForEnv;
 }
