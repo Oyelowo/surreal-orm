@@ -31,12 +31,6 @@ export const APPLICATION_DIR = path.join(MANIFESTS_BASE_DIR_FOR_ENV, "applicatio
 
 export const getPathToApplicationDir = (appName: AppName) => path.join(APPLICATION_DIR, appName);
 
-export const applicationsDirectory = new k8s.Provider("render-applications", {
-  renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/applications`,
-  // renderYamlToDirectory: `${rootDirectory}/${nameSpaceName}`,
-  // namespace: "nana",
-});
-
 export const nameSpacesDirectory = new k8s.Provider("render-namespaces", {
   renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/namespaces`,
   // namespace: "nana",
@@ -45,7 +39,7 @@ export const nameSpacesDirectory = new k8s.Provider("render-namespaces", {
 // Stores resources useful for starting a fresh cluster such as the
 // sealed secrets controller and ingress controller which are
 // fundamental for the applications that would run in the cluster
-export const clusterSetupDirectory = new k8s.Provider("render-cluster-setup", {
+export const clusterSetupProvider = new k8s.Provider("render-cluster-setup", {
   renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/cluster-setup`,
   // namespace: "nana",
 });

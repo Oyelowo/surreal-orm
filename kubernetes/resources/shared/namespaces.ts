@@ -3,7 +3,7 @@ import { Namespace } from "@pulumi/kubernetes/core/v1";
 import * as kx from "@pulumi/kubernetesx";
 
 import {
-  clusterSetupDirectory,
+  clusterSetupProvider,
   applicationsDirectory,
   nameSpacesDirectory,
 } from "./manifestsDirectory";
