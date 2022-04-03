@@ -30,7 +30,7 @@ type EnvName = keyof ReturnType<typeof getEnvironmentVariables>;
 export const globAsync = util.promisify(glob);
 const promptGetAsync = util.promisify(prompt.get);
 export const ENVIRONMENT: EnvName = "ENVIRONMENT";
-
+// find ./kubernetes -name "secret*ml"
 const yesOrNoOptions = ["y", "yes", "no", "n"] as const;
 type YesOrNoOptions = typeof yesOrNoOptions[number];
 

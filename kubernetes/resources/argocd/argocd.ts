@@ -1,5 +1,6 @@
 import * as k8s from "@pulumi/kubernetes";
 import { applicationsDirectory, argocdDirectory } from "../shared/manifestsDirectory";
+import { createArgocdApplication } from "../shared/createArgoApplicaiton";
 import { namespaceNames } from "../shared/namespaces";
 import { ArgocdHelmValuesBitnami } from "../shared/types/helm-charts/argocdHelmValuesBitnami";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
@@ -26,10 +27,17 @@ const metadata: Metadata = {
 };
 const resourceName = metadata.name;
 
-export const argocdOyelowoApplications = new argocd.argoproj.v1alpha1.Application(
+export const argocdApplication = createArgocdApplication({
+  metadata,
+  pathToAppManifests: "kubernetes/manifests/generated",
+  provider: applicationsDirectory,
+});
+
+export const argocdOyelopwoApplications = new argocd.argoproj.v1alpha1.Application(
   "argocd-oyelowo-applications",
   {
     apiVersion: "argoproj.io/v1alpha1",
+
     metadata,
     spec: {
       project: "oyelowo-project",

@@ -1,4 +1,4 @@
-import { Environment } from "./types/own-types";
+import { AppName, Environment } from "./types/own-types";
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
@@ -26,15 +26,19 @@ const { ENVIRONMENT, TEMPORARY_DIR } = getEnvironmentVariables();
 export const getManifestsOutputDirectory = (environment: Environment) =>
   path.join("manifests", "generated", environment);
 
-const manifestsBaseDirForEnvironment = getManifestsOutputDirectory(ENVIRONMENT);
+const MANIFESTS_BASE_DIR_FOR_ENV = getManifestsOutputDirectory(ENVIRONMENT);
+export const APPLICATION_DIR = path.join(MANIFESTS_BASE_DIR_FOR_ENV, "applications");
+
+export const getPathToApplicationDir = (appName: AppName) => path.join(APPLICATION_DIR, appName);
+
 export const applicationsDirectory = new k8s.Provider("render-applications", {
-  renderYamlToDirectory: `${manifestsBaseDirForEnvironment}/applications`,
+  renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/applications`,
   // renderYamlToDirectory: `${rootDirectory}/${nameSpaceName}`,
   // namespace: "nana",
 });
 
 export const nameSpacesDirectory = new k8s.Provider("render-namespaces", {
-  renderYamlToDirectory: `${manifestsBaseDirForEnvironment}/namespaces`,
+  renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/namespaces`,
   // namespace: "nana",
 });
 
@@ -42,12 +46,12 @@ export const nameSpacesDirectory = new k8s.Provider("render-namespaces", {
 // sealed secrets controller and ingress controller which are
 // fundamental for the applications that would run in the cluster
 export const clusterSetupDirectory = new k8s.Provider("render-cluster-setup", {
-  renderYamlToDirectory: `${manifestsBaseDirForEnvironment}/cluster-setup`,
+  renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/cluster-setup`,
   // namespace: "nana",
 });
 
 export const argocdDirectory = new k8s.Provider("render-argocd", {
-  renderYamlToDirectory: `${manifestsBaseDirForEnvironment}/argocd`,
+  renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/argocd`,
   // namespace: "nana",
 });
 
