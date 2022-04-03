@@ -2,11 +2,7 @@ import * as k8s from "@pulumi/kubernetes";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
 import * as kx from "@pulumi/kubernetesx";
 
-import {
-  clusterSetupProvider,
-  applicationsDirectory,
-  nameSpacesDirectory,
-} from "./manifestsDirectory";
+import { nameSpacesDirectory } from "./manifestsDirectory";
 
 // export const devNamespaceName = devNamespace.metadata.name as unknown as string;
 export const namespaceNames = {
@@ -40,4 +36,3 @@ export const argocdNamespace = new Namespace(
   },
   { provider: nameSpacesDirectory }
 );
-

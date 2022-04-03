@@ -1,5 +1,6 @@
+import { argocdProvider } from "./provider";
 import * as k8s from "@pulumi/kubernetes";
-import { applicationsDirectory, argocdDirectory } from "../shared/manifestsDirectory";
+import { argocdDirectory } from "../shared/manifestsDirectory";
 import { createArgocdApplication } from "../shared/createArgoApplicaiton";
 import { namespaceNames } from "../shared/namespaces";
 import { ArgocdHelmValuesBitnami } from "../shared/types/helm-charts/argocdHelmValuesBitnami";
@@ -30,40 +31,8 @@ const resourceName = metadata.name;
 export const argocdApplication = createArgocdApplication({
   metadata,
   pathToAppManifests: "kubernetes/manifests/generated",
-  provider: applicationsDirectory,
+  provider: argocdProvider,
 });
-
-export const argocdOyelopwoApplications = new argocd.argoproj.v1alpha1.Application(
-  "argocd-oyelowo-applications",
-  {
-    apiVersion: "argoproj.io/v1alpha1",
-
-    metadata,
-    spec: {
-      project: "oyelowo-project",
-      destination: {
-        server: "https://kubernetes.default.svc",
-        namespace: namespaceNames.applications,
-        name: "oyelowo-applications",
-      },
-      source: {
-        repoURL: "https://github.com/Oyelowo/modern-distributed-app-template",
-        path: "kubernetes/manifests/generated",
-        targetRevision: "HEAD",
-        directory: {
-          recurse: true,
-        },
-      },
-      syncPolicy: {
-        automated: {
-          prune: true,
-          selfHeal: true,
-        },
-      },
-    },
-  },
-  { provider: argocdDirectory }
-);
 
 /* SECRET */
 export const argoCDApplicationsSecret = new kx.Secret(

@@ -6,7 +6,7 @@ import * as nginx from "@pulumi/kubernetes-ingress-nginx";
 import { graphqlMongoSettings } from "../graphql-mongo/settings";
 import { graphqlPostgresSettings } from "../graphql-postgres/settings";
 import { reactWebSettings } from "../react-web/settings";
-import { applicationsDirectory } from "../shared/manifestsDirectory";
+// import { applicationsDirectory } from "../shared/manifestsDirectory";
 import { IngressControllerValuesBitnami } from "../shared/types/helm-charts/ingressControllerValuesBitnami";
 import { applicationsNamespace, namespaceNames } from "../shared/namespaces";
 import { NginxConfiguration } from "../shared/types/nginxConfigurations";

@@ -23,7 +23,7 @@ export function createArgocdApplication({ metadata, pathToAppManifests, provider
     },
   };
   const argocdApplication = new argocd.argoproj.v1alpha1.Application(
-    "argocd-oyelowo-applications",
+    metadata.name,
     {
       apiVersion: "argoproj.io/v1alpha1",
       metadata: metadataValues,
