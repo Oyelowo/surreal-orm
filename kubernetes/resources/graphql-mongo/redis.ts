@@ -1,4 +1,4 @@
-import { graphqlMongoProvider } from "./provider";
+import { graphqlMongo } from "./index";
 import { graphqlMongoSettings } from "./settings";
 import { getEnvironmentVariables } from "./../shared/validations";
 import { RedisHelmValuesBitnami } from "./../shared/types/helm-charts/redisHelmValuesBitnami";
@@ -60,5 +60,5 @@ export const graphqlMongoRedis = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: graphqlMongoProvider }
+  { provider: graphqlMongo.getProvider() }
 );

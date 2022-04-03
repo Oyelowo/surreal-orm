@@ -35,8 +35,8 @@ export type AppName =
   | "grpc-mongo"
   | "react-web"
   | "argocd"
-  | "ingress-controller"
-  | "sealed-secrets";
+  // | "ingress-controller"
+  // | "sealed-secrets";
 
 export interface Settings<TAppName extends AppName> {
   requestMemory: Memory;

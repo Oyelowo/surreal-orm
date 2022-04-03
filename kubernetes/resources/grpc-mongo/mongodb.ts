@@ -1,4 +1,4 @@
-import { grpcMongoProvider } from "./provider";
+import { grpcMongo } from "./index";
 import { MongodbHelmValuesBitnami } from "./../shared/types/helm-charts/MongodbHelmValuesBitnami";
 import { namespaceNames } from "./../shared/namespaces";
 import * as k8s from "@pulumi/kubernetes";
@@ -106,5 +106,5 @@ export const grpcMongoMongodb = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: grpcMongoProvider }
+  { provider: grpcMongo.getProvider() }
 );

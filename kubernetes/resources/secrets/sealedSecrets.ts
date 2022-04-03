@@ -1,10 +1,18 @@
-import { sealedSecretsProvider } from "./provider";
 import { SealedSecretsHelmValuesBitnami } from "../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { clusterSetupProvider } from "../shared/manifestsDirectory";
+import {
+  getPathToNonApplicationDir,
+  sealedSecretsControllerProvider,
+} from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
+
+const sealedSecretsDirectoryPath = getPathToNonApplicationDir("sealed-secrets-controller");
+
+const sealedSecretsProvider = new k8s.Provider(sealedSecretsDirectoryPath, {
+  renderYamlToDirectory: sealedSecretsDirectoryPath,
+});
 
 const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {
   // nameOverride: "mongodb-graphql",

@@ -8,7 +8,7 @@
 export * from "./resources/shared";
 
 // Ingress controller and ingress rule
-export * from "./resources/ingress";
+export * from "./resources/ingress-controller";
 
 export * from "./resources/secrets";
 

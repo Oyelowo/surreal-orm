@@ -1,4 +1,3 @@
-import { ingressControllerProvider } from "./provider";
 // import { clusterSetupDirectory } from "../shared/manifestsDirectory";
 import * as k8s from "@pulumi/kubernetes";
 import * as nginx from "@pulumi/kubernetes-ingress-nginx";
@@ -11,6 +10,14 @@ import { IngressControllerValuesBitnami } from "../shared/types/helm-charts/ingr
 import { applicationsNamespace, namespaceNames } from "../shared/namespaces";
 import { NginxConfiguration } from "../shared/types/nginxConfigurations";
 import { RecursivePartial } from "../shared/types/own-types";
+import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
+
+const controllerName = "nginx-ingress-controller";
+export const ingressControllerDirectoryPath = getPathToNonApplicationDir(controllerName);
+
+export const ingressControllerProvider = new k8s.Provider(ingressControllerDirectoryPath, {
+  renderYamlToDirectory: ingressControllerDirectoryPath,
+});
 
 // Install the NGINX ingress controller to our cluster. The controller
 // consists of a Pod and a Service. Install it and configure the controller
@@ -28,7 +35,6 @@ import { RecursivePartial } from "../shared/types/own-types";
 //   { provider: provider }
 // );
 
-const controllerName = "nginx-ingress-controller";
 const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> = {
   // containerPorts: {
   //   http: 8000,

@@ -1,4 +1,4 @@
-import { graphqlPostgresProvider } from './provider';
+import { graphqlPostgres } from "./index";
 import { postgresdbHaHelmValuesBitnami } from "./../shared/types/helm-charts/postgresdbHaHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
@@ -126,5 +126,5 @@ export const graphqlPostgresPostgresdbHA = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: graphqlPostgresProvider }
+  { provider: graphqlPostgres.getProvider() }
 );

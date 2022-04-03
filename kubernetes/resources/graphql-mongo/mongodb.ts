@@ -1,4 +1,4 @@
-import { graphqlMongoProvider } from "./provider";
+import { graphqlMongo } from "./index";
 import { MongodbHelmValuesBitnami } from "./../shared/types/helm-charts/MongodbHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
@@ -9,7 +9,7 @@ import { getEnvironmentVariables } from "../shared/validations";
 
 const { envVars } = graphqlMongoSettings;
 
-/* MONGODB STATEFULSET */
+/* MONGODB STATEFUL_SET */
 type Credentials = {
   usernames: string[];
   passwords: string[];
@@ -120,5 +120,5 @@ export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: graphqlMongoProvider }
+  { provider: graphqlMongo.getProvider() }
 );

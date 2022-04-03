@@ -1,4 +1,4 @@
-import { graphqlPostgresProvider } from "./provider";
+import { graphqlPostgres } from "./index";
 import { postgresdbHelmValuesBitnami } from "./../shared/types/helm-charts/postgresdbHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
@@ -85,7 +85,7 @@ const postgresValues: DeepPartial<postgresdbHelmValuesBitnami> = {
         },
       },
     },
-    storageClass: envVars.APP_ENVIRONMENT === "local" ? "" : "xxx", // FIXME TODO: Specify the storage class here
+    storageClass: envVars.APP_ENVIRONMENT === "local" ? "" : "linode-", // FIXME TODO: Specify the storage class here
   },
 
   //   primary: {
@@ -120,6 +120,6 @@ export const graphqlPostgresPostgresdb = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: graphqlPostgresProvider }
+  { provider: graphqlPostgres.getProvider() }
   // { provider }
 );

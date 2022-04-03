@@ -30,24 +30,24 @@ const MANIFESTS_BASE_DIR_FOR_ENV = getManifestsOutputDirectory(ENVIRONMENT);
 export const APPLICATION_DIR = path.join(MANIFESTS_BASE_DIR_FOR_ENV, "applications");
 
 export const getPathToApplicationDir = (appName: AppName) => path.join(APPLICATION_DIR, appName);
+export const getPathToNonApplicationDir = (toolName: string) =>
+  path.join(MANIFESTS_BASE_DIR_FOR_ENV, toolName);
 
-export const nameSpacesDirectory = new k8s.Provider("render-namespaces", {
+export const nameSpacesProvider = new k8s.Provider("render-namespaces", {
   renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/namespaces`,
-  // namespace: "nana",
 });
 
 // Stores resources useful for starting a fresh cluster such as the
 // sealed secrets controller and ingress controller which are
 // fundamental for the applications that would run in the cluster
-export const clusterSetupProvider = new k8s.Provider("render-cluster-setup", {
-  renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/cluster-setup`,
-  // namespace: "nana",
+export const sealedSecretsControllerProvider = new k8s.Provider("sealed-secrets-controller", {
+  renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/sealed-secrets-controller`,
+});
+export const ingressControllerProvider = new k8s.Provider("ingress-controller", {
+  renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/ingress-controller`,
 });
 
-export const argocdDirectory = new k8s.Provider("render-argocd", {
-  renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/argocd`,
-  // namespace: "nana",
-});
+
 
 // export const devNamespace = new k8s.core.v1.Namespace(
 //   "local",

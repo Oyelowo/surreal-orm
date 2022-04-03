@@ -1,7 +1,6 @@
-import { argocdProvider } from "./provider";
 import * as k8s from "@pulumi/kubernetes";
-import { argocdDirectory } from "../shared/manifestsDirectory";
-import { createArgocdApplication } from "../shared/createArgoApplicaiton";
+import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
+import { createArgocdApplication } from "../shared/createArgoApplication";
 import { namespaceNames } from "../shared/namespaces";
 import { ArgocdHelmValuesBitnami } from "../shared/types/helm-charts/argocdHelmValuesBitnami";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
@@ -10,41 +9,29 @@ import * as path from "path";
 import * as argocd from "../../crd2pulumi/argocd";
 import { getSecretForApp } from "../../secretsManagement";
 
-const secrets = getSecretForApp("argocd");
+const argocdControllerDir = getPathToNonApplicationDir("argocd-controller");
 
 type Metadata = {
   name: string;
   namespace: string;
-  labels: {
-    "argocd.argoproj.io/secret-type": "repository";
-  };
 };
 const metadata: Metadata = {
-  name: "argocd-application-secret",
+  name: "argocd-application",
   namespace: namespaceNames.argocd,
-  labels: {
-    "argocd.argoproj.io/secret-type": "repository",
-  },
 };
+
 const resourceName = metadata.name;
 
+// App that deploys argocd resources themselves
+/* ARGOCD APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const argocdApplication = createArgocdApplication({
   metadata,
-  pathToAppManifests: "kubernetes/manifests/generated",
-  provider: argocdProvider,
+  pathToAppManifests: argocdControllerDir,
 });
 
-/* SECRET */
-export const argoCDApplicationsSecret = new kx.Secret(
-  `${resourceName}-secret`,
-  {
-    stringData: {
-      ...secrets,
-    },
-    metadata,
-  },
-  { provider: argocdDirectory }
-);
+export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
+  renderYamlToDirectory: argocdControllerDir,
+});
 
 // export const argoApplicationSecret = new k8s.
 
@@ -116,6 +103,6 @@ export const argocdHelm = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: argocdDirectory }
+  { provider: argocdControllerProvider }
   // { provider }
 );

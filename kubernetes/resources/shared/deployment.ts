@@ -1,14 +1,12 @@
+import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
 import * as pulumi from "@pulumi/pulumi";
 import { NoUnion } from "./types/own-types";
-import {
-  AppConfigs,
-  AppName,
-  DBType,
-  NamespaceOfApps,
-} from "./types/own-types";
+import { AppConfigs, AppName, DBType, NamespaceOfApps } from "./types/own-types";
 import { getSecretForApp } from "../../secretsManagement";
-
+import * as argocd from "../../crd2pulumi/argocd";
+import { createArgocdApplication } from "./createArgoApplication";
+import { getPathToApplicationDir } from "./manifestsDirectory";
 export class ServiceDeployment<
   AN extends AppName,
   DBT extends DBType,
@@ -18,17 +16,18 @@ export class ServiceDeployment<
   public readonly configMaps: kx.ConfigMap;
   public readonly secret: kx.Secret;
   public readonly service: kx.Service;
+  public readonly argocdApplication: argocd.argoproj.v1alpha1.Application;
   public readonly ipAddress?: pulumi.Output<string>;
   public readonly secretProvider?: pulumi.ProviderResource;
   public readonly appName: AN;
 
   constructor(
     name: NoUnion<AN>,
-    args: AppConfigs<AN, DBT, NS>,
-    opts: pulumi.ComponentResourceOptions
+    args: AppConfigs<AN, DBT, NS>
+    // opts: pulumi.ComponentResourceOptions
   ) {
-    super("k8sjs:service:ServiceDeployment", name, {}, opts);
-    const provider = opts?.provider;
+    super("k8sjs:service:ServiceDeployment", name, {} /* opts */);
+    // const provider = opts?.provider;
     this.appName = name;
     const { envVars, kubeConfig, metadata } = args;
     const resourceName = metadata.name;
@@ -39,7 +38,7 @@ export class ServiceDeployment<
         data: { config: "very important data" },
         metadata,
       },
-      { provider, parent: this }
+      { provider: this.getProvider(), parent: this }
     );
 
     const secrets = getSecretForApp(this.appName);
@@ -53,8 +52,9 @@ export class ServiceDeployment<
         },
         metadata,
       },
-      //TODO: Confirm why secret has a separate provider
-      { provider: this.secretProvider, parent: this }
+      // //TODO: Confirm why secret has a separate provider
+      // { provider: this.secretProvider, parent: this }
+      { provider: this.getProvider(), parent: this }
     );
 
     // Define a Pod.
@@ -94,7 +94,7 @@ export class ServiceDeployment<
         }),
         metadata,
       },
-      { provider, parent: this }
+      { provider: this.getProvider(), parent: this }
     );
 
     this.service = this.deployment.createService({
@@ -109,6 +109,16 @@ export class ServiceDeployment<
       ],
     });
 
+    this.argocdApplication = createArgocdApplication({
+      metadata: {
+        name: metadata.name,
+        namespace: metadata.namespace,
+      },
+      pathToAppManifests: getPathToApplicationDir(this.appName),
+      opts: {
+        parent: this,
+      },
+    });
     const useLoadBalancer = new pulumi.Config("useLoadBalancer") ?? false;
     if (useLoadBalancer) {
       this.ipAddress = this.service.status.loadBalancer.ingress[0].ip;
@@ -148,5 +158,14 @@ export class ServiceDeployment<
       secretInstance.asEnvValue(key),
     ]);
     return Object.fromEntries(keyValueEntries);
+  };
+
+  getProvider = () => {
+    const renderYamlPath = getPathToApplicationDir(this.appName);
+
+    const provider = new k8s.Provider(this.appName, {
+      renderYamlToDirectory: renderYamlPath,
+    });
+    return provider;
   };
 }
