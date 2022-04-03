@@ -34,10 +34,10 @@ export async function generateSealedSecretsManifests({
 
   for (const unsealedSecretPath of unsealedSecretsFilePathsForEnv) {
     if (generateSealedSecrets) {
-      const unsealedSecretDir = path.basename(unsealedSecretPath);
+      const unsealedSecretDir = path.dirname(unsealedSecretPath);
       // Secrets are prefixed with "secret-"
       const unsealedSecretFileName = path.basename(unsealedSecretPath);
-      const sealedSecretFileName = `sealed-s${unsealedSecretFileName}`;
+      const sealedSecretFileName = `sealed-${unsealedSecretFileName}`;
       const sealedSecretFilePath = path.join(unsealedSecretDir, sealedSecretFileName);
 
       sh.echo(
