@@ -18,7 +18,7 @@ import { setupUnsealedSecretFiles } from "../secretsManagement/setupSecrets";
 import { generateManifests } from "./generateManifests";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
 import { promptKubernetesClusterSwitch } from "./promptKubernetesClusterSwitch";
-import { generateSealedSecretsManifests } from "./generateSealedSecretsManifests";
+
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
 // npm i inquirer
 type EnvName = keyof ReturnType<typeof getEnvironmentVariables>;
@@ -68,7 +68,33 @@ export const manifestsDirForEnv = path.join("manifests", "generated", ARGV.e);
 prompt.override = ARGV;
 prompt.start();
 
-function doInitialClusterSetup() {
+async function bootstrap() {
+  const yes: YesOrNoOptions[] = ["yes", "y"];
+
+  const generateSealedSecrets = yes.includes(ARGV.gss);
+  const imageTags = await getImageTagsFromDir();
+
+  if (!generateSealedSecrets) {
+    await generateManifests({
+      environment: ARGV.e,
+      imageTags,
+      keepSecretOutputs: yes.includes(ARGV.kuso),
+      keepSecretInputs: yes.includes(ARGV.kusi),
+      // When false, does not require cluster being live
+      regenerateSealedSecrets: false,
+    });
+
+    return;
+  }
+
+  await promptKubernetesClusterSwitch();
+
+  setupUnsealedSecretFiles();
+
+  /*
+       This requires the above step with initial cluster setup making sure that the sealed secret controller is
+       running in the cluster */
+
   // # Apply namespace first
   // TODO: Use a function to get and share this with manifestDirectory.ts module
   sh.exec(`kubectl apply -R -f ${manifestsDirForEnv}/namespaces`);
@@ -78,42 +104,17 @@ function doInitialClusterSetup() {
 
   // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
   sh.exec(`kubectl rollout status deployment/sealed-secrets-controller -n=kube-system`);
-}
-
-async function bootstrap() {
-  const yes: YesOrNoOptions[] = ["yes", "y"];
-
-  const shouldGenerateSealedSecrets = yes.includes(ARGV.gss);
-
-  if (shouldGenerateSealedSecrets) {
-    await promptKubernetesClusterSwitch();
-  }
-  setupUnsealedSecretFiles();
-  const imageTags = await getImageTagsFromDir();
-
   await generateManifests({
     environment: ARGV.e,
     imageTags,
-  });
-
-  await generateSealedSecretsManifests({
     keepSecretOutputs: yes.includes(ARGV.kuso),
     keepSecretInputs: yes.includes(ARGV.kusi),
-    generateSealedSecrets: shouldGenerateSealedSecrets,
-    environment: ARGV.e,
+    regenerateSealedSecrets: true,
   });
 
-  if (yes.includes(ARGV.gss)) {
-    /*
-       This requires the above step with initial cluster setup making sure that the sealed secret controller is
-       running in the cluster */
-    doInitialClusterSetup();
-
-    // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
-    sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd-controller/0-crd`);
-    sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd-controller/1-manifest`);
-    // sh.exec(`kubectl apply -f ${SEALED_SECRETS_DIR_FOR_ENV}`);
-  }
+  // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
+  sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd-controller/0-crd`);
+  sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd-controller/1-manifest`);
 }
 
 bootstrap();
