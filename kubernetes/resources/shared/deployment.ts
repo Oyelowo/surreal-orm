@@ -18,6 +18,7 @@ export class ServiceDeployment<
   public readonly service: kx.Service;
   public readonly argocdApplication: argocd.argoproj.v1alpha1.Application;
   public readonly ipAddress?: pulumi.Output<string>;
+  public readonly provider?: pulumi.ProviderResource;
   public readonly secretProvider?: pulumi.ProviderResource;
   public readonly appName: AN;
 
@@ -31,6 +32,15 @@ export class ServiceDeployment<
     this.appName = name;
     const { envVars, kubeConfig, metadata } = args;
     const resourceName = metadata.name;
+
+    this.provider = new k8s.Provider(
+      this.appName,
+      {
+        renderYamlToDirectory: getPathToApplicationDir(this.appName),
+      },
+      { parent: this }
+    );
+    // this.provider = this.getProvider();
 
     this.configMaps = new kx.ConfigMap(
       `${resourceName}-configmap`,
@@ -161,11 +171,6 @@ export class ServiceDeployment<
   };
 
   getProvider = () => {
-    const renderYamlPath = getPathToApplicationDir(this.appName);
-
-    const provider = new k8s.Provider(this.appName, {
-      renderYamlToDirectory: renderYamlPath,
-    });
-    return provider;
+    return this.provider;
   };
 }
