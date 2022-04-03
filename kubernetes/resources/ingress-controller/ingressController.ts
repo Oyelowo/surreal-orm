@@ -1,22 +1,20 @@
 // import { clusterSetupDirectory } from "../shared/manifestsDirectory";
 import * as k8s from "@pulumi/kubernetes";
-import * as nginx from "@pulumi/kubernetes-ingress-nginx";
 
 import { graphqlMongoSettings } from "../graphql-mongo/settings";
-import { graphqlPostgresSettings } from "../graphql-postgres/settings";
 import { reactWebSettings } from "../react-web/settings";
 // import { applicationsDirectory } from "../shared/manifestsDirectory";
 import { IngressControllerValuesBitnami } from "../shared/types/helm-charts/ingressControllerValuesBitnami";
-import { applicationsNamespace, namespaceNames } from "../shared/namespaces";
+import { namespaceNames } from "../shared/namespaces";
 import { NginxConfiguration } from "../shared/types/nginxConfigurations";
 import { RecursivePartial } from "../shared/types/own-types";
 import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
 
-const controllerName = "nginx-ingress-controller";
-export const ingressControllerDirectoryPath = getPathToNonApplicationDir(controllerName);
+export const controllerName = "nginx-ingress-controller";
+export const ingressControllerDirName = getPathToNonApplicationDir(controllerName);
 
-export const ingressControllerProvider = new k8s.Provider(ingressControllerDirectoryPath, {
-  renderYamlToDirectory: ingressControllerDirectoryPath,
+export const ingressControllerProvider = new k8s.Provider(ingressControllerDirName, {
+  renderYamlToDirectory: ingressControllerDirName,
 });
 
 // Install the NGINX ingress controller to our cluster. The controller

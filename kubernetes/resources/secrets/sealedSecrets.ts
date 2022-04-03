@@ -1,4 +1,3 @@
-import { sealedSecretsControllerDir } from "./index";
 import { SealedSecretsHelmValuesBitnami } from "../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
@@ -6,8 +5,11 @@ import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
 
-const sealedSecretsProvider = new k8s.Provider(sealedSecretsControllerDir, {
-  renderYamlToDirectory: sealedSecretsControllerDir,
+export const controllerName = "sealed-secrets-controller";
+export const sealedSecretsControllerDirName = getPathToNonApplicationDir(controllerName);
+
+const sealedSecretsProvider = new k8s.Provider(sealedSecretsControllerDirName, {
+  renderYamlToDirectory: sealedSecretsControllerDirName,
 });
 
 const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {
@@ -18,12 +20,12 @@ const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {
 kubeseal --controller-name sealed-secrets <args>
 Alternatively, you can override fullnameOverride on the helm chart install.
   */
-  fullnameOverride: "sealed-secrets-controller",
+  fullnameOverride: controllerName,
 };
 
 // `http://${name}.${namespace}:${port}`;
 export const sealedSecret = new k8s.helm.v3.Chart(
-  "sealed-secrets-controller",
+  controllerName,
   {
     chart: "sealed-secrets",
     fetchOpts: {
