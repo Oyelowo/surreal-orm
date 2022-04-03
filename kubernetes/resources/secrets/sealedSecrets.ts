@@ -1,10 +1,7 @@
 import { SealedSecretsHelmValuesBitnami } from "../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import {
-  getPathToNonApplicationDir,
-  sealedSecretsControllerProvider,
-} from "../shared/manifestsDirectory";
+import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
 
