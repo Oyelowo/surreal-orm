@@ -1,3 +1,4 @@
+import { sealedSecretsControllerDir } from "./index";
 import { SealedSecretsHelmValuesBitnami } from "../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
@@ -5,10 +6,8 @@ import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
 
-const sealedSecretsDirectoryPath = getPathToNonApplicationDir("sealed-secrets-controller");
-
-const sealedSecretsProvider = new k8s.Provider(sealedSecretsDirectoryPath, {
-  renderYamlToDirectory: sealedSecretsDirectoryPath,
+const sealedSecretsProvider = new k8s.Provider(sealedSecretsControllerDir, {
+  renderYamlToDirectory: sealedSecretsControllerDir,
 });
 
 const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {

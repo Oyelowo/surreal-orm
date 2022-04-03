@@ -8,6 +8,7 @@ import { nameSpacesProvider } from "./manifestsDirectory";
 export const namespaceNames = {
   applications: "applications",
   argocd: "argocd",
+  default: "default",
   // Default namespace that comes with the deployment
   kubeSystem: "kube-system",
 } as const;

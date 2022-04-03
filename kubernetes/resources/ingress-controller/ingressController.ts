@@ -44,7 +44,7 @@ const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> 
 };
 // nginx-ingress-controller
 // K3s also comes with a traefik ingress controoler. Disable that if using this
-export const ingressNginx = new k8s.helm.v3.Chart(
+export const ingressNginxController = new k8s.helm.v3.Chart(
   controllerName,
   {
     chart: "nginx-ingress-controller",

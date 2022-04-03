@@ -36,7 +36,11 @@ export function createArgocdApplication({ metadata, pathToAppManifests, opts }: 
     metadata.name,
     {
       apiVersion: "argoproj.io/v1alpha1",
-      metadata: metadataValues,
+      // metadata: metadataValues,
+      metadata: {
+        name: metadata.name,
+        namespace: "argocd"
+      },
       spec: {
         project: "default",
         destination: {
