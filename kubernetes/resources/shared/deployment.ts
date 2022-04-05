@@ -1,3 +1,4 @@
+import { getEnvironmentVariables } from "./validations";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
 import * as pulumi from "@pulumi/pulumi";
@@ -6,7 +7,7 @@ import { AppConfigs, AppName, DBType, NamespaceOfApps } from "./types/own-types"
 import { getSecretForApp } from "../../secretsManagement";
 import * as argocd from "../../crd2pulumi/argocd";
 import { createArgocdApplication } from "./createArgoApplication";
-import { getPathToApplicationDir } from "./manifestsDirectory";
+import { getPathToApplicationDirForEnv } from "./manifestsDirectory";
 export class ServiceDeployment<
   AN extends AppName,
   DBT extends DBType,
@@ -36,7 +37,10 @@ export class ServiceDeployment<
     this.provider = new k8s.Provider(
       this.appName,
       {
-        renderYamlToDirectory: getPathToApplicationDir(this.appName),
+        renderYamlToDirectory: getPathToApplicationDirForEnv(
+          this.appName,
+          getEnvironmentVariables().ENVIRONMENT
+        ),
       },
       { parent: this }
     );
@@ -124,7 +128,7 @@ export class ServiceDeployment<
         name: metadata.name,
         namespace: metadata.namespace,
       },
-      pathToAppManifests: getPathToApplicationDir(this.appName),
+      pathToAppManifests: getPathToApplicationDirForEnv(this.appName, getEnvironmentVariables().ENVIRONMENT),
       opts: {
         parent: this,
       },
@@ -163,10 +167,7 @@ export class ServiceDeployment<
    */
   #secretsObjectToEnv = (secretInstance: kx.Secret) => {
     const secretObject = getSecretForApp(this.appName);
-    const keyValueEntries = Object.keys(secretObject).map((key) => [
-      key,
-      secretInstance.asEnvValue(key),
-    ]);
+    const keyValueEntries = Object.keys(secretObject).map((key) => [key, secretInstance.asEnvValue(key)]);
     return Object.fromEntries(keyValueEntries);
   };
 

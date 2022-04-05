@@ -4,7 +4,8 @@
 TODO: ADD INSTRUCTION ON HOW THIS WORKS
 */
 import { ArgumentTypes } from "../../typescript/apps/web/utils/typescript";
-
+// TODO: Allow the selections of applications to regenerate secret for. This should be done with inquirer prompt.
+// This would read the name of the app = name of deployment in manifests to determine the sealed secrets  to regenerate and override
 import path from "path";
 import glob from "glob";
 import prompt from "prompt";
@@ -18,6 +19,7 @@ import { setupUnsealedSecretFiles } from "../secretsManagement/setupSecrets";
 import { generateManifests } from "./generateManifests";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
 import { promptKubernetesClusterSwitch } from "./promptKubernetesClusterSwitch";
+import { getManifestsOutputDirectory } from "../resources/shared/manifestsDirectory";
 
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
 // npm i inquirer
@@ -55,15 +57,14 @@ export const ARGV = yargs(process.argv.slice(2))
       alias: "keep-unsealed-secrets-input",
       choices: yesOrNoOptions,
       // default: "no" as YesOrNoOptions,
-      describe:
-        "Keep unsealed secrets inputs plain configs used to generate kubernetes secrets manifests",
+      describe: "Keep unsealed secrets inputs plain configs used to generate kubernetes secrets manifests",
       demandOption: true,
     },
   } as const)
   .parseSync();
 
-// const manifestsDirForEnv = getManifestsOutputDirectory(ARGV.e);
-export const manifestsDirForEnv = path.join("manifests", "generated", ARGV.e);
+const manifestsDirForEnv = getManifestsOutputDirectory(ARGV.e);
+// export const manifestsDirForEnv = path.join("manifests", "generated", ARGV.e);
 
 prompt.override = ARGV;
 prompt.start();

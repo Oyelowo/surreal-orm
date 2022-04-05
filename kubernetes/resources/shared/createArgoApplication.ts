@@ -5,9 +5,13 @@ import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
 import { getSecretForApp } from "../../secretsManagement";
 import { namespaceNames } from "./namespaces";
+import { getEnvironmentVariables } from "./validations";
 
 export const argocdApplicationsProvider = new k8s.Provider("argocd-applications", {
-  renderYamlToDirectory: getPathToNonApplicationDir("argocd-applications"),
+  renderYamlToDirectory: getPathToNonApplicationDir(
+    "argocd-applications",
+    getEnvironmentVariables().ENVIRONMENT
+  ),
 });
 
 type Metadata = {
@@ -39,7 +43,7 @@ export function createArgocdApplication({ metadata, pathToAppManifests, opts }: 
       // metadata: metadataValues,
       metadata: {
         name: metadata.name,
-        namespace: "argocd"
+        namespace: "argocd",
       },
       spec: {
         project: "default",

@@ -8,8 +8,9 @@ import * as kx from "@pulumi/kubernetesx";
 import * as path from "path";
 import * as argocd from "../../crd2pulumi/argocd";
 import { getSecretForApp } from "../../secretsManagement";
+import { getEnvironmentVariables } from "../shared/validations";
 
-const argocdControllerDir = getPathToNonApplicationDir("argocd-controller");
+const argocdControllerDir = getPathToNonApplicationDir("argocd-controller", getEnvironmentVariables().ENVIRONMENT);
 
 type Metadata = {
   name: string;

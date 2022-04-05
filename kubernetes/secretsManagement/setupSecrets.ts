@@ -79,7 +79,7 @@ function getFilePath(environment: Environment): SecretUnseatFilePath {
 
 // import chalk from "chalk";
 
-async function createSecretsConfigFile(environment: Environment, overwrite: boolean) {
+async function createSecretsConfigFile(environment: Environment, resetConfigs: boolean) {
   const filePath = getFilePath(environment);
 
   const content = `
@@ -89,15 +89,13 @@ async function createSecretsConfigFile(environment: Environment, overwrite: bool
   )};
     `;
 
-  fs.writeFile(filePath, content, { flag: overwrite ? "" : "wx" }, (error) => {
+  fs.writeFile(filePath, content, { flag: resetConfigs ? "wx" : "" }, (error) => {
     // if (err) throw err;
     if (error) {
       console.info("File already created previously!");
     }
     console.info(
-      c.blueBright(
-        `Secret files created and gitignored at ${filePath}! NEVER commit these secrets to git!🎉`
-      )
+      c.blueBright(`Secret files created and gitignored at ${filePath}! NEVER commit these secrets to git!🎉`)
     );
   });
 }

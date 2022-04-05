@@ -4,9 +4,12 @@ import * as k8s from "@pulumi/kubernetes";
 import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
+import { getEnvironmentVariables } from "../shared/validations";
 
 export const controllerName = "sealed-secrets-controller";
-export const sealedSecretsControllerDirName = getPathToNonApplicationDir(controllerName);
+
+
+export const sealedSecretsControllerDirName = getPathToNonApplicationDir(controllerName, getEnvironmentVariables().ENVIRONMENT);
 
 const sealedSecretsProvider = new k8s.Provider(sealedSecretsControllerDirName, {
   renderYamlToDirectory: sealedSecretsControllerDirName,

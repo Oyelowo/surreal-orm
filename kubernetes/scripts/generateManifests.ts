@@ -1,8 +1,8 @@
-import { getPathToApplicationDirForEnv } from "./../resources/shared/manifestsDirectory";
+import { getManifestsOutputDirectory } from "./../resources/shared/manifestsDirectory";
 import { ImageTags } from "./../resources/shared/validations";
 import sh from "shelljs";
 import { Environment } from "../resources/shared/types/own-types";
-import { manifestsDirForEnv, ENVIRONMENT, ARGV } from "./bootstrap";
+import { ENVIRONMENT } from "./bootstrap";
 import p from "path";
 
 /*
@@ -24,6 +24,13 @@ export async function generateManifests({
   sh.mkdir("./login");
 
   sh.exec("pulumi login file://login");
+  sh.echo(c.blueBright(`First Delete old resources for" ${environment}`));
+
+  const manifestsDirForEnv = getManifestsOutputDirectory(environment);
+
+  sh.exec(`find ${manifestsDirForEnv} -type d -name "1-manifest" -prune -exec rm -rf {} \;`);
+  sh.exec(`find ${manifestsDirForEnv} -type d -name "0-crd" -prune -exec rm -rf {} \;`);
+
   sh.exec("export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev");
 
   // Pulumi needs some environment variables set for generating deployments with image tag
@@ -41,12 +48,6 @@ export async function generateManifests({
       pulumi update --yes --skip-preview --stack dev
       `
   );
-
-  // // Write them back
-  // const sealedSecretsFilePathsForEnvTemporary = getFilePathsThatMatch({
-  //   contextDir: manifestsDirForEnv,
-  //   pattern: "sealed-secret-*ml",
-  // });
 
   regenerateSealedSecretsManifests({
     keepSecretInputs,
@@ -86,9 +87,9 @@ export async function regenerateSealedSecretsManifests({
   });
 
   for (const unsealedSecretManifestPath of unsealedSecretsFilePathsForEnv) {
+    const appManifestsDir = p.dirname(unsealedSecretManifestPath);
     if (regenerateSealedSecrets) {
       // The path format is: kubernetes/manifests/generated/production/applications/graphql-mongo/1-manifest
-      const appManifestsDir = p.dirname(unsealedSecretManifestPath);
       const appBaseDir = p.join(appManifestsDir, "..");
       const unsealedSecretResourceFileName = p.basename(unsealedSecretManifestPath);
       const sealedSecretDirForApp = p.join(appBaseDir, "sealed-secrets");

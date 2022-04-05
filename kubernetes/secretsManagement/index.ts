@@ -14,8 +14,6 @@ const secretRecord: Record<Environment, Secrets> = {
   local: SECRET_LOCAL,
 };
 
-export function getSecretForApp<App extends AppName>(
-  appName: App
-): typeof secretRecord[Environment][App] {
+export function getSecretForApp<App extends AppName>(appName: App): typeof secretRecord[Environment][App] {
   return secretRecord[getEnvironmentVariables().ENVIRONMENT][appName];
 }

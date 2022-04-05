@@ -1,8 +1,16 @@
 import * as k8s from "@pulumi/kubernetes";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
 import * as kx from "@pulumi/kubernetesx";
+import { getManifestsOutputDirectory } from "./manifestsDirectory";
+import { getEnvironmentVariables } from "./validations";
 
-import { nameSpacesProvider } from "./manifestsDirectory";
+const { ENVIRONMENT } = getEnvironmentVariables();
+
+const MANIFESTS_BASE_DIR_FOR_ENV = getManifestsOutputDirectory(ENVIRONMENT);
+
+export const nameSpacesProvider = new k8s.Provider("render-namespaces", {
+  renderYamlToDirectory: `${MANIFESTS_BASE_DIR_FOR_ENV}/namespaces`,
+});
 
 // export const devNamespaceName = devNamespace.metadata.name as unknown as string;
 export const namespaceNames = {
