@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { getManifestsBaseDir, getGeneratedEnvManifestsDir } from './../resources/shared/manifestsDirectory';
 
 /* 
 TODO: ADD INSTRUCTION ON HOW THIS WORKS
@@ -17,8 +18,9 @@ import {
 // npm i inquirer
 const globAsync = util.promisify(glob);
 
-import z from "zod";
-const MANIFESTS_DIR = path.join(__dirname, "..", "manifests");
+// import z from "zod";
+// const MANIFESTS_DIR = path.join(__dirname, "..", "manifests");
+const MANIFESTS_DIR = getManifestsBaseDir();
 const IMAGE_TAGS_FILES = path.join(MANIFESTS_DIR, "image-tags", "*");
 
 export async function getImageTagsFromDir(): Promise<ImageTags> {

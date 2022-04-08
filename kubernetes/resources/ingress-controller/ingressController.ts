@@ -1,3 +1,4 @@
+import { getEnvironmentVariables } from "./../shared/validations";
 // import { clusterSetupDirectory } from "../shared/manifestsDirectory";
 import * as k8s from "@pulumi/kubernetes";
 
@@ -11,7 +12,11 @@ import { RecursivePartial } from "../shared/types/own-types";
 import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
 
 export const controllerName = "nginx-ingress-controller";
-export const ingressControllerDirName = getPathToNonApplicationDir(controllerName);
+
+export const ingressControllerDirName = getPathToNonApplicationDir(
+  controllerName,
+  getEnvironmentVariables().ENVIRONMENT
+);
 
 export const ingressControllerProvider = new k8s.Provider(ingressControllerDirName, {
   renderYamlToDirectory: ingressControllerDirName,

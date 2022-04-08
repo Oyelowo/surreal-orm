@@ -8,8 +8,10 @@ import { getEnvironmentVariables } from "../shared/validations";
 
 export const controllerName = "sealed-secrets-controller";
 
-
-export const sealedSecretsControllerDirName = getPathToNonApplicationDir(controllerName, getEnvironmentVariables().ENVIRONMENT);
+export const sealedSecretsControllerDirName = getPathToNonApplicationDir(
+  controllerName,
+  getEnvironmentVariables().ENVIRONMENT
+);
 
 const sealedSecretsProvider = new k8s.Provider(sealedSecretsControllerDirName, {
   renderYamlToDirectory: sealedSecretsControllerDirName,

@@ -1,17 +1,29 @@
 import { AppName, Environment } from "./types/own-types";
 import path from "path";
+import sh from "shelljs";
 
-// const { ENVIRONMENT } = getEnvironmentVariables();
+export const getManifestsBaseDir = () => {
+  const MANIFESTS_DIR = path.join(__dirname, "..", "..", "manifests");
+  return MANIFESTS_DIR;
+};
 
-// TODO: probably use path and __dirname modules?
-export const getManifestsOutputDirectory = (environment: Environment) =>
-  path.join("manifests", "generated", environment);
+/**
+ * e.g /manifests/generated/local/1-manifests
+ *                               /1-crd
+ *                               /sealed-secrets
+ */
+export const getGeneratedEnvManifestsDir = (environment: Environment) => {
+  const MANIFESTS_DIR = getManifestsBaseDir();
+  return path.join(MANIFESTS_DIR, "generated", environment);
+};
 
 export const getPathToApplicationDirForEnv = (appName: AppName, environment: Environment) => {
-  return path.join(getManifestsOutputDirectory(environment), "applications", appName);
+  return path.join(getGeneratedEnvManifestsDir(environment), "applications", appName);
 };
 
 export const getPathToNonApplicationDir = (toolName: string, environment: Environment) => {
-  const MANIFESTS_BASE_DIR_FOR_ENV = getManifestsOutputDirectory(environment);
-  return path.join(MANIFESTS_BASE_DIR_FOR_ENV, toolName);
+  const MANIFESTS_BASE_DIR_FOR_ENV = getGeneratedEnvManifestsDir(environment);
+  const dir = path.join(MANIFESTS_BASE_DIR_FOR_ENV, toolName);
+  sh.mkdir(dir);
+  return dir;
 };

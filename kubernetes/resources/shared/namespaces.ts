@@ -1,12 +1,12 @@
 import * as k8s from "@pulumi/kubernetes";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
-import { getManifestsOutputDirectory } from "./manifestsDirectory";
+import { getGeneratedEnvManifestsDir } from "./manifestsDirectory";
 import { getEnvironmentVariables } from "./validations";
 import path from "path";
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 
-const MANIFESTS_BASE_DIR_FOR_ENV = getManifestsOutputDirectory(ENVIRONMENT);
+const MANIFESTS_BASE_DIR_FOR_ENV = getGeneratedEnvManifestsDir(ENVIRONMENT);
 
 export const nameSpacesProvider = new k8s.Provider("render-namespaces", {
   renderYamlToDirectory: path.join(MANIFESTS_BASE_DIR_FOR_ENV, "namespaces"),

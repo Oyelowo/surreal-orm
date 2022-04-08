@@ -19,7 +19,7 @@ import { setupUnsealedSecretFiles } from "../secretsManagement/setupSecrets";
 import { generateManifests } from "./generateManifests";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
 import { promptKubernetesClusterSwitch } from "./promptKubernetesClusterSwitch";
-import { getManifestsOutputDirectory } from "../resources/shared/manifestsDirectory";
+import { getGeneratedEnvManifestsDir } from "../resources/shared/manifestsDirectory";
 
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
 // npm i inquirer
@@ -63,7 +63,7 @@ export const ARGV = yargs(process.argv.slice(2))
   } as const)
   .parseSync();
 
-const manifestsDirForEnv = getManifestsOutputDirectory(ARGV.e);
+const manifestsDirForEnv = getGeneratedEnvManifestsDir(ARGV.e);
 // export const manifestsDirForEnv = path.join("manifests", "generated", ARGV.e);
 
 prompt.override = ARGV;

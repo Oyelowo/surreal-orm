@@ -1,4 +1,4 @@
-import { getManifestsOutputDirectory } from "./../resources/shared/manifestsDirectory";
+import { getGeneratedEnvManifestsDir } from "./../resources/shared/manifestsDirectory";
 import { ImageTags } from "./../resources/shared/validations";
 import sh from "shelljs";
 import { Environment } from "../resources/shared/types/own-types";
@@ -26,7 +26,7 @@ export async function generateManifests({
   sh.exec("pulumi login file://login");
   sh.echo(c.blueBright(`First Delete old resources for" ${environment}`));
 
-  const manifestsDirForEnv = getManifestsOutputDirectory(environment);
+  const manifestsDirForEnv = getGeneratedEnvManifestsDir(environment);
 
   sh.exec(`find ${manifestsDirForEnv} -type d -name "1-manifest" -prune -exec rm -rf {} \;`);
   sh.exec(`find ${manifestsDirForEnv} -type d -name "0-crd" -prune -exec rm -rf {} \;`);
