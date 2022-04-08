@@ -1,5 +1,5 @@
 import { createArgocdApplication, namespaceNames } from "../shared";
-import { controllerName, ingressControllerDirName } from "./ingressController";
+import { ingressControllerName, ingressControllerDirName } from "./ingressController";
 
 type Metadata = {
   name: string;
@@ -7,13 +7,13 @@ type Metadata = {
 };
 
 const metadataIngressController: Metadata = {
-  name: controllerName,
+  name: ingressControllerName,
   namespace: namespaceNames.default,
 };
 
 // App that deploys sealedSecretsController resources themselves
 /* sealedSecretsController APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
-export const sealedSecretsControllerApplication = createArgocdApplication({
+export const ingressControllerApplication = createArgocdApplication({
   metadata: { ...metadataIngressController },
   pathToAppManifests: ingressControllerDirName,
 });

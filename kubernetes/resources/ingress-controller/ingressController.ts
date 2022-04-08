@@ -11,10 +11,10 @@ import { NginxConfiguration } from "../shared/types/nginxConfigurations";
 import { RecursivePartial } from "../shared/types/own-types";
 import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
 
-export const controllerName = "nginx-ingress-controller";
+export const ingressControllerName = "nginx-ingress-controller";
 
 export const ingressControllerDirName = getPathToNonApplicationDir(
-  controllerName,
+  ingressControllerName,
   getEnvironmentVariables().ENVIRONMENT
 );
 
@@ -43,12 +43,12 @@ const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> 
   //   http: 8000,
   //   https: 443,
   // },
-  fullnameOverride: controllerName,
+  fullnameOverride: ingressControllerName,
 };
 // nginx-ingress-controller
 // K3s also comes with a traefik ingress controoler. Disable that if using this
 export const ingressNginxController = new k8s.helm.v3.Chart(
-  controllerName,
+  ingressControllerName,
   {
     chart: "nginx-ingress-controller",
     fetchOpts: {

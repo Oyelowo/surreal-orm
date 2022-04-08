@@ -6,10 +6,10 @@ import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
 import { getEnvironmentVariables } from "../shared/validations";
 
-export const controllerName = "sealed-secrets-controller";
+export const sealedSecretsControllerName = "sealed-secrets-controller";
 
 export const sealedSecretsControllerDirName = getPathToNonApplicationDir(
-  controllerName,
+  sealedSecretsControllerName,
   getEnvironmentVariables().ENVIRONMENT
 );
 
@@ -25,12 +25,12 @@ const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {
 kubeseal --controller-name sealed-secrets <args>
 Alternatively, you can override fullnameOverride on the helm chart install.
   */
-  fullnameOverride: controllerName,
+  fullnameOverride: sealedSecretsControllerName,
 };
 
 // `http://${name}.${namespace}:${port}`;
 export const sealedSecret = new k8s.helm.v3.Chart(
-  controllerName,
+  sealedSecretsControllerName,
   {
     chart: "sealed-secrets",
     fetchOpts: {

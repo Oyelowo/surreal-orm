@@ -1,7 +1,8 @@
 // import { createArgocdApplication, namespaceNames } from "../shared";
 // import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
 
-// export * from "./ingressController";
+export * from "./ingressController";
+export * from "./argoApp";
 
 // const ingressControllerControllerDir = getPathToNonApplicationDir("ingressController-controller");
 

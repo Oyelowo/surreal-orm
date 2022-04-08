@@ -1,5 +1,5 @@
 import { createArgocdApplication, namespaceNames } from "../shared";
-import { controllerName, sealedSecretsControllerDirName } from "./sealedSecrets";
+import { sealedSecretsControllerName, sealedSecretsControllerDirName } from "./sealedSecrets";
 
 type Metadata = {
   name: string;
@@ -7,7 +7,7 @@ type Metadata = {
 };
 
 const metadataSealedSecretsController: Metadata = {
-  name: controllerName,
+  name: sealedSecretsControllerName,
   namespace: namespaceNames.kubeSystem,
 };
 
