@@ -86,6 +86,10 @@ async function bootstrap() {
     imageTags,
   });
 
+  if (!generateSealedSecrets) {
+    return;
+  }
+
   setupUnsealedSecretFiles();
 
   /*
