@@ -106,6 +106,7 @@ async function bootstrap() {
   // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
   sh.exec(`kubectl rollout status deployment/${sealedSecretsControllerName} -n=kube-system`);
 
+  // TODO: separate sealed secrets deletion step
   await regenerateSealedSecretsManifests({
     environment: ARGV.e,
     regenerateSealedSecrets: generateSealedSecrets,

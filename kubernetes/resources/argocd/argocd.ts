@@ -35,6 +35,11 @@ export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
 
 const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
   fullnameOverride: "argocd",
+  // global:{
+
+  // },
+  // TODO:,
+  config: { secret: { argocdServerAdminPassword: "lowo" } },
   // clusterDomain: "https:kubernetes.default.svc",
   // repoServer: {},
   // global: {},
