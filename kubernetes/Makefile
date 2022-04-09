@@ -23,16 +23,16 @@ manifests_local_with_sealed_secrets:
 manifests_development_with_sealed_secrets:
 # Example usage: make manifests_development_with_sealed_secrets tag=github-sha  
 # Change to yes if you dont want the input plain secret typescript file to be cleared after the run
-	npx ts-node scripts/bootstrap.ts --e=development --gss=yes --kusi=no --kuso=no
-# npx ts-node scripts/bootstrap.ts --e=development --gss=yes --kusi=no --kuso=no
+	npx ts-node scripts/bootstrap.ts --e=development --gss=yes --kusi=yes --kuso=no
+# npx ts-node scripts/bootstrap.ts --e=development --gss=yes --kusi=yes --kuso=no
 
 manifests_staging_with_sealed_secrets:
 # make manifests_staging_with_sealed_secrets tag=github-sha  
-	npx ts-node scripts/bootstrap.ts --e=staging --gss=yes --kusi=no --kuso=no
+	npx ts-node scripts/bootstrap.ts --e=staging --gss=yes --kusi=yes --kuso=no
 
 manifests_production_with_sealed_secrets:
 # make manifests_production_with_sealed_secrets tag=github-sha  
-	npx ts-node scripts/bootstrap.ts --e=production --gss=yes --kusi=no --kuso=no
+	npx ts-node scripts/bootstrap.ts --e=production --gss=yes --kusi=yes --kuso=no
 
 
 #####  NO SEALED OR PLAIN SECRETS GENERATED ####

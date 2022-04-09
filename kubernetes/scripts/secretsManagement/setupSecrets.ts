@@ -2,6 +2,7 @@
 ADD INSTRUCTION HERE
  */
 import * as z from "zod";
+import sh from "shelljs";
 
 import fs from "fs";
 import path from "path";
@@ -12,14 +13,14 @@ import { getUnsealedSecretsConfigFilesBaseDir } from "./../../resources/shared/m
 import { secretsLocalSample, secretsSample } from "./secretsSample";
 
 const ENVIRONMENTS: Environment[] = ["local", "development", "staging", "production"];
-const UNSEALED_SECRETS_DIR = getUnsealedSecretsConfigFilesBaseDir();
+const UNSEALED_SECRETS_CONFIGS_DIR = getUnsealedSecretsConfigFilesBaseDir();
 export type Secrets = z.infer<typeof secretsSchema>;
 const SECRETS_TYPE = "Secrets" as const; // This should be same as the secrets type above
 
-type SecretUnseatFilePath = `${typeof UNSEALED_SECRETS_DIR}/${Environment}.ts`;
+type SecretUnseatFilePath = `${typeof UNSEALED_SECRETS_CONFIGS_DIR}/${Environment}.ts`;
 
 export function setupUnsealedSecretFiles() {
-  fs.mkdir(UNSEALED_SECRETS_DIR, (err) => {
+  fs.mkdir(UNSEALED_SECRETS_CONFIGS_DIR, (err) => {
     console.info(`Unsealed secrets directory already created`);
   });
 
@@ -71,7 +72,7 @@ const secretsSchema = z.object({
 });
 
 function getFilePath(environment: Environment): SecretUnseatFilePath {
-  return `${UNSEALED_SECRETS_DIR}/${environment}.ts`;
+  return `${UNSEALED_SECRETS_CONFIGS_DIR}/${environment}.ts`;
 }
 
 async function createSecretsConfigFile(environment: Environment, resetConfigs: boolean) {
@@ -96,6 +97,7 @@ async function createSecretsConfigFile(environment: Environment, resetConfigs: b
 
   if (resetConfigs) {
     // Override existing secret config file regardless if specified
+    sh.rm("-rf", filePath);
     writeSecretConfigFile(filePath, content);
   }
 }
