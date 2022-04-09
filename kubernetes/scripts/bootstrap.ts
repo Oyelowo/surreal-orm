@@ -3,6 +3,7 @@
 /* 
 TODO: ADD INSTRUCTION ON HOW THIS WORKS
 */
+// TODO: Maybe setup base argocd app that deploys other argocd apps?
 import { ArgumentTypes } from "../../typescript/apps/web/utils/typescript";
 // TODO: Allow the selections of applications to regenerate secret for. This should be done with inquirer prompt.
 // This would read the name of the app = name of deployment in manifests to determine the sealed secrets  to regenerate and override
