@@ -1,15 +1,13 @@
 import { SealedSecretsHelmValuesBitnami } from "../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
+import { getSealedSecretsControllerDir, sealedSecretsControllerName } from "../shared/manifestsDirectory";
 import { namespaceNames } from "../shared/namespaces";
 import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
 import { getEnvironmentVariables } from "../shared/validations";
 
-export const sealedSecretsControllerName = "sealed-secrets-controller";
 
-export const sealedSecretsControllerDirName = getPathToNonApplicationDir(
-  sealedSecretsControllerName,
+export const sealedSecretsControllerDirName = getSealedSecretsControllerDir(
   getEnvironmentVariables().ENVIRONMENT
 );
 

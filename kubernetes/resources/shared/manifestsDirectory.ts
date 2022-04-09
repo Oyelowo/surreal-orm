@@ -36,3 +36,13 @@ export const getPathToNonApplicationDir = (toolName: string, environment: Enviro
   sh.mkdir(dir);
   return dir;
 };
+
+export const getArgocdControllerDir = (environment: Environment) => {
+  return getPathToNonApplicationDir("argocd-controller", environment);
+};
+
+
+export const sealedSecretsControllerName = "sealed-secrets-controller";
+export const getSealedSecretsControllerDir = (environment: Environment) => {
+  return getPathToNonApplicationDir(sealedSecretsControllerName, environment);
+};

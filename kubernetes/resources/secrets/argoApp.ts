@@ -1,5 +1,5 @@
-import { createArgocdApplication, namespaceNames } from "../shared";
-import { sealedSecretsControllerName, sealedSecretsControllerDirName } from "./sealedSecrets";
+import { createArgocdApplication, namespaceNames, sealedSecretsControllerName } from "../shared";
+import { sealedSecretsControllerDirName } from "./sealedSecrets";
 
 type Metadata = {
   name: string;

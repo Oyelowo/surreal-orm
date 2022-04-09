@@ -87,7 +87,21 @@ async function createSecretsConfigFile(environment: Environment, resetConfigs: b
   )};
     `;
 
-  fs.writeFile(filePath, content, { flag: resetConfigs ? "wx" : "" }, (error) => {
+  fs.readFile(filePath, (error) => {
+    if (error) {
+      // Only create new config file if not already exists
+      writeSecretConfigFile(filePath, content);
+    }
+  });
+
+  if (resetConfigs) {
+    // Override existing secret config file regardless if specified
+    writeSecretConfigFile(filePath, content);
+  }
+}
+
+function writeSecretConfigFile(filePath: string, content: string) {
+  fs.writeFile(filePath, content, { flag: "wx" }, (error) => {
     if (error) {
       console.info("File already created previously!");
     }

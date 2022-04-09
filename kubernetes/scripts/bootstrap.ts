@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+import {
+  getSealedSecretsControllerDir,
+  sealedSecretsControllerName,
+} from "./../resources/shared/manifestsDirectory";
 
 /* 
 TODO: ADD INSTRUCTION ON HOW THIS WORKS
@@ -20,7 +24,7 @@ import { setupUnsealedSecretFiles } from "./secretsManagement/setupSecrets";
 import { generateManifests } from "./generateManifests";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
 import { promptKubernetesClusterSwitch } from "./promptKubernetesClusterSwitch";
-import { getGeneratedEnvManifestsDir } from "../resources/shared/manifestsDirectory";
+import { getArgocdControllerDir, getGeneratedEnvManifestsDir } from "../resources/shared/manifestsDirectory";
 
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
 // npm i inquirer
@@ -67,9 +71,6 @@ export const ARGV = yargs(process.argv.slice(2))
 const manifestsDirForEnv = getGeneratedEnvManifestsDir(ARGV.e);
 // export const manifestsDirForEnv = path.join("manifests", "generated", ARGV.e);
 
-prompt.override = ARGV;
-prompt.start();
-
 async function bootstrap() {
   const yes: YesOrNoOptions[] = ["yes", "y"];
 
@@ -102,10 +103,10 @@ async function bootstrap() {
   sh.exec(`kubectl apply -R -f ${manifestsDirForEnv}/namespaces`);
 
   // # Apply setups with sealed secret controller
-  sh.exec(`kubectl apply -R -f  ${manifestsDirForEnv}/sealed-secret-controller`);
+  sh.exec(`kubectl apply -R -f  ${getSealedSecretsControllerDir(ARGV.e)}`);
 
   // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
-  sh.exec(`kubectl rollout status deployment/sealed-secrets-controller -n=kube-system`);
+  sh.exec(`kubectl rollout status deployment/${sealedSecretsControllerName} -n=kube-system`);
   await generateManifests({
     environment: ARGV.e,
     imageTags,
@@ -115,8 +116,8 @@ async function bootstrap() {
   });
 
   // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
-  sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd-controller/0-crd`);
-  sh.exec(`kubectl apply -f ${manifestsDirForEnv}/argocd-controller/1-manifest`);
+  sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/0-crd`);
+  sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/1-manifest`);
 }
 
 bootstrap();

@@ -1,15 +1,12 @@
 import * as k8s from "@pulumi/kubernetes";
-import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
+import { getArgocdControllerDir } from "../shared/manifestsDirectory";
 import { createArgocdApplication } from "../shared/createArgoApplication";
 import { namespaceNames } from "../shared/namespaces";
 import { ArgocdHelmValuesBitnami } from "../shared/types/helm-charts/argocdHelmValuesBitnami";
 import { DeepPartial } from "../shared/types/own-types";
 import { getEnvironmentVariables } from "../shared/validations";
 
-const argocdControllerDir = getPathToNonApplicationDir(
-  "argocd-controller",
-  getEnvironmentVariables().ENVIRONMENT
-);
+const argocdControllerDir = getArgocdControllerDir(getEnvironmentVariables().ENVIRONMENT);
 
 type Metadata = {
   name: string;
