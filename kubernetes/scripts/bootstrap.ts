@@ -77,12 +77,12 @@ async function bootstrap() {
   const generateSealedSecrets = yes.includes(ARGV.gss);
   const imageTags = await getImageTagsFromDir();
 
+  await promptKubernetesClusterSwitch();
+
   await generateManifests({
     environment: ARGV.e,
     imageTags,
   });
-
-  await promptKubernetesClusterSwitch();
 
   setupUnsealedSecretFiles();
 
