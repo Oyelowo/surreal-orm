@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"labels":{"app.kubernetes.io/component":"server","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argo-cd","helm.sh/chart":"argo-cd-2.0.4"},"name":"argocd-argo-cd-server","namespace":"argocd"},"spec":{"rules":[{"host":"194-195-247-46.ip.linodeusercontent.com","http":{"paths":[{"backend":{"service":{"name":"argocd-argo-cd-server","port":{"name":"http"}}},"path":"/tools/argocd","pathType":"Prefix"}]}}]}}
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/instance: argocd
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: argo-cd
+    helm.sh/chart: argo-cd-2.0.4
+  name: argocd-argo-cd-server
+  namespace: argocd
+spec:
+  rules:
+  - host: 194-195-247-46.ip.linodeusercontent.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: argocd-argo-cd-server
+            port:
+              name: http
+        path: /tools/argocd
+        pathType: Prefix
