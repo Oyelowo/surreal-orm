@@ -33,7 +33,8 @@ export const getPathToApplicationDirForEnv = (appName: AppName, environment: Env
 export const getPathToNonApplicationDir = (toolName: string, environment: Environment) => {
   const MANIFESTS_BASE_DIR_FOR_ENV = getGeneratedEnvManifestsDir(environment);
   const dir = path.join(MANIFESTS_BASE_DIR_FOR_ENV, toolName);
-  sh.mkdir(dir);
+  // TODO: sh.mk`dir(dir);
+  // sh.mk`dir(dir);
   return dir;
 };
 

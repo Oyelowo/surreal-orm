@@ -10,17 +10,11 @@ import { clearUnsealedInputTsSecretFilesContents } from "./secretsManagement/set
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 */
-interface GenerateManifestsProps extends GenSealedSecretsProps {
+interface GenerateManifestsProps extends Pick<GenSealedSecretsProps, "environment"> {
   imageTags: ImageTags;
 }
 
-export async function generateManifests({
-  environment,
-  imageTags,
-  regenerateSealedSecrets: generateSealedSecrets,
-  keepSecretInputs,
-  keepSecretOutputs,
-}: GenerateManifestsProps) {
+export async function generateManifests({ environment, imageTags }: GenerateManifestsProps) {
   const manifestsDirForEnv = getGeneratedEnvManifestsDir(environment);
   sh.exec("npm i");
   sh.rm("-rf", "./login");
@@ -51,13 +45,6 @@ export async function generateManifests({
   );
 
   sh.rm("-rf", "./login");
-
-  regenerateSealedSecretsManifests({
-    keepSecretInputs,
-    keepSecretOutputs,
-    regenerateSealedSecrets: generateSealedSecrets,
-    environment,
-  });
 }
 
 /* 

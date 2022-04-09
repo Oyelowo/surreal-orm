@@ -21,7 +21,7 @@ import yargs from "yargs/yargs";
 import { Environment } from "../resources/shared/types/own-types";
 import { getEnvironmentVariables } from "../resources/shared/validations";
 import { setupUnsealedSecretFiles } from "./secretsManagement/setupSecrets";
-import { generateManifests } from "./generateManifests";
+import { generateManifests, regenerateSealedSecretsManifests } from "./generateManifests";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
 import { promptKubernetesClusterSwitch } from "./promptKubernetesClusterSwitch";
 import { getArgocdControllerDir, getGeneratedEnvManifestsDir } from "../resources/shared/manifestsDirectory";
@@ -77,18 +77,10 @@ async function bootstrap() {
   const generateSealedSecrets = yes.includes(ARGV.gss);
   const imageTags = await getImageTagsFromDir();
 
-  if (!generateSealedSecrets) {
-    await generateManifests({
-      environment: ARGV.e,
-      imageTags,
-      keepSecretOutputs: yes.includes(ARGV.kuso),
-      keepSecretInputs: yes.includes(ARGV.kusi),
-      // When false, does not require cluster being live
-      regenerateSealedSecrets: false,
-    });
-
-    return;
-  }
+  await generateManifests({
+    environment: ARGV.e,
+    imageTags,
+  });
 
   await promptKubernetesClusterSwitch();
 
@@ -107,12 +99,12 @@ async function bootstrap() {
 
   // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
   sh.exec(`kubectl rollout status deployment/${sealedSecretsControllerName} -n=kube-system`);
-  await generateManifests({
+
+  await regenerateSealedSecretsManifests({
     environment: ARGV.e,
-    imageTags,
-    keepSecretOutputs: yes.includes(ARGV.kuso),
+    regenerateSealedSecrets: generateSealedSecrets,
     keepSecretInputs: yes.includes(ARGV.kusi),
-    regenerateSealedSecrets: true,
+    keepSecretOutputs: yes.includes(ARGV.kuso),
   });
 
   // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
