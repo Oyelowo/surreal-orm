@@ -2,6 +2,8 @@
 import {
   getSealedSecretsControllerDir,
   sealedSecretsControllerName,
+  getIngressControllerDir,
+  getArgocdApplicationsDir,
 } from "./../resources/shared/manifestsDirectory";
 
 /* 
@@ -108,9 +110,14 @@ async function bootstrap() {
   });
 
   // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
-  sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/sealed-secrets`);
-  sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/0-crd`);
-  sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/1-manifest`);
+  sh.exec(`kubectl apply -R -f ${getArgocdControllerDir(ARGV.e)}`);
+  // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/sealed-secrets`);
+  // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/0-crd`);
+  // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/1-manifest`);
+
+  sh.exec(`kubectl apply -R -f ${getIngressControllerDir(ARGV.e)}`);
+
+  sh.exec(`kubectl apply -R -f ${getArgocdApplicationsDir(ARGV.e)}`);
 }
 
 bootstrap();

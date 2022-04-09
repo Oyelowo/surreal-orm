@@ -1,4 +1,4 @@
-import { getPathToNonApplicationDir } from "./manifestsDirectory";
+import { getArgocdApplicationsDir, argocdApplicationName } from "./manifestsDirectory";
 import { CustomResourceOptions, Resource } from "@pulumi/pulumi";
 import * as argocd from "../../crd2pulumi/argocd";
 import * as k8s from "@pulumi/kubernetes";
@@ -7,11 +7,8 @@ import { namespaceNames } from "./namespaces";
 import { getEnvironmentVariables } from "./validations";
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
 
-export const argocdApplicationsProvider = new k8s.Provider("argocd-applications", {
-  renderYamlToDirectory: getPathToNonApplicationDir(
-    "argocd-applications",
-    getEnvironmentVariables().ENVIRONMENT
-  ),
+export const argocdApplicationsProvider = new k8s.Provider(argocdApplicationName, {
+  renderYamlToDirectory: getArgocdApplicationsDir(getEnvironmentVariables().ENVIRONMENT),
 });
 
 type Metadata = {

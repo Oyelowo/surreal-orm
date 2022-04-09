@@ -9,14 +9,9 @@ import { IngressControllerValuesBitnami } from "../shared/types/helm-charts/ingr
 import { namespaceNames } from "../shared/namespaces";
 import { NginxConfiguration } from "../shared/types/nginxConfigurations";
 import { RecursivePartial } from "../shared/types/own-types";
-import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
+import { getIngressControllerDir, ingressControllerName } from "../shared/manifestsDirectory";
 
-export const ingressControllerName = "nginx-ingress-controller";
-
-export const ingressControllerDirName = getPathToNonApplicationDir(
-  ingressControllerName,
-  getEnvironmentVariables().ENVIRONMENT
-);
+export const ingressControllerDirName = getIngressControllerDir(getEnvironmentVariables().ENVIRONMENT);
 
 export const ingressControllerProvider = new k8s.Provider(ingressControllerDirName, {
   renderYamlToDirectory: ingressControllerDirName,

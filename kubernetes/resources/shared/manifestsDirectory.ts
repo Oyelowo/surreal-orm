@@ -42,8 +42,17 @@ export const getArgocdControllerDir = (environment: Environment) => {
   return getPathToNonApplicationDir("argocd-controller", environment);
 };
 
-
 export const sealedSecretsControllerName = "sealed-secrets-controller";
 export const getSealedSecretsControllerDir = (environment: Environment) => {
   return getPathToNonApplicationDir(sealedSecretsControllerName, environment);
+};
+
+export const ingressControllerName = "nginx-ingress-controller";
+export const getIngressControllerDir = (environment: Environment) => {
+  return getPathToNonApplicationDir(ingressControllerName, environment);
+};
+
+export const argocdApplicationName = "argocd-applications";
+export const getArgocdApplicationsDir = (environment: Environment) => {
+  return getPathToNonApplicationDir(argocdApplicationName, environment);
 };

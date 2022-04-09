@@ -1,5 +1,5 @@
-import { createArgocdApplication, namespaceNames } from "../shared";
-import { ingressControllerName, ingressControllerDirName } from "./ingressController";
+import { createArgocdApplication, ingressControllerName, namespaceNames } from "../shared";
+import { ingressControllerDirName } from "./ingressController";
 
 type Metadata = {
   name: string;
