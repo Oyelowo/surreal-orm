@@ -97,8 +97,9 @@ export async function regenerateSealedSecretsManifests({
 
       sh.mkdir(sealedSecretDirForApp);
 
+      // TODO: Check the content of the file to confirm if it is actually a secret object
       sh.echo(
-        c.blueBright(`Generating sealed secret for ${unsealedSecretResourceFileName} at ${appBaseDir}`)
+        c.blueBright(`Generating sealed secret ${unsealedSecretManifestPath} \n to \n ${sealedSecretFilePath}`)
       );
 
       // TODO: Should I delete old sealed secrets before creating new ones?
