@@ -4,10 +4,11 @@ import * as kx from "@pulumi/kubernetesx";
 import * as pulumi from "@pulumi/pulumi";
 import { NoUnion } from "./types/own-types";
 import { AppConfigs, AppName, DBType, NamespaceOfApps } from "./types/own-types";
-import { getSecretForApp } from "../../secretsManagement";
 import * as argocd from "../../crd2pulumi/argocd";
 import { createArgocdApplication } from "./createArgoApplication";
 import { getPathToApplicationDirForEnv } from "./manifestsDirectory";
+import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
+
 export class ServiceDeployment<
   AN extends AppName,
   DBT extends DBType,
@@ -55,7 +56,7 @@ export class ServiceDeployment<
       { provider: this.getProvider(), parent: this }
     );
 
-    const secrets = getSecretForApp(this.appName);
+    const secrets = getSecretsForApp(this.appName);
     // Create a Kubernetes Secret.
     this.secret = new kx.Secret(
       `${resourceName}-secret`,
@@ -166,7 +167,7 @@ export class ServiceDeployment<
 
    */
   #secretsObjectToEnv = (secretInstance: kx.Secret) => {
-    const secretObject = getSecretForApp(this.appName);
+    const secretObject = getSecretsForApp(this.appName);
     const keyValueEntries = Object.keys(secretObject).map((key) => [key, secretInstance.asEnvValue(key)]);
     return Object.fromEntries(keyValueEntries);
   };

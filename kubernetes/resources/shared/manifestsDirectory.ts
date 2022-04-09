@@ -2,9 +2,18 @@ import { AppName, Environment } from "./types/own-types";
 import path from "path";
 import sh from "shelljs";
 
+export const getMainBaseDir = () => {
+  const mainBaseDir = path.join(__dirname, "..", "..");
+  return mainBaseDir;
+};
+
 export const getManifestsBaseDir = () => {
-  const MANIFESTS_DIR = path.join(__dirname, "..", "..", "manifests");
+  const MANIFESTS_DIR = path.join(getMainBaseDir(), "manifests");
   return MANIFESTS_DIR;
+};
+
+export const getUnsealedSecretsConfigFilesBaseDir = () => {
+  return path.join(getMainBaseDir(), ".secrets");
 };
 
 /**

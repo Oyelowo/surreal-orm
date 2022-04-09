@@ -4,6 +4,8 @@ import sh from "shelljs";
 import { Environment } from "../resources/shared/types/own-types";
 import { ENVIRONMENT } from "./bootstrap";
 import p from "path";
+import c from "chalk";
+import { clearUnsealedInputTsSecretFilesContents } from "./secretsManagement/setupSecrets";
 
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
@@ -57,9 +59,7 @@ export async function generateManifests({
   });
 }
 
-import c from "chalk";
-import { clearUnsealedInputTsSecretFilesContents } from "../secretsManagement/setupSecrets";
-
+// TODO: Use from shared helper
 export const MANIFESTS_DIR = p.join(__dirname, "..", "manifests");
 
 /* 

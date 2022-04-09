@@ -3,9 +3,9 @@ import { CustomResourceOptions, Resource } from "@pulumi/pulumi";
 import * as argocd from "../../crd2pulumi/argocd";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
-import { getSecretForApp } from "../../secretsManagement";
 import { namespaceNames } from "./namespaces";
 import { getEnvironmentVariables } from "./validations";
+import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
 
 export const argocdApplicationsProvider = new k8s.Provider("argocd-applications", {
   renderYamlToDirectory: getPathToNonApplicationDir(
@@ -84,7 +84,7 @@ const metadata: Metadata = {
 };
 
 /* SECRET */
-const secrets = getSecretForApp("argocd");
+const secrets = getSecretsForApp("argocd");
 
 export const argoCDApplicationsSecret = new kx.Secret(
   `argocd-secret`,

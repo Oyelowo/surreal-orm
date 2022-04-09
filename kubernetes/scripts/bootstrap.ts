@@ -16,7 +16,7 @@ import yargs from "yargs/yargs";
 
 import { Environment } from "../resources/shared/types/own-types";
 import { getEnvironmentVariables } from "../resources/shared/validations";
-import { setupUnsealedSecretFiles } from "../secretsManagement/setupSecrets";
+import { setupUnsealedSecretFiles } from "./secretsManagement/setupSecrets";
 import { generateManifests } from "./generateManifests";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
 import { promptKubernetesClusterSwitch } from "./promptKubernetesClusterSwitch";

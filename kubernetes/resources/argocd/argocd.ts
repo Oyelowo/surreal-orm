@@ -3,14 +3,13 @@ import { getPathToNonApplicationDir } from "../shared/manifestsDirectory";
 import { createArgocdApplication } from "../shared/createArgoApplication";
 import { namespaceNames } from "../shared/namespaces";
 import { ArgocdHelmValuesBitnami } from "../shared/types/helm-charts/argocdHelmValuesBitnami";
-import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
-import * as kx from "@pulumi/kubernetesx";
-import * as path from "path";
-import * as argocd from "../../crd2pulumi/argocd";
-import { getSecretForApp } from "../../secretsManagement";
+import { DeepPartial } from "../shared/types/own-types";
 import { getEnvironmentVariables } from "../shared/validations";
 
-const argocdControllerDir = getPathToNonApplicationDir("argocd-controller", getEnvironmentVariables().ENVIRONMENT);
+const argocdControllerDir = getPathToNonApplicationDir(
+  "argocd-controller",
+  getEnvironmentVariables().ENVIRONMENT
+);
 
 type Metadata = {
   name: string;

@@ -1,2 +1,2 @@
-import { setupUnsealedSecretFiles } from "../secretsManagement/setupSecrets";
+import { setupUnsealedSecretFiles } from "./secretsManagement/setupSecrets";
 setupUnsealedSecretFiles();

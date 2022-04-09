@@ -1,12 +1,12 @@
 import { namespaceNames } from "./../shared/namespaces";
 import { getEnvironmentVariables } from "../shared/validations";
 import { AppConfigs } from "./../shared/types/own-types";
-import { getSecretForApp } from "../../secretsManagement";
+import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
 
 const environmentVariables = getEnvironmentVariables();
 const environment = environmentVariables.ENVIRONMENT;
 // TODO: Rethink this abstraction for secret
-const secretsFromLocalConfigs = getSecretForApp("grpc-mongo");
+const secretsFromLocalConfigs = getSecretsForApp("grpc-mongo");
 
 export const grpcMongoSettings: AppConfigs<"grpc-mongo", "mongodb", "applications"> = {
   kubeConfig: {

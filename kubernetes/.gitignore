@@ -1,2 +1,4 @@
-/secrets-unsealed
+/.secrets-unsealed
+/.secrets
+.secrets
 /login
