@@ -1,12 +1,13 @@
 import * as k8s from "@pulumi/kubernetes";
-import { getArgocdControllerDir } from "../shared/manifestsDirectory";
+import { getArgocdControllerDir, getRepoPathFromAbsolutePath } from "../shared/manifestsDirectory";
 import { createArgocdApplication } from "../shared/createArgoApplication";
 import { namespaceNames } from "../shared/namespaces";
 import { ArgocdHelmValuesBitnami } from "../shared/types/helm-charts/argocdHelmValuesBitnami";
 import { DeepPartial } from "../shared/types/own-types";
 import { getEnvironmentVariables } from "../shared/validations";
 
-const argocdControllerDir = getArgocdControllerDir(getEnvironmentVariables().ENVIRONMENT);
+const { ENVIRONMENT } = getEnvironmentVariables();
+const argocdControllerDir = getArgocdControllerDir(ENVIRONMENT);
 
 type Metadata = {
   name: string;
@@ -23,7 +24,7 @@ const resourceName = metadata.name;
 /* ARGOCD APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const argocdApplication = createArgocdApplication({
   metadata,
-  pathToAppManifests: argocdControllerDir,
+  pathToAppManifests: getRepoPathFromAbsolutePath(argocdControllerDir),
 });
 
 export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
@@ -91,7 +92,7 @@ export const argocdHelm = new k8s.helm.v3.Chart(
     fetchOpts: {
       repo: "https://charts.bitnami.com/bitnami",
     },
-    version: "2.0.4",
+    version: "2.3.3",
     values: argocdValues,
     namespace: namespaceNames.argocd,
     // namespace: devNamespaceName,

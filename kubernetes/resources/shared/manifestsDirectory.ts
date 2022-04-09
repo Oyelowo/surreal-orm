@@ -26,10 +26,6 @@ export const getGeneratedEnvManifestsDir = (environment: Environment) => {
   return path.join(MANIFESTS_DIR, "generated", environment);
 };
 
-export const getPathToApplicationDirForEnv = (appName: AppName, environment: Environment) => {
-  return path.join(getGeneratedEnvManifestsDir(environment), "applications", appName);
-};
-
 export const getPathToNonApplicationDir = (toolName: string, environment: Environment) => {
   const MANIFESTS_BASE_DIR_FOR_ENV = getGeneratedEnvManifestsDir(environment);
   const dir = path.join(MANIFESTS_BASE_DIR_FOR_ENV, toolName);
@@ -38,8 +34,17 @@ export const getPathToNonApplicationDir = (toolName: string, environment: Enviro
   return dir;
 };
 
+export const getRepoPathFromAbsolutePath = (absolutePath: string) => {
+  const toolPath = absolutePath.split("/kubernetes/").at(-1);
+  if (!toolPath) {
+    throw new Error(`path not found`);
+  }
+  return path.join("kubernetes", toolPath);
+};
+
+export const argocdControllerName = "argocd-controller";
 export const getArgocdControllerDir = (environment: Environment) => {
-  return getPathToNonApplicationDir("argocd-controller", environment);
+  return getPathToNonApplicationDir(argocdControllerName, environment);
 };
 
 export const sealedSecretsControllerName = "sealed-secrets-controller";
@@ -55,4 +60,9 @@ export const getIngressControllerDir = (environment: Environment) => {
 export const argocdApplicationName = "argocd-applications";
 export const getArgocdApplicationsDir = (environment: Environment) => {
   return getPathToNonApplicationDir(argocdApplicationName, environment);
+};
+
+export const getApplicationDir = (appName: AppName, environment: Environment) => {
+  return path.join(getGeneratedEnvManifestsDir(environment), "applications", appName);
+  // return `kubernetes/manifests/generated/${environment}/applications/${appName}`;
 };
