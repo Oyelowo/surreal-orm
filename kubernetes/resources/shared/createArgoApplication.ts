@@ -46,7 +46,7 @@ export function createArgocdApplication({ metadata, pathToAppManifests, opts }: 
         project: "default",
         destination: {
           server: "https://kubernetes.default.svc",
-          name: metadata.name,
+          // name: metadata.name,
           namespace: metadata.namespace,
         },
         source: {
