@@ -3,7 +3,7 @@ kind: Application
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"argoproj.io/v1alpha1","kind":"Application","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"nginx-ingress-controller","namespace":"argocd"},"spec":{"destination":{"name":"nginx-ingress-controller","namespace":"default","server":"https://kubernetes.default.svc"},"project":"default","source":{"directory":{"recurse":true},"path":"/Users/oyelowo.oyedayo/Desktop/personal/modern-distributed-app-template/kubernetes/manifests/generated/production/nginx-ingress-controller","repoURL":"https://github.com/Oyelowo/modern-distributed-app-template","targetRevision":"HEAD"},"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}
+      {"apiVersion":"argoproj.io/v1alpha1","kind":"Application","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"nginx-ingress-controller","namespace":"argocd"},"spec":{"destination":{"name":"nginx-ingress-controller","namespace":"default","server":"https://kubernetes.default.svc"},"project":"default","source":{"directory":{"recurse":true},"path":"kubernetes/manifests/generated/production/nginx-ingress-controller","repoURL":"https://github.com/Oyelowo/modern-distributed-app-template","targetRevision":"HEAD"},"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}
   labels:
     app.kubernetes.io/managed-by: pulumi
   name: nginx-ingress-controller
@@ -17,7 +17,7 @@ spec:
   source:
     directory:
       recurse: true
-    path: /Users/oyelowo.oyedayo/Desktop/personal/modern-distributed-app-template/kubernetes/manifests/generated/production/nginx-ingress-controller
+    path: kubernetes/manifests/generated/production/nginx-ingress-controller
     repoURL: https://github.com/Oyelowo/modern-distributed-app-template
     targetRevision: HEAD
   syncPolicy:
