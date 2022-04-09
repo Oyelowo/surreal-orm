@@ -1,5 +1,6 @@
+import { getRepoPathFromAbsolutePath } from "./../shared/manifestsDirectory";
 import { createArgocdApplication, namespaceNames, sealedSecretsControllerName } from "../shared";
-import { sealedSecretsControllerDirName } from "./sealedSecrets";
+import { sealedSecretsControllerDir } from "./sealedSecrets";
 
 type Metadata = {
   name: string;
@@ -15,5 +16,5 @@ const metadataSealedSecretsController: Metadata = {
 /* sealedSecretsController APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const sealedSecretsControllerApplication = createArgocdApplication({
   metadata: { ...metadataSealedSecretsController },
-  pathToAppManifests: sealedSecretsControllerDirName,
+  pathToAppManifests: getRepoPathFromAbsolutePath(sealedSecretsControllerDir),
 });

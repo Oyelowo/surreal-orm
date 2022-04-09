@@ -11,10 +11,10 @@ import { NginxConfiguration } from "../shared/types/nginxConfigurations";
 import { RecursivePartial } from "../shared/types/own-types";
 import { getIngressControllerDir, ingressControllerName } from "../shared/manifestsDirectory";
 
-export const ingressControllerDirName = getIngressControllerDir(getEnvironmentVariables().ENVIRONMENT);
+export const ingressControllerDir = getIngressControllerDir(getEnvironmentVariables().ENVIRONMENT);
 
-export const ingressControllerProvider = new k8s.Provider(ingressControllerDirName, {
-  renderYamlToDirectory: ingressControllerDirName,
+export const ingressControllerProvider = new k8s.Provider(ingressControllerDir, {
+  renderYamlToDirectory: ingressControllerDir,
 });
 
 // Install the NGINX ingress controller to our cluster. The controller

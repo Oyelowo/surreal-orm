@@ -7,12 +7,12 @@ import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
 import { getEnvironmentVariables } from "../shared/validations";
 
 
-export const sealedSecretsControllerDirName = getSealedSecretsControllerDir(
+export const sealedSecretsControllerDir = getSealedSecretsControllerDir(
   getEnvironmentVariables().ENVIRONMENT
 );
 
-const sealedSecretsProvider = new k8s.Provider(sealedSecretsControllerDirName, {
-  renderYamlToDirectory: sealedSecretsControllerDirName,
+const sealedSecretsProvider = new k8s.Provider(sealedSecretsControllerDir, {
+  renderYamlToDirectory: sealedSecretsControllerDir,
 });
 
 const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {

@@ -1,5 +1,6 @@
+import { getRepoPathFromAbsolutePath } from "./../shared/manifestsDirectory";
 import { createArgocdApplication, ingressControllerName, namespaceNames } from "../shared";
-import { ingressControllerDirName } from "./ingressController";
+import { ingressControllerDir } from "./ingressController";
 
 type Metadata = {
   name: string;
@@ -15,5 +16,5 @@ const metadataIngressController: Metadata = {
 /* sealedSecretsController APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const ingressControllerApplication = createArgocdApplication({
   metadata: { ...metadataIngressController },
-  pathToAppManifests: ingressControllerDirName,
+  pathToAppManifests: getRepoPathFromAbsolutePath(ingressControllerDir),
 });
