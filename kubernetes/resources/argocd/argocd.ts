@@ -33,7 +33,7 @@ export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
 // export const argoApplicationSecret = new k8s.
 
 const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
-  // fullnameOverride: "argocd",
+  fullnameOverride: "argocd",
   // clusterDomain: "https:kubernetes.default.svc",
   // repoServer: {},
   // global: {},
@@ -72,7 +72,7 @@ const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
   server: {
     ingress: {
       enabled: true,
-      hostname: "194-195-247-46.ip.linodeusercontent.com",
+      hostname: "https://90ebae0a-60a8-4b2a-9353-c0ccf3041608.eu-central-1.linodelke.net:443",
       path: "/tools/argocd",
       pathType: "Prefix" as "Exact" | "ImplementationSpecific" | "Prefix",
       ingressClassName: "nginx",
