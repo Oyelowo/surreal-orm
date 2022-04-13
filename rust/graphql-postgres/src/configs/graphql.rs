@@ -5,7 +5,7 @@ use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, MergedObject, Schema, SchemaBuilder};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 
-use super::configuration::Environemnt;
+use super::configuration::Environment;
 use crate::{
     app::{
         post::{PostMutationRoot, PostQueryRoot},
@@ -50,7 +50,7 @@ impl GraphQlApp {
             ..
         } = Configs::init();
 
-        use Environemnt::*;
+        use Environment::*;
         let (limit_depth, limit_complexity) = match application.environment {
             Local | Development | Staging => (usize::max_value(), usize::max_value()),
             _ => (5, 7),

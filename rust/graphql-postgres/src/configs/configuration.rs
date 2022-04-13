@@ -4,7 +4,7 @@ use sqlx::postgres::{PgConnectOptions, PgSslMode};
 
 #[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
-pub enum Environemnt {
+pub enum Environment {
     Local,
     Development,
     Staging,
@@ -20,7 +20,7 @@ pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
-    pub environment: Environemnt,
+    pub environment: Environment,
 }
 
 impl ApplicationSettings {
