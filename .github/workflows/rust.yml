@@ -90,14 +90,22 @@ jobs:
       # for consistency sake.
       - name: Set environment variables
         run: |
-          echo "IMAGE_TAG_GRAPHQL_MONGO=$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
-          echo "IMAGE_WITH_TAG_GRAPHQL_MONGO=ghcr.io/oyelowo/graphql-mongo:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          CONTAINER_REGISTRY=ghcr.io/oyelowo
+          # For now, they all share the same image as they all get built whenever any is built
+          IMAGE_TAG=$GITHUB_REF_NAME-$GITHUB_SHA
+
+
+          echo "IMAGE_TAG_GRAPHQL_MONGO=$IMAGE_TAG" >> $GITHUB_ENV
+          IMAGE_NAME_GRAPHQL_MONGO=$CONTAINER_REGISTRY/graphql-mongo
+          echo "IMAGE_WITH_TAG_GRAPHQL_MONGO=$IMAGE_NAME_GRAPHQL_MONGO:$IMAGE_TAG, $IMAGE_NAME_GRAPHQL_MONGO:latest" >> $GITHUB_ENV
           
-          echo "IMAGE_TAG_GRAPHQL_POSTGRES=$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
-          echo "IMAGE_WITH_TAG_GRAPHQL_POSTGRES=ghcr.io/oyelowo/graphql-postgres:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          echo "IMAGE_TAG_GRAPHQL_POSTGRES=$IMAGE_TAG" >> $GITHUB_ENV
+          IMAGE_NAME_GRAPHQL_POSTGRES=$CONTAINER_REGISTRY/graphql-postgres
+          echo "IMAGE_WITH_TAG_GRAPHQL_POSTGRES=$IMAGE_NAME_GRAPHQL_POSTGRES:$IMAGE_TAG, $IMAGE_NAME_GRAPHQL_POSTGRES:latest" >> $GITHUB_ENV
           
-          echo "IMAGE_TAG_GRPC_MONGO=$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
-          echo "IMAGE_WITH_TAG_GRPC_MONGO=ghcr.io/oyelowo/grpc-mongo:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+          echo "IMAGE_TAG_GRPC_MONGO=$IMAGE_TAG" >> $GITHUB_ENV
+          IMAGE_NAME_TAG_GRPC_MONGO=$CONTAINER_REGISTRY/grpc-mongo
+          echo "IMAGE_WITH_TAG_GRPC_MONGO=$IMAGE_NAME_GRPC_MONGO:$IMAGE_TAG, $IMAGE_NAME_GRPC_MONGO:latest" >> $GITHUB_ENV
 
           
       - name: Login to GitHub Container Registry
@@ -157,7 +165,7 @@ jobs:
         run: |
           echo ${{env.IMAGE_TAG_GRAPHQL_MONGO}} > ../kubernetes/manifests/image-tags/IMAGE_TAG_GRAPHQL_MONGO
           echo ${{env.IMAGE_TAG_GRAPHQL_POSTGRES}} > ../kubernetes/manifests/image-tags/IMAGE_TAG_GRAPHQL_POSTGRES
-          echo ${{env.IMAGE_WITH_TAG_GRPC_MONGO}} > ../kubernetes/manifests/image-tags/IMAGE_WITH_TAG_GRPC_MONGO
+          echo ${{env.IMAGE_TAG_GRPC_MONGO}} > ../kubernetes/manifests/image-tags/IMAGE_TAG_GRPC_MONGO
 
       - name: Commit files
         run: |
