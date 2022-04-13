@@ -33,6 +33,6 @@ impl PostQueryRoot {
     async fn posts(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<Post>> {
         let db = ctx.data_unchecked::<Database>();
         let cursor = Post::find(db, None, None).await?;
-        Ok(model_cursor_to_vec(cursor).await?)
+        model_cursor_to_vec(cursor).await
     }
 }
