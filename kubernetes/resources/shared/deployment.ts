@@ -95,6 +95,11 @@ export class ServiceDeployment<
           },
         },
       ],
+      imagePullSecrets: [
+        {
+          name: "myregistrykey",
+        },
+      ],
     });
 
     // Create a Kubernetes Deployment.
