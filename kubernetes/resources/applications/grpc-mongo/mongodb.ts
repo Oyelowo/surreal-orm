@@ -1,11 +1,11 @@
 import { grpcMongo } from "./index";
-import { MongodbHelmValuesBitnami } from "./../shared/types/helm-charts/MongodbHelmValuesBitnami";
-import { namespaceNames } from "./../shared/namespaces";
+import { MongodbHelmValuesBitnami } from "../../shared/types/helm-charts/MongodbHelmValuesBitnami";
+import { namespaceNames } from "../../shared/namespaces";
 import * as k8s from "@pulumi/kubernetes";
 
 import { grpcMongoSettings } from "./settings";
-import { DeepPartial } from "../shared/types/own-types";
-import { getEnvironmentVariables } from "../shared/validations";
+import { DeepPartial } from "../../shared/types/own-types";
+import { getEnvironmentVariables } from "../../shared/validations";
 
 const environmentVariables = getEnvironmentVariables();
 

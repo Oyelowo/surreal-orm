@@ -1,4 +1,4 @@
-import { ServiceDeployment } from "../shared/deployment";
+import { ServiceDeployment } from "../../shared/deployment";
 import { graphqlPostgresSettings } from "./settings";
 
 export const graphqlPostgres = new ServiceDeployment("graphql-postgres", graphqlPostgresSettings);

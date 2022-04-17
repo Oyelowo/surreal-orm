@@ -1,7 +1,7 @@
-import { namespaceNames } from "./../shared/namespaces";
-import { getEnvironmentVariables } from "./../shared/validations";
-import { AppConfigs } from "../shared/types/own-types";
-import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
+import { namespaceNames } from "../../shared/namespaces";
+import { getEnvironmentVariables } from "../../shared/validations";
+import { AppConfigs } from "../../shared/types/own-types";
+import { getSecretsForApp } from "../../../scripts/secretsManagement/getSecretsForApp";
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
 const secretsFromLocalConfigs = getSecretsForApp("graphql-postgres");

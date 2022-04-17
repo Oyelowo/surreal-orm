@@ -1,13 +1,12 @@
 import { graphqlPostgres } from "./index";
-import { postgresdbHelmValuesBitnami } from "./../shared/types/helm-charts/postgresdbHelmValuesBitnami";
+import { postgresdbHaHelmValuesBitnami } from "../../shared/types/helm-charts/postgresdbHaHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { namespaceNames } from "../shared/namespaces";
-import { DeepPartial } from "../shared/types/own-types";
+import { namespaceNames } from "../../shared/namespaces";
 import { graphqlPostgresSettings } from "./settings";
+import { DeepPartial } from "../../shared/types/own-types";
 
 const { envVars } = graphqlPostgresSettings;
-
 type Credentials = {
   usernames: string[];
   passwords: string[];
@@ -55,64 +54,71 @@ const mappedCredentials = credentials.reduce<Credentials>(
   }
 );
 
-const postgresValues: DeepPartial<postgresdbHelmValuesBitnami> = {
+const postgresValues: DeepPartial<postgresdbHaHelmValuesBitnami> = {
   // useStatefulSet: true,
-  architecture: "standalone", //  "replication" | "standalone"
+  // architecture: "replicaset",
   // replicaCount: 3,
   // nameOverride: "postgres-database",
+  // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
   fullnameOverride: envVars.POSTGRES_SERVICE_NAME,
-  auth: {
-    database: envVars.POSTGRES_DATABASE_NAME,
-    postgresPassword: envVars.POSTGRES_PASSWORD,
-    password: envVars.POSTGRES_PASSWORD,
+  postgresql: {
+    // replicaCount: 3,
+    // containerPort,
     username: envVars.POSTGRES_USERNAME,
+    //pgHbaConfiguration: "",
+    postgresPassword: envVars.POSTGRES_PASSWORD,
+    database: envVars.POSTGRES_DATABASE_NAME,
+    password: envVars.POSTGRES_PASSWORD,
+    // repmgrPassword: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
+    // repmgrDatabase: graphqlPostgresEnvironmentVariables.POSTGRES_DATABASE_NAME,
+    // existingSecret: "",
+  },
+  pgpool: {
+    // existingSecret: "",
+    // customUsers: "",
+    // usernames: "",
+    // passwords: "",
+    // adminPassword: "",
+    // adminUsername: "",
+    replicaCount: 2,
   },
   global: {
     // namespaceOverride: devNamespaceName,
     // imagePullSecrets: [],
-    // storageClass: "",
-    postgresql: {
-      auth: {
-        username: envVars.POSTGRES_USERNAME,
-        password: envVars.POSTGRES_PASSWORD,
-        database: envVars.POSTGRES_DATABASE_NAME,
-        postgresPassword: envVars.POSTGRES_PASSWORD,
-        // existingSecret: "",
-      },
-      service: {
-        ports: {
-          postgresql: envVars.POSTGRES_PORT,
-        },
-      },
+    //storageClass: "",
+    pgpool: {
+      // adminUsername: "",
+      // adminPassword: "",
+      // existingSecret: "",
     },
-    storageClass: envVars.APP_ENVIRONMENT === "local" ? "" : "linode-", // FIXME TODO: Specify the storage class here
+    postgresql: {
+      // username: "",
+      // password: "",
+      // database: "",
+      // repmgrUsername: "",
+      // repmgrPassword: "",
+      // repmgrDatabase: "",
+      // existingSecret: "",
+    },
+    ldap: {},
   },
-
-  //   primary: {
-  //     service: {
-  //       type: "ClusterIP",
-  //       ports: {
-  //         postgresql: Number(graphqlPostgresEnvironmentVariables.POSTGRES_PORT),
-  //       },
-  //     },
-  //   },
-
-  //   service: {
-  //     type: "ClusterIP",
-  //     port: Number(graphqlPostgresEnvironmentVariables.POSTGRES_PORT),
-  //     // portName: "mongo-graphql",
-  //     // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
-  //   },
+  service: {
+    type: "ClusterIP",
+    port: Number(envVars.POSTGRES_PORT),
+    // portName: "mongo-graphql",
+    // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
+  },
 };
 
-export const graphqlPostgresPostgresdb = new k8s.helm.v3.Chart(
-  "postgres-helm",
+// `http://${name}.${namespace}:${port}`;
+export const graphqlPostgresPostgresdbHA = new k8s.helm.v3.Chart(
+  "postgres-ha",
   {
-    chart: "postgresql",
+    chart: "postgresql-ha",
     fetchOpts: {
       repo: "https://charts.bitnami.com/bitnami",
     },
-    version: "11.0.6",
+    version: "8.4.0",
     values: postgresValues,
     namespace: namespaceNames.applications,
     // By default Release resource will wait till all created resources
@@ -121,5 +127,4 @@ export const graphqlPostgresPostgresdb = new k8s.helm.v3.Chart(
     skipAwait: false,
   },
   { provider: graphqlPostgres.getProvider() }
-  // { provider }
 );

@@ -1,10 +1,10 @@
 import * as k8s from "@pulumi/kubernetes";
-import { getArgocdControllerDir, getRepoPathFromAbsolutePath } from "../shared/manifestsDirectory";
-import { createArgocdApplication } from "../shared/createArgoApplication";
-import { namespaceNames } from "../shared/namespaces";
-import { ArgocdHelmValuesBitnami } from "../shared/types/helm-charts/argocdHelmValuesBitnami";
-import { DeepPartial } from "../shared/types/own-types";
-import { getEnvironmentVariables } from "../shared/validations";
+import { getArgocdControllerDir, getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
+import { createArgocdApplication } from "../../shared/createArgoApplication";
+import { namespaceNames } from "../../shared/namespaces";
+import { ArgocdHelmValuesBitnami } from "../../shared/types/helm-charts/argocdHelmValuesBitnami";
+import { DeepPartial } from "../../shared/types/own-types";
+import { getEnvironmentVariables } from "../../shared/validations";
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 const argocdControllerDir = getArgocdControllerDir(ENVIRONMENT);

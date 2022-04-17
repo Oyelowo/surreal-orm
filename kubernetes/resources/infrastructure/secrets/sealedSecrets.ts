@@ -1,10 +1,10 @@
-import { SealedSecretsHelmValuesBitnami } from "../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
+import { SealedSecretsHelmValuesBitnami } from "../../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { getSealedSecretsControllerDir, sealedSecretsControllerName } from "../shared/manifestsDirectory";
-import { namespaceNames } from "../shared/namespaces";
-import { DeepPartial, RecursivePartial } from "../shared/types/own-types";
-import { getEnvironmentVariables } from "../shared/validations";
+import { getSealedSecretsControllerDir, sealedSecretsControllerName } from "../../shared/manifestsDirectory";
+import { namespaceNames } from "../../shared/namespaces";
+import { DeepPartial, RecursivePartial } from "../../shared/types/own-types";
+import { getEnvironmentVariables } from "../../shared/validations";
 
 
 export const sealedSecretsControllerDir = getSealedSecretsControllerDir(

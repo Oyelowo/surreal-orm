@@ -1,15 +1,15 @@
-import { getEnvironmentVariables } from "./../shared/validations";
+import { getEnvironmentVariables } from "../../shared/validations";
 // import { clusterSetupDirectory } from "../shared/manifestsDirectory";
 import * as k8s from "@pulumi/kubernetes";
 
-import { graphqlMongoSettings } from "../graphql-mongo/settings";
-import { reactWebSettings } from "../react-web/settings";
+import { graphqlMongoSettings } from "../../applications/graphql-mongo/settings";
+import { reactWebSettings } from "../../applications/react-web/settings";
 // import { applicationsDirectory } from "../shared/manifestsDirectory";
-import { IngressControllerValuesBitnami } from "../shared/types/helm-charts/ingressControllerValuesBitnami";
-import { namespaceNames } from "../shared/namespaces";
-import { NginxConfiguration } from "../shared/types/nginxConfigurations";
-import { RecursivePartial } from "../shared/types/own-types";
-import { getIngressControllerDir, ingressControllerName } from "../shared/manifestsDirectory";
+import { IngressControllerValuesBitnami } from "../../shared/types/helm-charts/ingressControllerValuesBitnami";
+import { namespaceNames } from "../../shared/namespaces";
+import { NginxConfiguration } from "../../shared/types/nginxConfigurations";
+import { RecursivePartial } from "../../shared/types/own-types";
+import { getIngressControllerDir, ingressControllerName } from "../../shared/manifestsDirectory";
 
 export const ingressControllerDir = getIngressControllerDir(getEnvironmentVariables().ENVIRONMENT);
 

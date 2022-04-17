@@ -1,5 +1,5 @@
-import { getRepoPathFromAbsolutePath } from "./../shared/manifestsDirectory";
-import { createArgocdApplication, namespaceNames, sealedSecretsControllerName } from "../shared";
+import { getRepoPathFromAbsolutePath } from "./../../shared/manifestsDirectory";
+import { createArgocdApplication, namespaceNames, sealedSecretsControllerName } from "../../shared";
 import { sealedSecretsControllerDir } from "./sealedSecrets";
 
 type Metadata = {

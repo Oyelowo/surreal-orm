@@ -1,5 +1,5 @@
-import { getRepoPathFromAbsolutePath } from "./../shared/manifestsDirectory";
-import { createArgocdApplication, ingressControllerName, namespaceNames } from "../shared";
+import { getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
+import { createArgocdApplication, ingressControllerName, namespaceNames } from "../../shared";
 import { ingressControllerDir } from "./ingressController";
 
 type Metadata = {
