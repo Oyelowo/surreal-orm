@@ -1,0 +1,33 @@
+{
+    "compilerOptions": {
+        "outDir": "bin",
+        "target": "es2016",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "declaration": true,
+        "sourceMap": true,
+        "stripInternal": true,
+        "experimentalDecorators": true,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true
+    },
+    "files": [
+        "acme/index.ts",
+        "acme/v1/challenge.ts",
+        "acme/v1/index.ts",
+        "acme/v1/order.ts",
+        "certmanager/index.ts",
+        "certmanager/v1/certificate.ts",
+        "certmanager/v1/certificateRequest.ts",
+        "certmanager/v1/clusterIssuer.ts",
+        "certmanager/v1/index.ts",
+        "certmanager/v1/issuer.ts",
+        "index.ts",
+        "provider.ts",
+        "types/index.ts",
+        "types/input.ts",
+        "types/output.ts",
+        "utilities.ts"
+    ]
+}

@@ -48,6 +48,11 @@ export const getArgocdControllerDir = (environment: Environment) => {
   return getPathToNonApplicationDir(argocdControllerName, environment);
 };
 
+export const certManagerControllerName = "cert-manager-controller";
+export const getCertManagerControllerDir = (environment: Environment) => {
+  return getPathToNonApplicationDir(certManagerControllerName, environment);
+};
+
 export const sealedSecretsControllerName = "sealed-secrets-controller";
 export const getSealedSecretsControllerDir = (environment: Environment) => {
   return getPathToNonApplicationDir(sealedSecretsControllerName, environment);
