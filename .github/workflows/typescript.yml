@@ -106,6 +106,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add .
           git commit -m "Update image tags" -a
+          git config pull.rebase false  # merge
           git pull
       - name: Push changes
         uses: ad-m/github-push-action@master
