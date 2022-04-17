@@ -16,19 +16,20 @@ export const getUnsealedSecretsConfigFilesBaseDir = () => {
   return path.join(getMainBaseDir(), ".secrets");
 };
 
-/**
- * e.g /manifests/generated/local/1-manifests
- *                               /1-crd
- *                               /sealed-secrets
- */
+
 export const getGeneratedEnvManifestsDir = (environment: Environment) => {
   const MANIFESTS_DIR = getManifestsBaseDir();
   return path.join(MANIFESTS_DIR, "generated", environment);
 };
 
+/**
+ * e.g /manifests/generated/local/infrastructure/1-manifests
+ *                               /infrastructure/1-crd
+ *                               /infrastructure/sealed-secrets
+ */
 export const getPathToNonApplicationDir = (toolName: string, environment: Environment) => {
   const MANIFESTS_BASE_DIR_FOR_ENV = getGeneratedEnvManifestsDir(environment);
-  const dir = path.join(MANIFESTS_BASE_DIR_FOR_ENV, toolName);
+  const dir = path.join(MANIFESTS_BASE_DIR_FOR_ENV, "infrastructure", toolName);
   // TODO: sh.mk`dir(dir);
   // sh.mk`dir(dir);
   return dir;
@@ -62,7 +63,7 @@ export const getArgocdApplicationsDir = (environment: Environment) => {
   return getPathToNonApplicationDir(argocdApplicationName, environment);
 };
 
-export const getApplicationDir = (appName: AppName, environment: Environment) => {
-  return path.join(getGeneratedEnvManifestsDir(environment), "applications", appName);
-  // return `kubernetes/manifests/generated/${environment}/applications/${appName}`;
+export const getServiceDir = (appName: AppName, environment: Environment) => {
+  return path.join(getGeneratedEnvManifestsDir(environment), "services", appName);
+  // return `kubernetes/manifests/generated/${environment}/services/${appName}`;
 };

@@ -2,8 +2,8 @@ import { getEnvironmentVariables } from "../../shared/validations";
 // import { clusterSetupDirectory } from "../shared/manifestsDirectory";
 import * as k8s from "@pulumi/kubernetes";
 
-import { graphqlMongoSettings } from "../../applications/graphql-mongo/settings";
-import { reactWebSettings } from "../../applications/react-web/settings";
+import { graphqlMongoSettings } from "../../services/graphql-mongo/settings";
+import { reactWebSettings } from "../../services/react-web/settings";
 // import { applicationsDirectory } from "../shared/manifestsDirectory";
 import { IngressControllerValuesBitnami } from "../../shared/types/helm-charts/ingressControllerValuesBitnami";
 import { namespaceNames } from "../../shared/namespaces";

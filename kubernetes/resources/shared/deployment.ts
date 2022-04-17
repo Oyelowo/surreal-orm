@@ -6,7 +6,7 @@ import { NoUnion } from "./types/own-types";
 import { AppConfigs, AppName, DBType, NamespaceOfApps } from "./types/own-types";
 import * as argocd from "../../crd2pulumi/argocd";
 import { createArgocdApplication } from "./createArgoApplication";
-import { getApplicationDir, getRepoPathFromAbsolutePath } from "./manifestsDirectory";
+import { getServiceDir, getRepoPathFromAbsolutePath } from "./manifestsDirectory";
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
 
 export class ServiceDeployment<
@@ -38,7 +38,7 @@ export class ServiceDeployment<
     this.provider = new k8s.Provider(
       this.appName,
       {
-        renderYamlToDirectory: getApplicationDir(this.appName, getEnvironmentVariables().ENVIRONMENT),
+        renderYamlToDirectory: getServiceDir(this.appName, getEnvironmentVariables().ENVIRONMENT),
       },
       { parent: this }
     );
@@ -132,7 +132,7 @@ export class ServiceDeployment<
         namespace: metadata.namespace,
       },
       pathToAppManifests: getRepoPathFromAbsolutePath(
-        getApplicationDir(this.appName, getEnvironmentVariables().ENVIRONMENT)
+        getServiceDir(this.appName, getEnvironmentVariables().ENVIRONMENT)
       ),
       opts: {
         parent: this,

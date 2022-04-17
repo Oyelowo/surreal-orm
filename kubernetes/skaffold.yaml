@@ -11,36 +11,36 @@ build:
   # platforms: ["linux/amd64"]
   # platforms: ["linux/amd64", "linux/arm64"]
   artifacts:
-  - image: ghcr.io/oyelowo/react-web
-    context: ../typescript
-    docker:
-      dockerfile: Dockerfile.development
-      target: web
-      noCache: false
-      squash: false
+    - image: ghcr.io/oyelowo/react-web
+      context: ../typescript
+      docker:
+        dockerfile: Dockerfile.development
+        target: web
+        noCache: false
+        squash: false
 
-  - image: ghcr.io/oyelowo/graphql-mongo
-    context: ../rust
-    docker:
-      dockerfile: Dockerfile.development
-      target: graphql-mongo
-      noCache: false
-      squash: false
+    - image: ghcr.io/oyelowo/graphql-mongo
+      context: ../rust
+      docker:
+        dockerfile: Dockerfile.development
+        target: graphql-mongo
+        noCache: false
+        squash: false
+    #   requires:
+    #     - image: builder-base
+    #       alias: BASE
+
+    - image: ghcr.io/oyelowo/graphql-postgres
+      context: ../rust
+      docker:
+        dockerfile: Dockerfile.development
+        target: graphql-postgres
+        noCache: false
+        squash: false
   #   requires:
   #     - image: builder-base
   #       alias: BASE
 
-  - image: ghcr.io/oyelowo/graphql-postgres
-    context: ../rust
-    docker:
-      dockerfile: Dockerfile.development
-      target: graphql-postgres
-      noCache: false
-      squash: false
-  #   requires:
-  #     - image: builder-base
-  #       alias: BASE
-      
   # - image: ghcr.io/oyelowo/grpc-mongo
   #   context: ../rust
   #   docker:
@@ -51,7 +51,7 @@ build:
   #   requires:
   #     - image: builder-base
   #       alias: BASE
-  
+
   # - image: builder-base
   #   context: ../rust
   #   docker:
@@ -59,42 +59,41 @@ build:
   #     target: builder-base
   #     noCache: false
   #     squash: false
-    # buildpacks:
-    #   builder: gcr.io/buildpacks/builder:v1
+  # buildpacks:
+  #   builder: gcr.io/buildpacks/builder:v1
 
 deploy:
   kubectl:
     manifests:
-    - manifests/generated/local/namespaces/**/* 
-    - manifests/generated/local/nginx-ingress-controller/**/* 
-    - manifests/generated/local/sealed-secrets-controller/**/* 
-    - manifests/generated/local/**/**/* 
-
-
+      - manifests/generated/local/namespaces/**/*
+      - manifests/generated/local/infrastructure/sealed-secrets-controller/**/*
+      - manifests/generated/local/infrastructure/nginx-ingress-controller/**/*
+      - manifests/generated/local/infrastructure/**/**/*
+      - manifests/generated/local/services/**/**/*
 # portForward:
 #   - resourceType: service
 #     resourceName: react-web
 #     port: 3000
 #     localPort: 3000
 
-  # - resourceType: service
-  #   resourceName: graphql-mongo
-  #   namespace: development
-  #   port: 8000
-  #   localPort: 800
+# - resourceType: service
+#   resourceName: graphql-mongo
+#   namespace: development
+#   port: 8000
+#   localPort: 800
 
-  # - resourceType: service
-  #   resourceName: graphql-postgres
-  #   port: 8000
-  #   localPort: 8000
+# - resourceType: service
+#   resourceName: graphql-postgres
+#   port: 8000
+#   localPort: 8000
 
-  # - resourceType: service
-  #   resourceName: grpc-mongo
-  #   port: 50051
-  #   localPort: 50051
+# - resourceType: service
+#   resourceName: grpc-mongo
+#   port: 50051
+#   localPort: 50051
 
-  # - resourceType: service
-  #   # namespace: default
-  #   resourceName: nginx-ingress-controller
-  #   port: 80
-  #   localPort: 8080
+# - resourceType: service
+#   # namespace: default
+#   resourceName: nginx-ingress-controller
+#   port: 80
+#   localPort: 8080

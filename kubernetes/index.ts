@@ -16,14 +16,14 @@ export * from "./resources/infrastructure/argocd";
 
 // Rust server backend with support for graphql, mongodb and postgres
 // RUST WORKSPACE APPS
-export * from "./resources/applications/graphql-mongo";
+export * from "./resources/services/graphql-mongo";
 // Uncomment these if you want to work with graphql and postgres or grpc with mongodb
 // export * from "./resources/applications/graphql-postgres";
 // export * from "./resources/applications/grpc-mongo";
 
 // TYPESCRIPT WORKSPACE APPS
 // Web app. Nextjs with client and server support. Server is at /api
-export * from "./resources/applications/react-web";
+export * from "./resources/services/react-web";
 
 // export * from "./resources";
 
