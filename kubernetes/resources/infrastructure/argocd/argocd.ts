@@ -34,7 +34,7 @@ export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
 
 // export const argoApplicationSecret = new k8s.
 
-const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
+/* const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
   fullnameOverride: "argocd",
   // global:{
 
@@ -89,10 +89,31 @@ const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
   dex: {
     enabled: false,
   },
-};
+}; */
 
 const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
   fullnameOverride: "argocd",
+  configs: {
+    secret: {
+      argocdServerAdminPassword: "lowo"
+    }
+  }
+  ,
+  dex: {
+    enabled: false
+  },
+  redis: {
+    enabled: true
+  },
+  notifications: {
+    enabled: true,
+    secret: {
+      create: false,
+      // items: {
+      //   "name": "ererer"
+      // }
+    }
+  }
   // redis: {
 
   // }
