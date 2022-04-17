@@ -65,3 +65,8 @@ dev:
 	skaffold dev --trigger="manual"
 	# skaffold dev --trigger="manual" --no-prune=true --no-prune-children=true
 
+
+merge-kube-config:
+# Example Usage:  make merge-kube-config path=config.yaml  
+	cp ~/.kube/config ~/.kube/config.bak && KUBECONFIG=~/.kube/config:$(path) kubectl config view --flatten > /tmp/config && mv /tmp/config ~/.kube/config
+# cp ~/.kube/config ~/.kube/config.bak && KUBECONFIG=~/.kube/config:/path/to/new/config kubectl config view --flatten > /tmp/config && mv /tmp/config ~/.kube/config
