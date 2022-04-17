@@ -11,7 +11,9 @@ import { NginxConfiguration } from "../../shared/types/nginxConfigurations";
 import { RecursivePartial } from "../../shared/types/own-types";
 import { getIngressControllerDir, ingressControllerName } from "../../shared/manifestsDirectory";
 
-export const ingressControllerDir = getIngressControllerDir(getEnvironmentVariables().ENVIRONMENT);
+
+const { ENVIRONMENT } = getEnvironmentVariables()
+export const ingressControllerDir = getIngressControllerDir(ENVIRONMENT);
 
 export const ingressControllerProvider = new k8s.Provider(ingressControllerDir, {
   renderYamlToDirectory: ingressControllerDir,
@@ -87,7 +89,9 @@ export const appIngress = new k8s.networking.v1.Ingress(
           // Replace this with your own domain!
           // host: "myservicea.foo.org",
           // TODO: Change to proper domain name for prod and other environments in case of necessity
-          host: "localhost",
+          // host: ENVIRONMENT === "local" ? "localhost" : "oyelowo.dev",
+          host: ENVIRONMENT === "local" ? "localhost" : "172.104.255.25",
+          // host: ENVIRONMENT === "local" ? "oyelowo.dev" : "oyelowo.dev",
           http: {
             paths: [
               {
@@ -147,6 +151,14 @@ export const appIngress = new k8s.networking.v1.Ingress(
         //   },
         // },
       ],
+      tls: [
+        {
+          hosts: ["172.104.255.25"],
+          // hosts: ["oyelowo.dev"],
+          secretName: "tls"
+          
+        }
+      ]
     },
   },
   { provider: ingressControllerProvider }
