@@ -1,0 +1,26 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-weight: "-5"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"Role","metadata":{"annotations":{"helm.sh/hook":"post-install","helm.sh/hook-delete-policy":"before-hook-creation,hook-succeeded","helm.sh/hook-weight":"-5"},"labels":{"app":"startupapicheck","app.kubernetes.io/component":"startupapicheck","app.kubernetes.io/instance":"certManager","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"startupapicheck","app.kubernetes.io/version":"v1.8.0","helm.sh/chart":"cert-manager-v1.8.0"},"name":"certManager-cert-manager-startupapicheck:create-cert","namespace":"cert-manager"},"rules":[{"apiGroups":["cert-manager.io"],"resources":["certificates"],"verbs":["create"]}]}
+  labels:
+    app: startupapicheck
+    app.kubernetes.io/component: startupapicheck
+    app.kubernetes.io/instance: certManager
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: startupapicheck
+    app.kubernetes.io/version: v1.8.0
+    helm.sh/chart: cert-manager-v1.8.0
+  name: certManager-cert-manager-startupapicheck:create-cert
+  namespace: cert-manager
+rules:
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  verbs:
+  - create
