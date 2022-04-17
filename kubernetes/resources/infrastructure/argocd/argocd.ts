@@ -78,7 +78,7 @@ const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
   server: {
     ingress: {
       enabled: true,
-      hostname: "https://90ebae0a-60a8-4b2a-9353-c0ccf3041608.eu-central-1.linodelke.net:443",
+      hostname: "172.104.255.25",
       path: "/tools/argocd",
       pathType: "Prefix" as "Exact" | "ImplementationSpecific" | "Prefix",
       ingressClassName: "nginx",
