@@ -3,10 +3,19 @@ name: Generate Kubernetes manifests
 # Only trigger, when the rust and typescript workflow succeeded
 on:
   workflow_run:
-  # This  must match with the other two workflows
+    # This  must match with the other two workflows
     workflows: ["rust", "typescript"]
     types:
       - completed
+
+  push:
+    branches: [master]
+    paths:
+      - "kubernetes/**"
+
+  pull_request:
+    paths:
+      - "kubernetes/**"
 
 jobs:
   generate_kubernetes_manifests:
@@ -31,7 +40,7 @@ jobs:
         run: |
           # They all use same image tag for now
           echo "IMAGE_TAG=$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
-      
+
       - name: Install pulumi
         uses: pulumi/setup-pulumi@v2
         with:
@@ -40,7 +49,6 @@ jobs:
           # make manifests_development_no_sealed_secrets
           # make manifests_staging_no_sealed_secrets
           make manifests_production_no_sealed_secrets
-
 
       - name: Commit files
         run: |
