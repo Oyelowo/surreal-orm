@@ -16,6 +16,7 @@ export const nameSpacesProvider = new k8s.Provider("render-namespaces", {
 export const namespaceNames = {
   applications: "applications",
   argocd: "argocd",
+  certManager: "cert-manager",
   default: "default",
   // Default namespace that comes with the deployment
   kubeSystem: "kube-system",
