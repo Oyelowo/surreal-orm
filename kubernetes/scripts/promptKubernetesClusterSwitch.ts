@@ -23,7 +23,7 @@ export async function promptKubernetesClusterSwitch() {
       ),
       choices: choices,
       default: choices.find(
-        (c) => ["local", "K3d", "minikube"].includes(String(s))
+        (s) => ["local", "K3d", "minikube"].includes(String(s))
       ),
       pageSize: 20,
     },
