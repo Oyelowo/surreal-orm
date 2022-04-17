@@ -3,63 +3,54 @@ kind: Deployment
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/component":"repo-server","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argo-cd","helm.sh/chart":"argo-cd-3.1.12"},"name":"argocd-repo-server","namespace":"argocd"},"spec":{"replicas":1,"selector":{"matchLabels":{"app.kubernetes.io/component":"repo-server","app.kubernetes.io/instance":"argocd","app.kubernetes.io/name":"argo-cd"}},"strategy":{"type":"RollingUpdate"},"template":{"metadata":{"labels":{"app.kubernetes.io/component":"repo-server","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"argo-cd","helm.sh/chart":"argo-cd-3.1.12"}},"spec":{"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"podAffinityTerm":{"labelSelector":{"matchLabels":{"app.kubernetes.io/component":"repo-server","app.kubernetes.io/instance":"argocd","app.kubernetes.io/name":"argo-cd"}},"namespaces":["argocd"],"topologyKey":"kubernetes.io/hostname"},"weight":1}]}},"containers":[{"args":["--logformat","text","--loglevel","info","--redis","argocd-redis-master:6379"],"command":["argocd-repo-server"],"env":[{"name":"REDIS_PASSWORD","valueFrom":{"secretKeyRef":{"key":"redis-password","name":"argocd-redis"}}}],"image":"docker.io/bitnami/argo-cd:2.3.3-debian-10-r6","imagePullPolicy":"IfNotPresent","livenessProbe":{"failureThreshold":3,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":8081},"timeoutSeconds":1},"name":"argocd-repo-server","ports":[{"containerPort":8081,"name":"repo-server","protocol":"TCP"}],"readinessProbe":{"failureThreshold":3,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":8081},"timeoutSeconds":1},"resources":{"limits":{},"requests":{}},"securityContext":{"runAsNonRoot":true,"runAsUser":1001},"volumeMounts":[{"mountPath":"/app/config/ssh","name":"ssh-known-hosts"},{"mountPath":"/app/config/server/tls","name":"argocd-repo-server-tls"},{"mountPath":"/app/config/gpg/keys","name":"gpg-keyring"},{"mountPath":"/tmp","name":"tmp-dir"}]}],"initContainers":[{"args":["-ec","#!/bin/bash\n\nset -o errexit\nset -o nounset\nset -o pipefail\n\n. /opt/bitnami/scripts/libos.sh\n. /opt/bitnami/scripts/liblog.sh\n\ncheck_redis_connection() {\n  local result=\"$(redis-cli -h argocd-redis-master -p 6379 PING)\"\n  if [[ \"$result\" != \"PONG\" ]]; then\n    false\n  fi\n}\n\ninfo \"Checking redis connection...\"\nif ! retry_while \"check_redis_connection\"; then\n    error \"Could not connect to the Redis server\"\n    return 1\nelse\n    info \"Connected to the Redis instance\"\nfi\n"],"command":["/bin/bash"],"env":[{"name":"REDISCLI_AUTH","valueFrom":{"secretKeyRef":{"key":"redis-password","name":"argocd-redis"}}}],"image":"docker.io/bitnami/redis:6.2.6-debian-10-r176","imagePullPolicy":"IfNotPresent","name":"wait-for-redis"}],"securityContext":{"fsGroup":1001},"serviceAccountName":"argocd-argocd-repo-server","volumes":[{"configMap":{"name":"argocd-ssh-known-hosts-cm"},"name":"ssh-known-hosts"},{"name":"argocd-repo-server-tls","secret":{"items":[{"key":"tls.crt","path":"tls.crt"},{"key":"tls.key","path":"tls.key"},{"key":"ca.crt","path":"ca.crt"}],"optional":true,"secretName":"argocd-repo-server-tls"}},{"emptyDir":{},"name":"tmp-dir"},{"emptyDir":{},"name":"gpg-keyring"}]}}}}
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/component":"repo-server","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argocd-repo-server","app.kubernetes.io/part-of":"argocd","app.kubernetes.io/version":"v2.3.3","helm.sh/chart":"argo-cd-4.5.3"},"name":"argocd-repo-server","namespace":"argocd"},"spec":{"replicas":1,"revisionHistoryLimit":5,"selector":{"matchLabels":{"app.kubernetes.io/instance":"argocd","app.kubernetes.io/name":"argocd-repo-server"}},"template":{"metadata":{"labels":{"app.kubernetes.io/component":"repo-server","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"argocd-repo-server","app.kubernetes.io/part-of":"argocd","app.kubernetes.io/version":"v2.3.3","helm.sh/chart":"argo-cd-4.5.3"}},"spec":{"containers":[{"args":["argocd-repo-server","--redis","argocd-redis:6379","--logformat","text","--loglevel","info"],"command":["entrypoint.sh"],"env":[{"name":"HELM_CACHE_HOME","value":"/helm-working-dir"},{"name":"HELM_CONFIG_HOME","value":"/helm-working-dir"},{"name":"HELM_DATA_HOME","value":"/helm-working-dir"}],"image":"quay.io/argoproj/argocd:v2.3.3","imagePullPolicy":"IfNotPresent","livenessProbe":{"failureThreshold":3,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":8081},"timeoutSeconds":1},"name":"repo-server","ports":[{"containerPort":8081,"name":"repo-server","protocol":"TCP"}],"readinessProbe":{"failureThreshold":3,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":8081},"timeoutSeconds":1},"resources":{},"volumeMounts":[{"mountPath":"/app/config/gpg/source","name":"gpg-keys"},{"mountPath":"/app/config/gpg/keys","name":"gpg-keyring"},{"mountPath":"/app/config/ssh","name":"ssh-known-hosts"},{"mountPath":"/app/config/tls","name":"tls-certs"},{"mountPath":"/app/config/reposerver/tls","name":"argocd-repo-server-tls"},{"mountPath":"/tmp","name":"tmp-dir"},{"mountPath":"/helm-working-dir","name":"helm-working-dir"},{"mountPath":"/home/argocd/cmp-server/plugins","name":"plugins"}]}],"initContainers":[{"command":["cp","-n","/usr/local/bin/argocd","/var/run/argocd/argocd-cmp-server"],"image":"quay.io/argoproj/argocd:v2.3.3","name":"copyutil","resources":{},"volumeMounts":[{"mountPath":"/var/run/argocd","name":"var-files"}]}],"serviceAccountName":"argocd-repo-server","volumes":[{"configMap":{"name":"argocd-gpg-keys-cm"},"name":"gpg-keys"},{"emptyDir":{},"name":"gpg-keyring"},{"configMap":{"name":"argocd-ssh-known-hosts-cm"},"name":"ssh-known-hosts"},{"configMap":{"name":"argocd-tls-certs-cm"},"name":"tls-certs"},{"emptyDir":{},"name":"helm-working-dir"},{"name":"argocd-repo-server-tls","secret":{"items":[{"key":"tls.crt","path":"tls.crt"},{"key":"tls.key","path":"tls.key"},{"key":"ca.crt","path":"ca.crt"}],"optional":true,"secretName":"argocd-repo-server-tls"}},{"emptyDir":{},"name":"tmp-dir"},{"emptyDir":{},"name":"var-files"},{"emptyDir":{},"name":"plugins"}]}}}}
   labels:
     app.kubernetes.io/component: repo-server
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/managed-by: pulumi
-    app.kubernetes.io/name: argo-cd
-    helm.sh/chart: argo-cd-3.1.12
+    app.kubernetes.io/name: argocd-repo-server
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/version: v2.3.3
+    helm.sh/chart: argo-cd-4.5.3
   name: argocd-repo-server
   namespace: argocd
 spec:
   replicas: 1
+  revisionHistoryLimit: 5
   selector:
     matchLabels:
-      app.kubernetes.io/component: repo-server
       app.kubernetes.io/instance: argocd
-      app.kubernetes.io/name: argo-cd
-  strategy:
-    type: RollingUpdate
+      app.kubernetes.io/name: argocd-repo-server
   template:
     metadata:
       labels:
         app.kubernetes.io/component: repo-server
         app.kubernetes.io/instance: argocd
         app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: argo-cd
-        helm.sh/chart: argo-cd-3.1.12
+        app.kubernetes.io/name: argocd-repo-server
+        app.kubernetes.io/part-of: argocd
+        app.kubernetes.io/version: v2.3.3
+        helm.sh/chart: argo-cd-4.5.3
     spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/component: repo-server
-                  app.kubernetes.io/instance: argocd
-                  app.kubernetes.io/name: argo-cd
-              namespaces:
-              - argocd
-              topologyKey: kubernetes.io/hostname
-            weight: 1
       containers:
       - args:
+        - argocd-repo-server
+        - --redis
+        - argocd-redis:6379
         - --logformat
         - text
         - --loglevel
         - info
-        - --redis
-        - argocd-redis-master:6379
         command:
-        - argocd-repo-server
+        - entrypoint.sh
         env:
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              key: redis-password
-              name: argocd-redis
-        image: docker.io/bitnami/argo-cd:2.3.3-debian-10-r6
+        - name: HELM_CACHE_HOME
+          value: /helm-working-dir
+        - name: HELM_CONFIG_HOME
+          value: /helm-working-dir
+        - name: HELM_DATA_HOME
+          value: /helm-working-dir
+        image: quay.io/argoproj/argocd:v2.3.3
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
@@ -69,7 +60,7 @@ spec:
           tcpSocket:
             port: 8081
           timeoutSeconds: 1
-        name: argocd-repo-server
+        name: repo-server
         ports:
         - containerPort: 8081
           name: repo-server
@@ -82,66 +73,51 @@ spec:
           tcpSocket:
             port: 8081
           timeoutSeconds: 1
-        resources:
-          limits: {}
-          requests: {}
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1001
+        resources: {}
         volumeMounts:
-        - mountPath: /app/config/ssh
-          name: ssh-known-hosts
-        - mountPath: /app/config/server/tls
-          name: argocd-repo-server-tls
+        - mountPath: /app/config/gpg/source
+          name: gpg-keys
         - mountPath: /app/config/gpg/keys
           name: gpg-keyring
+        - mountPath: /app/config/ssh
+          name: ssh-known-hosts
+        - mountPath: /app/config/tls
+          name: tls-certs
+        - mountPath: /app/config/reposerver/tls
+          name: argocd-repo-server-tls
         - mountPath: /tmp
           name: tmp-dir
+        - mountPath: /helm-working-dir
+          name: helm-working-dir
+        - mountPath: /home/argocd/cmp-server/plugins
+          name: plugins
       initContainers:
-      - args:
-        - -ec
-        - |
-          #!/bin/bash
-
-          set -o errexit
-          set -o nounset
-          set -o pipefail
-
-          . /opt/bitnami/scripts/libos.sh
-          . /opt/bitnami/scripts/liblog.sh
-
-          check_redis_connection() {
-            local result="$(redis-cli -h argocd-redis-master -p 6379 PING)"
-            if [[ "$result" != "PONG" ]]; then
-              false
-            fi
-          }
-
-          info "Checking redis connection..."
-          if ! retry_while "check_redis_connection"; then
-              error "Could not connect to the Redis server"
-              return 1
-          else
-              info "Connected to the Redis instance"
-          fi
-        command:
-        - /bin/bash
-        env:
-        - name: REDISCLI_AUTH
-          valueFrom:
-            secretKeyRef:
-              key: redis-password
-              name: argocd-redis
-        image: docker.io/bitnami/redis:6.2.6-debian-10-r176
-        imagePullPolicy: IfNotPresent
-        name: wait-for-redis
-      securityContext:
-        fsGroup: 1001
-      serviceAccountName: argocd-argocd-repo-server
+      - command:
+        - cp
+        - -n
+        - /usr/local/bin/argocd
+        - /var/run/argocd/argocd-cmp-server
+        image: quay.io/argoproj/argocd:v2.3.3
+        name: copyutil
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/run/argocd
+          name: var-files
+      serviceAccountName: argocd-repo-server
       volumes:
+      - configMap:
+          name: argocd-gpg-keys-cm
+        name: gpg-keys
+      - emptyDir: {}
+        name: gpg-keyring
       - configMap:
           name: argocd-ssh-known-hosts-cm
         name: ssh-known-hosts
+      - configMap:
+          name: argocd-tls-certs-cm
+        name: tls-certs
+      - emptyDir: {}
+        name: helm-working-dir
       - name: argocd-repo-server-tls
         secret:
           items:
@@ -156,4 +132,6 @@ spec:
       - emptyDir: {}
         name: tmp-dir
       - emptyDir: {}
-        name: gpg-keyring
+        name: var-files
+      - emptyDir: {}
+        name: plugins
