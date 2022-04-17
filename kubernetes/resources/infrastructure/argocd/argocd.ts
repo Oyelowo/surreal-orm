@@ -3,6 +3,7 @@ import { getArgocdControllerDir, getRepoPathFromAbsolutePath } from "../../share
 import { createArgocdApplication } from "../../shared/createArgoApplication";
 import { namespaceNames } from "../../shared/namespaces";
 import { ArgocdHelmValuesBitnami } from "../../shared/types/helm-charts/argocdHelmValuesBitnami";
+import { ArgocdHelmValuesArgo } from "../../shared/types/helm-charts/argocdHelmValuesArgo";
 import { DeepPartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
 
@@ -33,7 +34,7 @@ export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
 
 // export const argoApplicationSecret = new k8s.
 
-const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
+const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
   fullnameOverride: "argocd",
   // global:{
 
@@ -82,6 +83,7 @@ const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
       path: "/tools/argocd",
       pathType: "Prefix" as "Exact" | "ImplementationSpecific" | "Prefix",
       ingressClassName: "nginx",
+      secrets: []
     },
   },
   dex: {
@@ -89,15 +91,23 @@ const argocdValues: DeepPartial<ArgocdHelmValuesBitnami> = {
   },
 };
 
+const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
+  fullnameOverride: "argocd",
+  // redis: {
+
+  // }
+};
 // `http://${name}.${namespace}:${port}`;
 export const argocdHelm = new k8s.helm.v3.Chart(
   "argocd",
   {
     chart: "argo-cd",
     fetchOpts: {
-      repo: "https://charts.bitnami.com/bitnami",
+      // repo: "https://charts.bitnami.com/bitnami",
+      repo: "https://argoproj.github.io/argo-helm",
     },
-    version: "3.1.12",
+    version: "4.5.3",
+    // version: "3.1.12",
     values: argocdValues,
     namespace: namespaceNames.argocd,
     // namespace: devNamespaceName,
