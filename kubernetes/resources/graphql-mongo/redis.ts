@@ -50,9 +50,10 @@ export const graphqlMongoRedis = new k8s.helm.v3.Chart(
   {
     chart: "redis",
     fetchOpts: {
+      // TODO: Put in an object global shared variable
       repo: "https://charts.bitnami.com/bitnami",
     },
-    version: "16.4.5",
+    version: "16.8.5",
     values: redisValues,
     namespace: namespaceNames.applications,
     // By default Release resource will wait till all created resources

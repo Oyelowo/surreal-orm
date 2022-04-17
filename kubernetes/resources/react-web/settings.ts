@@ -19,6 +19,7 @@ export const reactWebSettings: AppConfigs<"react-web", "doesNotHaveDb", "applica
     APP_ENVIRONMENT: getEnvironmentVariables().ENVIRONMENT,
     APP_HOST: "0.0.0.0",
     APP_PORT: "3000",
+    // TODO: Add from environment variables
     GITHUB_CLIENT_ID: "89c19374f7e7b5b35164",
     GITHUB_CLIENT_SECRET: "129488cc92e2d2f91e3a5a024086396c48c65339",
     GOOGLE_CLIENT_ID: "855174209543-6m0f088e55d3mevhnr8bs0qjap8j6g0g.apps.googleusercontent.com",

@@ -12,6 +12,7 @@ install:
 # Generates sealed secrets from output plain unsealed kubernetes secretes which
 # is also generated from the config created by you, the user at e.g: kubernetes/secretsManagement/secrets-unsealed/production.ts
 manifests_local_with_sealed_secrets:
+	make install
 	npx ts-node scripts/bootstrap.ts --e=local --gss=yes --kusi=yes --kuso=no
 # npx ts-node scripts/bootstrap.ts --e=local --gss=yes
 
