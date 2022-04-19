@@ -23,7 +23,7 @@ const resourceName = metadata.name;
 
 // App that deploys argocd resources themselves
 /* ARGOCD APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
-const argocdApplication = createArgocdApplication({
+export const argocdApplication = createArgocdApplication({
   metadata,
   pathToAppManifests: getRepoPathFromAbsolutePath(argocdControllerDir),
 });
@@ -94,7 +94,7 @@ export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
 const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
   fullnameOverride: "argocd",
   server: {
-
+                  
   },
   configs: {
     secret: {
@@ -105,6 +105,7 @@ const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
   ,
   dex: {
     enabled: false
+    
   },
   redis: {
     enabled: true
