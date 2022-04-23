@@ -4,6 +4,7 @@
     "postinstall": "patch-package && make setup"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
     "@types/inquirer": "^8.2.1",
     "@types/node": "^14.18.12",
     "@types/prompt": "^1.1.2",
@@ -18,6 +19,7 @@
     "@pulumi/kubernetesx": "^0.1.6",
     "@pulumi/pulumi": "^3.25.0",
     "@pulumi/random": "^4.3.1",
+    "bcrypt": "^5.0.1",
     "chalk": "^4.1.0",
     "inquirer": "^8.2.2",
     "json-schema-to-ts": "^1.6.5",

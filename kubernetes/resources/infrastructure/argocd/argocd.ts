@@ -23,7 +23,7 @@ const resourceName = metadata.name;
 
 // App that deploys argocd resources themselves
 /* ARGOCD APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
-export const argocdApplication = createArgocdApplication({
+const argocdApplication = createArgocdApplication({
   metadata,
   pathToAppManifests: getRepoPathFromAbsolutePath(argocdControllerDir),
 });
@@ -35,11 +35,12 @@ export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
 // export const argoApplicationSecret = new k8s.
 
 const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
-  fullnameOverride: "argocd",
+  // fullnameOverride: "argocd",
   // global:{
 
   // },
   // TODO:,
+  // controller: { serviceAccount: { create: false } },
   config: { secret: { create: true, argocdServerAdminPassword: "oyelowo", } },
   // clusterDomain: "https:kubernetes.default.svc",
   // repoServer: {},
@@ -63,8 +64,9 @@ const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
   //   existingSecretPasswordKey: "",
   //   existingSecret: "",
   // },
-
+  // rbac: { create: true },
   // redis: {
+  //   enabled: true,
   //   architecture: "standalone",
   //   auth: {
   //     enabled: true,
