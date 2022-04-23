@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"nginx.ingress.kubernetes.io/ssl-redirect":"false","nginx.ingress.kubernetes.io/use-regex":"true"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"nginx-ingress","namespace":"applications"},"spec":{"ingressClassName":"nginx","rules":[{"host":"oyelowo.dev","http":{"paths":[{"backend":{"service":{"name":"react-web","port":{"number":3000}}},"path":"/","pathType":"Prefix"},{"backend":{"service":{"name":"graphql-mongo","port":{"number":8000}}},"path":"/graphql","pathType":"Prefix"}]}}],"tls":[{"hosts":["oyelowo.dev"],"secretName":"tls"}]}}
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"nginx.ingress.kubernetes.io/ssl-redirect":"false","nginx.ingress.kubernetes.io/use-regex":"true"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"nginx-ingress","namespace":"applications"},"spec":{"ingressClassName":"nginx","rules":[{"host":"172-104-255-25.ip.linodeusercontent.com","http":{"paths":[{"backend":{"service":{"name":"react-web","port":{"number":3000}}},"path":"/","pathType":"Prefix"},{"backend":{"service":{"name":"graphql-mongo","port":{"number":8000}}},"path":"/graphql","pathType":"Prefix"}]}}]}}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/use-regex: "true"
   labels:
@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: oyelowo.dev
+  - host: 172-104-255-25.ip.linodeusercontent.com
     http:
       paths:
       - backend:
@@ -30,7 +30,3 @@ spec:
               number: 8000
         path: /graphql
         pathType: Prefix
-  tls:
-  - hosts:
-    - oyelowo.dev
-    secretName: tls
