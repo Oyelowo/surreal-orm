@@ -39,7 +39,7 @@ const certManagerValues: DeepPartial<CertManagerValuesJetspack> = {
 
 // `http://${name}.${namespace}:${port}`;
 export const certManagerHelm = new k8s.helm.v3.Chart(
-  "certManager",
+  "cert-manager",
   {
     chart: "cert-manager",
     fetchOpts: {
