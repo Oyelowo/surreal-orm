@@ -70,9 +70,11 @@ const ingressClassName: IngressClassName = "nginx";
 const appBase = "oyelowo";
 // // Next, expose the app using an Ingress.
 
-const annotations: Partial<NginxConfiguration> = {
+type IngressAnootations = NginxConfiguration & { "cert-manager.io/issuer": "letsencrypt-staging" }
+const annotations: Partial<IngressAnootations> = {
   "nginx.ingress.kubernetes.io/ssl-redirect": "false",
   "nginx.ingress.kubernetes.io/use-regex": "true",
+  "cert-manager.io/issuer": "letsencrypt-staging"
 };
 export const appIngress = new k8s.networking.v1.Ingress(
   `${appBase}-ingress`,
@@ -84,12 +86,22 @@ export const appIngress = new k8s.networking.v1.Ingress(
     },
     spec: {
       ingressClassName,
+      tls: [
+        {
+          // hosts: ["172.104.255.25"],
+          hosts: ["172-104-255-25.ip.linodeusercontent.com"],
+          // hosts: ["oyelowo.dev"],
+          secretName: "tls"
+          // secretName: "oyelowo-tls"
+
+        }
+      ],
       rules: [
         {
           // Replace this with your own domain!
           // host: "myservicea.foo.org",
           // TODO: Change to proper domain name for prod and other environments in case of necessity
-          host: ENVIRONMENT === "local" ? "localhost" : "oyelowo.dev",
+          host: ENVIRONMENT === "local" ? "localhost" : "172-104-255-25.ip.linodeusercontent.com",
           // host: "172-104-255-25.ip.linodeusercontent.com",
           // host: ENVIRONMENT === "local" ? "localhost" : "172.104.255.25",
           // host: ENVIRONMENT === "local" ? "oyelowo.dev" : "oyelowo.dev",
@@ -152,15 +164,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
         //   },
         // },
       ],
-      // tls: [
-      //   {
-      //     // hosts: ["172.104.255.25"],
-      //     hosts: ["oyelowo.dev"],
-      //     secretName: "tls"
-      //     // secretName: "oyelowo-tls"
-          
-      //   }
-      // ]
+
     },
   },
   { provider: ingressControllerProvider }
