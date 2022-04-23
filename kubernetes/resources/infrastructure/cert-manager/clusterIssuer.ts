@@ -1,6 +1,7 @@
-import * as cm from "../../../crd2pulumi/certManager/index";
+import * as cm from "../../../crd2pulumi/certManager/certmanager";
+import { certManagerControllerProvider } from "./certManager";
 
-export const clusterIssuer = new cm.certmanager.v1.ClusterIssuer(
+export const clusterIssuer = new cm.v1.ClusterIssuer(
     "letsencrypt-staging", {
     metadata: {
         name: "letsencrypt-staging",
@@ -28,5 +29,5 @@ export const clusterIssuer = new cm.certmanager.v1.ClusterIssuer(
 
         }
     }
-}
+}, { provider: certManagerControllerProvider }
 )
