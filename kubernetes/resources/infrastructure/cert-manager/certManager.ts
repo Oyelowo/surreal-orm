@@ -7,7 +7,7 @@ import { CertManagerValuesJetspack } from "../../shared/types/helm-charts/certMa
 import { CertManagerValuesBitnami } from "../../shared/types/helm-charts/certManagerValuesBitnami";
 
 const { ENVIRONMENT } = getEnvironmentVariables();
-const certManagerControllerDir = getCertManagerControllerDir(ENVIRONMENT);
+export const certManagerControllerDir = getCertManagerControllerDir(ENVIRONMENT);
 
 // type Metadata = {
 //   name: string;

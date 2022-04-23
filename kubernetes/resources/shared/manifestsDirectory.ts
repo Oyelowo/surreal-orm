@@ -27,7 +27,7 @@ export const getGeneratedEnvManifestsDir = (environment: Environment) => {
  *                               /infrastructure/1-crd
  *                               /infrastructure/sealed-secrets
  */
-export const getPathToNonApplicationDir = (toolName: string, environment: Environment) => {
+export const getPathToInfraToolDir = (toolName: string, environment: Environment) => {
   const MANIFESTS_BASE_DIR_FOR_ENV = getGeneratedEnvManifestsDir(environment);
   const dir = path.join(MANIFESTS_BASE_DIR_FOR_ENV, "infrastructure", toolName);
   // TODO: sh.mk`dir(dir);
@@ -45,27 +45,36 @@ export const getRepoPathFromAbsolutePath = (absolutePath: string) => {
 
 export const argocdControllerName = "argocd-controller";
 export const getArgocdControllerDir = (environment: Environment) => {
-  return getPathToNonApplicationDir(argocdControllerName, environment);
+  return getPathToInfraToolDir(argocdControllerName, environment);
 };
 
 export const certManagerControllerName = "cert-manager-controller";
 export const getCertManagerControllerDir = (environment: Environment) => {
-  return getPathToNonApplicationDir(certManagerControllerName, environment);
+  return getPathToInfraToolDir(certManagerControllerName, environment);
 };
+
+// TODO: Refactor to remove all these repititions
+// type InfrastructureToolName = "cert-manager-controller" | 'sealed-secrets-controller'
+
+// export const getInfraToolDir = (environment: Environment, infraTool: InfrastructureToolName) => {
+//   return getPathToInfraToolDir(infraTool, environment);
+// };
+// infraName: InfrastructureToolName =  "cert-manager-controller"
+// const kk = getInfraToolDir("production", "cert-manager-controller")
 
 export const sealedSecretsControllerName = "sealed-secrets-controller";
 export const getSealedSecretsControllerDir = (environment: Environment) => {
-  return getPathToNonApplicationDir(sealedSecretsControllerName, environment);
+  return getPathToInfraToolDir(sealedSecretsControllerName, environment);
 };
 
 export const ingressControllerName = "nginx-ingress-controller";
 export const getIngressControllerDir = (environment: Environment) => {
-  return getPathToNonApplicationDir(ingressControllerName, environment);
+  return getPathToInfraToolDir(ingressControllerName, environment);
 };
 
 export const argocdApplicationName = "argocd-applications";
 export const getArgocdApplicationsDir = (environment: Environment) => {
-  return getPathToNonApplicationDir(argocdApplicationName, environment);
+  return getPathToInfraToolDir(argocdApplicationName, environment);
 };
 
 export const getServiceDir = (appName: AppName, environment: Environment) => {
