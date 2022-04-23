@@ -51,7 +51,7 @@ export const ingressNginxController = new k8s.helm.v3.Chart(
     fetchOpts: {
       repo: "https://charts.bitnami.com/bitnami",
     },
-    version: "9.1.8",
+    version: "9.1.22",
     values: ingressControllerValues,
     // namespace: "nginx-ingress",
     // namespace: devNamespaceName,

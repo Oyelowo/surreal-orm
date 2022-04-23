@@ -98,7 +98,7 @@ export const grpcMongoMongodb = new k8s.helm.v3.Chart(
     fetchOpts: {
       repo: "https://charts.bitnami.com/bitnami",
     },
-    version: "11.0.3",
+    version: "11.1.5",
     values: mongoValues,
     namespace: namespaceNames.applications,
     // By default Release resource will wait till all created resources
