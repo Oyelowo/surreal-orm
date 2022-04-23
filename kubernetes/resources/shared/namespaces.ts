@@ -20,6 +20,7 @@ export const namespaceNames = {
   default: "default",
   // Default namespace that comes with the deployment
   kubeSystem: "kube-system",
+  // infrastructure: "infrastructure",
 } as const;
 
 type Keys = keyof typeof namespaceNames;
@@ -46,3 +47,25 @@ export const argocdNamespace = new Namespace(
   },
   { provider: nameSpacesProvider }
 );
+
+export const certManagerNamespace = new Namespace(
+  namespaceNames.certManager,
+  {
+    metadata: {
+      name: `${namespaceNames.certManager}`,
+      namespace: namespaceNames.certManager,
+    },
+  },
+  { provider: nameSpacesProvider }
+);
+
+// export const infrastructureNamespace = new Namespace(
+//   namespaceNames.argocd,
+//   {
+//     metadata: {
+//       name: `${namespaceNames.argocd}`,
+//       namespace: namespaceNames.argocd,
+//     },
+//   },
+//   { provider: nameSpacesProvider }
+// );
