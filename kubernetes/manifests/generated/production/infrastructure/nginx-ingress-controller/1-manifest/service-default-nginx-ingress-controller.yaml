@@ -3,13 +3,13 @@ kind: Service
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"nginx-ingress-controller","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"nginx-ingress-controller","helm.sh/chart":"nginx-ingress-controller-9.1.8"},"name":"nginx-ingress-controller","namespace":"default"},"spec":{"ports":[{"name":"http","port":80,"protocol":"TCP","targetPort":"http"},{"name":"https","port":443,"protocol":"TCP","targetPort":"https"}],"selector":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"nginx-ingress-controller","app.kubernetes.io/name":"nginx-ingress-controller"},"type":"LoadBalancer"}}
+      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"nginx-ingress-controller","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"nginx-ingress-controller","helm.sh/chart":"nginx-ingress-controller-9.1.22"},"name":"nginx-ingress-controller","namespace":"default"},"spec":{"ports":[{"name":"http","port":80,"protocol":"TCP","targetPort":"http"},{"name":"https","port":443,"protocol":"TCP","targetPort":"https"}],"selector":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"nginx-ingress-controller","app.kubernetes.io/name":"nginx-ingress-controller"},"type":"LoadBalancer"}}
   labels:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: nginx-ingress-controller
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/name: nginx-ingress-controller
-    helm.sh/chart: nginx-ingress-controller-9.1.8
+    helm.sh/chart: nginx-ingress-controller-9.1.22
   name: nginx-ingress-controller
   namespace: default
 spec:

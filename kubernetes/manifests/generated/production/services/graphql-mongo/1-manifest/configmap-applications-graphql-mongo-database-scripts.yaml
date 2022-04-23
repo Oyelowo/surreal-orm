@@ -25,19 +25,51 @@ data:
     #!/bin/bash
 
     . /opt/bitnami/scripts/mongodb-env.sh
+    . /opt/bitnami/scripts/libfs.sh
+    . /opt/bitnami/scripts/liblog.sh
+    . /opt/bitnami/scripts/libvalidations.sh
 
-    echo "Advertised Hostname: $MONGODB_ADVERTISED_HOSTNAME"
-    echo "Advertised Port: $MONGODB_ADVERTISED_PORT_NUMBER"
+    if is_empty_value "$MONGODB_ADVERTISED_PORT_NUMBER"; then
+      export MONGODB_ADVERTISED_PORT_NUMBER="$MONGODB_PORT_NUMBER"
+    fi
 
-    if [[ "$MY_POD_NAME" = "graphql-mongo-database-0" ]]; then
-        echo "Pod name matches initial primary pod name, configuring node as a primary"
+    info "Advertised Hostname: $MONGODB_ADVERTISED_HOSTNAME"
+    info "Advertised Port: $MONGODB_ADVERTISED_PORT_NUMBER"
+
+    # Check for existing replica set in case there is no data in the PVC
+    # This is for cases where the PVC is lost or for MongoDB caches without
+    # persistence
+    current_primary=""
+    if is_dir_empty "${MONGODB_DATA_DIR}/db"; then
+      info "Data dir empty, checking if the replica set already exists"
+      current_primary=$(mongo admin --host "graphql-mongo-database-0.graphql-mongo-database-headless.applications.svc.cluster.local:27017,graphql-mongo-database-1.graphql-mongo-database-headless.applications.svc.cluster.local:27017,graphql-mongo-database-2.graphql-mongo-database-headless.applications.svc.cluster.local:27017" --authenticationDatabase admin -u root -p $MONGODB_ROOT_PASSWORD --eval 'db.runCommand("ismaster")' | awk -F\" '/primary/ {print $4}')
+
+      if ! is_empty_value "$current_primary"; then
+        info "Detected existing primary: ${current_primary}"
+      fi
+    fi
+
+    if ! is_empty_value "$current_primary" && [[ "$MONGODB_ADVERTISED_HOSTNAME:$MONGODB_ADVERTISED_PORT_NUMBER" == "$current_primary" ]]; then
+        info "Advertised name matches current primary, configuring node as a primary"
+        export MONGODB_REPLICA_SET_MODE="primary"
+    elif ! is_empty_value "$current_primary" && [[ "$MONGODB_ADVERTISED_HOSTNAME:$MONGODB_ADVERTISED_PORT_NUMBER" != "$current_primary" ]]; then
+        info "Current primary is different from this node. Configuring the node as replica of ${current_primary}"
+        export MONGODB_REPLICA_SET_MODE="secondary"
+        export MONOGDB_INITIAL_PRIMARY_HOST="${current_primary%:*}"
+        export MONGODB_INITIAL_PRIMARY_PORT_NUMBER="${current_primary#*:}"
+        export MONGODB_SET_SECONDARY_OK="yes"
+    elif [[ "$MY_POD_NAME" = "graphql-mongo-database-0" ]]; then
+        info "Pod name matches initial primary pod name, configuring node as a primary"
         export MONGODB_REPLICA_SET_MODE="primary"
     else
-        echo "Pod name doesn't match initial primary pod name, configuring node as a secondary"
+        info "Pod name doesn't match initial primary pod name, configuring node as a secondary"
         export MONGODB_REPLICA_SET_MODE="secondary"
+        export MONGODB_INITIAL_PRIMARY_PORT_NUMBER="$MONGODB_PORT_NUMBER"
+    fi
+
+    if [[ "$MONGODB_REPLICA_SET_MODE" == "secondary" ]]; then
         export MONGODB_INITIAL_PRIMARY_ROOT_USER="$MONGODB_ROOT_USER"
         export MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD="$MONGODB_ROOT_PASSWORD"
-        export MONGODB_INITIAL_PRIMARY_PORT_NUMBER="$MONGODB_PORT_NUMBER"
         export MONGODB_ROOT_PASSWORD=""
         export MONGODB_EXTRA_USERNAMES=""
         export MONGODB_EXTRA_DATABASES=""
@@ -53,12 +85,12 @@ kind: ConfigMap
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","data":{"setup-hidden.sh":"#!/bin/bash\n\n. /opt/bitnami/scripts/mongodb-env.sh\n\necho \"Advertised Hostname: $MONGODB_ADVERTISED_HOSTNAME\"\necho \"Advertised Port: $MONGODB_ADVERTISED_PORT_NUMBER\"\necho \"Configuring node as a hidden node\"\nexport MONGODB_REPLICA_SET_MODE=\"hidden\"\nexport MONGODB_INITIAL_PRIMARY_ROOT_USER=\"$MONGODB_ROOT_USER\"\nexport MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=\"$MONGODB_ROOT_PASSWORD\"\nexport MONGODB_INITIAL_PRIMARY_PORT_NUMBER=\"$MONGODB_PORT_NUMBER\"\nexport MONGODB_ROOT_PASSWORD=\"\"\nexport MONGODB_EXTRA_USERNAMES=\"\"\nexport MONGODB_EXTRA_DATABASES=\"\"\nexport MONGODB_EXTRA_PASSWORDS=\"\"\nexport MONGODB_ROOT_PASSWORD_FILE=\"\"\nexport MONGODB_EXTRA_USERNAMES_FILE=\"\"\nexport MONGODB_EXTRA_DATABASES_FILE=\"\"\nexport MONGODB_EXTRA_PASSWORDS_FILE=\"\"\nexec /opt/bitnami/scripts/mongodb/entrypoint.sh /opt/bitnami/scripts/mongodb/run.sh","setup.sh":"#!/bin/bash\n\n. /opt/bitnami/scripts/mongodb-env.sh\n\necho \"Advertised Hostname: $MONGODB_ADVERTISED_HOSTNAME\"\necho \"Advertised Port: $MONGODB_ADVERTISED_PORT_NUMBER\"\n\nif [[ \"$MY_POD_NAME\" = \"graphql-mongo-database-0\" ]]; then\n    echo \"Pod name matches initial primary pod name, configuring node as a primary\"\n    export MONGODB_REPLICA_SET_MODE=\"primary\"\nelse\n    echo \"Pod name doesn't match initial primary pod name, configuring node as a secondary\"\n    export MONGODB_REPLICA_SET_MODE=\"secondary\"\n    export MONGODB_INITIAL_PRIMARY_ROOT_USER=\"$MONGODB_ROOT_USER\"\n    export MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=\"$MONGODB_ROOT_PASSWORD\"\n    export MONGODB_INITIAL_PRIMARY_PORT_NUMBER=\"$MONGODB_PORT_NUMBER\"\n    export MONGODB_ROOT_PASSWORD=\"\"\n    export MONGODB_EXTRA_USERNAMES=\"\"\n    export MONGODB_EXTRA_DATABASES=\"\"\n    export MONGODB_EXTRA_PASSWORDS=\"\"\n    export MONGODB_ROOT_PASSWORD_FILE=\"\"\n    export MONGODB_EXTRA_USERNAMES_FILE=\"\"\n    export MONGODB_EXTRA_DATABASES_FILE=\"\"\n    export MONGODB_EXTRA_PASSWORDS_FILE=\"\"\nfi\n\nexec /opt/bitnami/scripts/mongodb/entrypoint.sh /opt/bitnami/scripts/mongodb/run.sh"},"kind":"ConfigMap","metadata":{"labels":{"app.kubernetes.io/component":"mongodb","app.kubernetes.io/instance":"graphql-mongo-database","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"mongodb","helm.sh/chart":"mongodb-11.0.3"},"name":"graphql-mongo-database-scripts","namespace":"applications"}}
+      {"apiVersion":"v1","data":{"setup-hidden.sh":"#!/bin/bash\n\n. /opt/bitnami/scripts/mongodb-env.sh\n\necho \"Advertised Hostname: $MONGODB_ADVERTISED_HOSTNAME\"\necho \"Advertised Port: $MONGODB_ADVERTISED_PORT_NUMBER\"\necho \"Configuring node as a hidden node\"\nexport MONGODB_REPLICA_SET_MODE=\"hidden\"\nexport MONGODB_INITIAL_PRIMARY_ROOT_USER=\"$MONGODB_ROOT_USER\"\nexport MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=\"$MONGODB_ROOT_PASSWORD\"\nexport MONGODB_INITIAL_PRIMARY_PORT_NUMBER=\"$MONGODB_PORT_NUMBER\"\nexport MONGODB_ROOT_PASSWORD=\"\"\nexport MONGODB_EXTRA_USERNAMES=\"\"\nexport MONGODB_EXTRA_DATABASES=\"\"\nexport MONGODB_EXTRA_PASSWORDS=\"\"\nexport MONGODB_ROOT_PASSWORD_FILE=\"\"\nexport MONGODB_EXTRA_USERNAMES_FILE=\"\"\nexport MONGODB_EXTRA_DATABASES_FILE=\"\"\nexport MONGODB_EXTRA_PASSWORDS_FILE=\"\"\nexec /opt/bitnami/scripts/mongodb/entrypoint.sh /opt/bitnami/scripts/mongodb/run.sh","setup.sh":"#!/bin/bash\n\n. /opt/bitnami/scripts/mongodb-env.sh\n. /opt/bitnami/scripts/libfs.sh\n. /opt/bitnami/scripts/liblog.sh\n. /opt/bitnami/scripts/libvalidations.sh\n\nif is_empty_value \"$MONGODB_ADVERTISED_PORT_NUMBER\"; then\n  export MONGODB_ADVERTISED_PORT_NUMBER=\"$MONGODB_PORT_NUMBER\"\nfi\n\ninfo \"Advertised Hostname: $MONGODB_ADVERTISED_HOSTNAME\"\ninfo \"Advertised Port: $MONGODB_ADVERTISED_PORT_NUMBER\"\n\n# Check for existing replica set in case there is no data in the PVC\n# This is for cases where the PVC is lost or for MongoDB caches without\n# persistence\ncurrent_primary=\"\"\nif is_dir_empty \"${MONGODB_DATA_DIR}/db\"; then\n  info \"Data dir empty, checking if the replica set already exists\"\n  current_primary=$(mongo admin --host \"graphql-mongo-database-0.graphql-mongo-database-headless.applications.svc.cluster.local:27017,graphql-mongo-database-1.graphql-mongo-database-headless.applications.svc.cluster.local:27017,graphql-mongo-database-2.graphql-mongo-database-headless.applications.svc.cluster.local:27017\" --authenticationDatabase admin -u root -p $MONGODB_ROOT_PASSWORD --eval 'db.runCommand(\"ismaster\")' | awk -F\\\" '/primary/ {print $4}')\n\n  if ! is_empty_value \"$current_primary\"; then\n    info \"Detected existing primary: ${current_primary}\"\n  fi\nfi\n\nif ! is_empty_value \"$current_primary\" \u0026\u0026 [[ \"$MONGODB_ADVERTISED_HOSTNAME:$MONGODB_ADVERTISED_PORT_NUMBER\" == \"$current_primary\" ]]; then\n    info \"Advertised name matches current primary, configuring node as a primary\"\n    export MONGODB_REPLICA_SET_MODE=\"primary\"\nelif ! is_empty_value \"$current_primary\" \u0026\u0026 [[ \"$MONGODB_ADVERTISED_HOSTNAME:$MONGODB_ADVERTISED_PORT_NUMBER\" != \"$current_primary\" ]]; then\n    info \"Current primary is different from this node. Configuring the node as replica of ${current_primary}\"\n    export MONGODB_REPLICA_SET_MODE=\"secondary\"\n    export MONOGDB_INITIAL_PRIMARY_HOST=\"${current_primary%:*}\"\n    export MONGODB_INITIAL_PRIMARY_PORT_NUMBER=\"${current_primary#*:}\"\n    export MONGODB_SET_SECONDARY_OK=\"yes\"\nelif [[ \"$MY_POD_NAME\" = \"graphql-mongo-database-0\" ]]; then\n    info \"Pod name matches initial primary pod name, configuring node as a primary\"\n    export MONGODB_REPLICA_SET_MODE=\"primary\"\nelse\n    info \"Pod name doesn't match initial primary pod name, configuring node as a secondary\"\n    export MONGODB_REPLICA_SET_MODE=\"secondary\"\n    export MONGODB_INITIAL_PRIMARY_PORT_NUMBER=\"$MONGODB_PORT_NUMBER\"\nfi\n\nif [[ \"$MONGODB_REPLICA_SET_MODE\" == \"secondary\" ]]; then\n    export MONGODB_INITIAL_PRIMARY_ROOT_USER=\"$MONGODB_ROOT_USER\"\n    export MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=\"$MONGODB_ROOT_PASSWORD\"\n    export MONGODB_ROOT_PASSWORD=\"\"\n    export MONGODB_EXTRA_USERNAMES=\"\"\n    export MONGODB_EXTRA_DATABASES=\"\"\n    export MONGODB_EXTRA_PASSWORDS=\"\"\n    export MONGODB_ROOT_PASSWORD_FILE=\"\"\n    export MONGODB_EXTRA_USERNAMES_FILE=\"\"\n    export MONGODB_EXTRA_DATABASES_FILE=\"\"\n    export MONGODB_EXTRA_PASSWORDS_FILE=\"\"\nfi\n\nexec /opt/bitnami/scripts/mongodb/entrypoint.sh /opt/bitnami/scripts/mongodb/run.sh"},"kind":"ConfigMap","metadata":{"labels":{"app.kubernetes.io/component":"mongodb","app.kubernetes.io/instance":"graphql-mongo-database","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"mongodb","helm.sh/chart":"mongodb-11.1.5"},"name":"graphql-mongo-database-scripts","namespace":"applications"}}
   labels:
     app.kubernetes.io/component: mongodb
     app.kubernetes.io/instance: graphql-mongo-database
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/name: mongodb
-    helm.sh/chart: mongodb-11.0.3
+    helm.sh/chart: mongodb-11.1.5
   name: graphql-mongo-database-scripts
   namespace: applications
