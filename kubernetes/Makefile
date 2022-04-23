@@ -33,7 +33,7 @@ manifests_staging_with_sealed_secrets:
 
 manifests_production_with_sealed_secrets:
 # make manifests_production_with_sealed_secrets tag=github-sha  
-	npx ts-node scripts/bootstrap.ts --e=production --gss=yes --kusi=yes --kuso=no
+	npx ts-node scripts/bootstrap.ts --e=production --gss=yes --kusi=yes --kuso=yes
 
 
 #####  NO SEALED OR PLAIN SECRETS GENERATED ####

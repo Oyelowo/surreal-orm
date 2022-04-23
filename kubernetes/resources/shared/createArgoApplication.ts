@@ -30,6 +30,7 @@ export function createArgocdApplication({ metadata, pathToAppManifests, opts }: 
     namespace: metadata.namespace,
     labels: {
       "argocd.argoproj.io/secret-type": "repository",
+      // "app.kubernetes.io/part-of": "argocd",
       ...metadata.labels,
     },
   };
@@ -77,6 +78,7 @@ const metadata: Metadata = {
   namespace: namespaceNames.argocd,
   labels: {
     "argocd.argoproj.io/secret-type": "repository",
+    // "app.kubernetes.io/part-of": "argocd",
   },
 };
 

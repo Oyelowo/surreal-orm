@@ -34,13 +34,13 @@ export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
 
 // export const argoApplicationSecret = new k8s.
 
-/* const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
+const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
   fullnameOverride: "argocd",
   // global:{
 
   // },
   // TODO:,
-  config: { secret: { argocdServerAdminPassword: "lowo" } },
+  config: { secret: { create: true, argocdServerAdminPassword: "oyelowo", } },
   // clusterDomain: "https:kubernetes.default.svc",
   // repoServer: {},
   // global: {},
@@ -63,38 +63,34 @@ export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
   //   existingSecretPasswordKey: "",
   //   existingSecret: "",
   // },
-  // config: {
-  //   secret: {
-  //     argocdServerAdminPassword: "",
+
+  // redis: {
+  //   architecture: "standalone",
+  //   auth: {
+  //     enabled: true,
+  //     // existingSecretPasswordKey: "1234",
+  //     // existingSecret: "wert" ,
   //   },
   // },
-  redis: {
-    architecture: "standalone",
-    auth: {
-      enabled: true,
-      // existingSecretPasswordKey: "1234",
-      // existingSecret: "wert" ,
-    },
-  },
-  server: {
-    ingress: {
-      enabled: true,
-      hostname: "172.104.255.25",
-      path: "/tools/argocd",
-      pathType: "Prefix" as "Exact" | "ImplementationSpecific" | "Prefix",
-      ingressClassName: "nginx",
-      secrets: []
-    },
-  },
+  // server: {
+  //   ingress: {
+  //     enabled: true,
+  //     hostname: "172.104.255.25",
+  //     path: "/tools/argocd",
+  //     pathType: "Prefix" as "Exact" | "ImplementationSpecific" | "Prefix",
+  //     ingressClassName: "nginx",
+  //     secrets: []
+  //   },
+  // },
   dex: {
     enabled: false,
   },
-}; */
+};
 
 const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
   fullnameOverride: "argocd",
   server: {
-                  
+
   },
   configs: {
     secret: {
@@ -105,7 +101,7 @@ const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
   ,
   dex: {
     enabled: false
-    
+
   },
   redis: {
     enabled: true
@@ -113,7 +109,7 @@ const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
   notifications: {
     enabled: true,
     secret: {
-      create: false,
+      // create: false,
       // items: {
       //   "name": "ererer"
       // }
@@ -129,12 +125,12 @@ export const argocdHelm = new k8s.helm.v3.Chart(
   {
     chart: "argo-cd",
     fetchOpts: {
-      // repo: "https://charts.bitnami.com/bitnami",
-      repo: "https://argoproj.github.io/argo-helm",
+      repo: "https://charts.bitnami.com/bitnami",
+      // repo: "https://argoproj.github.io/argo-helm",
     },
-    version: "4.5.3",
-    // version: "3.1.12",
-    values: argocdValues,
+    // version: "4.5.3",
+    version: "3.1.12",
+    values: argocdValuesOld,
     namespace: namespaceNames.argocd,
     // namespace: devNamespaceName,
     // By default Release resource will wait till all created resources
