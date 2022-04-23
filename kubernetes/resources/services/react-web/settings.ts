@@ -24,7 +24,7 @@ export const reactWebSettings: AppConfigs<"react-web", "doesNotHaveDb", "applica
     GITHUB_CLIENT_SECRET: "129488cc92e2d2f91e3a5a024086396c48c65339",
     GOOGLE_CLIENT_ID: "855174209543-6m0f088e55d3mevhnr8bs0qjap8j6g0g.apps.googleusercontent.com",
     GOOGLE_CLIENT_SECRET: "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",
-    NEXTAUTH_URL: "http://localhost:8080",
+    NEXTAUTH_URL: getFQDNFromSettings(graphqlMongoSettings), // Get Url mongoFQDN
     GRAPHQL_MONGO_URL: getFQDNFromSettings(graphqlMongoSettings), // Get Url mongoFQDN
   },
   metadata: {
