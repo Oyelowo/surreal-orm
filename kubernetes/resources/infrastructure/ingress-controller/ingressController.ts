@@ -89,8 +89,8 @@ export const appIngress = new k8s.networking.v1.Ingress(
           // Replace this with your own domain!
           // host: "myservicea.foo.org",
           // TODO: Change to proper domain name for prod and other environments in case of necessity
-          // host: ENVIRONMENT === "local" ? "localhost" : "oyelowo.dev",
-          host: ENVIRONMENT === "local" ? "localhost" : "172.104.255.25",
+          host: ENVIRONMENT === "local" ? "localhost" : "oyelowo.dev",
+          // host: ENVIRONMENT === "local" ? "localhost" : "172.104.255.25",
           // host: ENVIRONMENT === "local" ? "oyelowo.dev" : "oyelowo.dev",
           http: {
             paths: [
@@ -153,8 +153,8 @@ export const appIngress = new k8s.networking.v1.Ingress(
       ],
       tls: [
         {
-          hosts: ["172.104.255.25"],
-          // hosts: ["oyelowo.dev"],
+          // hosts: ["172.104.255.25"],
+          hosts: ["oyelowo.dev"],
           secretName: "tls"
           
         }
