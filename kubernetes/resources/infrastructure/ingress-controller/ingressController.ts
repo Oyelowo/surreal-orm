@@ -98,7 +98,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
       tls: [
         {
           // hosts: ["172.104.255.25"],
-          hosts: [DOMAIN_NAME_BASE],
+          hosts: [DOMAIN_NAME_BASE, `www.${DOMAIN_NAME_BASE}`],
           // hosts: ["oyelowo.dev"],
           secretName: SECRET_NAME_NGINX
           // secretName: "oyelowo-tls"
