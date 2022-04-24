@@ -10,7 +10,7 @@ import { namespaceNames } from "../../shared/namespaces";
 import { NginxConfiguration } from "../../shared/types/nginxConfigurations";
 import { RecursivePartial } from "../../shared/types/own-types";
 import { getIngressControllerDir, ingressControllerName } from "../../shared/manifestsDirectory";
-import { DNS_NAME_LINODE_BASE } from "./constant"
+import { DOMAIN_NAME_BASE } from "./constant"
 import { CLUSTER_ISSUER_NAME } from "../cert-manager";
 
 const { ENVIRONMENT } = getEnvironmentVariables()
@@ -98,7 +98,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
       tls: [
         {
           // hosts: ["172.104.255.25"],
-          hosts: [DNS_NAME_LINODE_BASE],
+          hosts: [DOMAIN_NAME_BASE],
           // hosts: ["oyelowo.dev"],
           secretName: SECRET_NAME_NGINX
           // secretName: "oyelowo-tls"
@@ -110,7 +110,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
           // Replace this with your own domain!
           // host: "myservicea.foo.org",
           // TODO: Change to proper domain name for prod and other environments in case of necessity
-          host: ENVIRONMENT === "local" ? "localhost" : DNS_NAME_LINODE_BASE,
+          host: ENVIRONMENT === "local" ? "localhost" : DOMAIN_NAME_BASE,
           // host: "172-104-255-25.ip.linodeusercontent.com",
           // host: ENVIRONMENT === "local" ? "localhost" : "172.104.255.25",
           // host: ENVIRONMENT === "local" ? "oyelowo.dev" : "oyelowo.dev",
