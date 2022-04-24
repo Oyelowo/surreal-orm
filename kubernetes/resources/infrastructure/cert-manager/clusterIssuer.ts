@@ -13,7 +13,8 @@ export const clusterIssuer = new cm.v1.ClusterIssuer(
     spec: {
         acme: {
             // The ACME server URL
-            server: "https://acme-staging-v02.api.letsencrypt.org/directory",
+            server: "https://acme-v02.api.letsencrypt.org/directory",
+            // server: "https://acme-staging-v02.api.letsencrypt.org/directory",
             // server: "https://acme-v02.api.letsencrypt.org/directory",
             // Email address used for ACME registration
             email: "oyelowooyedayo@gmail.com",
