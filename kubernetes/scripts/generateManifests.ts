@@ -40,7 +40,7 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
       ${imageEnvVarSetterForPulumi} 
       export ${ENVIRONMENT}=${environment}  
       export PULUMI_CONFIG_PASSPHRASE="" 
-      pulumi update --yes --skip-preview --stack dev
+      pulumi up --yes --skip-preview --stack dev
       `
   );
 
