@@ -72,12 +72,12 @@ const ingressClassName: IngressClassName = "nginx";
 const appBase = "oyelowo";
 // // Next, expose the app using an Ingress.
 
-type IngressAnootations = NginxConfiguration /* & { "cert-manager.io/issuer": typeof CLUSTER_ISSUER_NAME } */
+type IngressAnootations = NginxConfiguration & { "cert-manager.io/cluster-issuer": typeof CLUSTER_ISSUER_NAME }
 const annotations: Partial<IngressAnootations> = {
   "nginx.ingress.kubernetes.io/ssl-redirect": "false",
   "nginx.ingress.kubernetes.io/use-regex": "true",
   // "cert-manager.io/issuer": "letsencrypt-staging",
-  // "cert-manager.io/issuer": CLUSTER_ISSUER_NAME,
+  "cert-manager.io/cluster-issuer": CLUSTER_ISSUER_NAME,
   // "kubernetes/io/ingress.class": "nginx"
 };
 export const appIngress = new k8s.networking.v1.Ingress(
