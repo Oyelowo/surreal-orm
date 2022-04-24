@@ -3,6 +3,7 @@
 
 export * from "./ingressController";
 export * from "./argoApp";
+export * from "./certificate";
 
 // const ingressControllerControllerDir = getPathToNonApplicationDir("ingressController-controller");
 

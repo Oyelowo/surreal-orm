@@ -10,7 +10,8 @@ import { namespaceNames } from "../../shared/namespaces";
 import { NginxConfiguration } from "../../shared/types/nginxConfigurations";
 import { RecursivePartial } from "../../shared/types/own-types";
 import { getIngressControllerDir, ingressControllerName } from "../../shared/manifestsDirectory";
-
+import { SECRET_NAME_NGINX } from "./certificate"
+import { DNS_NAME_LINODE_BASE } from "./constant"
 
 const { ENVIRONMENT } = getEnvironmentVariables()
 export const ingressControllerDir = getIngressControllerDir(ENVIRONMENT);
@@ -74,7 +75,8 @@ type IngressAnootations = NginxConfiguration & { "cert-manager.io/issuer": "lets
 const annotations: Partial<IngressAnootations> = {
   "nginx.ingress.kubernetes.io/ssl-redirect": "false",
   "nginx.ingress.kubernetes.io/use-regex": "true",
-  "cert-manager.io/issuer": "letsencrypt-staging"
+  "cert-manager.io/issuer": "letsencrypt-staging",
+  // "kubernetes/io/ingress.class": "nginx"
 };
 export const appIngress = new k8s.networking.v1.Ingress(
   `${appBase}-ingress`,
@@ -89,9 +91,9 @@ export const appIngress = new k8s.networking.v1.Ingress(
       tls: [
         {
           // hosts: ["172.104.255.25"],
-          hosts: ["172-104-255-25.ip.linodeusercontent.com"],
+          hosts: [DNS_NAME_LINODE_BASE],
           // hosts: ["oyelowo.dev"],
-          secretName: "tls"
+          secretName: SECRET_NAME_NGINX
           // secretName: "oyelowo-tls"
 
         }
@@ -101,7 +103,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
           // Replace this with your own domain!
           // host: "myservicea.foo.org",
           // TODO: Change to proper domain name for prod and other environments in case of necessity
-          host: ENVIRONMENT === "local" ? "localhost" : "172-104-255-25.ip.linodeusercontent.com",
+          host: ENVIRONMENT === "local" ? "localhost" : DNS_NAME_LINODE_BASE,
           // host: "172-104-255-25.ip.linodeusercontent.com",
           // host: ENVIRONMENT === "local" ? "localhost" : "172.104.255.25",
           // host: ENVIRONMENT === "local" ? "oyelowo.dev" : "oyelowo.dev",
@@ -172,6 +174,3 @@ export const appIngress = new k8s.networking.v1.Ingress(
 
 // // export const appStatuses = apps;
 // // export const controllerStatus = ctrl.status;
-
-
-
