@@ -22,9 +22,12 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
 
   sh.exec("pulumi login file://login");
 
-  sh.echo(c.blueBright(`First Delete old resources for" ${environment}`));
-  sh.exec(`find ${manifestsDirForEnv} -type d -name "1-manifest" -prune -exec rm -rf {} \;`);
-  sh.exec(`find ${manifestsDirForEnv} -type d -name "0-crd" -prune -exec rm -rf {} \;`);
+  sh.echo(c.blueBright(`First Delete old resources for" ${environment} at ${manifestsDirForEnv}`));
+
+  const getManifestsWithinDirName = (dirName: "1-manifest" | "0-crd") => sh.exec(`find ${manifestsDirForEnv} -type d -name "${dirName}"`, { silent: true }).stdout.split("\n");
+  const manifestsNonCrds = getManifestsWithinDirName("1-manifest");
+  const manifestsCrds = getManifestsWithinDirName("0-crd");
+  manifestsNonCrds.concat(manifestsCrds).forEach(f => sh.rm("-rf", f.trim()));
 
   sh.exec("export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev");
 
