@@ -10,7 +10,6 @@ import { namespaceNames } from "../../shared/namespaces";
 import { NginxConfiguration } from "../../shared/types/nginxConfigurations";
 import { RecursivePartial } from "../../shared/types/own-types";
 import { getIngressControllerDir, ingressControllerName } from "../../shared/manifestsDirectory";
-import { SECRET_NAME_NGINX } from "./certificate"
 import { DNS_NAME_LINODE_BASE } from "./constant"
 import { CLUSTER_ISSUER_NAME } from "../cert-manager";
 
@@ -68,17 +67,23 @@ export const ingressNginxController = new k8s.helm.v3.Chart(
 
 type IngressClassName = "nginx" | "traefik";
 const ingressClassName: IngressClassName = "nginx";
+export const SECRET_NAME_NGINX = "nginx-ingress-tls";
 
 const appBase = "oyelowo";
 // // Next, expose the app using an Ingress.
 
-type IngressAnootations = NginxConfiguration & { "cert-manager.io/cluster-issuer": typeof CLUSTER_ISSUER_NAME }
-const annotations: Partial<IngressAnootations> = {
+type CertManagerAnnotations = {
+  // NOTE: Make sure you specify the right one, if using cluster-issuer, user cluster-issuer annotations, otherwise, use mere issuer
+  // which is namespaced
+  "cert-manager.io/cluster-issuer": typeof CLUSTER_ISSUER_NAME
+  "cert-manager.io/issuer": string // We don't yet have an issuer. We are still using cluster issuer
+}
+
+type IngressAnnotations = NginxConfiguration & CertManagerAnnotations
+const annotations: Partial<IngressAnnotations> = {
   "nginx.ingress.kubernetes.io/ssl-redirect": "false",
   "nginx.ingress.kubernetes.io/use-regex": "true",
-  // "cert-manager.io/issuer": "letsencrypt-staging",
   "cert-manager.io/cluster-issuer": CLUSTER_ISSUER_NAME,
-  // "kubernetes/io/ingress.class": "nginx"
 };
 export const appIngress = new k8s.networking.v1.Ingress(
   `${appBase}-ingress`,
