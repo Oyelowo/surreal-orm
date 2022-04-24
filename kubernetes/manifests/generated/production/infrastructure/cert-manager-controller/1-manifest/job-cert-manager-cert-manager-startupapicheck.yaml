@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-weight: "1"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"batch/v1","kind":"Job","metadata":{"annotations":{"helm.sh/hook":"post-install","helm.sh/hook-delete-policy":"before-hook-creation,hook-succeeded","helm.sh/hook-weight":"1"},"labels":{"app":"startupapicheck","app.kubernetes.io/component":"startupapicheck","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"startupapicheck","app.kubernetes.io/version":"v1.8.0","helm.sh/chart":"cert-manager-v1.8.0"},"name":"cert-manager-startupapicheck","namespace":"cert-manager"},"spec":{"backoffLimit":4,"template":{"metadata":{"labels":{"app":"startupapicheck","app.kubernetes.io/component":"startupapicheck","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"startupapicheck","app.kubernetes.io/version":"v1.8.0","helm.sh/chart":"cert-manager-v1.8.0"}},"spec":{"containers":[{"args":["check","api","--wait=1m"],"image":"quay.io/jetstack/cert-manager-ctl:v1.8.0","imagePullPolicy":"IfNotPresent","name":"cert-manager","securityContext":{"allowPrivilegeEscalation":false}}],"restartPolicy":"OnFailure","securityContext":{"runAsNonRoot":true},"serviceAccountName":"cert-manager-startupapicheck"}}}}
+  labels:
+    app: startupapicheck
+    app.kubernetes.io/component: startupapicheck
+    app.kubernetes.io/instance: cert-manager
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: startupapicheck
+    app.kubernetes.io/version: v1.8.0
+    helm.sh/chart: cert-manager-v1.8.0
+  name: cert-manager-startupapicheck
+  namespace: cert-manager
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      labels:
+        app: startupapicheck
+        app.kubernetes.io/component: startupapicheck
+        app.kubernetes.io/instance: cert-manager
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: startupapicheck
+        app.kubernetes.io/version: v1.8.0
+        helm.sh/chart: cert-manager-v1.8.0
+    spec:
+      containers:
+      - args:
+        - check
+        - api
+        - --wait=1m
+        image: quay.io/jetstack/cert-manager-ctl:v1.8.0
+        imagePullPolicy: IfNotPresent
+        name: cert-manager
+        securityContext:
+          allowPrivilegeEscalation: false
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+      serviceAccountName: cert-manager-startupapicheck
