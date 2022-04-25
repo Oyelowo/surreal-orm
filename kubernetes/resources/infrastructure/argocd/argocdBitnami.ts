@@ -10,30 +10,11 @@ import { getEnvironmentVariables } from "../../shared/validations";
 const { ENVIRONMENT } = getEnvironmentVariables();
 const argocdControllerDir = getArgocdControllerDir(ENVIRONMENT);
 
-type Metadata = {
-  name: string;
-  namespace: string;
-};
-const metadata: Metadata = {
-  name: "argocd-application",
-  namespace: namespaceNames.argocd,
-};
-
-const resourceName = metadata.name;
-
-// App that deploys argocd resources themselves
-/* ARGOCD APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
-// Deploy argocd as argocd applications leads to issue as it is checking itself. This will be bootstrap in the bootsrap script instead
-// export const argocdApplication = createArgocdApplication({
-//   metadata,
-//   pathToAppManifests: getRepoPathFromAbsolutePath(argocdControllerDir),
-// });
 
 export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
   renderYamlToDirectory: argocdControllerDir,
 });
 
-// export const argoApplicationSecret = new k8s.
 
 const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
   // fullnameOverride: "argocd",
@@ -128,35 +109,14 @@ const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
 
   // }
 };
-// `http://${name}.${namespace}:${port}`;
+
 export const argocdHelm = new k8s.helm.v3.Chart(
   "argocd",
   {
     chart: "argo-cd",
     fetchOpts: {
-      repo: "https://argoproj.github.io/argo-helm",
-    },
-    version: "4.5.3",
-    values: argocdValues,
-    namespace: namespaceNames.argocd,
-    // namespace: devNamespaceName,
-    // By default Release resource will wait till all created resources
-    // are available. Set this to true to skip waiting on resources being
-    // available.
-    skipAwait: false,
-  },
-  { provider: argocdControllerProvider }
-  // { provider }
-);
-/* export const argocdHelm = new k8s.helm.v3.Chart(
-  "argocd",
-  {
-    chart: "argo-cd",
-    fetchOpts: {
       repo: "https://charts.bitnami.com/bitnami",
-      // repo: "https://argoproj.github.io/argo-helm",
     },
-    // version: "4.5.3",
     version: "3.1.12",
     values: argocdValuesOld,
     namespace: namespaceNames.argocd,
@@ -167,6 +127,4 @@ export const argocdHelm = new k8s.helm.v3.Chart(
     skipAwait: false,
   },
   { provider: argocdControllerProvider }
-  // { provider }
 );
- */
