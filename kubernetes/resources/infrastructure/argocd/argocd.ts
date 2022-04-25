@@ -23,10 +23,11 @@ const resourceName = metadata.name;
 
 // App that deploys argocd resources themselves
 /* ARGOCD APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
-const argocdApplication = createArgocdApplication({
-  metadata,
-  pathToAppManifests: getRepoPathFromAbsolutePath(argocdControllerDir),
-});
+// Deploy argocd as argocd applications leads to issue as it is checking itself. This will be bootstrap in the bootsrap script instead
+// export const argocdApplication = createArgocdApplication({
+//   metadata,
+//   pathToAppManifests: getRepoPathFromAbsolutePath(argocdControllerDir),
+// });
 
 export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
   renderYamlToDirectory: argocdControllerDir,
@@ -89,6 +90,11 @@ const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
   },
 };
 
+import bcrypt from "bcrypt"
+
+const saltRounds = 10;
+const myPlaintextPassword = 'oyelowo';
+const hash = bcrypt.hashSync(myPlaintextPassword, saltRounds);
 const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
   fullnameOverride: "argocd",
   server: {
@@ -97,7 +103,8 @@ const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
   configs: {
     secret: {
       // createSecret: false,
-      argocdServerAdminPassword: "lowoo",
+      argocdServerAdminPassword: hash,
+      // argocdServerAdminPassword: "lowoo",
     }
   }
   ,
