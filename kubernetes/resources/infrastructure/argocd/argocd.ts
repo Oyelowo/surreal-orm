@@ -118,10 +118,10 @@ const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
   notifications: {
     enabled: true,
     secret: {
-      // create: false,
-      // items: {
-      //   "name": "ererer"
-      // }
+      create: true,
+      items: {
+        "name": "ererer"
+      }
     }
   }
   // redis: {
@@ -130,6 +130,25 @@ const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
 };
 // `http://${name}.${namespace}:${port}`;
 export const argocdHelm = new k8s.helm.v3.Chart(
+  "argocd",
+  {
+    chart: "argo-cd",
+    fetchOpts: {
+      repo: "https://argoproj.github.io/argo-helm",
+    },
+    version: "4.5.3",
+    values: argocdValues,
+    namespace: namespaceNames.argocd,
+    // namespace: devNamespaceName,
+    // By default Release resource will wait till all created resources
+    // are available. Set this to true to skip waiting on resources being
+    // available.
+    skipAwait: false,
+  },
+  { provider: argocdControllerProvider }
+  // { provider }
+);
+/* export const argocdHelm = new k8s.helm.v3.Chart(
   "argocd",
   {
     chart: "argo-cd",
@@ -150,3 +169,4 @@ export const argocdHelm = new k8s.helm.v3.Chart(
   { provider: argocdControllerProvider }
   // { provider }
 );
+ */
