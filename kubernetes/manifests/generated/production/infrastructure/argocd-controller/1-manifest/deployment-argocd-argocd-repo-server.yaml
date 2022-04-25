@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/component":"repo-server","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argocd-repo-server","app.kubernetes.io/part-of":"argocd","app.kubernetes.io/version":"v2.3.3","helm.sh/chart":"argo-cd-4.5.3"},"name":"argocd-repo-server","namespace":"argocd"},"spec":{"replicas":1,"revisionHistoryLimit":5,"selector":{"matchLabels":{"app.kubernetes.io/instance":"argocd","app.kubernetes.io/name":"argocd-repo-server"}},"template":{"metadata":{"labels":{"app.kubernetes.io/component":"repo-server","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"argocd-repo-server","app.kubernetes.io/part-of":"argocd","app.kubernetes.io/version":"v2.3.3","helm.sh/chart":"argo-cd-4.5.3"}},"spec":{"containers":[{"args":["argocd-repo-server","--redis","argocd-redis:6379","--logformat","text","--loglevel","info"],"command":["entrypoint.sh"],"env":[{"name":"HELM_CACHE_HOME","value":"/helm-working-dir"},{"name":"HELM_CONFIG_HOME","value":"/helm-working-dir"},{"name":"HELM_DATA_HOME","value":"/helm-working-dir"}],"image":"quay.io/argoproj/argocd:v2.3.3","imagePullPolicy":"IfNotPresent","livenessProbe":{"failureThreshold":3,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":8081},"timeoutSeconds":1},"name":"repo-server","ports":[{"containerPort":8081,"name":"repo-server","protocol":"TCP"}],"readinessProbe":{"failureThreshold":3,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":8081},"timeoutSeconds":1},"resources":{},"volumeMounts":[{"mountPath":"/app/config/gpg/source","name":"gpg-keys"},{"mountPath":"/app/config/gpg/keys","name":"gpg-keyring"},{"mountPath":"/app/config/ssh","name":"ssh-known-hosts"},{"mountPath":"/app/config/tls","name":"tls-certs"},{"mountPath":"/app/config/reposerver/tls","name":"argocd-repo-server-tls"},{"mountPath":"/tmp","name":"tmp-dir"},{"mountPath":"/helm-working-dir","name":"helm-working-dir"},{"mountPath":"/home/argocd/cmp-server/plugins","name":"plugins"}]}],"initContainers":[{"command":["cp","-n","/usr/local/bin/argocd","/var/run/argocd/argocd-cmp-server"],"image":"quay.io/argoproj/argocd:v2.3.3","name":"copyutil","resources":{},"volumeMounts":[{"mountPath":"/var/run/argocd","name":"var-files"}]}],"serviceAccountName":"argocd-repo-server","volumes":[{"configMap":{"name":"argocd-gpg-keys-cm"},"name":"gpg-keys"},{"emptyDir":{},"name":"gpg-keyring"},{"configMap":{"name":"argocd-ssh-known-hosts-cm"},"name":"ssh-known-hosts"},{"configMap":{"name":"argocd-tls-certs-cm"},"name":"tls-certs"},{"emptyDir":{},"name":"helm-working-dir"},{"name":"argocd-repo-server-tls","secret":{"items":[{"key":"tls.crt","path":"tls.crt"},{"key":"tls.key","path":"tls.key"},{"key":"ca.crt","path":"ca.crt"}],"optional":true,"secretName":"argocd-repo-server-tls"}},{"emptyDir":{},"name":"tmp-dir"},{"emptyDir":{},"name":"var-files"},{"emptyDir":{},"name":"plugins"}]}}}}
+  labels:
+    app.kubernetes.io/component: repo-server
+    app.kubernetes.io/instance: argocd
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: argocd-repo-server
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/version: v2.3.3
+    helm.sh/chart: argo-cd-4.5.3
+  name: argocd-repo-server
+  namespace: argocd
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: argocd
+      app.kubernetes.io/name: argocd-repo-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: repo-server
+        app.kubernetes.io/instance: argocd
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: argocd-repo-server
+        app.kubernetes.io/part-of: argocd
+        app.kubernetes.io/version: v2.3.3
+        helm.sh/chart: argo-cd-4.5.3
+    spec:
+      containers:
+      - args:
+        - argocd-repo-server
+        - --redis
+        - argocd-redis:6379
+        - --logformat
+        - text
+        - --loglevel
+        - info
+        command:
+        - entrypoint.sh
+        env:
+        - name: HELM_CACHE_HOME
+          value: /helm-working-dir
+        - name: HELM_CONFIG_HOME
+          value: /helm-working-dir
+        - name: HELM_DATA_HOME
+          value: /helm-working-dir
+        image: quay.io/argoproj/argocd:v2.3.3
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8081
+          timeoutSeconds: 1
+        name: repo-server
+        ports:
+        - containerPort: 8081
+          name: repo-server
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8081
+          timeoutSeconds: 1
+        resources: {}
+        volumeMounts:
+        - mountPath: /app/config/gpg/source
+          name: gpg-keys
+        - mountPath: /app/config/gpg/keys
+          name: gpg-keyring
+        - mountPath: /app/config/ssh
+          name: ssh-known-hosts
+        - mountPath: /app/config/tls
+          name: tls-certs
+        - mountPath: /app/config/reposerver/tls
+          name: argocd-repo-server-tls
+        - mountPath: /tmp
+          name: tmp-dir
+        - mountPath: /helm-working-dir
+          name: helm-working-dir
+        - mountPath: /home/argocd/cmp-server/plugins
+          name: plugins
+      initContainers:
+      - command:
+        - cp
+        - -n
+        - /usr/local/bin/argocd
+        - /var/run/argocd/argocd-cmp-server
+        image: quay.io/argoproj/argocd:v2.3.3
+        name: copyutil
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/run/argocd
+          name: var-files
+      serviceAccountName: argocd-repo-server
+      volumes:
+      - configMap:
+          name: argocd-gpg-keys-cm
+        name: gpg-keys
+      - emptyDir: {}
+        name: gpg-keyring
+      - configMap:
+          name: argocd-ssh-known-hosts-cm
+        name: ssh-known-hosts
+      - configMap:
+          name: argocd-tls-certs-cm
+        name: tls-certs
+      - emptyDir: {}
+        name: helm-working-dir
+      - name: argocd-repo-server-tls
+        secret:
+          items:
+          - key: tls.crt
+            path: tls.crt
+          - key: tls.key
+            path: tls.key
+          - key: ca.crt
+            path: ca.crt
+          optional: true
+          secretName: argocd-repo-server-tls
+      - emptyDir: {}
+        name: tmp-dir
+      - emptyDir: {}
+        name: var-files
+      - emptyDir: {}
+        name: plugins
