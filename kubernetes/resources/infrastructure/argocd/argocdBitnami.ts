@@ -1,3 +1,5 @@
+import { DOMAIN_NAME_BASE, DOMAIN_NAME_SUB_ARGOCD } from './../ingress-controller/constant';
+import { annotations } from './../ingress-controller/ingressRules';
 import * as k8s from "@pulumi/kubernetes";
 import { getArgocdControllerDir, getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
 import { createArgocdApplication } from "../../shared/createArgoApplication";
@@ -56,59 +58,25 @@ const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
   //     // existingSecret: "wert" ,
   //   },
   // },
-  // server: {
-  //   ingress: {
-  //     enabled: true,
-  //     hostname: "172.104.255.25",
-  //     path: "/tools/argocd",
-  //     pathType: "Prefix" as "Exact" | "ImplementationSpecific" | "Prefix",
-  //     ingressClassName: "nginx",
-  //     secrets: []
-  //   },
-  // },
+  server: {
+    ingress: {
+      enabled: true,
+      hostname: DOMAIN_NAME_SUB_ARGOCD,
+      annotations: annotations,
+      pathType: "Prefix" as "Exact" | "ImplementationSpecific" | "Prefix",
+      ingressClassName: "nginx",
+      tls: true
+
+    },
+    // Ingress-controller already handles TLS. Argocd does too which causes collision. Disable argo from doing that
+    // https://stackoverflow.com/questions/49856754/nginx-ingress-too-many-redirects-when-force-ssl-is-enabled
+    extraArgs: ["--insecure"] as any[]
+  },
   dex: {
     enabled: false,
   },
 };
 
-import bcrypt from "bcrypt"
-
-const saltRounds = 10;
-const myPlaintextPassword = 'oyelowo';
-const hash = bcrypt.hashSync(myPlaintextPassword, saltRounds);
-const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
-  fullnameOverride: "argocd",
-  server: {
-
-  },
-  configs: {
-    secret: {
-      // createSecret: false,
-      argocdServerAdminPassword: hash,
-      // argocdServerAdminPassword: "lowoo",
-    }
-  }
-  ,
-  dex: {
-    enabled: false
-
-  },
-  redis: {
-    enabled: true
-  },
-  notifications: {
-    enabled: true,
-    secret: {
-      create: true,
-      items: {
-        "name": "ererer"
-      }
-    }
-  }
-  // redis: {
-
-  // }
-};
 
 export const argocdHelm = new k8s.helm.v3.Chart(
   "argocd",
