@@ -4,7 +4,6 @@ import { namespaceNames } from "../../shared/namespaces";
 import { DeepPartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
 import { CertManagerValuesJetspack } from "../../shared/types/helm-charts/certManagerValuesJetspack";
-import { CertManagerValuesBitnami } from "../../shared/types/helm-charts/certManagerValuesBitnami";
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 export const certManagerControllerDir = getCertManagerControllerDir(ENVIRONMENT);
