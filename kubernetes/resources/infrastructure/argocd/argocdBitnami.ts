@@ -25,7 +25,7 @@ const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
       annotations: annotations,
       pathType: "Prefix" as "Exact" | "ImplementationSpecific" | "Prefix",
       ingressClassName,
-      tls: true
+      tls: true,
     },
     // Ingress-controller already handles TLS. Argocd does too which causes collision. Disable argo from doing that
     // https://stackoverflow.com/questions/49856754/nginx-ingress-too-many-redirects-when-force-ssl-is-enabled

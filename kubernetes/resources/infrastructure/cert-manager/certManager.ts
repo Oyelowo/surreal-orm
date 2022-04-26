@@ -9,35 +9,16 @@ import { CertManagerValuesBitnami } from "../../shared/types/helm-charts/certMan
 const { ENVIRONMENT } = getEnvironmentVariables();
 export const certManagerControllerDir = getCertManagerControllerDir(ENVIRONMENT);
 
-// type Metadata = {
-//   name: string;
-//   namespace: string;
-// };
-// const metadata: Metadata = {
-//   name: "cert-manager",
-//   namespace: namespaceNames.certManager,
-// };
-
-// const resourceName = metadata.name;
 
 export const certManagerControllerProvider = new k8s.Provider(certManagerControllerDir, {
   renderYamlToDirectory: certManagerControllerDir,
 });
 
-// export const argoApplicationSecret = new k8s.
 
-// CertManagerValuesBitnami
-// const certManagerValuesB: DeepPartial<CertManagerValuesBitnami> = {
-//   // fullnameOverride: "cert-manager",
-//   fullnameOverride: "cert-manager",
-//   installCRDs: true
-// };
 const certManagerValues: DeepPartial<CertManagerValuesJetspack> = {
-  // fullnameOverride: "cert-manager",
   installCRDs: true
 };
 
-// `http://${name}.${namespace}:${port}`;
 export const certManagerHelm = new k8s.helm.v3.Chart(
   "cert-manager",
   {
@@ -55,5 +36,4 @@ export const certManagerHelm = new k8s.helm.v3.Chart(
     skipAwait: false,
   },
   { provider: certManagerControllerProvider }
-  // { provider }
 );
