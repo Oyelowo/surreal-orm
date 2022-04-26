@@ -1,5 +1,5 @@
 import { DOMAIN_NAME_SUB_ARGOCD } from './../ingress-controller/constant';
-import { annotations } from './../ingress-controller/ingressRules';
+import { annotations, ingressClassName } from './../ingress-controller/ingressRules';
 import * as k8s from "@pulumi/kubernetes";
 import { getArgocdControllerDir, getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../shared/namespaces";
@@ -24,9 +24,8 @@ const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
       hostname: DOMAIN_NAME_SUB_ARGOCD,
       annotations: annotations,
       pathType: "Prefix" as "Exact" | "ImplementationSpecific" | "Prefix",
-      ingressClassName: "nginx",
+      ingressClassName,
       tls: true
-
     },
     // Ingress-controller already handles TLS. Argocd does too which causes collision. Disable argo from doing that
     // https://stackoverflow.com/questions/49856754/nginx-ingress-too-many-redirects-when-force-ssl-is-enabled
