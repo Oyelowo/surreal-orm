@@ -133,7 +133,7 @@ impl GraphQlApp {
         use Environment::*;
         let (limit_depth, limit_complexity) = match application.environment {
             Local | Development | Staging => (usize::max_value(), usize::max_value()),
-            Production => (5, 7),
+            Production => (8, 8),
         };
 
         let db = database.get_database()?;
