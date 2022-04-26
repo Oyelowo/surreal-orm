@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/component":"application-controller","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argocd-application-controller","app.kubernetes.io/part-of":"argocd","helm.sh/chart":"argo-cd-4.5.3"},"name":"argocd-application-controller","namespace":"argocd"},"spec":{"ports":[{"name":"https-controller","port":8082,"targetPort":8082}],"selector":{"app.kubernetes.io/instance":"argocd","app.kubernetes.io/name":"argocd-application-controller"}}}
+  labels:
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/instance: argocd
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: argocd-application-controller
+    app.kubernetes.io/part-of: argocd
+    helm.sh/chart: argo-cd-4.5.3
+  name: argocd-application-controller
+  namespace: argocd
+spec:
+  ports:
+  - name: https-controller
+    port: 8082
+    targetPort: 8082
+  selector:
+    app.kubernetes.io/instance: argocd
+    app.kubernetes.io/name: argocd-application-controller
