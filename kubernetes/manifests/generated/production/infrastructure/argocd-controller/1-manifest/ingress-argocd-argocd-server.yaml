@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-cluster-issuer","nginx.ingress.kubernetes.io/ssl-redirect":"false","nginx.ingress.kubernetes.io/use-regex":"true"},"labels":{"app.kubernetes.io/component":"server","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argocd-server","app.kubernetes.io/part-of":"argocd","helm.sh/chart":"argo-cd-4.5.3"},"name":"argocd-server","namespace":"argocd"},"spec":{"ingressClassName":"nginx","rules":[{"host":"argocd.oyelowo.dev","http":{"paths":[{"backend":{"service":{"name":"argocd-server","port":{"number":443}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["argocd.oyelowo.dev"],"secretName":"argocd.oyelowo.dev-tls"}]}}
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/instance: argocd
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: argocd-server
+    app.kubernetes.io/part-of: argocd
+    helm.sh/chart: argo-cd-4.5.3
+  name: argocd-server
+  namespace: argocd
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: argocd.oyelowo.dev
+    http:
+      paths:
+      - backend:
+          service:
+            name: argocd-server
+            port:
+              number: 443
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - argocd.oyelowo.dev
+    secretName: argocd.oyelowo.dev-tls
