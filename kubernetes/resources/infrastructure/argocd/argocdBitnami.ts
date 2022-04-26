@@ -85,7 +85,7 @@ export const argocdHelm = new k8s.helm.v3.Chart(
     fetchOpts: {
       repo: "https://charts.bitnami.com/bitnami",
     },
-    version: "3.1.12",
+    version: "3.1.14",
     values: argocdValuesOld,
     namespace: namespaceNames.argocd,
     // namespace: devNamespaceName,
