@@ -1,3 +1,4 @@
+import { CertManagerValuesBitnami } from './../../shared/types/helm-charts/certManagerValuesBitnami';
 import { helmChartsMetadata } from './../../shared/helmChartInfo';
 import * as k8s from "@pulumi/kubernetes";
 import { getCertManagerControllerDir } from "../../shared/manifestsDirectory";
@@ -15,7 +16,7 @@ export const certManagerControllerProvider = new k8s.Provider(certManagerControl
 });
 
 
-const certManagerValues: DeepPartial<CertManagerValuesJetspack> = {
+const certManagerValues: DeepPartial<CertManagerValuesBitnami> = {
   installCRDs: true
 };
 
