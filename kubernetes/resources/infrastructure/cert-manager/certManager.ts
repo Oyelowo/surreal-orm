@@ -1,4 +1,3 @@
-import { CertManagerValuesBitnami } from './../../shared/types/helm-charts/certManagerValuesBitnami';
 import { helmChartsMetadata } from './../../shared/helmChartInfo';
 import * as k8s from "@pulumi/kubernetes";
 import { getCertManagerControllerDir } from "../../shared/manifestsDirectory";
@@ -16,20 +15,20 @@ export const certManagerControllerProvider = new k8s.Provider(certManagerControl
 });
 
 
-const certManagerValues: DeepPartial<CertManagerValuesBitnami> = {
+const certManagerValues: DeepPartial<CertManagerValuesJetspack> = {
   installCRDs: true
 };
 
 export const certManagerHelm = new k8s.helm.v3.Chart(
   "cert-manager",
   {
-    chart: helmChartsMetadata.certManager.bitnami.version,
+    chart: helmChartsMetadata.certManager.jetspack.version,
     fetchOpts: {
       // repo: "https://charts.jetstack.io",
-      repo: helmChartsMetadata.certManager.bitnami.repoUrl,
+      repo: helmChartsMetadata.certManager.jetspack.repoUrl,
     },
     // version: "1.8.0",
-    version: helmChartsMetadata.certManager.bitnami.version,
+    version: helmChartsMetadata.certManager.jetspack.version,
     values: certManagerValues,
     namespace: namespaceNames.certManager,
     // namespace: devNamespaceName,
