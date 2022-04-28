@@ -1,3 +1,4 @@
+import { helmChartsMetadata } from './../../shared/helmChartInfo';
 import * as k8s from "@pulumi/kubernetes";
 import { getCertManagerControllerDir } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../shared/namespaces";
@@ -21,11 +22,13 @@ const certManagerValues: DeepPartial<CertManagerValuesJetspack> = {
 export const certManagerHelm = new k8s.helm.v3.Chart(
   "cert-manager",
   {
-    chart: "cert-manager",
+    chart: helmChartsMetadata.certManager.bitnami.version,
     fetchOpts: {
-      repo: "https://charts.jetstack.io",
+      // repo: "https://charts.jetstack.io",
+      repo: helmChartsMetadata.certManager.bitnami.repoUrl,
     },
-    version: "1.8.0",
+    // version: "1.8.0",
+    version: helmChartsMetadata.certManager.bitnami.version,
     values: certManagerValues,
     namespace: namespaceNames.certManager,
     // namespace: devNamespaceName,
