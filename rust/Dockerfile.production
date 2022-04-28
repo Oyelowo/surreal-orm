@@ -25,14 +25,16 @@ COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
 # others
 COPY . .
-RUN useradd --uid 10000 runner
-USER 10000
 
 
 ######### START GRAPHQL-MONGO BACKEND SERVICE  #################
 ################################################################
 FROM builder-base as builder-graphql-mongo
 RUN cargo build --release --bin graphql-mongo
+# Run as non-privileged user after installations and builds which require privileged access
+RUN useradd --uid 10000 runner
+USER 10000
+
 FROM gcr.io/distroless/cc AS graphql-mongo
 WORKDIR /app
 EXPOSE 8000
@@ -50,6 +52,9 @@ FROM builder-base as builder-graphql-postgres
 # This is necessary to for sqlx to build the app in offline mode without being connected to DB.
 ENV SQLX_OFFLINE=true
 RUN cargo build --release --bin graphql-postgres
+# Run as non-privileged user after installations and builds which require privileged access
+RUN useradd --uid 10000 runner
+USER 10000
 
 
 FROM gcr.io/distroless/cc AS graphql-postgres
@@ -71,7 +76,9 @@ FROM builder-base as builder-grpc-mongo
 # Necessary for tonic when building grpc protobuf
 RUN rustup component add rustfmt
 RUN cargo build --release --bin grpc-mongo
-
+# Run as non-privileged user after installations and builds which require privileged access
+RUN useradd --uid 10000 runner
+USER 10000
 
 FROM gcr.io/distroless/cc AS grpc-mongo
 WORKDIR /app

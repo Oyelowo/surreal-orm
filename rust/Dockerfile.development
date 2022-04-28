@@ -25,8 +25,6 @@ COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
 #others 
 COPY . .
-RUN useradd --uid 10000 runner
-USER 10000
 
 
 
@@ -34,6 +32,9 @@ USER 10000
 ################################################################
 FROM builder-base as builder-graphql-mongo
 RUN cargo build --bin graphql-mongo
+# Run as non-privileged user after installations and builds which require privileged access
+RUN useradd --uid 10000 runner
+USER 10000
 # Although, we do not need the Rust toolchain to run the binary!
 # Not using distroless in dev so that we can get extra toolchain for debugging containers in pods
 # To test distroless in dev, uncomment the below and comment out the next baseline, of course!
@@ -56,6 +57,9 @@ FROM builder-base as builder-graphql-postgres
 # This is necessary to for sqlx to build the app in offline mode without being connected to DB.
 ENV SQLX_OFFLINE=true
 RUN cargo build --bin graphql-postgres
+# Run as non-privileged user after installations and builds which require privileged access
+RUN useradd --uid 10000 runner
+USER 10000
 
 
 FROM gcr.io/distroless/cc AS graphql-postgres
@@ -77,7 +81,9 @@ FROM builder-base as builder-grpc-mongo
 # Necessary for tonic when building grpc protobuf
 RUN rustup component add rustfmt
 RUN cargo build --bin grpc-mongo
-
+# Run as non-privileged user after installations and builds which require privileged access
+RUN useradd --uid 10000 runner
+USER 10000
 
 FROM gcr.io/distroless/cc AS grpc-mongo
 WORKDIR /app
