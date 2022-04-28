@@ -17,6 +17,7 @@ export const namespaceNames = {
   applications: "applications",
   argocd: "argocd",
   certManager: "cert-manager",
+  linkerd: "linkerd",
   default: "default",
   // Default namespace that comes with the deployment
   kubeSystem: "kube-system",

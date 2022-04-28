@@ -31,5 +31,12 @@ export const helmChartsMetadata = {
             chart: "cert-manager",
             version: "1.8.0",
         },
+    },
+    linked2: {
+        linkerd: {
+            repo: "https://helm.linkerd.io/stable",
+            chart: "linkerd2",
+            version: "2.11.2",
+        }
     }
 } as const

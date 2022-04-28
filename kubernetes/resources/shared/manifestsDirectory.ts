@@ -53,6 +53,11 @@ export const getCertManagerControllerDir = (environment: Environment) => {
   return getPathToInfraToolDir(certManagerControllerName, environment);
 };
 
+export const linkerd2Name = "linkerd2";
+export const getLinkerd2Dir = (environment: Environment) => {
+  return getPathToInfraToolDir(linkerd2Name, environment);
+};
+
 // TODO: Refactor to remove all these repititions
 // type InfrastructureToolName = "cert-manager-controller" | 'sealed-secrets-controller'
 
