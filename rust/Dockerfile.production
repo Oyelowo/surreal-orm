@@ -25,7 +25,8 @@ COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
 # others
 COPY . .
-
+RUN useradd --uid 10000 runner
+USER 10000
 
 
 ######### START GRAPHQL-MONGO BACKEND SERVICE  #################
@@ -33,8 +34,6 @@ COPY . .
 FROM builder-base as builder-graphql-mongo
 RUN cargo build --release --bin graphql-mongo
 FROM gcr.io/distroless/cc AS graphql-mongo
-RUN useradd --uid 10000 runner
-USER 10000
 WORKDIR /app
 EXPOSE 8000
 COPY --from=builder-graphql-mongo /app/target/release/graphql-mongo /usr/local/bin/graphql-mongo
@@ -54,8 +53,6 @@ RUN cargo build --release --bin graphql-postgres
 
 
 FROM gcr.io/distroless/cc AS graphql-postgres
-RUN useradd --uid 10000 runner
-USER 10000
 WORKDIR /app
 EXPOSE 8000
 # We are building in release mode
@@ -77,8 +74,6 @@ RUN cargo build --release --bin grpc-mongo
 
 
 FROM gcr.io/distroless/cc AS grpc-mongo
-RUN useradd --uid 10000 runner
-USER 10000
 WORKDIR /app
 EXPOSE 8000
 COPY --from=builder-grpc-mongo /app/target/release/grpc-mongo /usr/local/bin/grpc-mongo

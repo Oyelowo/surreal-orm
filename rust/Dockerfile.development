@@ -25,7 +25,8 @@ COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
 #others 
 COPY . .
-
+RUN useradd --uid 10000 runner
+USER 10000
 
 
 
@@ -38,8 +39,6 @@ RUN cargo build --bin graphql-mongo
 # To test distroless in dev, uncomment the below and comment out the next baseline, of course!
 FROM gcr.io/distroless/cc AS graphql-mongo
 # FROM alpine AS graphql-mongo
-RUN useradd --uid 10000 runner
-USER 10000
 WORKDIR /app
 EXPOSE 8000
 # We are building in debug mode
@@ -60,8 +59,6 @@ RUN cargo build --bin graphql-postgres
 
 
 FROM gcr.io/distroless/cc AS graphql-postgres
-RUN useradd --uid 10000 runner
-USER 10000
 WORKDIR /app
 EXPOSE 8000
 # We are building in debug mode
@@ -83,8 +80,6 @@ RUN cargo build --bin grpc-mongo
 
 
 FROM gcr.io/distroless/cc AS grpc-mongo
-RUN useradd --uid 10000 runner
-USER 10000
 WORKDIR /app
 EXPOSE 8000
 COPY --from=builder-grpc-mongo /app/target/debug/grpc-mongo /usr/local/bin/grpc-mongo
