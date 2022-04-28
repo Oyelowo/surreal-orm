@@ -13,7 +13,7 @@ export class ServiceDeployment<
   AN extends AppName,
   DBT extends DBType,
   NS extends NamespaceOfApps
-> extends pulumi.ComponentResource {
+  > extends pulumi.ComponentResource {
   public readonly deployment: kx.Deployment;
   public readonly configMaps: kx.ConfigMap;
   public readonly secret: kx.Secret;
@@ -95,6 +95,12 @@ export class ServiceDeployment<
           },
         },
       ],
+      securityContext: {
+        runAsNonRoot: true,
+        runAsUser: 10000,
+        runAsGroup: 10000,
+        // fsGroup: 
+      },
       imagePullSecrets: [
         {
           name: "myregistrykey",
