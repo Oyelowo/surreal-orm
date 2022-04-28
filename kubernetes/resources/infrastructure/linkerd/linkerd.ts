@@ -1,4 +1,4 @@
-import { helmChartsMetadata } from './../../shared/helmChartInfo';
+import { helmChartsMetadata } from '../../shared/helmChartInfo';
 import { Linkerd2HelmValues } from "../../shared/types/helm-charts/linkerd2HelmValues";
 import * as k8s from "@pulumi/kubernetes";
 
@@ -21,14 +21,14 @@ const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
 
 };
 
-export const sealedSecret = new k8s.helm.v3.Chart(
+export const linkerd2 = new k8s.helm.v3.Chart(
   linkerd2Name,
   {
     chart: helmChartsMetadata.linked2.linkerd.chart,
     fetchOpts: {
       repo: helmChartsMetadata.linked2.linkerd.repo,
     },
-    version: "2.1.4",
+    version: helmChartsMetadata.linked2.linkerd.version,
     values: Linkerd2Values,
     namespace: namespaceNames.linkerd,
     // namespace: devNamespaceName,

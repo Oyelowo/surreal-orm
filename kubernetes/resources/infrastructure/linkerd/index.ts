@@ -1,3 +1,3 @@
-export * from "./linkerd2";
+export * from "./linkerd";
 export * from "./argoApp";
 

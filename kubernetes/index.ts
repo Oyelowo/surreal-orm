@@ -12,6 +12,7 @@ export * from "./resources/infrastructure/ingress-controller";
 export * from "./resources/infrastructure/secrets";
 export * from "./resources/infrastructure/argocd";
 export * from "./resources/infrastructure/cert-manager";
+export * from "./resources/infrastructure/linkerd";
 
 
 
