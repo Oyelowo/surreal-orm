@@ -53,7 +53,7 @@ export const getCertManagerControllerDir = (environment: Environment) => {
   return getPathToInfraToolDir(certManagerControllerName, environment);
 };
 
-export const linkerd2Name = "linkerd2";
+export const linkerd2Name = "linkerd";
 export const getLinkerd2Dir = (environment: Environment) => {
   return getPathToInfraToolDir(linkerd2Name, environment);
 };
