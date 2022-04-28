@@ -2,9 +2,9 @@
 type charts = "certManager"
 interface Props {
     bitnami: {
-        repoUrl: "https://charts.bitnami.com/bitnami",
+        repo: "https://charts.bitnami.com/bitnami",
         certManager: {
-            name: "cert-manager",
+            chart: "cert-manager",
             version: "0.4.17",
         }
     }
@@ -12,9 +12,9 @@ interface Props {
 
 // export const helmChartsMetadata: Props = {
 //     bitnami: {
-//         repoUrl: "https://charts.bitnami.com/bitnami",
+//         repo: "https://charts.bitnami.com/bitnami",
 //         certManager: {
-//             name: "cert-manager",
+//             chart: "cert-manager",
 //             version: "0.4.17"
 //         }
 //     }
@@ -22,13 +22,13 @@ interface Props {
 export const helmChartsMetadata = {
     certManager: {
         bitnami: {
-            repoUrl: "https://charts.bitnami.com/bitnami",
-            name: "cert-manager",
+            repo: "https://charts.bitnami.com/bitnami",
+            chart: "cert-manager",
             version: "0.4.17",
         },
         jetspack: {
-            repoUrl: "https://charts.jetstack.io",
-            name: "cert-manager",
+            repo: "https://charts.jetstack.io",
+            chart: "cert-manager",
             version: "1.8.0",
         },
     }
