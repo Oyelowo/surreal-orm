@@ -1,5 +1,5 @@
-import { argocdHelm } from './../resources/infrastructure/argocd/argocdOfficial';
 #!/usr/bin / env ts - node
+import { argocdHelm } from './../resources/infrastructure/argocd/argocdOfficial';
 import {
   getSealedSecretsControllerDir,
   sealedSecretsControllerName,
