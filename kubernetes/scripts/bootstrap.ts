@@ -1,4 +1,5 @@
-#!/usr/bin/env ts-node
+import { argocdHelm } from './../resources/infrastructure/argocd/argocdOfficial';
+#!/usr/bin / env ts - node
 import {
   getSealedSecretsControllerDir,
   sealedSecretsControllerName,
@@ -122,6 +123,8 @@ async function bootstrap() {
   // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
   // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/sealed-secrets`);
   sh.exec(`kubectl apply -R -f ${getArgocdControllerDir(ARGV.e)}`);
+  // TODO: Split bootstrap process from restart from update
+  sh.exec(`kubectl rollout restart deployment argocd-argo-cd-server`);
   // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/0-crd`);
   // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/1-manifest`);
 
