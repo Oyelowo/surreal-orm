@@ -124,7 +124,7 @@ async function bootstrap() {
   // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/sealed-secrets`);
   sh.exec(`kubectl apply -R -f ${getArgocdControllerDir(ARGV.e)}`);
   // TODO: Split bootstrap process from restart from update
-  sh.exec(`kubectl rollout restart deployment argocd-argo-cd-server`);
+  sh.exec(`kubectl -n argocd rollout restart deployment argocd-argo-cd-server`);
   // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/0-crd`);
   // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/1-manifest`);
 
