@@ -76,7 +76,7 @@ export const linkerVizIngress = new k8s.networking.v1.Ingress(
             ],
             rules: [
                 {
-                    host: "",
+                    host: DOMAIN_NAME_SUB_LINKERD_VIZ,
                     http: {
                         paths: [
                             {
