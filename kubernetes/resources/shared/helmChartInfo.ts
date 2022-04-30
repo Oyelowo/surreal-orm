@@ -55,6 +55,10 @@ export const helmChartsInfo = {
         linkerd2: {
             chart: "linkerd2",
             version: "2.11.2",
+        },
+        linkerdViz: {
+            chart: "linkerd-viz",
+            version: "2.11.2",
         }
     }
 } as const

@@ -43,14 +43,15 @@ const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
   // cniEnabled: true
 };
 
+const { repo, linkerd2: { chart, version } } = helmChartsInfo.linkerdRepo;
 export const linkerd = new k8s.helm.v3.Chart(
   linkerd2Name,
   {
-    chart: helmChartsInfo.linkerdRepo.linkerd2.chart,
+    chart,
     fetchOpts: {
-      repo: helmChartsInfo.linkerdRepo.repo,
+      repo,
     },
-    version: helmChartsInfo.linkerdRepo.linkerd2.version,
+    version,
     values: Linkerd2Values,
     namespace: namespaceNames.linkerd,
     // namespace: devNamespaceName,
