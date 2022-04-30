@@ -38,7 +38,7 @@ export const linkerdVizHelmChart = new k8s.helm.v3.Chart(
         },
         version,
         values,
-        namespace: namespaceNames.linkerd,
+        namespace: namespaceNames.linkerdViz,
         // namespace: devNamespaceName,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being
@@ -69,7 +69,7 @@ export const linkerVizIngress = new k8s.networking.v1.Ingress(
     {
         metadata: {
             name: linkerdVizIngressName,
-            namespace: namespaceNames.linkerd,
+            namespace: namespaceNames.linkerdViz,
             annotations: {
                 ...(nginxAnnotions as Record<string, string>),
                 "cert-manager.io/cluster-issuer": CLUSTER_ISSUER_NAME,
@@ -118,7 +118,7 @@ export const linkerdVizSecret = new kx.Secret(
     {
         metadata: {
             name: linkerdVizSecretName,
-            namespace: namespaceNames.linkerd,
+            namespace: namespaceNames.linkerdViz,
         },
         stringData: {
             // format: username:encryptedpassword
