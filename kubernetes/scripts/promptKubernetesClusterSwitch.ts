@@ -2,6 +2,7 @@ import inquirer from "inquirer";
 import sh from "shelljs";
 import util from "util";
 import chalk from "chalk";
+import { ARGV } from "./bootstrap";
 
 /* 
 Prompt cluster selection
@@ -19,7 +20,7 @@ export async function promptKubernetesClusterSwitch() {
       type: "list",
       name,
       message: chalk.greenBright(
-        "🆘 Which cluster's do you want to apply sealed secret controller to⁉️ "
+        `🆘Select the ${ARGV.e.toLocaleUpperCase()} cluster ‼️‼️‼️‼️`
       ),
       choices: choices,
       default: choices.find(
