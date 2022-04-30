@@ -10,8 +10,7 @@ export const CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME = "linkerd-self-signed-issu
 export const LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME = "linkerd-trust-anchor"
 export const LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME = "linkerd-identity-trust-roots"
 // First, create  a clusterIssuer for our linkerd CA. This resource will issue our roots
-export const clusterIssuerLinkerdSelfSigned = new cm.v1.ClusterIssuer(
-    `${CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME}-cluster-issuer`, {
+export const clusterIssuerLinkerdSelfSigned = new cm.v1.ClusterIssuer(CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME, {
     metadata: {
         name: CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME,
         // This should be in cert manager namespace because we want the certificate key to stay in
@@ -53,7 +52,7 @@ export const clusterIssuerLinkerdSelfSigned = new cm.v1.ClusterIssuer(
 
 // Then, creat the actual CA certificate to be used for validation paths.This
 //  will be signed(issued) by our issuer created above,
-export const certificateLinkerdTrustAnchor = new cm.v1.Certificate(`${LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME}-certificate`, {
+export const certificateLinkerdTrustAnchor = new cm.v1.Certificate(LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME, {
     metadata: {
         name: LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME,
         namespace: namespaceNames.certManager
@@ -81,7 +80,7 @@ Finally, create another ClusterIssuer to sign intermediate issuers. This
 will use the root cert we just created, our issuer will be "signed" by the root CA.
 */
 export const clusterIssuerLinkerdTrustAnchor = new cm.v1.ClusterIssuer(
-    `${LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME}-cluster-issuer`, {
+    LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME, {
     metadata: {
         name: LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME,
         namespace: namespaceNames.certManager

@@ -14,7 +14,7 @@ import * as cm from "../../../crd2pulumi/certManager/certmanager";
 
 const CERTIFICATE_NAME = "linkerd-identity-issuer";
 const DNS_NAME_IDENTITY_LINKERD = "identity.linkerd.cluster.local";
-export const certificateLinkerdIdentityIssuer = new cm.v1.Certificate(`${CERTIFICATE_NAME}-certificate`, {
+export const certificateLinkerdIdentityIssuer = new cm.v1.Certificate(CERTIFICATE_NAME, {
     metadata: {
         name: CERTIFICATE_NAME,
         namespace: namespaceNames.linkerd

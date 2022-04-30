@@ -4,7 +4,7 @@ import * as cmt from "../../../crd2pulumi/certManagerTrust/trust";
 import { LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME } from "./certManagerCAIssuer";
 
 export const linkerdCertManagertrust = new cmt.v1alpha1.Bundle(
-    `${LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME}-trust`,
+    LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME,
     {
         metadata: {
             name: LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME,
