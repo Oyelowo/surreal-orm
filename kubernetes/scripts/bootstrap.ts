@@ -95,7 +95,7 @@ async function bootstrap() {
     environment: ARGV.e,
     imageTags,
   });
-
+return
   setupUnsealedSecretFiles();
 
   /*
