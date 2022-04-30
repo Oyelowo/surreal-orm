@@ -1,16 +1,17 @@
+import { linkerdProvider } from './linkerd';
 import { namespaceNames } from '../../shared/namespaces';
 import * as cm from "../../../crd2pulumi/certManager/certmanager";
-import { certManagerControllerProvider } from '../cert-manager';
+
 
 // ROOT TRUST ANCHOR CERTIFICATES AND CLUSTER ISSUE
 
 
 export const CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME = "linkerd-self-signed-issuer"
-export const LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME = "Linkerd-trust-anchor"
+export const LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME = "linkerd-trust-anchor"
 export const LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME = "linkerd-identity-trust-roots"
 // First, create  a clusterIssuer for our linkerd CA. This resource will issue our roots
 export const clusterIssuerLinkerdSelfSigned = new cm.v1.ClusterIssuer(
-    CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME, {
+    `${CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME}-cluster-issuer`, {
     metadata: {
         name: CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME,
         // This should be in cert manager namespace because we want the certificate key to stay in
@@ -19,6 +20,7 @@ export const clusterIssuerLinkerdSelfSigned = new cm.v1.ClusterIssuer(
     },
     spec: {
         selfSigned: {},
+
         // acme: {
         //     // The ACME server URL
         //     server: "https://acme-v02.api.letsencrypt.org/directory",
@@ -44,14 +46,14 @@ export const clusterIssuerLinkerdSelfSigned = new cm.v1.ClusterIssuer(
         // }
     }
     // We are using the certManager provider because we want it in that namespace anyway
-}, { provider: certManagerControllerProvider }
+}, { provider: linkerdProvider }
 )
 
 
 
 // Then, creat the actual CA certificate to be used for validation paths.This
 //  will be signed(issued) by our issuer created above,
-export const certificateLinkerdTrustAnchor = new cm.v1.Certificate(LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME, {
+export const certificateLinkerdTrustAnchor = new cm.v1.Certificate(`${LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME}-certificate`, {
     metadata: {
         name: LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME,
         namespace: namespaceNames.certManager
@@ -60,6 +62,7 @@ export const certificateLinkerdTrustAnchor = new cm.v1.Certificate(LINKERD_TRUST
         isCA: true,
         commonName: "root.linkerd.cluster.local",
         secretName: LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME,
+        // renewBefore: "",
         privateKey: {
             algorithm: "ECDSA",
             size: 256
@@ -70,7 +73,7 @@ export const certificateLinkerdTrustAnchor = new cm.v1.Certificate(LINKERD_TRUST
             group: "cert-manager.io"
         }
     }
-}, { provider: certManagerControllerProvider })
+}, { provider: linkerdProvider })
 
 
 /* 
@@ -78,7 +81,7 @@ Finally, create another ClusterIssuer to sign intermediate issuers. This
 will use the root cert we just created, our issuer will be "signed" by the root CA.
 */
 export const clusterIssuerLinkerdTrustAnchor = new cm.v1.ClusterIssuer(
-    CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME, {
+    `${LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME}-cluster-issuer`, {
     metadata: {
         name: LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME,
         namespace: namespaceNames.certManager
@@ -88,7 +91,7 @@ export const clusterIssuerLinkerdTrustAnchor = new cm.v1.ClusterIssuer(
             secretName: LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME
         }
     }
-}, { provider: certManagerControllerProvider }
+}, { provider: linkerdProvider }
 )
 
 
