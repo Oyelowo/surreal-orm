@@ -131,13 +131,13 @@ async function bootstrap() {
   // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/0-crd`);
   // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/1-manifest`);
 
-  sh.exec(`kubectl apply -R -f ${getIngressControllerDir(ARGV.e)}`);
-  sh.exec(`kubectl apply -R -f ${getCertManagerControllerDir(ARGV.e)}`);
-  // sh.exec(`kubectl apply -R -f ${getLinkerd2Dir(ARGV.e)}`);
-  sh.exec(`kubectl apply -R -f ${getLinkerd2Dir(ARGV.e)}/0-crd`);
-  sh.exec(`kubectl apply -R -f ${getLinkerd2Dir(ARGV.e)}/1-manifest`);
+  // sh.exec(`kubectl apply -R -f ${getIngressControllerDir(ARGV.e)}`);
+  // sh.exec(`kubectl apply -R -f ${getCertManagerControllerDir(ARGV.e)}`);
+  // // sh.exec(`kubectl apply -R -f ${getLinkerd2Dir(ARGV.e)}`);
+  // sh.exec(`kubectl apply -R -f ${getLinkerd2Dir(ARGV.e)}/0-crd`);
+  // sh.exec(`kubectl apply -R -f ${getLinkerd2Dir(ARGV.e)}/1-manifest`);
 
-  sh.exec(`kubectl apply -R -f ${getLinkerdVizDir(ARGV.e)}`);
+  // sh.exec(`kubectl apply -R -f ${getLinkerdVizDir(ARGV.e)}`);
 
   sh.exec(`kubectl apply -R -f ${getArgocdApplicationsDir(ARGV.e)}`);
 }
