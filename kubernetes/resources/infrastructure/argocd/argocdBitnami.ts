@@ -15,9 +15,14 @@ export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
   renderYamlToDirectory: argocdControllerDir,
 });
 
-
+// TODO: Use this everywhere
+const STORAGE_CLASS = "linode-block-storage-retain"
 const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
   config: { secret: { create: true, argocdServerAdminPassword: "oyelowo", } },
+  global: {
+    storageClass:
+      getEnvironmentVariables().ENVIRONMENT === "local" ? "" : STORAGE_CLASS,
+  },
   server: {
     ingress: {
       enabled: true,
