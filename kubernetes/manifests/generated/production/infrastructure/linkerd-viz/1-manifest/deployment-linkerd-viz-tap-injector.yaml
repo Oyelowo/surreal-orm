@@ -3,7 +3,11 @@ kind: Deployment
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
+<<<<<<< HEAD
       {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.11.2"},"labels":{"app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"tap-injector","app.kubernetes.io/part-of":"Linkerd","component":"tap-injector","linkerd.io/extension":"viz"},"name":"tap-injector","namespace":"linkerd-viz"},"spec":{"replicas":1,"selector":{"matchLabels":{"component":"tap-injector"}},"template":{"metadata":{"annotations":{"checksum/config":"e8568cdcce5d248f4ee3b1ed131c7059995a7b4cdc4073b9a8e2c4f65ee76602","linkerd.io/created-by":"linkerd/helm stable-2.11.2"},"labels":{"component":"tap-injector","linkerd.io/extension":"viz"}},"spec":{"containers":[{"args":["injector","-tap-service-name=tap.linkerd-viz.serviceaccount.identity.linkerd.cluster.local","-log-level=info","-log-format=plain","-enable-pprof=false"],"image":"cr.l5d.io/linkerd/tap:stable-2.11.2","imagePullPolicy":"IfNotPresent","livenessProbe":{"httpGet":{"path":"/ping","port":9995},"initialDelaySeconds":10},"name":"tap-injector","ports":[{"containerPort":8443,"name":"tap-injector"},{"containerPort":9995,"name":"admin-http"}],"readinessProbe":{"failureThreshold":7,"httpGet":{"path":"/ready","port":9995}},"securityContext":{"runAsUser":2103},"volumeMounts":[{"mountPath":"/var/run/linkerd/tls","name":"tls","readOnly":true}]}],"nodeSelector":{"kubernetes.io/os":"linux"},"serviceAccountName":"tap-injector","volumes":[{"name":"tls","secret":{"secretName":"tap-injector-k8s-tls"}}]}}}}
+=======
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.11.2"},"labels":{"app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"tap-injector","app.kubernetes.io/part-of":"Linkerd","component":"tap-injector","linkerd.io/extension":"viz"},"name":"tap-injector","namespace":"linkerd-viz"},"spec":{"replicas":1,"selector":{"matchLabels":{"component":"tap-injector"}},"template":{"metadata":{"annotations":{"checksum/config":"f98a913ba14e1e63c34abbc80ec18572aa05b28190ba8ba48e0e368cf6c70e15","linkerd.io/created-by":"linkerd/helm stable-2.11.2"},"labels":{"component":"tap-injector","linkerd.io/extension":"viz"}},"spec":{"containers":[{"args":["injector","-tap-service-name=tap.linkerd-viz.serviceaccount.identity.linkerd.cluster.local","-log-level=info","-log-format=plain","-enable-pprof=false"],"image":"cr.l5d.io/linkerd/tap:stable-2.11.2","imagePullPolicy":"IfNotPresent","livenessProbe":{"httpGet":{"path":"/ping","port":9995},"initialDelaySeconds":10},"name":"tap-injector","ports":[{"containerPort":8443,"name":"tap-injector"},{"containerPort":9995,"name":"admin-http"}],"readinessProbe":{"failureThreshold":7,"httpGet":{"path":"/ready","port":9995}},"securityContext":{"runAsUser":2103},"volumeMounts":[{"mountPath":"/var/run/linkerd/tls","name":"tls","readOnly":true}]}],"nodeSelector":{"kubernetes.io/os":"linux"},"serviceAccountName":"tap-injector","volumes":[{"name":"tls","secret":{"secretName":"tap-injector-k8s-tls"}}]}}}}
+>>>>>>> 799dc57ffe54591f840273ef900719aed2d0b045
     linkerd.io/created-by: linkerd/helm stable-2.11.2
   labels:
     app.kubernetes.io/managed-by: pulumi
@@ -21,7 +25,11 @@ spec:
   template:
     metadata:
       annotations:
+<<<<<<< HEAD
         checksum/config: e8568cdcce5d248f4ee3b1ed131c7059995a7b4cdc4073b9a8e2c4f65ee76602
+=======
+        checksum/config: f98a913ba14e1e63c34abbc80ec18572aa05b28190ba8ba48e0e368cf6c70e15
+>>>>>>> 799dc57ffe54591f840273ef900719aed2d0b045
         linkerd.io/created-by: linkerd/helm stable-2.11.2
       labels:
         component: tap-injector
