@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-cluster-issuer","nginx.ingress.kubernetes.io/auth-realm":"Authentication Required","nginx.ingress.kubernetes.io/auth-secret":"linkerd-viz-ingress-auth","nginx.ingress.kubernetes.io/auth-type":"basic","nginx.ingress.kubernetes.io/configuration-snippet":"|\n    proxy_set_header Origin;\n      proxy_hide_header l5d-remote-ip;\n      proxy_hide_header l5d-server-id;","nginx.ingress.kubernetes.io/upstream-vhost":"$service_name.$namespace.svc.cluster.local:8084"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"linkerd-viz-ingress","namespace":"linkerd"},"spec":{"ingressClassName":"nginx","rules":[{"host":"linkerd.oyedev.com","http":{"paths":[{"backend":{"service":{"name":"web","port":{"number":8084}}},"pathType":"Prefix"}]}}],"tls":[{"hosts":["linkerd.oyedev.com"],"secretName":"linkerd-nginx-ingress-tls"}]}}
+    nginx.ingress.kubernetes.io/auth-realm: Authentication Required
+    nginx.ingress.kubernetes.io/auth-secret: linkerd-viz-ingress-auth
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/configuration-snippet: |-
+      |
+          proxy_set_header Origin;
+            proxy_hide_header l5d-remote-ip;
+            proxy_hide_header l5d-server-id;
+    nginx.ingress.kubernetes.io/upstream-vhost: $service_name.$namespace.svc.cluster.local:8084
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: linkerd-viz-ingress
+  namespace: linkerd
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: linkerd.oyedev.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: web
+            port:
+              number: 8084
+        pathType: Prefix
+  tls:
+  - hosts:
+    - linkerd.oyedev.com
+    secretName: linkerd-nginx-ingress-tls
