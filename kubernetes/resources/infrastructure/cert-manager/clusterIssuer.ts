@@ -1,4 +1,4 @@
-import { ingressClassName } from './../ingress-controller/ingressRules';
+import { INGRESS_CLASSNAME_NGINX } from './../ingress-controller/ingressRules';
 import * as cm from "../../../crd2pulumi/certManager/certmanager";
 import { certManagerControllerProvider } from "./certManager";
 
@@ -29,7 +29,7 @@ export const clusterIssuer = new cm.v1.ClusterIssuer(
             solvers: [{
                 http01: {
                     ingress: {
-                        class: ingressClassName
+                        class: INGRESS_CLASSNAME_NGINX
                     }
                 }
             }]

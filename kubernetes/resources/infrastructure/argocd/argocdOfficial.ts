@@ -1,4 +1,4 @@
-import { annotations, ingressClassName } from './../ingress-controller/ingressRules';
+import { annotations, INGRESS_CLASSNAME_NGINX } from './../ingress-controller/ingressRules';
 import * as k8s from "@pulumi/kubernetes";
 import { getArgocdControllerDir } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../shared/namespaces";
@@ -26,7 +26,7 @@ const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
     server: {
         ingress: {
             enabled: true,
-            ingressClassName,
+            ingressClassName: INGRESS_CLASSNAME_NGINX,
             annotations: {
                 ...annotations
             },

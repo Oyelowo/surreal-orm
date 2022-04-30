@@ -44,7 +44,7 @@ jobs:
       - name: Install pulumi
         uses: pulumi/setup-pulumi@v2
         with:
-          pulumi-version: 3.28.0
+          pulumi-version: 3.31.0
       - run: |
           # make manifests_development_no_sealed_secrets
           # make manifests_staging_no_sealed_secrets

@@ -14,8 +14,8 @@ const { ENVIRONMENT } = getEnvironmentVariables()
 
 
 type IngressClassName = "nginx" | "traefik";
-export const ingressClassName: IngressClassName = "nginx";
-export const SECRET_NAME_NGINX = "nginx-ingress-tls";
+export const INGRESS_CLASSNAME_NGINX: IngressClassName = "nginx";
+const SECRET_NAME_NGINX = "nginx-ingress-tls";
 
 const appBase = "oyelowo";
 // // Next, expose the app using an Ingress.
@@ -42,7 +42,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
             annotations: annotations as any,
         },
         spec: {
-            ingressClassName,
+            ingressClassName: INGRESS_CLASSNAME_NGINX,
             tls: [
                 {
                     hosts: [DOMAIN_NAME_BASE, `www.${DOMAIN_NAME_BASE}`],
