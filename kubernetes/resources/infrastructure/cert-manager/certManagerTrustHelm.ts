@@ -1,4 +1,4 @@
-import { helmChartsInfo } from './../../shared/helmChartInfo';
+import { helmChartsInfo } from '../../shared/helmChartInfo';
 import * as k8s from "@pulumi/kubernetes";
 import { getCertManagerControllerDir } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../shared/namespaces";
@@ -24,10 +24,8 @@ export const certManagerTrustHelm = new k8s.helm.v3.Chart(
     {
         chart,
         fetchOpts: {
-            // repo: "https://charts.jetstack.io",
             repo: repo,
         },
-        // version: "1.8.0",
         version,
         values: certManagerValues,
         namespace: namespaceNames.certManager,

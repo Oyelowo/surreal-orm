@@ -89,6 +89,7 @@ export const linkerVizIngress = new k8s.networking.v1.Ingress(
                     http: {
                         paths: [
                             {
+                                path:"/",
                                 pathType: "Prefix",
                                 backend: {
                                     service: {
