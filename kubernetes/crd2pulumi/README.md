@@ -8,7 +8,7 @@ brew install pulumi/tap/crd2pulumi
 
 # Local and url paths work
 crd2pulumi --nodejsPath ./crd2pulumi/argocd  ./path/to/crd.yaml           
-
+jetstack/cert-manager-trust 
 
 # Example
 crd2pulumi --nodejsPath ./crd2pulumi/argocd  https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml           

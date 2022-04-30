@@ -34,7 +34,8 @@ export const clusterIssuer = new cm.v1.ClusterIssuer(
                 }
             }]
 
-        }
+        },
+
     }
 }, { provider: certManagerControllerProvider }
 )

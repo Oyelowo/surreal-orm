@@ -8,12 +8,12 @@ import { DeepPartial, RecursivePartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
 
 
-export const linkerd2Dir = getLinkerd2Dir(
+export const linkerdDir = getLinkerd2Dir(
   getEnvironmentVariables().ENVIRONMENT
 );
 
-const Linkerd2Provider = new k8s.Provider(linkerd2Dir, {
-  renderYamlToDirectory: linkerd2Dir,
+export const linkerdProvider = new k8s.Provider(linkerdDir, {
+  renderYamlToDirectory: linkerdDir,
 });
 
 /* 
@@ -50,6 +50,6 @@ export const linkerd = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: Linkerd2Provider }
+  { provider: linkerdProvider }
   // { provider }
 );

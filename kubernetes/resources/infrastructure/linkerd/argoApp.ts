@@ -1,6 +1,6 @@
 import { getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
 import { createArgocdApplication, namespaceNames, linkerd2Name } from "../../shared";
-import { linkerd2Dir } from "./linkerd";
+import { linkerdDir } from "./linkerd";
 
 type Metadata = {
   name: string;
@@ -16,5 +16,5 @@ const metadataLinkerd2: Metadata = {
 /* Linkerd2 APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const Linkerd2Application = createArgocdApplication({
   metadata: { ...metadataLinkerd2 },
-  pathToAppManifests: getRepoPathFromAbsolutePath(linkerd2Dir),
+  pathToAppManifests: getRepoPathFromAbsolutePath(linkerdDir),
 });
