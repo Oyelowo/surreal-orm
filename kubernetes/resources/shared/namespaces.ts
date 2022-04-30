@@ -18,6 +18,7 @@ export const namespaceNames = {
   argocd: "argocd",
   certManager: "cert-manager",
   linkerd: "linkerd",
+  linkerdViz: "linkerd-viz",
   default: "default",
   // Default namespace that comes with the deployment
   kubeSystem: "kube-system",
@@ -27,46 +28,16 @@ export const namespaceNames = {
 type Keys = keyof typeof namespaceNames;
 export type NamespaceName = typeof namespaceNames[Keys];
 
-export const applicationsNamespace = new Namespace(
-  namespaceNames.applications,
-  {
-    metadata: {
-      name: `${namespaceNames.applications}`,
-      namespace: namespaceNames.applications,
+export const resourceNamespaces = Object.entries(namespaceNames).map(([_k, namespace]) => {
+  const resourceNamespace = new Namespace(
+    namespace,
+    {
+      metadata: {
+        name: namespace,
+        namespace,
+      },
     },
-  },
-  { provider: nameSpacesProvider }
-);
-
-export const argocdNamespace = new Namespace(
-  namespaceNames.argocd,
-  {
-    metadata: {
-      name: `${namespaceNames.argocd}`,
-      namespace: namespaceNames.argocd,
-    },
-  },
-  { provider: nameSpacesProvider }
-);
-
-export const certManagerNamespace = new Namespace(
-  namespaceNames.certManager,
-  {
-    metadata: {
-      name: `${namespaceNames.certManager}`,
-      namespace: namespaceNames.certManager,
-    },
-  },
-  { provider: nameSpacesProvider }
-);
-
-// export const infrastructureNamespace = new Namespace(
-//   namespaceNames.argocd,
-//   {
-//     metadata: {
-//       name: `${namespaceNames.argocd}`,
-//       namespace: namespaceNames.argocd,
-//     },
-//   },
-//   { provider: nameSpacesProvider }
-// );
+    { provider: nameSpacesProvider }
+  );
+  return resourceNamespace
+})
