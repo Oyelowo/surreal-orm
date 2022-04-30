@@ -1,14 +1,27 @@
+import { getLinkerdVizDir, linkerdVizName } from './../../shared/manifestsDirectory';
 import * as bcrypt from "bcrypt";
 import { INGRESS_CLASSNAME_NGINX } from "./../ingress-controller/ingressRules";
 import { NginxConfiguration } from "./../../shared/types/nginxConfigurations";
 import { LinkerdVizHelmValues } from "./../../shared/types/helm-charts/linkerdVizHelmValues";
 import { helmChartsInfo } from "./../../shared/helmChartInfo";
 import * as k8s from "@pulumi/kubernetes";
-
-import { linkerd2Name } from "../../shared/manifestsDirectory";
+import * as kx from "@pulumi/kubernetesx";
+import { CLUSTER_ISSUER_NAME } from "../cert-manager/clusterIssuer";
+import { DOMAIN_NAME_SUB_LINKERD_VIZ } from "../ingress-controller/constant";
+import { getEnvironmentVariables } from "../../shared/validations";
 import { namespaceNames } from "../../shared/namespaces";
 import { DeepPartial } from "../../shared/types/own-types";
-import { linkerdProvider } from "./linkerd";
+
+
+
+export const linkerdVizDir = getLinkerdVizDir(
+    getEnvironmentVariables().ENVIRONMENT
+);
+
+export const linkerdVizProvider = new k8s.Provider(linkerdVizDir, {
+    renderYamlToDirectory: linkerdVizDir,
+});
+
 
 const values: DeepPartial<LinkerdVizHelmValues> = {};
 
@@ -16,8 +29,8 @@ const {
     repo,
     linkerdViz: { chart, version },
 } = helmChartsInfo.linkerdRepo;
-export const linkerdViz = new k8s.helm.v3.Chart(
-    linkerd2Name,
+export const linkerdVizHelmChart = new k8s.helm.v3.Chart(
+    linkerdVizName,
     {
         chart,
         fetchOpts: {
@@ -32,13 +45,10 @@ export const linkerdViz = new k8s.helm.v3.Chart(
         // available.
         skipAwait: false,
     },
-    { provider: linkerdProvider }
+    { provider: linkerdVizProvider }
     // { provider }
 );
 
-import * as kx from "@pulumi/kubernetesx";
-import { CLUSTER_ISSUER_NAME } from "../cert-manager/clusterIssuer";
-import { DOMAIN_NAME_SUB_LINKERD_VIZ } from "../ingress-controller/constant";
 const linkerdVizIngressName = "linkerd-viz-ingress";
 const linkerdVizSecretName = `${linkerdVizIngressName}-auth`;
 const nginxAnnotions: Partial<NginxConfiguration> = {
@@ -53,7 +63,7 @@ const nginxAnnotions: Partial<NginxConfiguration> = {
     "nginx.ingress.kubernetes.io/auth-realm": "Authentication Required",
 };
 
-export const SECRET_NAME_NGINX = "linkerd-nginx-ingress-tls";
+const SECRET_NAME_NGINX = "linkerd-nginx-ingress-tls";
 export const linkerVizIngress = new k8s.networking.v1.Ingress(
     "linkerd-viz-ingress",
     {
@@ -96,7 +106,7 @@ export const linkerVizIngress = new k8s.networking.v1.Ingress(
             ],
         },
     },
-    { provider: linkerdProvider }
+    { provider: linkerdVizProvider }
 );
 
 const saltRounds = 10;
@@ -116,5 +126,5 @@ export const linkerdVizSecret = new kx.Secret(
             auth: `admin:${hash}`,
         },
     },
-    {}
+    { provider: linkerdVizProvider }
 );
