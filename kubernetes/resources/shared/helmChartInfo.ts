@@ -42,11 +42,11 @@ export const helmChartsInfo = {
         repo: "https://charts.jetstack.io",
         certManager: {
             chart: "cert-manager",
-            version: "1.8.0",
+            version: "v1.8.0",
         },
         certManagerTrust: {
             chart: "cert-manager-trust",
-            version: "0.1.1"
+            version: "v0.1.1"
         },
 
     },

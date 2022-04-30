@@ -1,22 +1,13 @@
+import { CertManagerTrustHelmValues } from './../../shared/types/helm-charts/certManagerTrustHelmValues';
+import { argocdApplicationsProvider } from './../../shared/createArgoApplication';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 import * as k8s from "@pulumi/kubernetes";
-import { getCertManagerControllerDir } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../shared/namespaces";
 import { DeepPartial } from "../../shared/types/own-types";
-import { getEnvironmentVariables } from "../../shared/validations";
-import { CertManagerValuesJetspack } from "../../shared/types/helm-charts/certManagerValuesJetspack";
-
-const { ENVIRONMENT } = getEnvironmentVariables();
-export const certManagerControllerDir = getCertManagerControllerDir(ENVIRONMENT);
 
 
-export const certManagerControllerProvider = new k8s.Provider(certManagerControllerDir, {
-    renderYamlToDirectory: certManagerControllerDir,
-});
+const values: DeepPartial<CertManagerTrustHelmValues> = {
 
-
-const certManagerValues: DeepPartial<CertManagerValuesJetspack> = {
-    installCRDs: true
 };
 const { repo, certManagerTrust: { chart, version } } = helmChartsInfo.jetspackRepo
 export const certManagerTrustHelm = new k8s.helm.v3.Chart(
@@ -27,7 +18,7 @@ export const certManagerTrustHelm = new k8s.helm.v3.Chart(
             repo: repo,
         },
         version,
-        values: certManagerValues,
+        values,
         namespace: namespaceNames.certManager,
         // namespace: devNamespaceName,
         // By default Release resource will wait till all created resources
@@ -35,5 +26,5 @@ export const certManagerTrustHelm = new k8s.helm.v3.Chart(
         // available.
         skipAwait: false,
     },
-    { provider: certManagerControllerProvider }
+    { provider: argocdApplicationsProvider }
 );
