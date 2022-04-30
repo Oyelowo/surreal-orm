@@ -21,14 +21,23 @@ export const linkerdProvider = new k8s.Provider(linkerdDir, {
   --set-file identity.issuer.tls.crtPEM=issuer.crt \
   --set-file identity.issuer.tls.keyPEM=issuer.key \
 */
+
+/* 
+for automanaged ca
+  --set-file identityTrustAnchorsPEM=ca.crt \
+  --set identity.issuer.scheme=kubernetes.io/tls \
+  --set installNamespace=false \
+  linkerd/linkerd2 \
+*/
 const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
-  identityTrustAnchorsPEM: "ca",
+  identityTrustAnchorsPEM: "ca.crt",
   identity: {
     issuer: {
-      tls: {
-        crtPEM: "",
-        keyPEM: "",
-      },
+      scheme: "kubernetes.io/tls",
+      // tls: {
+      //   crtPEM: "",
+      //   keyPEM: "",
+      // },
     }
   },
   // cniEnabled: true
