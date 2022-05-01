@@ -1,0 +1,25 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"RoleBinding","metadata":{"labels":{"app":"cert-manager","app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"cert-manager","app.kubernetes.io/version":"v1.8.0","helm.sh/chart":"cert-manager-v1.8.0"},"name":"cert-manager:leaderelection","namespace":"kube-system"},"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"Role","name":"cert-manager:leaderelection"},"subjects":[{"apiGroup":"","kind":"ServiceAccount","name":"cert-manager","namespace":"cert-manager"}]}
+  labels:
+    app: cert-manager
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: cert-manager
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: cert-manager
+    app.kubernetes.io/version: v1.8.0
+    helm.sh/chart: cert-manager-v1.8.0
+  name: cert-manager:leaderelection
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cert-manager:leaderelection
+subjects:
+- apiGroup: ""
+  kind: ServiceAccount
+  name: cert-manager
+  namespace: cert-manager

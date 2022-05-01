@@ -1,0 +1,97 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apiextensions.k8s.io/v1","kind":"CustomResourceDefinition","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.11.2"},"labels":{"app.kubernetes.io/managed-by":"pulumi","linkerd.io/control-plane-ns":"linkerd"},"name":"trafficsplits.split.smi-spec.io"},"spec":{"conversion":{"strategy":"None"},"group":"split.smi-spec.io","names":{"kind":"TrafficSplit","listKind":"TrafficSplitList","plural":"trafficsplits","shortNames":["ts"],"singular":"trafficsplit"},"preserveUnknownFields":false,"scope":"Namespaced","versions":[{"additionalPrinterColumns":[{"description":"The apex service of this split.","jsonPath":".spec.service","name":"Service","type":"string"}],"name":"v1alpha1","schema":{"openAPIV3Schema":{"properties":{"spec":{"properties":{"backends":{"description":"The backend services of this split.","items":{"properties":{"service":{"description":"Name of the Kubernetes service.","type":"string"},"weight":{"description":"Traffic weight value of this backend.","x-kubernetes-int-or-string":true}},"required":["service","weight"],"type":"object"},"type":"array"},"service":{"description":"The apex service of this split.","type":"string"}},"required":["service","backends"],"type":"object"}},"type":"object"}},"served":true,"storage":true},{"additionalPrinterColumns":[{"description":"The apex service of this split.","jsonPath":".spec.service","name":"Service","type":"string"}],"name":"v1alpha2","schema":{"openAPIV3Schema":{"properties":{"spec":{"properties":{"backends":{"description":"The backend services of this split.","items":{"properties":{"service":{"description":"Name of the Kubernetes service.","type":"string"},"weight":{"description":"Traffic weight value of this backend.","type":"number"}},"required":["service","weight"],"type":"object"},"type":"array"},"service":{"description":"The apex service of this split.","type":"string"}},"required":["service","backends"],"type":"object"}},"type":"object"}},"served":true,"storage":false}]}}
+    linkerd.io/created-by: linkerd/helm stable-2.11.2
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+    linkerd.io/control-plane-ns: linkerd
+  name: trafficsplits.split.smi-spec.io
+spec:
+  conversion:
+    strategy: None
+  group: split.smi-spec.io
+  names:
+    kind: TrafficSplit
+    listKind: TrafficSplitList
+    plural: trafficsplits
+    shortNames:
+    - ts
+    singular: trafficsplit
+  preserveUnknownFields: false
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The apex service of this split.
+      jsonPath: .spec.service
+      name: Service
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          spec:
+            properties:
+              backends:
+                description: The backend services of this split.
+                items:
+                  properties:
+                    service:
+                      description: Name of the Kubernetes service.
+                      type: string
+                    weight:
+                      description: Traffic weight value of this backend.
+                      x-kubernetes-int-or-string: true
+                  required:
+                  - service
+                  - weight
+                  type: object
+                type: array
+              service:
+                description: The apex service of this split.
+                type: string
+            required:
+            - service
+            - backends
+            type: object
+        type: object
+    served: true
+    storage: true
+  - additionalPrinterColumns:
+    - description: The apex service of this split.
+      jsonPath: .spec.service
+      name: Service
+      type: string
+    name: v1alpha2
+    schema:
+      openAPIV3Schema:
+        properties:
+          spec:
+            properties:
+              backends:
+                description: The backend services of this split.
+                items:
+                  properties:
+                    service:
+                      description: Name of the Kubernetes service.
+                      type: string
+                    weight:
+                      description: Traffic weight value of this backend.
+                      type: number
+                  required:
+                  - service
+                  - weight
+                  type: object
+                type: array
+              service:
+                description: The apex service of this split.
+                type: string
+            required:
+            - service
+            - backends
+            type: object
+        type: object
+    served: true
+    storage: false

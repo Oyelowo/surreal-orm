@@ -1,0 +1,20 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"Role","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi","linkerd.io/control-plane-ns":"linkerd"},"name":"linkerd-heartbeat","namespace":"linkerd"},"rules":[{"apiGroups":[""],"resourceNames":["linkerd-config"],"resources":["configmaps"],"verbs":["get"]}]}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+    linkerd.io/control-plane-ns: linkerd
+  name: linkerd-heartbeat
+  namespace: linkerd
+rules:
+- apiGroups:
+  - ""
+  resourceNames:
+  - linkerd-config
+  resources:
+  - configmaps
+  verbs:
+  - get
