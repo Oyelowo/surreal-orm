@@ -115,7 +115,12 @@ export class ServiceDeployment<
         spec: podBuilder.asDeploymentSpec({
           replicas: kubeConfig.replicaCount,
         }),
-        metadata,
+        metadata: {
+          ...metadata,
+          annotations: {
+            "linkerd.io/inject": "enabled"
+          }
+        },
       },
       { provider: this.getProvider(), parent: this }
     );
