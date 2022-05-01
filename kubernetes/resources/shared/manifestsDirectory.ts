@@ -53,6 +53,11 @@ export const getCertManagerControllerDir = (environment: Environment) => {
   return getPathToInfraToolDir(certManagerControllerName, environment);
 };
 
+export const argocdApplicationsName = "argocd-applications";
+export const argocdApplicationsDir = (environment: Environment) => {
+  return getPathToInfraToolDir(argocdApplicationsName, environment);
+};
+
 export const linkerd2Name = "linkerd";
 export const getLinkerd2Dir = (environment: Environment) => {
   return getPathToInfraToolDir(linkerd2Name, environment);
