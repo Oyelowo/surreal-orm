@@ -3,14 +3,14 @@ kind: Application
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"argoproj.io/v1alpha1","kind":"Application","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"cert-manager-controller","namespace":"argocd"},"spec":{"destination":{"namespace":"default","server":"https://kubernetes.default.svc"},"project":"default","source":{"directory":{"recurse":true},"path":"kubernetes/manifests/generated/production/infrastructure/cert-manager-controller","repoURL":"https://github.com/Oyelowo/modern-distributed-app-template","targetRevision":"HEAD"},"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}
+      {"apiVersion":"argoproj.io/v1alpha1","kind":"Application","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"cert-manager-controller","namespace":"argocd"},"spec":{"destination":{"namespace":"cert-manager","server":"https://kubernetes.default.svc"},"project":"default","source":{"directory":{"recurse":true},"path":"kubernetes/manifests/generated/production/infrastructure/cert-manager-controller","repoURL":"https://github.com/Oyelowo/modern-distributed-app-template","targetRevision":"HEAD"},"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}
   labels:
     app.kubernetes.io/managed-by: pulumi
   name: cert-manager-controller
   namespace: argocd
 spec:
   destination:
-    namespace: default
+    namespace: cert-manager
     server: https://kubernetes.default.svc
   project: default
   source:
