@@ -10,7 +10,7 @@ export const linkerdCertManagertrust = new cmt.v1alpha1.Bundle(
     {
         metadata: {
             name: LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME,
-            namespace: namespaceNames.default,
+            // namespace: namespaceNames.default,
         },
         spec: {
             sources: [
