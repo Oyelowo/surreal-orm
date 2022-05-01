@@ -3,9 +3,10 @@ kind: Namespace
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","kind":"Namespace","metadata":{"annotations":{"linkerd.io/inject":"enabled"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"linkerd-viz","namespace":"linkerd-viz"}}
+      {"apiVersion":"v1","kind":"Namespace","metadata":{"annotations":{"linkerd.io/inject":"enabled"},"labels":{"app.kubernetes.io/managed-by":"pulumi","config.linkerd.io/admission-webhooks":""},"name":"linkerd-viz","namespace":"linkerd-viz"}}
     linkerd.io/inject: enabled
   labels:
     app.kubernetes.io/managed-by: pulumi
+    config.linkerd.io/admission-webhooks: ""
   name: linkerd-viz
   namespace: linkerd-viz
