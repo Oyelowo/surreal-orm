@@ -63,7 +63,7 @@ const nginxAnnotions: Partial<NginxConfiguration> = {
 };
 
 const SECRET_NAME_NGINX = "linkerd-nginx-ingress-tls";
-export const linkerVizIngress = new k8s.networking.v1.Ingress(
+const linkerVizIngress = new k8s.networking.v1.Ingress(
     "linkerd-viz-ingress",
     {
         metadata: {

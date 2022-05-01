@@ -6,7 +6,7 @@ import { namespaceNames } from '../../namespaces/namespaces';
 
 // App that deploys Linkerd2 resources themselves
 /* Linkerd2 APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
-export const LinkerdVizApplication = createArgocdApplication({
+const LinkerdVizApplication = createArgocdApplication({
     metadata: {
         name: linkerdVizName,
         namespace: namespaceNames.linkerdViz,

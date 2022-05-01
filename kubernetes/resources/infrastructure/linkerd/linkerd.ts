@@ -31,6 +31,7 @@ for automanaged ca
 */
 const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
   identityTrustAnchorsPEM: "ca.crt",
+  installNamespace: false,
   identity: {
     issuer: {
       scheme: "kubernetes.io/tls",
