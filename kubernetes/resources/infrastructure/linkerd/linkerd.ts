@@ -30,9 +30,12 @@ for automanaged ca
   linkerd/linkerd2 \
 */
 const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
-  identityTrustAnchorsPEM: "ca.crt",
-  installNamespace: false,
+  // identityTrustAnchorsPEM: "ca.crt",
+  // identityTrustDomain
+  // installNamespace: false,
+
   identity: {
+    externalCA: true,
     issuer: {
       scheme: "kubernetes.io/tls",
       // tls: {
@@ -41,6 +44,9 @@ const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
       // },
     }
   },
+  // proxyInit:{
+  //   runAsRoot: true
+  // }
   // cniEnabled: true
 };
 

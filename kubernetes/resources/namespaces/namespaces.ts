@@ -40,6 +40,9 @@ export const resourceNamespaces = Object.entries(namespaceNames).map(([_k, names
       metadata: {
         name: namespace,
         namespace,
+        labels: {
+          "config.linkerd.io/admission-webhooks": namespace === "linkerd" ? "disabled" : ""
+        },
         annotations: {
           "linkerd.io/inject": "enabled"
         }
