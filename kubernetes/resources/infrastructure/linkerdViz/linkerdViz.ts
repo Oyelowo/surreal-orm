@@ -51,15 +51,15 @@ export const linkerdVizHelmChart = new k8s.helm.v3.Chart(
 const linkerdVizIngressName = "linkerd-viz-ingress";
 const linkerdVizSecretName = `${linkerdVizIngressName}-auth`;
 const nginxAnnotions: Partial<NginxConfiguration> = {
-    "nginx.ingress.kubernetes.io/upstream-vhost":
-        "$service_name.$namespace.svc.cluster.local:8084",
-    "nginx.ingress.kubernetes.io/configuration-snippet": `|
-    proxy_set_header Origin;
-      proxy_hide_header l5d-remote-ip;
-      proxy_hide_header l5d-server-id;`,
-    "nginx.ingress.kubernetes.io/auth-type": "basic",
-    "nginx.ingress.kubernetes.io/auth-secret": linkerdVizSecretName,
-    "nginx.ingress.kubernetes.io/auth-realm": "Authentication Required",
+    // "nginx.ingress.kubernetes.io/upstream-vhost":
+    //     "$service_name.$namespace.svc.cluster.local:8084",
+    // "nginx.ingress.kubernetes.io/configuration-snippet": `|
+    // proxy_set_header Origin;
+    //   proxy_hide_header l5d-remote-ip;
+    //   proxy_hide_header l5d-server-id;`,
+    // "nginx.ingress.kubernetes.io/auth-type": "basic",
+    // "nginx.ingress.kubernetes.io/auth-secret": linkerdVizSecretName,
+    // "nginx.ingress.kubernetes.io/auth-realm": "Authentication Required",
 };
 
 const SECRET_NAME_NGINX = "linkerd-nginx-ingress-tls";
