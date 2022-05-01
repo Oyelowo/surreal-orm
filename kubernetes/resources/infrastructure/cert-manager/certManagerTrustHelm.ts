@@ -1,3 +1,4 @@
+import { certManagerControllerProvider } from './certManager';
 import { CertManagerTrustHelmValues } from './../../shared/types/helm-charts/certManagerTrustHelmValues';
 import { argocdApplicationsProvider } from './../../shared/createArgoApplication';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
@@ -26,5 +27,5 @@ export const certManagerTrustHelm = new k8s.helm.v3.Chart(
         // available.
         skipAwait: false,
     },
-    { provider: argocdApplicationsProvider }
+    { provider: certManagerControllerProvider }
 );
