@@ -3,7 +3,7 @@ import { CustomResourceOptions, Resource } from "@pulumi/pulumi";
 import * as argocd from "../../crd2pulumi/argocd";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
-import { namespaceNames } from "./namespaces";
+import { namespaceNames } from "../namespaces/namespaces";
 import { getEnvironmentVariables } from "./validations";
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
 
@@ -40,7 +40,7 @@ export function createArgocdApplication({ metadata, pathToAppManifests, opts }: 
       // metadata: metadataValues,
       metadata: {
         name: metadata.name,
-        namespace: "argocd",
+        namespace: namespaceNames.argocd,
       },
       spec: {
         project: "default",

@@ -3,7 +3,7 @@ import { CertManagerTrustHelmValues } from './../../shared/types/helm-charts/cer
 import { argocdApplicationsProvider } from './../../shared/createArgoApplication';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 import * as k8s from "@pulumi/kubernetes";
-import { namespaceNames } from "../../shared/namespaces";
+import { namespaceNames } from "../../namespaces/namespaces";
 import { DeepPartial } from "../../shared/types/own-types";
 
 

@@ -1,4 +1,4 @@
-import { namespaceNames } from "../../shared/namespaces";
+import { namespaceNames } from "../../namespaces/namespaces";
 import { getEnvironmentVariables } from "../../shared/validations";
 import { AppConfigs } from "../../shared/types/own-types";
 import { getSecretsForApp } from "../../../scripts/secretsManagement/getSecretsForApp";

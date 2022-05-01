@@ -1,5 +1,7 @@
-import { getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
-import { createArgocdApplication, certManagerControllerName, namespaceNames } from "../../shared";
+import { namespaceNames } from "../../namespaces";
+import { createArgocdApplication } from "../../shared/createArgoApplication";
+import { certManagerControllerName, getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
+
 import { certManagerControllerDir } from "./certManager";
 
 

@@ -1,6 +1,6 @@
 import { linkerdProvider } from './linkerd';
 import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer';
-import { namespaceNames } from '../../shared/namespaces';
+import { namespaceNames } from '../../namespaces/namespaces';
 import * as cm from "../../../crd2pulumi/certManager/certmanager";
 
 // IDENTITY CERTIFICATE WHICH ISSUES THE SECRETS FOR GENERATING CERTIFICATE FOR PODS PROXIES

@@ -1,0 +1,14 @@
+// Use either, Both work, but I'm using the offical one for now as it is stable and has support for notification. 
+
+import { createArgocdApplication } from "../shared/createArgoApplication";
+import { getRepoPathFromAbsolutePath } from "../shared/manifestsDirectory";
+import { namespaceNames, namespacesNamesDir } from "../namespaces/namespaces";
+
+
+// This is the argo application for update namespace resource manifests
+// 
+export const namespacesArgoApps = createArgocdApplication({
+    metadata: { name: "namespace-names", namespace: namespaceNames.default },
+    pathToAppManifests: getRepoPathFromAbsolutePath(namespacesNamesDir),
+});
+

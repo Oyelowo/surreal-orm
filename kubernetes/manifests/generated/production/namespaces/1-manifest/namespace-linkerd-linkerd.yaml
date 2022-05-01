@@ -3,7 +3,8 @@ kind: Namespace
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","kind":"Namespace","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"linkerd","namespace":"linkerd"}}
+      {"apiVersion":"v1","kind":"Namespace","metadata":{"annotations":{"linkerd.io/inject":"enabled"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"linkerd","namespace":"linkerd"}}
+    linkerd.io/inject: enabled
   labels:
     app.kubernetes.io/managed-by: pulumi
   name: linkerd

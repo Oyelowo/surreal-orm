@@ -1,5 +1,5 @@
 import { graphqlMongoSettings } from "../graphql-mongo/settings";
-import { namespaceNames } from "../../shared/namespaces";
+import { namespaceNames } from "../../namespaces/namespaces";
 import { AppConfigs } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
 import { getFQDNFromSettings } from "../../shared/helpers";

@@ -1,7 +1,7 @@
 import { helmChartsInfo } from './../../shared/helmChartInfo';
 import * as k8s from "@pulumi/kubernetes";
 import { getCertManagerControllerDir } from "../../shared/manifestsDirectory";
-import { namespaceNames } from "../../shared/namespaces";
+import { namespaceNames } from "../../namespaces/namespaces";
 import { DeepPartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
 import { CertManagerValuesJetspack } from "../../shared/types/helm-charts/certManagerValuesJetspack";

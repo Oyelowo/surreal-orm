@@ -4,7 +4,7 @@ import { getEnvironmentVariables } from "../../shared/validations";
 import { RedisHelmValuesBitnami } from "../../shared/types/helm-charts/redisHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { namespaceNames } from "../../shared/namespaces";
+import { namespaceNames } from "../../namespaces/namespaces";
 import { DeepPartial } from "../../shared/types/own-types";
 
 const { envVars } = graphqlMongoSettings;

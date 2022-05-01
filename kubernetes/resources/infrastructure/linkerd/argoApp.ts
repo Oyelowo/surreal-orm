@@ -1,5 +1,7 @@
-import { getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
-import { createArgocdApplication, namespaceNames, linkerd2Name } from "../../shared";
+import { namespaceNames } from "../../namespaces";
+import { createArgocdApplication } from "../../shared/createArgoApplication";
+import { getRepoPathFromAbsolutePath, linkerd2Name } from "../../shared/manifestsDirectory";
+
 import { linkerdDir } from "./linkerd";
 
 

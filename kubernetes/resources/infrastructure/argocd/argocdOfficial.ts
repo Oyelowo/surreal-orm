@@ -4,7 +4,7 @@ import {
 } from "./../ingress-controller/ingressRules";
 import * as k8s from "@pulumi/kubernetes";
 import { getArgocdControllerDir } from "../../shared/manifestsDirectory";
-import { namespaceNames } from "../../shared/namespaces";
+import { namespaceNames } from "../../namespaces/namespaces";
 import { ArgocdHelmValuesArgo } from "../../shared/types/helm-charts/argocdHelmValuesArgo";
 import { DeepPartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";

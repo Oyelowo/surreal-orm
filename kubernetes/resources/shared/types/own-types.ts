@@ -1,4 +1,4 @@
-import { NamespaceName } from "./../namespaces";
+import { NamespaceName } from "../../namespaces/namespaces";
 
 import * as z from "zod";
 export const appEnvironmentsSchema = z.union([

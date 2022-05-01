@@ -1,5 +1,5 @@
 import { linkerdProvider } from './linkerd';
-import { namespaceNames } from '../../shared/namespaces';
+import { namespaceNames } from '../../namespaces/namespaces';
 import * as cm from "../../../crd2pulumi/certManager/certmanager";
 
 

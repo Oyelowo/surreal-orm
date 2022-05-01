@@ -1,5 +1,5 @@
 import { linkerdProvider } from "./linkerd";
-import { namespaceNames } from "./../../shared/namespaces";
+import { namespaceNames } from "../../namespaces/namespaces";
 import * as cmt from "../../../crd2pulumi/certManagerTrust/trust";
 import { LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME } from "./certManagerCAIssuer";
 

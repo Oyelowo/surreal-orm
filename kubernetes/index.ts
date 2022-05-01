@@ -5,9 +5,10 @@
 // setupUnsealedSecretFiles();
 
 // export * from "./resources/shared/cluster";
-export * from "./resources/shared";
+
 
 // Ingress controller and ingress rule
+export * from "./resources/namespaces";
 export * from "./resources/infrastructure/ingress-controller";
 export * from "./resources/infrastructure/secrets";
 export * from "./resources/infrastructure/argocd";
