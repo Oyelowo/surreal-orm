@@ -14,7 +14,7 @@ export * from "./resources/infrastructure/secrets";
 export * from "./resources/infrastructure/argocd";
 export * from "./resources/infrastructure/cert-manager";
 export * from "./resources/infrastructure/linkerd";
-export * from "./resources/infrastructure/linkerdViz";
+// export * from "./resources/infrastructure/linkerdViz";
 
 
 
