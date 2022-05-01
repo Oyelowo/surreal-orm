@@ -1,0 +1,24 @@
+apiVersion: linkerd.io/v1alpha2
+kind: ServiceProfile
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"linkerd.io/v1alpha2","kind":"ServiceProfile","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"prometheus.linkerd-viz.svc.cluster.local","namespace":"linkerd-viz"},"spec":{"routes":[{"condition":{"method":"POST","pathRegex":"/api/v1/query"},"name":"POST /api/v1/query"},{"condition":{"method":"GET","pathRegex":"/api/v1/query_range"},"name":"GET /api/v1/query_range"},{"condition":{"method":"GET","pathRegex":"/api/v1/series"},"name":"GET /api/v1/series"}]}}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: prometheus.linkerd-viz.svc.cluster.local
+  namespace: linkerd-viz
+spec:
+  routes:
+  - condition:
+      method: POST
+      pathRegex: /api/v1/query
+    name: POST /api/v1/query
+  - condition:
+      method: GET
+      pathRegex: /api/v1/query_range
+    name: GET /api/v1/query_range
+  - condition:
+      method: GET
+      pathRegex: /api/v1/series
+    name: GET /api/v1/series

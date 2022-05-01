@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.11.2"},"labels":{"app.kubernetes.io/managed-by":"pulumi","component":"web","linkerd.io/extension":"viz","namespace":"linkerd-viz"},"name":"web","namespace":"linkerd-viz"},"spec":{"ports":[{"name":"http","port":8084,"targetPort":8084},{"name":"admin-http","port":9994,"targetPort":9994}],"selector":{"component":"web","linkerd.io/extension":"viz"},"type":"ClusterIP"}}
+    linkerd.io/created-by: linkerd/helm stable-2.11.2
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+    component: web
+    linkerd.io/extension: viz
+    namespace: linkerd-viz
+  name: web
+  namespace: linkerd-viz
+spec:
+  ports:
+  - name: http
+    port: 8084
+    targetPort: 8084
+  - name: admin-http
+    port: 9994
+    targetPort: 9994
+  selector:
+    component: web
+    linkerd.io/extension: viz
+  type: ClusterIP
