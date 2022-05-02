@@ -58,6 +58,11 @@ export const argocdApplicationsDir = (environment: Environment) => {
   return getPathToInfraToolDir(argocdApplicationsName, environment);
 };
 
+export const linkerdBootstrapName = "linkerd-bootstrap";
+export const getLinkerdBootstrapDir = (environment: Environment) => {
+  return getPathToInfraToolDir(linkerdBootstrapName, environment);
+};
+
 export const linkerd2Name = "linkerd";
 export const getLinkerd2Dir = (environment: Environment) => {
   return getPathToInfraToolDir(linkerd2Name, environment);
