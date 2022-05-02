@@ -34,7 +34,7 @@ export const sealedSecret = new k8s.helm.v3.Chart(
     fetchOpts: {
       repo: "https://bitnami-labs.github.io/sealed-secrets",
     },
-    version: "2.1.4",
+    version: "2.1.7",
     values: sealedSecretsValues,
     namespace: namespaceNames.kubeSystem,
     // namespace: devNamespaceName,
