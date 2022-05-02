@@ -3,7 +3,7 @@ import { Linkerd2HelmValues } from "../../shared/types/helm-charts/linkerd2HelmV
 import * as k8s from "@pulumi/kubernetes";
 
 import { getLinkerd2Dir, linkerd2Name } from "../../shared/manifestsDirectory";
-import { namespaceNames } from "../../namespaces/namespaces";
+import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial, RecursivePartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
 

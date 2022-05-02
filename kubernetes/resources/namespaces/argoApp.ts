@@ -1,14 +1,15 @@
+import { getEnvironmentVariables } from './../shared/validations';
 // Use either, Both work, but I'm using the offical one for now as it is stable and has support for notification. 
 
 import { createArgocdApplication } from "../shared/createArgoApplication";
-import { getRepoPathFromAbsolutePath } from "../shared/manifestsDirectory";
-import { namespaceNames, namespacesNamesDir } from "../namespaces/namespaces";
+import { getNamespacesNamesDir, getRepoPathFromAbsolutePath } from "../shared/manifestsDirectory";
+import { namespaceNames } from "./util";
 
 
 // This is the argo application for update namespace resource manifests
 // 
 export const namespacesArgoApps = createArgocdApplication({
     metadata: { name: "namespace-names", namespace: namespaceNames.default },
-    pathToAppManifests: getRepoPathFromAbsolutePath(namespacesNamesDir),
+    pathToAppManifests: getRepoPathFromAbsolutePath(getNamespacesNamesDir(getEnvironmentVariables().ENVIRONMENT)),
 });
 

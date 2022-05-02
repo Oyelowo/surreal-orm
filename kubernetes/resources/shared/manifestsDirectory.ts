@@ -43,12 +43,12 @@ export const getRepoPathFromAbsolutePath = (absolutePath: string) => {
   return path.join("kubernetes", toolPath);
 };
 
-export const argocdControllerName = "argocd-controller";
+export const argocdControllerName = "argocd";
 export const getArgocdControllerDir = (environment: Environment) => {
   return getPathToInfraToolDir(argocdControllerName, environment);
 };
 
-export const certManagerControllerName = "cert-manager-controller";
+export const certManagerControllerName = "cert-manager";
 export const getCertManagerControllerDir = (environment: Environment) => {
   return getPathToInfraToolDir(certManagerControllerName, environment);
 };
@@ -77,12 +77,12 @@ export const getLinkerdVizDir = (environment: Environment) => {
 // infraName: InfrastructureToolName =  "cert-manager-controller"
 // const kk = getInfraToolDir("production", "cert-manager-controller")
 
-export const sealedSecretsControllerName = "sealed-secrets-controller";
+export const sealedSecretsControllerName = "sealed-secrets";
 export const getSealedSecretsControllerDir = (environment: Environment) => {
   return getPathToInfraToolDir(sealedSecretsControllerName, environment);
 };
 
-export const ingressControllerName = "nginx-ingress-controller";
+export const ingressControllerName = "nginx-ingress";
 export const getIngressControllerDir = (environment: Environment) => {
   return getPathToInfraToolDir(ingressControllerName, environment);
 };
@@ -96,3 +96,9 @@ export const getServiceDir = (appName: AppName, environment: Environment) => {
   return path.join(getGeneratedEnvManifestsDir(environment), "services", appName);
   // return `kubernetes/manifests/generated/${environment}/services/${appName}`;
 };
+
+
+export const getNamespacesNamesDir = (environment: Environment) => {
+  return path.join(getGeneratedEnvManifestsDir(environment), "namespaces")
+
+}

@@ -2,7 +2,7 @@ import { SealedSecretsHelmValuesBitnami } from "../../shared/types/helm-charts/s
 import * as k8s from "@pulumi/kubernetes";
 
 import { getSealedSecretsControllerDir, sealedSecretsControllerName } from "../../shared/manifestsDirectory";
-import { namespaceNames } from "../../namespaces/namespaces";
+import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial, RecursivePartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
 

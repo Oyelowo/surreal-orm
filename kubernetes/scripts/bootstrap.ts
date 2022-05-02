@@ -1,4 +1,7 @@
 #!/usr/bin / env ts - node
+
+import { helmChartsInfo } from './../resources/shared/helmChartInfo';
+import { namespaceNames } from '../resources/namespaces/util';
 import { argocdHelm } from './../resources/infrastructure/argocd/argocdOfficial';
 import {
   getSealedSecretsControllerDir,
@@ -8,6 +11,8 @@ import {
   getLinkerd2Dir,
   getLinkerdVizDir,
   getCertManagerControllerDir,
+  certManagerControllerName,
+  getNamespacesNamesDir,
 } from "./../resources/shared/manifestsDirectory";
 
 /* 
@@ -31,6 +36,8 @@ import { generateManifests, regenerateSealedSecretsManifests } from "./generateM
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
 import { promptKubernetesClusterSwitch } from "./promptKubernetesClusterSwitch";
 import { getArgocdControllerDir, getGeneratedEnvManifestsDir } from "../resources/shared/manifestsDirectory";
+import { certManagerTrustDeploymentName } from '../resources/infrastructure/cert-manager';
+
 
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
 // npm i inquirer
@@ -107,13 +114,35 @@ async function bootstrap() {
 
   // # Apply namespace first
   // TODO: Use a function to get and share this with manifestDirectory.ts module
-  sh.exec(`kubectl apply -R -f ${manifestsDirForEnv}/namespaces`);
+  sh.exec(`kubectl apply -R -f ${getNamespacesNamesDir(ARGV.e)}`);
+  // sh.exec(`kubectl apply -R -f ${manifestsDirForEnv}/namespaces`);
 
   // # Apply setups with sealed secret controller
   sh.exec(`kubectl apply -R -f  ${getSealedSecretsControllerDir(ARGV.e)}`);
 
   // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
-  sh.exec(`kubectl rollout status deployment/${sealedSecretsControllerName} -n=kube-system`);
+  sh.exec(`kubectl rollout status deployment/${sealedSecretsControllerName} -n=${namespaceNames.kubeSystem}`);
+
+
+  // # Apply setups with cert-manager controller
+  sh.exec(`kubectl apply -R -f  ${getCertManagerControllerDir(ARGV.e)}/0-crd`);
+  sh.exec(`kubectl apply -R -f  ${getCertManagerControllerDir(ARGV.e)}/1-manifest`);
+
+  // # Wait for cert-manager and cert-manager-trust controllers to be in running phase so that we can use it to encrypt secrets
+  const { certManager, certManagerTrust } = helmChartsInfo.jetspackRepo
+  sh.exec(`kubectl rollout status deployment/${certManager.chart} -n=${namespaceNames.certManager}`);
+  sh.exec(`kubectl rollout status deployment/${certManagerTrust.chart} -n=${namespaceNames.certManager}`);
+
+
+  // # Apply setups with linkerd controller
+  sh.exec(`kubectl apply -R -f  ${getLinkerd2Dir(ARGV.e)}/sealed-secrets`);
+  sh.exec(`kubectl apply -R -f  ${getLinkerd2Dir(ARGV.e)}/0-crd`);
+  sh.exec(`kubectl apply -R -f  ${getLinkerd2Dir(ARGV.e)}/1-manifest`);
+  
+  sh.exec(`kubectl apply -R -f  ${getLinkerdVizDir(ARGV.e)}/sealed-secrets`);
+  sh.exec(`kubectl apply -R -f  ${getLinkerdVizDir(ARGV.e)}/0-crd`);
+  sh.exec(`kubectl apply -R -f  ${getLinkerdVizDir(ARGV.e)}/1-manifest`);
+
 
   // TODO: separate sealed secrets deletion step
   await regenerateSealedSecretsManifests({

@@ -3,7 +3,7 @@ import { CertManagerTrustHelmValues } from './../../shared/types/helm-charts/cer
 import { argocdApplicationsProvider } from './../../shared/createArgoApplication';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 import * as k8s from "@pulumi/kubernetes";
-import { namespaceNames } from "../../namespaces/namespaces";
+import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial } from "../../shared/types/own-types";
 
 
@@ -11,6 +11,7 @@ const values: DeepPartial<CertManagerTrustHelmValues> = {
 
 };
 const { repo, certManagerTrust: { chart, version } } = helmChartsInfo.jetspackRepo
+export const certManagerTrustDeploymentName = chart;
 export const certManagerTrustHelm = new k8s.helm.v3.Chart(
     chart,
     {

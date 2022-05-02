@@ -1,6 +1,7 @@
-import { NamespaceName } from "../../namespaces/namespaces";
+
 
 import * as z from "zod";
+import { NamespaceName } from "../../namespaces";
 export const appEnvironmentsSchema = z.union([
   z.literal("local"),
   z.literal("development"),
@@ -12,8 +13,7 @@ export type Environment = z.infer<typeof appEnvironmentsSchema>;
 // This might change but make it the environment for now.
 export type NamespaceOfApps = NamespaceName;
 
-export type Memory = `${number}${
-  | "E"
+export type Memory = `${number}${| "E"
   | "P"
   | "T"
   | "G"
@@ -35,8 +35,8 @@ export type AppName =
   | "grpc-mongo"
   | "react-web"
   | "argocd"
-  // | "ingress-controller"
-  // | "sealed-secrets";
+// | "ingress-controller"
+// | "sealed-secrets";
 
 export interface Settings<TAppName extends AppName> {
   requestMemory: Memory;
@@ -50,10 +50,10 @@ export interface Settings<TAppName extends AppName> {
 
 export type RecursivePartial<T> = {
   [P in keyof T]?: T[P] extends (infer U)[]
-    ? RecursivePartial<U>[]
-    : T[P] extends object | undefined
-    ? RecursivePartial<T[P]>
-    : T[P];
+  ? RecursivePartial<U>[]
+  : T[P] extends object | undefined
+  ? RecursivePartial<T[P]>
+  : T[P];
 };
 
 // make all properties optional recursively including nested objects.
@@ -135,7 +135,7 @@ type EnvironmentVariables<
   AN extends AppName,
   NS extends NamespaceOfApps,
   DBT extends DBType
-> = Extract<AppEnvVars<AN, NS>, { dbType: DBT }>;
+  > = Extract<AppEnvVars<AN, NS>, { dbType: DBT }>;
 
 export type AppConfigs<AN extends AppName, DBT extends DBType, NS extends NamespaceOfApps> = {
   kubeConfig: Settings<NoUnion<AN>>;

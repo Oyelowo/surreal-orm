@@ -9,7 +9,7 @@ import * as kx from "@pulumi/kubernetesx";
 import { CLUSTER_ISSUER_NAME } from "../cert-manager/clusterIssuer";
 import { DOMAIN_NAME_SUB_LINKERD_VIZ } from "../ingress-controller/constant";
 import { getEnvironmentVariables } from "../../shared/validations";
-import { namespaceNames } from "../../namespaces/namespaces";
+import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial } from "../../shared/types/own-types";
 
 

@@ -6,7 +6,7 @@ import { graphqlMongoSettings } from "../../services/graphql-mongo/settings";
 import { reactWebSettings } from "../../services/react-web/settings";
 // import { applicationsDirectory } from "../shared/manifestsDirectory";
 import { IngressControllerValuesBitnami } from "../../shared/types/helm-charts/ingressControllerValuesBitnami";
-import { namespaceNames } from "../../namespaces/namespaces";
+import { namespaceNames } from "../../namespaces/util";
 import { NginxConfiguration } from "../../shared/types/nginxConfigurations";
 import { RecursivePartial } from "../../shared/types/own-types";
 import { getIngressControllerDir, ingressControllerName } from "../../shared/manifestsDirectory";

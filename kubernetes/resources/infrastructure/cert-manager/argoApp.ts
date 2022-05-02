@@ -1,4 +1,4 @@
-import { namespaceNames } from "../../namespaces";
+import { namespaceNames } from "../../namespaces/util";
 import { createArgocdApplication } from "../../shared/createArgoApplication";
 import { certManagerControllerName, getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
 

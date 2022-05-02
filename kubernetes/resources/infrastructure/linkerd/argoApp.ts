@@ -1,4 +1,4 @@
-import { namespaceNames } from "../../namespaces";
+import { namespaceNames } from "../../namespaces/util";
 import { createArgocdApplication } from "../../shared/createArgoApplication";
 import { getRepoPathFromAbsolutePath, linkerd2Name } from "../../shared/manifestsDirectory";
 

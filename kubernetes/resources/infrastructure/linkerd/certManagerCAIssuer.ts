@@ -1,6 +1,6 @@
 import { certManagerControllerProvider } from './../cert-manager/certManager';
 import { linkerdProvider } from './linkerd';
-import { namespaceNames } from '../../namespaces/namespaces';
+import { namespaceNames } from '../../namespaces/util';
 import * as cm from "../../../crd2pulumi/certManager/certmanager";
 
 

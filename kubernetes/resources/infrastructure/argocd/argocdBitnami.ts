@@ -2,7 +2,7 @@ import { DOMAIN_NAME_SUB_ARGOCD } from './../ingress-controller/constant';
 import { annotations, INGRESS_CLASSNAME_NGINX } from './../ingress-controller/ingressRules';
 import * as k8s from "@pulumi/kubernetes";
 import { getArgocdControllerDir, getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
-import { namespaceNames } from "../../namespaces/namespaces";
+import { namespaceNames } from "../../namespaces/util";
 import { ArgocdHelmValuesBitnami } from "../../shared/types/helm-charts/argocdHelmValuesBitnami";
 import { DeepPartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";

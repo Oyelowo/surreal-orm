@@ -2,7 +2,7 @@ import { graphqlMongo } from "./index";
 import { MongodbHelmValuesBitnami } from "../../shared/types/helm-charts/MongodbHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { namespaceNames } from "../../namespaces/namespaces";
+import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial } from "../../shared/types/own-types";
 import { graphqlMongoSettings } from "./settings";
 import { getEnvironmentVariables } from "../../shared/validations";
