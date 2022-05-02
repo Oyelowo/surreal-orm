@@ -1,4 +1,4 @@
-import { getGeneratedEnvManifestsDir } from "./../resources/shared/manifestsDirectory";
+import { getGeneratedEnvManifestsDir, sealedSecretsControllerName } from "./../resources/shared/manifestsDirectory";
 import { ImageTags } from "./../resources/shared/validations";
 import sh from "shelljs";
 import { Environment } from "../resources/shared/types/own-types";
@@ -96,7 +96,7 @@ export async function regenerateSealedSecretsManifests({
       );
 
       // TODO: Should I delete old sealed secrets before creating new ones?
-      const kubeSeal = sh.exec(`kubeseal < ${unsealedSecretManifestPath} -o yaml >${sealedSecretFilePath}`, {
+      const kubeSeal = sh.exec(`kubeseal --controller-name ${sealedSecretsControllerName} < ${unsealedSecretManifestPath} -o yaml >${sealedSecretFilePath}`, {
         silent: true,
       });
 
