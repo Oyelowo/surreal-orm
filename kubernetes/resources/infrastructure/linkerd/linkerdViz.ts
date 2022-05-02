@@ -1,13 +1,13 @@
 import { getLinkerdVizDir, linkerdVizName } from '../../shared/manifestsDirectory';
 import * as bcrypt from "bcrypt";
-import { INGRESS_CLASSNAME_NGINX } from "../ingress-controller/ingressRules";
+import { INGRESS_CLASSNAME_NGINX } from "../ingress/ingressRules";
 import { NginxConfiguration } from "../../shared/types/nginxConfigurations";
 import { LinkerdVizHelmValues } from "../../shared/types/helm-charts/linkerdVizHelmValues";
 import { helmChartsInfo } from "../../shared/helmChartInfo";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
 import { CLUSTER_ISSUER_NAME } from "../cert-manager/clusterIssuer";
-import { DOMAIN_NAME_SUB_LINKERD_VIZ } from "../ingress-controller/constant";
+import { DOMAIN_NAME_SUB_LINKERD_VIZ } from "../ingress/constant";
 import { getEnvironmentVariables } from "../../shared/validations";
 import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial } from "../../shared/types/own-types";

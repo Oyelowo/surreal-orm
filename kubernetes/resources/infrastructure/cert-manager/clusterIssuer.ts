@@ -1,4 +1,4 @@
-import { INGRESS_CLASSNAME_NGINX } from './../ingress-controller/ingressRules';
+import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
 import * as cm from "../../../crd2pulumi/certManager/certmanager";
 import { certManagerControllerProvider } from "./certManager";
 

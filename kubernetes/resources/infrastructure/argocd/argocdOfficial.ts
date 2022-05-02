@@ -1,7 +1,7 @@
 import {
     annotations,
     INGRESS_CLASSNAME_NGINX,
-} from "./../ingress-controller/ingressRules";
+} from "../ingress/ingressRules";
 import * as k8s from "@pulumi/kubernetes";
 import { getArgocdControllerDir } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../namespaces/util";
@@ -9,7 +9,7 @@ import { ArgocdHelmValuesArgo } from "../../shared/types/helm-charts/argocdHelmV
 import { DeepPartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
 import bcrypt from "bcrypt";
-import { DOMAIN_NAME_SUB_ARGOCD } from "../ingress-controller/constant";
+import { DOMAIN_NAME_SUB_ARGOCD } from "../ingress/constant";
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 const argocdControllerDir = getArgocdControllerDir(ENVIRONMENT);

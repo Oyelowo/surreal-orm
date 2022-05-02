@@ -29,5 +29,6 @@ export const linkerdCertManagertrust = new cmt.v1alpha1.Bundle(
             },
         },
     },
+    // Put in cert manager so that it can be redistributed earlier
     { provider: certManagerControllerProvider }
 );

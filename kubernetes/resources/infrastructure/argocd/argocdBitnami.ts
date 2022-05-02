@@ -1,5 +1,5 @@
-import { DOMAIN_NAME_SUB_ARGOCD } from './../ingress-controller/constant';
-import { annotations, INGRESS_CLASSNAME_NGINX } from './../ingress-controller/ingressRules';
+import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant';
+import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
 import * as k8s from "@pulumi/kubernetes";
 import { getArgocdControllerDir, getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../namespaces/util";

@@ -9,7 +9,7 @@
 
 // Ingress controller and ingress rule
 export * from "./resources/namespaces";
-export * from "./resources/infrastructure/ingress-controller";
+export * from "./resources/infrastructure/ingress";
 export * from "./resources/infrastructure/secrets";
 export * from "./resources/infrastructure/argocd";
 export * from "./resources/infrastructure/cert-manager";
