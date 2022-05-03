@@ -57,7 +57,7 @@ const providers: Record<ResourceType, k8s.Provider> = {
   infrastructure: argocdApplicationsInfraProvider,
   services: argocdApplicationsServicesProvider,
   namespaces: argocdApplicationsNamespaceNamesProvider,
-  "argo_applications_parents": argocdApplicationsNamespaceNamesProvider,
+  "argo_applications_parents": argoAppsParentsProvider,
 };
 const getArgoAppDir = (resourceType: ResourceType) => {
   return providers[resourceType];
@@ -94,8 +94,8 @@ export function createArgocdApplication({
   const argocdApplication = new argocd.argoproj.v1alpha1.Application(
     metadata.name,
     {
-      apiVersion: "argoproj.io/v1alpha1",
-      kind: "Application",
+      // apiVersion: "argoproj.io/v1alpha1",
+      // kind: "Application",
       metadata: {
         name: metadata.name,
         namespace: namespaceNames.argocd,
