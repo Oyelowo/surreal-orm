@@ -1,5 +1,5 @@
 import { argoAppsParentsProvider } from './../../shared/createArgoApplication';
-import { argocdControllerName, getArgocdInfraApplicationsDir, getArgoAppsParentsDir } from './../../shared/manifestsDirectory';
+import { argocdControllerName, getArgocdInfraApplicationsDir, getArgoAppsParentsDir, getArgocdServicesApplicationsDir, getNamespacesNamesArgoAppDir } from './../../shared/manifestsDirectory';
 // Use either, Both work, but I'm using the offical one for now as it is stable and has support for notification. 
 
 // I am keeping bitnami version in the meantime for reference purpose. 26th April, 2022.
@@ -44,12 +44,43 @@ export const argocdController = createArgocdApplication({
 });
 
 
-export const argoAppsParentsApplications = createArgocdApplication({
+// export const argoAppsParentsApplications = createArgocdApplication({
+//     metadata: {
+//         name: "argo-applications-parents",
+//         namespace: namespaceNames.argocd,
+//         resourceType: "argo_applications_parents"
+//         // argoApplicationName: "cert-manager"
+//     },
+// pathToAppManifests: getRepoPathFromAbsolutePath(getArgoAppsParentsDir(ENVIRONMENT)),
+// });
+export const argoAppsParentsApplications2 = createArgocdApplication({
     metadata: {
-        name: "argo-applications-parents",
+        name: "argo-applications-parents-infrastructure",
         namespace: namespaceNames.argocd,
         resourceType: "argo_applications_parents"
         // argoApplicationName: "cert-manager"
     },
-    pathToAppManifests: getRepoPathFromAbsolutePath(getArgoAppsParentsDir(ENVIRONMENT)),
+    pathToAppManifests: getRepoPathFromAbsolutePath(getArgocdInfraApplicationsDir(ENVIRONMENT)),
+    // pathToAppManifests: getRepoPathFromAbsolutePath(getArgoAppsParentsDir(ENVIRONMENT)),
+});
+
+export const argoAppsParentsApplications3 = createArgocdApplication({
+    metadata: {
+        name: "argo-applications-parents-services",
+        namespace: namespaceNames.argocd,
+        resourceType: "argo_applications_parents"
+        // argoApplicationName: "cert-manager"
+    },
+    pathToAppManifests: getRepoPathFromAbsolutePath(getArgocdServicesApplicationsDir(ENVIRONMENT)),
+    // pathToAppManifests: getRepoPathFromAbsolutePath(getArgoAppsParentsDir(ENVIRONMENT)),
+});
+export const argoAppsParentsApplications4 = createArgocdApplication({
+    metadata: {
+        name: "argo-applications-parents-namespaces",
+        namespace: namespaceNames.argocd,
+        resourceType: "argo_applications_parents"
+        // argoApplicationName: "cert-manager"
+    },
+    pathToAppManifests: getRepoPathFromAbsolutePath(getNamespacesNamesArgoAppDir(ENVIRONMENT)),
+    // pathToAppManifests: getRepoPathFromAbsolutePath(getArgoAppsParentsDir(ENVIRONMENT)),
 });
