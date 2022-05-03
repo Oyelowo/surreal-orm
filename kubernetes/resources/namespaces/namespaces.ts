@@ -16,10 +16,6 @@ export const namespacesProvider = new k8s.Provider("render-namespaces", {
 });
 
 
-
-type Keys = keyof typeof namespaceNames;
-export type NamespaceName = typeof namespaceNames[Keys];
-
 export const resourceNamespaces = Object.entries(namespaceNames).map(([_k, namespace]) => {
   const resourceNamespace = new Namespace(
     namespace,

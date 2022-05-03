@@ -1,19 +1,19 @@
-import { namespacesProvider } from "./../namespaces/namespaces";
+import { NamespaceName, namespaceNames } from './../namespaces/util';
 import {
   argocdApplicationsName,
-  argoApplicationsNames,
-  ArgoApplicationName,
   ResourceType,
   getArgocdInfraApplicationsDir,
   getArgocdServicesApplicationsDir,
   getNamespacesNamesArgoAppDir,
   getArgoAppsParentsDir,
+  ResourceName,
+  getPathToResource,
+  getRepoPathFromAbsolutePath,
 } from "./manifestsDirectory";
 import { CustomResourceOptions, Resource } from "@pulumi/pulumi";
 import * as argocd from "../../crd2pulumi/argocd";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
-import { namespaceNames } from "../namespaces/util";
 import { getEnvironmentVariables } from "./validations";
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
 
@@ -63,26 +63,32 @@ const getArgoAppDir = (resourceType: ResourceType) => {
   return providers[resourceType];
 };
 type Metadata = {
-  name: string;
-  namespace: string;
-  // TODO: Consider removing this or replace the name above with it
-  // argoApplicationName: ArgoApplicationName;
-  resourceType: ResourceType;
-  labels?: Record<string, string>;
 };
 
 type Props = {
-  pathToAppManifests: string;
-  metadata: Metadata;
-  // provider: ProviderResource;
+  name?: ResourceName;
+  labels?: Record<string, string>;
+  namespace: NamespaceName;
+  resourceType: ResourceType;
+  resourceName: ResourceName,
+  // environment: Environment,
   opts?: CustomResourceOptions | undefined;
 };
 
 export function createArgocdApplication({
-  metadata,
-  pathToAppManifests,
+  name,
+  namespace,
+  labels,
+  resourceName,
+  resourceType,
+  // environment,
   opts,
 }: Props) {
+  const metadata = {
+    name,
+    namespace,
+    labels
+  }
   // const metadataValues: Metadata = {
   //   name: metadata.name,
   //   namespace: metadata.namespace,
@@ -92,7 +98,7 @@ export function createArgocdApplication({
   //   },
   // };
   const argocdApplication = new argocd.argoproj.v1alpha1.Application(
-    metadata.name,
+    resourceName,
     {
       // apiVersion: "argoproj.io/v1alpha1",
       // kind: "Application",
@@ -113,7 +119,12 @@ export function createArgocdApplication({
         },
         source: {
           repoURL: "https://github.com/Oyelowo/modern-distributed-app-template",
-          path: pathToAppManifests,
+          // path: pathToAppManifests,
+          path: getRepoPathFromAbsolutePath(getPathToResource({
+            environment: getEnvironmentVariables().ENVIRONMENT,
+            resourceName,
+            resourceType
+          })),
           //   path: "kubernetes/manifests/generated",
           targetRevision: "HEAD",
           directory: {
@@ -129,7 +140,8 @@ export function createArgocdApplication({
       },
     },
     {
-      provider: getArgoAppDir(metadata.resourceType),
+      provider: getArgoAppDir(resourceType),
+      // provider: getArgoAppDir(metadata.resourceType),
       ...opts,
     }
   );
@@ -142,29 +154,29 @@ const providersEntries = Object.entries(providers) as [
   k8s.Provider
 ][];
 
-export const secrets = providersEntries.map(([resourceType, provider]) => {
-  const metadata: Omit<Metadata, "argoApplicationName" | "resourceType"> = {
-    name: "argocd-applications-secret",
-    namespace: namespaceNames.argocd,
-    labels: {
-      "argocd.argoproj.io/secret-type": "repository",
-    },
-  };
+// export const secrets = providersEntries.map(([resourceType, provider]) => {
+//   const metadata: Omit<Metadata, "argoApplicationName" | "resourceType"> = {
+//     name: "argocd-applications-secret",
+//     namespace: namespaceNames.argocd,
+//     labels: {
+//       "argocd.argoproj.io/secret-type": "repository",
+//     },
+//   };
 
-  /* SECRET */
-  const secrets = getSecretsForApp("argocd");
+//   /* SECRET */
+//   const secrets = getSecretsForApp("argocd");
 
-  const argoCDApplicationsSecret = new kx.Secret(
-    `argocd-secret` + resourceType,
-    // `${resourceName}-secret`,
-    {
-      stringData: {
-        ...secrets,
-      },
-      metadata,
-    },
-    { provider }
-  );
+//   const argoCDApplicationsSecret = new kx.Secret(
+//     `argocd-secret` + resourceType,
+//     // `${resourceName}-secret`,
+//     {
+//       stringData: {
+//         ...secrets,
+//       },
+//       metadata,
+//     },
+//     { provider }
+//   );
 
-  return argoCDApplicationsSecret;
-});
+//   return argoCDApplicationsSecret;
+// });

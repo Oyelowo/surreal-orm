@@ -1,20 +1,16 @@
+import { createProvider } from "./../../shared/manifestsDirectory";
 import { SealedSecretsHelmValuesBitnami } from "../../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import {
-  getSealedSecretsControllerDir,
-  sealedSecretsControllerName,
-} from "../../shared/manifestsDirectory";
+import { sealedSecretsControllerName } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial, RecursivePartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
 
-export const sealedSecretsControllerDir = getSealedSecretsControllerDir(
-  getEnvironmentVariables().ENVIRONMENT
-);
-
-const sealedSecretsProvider = new k8s.Provider(sealedSecretsControllerDir, {
-  renderYamlToDirectory: sealedSecretsControllerDir,
+const sealedSecretsProvider = createProvider({
+  resourceName: "sealed-secrets",
+  resourceType: "infrastructure",
+  environment: getEnvironmentVariables().ENVIRONMENT,
 });
 
 const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {
@@ -54,5 +50,4 @@ export const sealedSecret = new k8s.helm.v3.Chart(
     skipAwait: false,
   },
   { provider: sealedSecretsProvider }
-  // { provider }
 );

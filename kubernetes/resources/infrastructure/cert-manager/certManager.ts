@@ -1,18 +1,19 @@
+import { getPathToResource, createProvider } from './../../shared/manifestsDirectory';
 import { helmChartsInfo } from './../../shared/helmChartInfo';
 import * as k8s from "@pulumi/kubernetes";
-import { getCertManagerControllerDir } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
 import { CertManagerValuesJetspack } from "../../shared/types/helm-charts/certManagerValuesJetspack";
 
 const { ENVIRONMENT } = getEnvironmentVariables();
-export const certManagerControllerDir = getCertManagerControllerDir(ENVIRONMENT);
 
 
-export const certManagerControllerProvider = new k8s.Provider(certManagerControllerDir, {
-  renderYamlToDirectory: certManagerControllerDir,
-});
+export const certManagerControllerProvider = createProvider({
+  resourceName: "cert-manager",
+  resourceType: "infrastructure",
+  environment: ENVIRONMENT
+})
 
 
 const certManagerValues: DeepPartial<CertManagerValuesJetspack> = {

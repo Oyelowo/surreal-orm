@@ -150,13 +150,9 @@ export class ServiceDeployment<
     });
 
     this.argocdApplication = createArgocdApplication({
-      metadata: {
-        name: metadata.name,
-        namespace: metadata.namespace,
-        // argoApplicationName: "argocd-applications",
-        resourceType: "services",
-      },
-      pathToAppManifests: getRepoPathFromAbsolutePath(this.getServiceDir()),
+      namespace: metadata.namespace,
+      resourceType: "services",
+      resourceName: this.appName,
       opts: {
         parent: this,
       },

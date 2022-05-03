@@ -9,9 +9,8 @@ import { namespaceNames } from "./util";
 // This is the argo application for update namespace resource manifests
 // 
 export const namespacesArgoApps = createArgocdApplication({
-    metadata: {
-        name: "namespace-names", namespace: namespaceNames.default,
-        resourceType: "namespaces" },
-    pathToAppManifests: getRepoPathFromAbsolutePath(getNamespacesNamesDir(getEnvironmentVariables().ENVIRONMENT)),
+    resourceType: "namespaces",
+    resourceName: "namespace-names",
+    namespace: namespaceNames.default
 });
 

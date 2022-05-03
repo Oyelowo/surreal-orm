@@ -29,6 +29,6 @@ export const reactWebSettings: AppConfigs<"react-web", "doesNotHaveDb", "applica
   },
   metadata: {
     name: "react-web",
-    namespace: namespaceNames.applications,
+    namespace: "applications",
   },
 };

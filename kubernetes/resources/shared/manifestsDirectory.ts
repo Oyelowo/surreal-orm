@@ -1,6 +1,7 @@
 import { AppName, Environment } from "./types/own-types";
 import path from "path";
 import sh from "shelljs";
+import * as k8s from "@pulumi/kubernetes";
 // TODO:  Unify all the resourceType/resourceName path utils into a singular function e.g
 
 export const getMainBaseDir = () => {
@@ -40,32 +41,8 @@ export type ResourceType =
   | "services"
   | "namespaces"
   | "argo_applications_parents";
-type ResourceName = ArgoApplicationName | AppName;
+export type ResourceName = ArgoApplicationName | AppName;
 
-export const getPathToInfrastructureDir = (
-  // toolName: ArgoApplicationName,
-  toolName: ResourceName,
-  environment: Environment
-) => {
-  const MANIFESTS_BASE_DIR_FOR_ENV = getGeneratedEnvManifestsDir(environment);
-  const dir = path.join(MANIFESTS_BASE_DIR_FOR_ENV, "infrastructure", toolName);
-  // TODO: sh.mk`dir(dir);
-  // sh.mk`dir(dir);
-  return dir;
-};
-
-// export const getPathToServicesDir = (appName: AppName | "argocd-applications", environment: Environment) => {
-export const getPathToServicesDir = (
-  appName: ResourceName,
-  environment: Environment
-) => {
-  return path.join(
-    getGeneratedEnvManifestsDir(environment),
-    "services",
-    appName
-  );
-  // return `kubernetes/manifests/generated/${environment}/services/${appName}`;
-};
 
 export const getPathToResoucrcesDir = (
   appName: ResourceName,
@@ -97,7 +74,7 @@ export const getRepoPathFromAbsolutePath = (absolutePath: string) => {
 type GetPathToResourceProps = {
   resourceType: ResourceType;
   // resourceName: Omit<ArgoApplicationName | AppName, "service">
-  resourceName: ArgoApplicationName | AppName;
+  resourceName: ResourceName;
   environment: Environment;
 };
 
@@ -108,6 +85,46 @@ export const getPathToResource = (props: GetPathToResourceProps): string => {
     props.resourceName
   );
   return resourcePath;
+};
+
+
+export const createProvider = (props: GetPathToResourceProps) => {
+  return new k8s.Provider(props.resourceType + props.resourceName, {
+    renderYamlToDirectory: getPathToResource({
+      resourceName: props.resourceName,
+      resourceType: props.resourceType,
+      environment: props.environment
+    }),
+  });
+
+}
+
+
+
+//////////\
+export const getPathToInfrastructureDir = (
+  // toolName: ArgoApplicationName,
+  toolName: ResourceName,
+  environment: Environment
+) => {
+  const MANIFESTS_BASE_DIR_FOR_ENV = getGeneratedEnvManifestsDir(environment);
+  const dir = path.join(MANIFESTS_BASE_DIR_FOR_ENV, "infrastructure", toolName);
+  // TODO: sh.mk`dir(dir);
+  // sh.mk`dir(dir);
+  return dir;
+};
+
+// export const getPathToServicesDir = (appName: AppName | "argocd-applications", environment: Environment) => {
+export const getPathToServicesDir = (
+  appName: ResourceName,
+  environment: Environment
+) => {
+  return path.join(
+    getGeneratedEnvManifestsDir(environment),
+    "services",
+    appName
+  );
+  // return `kubernetes/manifests/generated/${environment}/services/${appName}`;
 };
 
 function assertUnreachable(x: never): never {
@@ -186,3 +203,4 @@ export const getArgoAppsParentsDir = (environment: Environment) => {
     "argo-applications-parents"
   );
 };
+

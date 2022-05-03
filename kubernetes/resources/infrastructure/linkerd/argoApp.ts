@@ -10,23 +10,16 @@ import { linkerdDir } from "./linkerd";
 // App that deploys Linkerd2 resources themselves
 /* Linkerd2 APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const Linkerd2Application = createArgocdApplication({
-  metadata: {
-    name: linkerd2Name,
-    namespace: namespaceNames.linkerd,
-    resourceType: "infrastructure"
-    // argoApplicationName: "linkerd"
-  },
-  pathToAppManifests: getRepoPathFromAbsolutePath(linkerdDir),
+  resourceType: "infrastructure",
+  resourceName: "linkerd",
+  namespace: "linkerd"
 });
 
+
 export const LinkerdVizApplication = createArgocdApplication({
-  metadata: {
-    name: linkerdVizName,
-    namespace: namespaceNames.linkerd,
-    resourceType: "infrastructure"
-    // argoApplicationName: "linkerd-viz"
-  },
-  pathToAppManifests: getRepoPathFromAbsolutePath(linkerdVizDir),
+  resourceType: "infrastructure",
+  resourceName: "linkerd-viz",
+  namespace: "linkerd-viz"
 });
 
 

@@ -8,11 +8,7 @@ import { ingressControllerDir } from "./ingressController";
 // App that deploys sealedSecretsController resources themselves
 /* sealedSecretsController APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const ingressControllerApplication = createArgocdApplication({
-  metadata: {
-    name: ingressControllerName,
-    namespace: namespaceNames.default,
-    resourceType:"infrastructure"
-    // argoApplicationName: "nginx-ingress"
-  },
-  pathToAppManifests: getRepoPathFromAbsolutePath(ingressControllerDir),
+  resourceType: "infrastructure",
+  resourceName: "nginx-ingress",
+  namespace: "default"
 });
