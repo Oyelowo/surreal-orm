@@ -1,11 +1,13 @@
 import { SealedSecretsHelmValuesBitnami } from "../../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { getSealedSecretsControllerDir, sealedSecretsControllerName } from "../../shared/manifestsDirectory";
+import {
+  getSealedSecretsControllerDir,
+  sealedSecretsControllerName,
+} from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial, RecursivePartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
-
 
 export const sealedSecretsControllerDir = getSealedSecretsControllerDir(
   getEnvironmentVariables().ENVIRONMENT
@@ -24,6 +26,14 @@ kubeseal --controller-name sealed-secrets <args>
 Alternatively, you can override fullnameOverride on the helm chart install.
   */
   fullnameOverride: sealedSecretsControllerName,
+  podAnnotations: {
+    // ...getArgoAppSyncWaveAnnotation("sealed-secrets"),
+  },
+  // service: {
+  //   annotations: {
+  //     ...getArgoAppSyncWaveAnnotation("sealed-secrets")
+  //   }
+  // }
 };
 
 // `http://${name}.${namespace}:${port}`;

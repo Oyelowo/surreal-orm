@@ -6,7 +6,7 @@ import { NoUnion } from "./types/own-types";
 import { AppConfigs, AppName, DBType, NamespaceOfApps } from "./types/own-types";
 import * as argocd from "../../crd2pulumi/argocd";
 import { createArgocdApplication } from "./createArgoApplication";
-import { getServiceDir, getRepoPathFromAbsolutePath } from "./manifestsDirectory";
+import { getPathToServicesDir, getRepoPathFromAbsolutePath } from "./manifestsDirectory";
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
 
 export class ServiceDeployment<
@@ -32,13 +32,17 @@ export class ServiceDeployment<
     super("k8sjs:service:ServiceDeployment", name, {} /* opts */);
     // const provider = opts?.provider;
     this.appName = name;
-    const { envVars, kubeConfig, metadata } = args;
+    const { envVars, kubeConfig } = args;
+    const metadata = {
+      ...args.metadata,
+      // ...getArgoAppSyncWaveAnnotation("service")
+    }
     const resourceName = metadata.name;
 
     this.provider = new k8s.Provider(
       this.appName,
       {
-        renderYamlToDirectory: getServiceDir(this.appName, getEnvironmentVariables().ENVIRONMENT),
+        renderYamlToDirectory: getPathToServicesDir(this.appName, getEnvironmentVariables().ENVIRONMENT),
       },
       { parent: this }
     );
@@ -141,9 +145,11 @@ export class ServiceDeployment<
       metadata: {
         name: metadata.name,
         namespace: metadata.namespace,
+        // argoApplicationName: "argocd-applications",
+        resourceType: "services"
       },
       pathToAppManifests: getRepoPathFromAbsolutePath(
-        getServiceDir(this.appName, getEnvironmentVariables().ENVIRONMENT)
+        getPathToServicesDir(this.appName, getEnvironmentVariables().ENVIRONMENT)
       ),
       opts: {
         parent: this,

@@ -7,12 +7,13 @@ import {
   getSealedSecretsControllerDir,
   sealedSecretsControllerName,
   getIngressControllerDir,
-  getArgocdApplicationsDir,
+  // getArgocdApplicationsDir,
   getLinkerd2Dir,
   getLinkerdVizDir,
   getCertManagerControllerDir,
   certManagerControllerName,
   getNamespacesNamesDir,
+  getArgocdServicesApplicationsDir,
 } from "./../resources/shared/manifestsDirectory";
 
 /* 
@@ -97,9 +98,9 @@ async function bootstrap() {
     });
     return;
   }
-
-
+  
   await promptKubernetesClusterSwitch();
+
 
   await generateManifests({
     environment: ARGV.e,
@@ -154,11 +155,11 @@ async function bootstrap() {
 
   // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
   // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/sealed-secrets`);
-  sh.exec(`kubectl apply -R -f ${getArgocdControllerDir(ARGV.e)}`);
+  // sh.exec(`kubectl apply -R -f ${getArgocdControllerDir(ARGV.e)}`);
+  sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/0-crd`);
+  sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/1-manifest`);
   // TODO: Split bootstrap process from restart from update
   sh.exec(`kubectl -n argocd rollout restart deployment argocd-argo-cd-server`);
-  // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/0-crd`);
-  // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/1-manifest`);
 
   // sh.exec(`kubectl apply -R -f ${getIngressControllerDir(ARGV.e)}`);
   // sh.exec(`kubectl apply -R -f ${getCertManagerControllerDir(ARGV.e)}`);
@@ -168,7 +169,8 @@ async function bootstrap() {
 
   // sh.exec(`kubectl apply -R -f ${getLinkerdVizDir(ARGV.e)}`);
 
-  sh.exec(`kubectl apply -R -f ${getArgocdApplicationsDir(ARGV.e)}`);
+  // TODO: PUT THE BASE HERE
+  sh.exec(`kubectl apply -R -f ${getArgocdServicesApplicationsDir(ARGV.e)}`);
 }
 
 bootstrap();

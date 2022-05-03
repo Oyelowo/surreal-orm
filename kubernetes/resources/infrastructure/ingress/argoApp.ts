@@ -11,6 +11,8 @@ export const ingressControllerApplication = createArgocdApplication({
   metadata: {
     name: ingressControllerName,
     namespace: namespaceNames.default,
+    resourceType:"infrastructure"
+    // argoApplicationName: "nginx-ingress"
   },
   pathToAppManifests: getRepoPathFromAbsolutePath(ingressControllerDir),
 });

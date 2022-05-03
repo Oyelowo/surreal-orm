@@ -11,7 +11,7 @@ const { ENVIRONMENT } = getEnvironmentVariables();
 //   getEnvironmentVariables().ENVIRONMENT
 // );
 
-export const nameSpacesProvider = new k8s.Provider("render-namespaces", {
+export const namespacesProvider = new k8s.Provider("render-namespaces", {
   renderYamlToDirectory: getNamespacesNamesDir(ENVIRONMENT),
 });
 
@@ -35,7 +35,7 @@ export const resourceNamespaces = Object.entries(namespaceNames).map(([_k, names
         }
       },
     },
-    { provider: nameSpacesProvider }
+    { provider: namespacesProvider }
   );
   return resourceNamespace
 })

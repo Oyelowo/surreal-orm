@@ -19,34 +19,35 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
   sh.exec("npm i");
   sh.rm("-rf", "./login");
   sh.mkdir("./login");
-
+  
   sh.exec("pulumi login file://login");
-
+  
   sh.echo(c.blueBright(`First Delete old resources for" ${environment} at ${manifestsDirForEnv}`));
-
+  
   const getManifestsWithinDirName = (dirName: "1-manifest" | "0-crd") => sh.exec(`find ${manifestsDirForEnv} -type d -name "${dirName}"`, { silent: true }).stdout.split("\n");
   const manifestsNonCrds = getManifestsWithinDirName("1-manifest");
   const manifestsCrds = getManifestsWithinDirName("0-crd");
   manifestsNonCrds.concat(manifestsCrds).forEach(f => sh.rm("-rf", f.trim()));
-
+  
   sh.exec("export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev");
-
+  
   // Pulumi needs some environment variables set for generating deployments with image tag
   /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
-   */
-  const imageEnvVarSetterForPulumi = Object.entries(imageTags)
-    .map(([k, v]) => `export ${k}=${v}`)
-    .join(" ");
+  */
+ const imageEnvVarSetterForPulumi = Object.entries(imageTags)
+ .map(([k, v]) => `export ${k}=${v}`)
+ .join(" ");
+ 
 
-  sh.exec(
-    `
-      ${imageEnvVarSetterForPulumi} 
-      export ${ENVIRONMENT}=${environment}  
-      export PULUMI_CONFIG_PASSPHRASE="" 
-      pulumi up --yes --skip-preview --stack dev
-      `
-  );
-
+ sh.exec(
+   `
+   ${imageEnvVarSetterForPulumi} 
+   export ${ENVIRONMENT}=${environment}  
+   export PULUMI_CONFIG_PASSPHRASE="" 
+   pulumi up --yes --skip-preview --stack dev
+   `
+   );
+   
   sh.rm("-rf", "./login");
 }
 
@@ -68,6 +69,7 @@ export async function regenerateSealedSecretsManifests({
   keepSecretOutputs,
   regenerateSealedSecrets,
 }: GenSealedSecretsProps) {
+  return
   // const contextDir = p.join(__dirname, "..", "manifests", "generated", environment);
   const contextDir = getGeneratedEnvManifestsDir(environment);
   const unsealedSecretsFilePathsForEnv = getFilePathsThatMatch({

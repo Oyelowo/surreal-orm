@@ -16,6 +16,8 @@ const metadataSealedSecretsController: Metadata = {
 // App that deploys sealedSecretsController resources themselves
 /* sealedSecretsController APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const sealedSecretsControllerApplication = createArgocdApplication({
-  metadata: { ...metadataSealedSecretsController },
+  metadata: {
+    ...metadataSealedSecretsController,
+    resourceType: "infrastructure" },
   pathToAppManifests: getRepoPathFromAbsolutePath(sealedSecretsControllerDir),
 });

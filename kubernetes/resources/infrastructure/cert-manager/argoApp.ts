@@ -9,6 +9,8 @@ export const certManagerApplication = createArgocdApplication({
   metadata: {
     name: certManagerControllerName,
     namespace: namespaceNames.certManager,
+    resourceType: "infrastructure"
+    // argoApplicationName: "cert-manager"
   },
   pathToAppManifests: getRepoPathFromAbsolutePath(certManagerControllerDir),
 });

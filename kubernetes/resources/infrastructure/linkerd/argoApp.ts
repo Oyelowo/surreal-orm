@@ -1,5 +1,5 @@
+import { linkerdVizName } from './../../shared/manifestsDirectory';
 import { linkerdVizDir } from './linkerdViz';
-import { linkerdBootstrapDir } from './provider';
 import { namespaceNames } from "../../namespaces/util";
 import { createArgocdApplication } from "../../shared/createArgoApplication";
 import { getRepoPathFromAbsolutePath, linkerd2Name } from "../../shared/manifestsDirectory";
@@ -13,24 +13,18 @@ export const Linkerd2Application = createArgocdApplication({
   metadata: {
     name: linkerd2Name,
     namespace: namespaceNames.linkerd,
+    resourceType: "infrastructure"
+    // argoApplicationName: "linkerd"
   },
   pathToAppManifests: getRepoPathFromAbsolutePath(linkerdDir),
 });
 
-
-export const LinkerdBootstrapApplication = createArgocdApplication({
-  metadata: {
-    name: linkerd2Name,
-    // We want the bootstrap stuff to be in cert manager namespace
-    namespace: namespaceNames.certManager,
-  },
-  pathToAppManifests: getRepoPathFromAbsolutePath(linkerdBootstrapDir),
-});
-
 export const LinkerdVizApplication = createArgocdApplication({
   metadata: {
-    name: linkerd2Name,
+    name: linkerdVizName,
     namespace: namespaceNames.linkerd,
+    resourceType: "infrastructure"
+    // argoApplicationName: "linkerd-viz"
   },
   pathToAppManifests: getRepoPathFromAbsolutePath(linkerdVizDir),
 });

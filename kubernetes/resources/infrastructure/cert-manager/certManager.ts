@@ -16,7 +16,7 @@ export const certManagerControllerProvider = new k8s.Provider(certManagerControl
 
 
 const certManagerValues: DeepPartial<CertManagerValuesJetspack> = {
-  installCRDs: true
+  installCRDs: true,
 };
 
 export const certManagerHelm = new k8s.helm.v3.Chart(
