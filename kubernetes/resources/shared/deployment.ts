@@ -3,10 +3,18 @@ import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
 import * as pulumi from "@pulumi/pulumi";
 import { NoUnion } from "./types/own-types";
-import { AppConfigs, AppName, DBType, NamespaceOfApps } from "./types/own-types";
+import {
+  AppConfigs,
+  AppName,
+  DBType,
+  NamespaceOfApps,
+} from "./types/own-types";
 import * as argocd from "../../crd2pulumi/argocd";
 import { createArgocdApplication } from "./createArgoApplication";
-import { getPathToServicesDir, getRepoPathFromAbsolutePath } from "./manifestsDirectory";
+import {
+  getPathToResource,
+  getRepoPathFromAbsolutePath,
+} from "./manifestsDirectory";
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
 
 export class ServiceDeployment<
@@ -36,13 +44,13 @@ export class ServiceDeployment<
     const metadata = {
       ...args.metadata,
       // ...getArgoAppSyncWaveAnnotation("service")
-    }
+    };
     const resourceName = metadata.name;
 
     this.provider = new k8s.Provider(
       this.appName,
       {
-        renderYamlToDirectory: getPathToServicesDir(this.appName, getEnvironmentVariables().ENVIRONMENT),
+        renderYamlToDirectory: this.getServiceDir(),
       },
       { parent: this }
     );
@@ -103,7 +111,7 @@ export class ServiceDeployment<
         runAsNonRoot: true,
         runAsUser: 10000,
         runAsGroup: 10000,
-        // fsGroup: 
+        // fsGroup:
       },
       imagePullSecrets: [
         {
@@ -122,8 +130,8 @@ export class ServiceDeployment<
         metadata: {
           ...metadata,
           annotations: {
-            "linkerd.io/inject": "enabled"
-          }
+            "linkerd.io/inject": "enabled",
+          },
         },
       },
       { provider: this.getProvider(), parent: this }
@@ -146,15 +154,14 @@ export class ServiceDeployment<
         name: metadata.name,
         namespace: metadata.namespace,
         // argoApplicationName: "argocd-applications",
-        resourceType: "services"
+        resourceType: "services",
       },
-      pathToAppManifests: getRepoPathFromAbsolutePath(
-        getPathToServicesDir(this.appName, getEnvironmentVariables().ENVIRONMENT)
-      ),
+      pathToAppManifests: getRepoPathFromAbsolutePath(this.getServiceDir()),
       opts: {
         parent: this,
       },
     });
+
     const useLoadBalancer = new pulumi.Config("useLoadBalancer") ?? false;
     if (useLoadBalancer) {
       this.ipAddress = this.service.status.loadBalancer.ingress[0].ip;
@@ -189,11 +196,22 @@ export class ServiceDeployment<
    */
   #secretsObjectToEnv = (secretInstance: kx.Secret) => {
     const secretObject = getSecretsForApp(this.appName);
-    const keyValueEntries = Object.keys(secretObject).map((key) => [key, secretInstance.asEnvValue(key)]);
+    const keyValueEntries = Object.keys(secretObject).map((key) => [
+      key,
+      secretInstance.asEnvValue(key),
+    ]);
     return Object.fromEntries(keyValueEntries);
   };
 
   getProvider = () => {
     return this.provider;
+  };
+
+  getServiceDir = (): string => {
+    return getPathToResource({
+      resourceType: "services",
+      environment: getEnvironmentVariables().ENVIRONMENT,
+      resourceName: this.appName,
+    });
   };
 }

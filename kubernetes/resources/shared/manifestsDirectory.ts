@@ -1,6 +1,7 @@
 import { AppName, Environment } from "./types/own-types";
 import path from "path";
 import sh from "shelljs";
+// TODO:  Unify all the resourceType/resourceName path utils into a singular function e.g
 
 export const getMainBaseDir = () => {
   const mainBaseDir = path.join(__dirname, "..", "..");
@@ -20,6 +21,7 @@ export const getGeneratedEnvManifestsDir = (environment: Environment) => {
   const MANIFESTS_DIR = getManifestsBaseDir();
   return path.join(MANIFESTS_DIR, "generated", environment);
 };
+
 export const argoApplicationsNames = [
   "namespace-names",
   "sealed-secrets",
@@ -29,19 +31,20 @@ export const argoApplicationsNames = [
   "linkerd-viz",
   "argocd",
   "argocd-applications",
-  "service"
+  "service",
 ] as const;
 
 export type ArgoApplicationName = typeof argoApplicationsNames[number];
-export type ResourceType = "infrastructure" | "services" | "namespaces" | "argo_applications_parents"
+export type ResourceType =
+  | "infrastructure"
+  | "services"
+  | "namespaces"
+  | "argo_applications_parents";
+type ResourceName = ArgoApplicationName | AppName;
 
-/**
- * e.g /manifests/generated/local/infrastructure/1-manifests
- *                               /infrastructure/1-crd
- *                               /infrastructure/sealed-secrets
- */
 export const getPathToInfrastructureDir = (
-  toolName: ArgoApplicationName,
+  // toolName: ArgoApplicationName,
+  toolName: ResourceName,
   environment: Environment
 ) => {
   const MANIFESTS_BASE_DIR_FOR_ENV = getGeneratedEnvManifestsDir(environment);
@@ -51,7 +54,11 @@ export const getPathToInfrastructureDir = (
   return dir;
 };
 
-export const getPathToServicesDir = (appName: AppName | "argocd-applications", environment: Environment) => {
+// export const getPathToServicesDir = (appName: AppName | "argocd-applications", environment: Environment) => {
+export const getPathToServicesDir = (
+  appName: ResourceName,
+  environment: Environment
+) => {
   return path.join(
     getGeneratedEnvManifestsDir(environment),
     "services",
@@ -59,6 +66,25 @@ export const getPathToServicesDir = (appName: AppName | "argocd-applications", e
   );
   // return `kubernetes/manifests/generated/${environment}/services/${appName}`;
 };
+
+export const getPathToResoucrcesDir = (
+  appName: ResourceName,
+  resourceType: ResourceType,
+  environment: Environment
+) => {
+  return path.join(
+    getGeneratedEnvManifestsDir(environment),
+    resourceType,
+    appName
+  );
+  // return `kubernetes/manifests/generated/${environment}/services/${appName}`;
+};
+
+/**
+ * e.g /manifests/generated/local/infrastructure/1-manifests
+ *                               /infrastructure/1-crd
+ *                               /infrastructure/sealed-secrets
+ */
 
 export const getRepoPathFromAbsolutePath = (absolutePath: string) => {
   const toolPath = absolutePath.split("/kubernetes/").at(-1);
@@ -68,6 +94,25 @@ export const getRepoPathFromAbsolutePath = (absolutePath: string) => {
   return path.join("kubernetes", toolPath);
 };
 
+type GetPathToResourceProps = {
+  resourceType: ResourceType;
+  // resourceName: Omit<ArgoApplicationName | AppName, "service">
+  resourceName: ArgoApplicationName | AppName;
+  environment: Environment;
+};
+
+export const getPathToResource = (props: GetPathToResourceProps): string => {
+  const resourcePath = path.join(
+    getGeneratedEnvManifestsDir(props.environment),
+    props.resourceType,
+    props.resourceName
+  );
+  return resourcePath;
+};
+
+function assertUnreachable(x: never): never {
+  throw new Error("Didn't expect to get here");
+}
 
 // export const getArgoAppSyncWaveAnnotation = (argoApplicationName: ArgoApplicationName) => {
 
@@ -86,8 +131,6 @@ export const certManagerControllerName: ArgoApplicationName = "cert-manager";
 export const getCertManagerControllerDir = (environment: Environment) => {
   return getPathToInfrastructureDir(certManagerControllerName, environment);
 };
-
-
 
 export const linkerd2Name: ArgoApplicationName = "linkerd";
 export const getLinkerd2Dir = (environment: Environment) => {
@@ -119,16 +162,15 @@ export const getIngressControllerDir = (environment: Environment) => {
   return getPathToInfrastructureDir(ingressControllerName, environment);
 };
 
-export const argocdApplicationsName: ArgoApplicationName = "argocd-applications";
+export const argocdApplicationsName: ArgoApplicationName =
+  "argocd-applications";
 export const getArgocdInfraApplicationsDir = (environment: Environment) => {
   return getPathToInfrastructureDir(argocdApplicationsName, environment);
 };
 
-
 export const getArgocdServicesApplicationsDir = (environment: Environment) => {
   return getPathToServicesDir(argocdApplicationsName, environment);
 };
-
 
 export const getNamespacesNamesDir = (environment: Environment) => {
   return path.join(getGeneratedEnvManifestsDir(environment), "namespaces");
@@ -139,5 +181,8 @@ export const getNamespacesNamesArgoAppDir = (environment: Environment) => {
 };
 
 export const getArgoAppsParentsDir = (environment: Environment) => {
-  return path.join(getGeneratedEnvManifestsDir(environment), "argo-applications-parents");
+  return path.join(
+    getGeneratedEnvManifestsDir(environment),
+    "argo-applications-parents"
+  );
 };
