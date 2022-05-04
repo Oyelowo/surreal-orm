@@ -1,10 +1,10 @@
 import { namespaceNames } from "../../namespaces";
-import { createArgocdApplication } from "../../shared/createArgoApplication";
+import { createArgocdChildrenApplication } from "../../shared/createArgoApplication";
 
 
 // App that deploys sealedSecretsController resources themselves
 /* sealedSecretsController APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
-export const sealedSecretsControllerApplication = createArgocdApplication({
+export const sealedSecretsControllerApplication = createArgocdChildrenApplication({
   // resourceType: "infrastructure",
   resourceName: "sealed-secrets",
   namespace: namespaceNames.default

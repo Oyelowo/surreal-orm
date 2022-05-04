@@ -180,15 +180,18 @@ export function getResourceProvider(
           kubernetes/manifests/generated/local/infrastructure/argo-applications/(application-argo-linkerd, application-argo-cert-manager)
  */
 
+export function getArgocdChildrenApplicationsAbsolutePath(resourceType: ResourceType, environment: Environment) {
+  return path.join(getPathToResourceType({ resourceType, environment }), ARGO_APPLICATIONS_DIR_NAME)
+}
 const ARGO_APPLICATIONS_DIR_NAME = "argo-children-applications"
-export function getArgocdResourceProvider(
+export function getArgocdChildrenResourcesProvider(
   resourceName: ResourceName,
   // resourceType: ResourceType,
   environment: Environment
 ): k8s.Provider {
   return getResourceProperties(resourceName, (resourceType) => {
     return new k8s.Provider(`${resourceType}-${resourceName}-${uuid()}`, {
-      renderYamlToDirectory: path.join(getPathToResourceType({ resourceType, environment }), ARGO_APPLICATIONS_DIR_NAME),
+      renderYamlToDirectory: getArgocdChildrenApplicationsAbsolutePath(resourceType, environment),
     });
   });
 }

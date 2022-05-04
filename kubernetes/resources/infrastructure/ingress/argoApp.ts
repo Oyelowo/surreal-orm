@@ -1,7 +1,7 @@
 
-import { createArgocdApplication } from "../../shared/createArgoApplication"
+import { createArgocdChildrenApplication } from "../../shared/createArgoApplication"
 
-export const ingressControllerApplication = createArgocdApplication({
+export const ingressControllerApplication = createArgocdChildrenApplication({
   // resourceType: "infrastructure",
   resourceName: "nginx-ingress",
   namespace: "default"

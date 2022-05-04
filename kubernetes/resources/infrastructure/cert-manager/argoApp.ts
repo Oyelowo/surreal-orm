@@ -1,8 +1,7 @@
-import { namespaceNames } from "../../namespaces/util";
-import { createArgocdApplication } from "../../shared/createArgoApplication";
+import { createArgocdChildrenApplication } from "../../shared/createArgoApplication";
 
 
-export const certManagerApplication = createArgocdApplication({
+export const certManagerApplication = createArgocdChildrenApplication({
   // resourceType: "infrastructure",
   resourceName: "cert-manager",
   namespace: "cert-manager"

@@ -10,7 +10,7 @@ import {
   NamespaceOfApps,
 } from "./types/own-types";
 import * as argocd from "../../crd2pulumi/argocd";
-import { createArgocdApplication } from "./createArgoApplication";
+import { createArgocdChildrenApplication } from "./createArgoApplication";
 import {
   getPathToResource,
   getRepoPathFromAbsolutePath,
@@ -149,7 +149,7 @@ export class ServiceDeployment<
       ],
     });
 
-    this.argocdApplication = createArgocdApplication({
+    this.argocdApplication = createArgocdChildrenApplication({
       namespace: metadata.namespace,
       // resourceType: "services",
       resourceName: this.appName,
