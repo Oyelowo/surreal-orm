@@ -1,5 +1,9 @@
 import { NamespaceName, namespaceNames } from "./../namespaces/util";
-import { ResourceName, getResourceRelativePath } from "./manifestsDirectory";
+import {
+  ResourceName,
+  getResourceRelativePath,
+  getArgoResourceProvider,
+} from "./manifestsDirectory";
 import { CustomResourceOptions } from "@pulumi/pulumi";
 import * as argocd from "../../crd2pulumi/argocd";
 import * as k8s from "@pulumi/kubernetes";
@@ -86,13 +90,15 @@ export function createArgocdApplication({
   //     ...metadata.labels,
   //   },
   // };
+  const { ENVIRONMENT } = getEnvironmentVariables();
   const argocdApplication = new argocd.argoproj.v1alpha1.Application(
     resourceName,
     {
       // apiVersion: "argoproj.io/v1alpha1",
       // kind: "Application",
       metadata: {
-        name: metadata.name,
+        name: resourceName,
+        // name: metadata.name,
         namespace: namespaceNames.argocd,
         annotations: {
           finalizers: ["resources-finalizer.argocd.argoproj.io"] as any,
@@ -109,10 +115,7 @@ export function createArgocdApplication({
         source: {
           repoURL: "https://github.com/Oyelowo/modern-distributed-app-template",
           // path: pathToAppManifests,
-          path: getResourceRelativePath(
-            resourceName,
-            getEnvironmentVariables().ENVIRONMENT
-          ),
+          path: getResourceRelativePath(resourceName, ENVIRONMENT),
           //   path: "kubernetes/manifests/generated",
           targetRevision: "HEAD",
           directory: {
@@ -128,7 +131,7 @@ export function createArgocdApplication({
       },
     },
     {
-      // provider: getArgoAppDir(resourceType),
+      provider: getArgoResourceProvider(resourceName, ENVIRONMENT),
       // provider: getArgoAppDir(metadata.resourceType),
       ...opts,
     }

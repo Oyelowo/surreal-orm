@@ -152,3 +152,23 @@ export function getResourceProvider(
     });
   });
 }
+
+/* 
+// We want argo-applications to be in the same folder
+// resources may be for
+          kubernetes/manifests/generated/local/infrastructure/linkerd
+          kubernetes/manifests/generated/local/infrastructure/cert-manager
+   
+    The argo applications will be in:
+          kubernetes/manifests/generated/local/infrastructure/argo-applications/(application-argo-linkerd, application-argo-cert-manager)
+ */
+export function getArgoResourceProvider(
+  resourceName: ResourceName,
+  environment: Environment
+): k8s.Provider {
+  return getResourceProperties(resourceName, (resourceType) => {
+    return new k8s.Provider(`${resourceType}-${resourceName}-${uuid()}`, {
+      renderYamlToDirectory: path.join(getResourceAbsolutePath(resourceName, environment), "..", "argo-applications"),
+    });
+  });
+}
