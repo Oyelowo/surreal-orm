@@ -2,7 +2,7 @@ import { NamespaceName, namespaceNames } from "./../namespaces/util";
 import {
   ResourceName,
   getResourceRelativePath,
-  getArgoResourceProvider,
+  getArgocdResourceProvider,
 } from "./manifestsDirectory";
 import { CustomResourceOptions } from "@pulumi/pulumi";
 import * as argocd from "../../crd2pulumi/argocd";
@@ -65,6 +65,7 @@ type Props = {
   // resourceType: ResourceType;
   resourceName: ResourceName;
   // environment: Environment,
+  sourcePath?: string;
   opts?: CustomResourceOptions | undefined;
 };
 
@@ -76,6 +77,7 @@ export function createArgocdApplication({
   // resourceType,
   // environment,
   opts,
+  sourcePath
 }: Props) {
   const metadata = {
     name,
@@ -115,7 +117,7 @@ export function createArgocdApplication({
         source: {
           repoURL: "https://github.com/Oyelowo/modern-distributed-app-template",
           // path: pathToAppManifests,
-          path: getResourceRelativePath(resourceName, ENVIRONMENT),
+          path: sourcePath ?? getResourceRelativePath(resourceName, ENVIRONMENT),
           //   path: "kubernetes/manifests/generated",
           targetRevision: "HEAD",
           directory: {
@@ -131,7 +133,7 @@ export function createArgocdApplication({
       },
     },
     {
-      provider: getArgoResourceProvider(resourceName, ENVIRONMENT),
+      provider: getArgocdResourceProvider(resourceName, ENVIRONMENT),
       // provider: getArgoAppDir(metadata.resourceType),
       ...opts,
     }
