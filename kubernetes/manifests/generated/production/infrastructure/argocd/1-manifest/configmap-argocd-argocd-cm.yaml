@@ -7,12 +7,12 @@ kind: ConfigMap
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","data":{"application.instanceLabelKey":"argocd.argoproj.io/instance","dex.config":"","url":""},"kind":"ConfigMap","metadata":{"labels":{"app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argo-cd","app.kubernetes.io/part-of":"argocd","helm.sh/chart":"argo-cd-3.1.14"},"name":"argocd-cm","namespace":"argocd"}}
+      {"apiVersion":"v1","data":{"application.instanceLabelKey":"argocd.argoproj.io/instance","dex.config":"","url":""},"kind":"ConfigMap","metadata":{"labels":{"app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argo-cd","app.kubernetes.io/part-of":"argocd","helm.sh/chart":"argo-cd-3.1.16"},"name":"argocd-cm","namespace":"argocd"}}
   labels:
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/name: argo-cd
     app.kubernetes.io/part-of: argocd
-    helm.sh/chart: argo-cd-3.1.14
+    helm.sh/chart: argo-cd-3.1.16
   name: argocd-cm
   namespace: argocd
