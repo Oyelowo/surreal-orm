@@ -141,8 +141,8 @@ export function createArgocdChildrenApplication({
   resourceName,
   namespace,
   labels,
-}: ArgocdChildrenApplicationProps) {
-  createArgocdApplication({
+}: ArgocdChildrenApplicationProps): argocd.argoproj.v1alpha1.Application {
+  return createArgocdApplication({
     name: resourceName,
     namespace,
     labels,
@@ -178,8 +178,8 @@ export function createArgocdParentsApplication({
   resourceType,
   name,
   labels,
-}: ArgocdParentsApplicationProps) {
-  createArgocdApplication({
+}: ArgocdParentsApplicationProps): argocd.argoproj.v1alpha1.Application {
+  return createArgocdApplication({
     name,
     namespace,
     labels,
