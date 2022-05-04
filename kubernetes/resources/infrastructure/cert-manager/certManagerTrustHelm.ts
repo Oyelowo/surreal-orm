@@ -1,4 +1,4 @@
-import { certManagerProperties } from './settings';
+import { certManagerProvider } from './settings';
 import { CertManagerTrustHelmValues } from './../../shared/types/helm-charts/certManagerTrustHelmValues';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 import * as k8s from "@pulumi/kubernetes";
@@ -27,5 +27,5 @@ export const certManagerTrustHelm = new k8s.helm.v3.Chart(
         // available.
         skipAwait: false,
     },
-    { provider: certManagerProperties.provider }
+    { provider: certManagerProvider }
 );

@@ -1,4 +1,4 @@
-import { certManagerProperties } from './../cert-manager/settings';
+import { certManagerProvider } from './../cert-manager/settings';
 import * as cmt from "../../../crd2pulumi/certManagerTrust/trust";
 import { LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME } from "./certManagerCAIssuer";
 
@@ -30,5 +30,5 @@ export const linkerdCertManagertrust = new cmt.v1alpha1.Bundle(
         },
     },
     // Put in cert manager so that it can be redistributed earlier
-    { provider: certManagerProperties.provider }
+    { provider: certManagerProvider }
 );

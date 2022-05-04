@@ -1,10 +1,11 @@
+import { ResourceName } from './../../shared/manifestsDirectory';
 import { helmChartsInfo } from './../../shared/helmChartInfo';
 import { Linkerd2HelmValues } from "../../shared/types/helm-charts/linkerd2HelmValues";
 import * as k8s from "@pulumi/kubernetes";
 
 import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial } from "../../shared/types/own-types";
-import { linkerdProperties } from './settings';
+import { linkerdProvider } from './settings';
 /* 
  --set-file identityTrustAnchorsPEM=ca.crt \
   --set-file identity.issuer.tls.crtPEM=issuer.crt \
@@ -39,9 +40,10 @@ const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
   // cniEnabled: true
 };
 
+// const resourceName: ResourceName = "linkerd";
 const { repo, linkerd2: { chart, version } } = helmChartsInfo.linkerdRepo;
 export const linkerd = new k8s.helm.v3.Chart(
-  linkerdProperties.resourceName,
+  chart,
   {
     chart,
     fetchOpts: {
@@ -56,5 +58,5 @@ export const linkerd = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: linkerdProperties.provider }
+  { provider: linkerdProvider }
 );

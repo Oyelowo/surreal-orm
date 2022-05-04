@@ -104,26 +104,12 @@ type ResourcePropertiesReturn = {
   resourceType: ResourceType;
 };
 
-export function getResourceProperties(
-  resourceName: ResourceName,
-  environment: Environment
-): ResourcePropertiesReturn {
-  const getResourceProps = (resourceType: ResourceType) => {
-    const props = {
-      resourceName,
-      environment,
-      resourceType,
-    };
-    const pathAbsolute = getPathToResource(props);
-    return {
-      pathAbsolute,
-      resourceName,
-      resourceType,
-      provider: createProvider(props),
-      pathRelative: getRepoPathFromAbsolutePath(pathAbsolute),
-    };
-  };
 
+function getResourceProperties<T>(
+  resourceName: ResourceName,
+  environment: Environment,
+  getResourceProps: (resourceName: ResourceType) => T
+): T {
   switch (resourceName) {
     case "react-web":
     case "graphql-mongo":
@@ -161,56 +147,39 @@ export function assertUnreachable(x: never): never {
 //   return getResourceProperties(resourceName, environment).pathAbsolute;
 // }
 
-export function getResourceRelativePath(
+
+// export function getResourceRelativePath(
+export function getResourceProvider(
   resourceName: ResourceName,
   environment: Environment
-): string {
-  return getResourceProperties(resourceName, environment).pathAbsolute;
+): k8s.Provider {
+  return getResourceProperties(resourceName, environment, (resourceType) => createProvider({
+    resourceName,
+    resourceType,
+    environment
+  })
+  );
 }
+
 
 export function getResourceAbsolutePath(
   resourceName: ResourceName,
   environment: Environment
 ): string {
-  // return getResourceProperties(resourceName, environment).pathAbsolute;
-  const getResourceProps = (resourceType: ResourceType) => {
-    const props = {
-      resourceName,
-      environment,
-      resourceType,
-    };
-    const pathAbsolute = getPathToResource(props);
-    return {
-      pathAbsolute,
-      resourceName,
-      resourceType,
-      // provider: createProvider(props),
-      pathRelative: getRepoPathFromAbsolutePath(pathAbsolute),
-    };
-  };
+  return getResourceProperties(resourceName, environment, (resourceType) => getPathToResource({
+    resourceName,
+    resourceType,
+    environment
+  })
+  );
+}
 
-  switch (resourceName) {
-    case "react-web":
-    case "graphql-mongo":
-    case "graphql-postgres":
-    case "grpc-mongo": {
-      return getResourceProps("services").pathAbsolute;
-    }
+export function getResourceRelativePath(
+  resourceName: ResourceName,
+  environment: Environment
+): string {
+  const pathAbsolute = getResourceAbsolutePath(resourceName, environment)
+  // provider: createProvider(props),
+  return getRepoPathFromAbsolutePath(pathAbsolute)
 
-    case "argocd":
-    case "cert-manager":
-    case "linkerd":
-    case "linkerd":
-    case "sealed-secrets":
-    case "linkerd-viz":
-    case "namespace-names":
-    case "nginx-ingress": {
-      return getResourceProps("infrastructure").pathAbsolute;
-    }
-
-    case "argocd-applications": {
-      return getResourceProps("argo_applications_parents").pathAbsolute;
-    }
-  }
-  return assertUnreachable(resourceName);
 }

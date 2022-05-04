@@ -1,6 +1,6 @@
-import { getResourceProperties } from "../shared/manifestsDirectory";
+import { getResourceProvider } from "../shared/manifestsDirectory";
 import { getEnvironmentVariables } from "../shared/validations";
 
 
 const { ENVIRONMENT } = getEnvironmentVariables();
-export const namespacesNamesProperties = getResourceProperties("namespace-names", ENVIRONMENT);
+export const namespacesNamesProvider = getResourceProvider("namespace-names", ENVIRONMENT);

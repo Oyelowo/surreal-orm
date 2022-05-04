@@ -1,6 +1,6 @@
-import { getResourceProperties } from "../../shared/manifestsDirectory";
+import { getResourceProvider } from "../../shared/manifestsDirectory";
 import { getEnvironmentVariables } from "../../shared/validations";
 
 const { ENVIRONMENT } = getEnvironmentVariables();
-export const linkerdProperties = getResourceProperties("linkerd", ENVIRONMENT);
-export const linkerdVizProperties = getResourceProperties("linkerd-viz", ENVIRONMENT);
+export const linkerdProvider = getResourceProvider("linkerd", ENVIRONMENT);
+export const linkerdVizProvider = getResourceProvider("linkerd-viz", ENVIRONMENT);

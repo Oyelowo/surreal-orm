@@ -1,3 +1,4 @@
+import { ResourceName } from './../../shared/manifestsDirectory';
 import * as bcrypt from "bcrypt";
 import { INGRESS_CLASSNAME_NGINX } from "../ingress/ingressRules";
 import { NginxConfiguration } from "../../shared/types/nginxConfigurations";
@@ -9,17 +10,17 @@ import { CLUSTER_ISSUER_NAME } from "../cert-manager/clusterIssuer";
 import { DOMAIN_NAME_SUB_LINKERD_VIZ } from "../ingress/constant";
 import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial } from "../../shared/types/own-types";
-import { linkerdVizProperties } from './settings';
+import { linkerdVizProvider } from './settings';
 
 
 const values: DeepPartial<LinkerdVizHelmValues> = {};
-
+const resourceName: ResourceName = "linkerd-viz"
 const {
     repo,
     linkerdViz: { chart, version },
 } = helmChartsInfo.linkerdRepo;
 export const linkerdVizHelmChart = new k8s.helm.v3.Chart(
-    linkerdVizProperties.resourceName,
+    resourceName,
     {
         chart,
         fetchOpts: {
@@ -34,7 +35,7 @@ export const linkerdVizHelmChart = new k8s.helm.v3.Chart(
         // available.
         skipAwait: false,
     },
-    { provider: linkerdVizProperties.provider }
+    { provider: linkerdVizProvider }
 );
 
 const linkerdVizIngressName = "linkerd-viz-ingress";
@@ -95,7 +96,7 @@ export const linkerVizIngress = new k8s.networking.v1.Ingress(
             ],
         },
     },
-    { provider: linkerdVizProperties.provider }
+    { provider: linkerdVizProvider }
 );
 
 const saltRounds = 10;
@@ -115,5 +116,5 @@ export const linkerdVizSecret = new kx.Secret(
             auth: `admin:${hash}`,
         },
     },
-    { provider: linkerdVizProperties.provider }
+    { provider: linkerdVizProvider }
 );

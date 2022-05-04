@@ -3,7 +3,8 @@ import { getEnvironmentVariables } from "../../shared/validations";
 import * as k8s from "@pulumi/kubernetes";
 import { IngressControllerValuesBitnami } from "../../shared/types/helm-charts/ingressControllerValuesBitnami";
 import { RecursivePartial } from "../../shared/types/own-types";
-import { nginxIngressProperties } from "./settings";
+import { nginxIngressProvider } from "./settings";
+import { helmChartsInfo } from "../../shared/helmChartInfo";
 
 
 // Install the NGINX ingress controller to our cluster. The controller
@@ -22,23 +23,24 @@ import { nginxIngressProperties } from "./settings";
 //   { provider: provider }
 // );
 
+const { repo, nginxIngress: { chart, version } } = helmChartsInfo.bitnamiRepo;
 const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> = {
   // containerPorts: {
   //   http: 8000,
   //   https: 443,
   // },
-  fullnameOverride: nginxIngressProperties.resourceName,
+  fullnameOverride: chart,
 };
 // nginx-ingress-controller
 // K3s also comes with a traefik ingress controoler. Disable that if using this
 export const ingressNginxController = new k8s.helm.v3.Chart(
-  nginxIngressProperties.resourceName,
+  chart,
   {
-    chart: "nginx-ingress-controller",
+    chart,
     fetchOpts: {
-      repo: "https://charts.bitnami.com/bitnami",
+      repo,
     },
-    version: "9.1.22",
+    version,
     values: ingressControllerValues,
     // namespace: "nginx-ingress",
     // namespace: devNamespaceName,
@@ -47,5 +49,5 @@ export const ingressNginxController = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: nginxIngressProperties.provider }
+  { provider: nginxIngressProvider }
 );

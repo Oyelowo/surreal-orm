@@ -35,7 +35,15 @@ export const helmChartsInfo = {
         repo: "https://charts.bitnami.com/bitnami",
         certManager: {
             chart: "cert-manager",
-            version: "0.4.17"
+            version: "0.5.0"
+        },
+        nginxIngress: {
+            chart: "nginx-ingress-controller",
+            version: "9.1.26",
+        },
+        argocd: {
+            chart: "argo-cd",
+            version: "3.1.16",
         }
     },
     jetspackRepo: {

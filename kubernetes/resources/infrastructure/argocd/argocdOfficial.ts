@@ -8,7 +8,7 @@ import { ArgocdHelmValuesArgo } from "../../shared/types/helm-charts/argocdHelmV
 import { DeepPartial } from "../../shared/types/own-types";
 import bcrypt from "bcrypt";
 import { DOMAIN_NAME_SUB_ARGOCD } from "../ingress/constant";
-import { argocdProperties } from "./settings";
+import { argocdProvider } from "./settings";
 
 
 // --insecure
@@ -77,5 +77,5 @@ export const argocdHelm = new k8s.helm.v3.Chart(
         // available.
         skipAwait: false,
     },
-    { provider: argocdProperties.provider }
+    { provider: argocdProvider }
 );

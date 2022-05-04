@@ -1,12 +1,6 @@
 import { NamespaceName, namespaceNames } from "./../namespaces/util";
-import {
-  ResourceType,
-  ResourceName,
-  getPathToResource,
-  getRepoPathFromAbsolutePath,
-  getResourceProperties,
-} from "./manifestsDirectory";
-import { CustomResourceOptions, Resource } from "@pulumi/pulumi";
+import { ResourceName, getResourceRelativePath } from "./manifestsDirectory";
+import { CustomResourceOptions } from "@pulumi/pulumi";
 import * as argocd from "../../crd2pulumi/argocd";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
@@ -115,10 +109,10 @@ export function createArgocdApplication({
         source: {
           repoURL: "https://github.com/Oyelowo/modern-distributed-app-template",
           // path: pathToAppManifests,
-          path: getResourceProperties(
+          path: getResourceRelativePath(
             resourceName,
             getEnvironmentVariables().ENVIRONMENT
-          ).pathAbsolute,
+          ),
           //   path: "kubernetes/manifests/generated",
           targetRevision: "HEAD",
           directory: {

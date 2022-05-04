@@ -2,7 +2,7 @@
 
 import { helmChartsInfo } from './../resources/shared/helmChartInfo';
 import { namespaceNames } from '../resources/namespaces/util';
-import { getResourceAbsolutePath, getResourceProperties, ResourceName } from "./../resources/shared/manifestsDirectory";
+import { getResourceAbsolutePath, ResourceName } from "./../resources/shared/manifestsDirectory";
 
 /* 
 TODO: ADD INSTRUCTION ON HOW THIS WORKS
@@ -137,7 +137,7 @@ async function bootstrap() {
   sh.exec(`kubectl apply -R -f  ${linkerdVizDir}/0-crd`);
   sh.exec(`kubectl apply -R -f  ${linkerdVizDir}/1-manifest`);
 
-return
+
   // TODO: separate sealed secrets deletion step
   await regenerateSealedSecretsManifests({
     environment: ARGV.e,

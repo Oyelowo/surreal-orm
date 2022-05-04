@@ -7,7 +7,7 @@ import { namespaceNames } from "../../namespaces/util";
 import { NginxConfiguration } from "../../shared/types/nginxConfigurations";
 import { DOMAIN_NAME_BASE } from "./constant"
 import { CLUSTER_ISSUER_NAME } from "../cert-manager";
-import { nginxIngressProperties } from "./settings";
+import { nginxIngressProvider } from "./settings";
 
 const { ENVIRONMENT } = getEnvironmentVariables()
 
@@ -36,7 +36,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
     `${appBase}-ingress`,
     {
         metadata: {
-            name: nginxIngressProperties.resourceName,
+            name: `${appBase}-ingress`,
             namespace: namespaceNames.applications,
             annotations: annotations as any,
         },
@@ -119,5 +119,5 @@ export const appIngress = new k8s.networking.v1.Ingress(
 
         },
     },
-    { provider: nginxIngressProperties.provider }
+    { provider: nginxIngressProvider }
 );

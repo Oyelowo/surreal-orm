@@ -5,7 +5,8 @@ import { namespaceNames } from "../../namespaces/util";
 import { ArgocdHelmValuesBitnami } from "../../shared/types/helm-charts/argocdHelmValuesBitnami";
 import { DeepPartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
-import { argocdProperties } from './settings';
+import { argocdProvider } from './settings';
+import { helmChartsInfo } from '../../shared/helmChartInfo';
 
 
 // TODO: Use this everywhere
@@ -35,14 +36,15 @@ const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
 };
 
 
+const { repo, argocd: { chart, version } } = helmChartsInfo.bitnamiRepo;
 export const argocdHelm = new k8s.helm.v3.Chart(
   "argocd",
   {
-    chart: "argo-cd",
+    chart,
     fetchOpts: {
-      repo: "https://charts.bitnami.com/bitnami",
+      repo,
     },
-    version: "3.1.14",
+    version,
     values: argocdValuesOld,
     namespace: namespaceNames.argocd,
     // By default Release resource will wait till all created resources
@@ -50,5 +52,5 @@ export const argocdHelm = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: argocdProperties.provider }
+  { provider: argocdProvider }
 );

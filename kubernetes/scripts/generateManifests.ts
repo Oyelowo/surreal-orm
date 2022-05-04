@@ -1,4 +1,4 @@
-import { getGeneratedEnvManifestsDir, getResourceProperties } from "./../resources/shared/manifestsDirectory";
+import { getGeneratedEnvManifestsDir, ResourceName } from "./../resources/shared/manifestsDirectory";
 import { ImageTags } from "./../resources/shared/validations";
 import sh from "shelljs";
 import { Environment } from "../resources/shared/types/own-types";
@@ -86,7 +86,7 @@ export async function regenerateSealedSecretsManifests({
       const unsealedSecretManifestFileName = p.basename(unsealedSecretManifestPath);
       const sealedSecretDir = p.join(appBaseDir, "sealed-secrets");
       const sealedSecretFilePath = p.join(sealedSecretDir, `sealed-${unsealedSecretManifestFileName}`);
-      const { resourceName: sealedSecretsControllerName } = getResourceProperties("sealed-secrets", environment);
+      const sealedSecretsControllerName: ResourceName = "sealed-secrets";
 
       sh.mkdir(sealedSecretDir);
 
