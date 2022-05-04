@@ -30,6 +30,9 @@ const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> 
   //   https: 443,
   // },
   fullnameOverride: chart,
+  commonAnnotations: {
+    "linkerd.io/inject": "enabled",
+  }
 };
 // nginx-ingress-controller
 // K3s also comes with a traefik ingress controoler. Disable that if using this
