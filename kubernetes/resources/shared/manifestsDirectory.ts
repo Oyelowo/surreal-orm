@@ -43,18 +43,13 @@ const argoApplicationsNames = [
 export type ArgoApplicationName = typeof argoApplicationsNames[number];
 // export type ArgoParentApplications = "argocd-parent-applications"
 
-export type ResourceType =
-  | "infrastructure"
-  | "services"
-  | "namespaces"
+export type ResourceType = "infrastructure" | "services" | "namespaces";
 // | ArgoParentApplications;
-
 
 // We don't want argocd-parent-applications-argocd-parent-applications
 // export type ArgoResourceName = `${Exclude<ResourceType, ArgoParentApplications>}-${ArgoParentApplications}`
 
 export type ResourceName = ArgoApplicationName | AppName;
-
 
 export const getPathToResourcesDir = (
   resourceName: ResourceName,
@@ -92,10 +87,9 @@ function getResourceProperties<T>(
     case "graphql-mongo":
     case "graphql-postgres":
     case "grpc-mongo":
-    case "services-argocd-applications":
-      {
-        return onGetResourceProperties("services");
-      }
+    case "services-argocd-applications": {
+      return onGetResourceProperties("services");
+    }
 
     case "argocd":
     case "cert-manager":
@@ -104,10 +98,9 @@ function getResourceProperties<T>(
     case "linkerd-viz":
     case "namespace-names":
     case "nginx-ingress":
-    case "infrastructure-argocd-applications":
-      {
-        return onGetResourceProperties("infrastructure");
-      }
+    case "infrastructure-argocd-applications": {
+      return onGetResourceProperties("infrastructure");
+    }
   }
   return assertUnreachable(resourceName);
 }
@@ -125,10 +118,12 @@ type GetPathToResourceProps = {
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
-export const getPathToResourceType = (props: Omit<GetPathToResourceProps, "resourceName">): string => {
+export const getPathToResourceType = (
+  props: Omit<GetPathToResourceProps, "resourceName">
+): string => {
   const resourcePath = path.join(
     getGeneratedEnvManifestsDir(props.environment),
-    props.resourceType,
+    props.resourceType
   );
   return resourcePath;
 };
@@ -142,14 +137,12 @@ export function getResourceAbsolutePath(
   environment: Environment
 ): string {
   return getResourceProperties(resourceName, (resourceType) => {
-
     return getPathToResource({
       resourceName,
       resourceType,
       environment,
-    })
-  }
-  );
+    });
+  });
 }
 
 export function getResourceRelativePath(
@@ -180,43 +173,27 @@ export function getResourceProvider(
           kubernetes/manifests/generated/local/infrastructure/argo-applications/(application-argo-linkerd, application-argo-cert-manager)
  */
 
-export function getArgocdChildrenApplicationsAbsolutePath(resourceType: ResourceType, environment: Environment) {
-  return path.join(getPathToResourceType({ resourceType, environment }), ARGO_APPLICATIONS_DIR_NAME)
+const ARGO_APPLICATIONS_DIR_NAME = "argo-children-applications";
+export function getArgocdChildrenApplicationsAbsolutePath(
+  resourceType: ResourceType,
+  environment: Environment
+) {
+  return path.join(
+    getPathToResourceType({ resourceType, environment }),
+    ARGO_APPLICATIONS_DIR_NAME
+  );
 }
-const ARGO_APPLICATIONS_DIR_NAME = "argo-children-applications"
+
 export function getArgocdChildrenResourcesProvider(
   resourceName: ResourceName,
-  // resourceType: ResourceType,
   environment: Environment
 ): k8s.Provider {
   return getResourceProperties(resourceName, (resourceType) => {
     return new k8s.Provider(`${resourceType}-${resourceName}-${uuid()}`, {
-      renderYamlToDirectory: getArgocdChildrenApplicationsAbsolutePath(resourceType, environment),
+      renderYamlToDirectory: getArgocdChildrenApplicationsAbsolutePath(
+        resourceType,
+        environment
+      ),
     });
   });
 }
-
-
-// export function getArgoParentsResourcesProvider(
-//   resourceName: ResourceName,
-//   environment: Environment
-// ): k8s.Provider {
-//   return getResourceProperties(resourceName, (resourceType) => {
-//     return new k8s.Provider(`${resourceType}-${resourceName}-${uuid()}`, {
-//       renderYamlToDirectory: path.join(getResourceAbsolutePath(resourceName, environment), ".."),
-//     });
-//   });
-// }
-
-
-export const getRelativePathToArgocdChildrenResource = (
-  resourceType: ResourceType,
-  environment: Environment
-) => {
-  return getRepoPathFromAbsolutePath(path.join(
-    getGeneratedEnvManifestsDir(environment),
-    resourceType,
-    ARGO_APPLICATIONS_DIR_NAME
-  ));
-  // return `kubernetes/manifests/generated/${environment}/services/${appName}`;
-};
