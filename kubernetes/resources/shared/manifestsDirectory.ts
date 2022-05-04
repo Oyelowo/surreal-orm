@@ -197,3 +197,11 @@ export function getArgocdChildrenResourcesProvider(
     });
   });
 }
+
+export const getArgocdParentApplicationsPath = (environment: Environment) => path.join(
+  getPathToResourceType({
+    resourceType: "infrastructure",
+    environment,
+  }),
+  "argocd-parents-applications"
+);

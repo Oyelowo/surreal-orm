@@ -10,6 +10,7 @@ import {
   getArgocdChildrenApplicationsAbsolutePath,
   ResourceType,
   getRepoPathFromAbsolutePath,
+  getArgocdParentApplicationsPath,
 } from "./manifestsDirectory";
 import { CustomResourceOptions } from "@pulumi/pulumi";
 import * as argocd from "../../crd2pulumi/argocd";
@@ -160,16 +161,12 @@ type ArgocdParentsApplicationProps = {
   isParentApp?: boolean;
 };
 
+
+
 const parentsProvider = new k8s.Provider(
   `argocd-parents-applications-${uuid()}`,
   {
-    renderYamlToDirectory: path.join(
-      getPathToResourceType({
-        resourceType: "infrastructure",
-        environment: ENVIRONMENT,
-      }),
-      "argocd-parents-applications"
-    ),
+    renderYamlToDirectory: getArgocdParentApplicationsPath(ENVIRONMENT),
   }
 );
 

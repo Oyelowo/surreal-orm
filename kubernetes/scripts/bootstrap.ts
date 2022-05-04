@@ -2,7 +2,7 @@
 
 import { helmChartsInfo } from './../resources/shared/helmChartInfo';
 import { namespaceNames } from '../resources/namespaces/util';
-import { getResourceAbsolutePath, ResourceName } from "./../resources/shared/manifestsDirectory";
+import { getArgocdParentApplicationsPath, getResourceAbsolutePath, ResourceName } from "./../resources/shared/manifestsDirectory";
 
 /* 
 TODO: ADD INSTRUCTION ON HOW THIS WORKS
@@ -163,9 +163,8 @@ async function bootstrap() {
 
   // sh.exec(`kubectl apply -R -f ${getLinkerdVizDir(ARGV.e)}`);
 
-  // TODO: PUT THE BASE HERE
-  // sh.exec(`kubectl apply -R -f ${getResourceProperties("services", ARGV.e)}`);
-  // sh.exec(`kubectl apply -R -f ${getArgocdServicesApplicationsDir(ARGV.e)}`);
+  // TODO: Only apply this in non prod environment
+  sh.exec(`kubectl apply -R -f ${getArgocdParentApplicationsPath(ARGV.e)}`);
 }
 
 bootstrap();
