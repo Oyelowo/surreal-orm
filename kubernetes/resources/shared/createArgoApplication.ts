@@ -2,6 +2,7 @@ import { NamespaceName, namespaceNames } from "./../namespaces/util";
 import {
   ResourceName,
   getResourceRelativePath,
+  getResourceProvider,
   getArgocdResourceProvider,
 } from "./manifestsDirectory";
 import { CustomResourceOptions } from "@pulumi/pulumi";
@@ -10,6 +11,7 @@ import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
 import { getEnvironmentVariables } from "./validations";
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
+import { argoAppsOfApp } from "../infrastructure/argocd";
 
 // export const argocdApplicationsInfraProvider = new k8s.Provider(
 //   argocdApplicationsName + "infrastructure",
@@ -65,8 +67,8 @@ type Props = {
   // resourceType: ResourceType;
   resourceName: ResourceName;
   // environment: Environment,
-  sourcePath?: string;
   opts?: CustomResourceOptions | undefined;
+  isParentApp?: boolean;
 };
 
 export function createArgocdApplication({
@@ -76,8 +78,8 @@ export function createArgocdApplication({
   resourceName,
   // resourceType,
   // environment,
+  isParentApp,
   opts,
-  sourcePath
 }: Props) {
   const metadata = {
     name,
@@ -117,7 +119,7 @@ export function createArgocdApplication({
         source: {
           repoURL: "https://github.com/Oyelowo/modern-distributed-app-template",
           // path: pathToAppManifests,
-          path: sourcePath ?? getResourceRelativePath(resourceName, ENVIRONMENT),
+          path: getResourceRelativePath(resourceName, ENVIRONMENT),
           //   path: "kubernetes/manifests/generated",
           targetRevision: "HEAD",
           directory: {
@@ -133,7 +135,10 @@ export function createArgocdApplication({
       },
     },
     {
+      // provider: getArgocdResourceProvider(resourceName, ENVIRONMENT),
+      // provider: getResourceProvider(resourceName, ENVIRONMENT),
       provider: getArgocdResourceProvider(resourceName, ENVIRONMENT),
+      // provider: getResourceProvider(isParentApp ? "argocd-parent-applications" : "argocd-children-applications", ENVIRONMENT),
       // provider: getArgoAppDir(metadata.resourceType),
       ...opts,
     }

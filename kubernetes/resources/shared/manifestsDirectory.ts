@@ -33,24 +33,27 @@ const argoApplicationsNames = [
   "linkerd",
   "linkerd-viz",
   "argocd",
-  // "argocd-parent-application",
+  // "argocd-parent-applications",
+  // "argocd-children-applications",
+  "services-argocd-applications",
+  "infrastructure-argocd-applications",
   // "service",
 ] as const;
 
 export type ArgoApplicationName = typeof argoApplicationsNames[number];
-export type ArgoParentApplications = "argocd-parent-applications"
+// export type ArgoParentApplications = "argocd-parent-applications"
 
 export type ResourceType =
   | "infrastructure"
   | "services"
   | "namespaces"
-  | ArgoParentApplications;
+// | ArgoParentApplications;
 
 
 // We don't want argocd-parent-applications-argocd-parent-applications
-export type ArgoResourceName = `${Exclude<ResourceType, ArgoParentApplications>}-${ArgoParentApplications}`
+// export type ArgoResourceName = `${Exclude<ResourceType, ArgoParentApplications>}-${ArgoParentApplications}`
 
-export type ResourceName = ArgoApplicationName | AppName | ArgoResourceName;
+export type ResourceName = ArgoApplicationName | AppName;
 
 
 export const getPathToResourcesDir = (
@@ -88,9 +91,11 @@ function getResourceProperties<T>(
     case "react-web":
     case "graphql-mongo":
     case "graphql-postgres":
-    case "grpc-mongo": {
-      return onGetResourceProperties("services");
-    }
+    case "grpc-mongo":
+    case "services-argocd-applications":
+      {
+        return onGetResourceProperties("services");
+      }
 
     case "argocd":
     case "cert-manager":
@@ -98,15 +103,10 @@ function getResourceProperties<T>(
     case "sealed-secrets":
     case "linkerd-viz":
     case "namespace-names":
-    case "nginx-ingress": {
-      return onGetResourceProperties("infrastructure");
-    }
-
-    case "infrastructure-argocd-parent-applications":
-    case "namespaces-argocd-parent-applications":
-    case "services-argocd-parent-applications":
+    case "nginx-ingress":
+    case "infrastructure-argocd-applications":
       {
-        return onGetResourceProperties("argocd-parent-applications");
+        return onGetResourceProperties("infrastructure");
       }
   }
   return assertUnreachable(resourceName);
@@ -123,13 +123,18 @@ type GetPathToResourceProps = {
   environment: Environment;
 };
 
-export const getPathToResource = (props: GetPathToResourceProps): string => {
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+export const getPathToResourceType = (props: Omit<GetPathToResourceProps, "resourceName">): string => {
   const resourcePath = path.join(
     getGeneratedEnvManifestsDir(props.environment),
     props.resourceType,
-    props.resourceName
   );
   return resourcePath;
+};
+
+export const getPathToResource = (props: GetPathToResourceProps): string => {
+  return path.join(getPathToResourceType(props), props.resourceName);
 };
 
 export function getResourceAbsolutePath(
@@ -175,14 +180,15 @@ export function getResourceProvider(
           kubernetes/manifests/generated/local/infrastructure/argo-applications/(application-argo-linkerd, application-argo-cert-manager)
  */
 
-const ARGO_APPLICATIONS_DIR_NAME = "argo-applications"
+const ARGO_APPLICATIONS_DIR_NAME = "argo-children-applications"
 export function getArgocdResourceProvider(
   resourceName: ResourceName,
+  // resourceType: ResourceType,
   environment: Environment
 ): k8s.Provider {
   return getResourceProperties(resourceName, (resourceType) => {
     return new k8s.Provider(`${resourceType}-${resourceName}-${uuid()}`, {
-      renderYamlToDirectory: path.join(getResourceAbsolutePath(resourceName, environment), "..", ARGO_APPLICATIONS_DIR_NAME),
+      renderYamlToDirectory: path.join(getPathToResourceType({ resourceType, environment }), ARGO_APPLICATIONS_DIR_NAME),
     });
   });
 }

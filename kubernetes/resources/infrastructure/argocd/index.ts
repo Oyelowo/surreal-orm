@@ -1,7 +1,5 @@
 import { getEnvironmentVariables } from "./../../shared/validations";
 import {
-    ArgoParentApplications,
-    ArgoResourceName,
     getRelativePathToArgocdChildrenResource,
     ResourceName,
     ResourceType,
@@ -15,66 +13,25 @@ import { createArgocdApplication } from "../../shared/createArgoApplication";
 export * from "./argocdBitnami";
 // // export * from "./argocdOfficial";
 
-// import { namespaceNames } from "../../namespaces";
-// import { createArgocdApplication } from "../../shared/createArgoApplication";
-// import { getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
-// import { getEnvironmentVariables } from "../../shared/validations";
-// import * as k8s from "@pulumi/kubernetes";
+// Argocd controller itself
+const argoAppsParentsApplications = createArgocdApplication({
+    resourceName: "argocd",
+    namespace: "argocd",
+    // sourcePath: getRelativePathToArgocdChildrenResource(resourceType, ENVIRONMENT)
+});
 
-// const { ENVIRONMENT } = getEnvironmentVariables();
-// export const argocdApplicationsDir = getArgocdInfraApplicationsDir(ENVIRONMENT);
-
-// export const argocdController = createArgocdApplication({
-//     metadata: {
-//         name: argocdControllerName,
-//         namespace: namespaceNames.argocd,
-//         resourceType: "infrastructure"
-//         // argoApplicationName: "argocd"
-//     },
-//     pathToAppManifests: getRepoPathFromAbsolutePath(argocdApplicationsDir),
-// });
-
-// getPathToResoucrceTypeDir()
-const { ENVIRONMENT } = getEnvironmentVariables();
-function getResourceTypeProvider(resourceType: ResourceType) {
-    new k8s.Provider(`${resourceType}`, {
-        renderYamlToDirectory: getRelativePathToArgocdChildrenResource(resourceType, ENVIRONMENT),
-    });
-}
-const resourceTypes: Exclude<ResourceType, ArgoParentApplications>[] = [
-    "infrastructure",
-    "namespaces",
-    "services",
+export const argoAppsOfApp: ResourceName[] = [
+    // "argocd-children-applications",
+    // "argocd-parent-applications"
 ];
 
-export const resourceTypesApp = resourceTypes.map((resourceType) => {
-    const resourceName: ArgoResourceName = `${resourceType}-argocd-parent-applications`
+
+export const resourceTypesApp = argoAppsOfApp.map((resourceName) => {
     const argoAppsParentsApplications = createArgocdApplication({
-        namespace: "argocd",
         resourceName,
-        sourcePath: getRelativePathToArgocdChildrenResource(resourceType, ENVIRONMENT)
+        namespace: "argocd",
+        isParentApp: true
+        // sourcePath: getRelativePathToArgocdChildrenResource(resourceType, ENVIRONMENT)
     });
     return argoAppsParentsApplications
 });
-
-
-// export const argoAppsParentsApplications3 = createArgocdApplication({
-//     metadata: {
-//         name: "argo-applications-parents-services",
-//         namespace: namespaceNames.argocd,
-//         resourceType: "argo_applications_parents"
-//         // argoApplicationName: "cert-manager"
-//     },
-//     pathToAppManifests: getRepoPathFromAbsolutePath(getArgocdServicesApplicationsDir(ENVIRONMENT)),
-//     // pathToAppManifests: getRepoPathFromAbsolutePath(getArgoAppsParentsDir(ENVIRONMENT)),
-// });
-// export const argoAppsParentsApplications4 = createArgocdApplication({
-//     metadata: {
-//         name: "argo-applications-parents-namespaces",
-//         namespace: namespaceNames.argocd,
-//         resourceType: "argo_applications_parents"
-//         // argoApplicationName: "cert-manager"
-//     },
-//     pathToAppManifests: getRepoPathFromAbsolutePath(getNamespacesNamesArgoAppDir(ENVIRONMENT)),
-//     // pathToAppManifests: getRepoPathFromAbsolutePath(getArgoAppsParentsDir(ENVIRONMENT)),
-// });
