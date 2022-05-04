@@ -1,11 +1,10 @@
-import { createProvider } from "./../../shared/manifestsDirectory";
 import { SealedSecretsHelmValuesBitnami } from "../../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
 import { namespaceNames } from "../../namespaces/util";
-import { DeepPartial, RecursivePartial } from "../../shared/types/own-types";
-import { getEnvironmentVariables } from "../../shared/validations";
+import { DeepPartial } from "../../shared/types/own-types";
 import { resourceName, sealedSecretsProvider } from "./settings";
+import { helmChartsInfo } from "../../shared/helmChartInfo";
 
 const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {
   // nameOverride: "mongodb-graphql",
@@ -27,14 +26,18 @@ Alternatively, you can override fullnameOverride on the helm chart install.
 };
 
 // `http://${name}.${namespace}:${port}`;
+const {
+  repo,
+  sealedSecrets: { chart, version },
+} = helmChartsInfo.sealedSecrets;
 export const sealedSecret = new k8s.helm.v3.Chart(
   resourceName,
   {
-    chart: "sealed-secrets",
+    chart,
     fetchOpts: {
-      repo: "https://bitnami-labs.github.io/sealed-secrets",
+      repo,
     },
-    version: "2.1.7",
+    version,
     values: sealedSecretsValues,
     namespace: namespaceNames.kubeSystem,
     // namespace: devNamespaceName,

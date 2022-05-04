@@ -46,6 +46,13 @@ export const helmChartsInfo = {
             version: "3.1.16",
         }
     },
+    sealedSecrets: {
+        repo: "https://bitnami-labs.github.io/sealed-secrets",
+        sealedSecrets: {
+            chart: "sealed-secrets",
+            version: "2.1.7",
+        }
+    },
     jetspackRepo: {
         repo: "https://charts.jetstack.io",
         certManager: {

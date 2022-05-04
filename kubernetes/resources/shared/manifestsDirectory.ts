@@ -2,6 +2,8 @@ import { AppName, Environment } from "./types/own-types";
 import path from "path";
 import sh from "shelljs";
 import * as k8s from "@pulumi/kubernetes";
+import { v4 as uuid } from "uuid";
+
 // TODO:  Unify all the resourceType/resourceName path utils into a singular function e.g
 
 export const getMainBaseDir = () => {
@@ -85,16 +87,6 @@ export const getPathToResource = (props: GetPathToResourceProps): string => {
   );
   return resourcePath;
 };
-import { v4 as uuid } from "uuid";
-
-export const createProvider = (props: GetPathToResourceProps) => {
-  return new k8s.Provider(
-    `${props.resourceType}-${props.resourceName}-${uuid()}`,
-    {
-      renderYamlToDirectory: getPathToResource(props),
-    }
-  );
-};
 
 type ResourcePropertiesReturn = {
   pathAbsolute: string;
@@ -104,33 +96,30 @@ type ResourcePropertiesReturn = {
   resourceType: ResourceType;
 };
 
-
 function getResourceProperties<T>(
   resourceName: ResourceName,
-  environment: Environment,
-  getResourceProps: (resourceName: ResourceType) => T
+  onGetResourceProperties: (resourceName: ResourceType) => T
 ): T {
   switch (resourceName) {
     case "react-web":
     case "graphql-mongo":
     case "graphql-postgres":
     case "grpc-mongo": {
-      return getResourceProps("services");
+      return onGetResourceProperties("services");
     }
 
     case "argocd":
     case "cert-manager":
     case "linkerd":
-    case "linkerd":
     case "sealed-secrets":
     case "linkerd-viz":
     case "namespace-names":
     case "nginx-ingress": {
-      return getResourceProps("infrastructure");
+      return onGetResourceProperties("infrastructure");
     }
 
     case "argocd-applications": {
-      return getResourceProps("argo_applications_parents");
+      return onGetResourceProperties("argo_applications_parents");
     }
   }
   return assertUnreachable(resourceName);
@@ -147,30 +136,16 @@ export function assertUnreachable(x: never): never {
 //   return getResourceProperties(resourceName, environment).pathAbsolute;
 // }
 
-
-// export function getResourceRelativePath(
-export function getResourceProvider(
-  resourceName: ResourceName,
-  environment: Environment
-): k8s.Provider {
-  return getResourceProperties(resourceName, environment, (resourceType) => createProvider({
-    resourceName,
-    resourceType,
-    environment
-  })
-  );
-}
-
-
 export function getResourceAbsolutePath(
   resourceName: ResourceName,
   environment: Environment
 ): string {
-  return getResourceProperties(resourceName, environment, (resourceType) => getPathToResource({
-    resourceName,
-    resourceType,
-    environment
-  })
+  return getResourceProperties(resourceName, (resourceType) =>
+    getPathToResource({
+      resourceName,
+      resourceType,
+      environment,
+    })
   );
 }
 
@@ -178,8 +153,24 @@ export function getResourceRelativePath(
   resourceName: ResourceName,
   environment: Environment
 ): string {
-  const pathAbsolute = getResourceAbsolutePath(resourceName, environment)
-  // provider: createProvider(props),
-  return getRepoPathFromAbsolutePath(pathAbsolute)
+  const pathAbsolute = getResourceAbsolutePath(resourceName, environment);
+  return getRepoPathFromAbsolutePath(pathAbsolute);
+}
 
+
+export function getResourceProvider(
+  resourceName: ResourceName,
+  environment: Environment
+): k8s.Provider {
+  return getResourceProperties(
+    resourceName,
+    (resourceType) => {
+      return new k8s.Provider(`${resourceType}-${resourceName}-${uuid()}`, {
+        renderYamlToDirectory: getResourceAbsolutePath(
+          resourceName,
+          environment
+        ),
+      })
+    }
+  );
 }
