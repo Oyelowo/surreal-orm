@@ -189,34 +189,24 @@ export function createArgocdParentsApplication({
     provider: parentsProvider,
   });
 }
-// const providersEntries = Object.entries(providers) as [
-//   ResourceType,
-//   k8s.Provider
-// ][];
+const metadata: Omit<Metadata, "argoApplicationName" | "resourceType"> = {
+  name: "argocd-applications-secret",
+  namespace: namespaceNames.argocd,
+  labels: {
+    "argocd.argoproj.io/secret-type": "repository",
+  },
+};
 
-// export const secrets = providersEntries.map(([resourceType, provider]) => {
-//   const metadata: Omit<Metadata, "argoApplicationName" | "resourceType"> = {
-//     name: "argocd-applications-secret",
-//     namespace: namespaceNames.argocd,
-//     labels: {
-//       "argocd.argoproj.io/secret-type": "repository",
-//     },
-//   };
 
-//   /* SECRET */
-//   const secrets = getSecretsForApp("argocd");
+const secrets = getSecretsForApp("argocd");
 
-//   const argoCDApplicationsSecret = new kx.Secret(
-//     `argocd-secret` + resourceType,
-//     // `${resourceName}-secret`,
-//     {
-//       stringData: {
-//         ...secrets,
-//       },
-//       metadata,
-//     },
-//     { provider }
-//   );
-
-//   return argoCDApplicationsSecret;
-// });
+export const argoCDApplicationsSecret = new kx.Secret(
+  `argocd-secret`,
+  {
+    stringData: {
+      ...secrets,
+    },
+    metadata,
+  },
+  { provider: parentsProvider }
+);
