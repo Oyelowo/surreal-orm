@@ -3,13 +3,13 @@ kind: Service
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argo-cd","helm.sh/chart":"argo-cd-3.1.14"},"name":"argocd-argo-cd-app-controller","namespace":"argocd"},"spec":{"ports":[{"name":"tcp-controller","port":8082,"protocol":"TCP","targetPort":"controller"}],"selector":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"argocd","app.kubernetes.io/name":"argo-cd"},"sessionAffinity":"None","type":"ClusterIP"}}
+      {"apiVersion":"v1","kind":"Service","metadata":{"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argo-cd","helm.sh/chart":"argo-cd-3.1.16"},"name":"argocd-argo-cd-app-controller","namespace":"argocd"},"spec":{"ports":[{"name":"tcp-controller","port":8082,"protocol":"TCP","targetPort":"controller"}],"selector":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"argocd","app.kubernetes.io/name":"argo-cd"},"sessionAffinity":"None","type":"ClusterIP"}}
   labels:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/name: argo-cd
-    helm.sh/chart: argo-cd-3.1.14
+    helm.sh/chart: argo-cd-3.1.16
   name: argocd-argo-cd-app-controller
   namespace: argocd
 spec:
