@@ -1,19 +1,12 @@
 import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant';
 import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
 import * as k8s from "@pulumi/kubernetes";
-import { getArgocdControllerDir, getRepoPathFromAbsolutePath } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../namespaces/util";
 import { ArgocdHelmValuesBitnami } from "../../shared/types/helm-charts/argocdHelmValuesBitnami";
 import { DeepPartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
+import { argocdProperties } from './settings';
 
-const { ENVIRONMENT } = getEnvironmentVariables();
-const argocdControllerDir = getArgocdControllerDir(ENVIRONMENT);
-
-
-export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
-  renderYamlToDirectory: argocdControllerDir,
-});
 
 // TODO: Use this everywhere
 const STORAGE_CLASS = "linode-block-storage-retain"
@@ -57,5 +50,5 @@ export const argocdHelm = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: argocdControllerProvider }
+  { provider: argocdProperties.provider }
 );

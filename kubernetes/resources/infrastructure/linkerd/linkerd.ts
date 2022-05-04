@@ -2,20 +2,9 @@ import { helmChartsInfo } from './../../shared/helmChartInfo';
 import { Linkerd2HelmValues } from "../../shared/types/helm-charts/linkerd2HelmValues";
 import * as k8s from "@pulumi/kubernetes";
 
-import { getLinkerd2Dir, linkerd2Name } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../namespaces/util";
-import { DeepPartial, RecursivePartial } from "../../shared/types/own-types";
-import { getEnvironmentVariables } from "../../shared/validations";
-
-
-export const linkerdDir = getLinkerd2Dir(
-  getEnvironmentVariables().ENVIRONMENT
-);
-
-export const linkerdProvider = new k8s.Provider(linkerdDir, {
-  renderYamlToDirectory: linkerdDir,
-});
-
+import { DeepPartial } from "../../shared/types/own-types";
+import { linkerdProperties } from './settings';
 /* 
  --set-file identityTrustAnchorsPEM=ca.crt \
   --set-file identity.issuer.tls.crtPEM=issuer.crt \
@@ -52,7 +41,7 @@ const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
 
 const { repo, linkerd2: { chart, version } } = helmChartsInfo.linkerdRepo;
 export const linkerd = new k8s.helm.v3.Chart(
-  linkerd2Name,
+  linkerdProperties.resourceName,
   {
     chart,
     fetchOpts: {
@@ -67,6 +56,5 @@ export const linkerd = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: linkerdProvider }
-  // { provider }
+  { provider: linkerdProperties.provider }
 );

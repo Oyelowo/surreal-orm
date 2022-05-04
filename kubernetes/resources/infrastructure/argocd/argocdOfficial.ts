@@ -3,20 +3,14 @@ import {
     INGRESS_CLASSNAME_NGINX,
 } from "../ingress/ingressRules";
 import * as k8s from "@pulumi/kubernetes";
-import { getArgocdControllerDir } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../namespaces/util";
 import { ArgocdHelmValuesArgo } from "../../shared/types/helm-charts/argocdHelmValuesArgo";
 import { DeepPartial } from "../../shared/types/own-types";
-import { getEnvironmentVariables } from "../../shared/validations";
 import bcrypt from "bcrypt";
 import { DOMAIN_NAME_SUB_ARGOCD } from "../ingress/constant";
+import { argocdProperties } from "./settings";
 
-const { ENVIRONMENT } = getEnvironmentVariables();
-const argocdControllerDir = getArgocdControllerDir(ENVIRONMENT);
 
-export const argocdControllerProvider = new k8s.Provider(argocdControllerDir, {
-    renderYamlToDirectory: argocdControllerDir,
-});
 // --insecure
 
 const saltRounds = 10;
@@ -83,5 +77,5 @@ export const argocdHelm = new k8s.helm.v3.Chart(
         // available.
         skipAwait: false,
     },
-    { provider: argocdControllerProvider }
+    { provider: argocdProperties.provider }
 );

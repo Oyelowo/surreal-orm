@@ -2,9 +2,9 @@ import { graphqlPostgres } from "./index";
 import { postgresdbHelmValuesBitnami } from "../../shared/types/helm-charts/postgresdbHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { namespaceNames } from "../../shared/namespaces";
 import { DeepPartial } from "../../shared/types/own-types";
 import { graphqlPostgresSettings } from "./settings";
+import { namespaceNames } from "../../namespaces/util";
 
 const { envVars } = graphqlPostgresSettings;
 

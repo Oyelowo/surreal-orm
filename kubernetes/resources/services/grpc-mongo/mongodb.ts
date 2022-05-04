@@ -1,6 +1,6 @@
 import { grpcMongo } from "./index";
 import { MongodbHelmValuesBitnami } from "../../shared/types/helm-charts/MongodbHelmValuesBitnami";
-import { namespaceNames } from "../../shared/namespaces";
+import { namespaceNames } from "../../namespaces";
 import * as k8s from "@pulumi/kubernetes";
 
 import { grpcMongoSettings } from "./settings";

@@ -1,19 +1,8 @@
 import { namespaceNames } from './util';
 import * as k8s from "@pulumi/kubernetes";
 import { Namespace } from "@pulumi/kubernetes/core/v1";
-import { getNamespacesNamesDir } from "../shared/manifestsDirectory";
-import { getEnvironmentVariables } from "../shared/validations";
+import { namespacesNamesProperties } from "./settings"
 // import { createArgocdApplication } from "./createArgoApplication";
-
-
-const { ENVIRONMENT } = getEnvironmentVariables();
-// export const linkerdVizDir = getLinkerdVizDir(
-//   getEnvironmentVariables().ENVIRONMENT
-// );
-
-export const namespacesProvider = new k8s.Provider("render-namespaces", {
-  renderYamlToDirectory: getNamespacesNamesDir(ENVIRONMENT),
-});
 
 
 export const resourceNamespaces = Object.entries(namespaceNames).map(([_k, namespace]) => {
@@ -31,7 +20,7 @@ export const resourceNamespaces = Object.entries(namespaceNames).map(([_k, names
         }
       },
     },
-    { provider: namespacesProvider }
+    { provider: namespacesNamesProperties.provider }
   );
   return resourceNamespace
 })

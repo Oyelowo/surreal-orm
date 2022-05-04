@@ -1,8 +1,8 @@
+import { sealedSecretsProperties } from './settings';
 import { createProvider } from "./../../shared/manifestsDirectory";
 import { SealedSecretsHelmValuesBitnami } from "../../shared/types/helm-charts/sealedSecretsHelmValuesBitnami";
 import * as k8s from "@pulumi/kubernetes";
 
-import { sealedSecretsControllerName } from "../../shared/manifestsDirectory";
 import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial, RecursivePartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
@@ -21,7 +21,7 @@ const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {
 kubeseal --controller-name sealed-secrets <args>
 Alternatively, you can override fullnameOverride on the helm chart install.
   */
-  fullnameOverride: sealedSecretsControllerName,
+  fullnameOverride: sealedSecretsProperties.resourceName,
   podAnnotations: {
     // ...getArgoAppSyncWaveAnnotation("sealed-secrets"),
   },
@@ -34,7 +34,7 @@ Alternatively, you can override fullnameOverride on the helm chart install.
 
 // `http://${name}.${namespace}:${port}`;
 export const sealedSecret = new k8s.helm.v3.Chart(
-  sealedSecretsControllerName,
+  sealedSecretsProperties.resourceName,
   {
     chart: "sealed-secrets",
     fetchOpts: {
@@ -49,5 +49,5 @@ export const sealedSecret = new k8s.helm.v3.Chart(
     // available.
     skipAwait: false,
   },
-  { provider: sealedSecretsProvider }
+  { provider: sealedSecretsProperties.provider }
 );

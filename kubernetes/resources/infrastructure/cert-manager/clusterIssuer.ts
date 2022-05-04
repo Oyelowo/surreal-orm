@@ -1,7 +1,7 @@
 import { getEnvironmentVariables } from "./../../shared/validations";
 import { INGRESS_CLASSNAME_NGINX } from "../ingress/ingressRules";
 import * as cm from "../../../crd2pulumi/certManager/certmanager";
-import { certManagerControllerProvider } from "./certManager";
+import { certManagerProperties } from "./settings";
 
 export const CLUSTER_ISSUER_NAME = "letsencrypt-cluster-issuer";
 export const clusterIssuer = new cm.v1.ClusterIssuer(
@@ -41,5 +41,5 @@ export const clusterIssuer = new cm.v1.ClusterIssuer(
       },
     },
   },
-  { provider: certManagerControllerProvider }
+  { provider: certManagerProperties.provider }
 );

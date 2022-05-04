@@ -2,7 +2,7 @@
 // import { namespaceNames } from "../../shared"
 // import { CLUSTER_ISSUER_NAME } from "../cert-manager/clusterIssuer";
 // import { DNS_NAME_LINODE_BASE } from "./constant"
-// import { ingressControllerProvider } from "./ingressController";
+// import { provider } from "./settings";
 
 
 // export const SECRET_NAME_NGINX = "nginx-ingress-tls";
@@ -20,4 +20,4 @@
 //             kind: "ClusterIssuer"
 //         }
 //     }
-// }, { provider: ingressControllerProvider })
+// }, { provider: })

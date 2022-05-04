@@ -1,4 +1,3 @@
-import { namespaceNames } from "../../namespaces/util";
 import { getEnvironmentVariables } from "../../shared/validations";
 import { AppConfigs } from "../../shared/types/own-types";
 import { getSecretsForApp } from "../../../scripts/secretsManagement/getSecretsForApp";
@@ -47,6 +46,6 @@ export const graphqlMongoSettings: AppConfigs<"graphql-mongo", "mongodb", "appli
   },
   metadata: {
     name: "graphql-mongo",
-    namespace: namespaceNames.applications,
+    namespace: "applications",
   },
 };

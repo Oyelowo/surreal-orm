@@ -151,7 +151,7 @@ export class ServiceDeployment<
 
     this.argocdApplication = createArgocdApplication({
       namespace: metadata.namespace,
-      resourceType: "services",
+      // resourceType: "services",
       resourceName: this.appName,
       opts: {
         parent: this,

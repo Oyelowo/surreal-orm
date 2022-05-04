@@ -1,5 +1,4 @@
 import { getEnvironmentVariables } from "../../shared/validations";
-// import { clusterSetupDirectory } from "../shared/manifestsDirectory";
 import * as k8s from "@pulumi/kubernetes";
 
 import { graphqlMongoSettings } from "../../services/graphql-mongo/settings";
@@ -8,7 +7,7 @@ import { namespaceNames } from "../../namespaces/util";
 import { NginxConfiguration } from "../../shared/types/nginxConfigurations";
 import { DOMAIN_NAME_BASE } from "./constant"
 import { CLUSTER_ISSUER_NAME } from "../cert-manager";
-import { ingressControllerProvider } from "./ingressController";
+import { nginxIngressProperties } from "./settings";
 
 const { ENVIRONMENT } = getEnvironmentVariables()
 
@@ -37,7 +36,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
     `${appBase}-ingress`,
     {
         metadata: {
-            name: "nginx-ingress",
+            name: nginxIngressProperties.resourceName,
             namespace: namespaceNames.applications,
             annotations: annotations as any,
         },
@@ -120,5 +119,5 @@ export const appIngress = new k8s.networking.v1.Ingress(
 
         },
     },
-    { provider: ingressControllerProvider }
+    { provider: nginxIngressProperties.provider }
 );

@@ -32,7 +32,7 @@ export const argoApplicationsNames = [
   "linkerd-viz",
   "argocd",
   "argocd-applications",
-  "service",
+  // "service",
 ] as const;
 
 export type ArgoApplicationName = typeof argoApplicationsNames[number];
@@ -42,7 +42,6 @@ export type ResourceType =
   | "namespaces"
   | "argo_applications_parents";
 export type ResourceName = ArgoApplicationName | AppName;
-
 
 export const getPathToResoucrcesDir = (
   appName: ResourceName,
@@ -86,121 +85,132 @@ export const getPathToResource = (props: GetPathToResourceProps): string => {
   );
   return resourcePath;
 };
-
+import { v4 as uuid } from "uuid";
 
 export const createProvider = (props: GetPathToResourceProps) => {
-  return new k8s.Provider(props.resourceType + props.resourceName, {
-    renderYamlToDirectory: getPathToResource({
-      resourceName: props.resourceName,
-      resourceType: props.resourceType,
-      environment: props.environment
-    }),
-  });
+  return new k8s.Provider(
+    `${props.resourceType}-${props.resourceName}-${uuid()}`,
+    {
+      renderYamlToDirectory: getPathToResource(props),
+    }
+  );
+};
 
+type ResourcePropertiesReturn = {
+  pathAbsolute: string;
+  provider: k8s.Provider;
+  pathRelative: string;
+  resourceName: ResourceName;
+  resourceType: ResourceType;
+};
+
+export function getResourceProperties(
+  resourceName: ResourceName,
+  environment: Environment
+): ResourcePropertiesReturn {
+  const getResourceProps = (resourceType: ResourceType) => {
+    const props = {
+      resourceName,
+      environment,
+      resourceType,
+    };
+    const pathAbsolute = getPathToResource(props);
+    return {
+      pathAbsolute,
+      resourceName,
+      resourceType,
+      provider: createProvider(props),
+      pathRelative: getRepoPathFromAbsolutePath(pathAbsolute),
+    };
+  };
+
+  switch (resourceName) {
+    case "react-web":
+    case "graphql-mongo":
+    case "graphql-postgres":
+    case "grpc-mongo": {
+      return getResourceProps("services");
+    }
+
+    case "argocd":
+    case "cert-manager":
+    case "linkerd":
+    case "linkerd":
+    case "sealed-secrets":
+    case "linkerd-viz":
+    case "namespace-names":
+    case "nginx-ingress": {
+      return getResourceProps("infrastructure");
+    }
+
+    case "argocd-applications": {
+      return getResourceProps("argo_applications_parents");
+    }
+  }
+  return assertUnreachable(resourceName);
 }
 
-
-
-//////////\
-export const getPathToInfrastructureDir = (
-  // toolName: ArgoApplicationName,
-  toolName: ResourceName,
-  environment: Environment
-) => {
-  const MANIFESTS_BASE_DIR_FOR_ENV = getGeneratedEnvManifestsDir(environment);
-  const dir = path.join(MANIFESTS_BASE_DIR_FOR_ENV, "infrastructure", toolName);
-  // TODO: sh.mk`dir(dir);
-  // sh.mk`dir(dir);
-  return dir;
-};
-
-// export const getPathToServicesDir = (appName: AppName | "argocd-applications", environment: Environment) => {
-export const getPathToServicesDir = (
-  appName: ResourceName,
-  environment: Environment
-) => {
-  return path.join(
-    getGeneratedEnvManifestsDir(environment),
-    "services",
-    appName
-  );
-  // return `kubernetes/manifests/generated/${environment}/services/${appName}`;
-};
-
-function assertUnreachable(x: never): never {
+export function assertUnreachable(x: never): never {
   throw new Error("Didn't expect to get here");
 }
 
-// export const getArgoAppSyncWaveAnnotation = (argoApplicationName: ArgoApplicationName) => {
-
-//   return {
-//     // https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-do-i-configure-waves
-//     "argocd.argoproj.io/sync-wave": String(argoApplicationsNames.indexOf(argoApplicationName))
-//   } as const
+// export function getResourceAbsolutePath(
+//   resourceName: ResourceName,
+//   environment: Environment
+// ): string {
+//   return getResourceProperties(resourceName, environment).pathAbsolute;
 // }
 
-export const argocdControllerName: ArgoApplicationName = "argocd";
-export const getArgocdControllerDir = (environment: Environment) => {
-  return getPathToInfrastructureDir(argocdControllerName, environment);
-};
+export function getResourceRelativePath(
+  resourceName: ResourceName,
+  environment: Environment
+): string {
+  return getResourceProperties(resourceName, environment).pathAbsolute;
+}
 
-export const certManagerControllerName: ArgoApplicationName = "cert-manager";
-export const getCertManagerControllerDir = (environment: Environment) => {
-  return getPathToInfrastructureDir(certManagerControllerName, environment);
-};
+export function getResourceAbsolutePath(
+  resourceName: ResourceName,
+  environment: Environment
+): string {
+  // return getResourceProperties(resourceName, environment).pathAbsolute;
+  const getResourceProps = (resourceType: ResourceType) => {
+    const props = {
+      resourceName,
+      environment,
+      resourceType,
+    };
+    const pathAbsolute = getPathToResource(props);
+    return {
+      pathAbsolute,
+      resourceName,
+      resourceType,
+      // provider: createProvider(props),
+      pathRelative: getRepoPathFromAbsolutePath(pathAbsolute),
+    };
+  };
 
-export const linkerd2Name: ArgoApplicationName = "linkerd";
-export const getLinkerd2Dir = (environment: Environment) => {
-  return getPathToInfrastructureDir(linkerd2Name, environment);
-};
+  switch (resourceName) {
+    case "react-web":
+    case "graphql-mongo":
+    case "graphql-postgres":
+    case "grpc-mongo": {
+      return getResourceProps("services").pathAbsolute;
+    }
 
-export const linkerdVizName: ArgoApplicationName = "linkerd-viz";
-export const getLinkerdVizDir = (environment: Environment) => {
-  return getPathToInfrastructureDir(linkerdVizName, environment);
-};
+    case "argocd":
+    case "cert-manager":
+    case "linkerd":
+    case "linkerd":
+    case "sealed-secrets":
+    case "linkerd-viz":
+    case "namespace-names":
+    case "nginx-ingress": {
+      return getResourceProps("infrastructure").pathAbsolute;
+    }
 
-// TODO: Refactor to remove all these repititions
-// type InfrastructureToolName: InfrastructureName = "cert-manager-controller" | 'sealed-secrets-controller'
-
-// export const getInfraToolDir = (environment: Environment, infraTool: InfrastructureToolName) => {
-//   return getPathToInfraToolDir(infraTool, environment);
-// };
-// infraName: InfrastructureToolName =  "cert-manager-controller"
-// const kk = getInfraToolDir("production", "cert-manager-controller")
-
-export const sealedSecretsControllerName: ArgoApplicationName =
-  "sealed-secrets";
-export const getSealedSecretsControllerDir = (environment: Environment) => {
-  return getPathToInfrastructureDir(sealedSecretsControllerName, environment);
-};
-
-export const ingressControllerName: ArgoApplicationName = "nginx-ingress";
-export const getIngressControllerDir = (environment: Environment) => {
-  return getPathToInfrastructureDir(ingressControllerName, environment);
-};
-
-export const argocdApplicationsName: ArgoApplicationName =
-  "argocd-applications";
-export const getArgocdInfraApplicationsDir = (environment: Environment) => {
-  return getPathToInfrastructureDir(argocdApplicationsName, environment);
-};
-
-export const getArgocdServicesApplicationsDir = (environment: Environment) => {
-  return getPathToServicesDir(argocdApplicationsName, environment);
-};
-
-export const getNamespacesNamesDir = (environment: Environment) => {
-  return path.join(getGeneratedEnvManifestsDir(environment), "namespaces");
-};
-
-export const getNamespacesNamesArgoAppDir = (environment: Environment) => {
-  return path.join(getNamespacesNamesDir(environment), argocdApplicationsName);
-};
-
-export const getArgoAppsParentsDir = (environment: Environment) => {
-  return path.join(
-    getGeneratedEnvManifestsDir(environment),
-    "argo-applications-parents"
-  );
-};
-
+    case "argocd-applications": {
+      return getResourceProps("argo_applications_parents").pathAbsolute;
+    }
+  }
+  return assertUnreachable(resourceName);
+}

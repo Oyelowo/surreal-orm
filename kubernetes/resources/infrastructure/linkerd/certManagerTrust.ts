@@ -1,6 +1,6 @@
+import { certManagerProperties } from './../cert-manager/settings';
 import * as cmt from "../../../crd2pulumi/certManagerTrust/trust";
 import { LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME } from "./certManagerCAIssuer";
-import { certManagerControllerProvider } from "../cert-manager/certManager";
 
 // Distribute the public key of the identity anchor trust trust from secrets to config maps
 // across clusters/ i.e in every namespace
@@ -30,5 +30,5 @@ export const linkerdCertManagertrust = new cmt.v1alpha1.Bundle(
         },
     },
     // Put in cert manager so that it can be redistributed earlier
-    { provider: certManagerControllerProvider }
+    { provider: certManagerProperties.provider }
 );

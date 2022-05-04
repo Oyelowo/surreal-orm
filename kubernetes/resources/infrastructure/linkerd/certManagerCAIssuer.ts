@@ -1,4 +1,4 @@
-import { certManagerControllerProvider } from './../cert-manager/certManager';
+import { certManagerProperties } from './../cert-manager/settings';
 import { namespaceNames } from '../../namespaces/util';
 import * as cm from "../../../crd2pulumi/certManager/certmanager";
 
@@ -45,7 +45,7 @@ export const clusterIssuerLinkerdSelfSigned = new cm.v1.ClusterIssuer(CLUSTER_IS
         // }
     }
     // We are using the certManager provider because we want it in that namespace anyway
-}, { provider: certManagerControllerProvider }
+}, { provider: certManagerProperties.provider }
 )
 
 
@@ -72,7 +72,7 @@ export const certificateLinkerdTrustAnchor = new cm.v1.Certificate(LINKERD_TRUST
             group: "cert-manager.io"
         }
     }
-}, { provider: certManagerControllerProvider })
+}, { provider: certManagerProperties.provider })
 
 
 /* 
@@ -90,7 +90,7 @@ export const clusterIssuerLinkerdTrustAnchor = new cm.v1.ClusterIssuer(
             secretName: LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME
         }
     }
-}, { provider: certManagerControllerProvider }
+}, { provider: certManagerProperties.provider }
 )
 
 

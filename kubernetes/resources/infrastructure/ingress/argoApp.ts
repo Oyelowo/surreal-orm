@@ -1,14 +1,8 @@
-import { namespaceNames } from "../../namespaces/util";
-import { createArgocdApplication } from "../../shared/createArgoApplication";
-import { getRepoPathFromAbsolutePath, ingressControllerName } from "../../shared/manifestsDirectory";
 
-import { ingressControllerDir } from "./ingressController";
+import { createArgocdApplication } from "../../shared/createArgoApplication"
 
-
-// App that deploys sealedSecretsController resources themselves
-/* sealedSecretsController APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const ingressControllerApplication = createArgocdApplication({
-  resourceType: "infrastructure",
+  // resourceType: "infrastructure",
   resourceName: "nginx-ingress",
   namespace: "default"
 });

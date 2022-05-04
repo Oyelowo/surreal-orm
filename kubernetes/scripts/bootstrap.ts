@@ -2,19 +2,7 @@
 
 import { helmChartsInfo } from './../resources/shared/helmChartInfo';
 import { namespaceNames } from '../resources/namespaces/util';
-import { argocdHelm } from './../resources/infrastructure/argocd/argocdOfficial';
-import {
-  getSealedSecretsControllerDir,
-  sealedSecretsControllerName,
-  getIngressControllerDir,
-  // getArgocdApplicationsDir,
-  getLinkerd2Dir,
-  getLinkerdVizDir,
-  getCertManagerControllerDir,
-  certManagerControllerName,
-  getNamespacesNamesDir,
-  getArgocdServicesApplicationsDir,
-} from "./../resources/shared/manifestsDirectory";
+import { getResourceAbsolutePath, getResourceProperties, ResourceName } from "./../resources/shared/manifestsDirectory";
 
 /* 
 TODO: ADD INSTRUCTION ON HOW THIS WORKS
@@ -36,8 +24,7 @@ import { setupUnsealedSecretFiles } from "./secretsManagement/setupSecrets";
 import { generateManifests, regenerateSealedSecretsManifests } from "./generateManifests";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
 import { promptKubernetesClusterSwitch } from "./promptKubernetesClusterSwitch";
-import { getArgocdControllerDir, getGeneratedEnvManifestsDir } from "../resources/shared/manifestsDirectory";
-import { certManagerTrustDeploymentName } from '../resources/infrastructure/cert-manager';
+import { getGeneratedEnvManifestsDir } from "../resources/shared/manifestsDirectory";
 
 
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
@@ -98,7 +85,7 @@ async function bootstrap() {
     });
     return;
   }
-  
+
   await promptKubernetesClusterSwitch();
 
 
@@ -106,6 +93,7 @@ async function bootstrap() {
     environment: ARGV.e,
     imageTags,
   });
+
 
   setupUnsealedSecretFiles();
 
@@ -115,19 +103,22 @@ async function bootstrap() {
 
   // # Apply namespace first
   // TODO: Use a function to get and share this with manifestDirectory.ts module
-  sh.exec(`kubectl apply -R -f ${getNamespacesNamesDir(ARGV.e)}`);
+  sh.exec(`kubectl apply -R -f ${getResourceAbsolutePath("namespace-names", ARGV.e)}`);
   // sh.exec(`kubectl apply -R -f ${manifestsDirForEnv}/namespaces`);
 
   // # Apply setups with sealed secret controller
-  sh.exec(`kubectl apply -R -f  ${getSealedSecretsControllerDir(ARGV.e)}`);
 
+  sh.exec(`kubectl apply -R -f  ${getResourceAbsolutePath("sealed-secrets", ARGV.e)}`);
+
+  const sealedSecretsName: ResourceName = "sealed-secrets";
   // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
-  sh.exec(`kubectl rollout status deployment/${sealedSecretsControllerName} -n=${namespaceNames.kubeSystem}`);
+  sh.exec(`kubectl rollout status deployment/${sealedSecretsName} -n=${namespaceNames.kubeSystem}`);
 
 
   // # Apply setups with cert-manager controller
-  sh.exec(`kubectl apply -R -f  ${getCertManagerControllerDir(ARGV.e)}/0-crd`);
-  sh.exec(`kubectl apply -R -f  ${getCertManagerControllerDir(ARGV.e)}/1-manifest`);
+  const certManagerDir = getResourceAbsolutePath("cert-manager", ARGV.e)
+  sh.exec(`kubectl apply -R -f  ${certManagerDir}/0-crd`);
+  sh.exec(`kubectl apply -R -f  ${certManagerDir}/1-manifest`);
 
   // # Wait for cert-manager and cert-manager-trust controllers to be in running phase so that we can use it to encrypt secrets
   const { certManager, certManagerTrust } = helmChartsInfo.jetspackRepo
@@ -136,15 +127,17 @@ async function bootstrap() {
 
 
   // # Apply setups with linkerd controller
-  sh.exec(`kubectl apply -R -f  ${getLinkerd2Dir(ARGV.e)}/sealed-secrets`);
-  sh.exec(`kubectl apply -R -f  ${getLinkerd2Dir(ARGV.e)}/0-crd`);
-  sh.exec(`kubectl apply -R -f  ${getLinkerd2Dir(ARGV.e)}/1-manifest`);
-  
-  sh.exec(`kubectl apply -R -f  ${getLinkerdVizDir(ARGV.e)}/sealed-secrets`);
-  sh.exec(`kubectl apply -R -f  ${getLinkerdVizDir(ARGV.e)}/0-crd`);
-  sh.exec(`kubectl apply -R -f  ${getLinkerdVizDir(ARGV.e)}/1-manifest`);
+  const linkerdDir = getResourceAbsolutePath("linkerd", ARGV.e)
+  sh.exec(`kubectl apply -R -f  ${linkerdDir}/sealed-secrets`);
+  sh.exec(`kubectl apply -R -f  ${linkerdDir}/0-crd`);
+  sh.exec(`kubectl apply -R -f  ${linkerdDir}/1-manifest`);
 
+  const linkerdVizDir = getResourceAbsolutePath("linkerd-viz", ARGV.e)
+  sh.exec(`kubectl apply -R -f  ${linkerdVizDir}/sealed-secrets`);
+  sh.exec(`kubectl apply -R -f  ${linkerdVizDir}/0-crd`);
+  sh.exec(`kubectl apply -R -f  ${linkerdVizDir}/1-manifest`);
 
+return
   // TODO: separate sealed secrets deletion step
   await regenerateSealedSecretsManifests({
     environment: ARGV.e,
@@ -156,8 +149,9 @@ async function bootstrap() {
   // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
   // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/sealed-secrets`);
   // sh.exec(`kubectl apply -R -f ${getArgocdControllerDir(ARGV.e)}`);
-  sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/0-crd`);
-  sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/1-manifest`);
+  const argocdDirController = getResourceAbsolutePath("argocd", ARGV.e)
+  sh.exec(`kubectl apply -f ${argocdDirController}/0-crd`);
+  sh.exec(`kubectl apply -f ${argocdDirController}/1-manifest`);
   // TODO: Split bootstrap process from restart from update
   sh.exec(`kubectl -n argocd rollout restart deployment argocd-argo-cd-server`);
 
@@ -170,7 +164,8 @@ async function bootstrap() {
   // sh.exec(`kubectl apply -R -f ${getLinkerdVizDir(ARGV.e)}`);
 
   // TODO: PUT THE BASE HERE
-  sh.exec(`kubectl apply -R -f ${getArgocdServicesApplicationsDir(ARGV.e)}`);
+  // sh.exec(`kubectl apply -R -f ${getResourceProperties("services", ARGV.e)}`);
+  // sh.exec(`kubectl apply -R -f ${getArgocdServicesApplicationsDir(ARGV.e)}`);
 }
 
 bootstrap();

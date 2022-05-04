@@ -1,4 +1,3 @@
-import { namespaceNames } from "../../shared/namespaces";
 import { getEnvironmentVariables } from "../../shared/validations";
 import { AppConfigs } from "../../shared/types/own-types";
 import { getSecretsForApp } from "../../../scripts/secretsManagement/getSecretsForApp";
@@ -32,6 +31,6 @@ export const graphqlPostgresSettings: AppConfigs<"graphql-postgres", "postgresdb
   },
   metadata: {
     name: "graphql-postgres",
-    namespace: namespaceNames.applications,
+    namespace: "applications",
   },
 };

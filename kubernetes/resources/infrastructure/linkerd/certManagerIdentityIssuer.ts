@@ -1,4 +1,4 @@
-import { linkerdProvider } from './linkerd';
+import { linkerdProperties } from './settings';
 import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer';
 import { namespaceNames } from '../../namespaces/util';
 import * as cm from "../../../crd2pulumi/certManager/certmanager";
@@ -37,5 +37,5 @@ export const certificateLinkerdIdentityIssuer = new cm.v1.Certificate(CERTIFICAT
         usages: ["cert sign", "crl sign", "server auth", "client auth"]
     }
     // Put this in cert manager folder first so, that it can be managed earlier
-}, { provider: linkerdProvider })
+}, { provider: linkerdProperties.provider })
 

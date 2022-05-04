@@ -1,4 +1,3 @@
-import { namespaceNames } from "../../shared/namespaces";
 import { getEnvironmentVariables } from "../../shared/validations";
 import { AppConfigs } from "../../shared/types/own-types";
 import { getSecretsForApp } from "../../../scripts/secretsManagement/getSecretsForApp";
@@ -39,6 +38,6 @@ export const grpcMongoSettings: AppConfigs<"grpc-mongo", "mongodb", "application
   },
   metadata: {
     name: "grpc-mongo",
-    namespace: namespaceNames.applications,
+    namespace: "applications",
   },
 };
