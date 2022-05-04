@@ -72,30 +72,6 @@ export const getRepoPathFromAbsolutePath = (absolutePath: string) => {
   return path.join("kubernetes", toolPath);
 };
 
-type GetPathToResourceProps = {
-  resourceType: ResourceType;
-  // resourceName: Omit<ArgoApplicationName | AppName, "service">
-  resourceName: ResourceName;
-  environment: Environment;
-};
-
-export const getPathToResource = (props: GetPathToResourceProps): string => {
-  const resourcePath = path.join(
-    getGeneratedEnvManifestsDir(props.environment),
-    props.resourceType,
-    props.resourceName
-  );
-  return resourcePath;
-};
-
-type ResourcePropertiesReturn = {
-  pathAbsolute: string;
-  provider: k8s.Provider;
-  pathRelative: string;
-  resourceName: ResourceName;
-  resourceType: ResourceType;
-};
-
 function getResourceProperties<T>(
   resourceName: ResourceName,
   onGetResourceProperties: (resourceName: ResourceType) => T
@@ -129,12 +105,21 @@ export function assertUnreachable(x: never): never {
   throw new Error("Didn't expect to get here");
 }
 
-// export function getResourceAbsolutePath(
-//   resourceName: ResourceName,
-//   environment: Environment
-// ): string {
-//   return getResourceProperties(resourceName, environment).pathAbsolute;
-// }
+type GetPathToResourceProps = {
+  resourceType: ResourceType;
+  // resourceName: Omit<ArgoApplicationName | AppName, "service">
+  resourceName: ResourceName;
+  environment: Environment;
+};
+
+export const getPathToResource = (props: GetPathToResourceProps): string => {
+  const resourcePath = path.join(
+    getGeneratedEnvManifestsDir(props.environment),
+    props.resourceType,
+    props.resourceName
+  );
+  return resourcePath;
+};
 
 export function getResourceAbsolutePath(
   resourceName: ResourceName,
@@ -157,20 +142,13 @@ export function getResourceRelativePath(
   return getRepoPathFromAbsolutePath(pathAbsolute);
 }
 
-
 export function getResourceProvider(
   resourceName: ResourceName,
   environment: Environment
 ): k8s.Provider {
-  return getResourceProperties(
-    resourceName,
-    (resourceType) => {
-      return new k8s.Provider(`${resourceType}-${resourceName}-${uuid()}`, {
-        renderYamlToDirectory: getResourceAbsolutePath(
-          resourceName,
-          environment
-        ),
-      })
-    }
-  );
+  return getResourceProperties(resourceName, (resourceType) => {
+    return new k8s.Provider(`${resourceType}-${resourceName}-${uuid()}`, {
+      renderYamlToDirectory: getResourceAbsolutePath(resourceName, environment),
+    });
+  });
 }
