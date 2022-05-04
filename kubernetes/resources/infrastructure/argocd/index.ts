@@ -5,7 +5,7 @@ export * from "./argocdBitnami";
 // // export * from "./argocdOfficial";
 
 export const argoInfrastructureParentApplications = createArgocdParentsApplication({
-    name: "infrastructure-aparent-pplication",
+    name: "infrastructure-parent-pplication",
     namespace: "argocd",
     resourceType: "infrastructure",
 
