@@ -4,7 +4,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-cluster-issuer","nginx.ingress.kubernetes.io/ssl-redirect":"false","nginx.ingress.kubernetes.io/use-regex":"true"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"oyelowo-ingress","namespace":"applications"},"spec":{"ingressClassName":"nginx","rules":[{"host":"oyelowo.dev","http":{"paths":[{"backend":{"service":{"name":"react-web","port":{"number":3000}}},"path":"/","pathType":"Prefix"},{"backend":{"service":{"name":"graphql-mongo","port":{"number":8000}}},"path":"/graphql","pathType":"Prefix"}]}}],"tls":[{"hosts":["oyelowo.dev","www.oyelowo.dev"],"secretName":"nginx-ingress-tls"}]}}
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-cluster-issuer","nginx.ingress.kubernetes.io/ssl-redirect":"false","nginx.ingress.kubernetes.io/use-regex":"true"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"oyelowo-ingress","namespace":"applications"},"spec":{"ingressClassName":"nginx","rules":[{"host":"oyelowo.dev","http":{"paths":[{"backend":{"service":{"name":"react-web","port":{"number":3000}}},"path":"/","pathType":"Prefix"},{"backend":{"service":{"name":"graphql-mongo","port":{"number":8000}}},"path":"/graphql","pathType":"Prefix"}]}}],"tls":[{"hosts":["oyelowo.dev"],"secretName":"nginx-ingress-tls"}]}}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/use-regex: "true"
   labels:
@@ -34,5 +34,4 @@ spec:
   tls:
   - hosts:
     - oyelowo.dev
-    - www.oyelowo.dev
     secretName: nginx-ingress-tls
