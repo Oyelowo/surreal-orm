@@ -17,6 +17,8 @@ import {
 } from "./manifestsDirectory";
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
 
+
+const { ENVIRONMENT } = getEnvironmentVariables()
 export class ServiceDeployment<
   AN extends AppName,
   DBT extends DBType,
@@ -65,7 +67,7 @@ export class ServiceDeployment<
       { provider: this.getProvider(), parent: this }
     );
 
-    const secrets = getSecretsForApp(this.appName);
+    const secrets = getSecretsForApp(this.appName, ENVIRONMENT);
     // Create a Kubernetes Secret.
     this.secret = new kx.Secret(
       `${resourceName}-secret`,
@@ -191,7 +193,7 @@ export class ServiceDeployment<
 
    */
   #secretsObjectToEnv = (secretInstance: kx.Secret) => {
-    const secretObject = getSecretsForApp(this.appName);
+    const secretObject = getSecretsForApp(this.appName, ENVIRONMENT);
     const keyValueEntries = Object.keys(secretObject).map((key) => [
       key,
       secretInstance.asEnvValue(key),
@@ -206,7 +208,7 @@ export class ServiceDeployment<
   getServiceDir = (): string => {
     return getPathToResource({
       resourceType: "services",
-      environment: getEnvironmentVariables().ENVIRONMENT,
+      environment: ENVIRONMENT,
       resourceName: this.appName,
     });
   };

@@ -195,7 +195,7 @@ const metadata: Omit<Metadata, "argoApplicationName" | "resourceType"> = {
 };
 
 
-const secrets = getSecretsForApp("argocd");
+const secrets = getSecretsForApp("argocd", ENVIRONMENT);
 
 export const argoCDApplicationsSecret = new kx.Secret(
   `argocd-secret`,

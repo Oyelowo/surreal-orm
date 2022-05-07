@@ -44,7 +44,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
             ingressClassName: INGRESS_CLASSNAME_NGINX,
             tls: [
                 {
-                    hosts: [DOMAIN_NAME_BASE, `www.${DOMAIN_NAME_BASE}`],
+                    hosts: [DOMAIN_NAME_BASE],
                     secretName: SECRET_NAME_NGINX
 
                 }

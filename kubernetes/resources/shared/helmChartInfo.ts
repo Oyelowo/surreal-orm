@@ -28,8 +28,7 @@
 //     }
 // }
 
-// type Props = Record<`${Repo}Repo`, BitnamiRepoCharts | JetspackRepoCharts | LinkerdRepoCharts>
-
+// type Props = Record<`${Repo}Repo`, BitnamiRepoCharts | JetspackRepoCharts | LinkerdRepoCharts
 export const helmChartsInfo = {
     bitnamiRepo: {
         repo: "https://charts.bitnami.com/bitnami",

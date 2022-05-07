@@ -1,5 +1,5 @@
+import { Environment } from "./../../resources/shared/types/own-types";
 import { AppName } from "../../resources/shared/types/own-types";
-import { Environment } from "../../resources/shared/types/own-types";
 import { Secrets } from "./setupSecrets";
 import { getEnvironmentVariables } from "../../resources/shared/validations";
 import { SECRET_DEVELOPMENT } from "../../.secrets/development";
@@ -14,6 +14,12 @@ const secretRecord: Record<Environment, Secrets> = {
   local: SECRET_LOCAL,
 };
 
-export function getSecretsForApp<App extends AppName>(appName: App): typeof secretRecord[Environment][App] {
-  return secretRecord[getEnvironmentVariables().ENVIRONMENT][appName];
+type AppSecrets<App extends AppName> = typeof secretRecord[Environment][App];
+
+export function getSecretsForApp<App extends AppName>(
+  appName: App,
+  environment: Environment
+): AppSecrets<App> {
+  // return secretRecord[getEnvironmentVariables().ENVIRONMENT][appName];
+  return secretRecord[environment][appName];
 }

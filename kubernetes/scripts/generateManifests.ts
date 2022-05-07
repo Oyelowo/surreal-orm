@@ -1,4 +1,7 @@
-import { getGeneratedEnvManifestsDir, ResourceName } from "./../resources/shared/manifestsDirectory";
+import {
+  getGeneratedEnvManifestsDir,
+  ResourceName,
+} from "./../resources/shared/manifestsDirectory";
 import { ImageTags } from "./../resources/shared/validations";
 import sh from "shelljs";
 import { Environment } from "../resources/shared/types/own-types";
@@ -10,11 +13,15 @@ import { clearUnsealedInputTsSecretFilesContents } from "./secretsManagement/set
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 */
-interface GenerateManifestsProps extends Pick<GenSealedSecretsProps, "environment"> {
+interface GenerateManifestsProps
+  extends Pick<GenSealedSecretsProps, "environment"> {
   imageTags: ImageTags;
 }
 
-export async function generateManifests({ environment, imageTags }: GenerateManifestsProps) {
+export async function generateManifests({
+  environment,
+  imageTags,
+}: GenerateManifestsProps) {
   const manifestsDirForEnv = getGeneratedEnvManifestsDir(environment);
   sh.exec("npm i");
   sh.rm("-rf", "./login");
@@ -22,29 +29,35 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
 
   sh.exec("pulumi login file://login");
 
-  sh.echo(c.blueBright(`First Delete old resources for" ${environment} at ${manifestsDirForEnv}`));
+  sh.echo(
+    c.blueBright(
+      `First Delete old resources for" ${environment} at ${manifestsDirForEnv}`
+    )
+  );
 
-  const getManifestsWithinDirName = (dirName: "1-manifest" | "0-crd") => sh.exec(`find ${manifestsDirForEnv} -type d -name "${dirName}"`, { silent: true }).stdout.split("\n");
+  const getManifestsWithinDirName = (dirName: "1-manifest" | "0-crd") =>
+    sh
+      .exec(`find ${manifestsDirForEnv} -type d -name "${dirName}"`, {
+        silent: true,
+      })
+      .stdout.split("\n");
   const manifestsNonCrds = getManifestsWithinDirName("1-manifest");
   const manifestsCrds = getManifestsWithinDirName("0-crd");
-  manifestsNonCrds.concat(manifestsCrds).forEach(f => sh.rm("-rf", f.trim()));
+  manifestsNonCrds.concat(manifestsCrds).forEach((f) => sh.rm("-rf", f.trim()));
 
-  sh.exec("export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev");
+  sh.exec(
+    "export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev"
+  );
 
   // Pulumi needs some environment variables set for generating deployments with image tag
   /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
-  */
-  const imageEnvVarSetterForPulumi = Object.entries(imageTags)
-    .map(([k, v]) => `export ${k}=${v}`)
-    .join(" ");
-
+   */
 
   sh.exec(
     `
-   ${imageEnvVarSetterForPulumi} 
-   export ${ENVIRONMENT}=${environment}  
-   export PULUMI_CONFIG_PASSPHRASE="" 
-   pulumi up --yes --skip-preview --stack dev
+    ${getEnvVarsForScript(environment, imageTags)}
+    export PULUMI_CONFIG_PASSPHRASE="" 
+    pulumi up --yes --skip-preview --stack dev
    `
   );
 
@@ -83,9 +96,14 @@ export async function regenerateSealedSecretsManifests({
       // The path format is: kubernetes/manifests/generated/production/applications/graphql-mongo/1-manifest
       // and we want as basedir: kubernetes/manifests/generated/production/applications/graphql-mongo
       const appBaseDir = p.join(appManifestsDir, "..");
-      const unsealedSecretManifestFileName = p.basename(unsealedSecretManifestPath);
+      const unsealedSecretManifestFileName = p.basename(
+        unsealedSecretManifestPath
+      );
       const sealedSecretDir = p.join(appBaseDir, "sealed-secrets");
-      const sealedSecretFilePath = p.join(sealedSecretDir, `sealed-${unsealedSecretManifestFileName}`);
+      const sealedSecretFilePath = p.join(
+        sealedSecretDir,
+        `sealed-${unsealedSecretManifestFileName}`
+      );
       const sealedSecretsControllerName: ResourceName = "sealed-secrets";
 
       sh.mkdir(sealedSecretDir);
@@ -98,9 +116,12 @@ export async function regenerateSealedSecretsManifests({
       );
 
       // TODO: Should I delete old sealed secrets before creating new ones?
-      const kubeSeal = sh.exec(`kubeseal --controller-name ${sealedSecretsControllerName} < ${unsealedSecretManifestPath} -o yaml >${sealedSecretFilePath}`, {
-        silent: true,
-      });
+      const kubeSeal = sh.exec(
+        `kubeseal --controller-name ${sealedSecretsControllerName} < ${unsealedSecretManifestPath} -o yaml >${sealedSecretFilePath}`,
+        {
+          silent: true,
+        }
+      );
 
       sh.echo(c.greenBright(kubeSeal.stdout));
       if (kubeSeal.stderr) {
@@ -109,10 +130,19 @@ export async function regenerateSealedSecretsManifests({
         return;
       }
 
-      sh.echo(c.greenBright("Successfully generated sealed secret at", unsealedSecretManifestPath));
+      sh.echo(
+        c.greenBright(
+          "Successfully generated sealed secret at",
+          unsealedSecretManifestPath
+        )
+      );
     }
 
-    sh.echo(c.blueBright(`Removing unsealed plain secret manifest ${unsealedSecretManifestPath}`));
+    sh.echo(
+      c.blueBright(
+        `Removing unsealed plain secret manifest ${unsealedSecretManifestPath}`
+      )
+    );
 
     // Delete unsealed plain secret if specified
     if (!keepSecretOutputs) {
@@ -125,13 +155,36 @@ export async function regenerateSealedSecretsManifests({
   }
 }
 
-export function getFilePathsThatMatch({ contextDir, pattern }: { contextDir: string; pattern: string }) {
-  const UNSEALED_SECRETS_MANIFESTS_FOR_ENV = sh.exec(`find ${contextDir} -name "${pattern}"`, {
-    silent: true,
-  });
-  const unsealedSecretsFilePathsForEnv = UNSEALED_SECRETS_MANIFESTS_FOR_ENV.stdout
-    .trim()
-    .split("\n")
-    .map((s) => s.trim());
+export function getEnvVarsForScript(
+  environment: Environment,
+  imageTags: ImageTags
+) {
+  const imageEnvVarSetterForPulumi = Object.entries(imageTags)
+    .map(([k, v]) => `export ${k}=${v}`)
+    .join(" ");
+  return `
+      ${imageEnvVarSetterForPulumi} 
+      export ${ENVIRONMENT}=${environment}  
+  `;
+}
+
+export function getFilePathsThatMatch({
+  contextDir,
+  pattern,
+}: {
+  contextDir: string;
+  pattern: string;
+}) {
+  const UNSEALED_SECRETS_MANIFESTS_FOR_ENV = sh.exec(
+    `find ${contextDir} -name "${pattern}"`,
+    {
+      silent: true,
+    }
+  );
+  const unsealedSecretsFilePathsForEnv =
+    UNSEALED_SECRETS_MANIFESTS_FOR_ENV.stdout
+      .trim()
+      .split("\n")
+      .map((s) => s.trim());
   return unsealedSecretsFilePathsForEnv;
 }
