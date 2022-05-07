@@ -1,3 +1,4 @@
+import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker';
 import { getEnvironmentVariables } from "./validations";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
@@ -117,7 +118,7 @@ export class ServiceDeployment<
       },
       imagePullSecrets: [
         {
-          name: "myregistrykey",
+          name: DOCKER_REGISTRY_KEY,
         },
       ],
     });

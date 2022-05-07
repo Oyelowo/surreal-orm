@@ -7,7 +7,7 @@ import { Environment } from '../../shared/types/own-types';
 import sh from "shelljs";
 
 const DOCKER_SERVER = "ghcr.io";
-const DOCKER_REGISTRY_KEY = "my-registry-key";
+export const DOCKER_REGISTRY_KEY = "my-registry-key";
 
 export function createContainerRegistrySecret(environment: Environment): void {
     const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } =

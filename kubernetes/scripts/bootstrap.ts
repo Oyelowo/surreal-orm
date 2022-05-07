@@ -108,7 +108,7 @@ async function bootstrap() {
     environment: ARGV.e,
     imageTags,
   });
-  
+
   setupUnsealedSecretFiles();
 
   /*
@@ -116,17 +116,10 @@ async function bootstrap() {
        running in the cluster */
 
   // # Apply namespace first
-  // TODO: Use a function to get and share this with manifestDirectory.ts module
-  sh.exec(
-    `kubectl apply -R -f ${getResourceAbsolutePath("namespace-names", ARGV.e)}`
-  );
-  // sh.exec(`kubectl apply -R -f ${manifestsDirForEnv}/namespaces`);
+  applyResourceManifests("namespace-names")
 
   // # Apply setups with sealed secret controller
-
-  sh.exec(
-    `kubectl apply -R -f  ${getResourceAbsolutePath("sealed-secrets", ARGV.e)}`
-  );
+  applyResourceManifests("sealed-secrets")
 
   const sealedSecretsName: ResourceName = "sealed-secrets";
   // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
@@ -135,9 +128,7 @@ async function bootstrap() {
   );
 
   // # Apply setups with cert-manager controller
-  const certManagerDir = getResourceAbsolutePath("cert-manager", ARGV.e);
-  sh.exec(`kubectl apply -R -f  ${certManagerDir}/0-crd`);
-  sh.exec(`kubectl apply -R -f  ${certManagerDir}/1-manifest`);
+  applyResourceManifests("cert-manager")
 
   // # Wait for cert-manager and cert-manager-trust controllers to be in running phase so that we can use it to encrypt secrets
   const { certManager, certManagerTrust } = helmChartsInfo.jetspackRepo;
@@ -149,15 +140,8 @@ async function bootstrap() {
   );
 
   // # Apply setups with linkerd controller
-  const linkerdDir = getResourceAbsolutePath("linkerd", ARGV.e);
-  sh.exec(`kubectl apply -R -f  ${linkerdDir}/sealed-secrets`);
-  sh.exec(`kubectl apply -R -f  ${linkerdDir}/0-crd`);
-  sh.exec(`kubectl apply -R -f  ${linkerdDir}/1-manifest`);
-
-  const linkerdVizDir = getResourceAbsolutePath("linkerd-viz", ARGV.e);
-  sh.exec(`kubectl apply -R -f  ${linkerdVizDir}/sealed-secrets`);
-  sh.exec(`kubectl apply -R -f  ${linkerdVizDir}/0-crd`);
-  sh.exec(`kubectl apply -R -f  ${linkerdVizDir}/1-manifest`);
+  applyResourceManifests("linkerd");
+  applyResourceManifests("linkerd-viz");
 
   // TODO: separate sealed secrets deletion step
   await regenerateSealedSecretsManifests({
@@ -170,9 +154,7 @@ async function bootstrap() {
   // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
   // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/sealed-secrets`);
   // sh.exec(`kubectl apply -R -f ${getArgocdControllerDir(ARGV.e)}`);
-  const argocdDirController = getResourceAbsolutePath("argocd", ARGV.e);
-  sh.exec(`kubectl apply -f ${argocdDirController}/0-crd`);
-  sh.exec(`kubectl apply -f ${argocdDirController}/1-manifest`);
+  applyResourceManifests("argocd")
   // TODO: Split bootstrap process from restart from update
   sh.exec(`kubectl -n argocd rollout restart deployment argocd-argo-cd-server`);
 
@@ -189,6 +171,13 @@ async function bootstrap() {
 }
 
 bootstrap();
-function deployContainerRegistrySecret() {
-  throw new Error("Function not implemented.");
+
+
+
+function applyResourceManifests(resourceName: ResourceName) {
+  const resourceDir = getResourceAbsolutePath(resourceName, ARGV.e);
+  sh.exec(`kubectl apply -R -f  ${resourceDir}/sealed-secrets`);
+  sh.exec(`kubectl apply -R -f  ${resourceDir}/0-crd`);
+  sh.exec(`kubectl apply -R -f  ${resourceDir}/1-manifest`);
 }
+
