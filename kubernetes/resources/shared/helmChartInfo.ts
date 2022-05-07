@@ -74,6 +74,13 @@ export const helmChartsInfo = {
             chart: "linkerd-viz",
             version: "2.11.2",
         }
+    },
+    argoRepo: {
+        repo: "https://argoproj.github.io/argo-helm",
+        argoCD: {
+            chart: "argo-cd",
+            version: "4.5.3",
+        },
     }
 } as const
 

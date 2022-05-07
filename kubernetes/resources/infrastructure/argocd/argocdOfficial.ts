@@ -9,6 +9,7 @@ import { DeepPartial } from "../../shared/types/own-types";
 import bcrypt from "bcrypt";
 import { DOMAIN_NAME_SUB_ARGOCD } from "../ingress/constant";
 import { argocdProvider } from "./settings";
+import { helmChartsInfo } from "../../shared/helmChartInfo";
 
 
 // --insecure
@@ -61,14 +62,15 @@ const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
     },
 };
 
+const { repo, argoCD: { chart, version } } = helmChartsInfo.argoRepo;
 export const argocdHelm = new k8s.helm.v3.Chart(
     "argocd",
     {
-        chart: "argo-cd",
+        chart,
         fetchOpts: {
-            repo: "https://argoproj.github.io/argo-helm",
+            repo,
         },
-        version: "4.5.3",
+        version,
         values: argocdValues,
         namespace: namespaceNames.argocd,
         // namespace: devNamespaceName,
