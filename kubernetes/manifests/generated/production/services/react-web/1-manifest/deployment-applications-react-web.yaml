@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"linkerd.io/inject":"enabled"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"react-web","namespace":"applications"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"react"}},"template":{"metadata":{"labels":{"app":"react"}},"spec":{"containers":[{"env":[{"name":"APP_ENVIRONMENT","value":"production"},{"name":"APP_HOST","value":"0.0.0.0"},{"name":"APP_PORT","value":"3000"},{"name":"GITHUB_CLIENT_ID","valueFrom":{"secretKeyRef":{"key":"GITHUB_CLIENT_ID","name":"react-web"}}},{"name":"GITHUB_CLIENT_SECRET","valueFrom":{"secretKeyRef":{"key":"GITHUB_CLIENT_SECRET","name":"react-web"}}},{"name":"GOOGLE_CLIENT_ID","valueFrom":{"secretKeyRef":{"key":"GOOGLE_CLIENT_ID","name":"react-web"}}},{"name":"GOOGLE_CLIENT_SECRET","valueFrom":{"secretKeyRef":{"key":"GOOGLE_CLIENT_SECRET","name":"react-web"}}},{"name":"NEXTAUTH_URL","value":"graphql-mongo.applications:8000"},{"name":"GRAPHQL_MONGO_URL","value":"graphql-mongo.applications:8000"}],"image":"ghcr.io/oyelowo/react-web:master-7384675ae2402b1c9df79f1e8fe85e29f3ad8c26","name":"react","ports":[{"containerPort":3000,"name":"http"}],"resources":{"limits":{"cpu":"100m","memory":"200Mi"},"requests":{"cpu":"100m","memory":"70Mi"}},"volumeMounts":[]}],"imagePullSecrets":[{"name":"myregistrykey"}],"initContainers":[],"securityContext":{"runAsGroup":10000,"runAsNonRoot":true,"runAsUser":10000},"volumes":[]}}}}
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"linkerd.io/inject":"enabled"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"react-web","namespace":"applications"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"react"}},"template":{"metadata":{"labels":{"app":"react"}},"spec":{"containers":[{"env":[{"name":"APP_ENVIRONMENT","value":"production"},{"name":"APP_HOST","value":"0.0.0.0"},{"name":"APP_PORT","value":"3000"},{"name":"GITHUB_CLIENT_ID","valueFrom":{"secretKeyRef":{"key":"GITHUB_CLIENT_ID","name":"react-web"}}},{"name":"GITHUB_CLIENT_SECRET","valueFrom":{"secretKeyRef":{"key":"GITHUB_CLIENT_SECRET","name":"react-web"}}},{"name":"GOOGLE_CLIENT_ID","valueFrom":{"secretKeyRef":{"key":"GOOGLE_CLIENT_ID","name":"react-web"}}},{"name":"GOOGLE_CLIENT_SECRET","valueFrom":{"secretKeyRef":{"key":"GOOGLE_CLIENT_SECRET","name":"react-web"}}},{"name":"NEXTAUTH_URL","value":"graphql-mongo.applications:8000"},{"name":"GRAPHQL_MONGO_URL","value":"graphql-mongo.applications:8000"}],"image":"ghcr.io/oyelowo/react-web:master-7384675ae2402b1c9df79f1e8fe85e29f3ad8c26","name":"react","ports":[{"containerPort":3000,"name":"http"}],"resources":{"limits":{"cpu":"100m","memory":"200Mi"},"requests":{"cpu":"100m","memory":"70Mi"}},"volumeMounts":[]}],"imagePullSecrets":[{"name":"my-registry-key"}],"initContainers":[],"securityContext":{"runAsGroup":10000,"runAsNonRoot":true,"runAsUser":10000},"volumes":[]}}}}
     linkerd.io/inject: enabled
   labels:
     app.kubernetes.io/managed-by: pulumi
@@ -65,7 +65,7 @@ spec:
             memory: 70Mi
         volumeMounts: []
       imagePullSecrets:
-      - name: myregistrykey
+      - name: my-registry-key
       initContainers: []
       securityContext:
         runAsGroup: 10000
