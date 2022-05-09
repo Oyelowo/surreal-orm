@@ -23,7 +23,9 @@ const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
   // identityTrustAnchorsPEM: "ca.crt",
   // identityTrustDomain
   // installNamespace: false,
-
+  podAnnotations: {
+    "sealedsecrets.bitnami.com/managed": "true"
+  },
   identity: {
     externalCA: true,
     issuer: {

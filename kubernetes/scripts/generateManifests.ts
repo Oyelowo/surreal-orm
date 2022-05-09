@@ -114,21 +114,51 @@ export async function regenerateSealedSecretsManifests({
           `Generating sealed secret ${unsealedSecretManifestPath} \n to \n ${sealedSecretFilePath}`
         )
       );
+      // inject `sealedsecrets.bitnami.com/managed: "true"` into existing secret annotaions to
+      // enable sealed secret controller manage existing secrets
+      // https://github.com/bitnami-labs/sealed-secrets/blob/main/README.md#managing-existing-secrets
+      // sh.exec(`yq -i '.metadata.annotations["sealedsecrets.bitnami.com/managed"] = "true"' ${unsealedSecretManifestPath}`)
 
-      // TODO: Should I delete old sealed secrets before creating new ones?
-      const kubeSeal = sh.exec(
-        `kubeseal --controller-name ${sealedSecretsControllerName} < ${unsealedSecretManifestPath} -o yaml >${sealedSecretFilePath}`,
-        {
-          silent: true,
+      if (sealedSecretFilePath) {
+        // Merge into existing sealed secret if it alredy exists. Otherwise, create a fresh one
+        // First check if value is empty. i.e empty string or null
+        // Delete empty and null secret data
+        // sh.exec(`yq eval 'del( .data[] | select( . == "" or . == null) )' dd.yaml`)
+        // Encode value of an empty string is Cg==
+        const emptyStringInBase64 = "Cg=="
+        // -i does the mutation in place
+        sh.exec(`yq -i eval 'del( .data[] | select( . == "" or . == null or . == "${emptyStringInBase64}") )' ${unsealedSecretManifestPath}`)
+        // sh.exec(`yq e '.metadata.annotations' dd.yaml`)
+
+        //Delete value if it is empty or null
+        // Add -i if you want the deletion in place
+        // sh.exec(`yq eval 'del(.metadata.annotations["sealedsecrets.bitnami.com/managedq"])' dd.yaml`)
+
+        // Merge only the values that have newly been included in the plain secret to the newly merged sealed secrets
+        sh.exec(`kubeseal --controller-name ${sealedSecretsControllerName} < ${unsealedSecretManifestPath} -o yaml --merge-into  ${sealedSecretFilePath}`)
+      } else {
+        // TODO: Should I delete old sealed secrets before creating new ones?
+        const kubeSeal = sh.exec(
+          `kubeseal --controller-name ${sealedSecretsControllerName} < ${unsealedSecretManifestPath} -o yaml >${sealedSecretFilePath}`,
+          {
+            silent: true,
+          }
+        );
+        // const kubeSeal = sh.exec(
+        //   `kubeseal --controller-name ${sealedSecretsControllerName} < ${unsealedSecretManifestPath} -o yaml >${sealedSecretFilePath}`,
+        //   {
+        //     silent: true,
+        //   }
+        // );
+
+        sh.echo(c.greenBright(kubeSeal.stdout));
+        if (kubeSeal.stderr) {
+          sh.echo(`Error sealing secrets: ${c.redBright(kubeSeal.stderr)}`);
+          sh.exit(1);
+          return;
         }
-      );
-
-      sh.echo(c.greenBright(kubeSeal.stdout));
-      if (kubeSeal.stderr) {
-        sh.echo(`Error sealing secrets: ${c.redBright(kubeSeal.stderr)}`);
-        sh.exit(1);
-        return;
       }
+
 
       sh.echo(
         c.greenBright(

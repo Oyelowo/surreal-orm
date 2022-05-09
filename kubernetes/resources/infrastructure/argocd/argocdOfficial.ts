@@ -43,6 +43,9 @@ const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
         secret: {
             // createSecret: false,
             argocdServerAdminPassword: hash,
+            annotations: {
+                "sealedsecrets.bitnami.com/managed": "true"
+            }
         },
     },
     dex: {

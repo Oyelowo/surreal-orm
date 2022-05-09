@@ -163,7 +163,7 @@ type ArgocdParentsApplicationProps = {
 
 
 
-const parentsProvider = new k8s.Provider(
+export const providerArgoCDApplicationsParent = new k8s.Provider(
   `argocd-parents-applications-${uuid()}`,
   {
     renderYamlToDirectory: getArgocdParentApplicationsPath(ENVIRONMENT),
@@ -183,7 +183,7 @@ export function createArgocdParentsApplication({
     sourcePath: getRepoPathFromAbsolutePath(
       getArgocdChildrenApplicationsAbsolutePath(resourceType, ENVIRONMENT)
     ),
-    provider: parentsProvider,
+    provider: providerArgoCDApplicationsParent,
   });
 }
 const metadata: Omit<Metadata, "argoApplicationName" | "resourceType"> = {
@@ -205,5 +205,5 @@ export const argoCDApplicationsSecret = new kx.Secret(
     },
     metadata,
   },
-  { provider: parentsProvider }
+  { provider: providerArgoCDApplicationsParent }
 );

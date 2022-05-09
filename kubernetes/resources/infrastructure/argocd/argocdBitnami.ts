@@ -12,7 +12,13 @@ import { helmChartsInfo } from '../../shared/helmChartInfo';
 // TODO: Use this everywhere
 const STORAGE_CLASS = "linode-block-storage-retain"
 const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
-  config: { secret: { create: true, argocdServerAdminPassword: "oyelowo", } },
+  config: {
+    secret: {
+      create: true, argocdServerAdminPassword: "oyelowo", annotations: {
+        "sealedsecrets.bitnami.com/managed": "true"
+      }
+    }
+  },
   global: {
     storageClass:
       getEnvironmentVariables().ENVIRONMENT === "local" ? "" : STORAGE_CLASS,

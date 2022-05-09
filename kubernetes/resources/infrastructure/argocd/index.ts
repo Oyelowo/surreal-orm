@@ -1,6 +1,6 @@
 import { createArgocdParentsApplication } from '../../shared/createArgoApplication';
 import { getEnvironmentVariables } from '../../shared/validations';
-import { createContainerRegistrySecret } from './docker';
+// import { createContainerRegistrySecret } from './docker';
 
 // // I am keeping bitnami version in the meantime for reference purpose. 26th April, 2022.
 export * from "./argocdBitnami";
@@ -20,5 +20,5 @@ export const argoServicesParentApplications = createArgocdParentsApplication({
 
 })
 
-createContainerRegistrySecret(getEnvironmentVariables().ENVIRONMENT)
+// createContainerRegistrySecret(getEnvironmentVariables().ENVIRONMENT)
 // export * from "./docker";

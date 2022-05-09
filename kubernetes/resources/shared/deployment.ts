@@ -14,7 +14,6 @@ import * as argocd from "../../crd2pulumi/argocd";
 import { createArgocdChildrenApplication } from "./createArgoApplication";
 import {
   getPathToResource,
-  getRepoPathFromAbsolutePath,
 } from "./manifestsDirectory";
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
 
@@ -77,7 +76,12 @@ export class ServiceDeployment<
           //  password: "fakepassword",
           ...secrets,
         },
-        metadata,
+        metadata: {
+          ...metadata,
+          annotations: {
+            "sealedsecrets.bitnami.com/managed": "true"
+          }
+        },
       },
       // //TODO: Confirm why secret has a separate provider
       // { provider: this.secretProvider, parent: this }
