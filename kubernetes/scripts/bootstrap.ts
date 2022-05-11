@@ -94,54 +94,54 @@ async function bootstrap() {
   const generateSealedSecrets = yes.includes(ARGV.gss);
   const imageTags = await getImageTagsFromDir();
 
-  // if (!generateSealedSecrets) {
-  //   await generateManifests({
-  //     environment: ARGV.e,
-  //     imageTags,
-  //   });
-  //   return;
-  // }
+  if (!generateSealedSecrets) {
+    await generateManifests({
+      environment: ARGV.e,
+      imageTags,
+    });
+    return;
+  }
 
-  // await promptKubernetesClusterSwitch();
+  await promptKubernetesClusterSwitch();
 
-  // await generateManifests({
-  //   environment: ARGV.e,
-  //   imageTags,
-  // });
-    
-  // setupUnsealedSecretFiles();
+  await generateManifests({
+    environment: ARGV.e,
+    imageTags,
+  });
 
-  // /*
-  //      This requires the above step with initial cluster setup making sure that the sealed secret controller is
-  //      running in the cluster */
+  setupUnsealedSecretFiles();
 
-  // // # Apply namespace first
-  // applyResourceManifests("namespace-names")
+  /*
+       This requires the above step with initial cluster setup making sure that the sealed secret controller is
+       running in the cluster */
 
-  // // # Apply setups with sealed secret controller
-  // applyResourceManifests("sealed-secrets")
+  // # Apply namespace first
+  applyResourceManifests("namespace-names")
 
-  // const sealedSecretsName: ResourceName = "sealed-secrets";
-  // // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
-  // sh.exec(
-  //   `kubectl rollout status deployment/${sealedSecretsName} -n=${namespaceNames.kubeSystem}`
-  // );
+  // # Apply setups with sealed secret controller
+  applyResourceManifests("sealed-secrets")
 
-  // // # Apply setups with cert-manager controller
-  // applyResourceManifests("cert-manager")
+  const sealedSecretsName: ResourceName = "sealed-secrets";
+  // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
+  sh.exec(
+    `kubectl rollout status deployment/${sealedSecretsName} -n=${namespaceNames.kubeSystem}`
+  );
 
-  // // # Wait for cert-manager and cert-manager-trust controllers to be in running phase so that we can use it to encrypt secrets
-  // const { certManager, certManagerTrust } = helmChartsInfo.jetspackRepo;
-  // sh.exec(
-  //   `kubectl rollout status deployment/${certManager.chart} -n=${namespaceNames.certManager}`
-  // );
-  // sh.exec(
-  //   `kubectl rollout status deployment/${certManagerTrust.chart} -n=${namespaceNames.certManager}`
-  // );
+  // # Apply setups with cert-manager controller
+  applyResourceManifests("cert-manager")
 
-  // // # Apply setups with linkerd controller
-  // applyResourceManifests("linkerd");
-  // applyResourceManifests("linkerd-viz");
+  // # Wait for cert-manager and cert-manager-trust controllers to be in running phase so that we can use it to encrypt secrets
+  const { certManager, certManagerTrust } = helmChartsInfo.jetspackRepo;
+  sh.exec(
+    `kubectl rollout status deployment/${certManager.chart} -n=${namespaceNames.certManager}`
+  );
+  sh.exec(
+    `kubectl rollout status deployment/${certManagerTrust.chart} -n=${namespaceNames.certManager}`
+  );
+
+  // # Apply setups with linkerd controller
+  applyResourceManifests("linkerd");
+  applyResourceManifests("linkerd-viz");
 
   // TODO: separate sealed secrets deletion step
   await regenerateSealedSecretsManifests({
@@ -150,21 +150,12 @@ async function bootstrap() {
     keepSecretInputs: yes.includes(ARGV.kusi),
     keepSecretOutputs: yes.includes(ARGV.kuso),
   });
-return
+
   // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
-  // sh.exec(`kubectl apply -f ${getArgocdControllerDir(ARGV.e)}/sealed-secrets`);
-  // sh.exec(`kubectl apply -R -f ${getArgocdControllerDir(ARGV.e)}`);
   applyResourceManifests("argocd")
   // TODO: Split bootstrap process from restart from update
   sh.exec(`kubectl -n argocd rollout restart deployment argocd-argo-cd-server`);
 
-  // sh.exec(`kubectl apply -R -f ${getIngressControllerDir(ARGV.e)}`);
-  // sh.exec(`kubectl apply -R -f ${getCertManagerControllerDir(ARGV.e)}`);
-  // // sh.exec(`kubectl apply -R -f ${getLinkerd2Dir(ARGV.e)}`);
-  // sh.exec(`kubectl apply -R -f ${getLinkerd2Dir(ARGV.e)}/0-crd`);
-  // sh.exec(`kubectl apply -R -f ${getLinkerd2Dir(ARGV.e)}/1-manifest`);
-
-  // sh.exec(`kubectl apply -R -f ${getLinkerdVizDir(ARGV.e)}`);
 
   // TODO: Only apply this in non prod environment
   sh.exec(`kubectl apply -R -f ${getArgocdParentApplicationsPath(ARGV.e)}`);

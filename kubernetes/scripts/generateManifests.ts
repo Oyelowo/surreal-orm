@@ -116,7 +116,8 @@ export async function regenerateSealedSecretsManifests({
         )
       );
 
-      if (sealedSecretFilePath) {
+      const isEmpty = isFileEmpty(sealedSecretFilePath)
+      if (sealedSecretFilePath && !isEmpty) {
         mergeSecretToSealedSecret({
           unsealedSecretFilePath,
           sealedSecretsControllerName,
@@ -258,4 +259,20 @@ export function getFilePathsThatMatch({
       .split("\n")
       .map((s) => s.trim());
   return unsealedSecretsFilePathsForEnv;
+}
+
+
+
+
+function isFileEmpty(fileName: string, ignoreWhitespace = true): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    fs.readFile(fileName, (err, data) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve((!ignoreWhitespace && data.length == 0) || (ignoreWhitespace && !!String(data).match(/^\s*$/)))
+    });
+  })
 }
