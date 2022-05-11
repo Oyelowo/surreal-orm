@@ -92,20 +92,18 @@ export async function regenerateSealedSecretsManifests({
     pattern: "secret-*ml",
   });
 
-  for (const unsealedSecretManifestPath of unsealedSecretsFilePathsForEnv) {
-    const appManifestsDir = p.dirname(unsealedSecretManifestPath);
+  for (const unsealedSecretFilePath of unsealedSecretsFilePathsForEnv) {
+    const appManifestsDir = p.dirname(unsealedSecretFilePath);
 
     if (regenerateSealedSecrets) {
       // The path format is: kubernetes/manifests/generated/production/applications/graphql-mongo/1-manifest
       // and we want as basedir: kubernetes/manifests/generated/production/applications/graphql-mongo
       const appBaseDir = p.join(appManifestsDir, "..");
-      const unsealedSecretManifestFileName = p.basename(
-        unsealedSecretManifestPath
-      );
+      const unsealedSecretFileName = p.basename(unsealedSecretFilePath);
       const sealedSecretDir = p.join(appBaseDir, "sealed-secrets");
       const sealedSecretFilePath = p.join(
         sealedSecretDir,
-        `sealed-${unsealedSecretManifestFileName}`
+        `sealed-${unsealedSecretFileName}`
       );
       const sealedSecretsControllerName: ResourceName = "sealed-secrets";
 
@@ -114,21 +112,20 @@ export async function regenerateSealedSecretsManifests({
       // TODO: Check the content of the file to confirm if it is actually a secret object
       sh.echo(
         c.blueBright(
-          `Generating sealed secret ${unsealedSecretManifestPath} \n to \n ${sealedSecretFilePath}`
+          `Generating sealed secret ${unsealedSecretFilePath} \n to \n ${sealedSecretFilePath}`
         )
       );
 
       if (sealedSecretFilePath) {
         mergeSecretToSealedSecret({
-          unsealedSecretManifestPath,
+          unsealedSecretFilePath,
           sealedSecretsControllerName,
           sealedSecretFilePath,
         });
-
       } else {
         // TODO: Should I delete old sealed secrets before creating new ones?
         const kubeSeal = sh.exec(
-          `kubeseal --controller-name ${sealedSecretsControllerName} < ${unsealedSecretManifestPath} -o yaml >${sealedSecretFilePath}`,
+          `kubeseal --controller-name ${sealedSecretsControllerName} < ${unsealedSecretFilePath} -o yaml >${sealedSecretFilePath}`,
           {
             silent: true,
           }
@@ -145,20 +142,20 @@ export async function regenerateSealedSecretsManifests({
       sh.echo(
         c.greenBright(
           "Successfully generated sealed secret at",
-          unsealedSecretManifestPath
+          unsealedSecretFilePath
         )
       );
     }
 
     sh.echo(
       c.blueBright(
-        `Removing unsealed plain secret manifest ${unsealedSecretManifestPath}`
+        `Removing unsealed plain secret manifest ${unsealedSecretFilePath}`
       )
     );
 
     // Delete unsealed plain secret if specified
     if (!keepSecretOutputs) {
-      sh.rm("-rf", unsealedSecretManifestPath);
+      sh.rm("-rf", unsealedSecretFilePath);
     }
 
     if (!keepSecretInputs) {
@@ -168,12 +165,13 @@ export async function regenerateSealedSecretsManifests({
 }
 
 type MergeProps = {
-  unsealedSecretManifestPath: string;
+  unsealedSecretFilePath: string;
   sealedSecretsControllerName: string;
   sealedSecretFilePath: string;
-}
+};
+
 function mergeSecretToSealedSecret({
-  unsealedSecretManifestPath,
+  unsealedSecretFilePath: unsealedSecretManifestPath,
   sealedSecretsControllerName,
   sealedSecretFilePath,
 }: MergeProps): void {
