@@ -72,8 +72,8 @@ export const dockerRegistry = new kx.Secret("docker-registry", {
     },
 
     data: {
-        ".dockerconfigjson": JSON.stringify(dataRaw)
-        // ".dockerconfigjson": toBase64(JSON.stringify(dataRaw))
+        // ".dockerconfigjson": JSON.stringify(dataRaw)
+        ".dockerconfigjson": toBase64(JSON.stringify(dataRaw))
     },
 }, { provider: providerArgoCDApplicationsParent });
 

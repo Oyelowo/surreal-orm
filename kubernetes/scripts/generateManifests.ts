@@ -1,3 +1,5 @@
+import { SecretTemplate } from "./../resources/shared/types/SecretTemplate";
+import { SealedSecretTemplate } from "./../resources/shared/types/sealedSecretTemplate";
 import {
   getGeneratedEnvManifestsDir,
   ResourceName,
@@ -9,7 +11,8 @@ import { ENVIRONMENT } from "./bootstrap";
 import p from "path";
 import c from "chalk";
 import { clearUnsealedInputTsSecretFilesContents } from "./secretsManagement/setupSecrets";
-
+import yaml from "js-yaml";
+import fs from "fs";
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 */
@@ -114,28 +117,14 @@ export async function regenerateSealedSecretsManifests({
           `Generating sealed secret ${unsealedSecretManifestPath} \n to \n ${sealedSecretFilePath}`
         )
       );
-      // inject `sealedsecrets.bitnami.com/managed: "true"` into existing secret annotaions to
-      // enable sealed secret controller manage existing secrets
-      // https://github.com/bitnami-labs/sealed-secrets/blob/main/README.md#managing-existing-secrets
-      // sh.exec(`yq -i '.metadata.annotations["sealedsecrets.bitnami.com/managed"] = "true"' ${unsealedSecretManifestPath}`)
 
       if (sealedSecretFilePath) {
-        // Merge into existing sealed secret if it alredy exists. Otherwise, create a fresh one
-        // First check if value is empty. i.e empty string or null
-        // Delete empty and null secret data
-        // sh.exec(`yq eval 'del( .data[] | select( . == "" or . == null) )' dd.yaml`)
-        // Encode value of an empty string is Cg==
-        const emptyStringInBase64 = "Cg=="
-        // -i does the mutation in place
-        sh.exec(`yq -i eval 'del( .data[] | select( . == "" or . == null or . == "${emptyStringInBase64}") )' ${unsealedSecretManifestPath}`)
-        // sh.exec(`yq e '.metadata.annotations' dd.yaml`)
+        mergeSecretToSealedSecret({
+          unsealedSecretManifestPath,
+          sealedSecretsControllerName,
+          sealedSecretFilePath,
+        });
 
-        //Delete value if it is empty or null
-        // Add -i if you want the deletion in place
-        // sh.exec(`yq eval 'del(.metadata.annotations["sealedsecrets.bitnami.com/managedq"])' dd.yaml`)
-
-        // Merge only the values that have newly been included in the plain secret to the newly merged sealed secrets
-        sh.exec(`kubeseal --controller-name ${sealedSecretsControllerName} < ${unsealedSecretManifestPath} -o yaml --merge-into  ${sealedSecretFilePath}`)
       } else {
         // TODO: Should I delete old sealed secrets before creating new ones?
         const kubeSeal = sh.exec(
@@ -144,12 +133,6 @@ export async function regenerateSealedSecretsManifests({
             silent: true,
           }
         );
-        // const kubeSeal = sh.exec(
-        //   `kubeseal --controller-name ${sealedSecretsControllerName} < ${unsealedSecretManifestPath} -o yaml >${sealedSecretFilePath}`,
-        //   {
-        //     silent: true,
-        //   }
-        // );
 
         sh.echo(c.greenBright(kubeSeal.stdout));
         if (kubeSeal.stderr) {
@@ -158,7 +141,6 @@ export async function regenerateSealedSecretsManifests({
           return;
         }
       }
-
 
       sh.echo(
         c.greenBright(
@@ -183,6 +165,67 @@ export async function regenerateSealedSecretsManifests({
       clearUnsealedInputTsSecretFilesContents();
     }
   }
+}
+
+type MergeProps = {
+  unsealedSecretManifestPath: string;
+  sealedSecretsControllerName: string;
+  sealedSecretFilePath: string;
+}
+function mergeSecretToSealedSecret({
+  unsealedSecretManifestPath,
+  sealedSecretsControllerName,
+  sealedSecretFilePath,
+}: MergeProps): void {
+  const emptyStringInBase64 = "Cg==";
+  const unsealedSecretJsonData: SecretTemplate = yaml.load(
+    fs.readFileSync(unsealedSecretManifestPath, { encoding: "utf-8" })
+  ) as SecretTemplate;
+
+  const removeEmptyValue = ([_, value]: [string, string]) =>
+    !(value === "" || value === null || value === emptyStringInBase64);
+  const sealValue = ([key, value]: [string, string]) => [
+    key,
+    sh.exec(
+      `echo -n ${value} | kubeseal --controller-name=${sealedSecretsControllerName} \
+         --raw --from-file=/dev/stdin --namespace ${unsealedSecretJsonData.metadata.namespace} \
+          --name ${unsealedSecretJsonData.metadata.name}`
+    ),
+  ];
+
+  const { stringData, data } = unsealedSecretJsonData;
+  const dataToSeal = stringData ?? data ?? {};
+  const filteredSealedSecretsData = Object.fromEntries(
+    Object.entries(dataToSeal).filter(removeEmptyValue).map(sealValue)
+  );
+
+  const existingSealedSecretJsonData: SealedSecretTemplate = yaml.load(
+    fs.readFileSync(sealedSecretFilePath, { encoding: "utf-8" })
+  ) as SealedSecretTemplate;
+
+  const updatedSealedSecrets: SealedSecretTemplate = {
+    ...existingSealedSecretJsonData,
+    spec: {
+      encryptedData: {
+        ...existingSealedSecretJsonData?.spec?.encryptedData,
+        ...filteredSealedSecretsData,
+      },
+      template: {
+        ...existingSealedSecretJsonData?.spec?.template,
+        data: null,
+        metadata: unsealedSecretJsonData.metadata,
+        type: unsealedSecretJsonData.type,
+      },
+    },
+  };
+
+  sh.exec(
+    `echo '${yaml.dump(updatedSealedSecrets)}' > ${sealedSecretFilePath}`
+  );
+
+  // Something as simple as this would have worked but kubeseal doesnt handle merging properly
+  // When there is a key in the new secret but not in the existing sealed secret, it throws an error
+  // sh.exec(`echo '${JSON.stringify(Data)}' | kubeseal --controller-name ${sealedSecretsControllerName} -o yaml --merge-into  ${sealedSecretFilePath}`)
 }
 
 export function getEnvVarsForScript(
