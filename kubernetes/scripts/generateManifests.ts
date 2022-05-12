@@ -5,7 +5,7 @@ import {
   ResourceName,
 } from "./../resources/shared/manifestsDirectory";
 import { ImageTags } from "./../resources/shared/validations";
-import sh from "shelljs";
+import sh, { ShellString } from "shelljs";
 import { Environment } from "../resources/shared/types/own-types";
 import { ENVIRONMENT } from "./bootstrap";
 import p from "path";
@@ -13,6 +13,7 @@ import c from "chalk";
 import { clearUnsealedInputTsSecretFilesContents } from "./secretsManagement/setupSecrets";
 import yaml from "js-yaml";
 import fs from "fs";
+import { ChildProcess } from "child_process";
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 */
@@ -48,21 +49,22 @@ export async function generateManifests({
   const manifestsCrds = getManifestsWithinDirName("0-crd");
   manifestsNonCrds.concat(manifestsCrds).forEach((f) => sh.rm("-rf", f.trim()));
 
-  sh.exec(
+  handleShellError(sh.exec(
     "export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev"
-  );
+  ));
 
   // Pulumi needs some environment variables set for generating deployments with image tag
   /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
    */
 
-  sh.exec(
+  handleShellError(sh.exec(
     `
     ${getEnvVarsForScript(environment, imageTags)}
     export PULUMI_CONFIG_PASSPHRASE="" 
     pulumi up --yes --skip-preview --stack dev
    `
-  );
+  ));
+
 
   sh.rm("-rf", "./login");
 }
@@ -100,24 +102,18 @@ export async function regenerateSealedSecretsManifests({
       // and we want as basedir: kubernetes/manifests/generated/production/applications/graphql-mongo
       const appBaseDir = p.join(appManifestsDir, "..");
       const unsealedSecretFileName = p.basename(unsealedSecretFilePath);
-      const sealedSecretDir = p.join(appBaseDir, "sealed-secrets");
-      const sealedSecretFilePath = p.join(
-        sealedSecretDir,
-        `sealed-${unsealedSecretFileName}`
-      );
       const sealedSecretsControllerName: ResourceName = "sealed-secrets";
+      const sealedSecretDir = p.join(appBaseDir, sealedSecretsControllerName);
+      const sealedSecretFilePath = p.join(sealedSecretDir, `sealed-${unsealedSecretFileName}`);
 
       sh.mkdir(sealedSecretDir);
 
       // TODO: Check the content of the file to confirm if it is actually a secret object
-      sh.echo(
-        c.blueBright(
-          `Generating sealed secret ${unsealedSecretFilePath} \n to \n ${sealedSecretFilePath}`
-        )
-      );
+      sh.echo(c.blueBright(`Generating sealed secret ${unsealedSecretFilePath} \n to \n ${sealedSecretFilePath}`));
 
-      const isEmpty = isFileEmpty(sealedSecretFilePath)
-      if (sealedSecretFilePath && !isEmpty) {
+      const isEmpty = await isFileEmpty(sealedSecretFilePath)
+      console.log("isEmpty", isEmpty)
+      if (sealedSecretFilePath) {
         mergeSecretToSealedSecret({
           unsealedSecretFilePath,
           sealedSecretsControllerName,
@@ -275,4 +271,14 @@ function isFileEmpty(fileName: string, ignoreWhitespace = true): Promise<boolean
       resolve((!ignoreWhitespace && data.length == 0) || (ignoreWhitespace && !!String(data).match(/^\s*$/)))
     });
   })
+}
+
+
+function handleShellError(shellCommand: ShellString) {
+  if (shellCommand.stderr) {
+    console.log(c.bgRedBright(shellCommand.stderr))
+    // process.exit(-1)
+    sh.exit(-1)
+  }
+  return shellCommand
 }

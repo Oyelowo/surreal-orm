@@ -5,7 +5,7 @@ import * as k8s from "@pulumi/kubernetes";
 import { v4 as uuid } from "uuid";
 
 // TODO:  Unify all the resourceType/resourceName path utils into a singular function e.g
-
+// 12th May, 2022: Get base dir for all kubernetes code: For now from the repo/monorepo root, it is: ./kubernetes
 export const getMainBaseDir = () => {
   const mainBaseDir = path.join(__dirname, "..", "..");
   return mainBaseDir;
