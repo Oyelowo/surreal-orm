@@ -2,6 +2,7 @@ import { SecretTemplate } from "./../resources/shared/types/SecretTemplate";
 import { SealedSecretTemplate } from "./../resources/shared/types/sealedSecretTemplate";
 import {
   getGeneratedEnvManifestsDir,
+  getMainBaseDir,
   ResourceName,
 } from "./../resources/shared/manifestsDirectory";
 import { ImageTags } from "./../resources/shared/validations";
@@ -49,8 +50,9 @@ export async function generateManifests({
   const manifestsCrds = getManifestsWithinDirName("0-crd");
   manifestsNonCrds.concat(manifestsCrds).forEach((f) => sh.rm("-rf", f.trim()));
 
+  handleShellError(sh.rm("-rf", `${p.join(getMainBaseDir(), "Pulumi.dev.yaml")}`))
   handleShellError(sh.exec(
-    "export PULUMI_CONFIG_PASSPHRASE='' && pulumi stack init --stack dev"
+    "export PULUMI_CONFIG_PASSPHRASE='not-needed' && pulumi stack init --stack dev"
   ));
 
   // Pulumi needs some environment variables set for generating deployments with image tag
@@ -60,7 +62,7 @@ export async function generateManifests({
   handleShellError(sh.exec(
     `
     ${getEnvVarsForScript(environment, imageTags)}
-    export PULUMI_CONFIG_PASSPHRASE="" 
+    export PULUMI_CONFIG_PASSPHRASE="not-needed" 
     pulumi up --yes --skip-preview --stack dev
    `
   ));
@@ -80,7 +82,7 @@ interface GenSealedSecretsProps {
   keepSecretInputs: boolean;
   regenerateSealedSecrets: boolean;
 }
-
+// TODO: Prompt user to specify which apps secrets they're looking to update
 export async function regenerateSealedSecretsManifests({
   environment,
   keepSecretInputs,
@@ -102,6 +104,10 @@ export async function regenerateSealedSecretsManifests({
       // and we want as basedir: kubernetes/manifests/generated/production/applications/graphql-mongo
       const appBaseDir = p.join(appManifestsDir, "..");
       const unsealedSecretFileName = p.basename(unsealedSecretFilePath);
+      // TODO: Get this as an argument to the function whch will be prompted on command start
+      // if (secretsToUpdate.inclues(unsealedSecretFileName)) {
+
+      // }
       const sealedSecretsControllerName: ResourceName = "sealed-secrets";
       const sealedSecretDir = p.join(appBaseDir, sealedSecretsControllerName);
       const sealedSecretFilePath = p.join(sealedSecretDir, `sealed-${unsealedSecretFileName}`);
