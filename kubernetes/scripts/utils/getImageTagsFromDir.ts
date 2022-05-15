@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { getManifestsBaseDir, getGeneratedEnvManifestsDir } from './../resources/shared/manifestsDirectory';
+import { getManifestsBaseDir, getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory';
 
 /* 
 TODO: ADD INSTRUCTION ON HOW THIS WORKS
@@ -12,7 +12,7 @@ import {
   getEnvironmentVariables,
   ImageTags,
   imageTagsObjectValidator,
-} from "../resources/shared/validations";
+} from "../../resources/shared/validations";
 
 // TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
 // npm i inquirer

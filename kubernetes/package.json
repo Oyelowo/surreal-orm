@@ -13,7 +13,7 @@
     "@types/uuid": "^8.3.4",
     "@types/yargs": "^17.0.10",
     "js-yaml": "^4.1.0",
-    "typescript": "^4.6.3",
+    "typescript": "^4.7.0-beta",
     "uuid": "^8.3.2"
   },
   "dependencies": {

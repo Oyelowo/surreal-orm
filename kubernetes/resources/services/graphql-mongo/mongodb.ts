@@ -17,29 +17,29 @@ type Credentials = {
 };
 const credentials = [
   {
-    username: envVars.MONGODB_USERNAME,
-    password: envVars.MONGODB_PASSWORD,
-    database: envVars.MONGODB_NAME,
+    username:"",
+    password: "",
+    database: "",
   },
   {
-    username: "username1",
-    password: "password1",
-    database: "database1",
+    username: "",
+    password: "",
+    database: "",
   },
   {
-    username: "username2",
-    password: "password2",
-    database: "database2",
+    username: "",
+    password: "",
+    database: "",
   },
   {
-    username: "username3",
-    password: "password3",
-    database: "database1",
+    username: "",
+    password: "",
+    database: "",
   },
   {
-    username: "username4",
-    password: "password4",
-    database: "database2",
+    username: "",
+    password: "",
+    database: "",
   },
 ];
 
@@ -88,7 +88,7 @@ In order to retain your Block Storage Volume and its data, even after the associ
     rootPassword: envVars.MONGODB_ROOT_PASSWORD,
     replicaSetKey: "Ld1My4Q1s4", // TODO
     // array of
-    ...mappedCredentials,
+    // ...mappedCredentials,
     username: envVars.MONGODB_USERNAME,
     password: envVars.MONGODB_PASSWORD,
     // usernames: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],

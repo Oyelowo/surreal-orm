@@ -1,13 +1,14 @@
+import { Environment } from '../../resources/shared/types/own-types';
 import inquirer from "inquirer";
 import sh from "shelljs";
 import util from "util";
 import chalk from "chalk";
-import { ARGV } from "./bootstrap";
+// import { ARGV } from "./bootstrap";
 
 /* 
 Prompt cluster selection
 */
-export async function promptKubernetesClusterSwitch() {
+export async function promptKubernetesClusterSwitch(environment: Environment) {
   const kubernetesContexts = sh.exec("kubectl config get-contexts --output=name", { silent: true });
   const choices = kubernetesContexts.stdout
     .trim()
@@ -20,7 +21,7 @@ export async function promptKubernetesClusterSwitch() {
       type: "list",
       name,
       message: chalk.greenBright(
-        `🆘Select the ${ARGV.e.toLocaleUpperCase()} cluster ‼️‼️‼️‼️`
+        `🆘Select the ${environment.toLocaleUpperCase()} cluster ‼️‼️‼️‼️`
       ),
       choices: choices,
       default: choices.find(

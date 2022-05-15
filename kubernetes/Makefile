@@ -4,16 +4,9 @@ setup:
 install:
 	npm i
 
-##### NOTE: Commands related to generating sealed secrets requires that there is a running
-# cluster. The script will generate a bitnami sealed secret controller
-# and apply that automatically to the cluster if it does not yet exist
-# Make sure your branch is up to date with master before this
-
-# Generates sealed secrets from output plain unsealed kubernetes secretes which
-# is also generated from the config created by you, the user at e.g: kubernetes/secretsManagement/secrets-unsealed/production.ts
-manifests_local_with_sealed_secrets:
-	make install
-	npx ts-node scripts/bootstrap.ts --e=local --gss=yes --kusi=yes --kuso=no
+generate_manifests_ci:
+	npx ts-node scripts/generateManifestsCI.ts --environment=$(environment)
+# npx ts-node scripts/generateManifestsCI.ts -e local
 # npx ts-node scripts/bootstrap.ts --e=local --gss=yes
 
 # If you want to keep unsealed secrets output(-kuso) or keep unsealed secrets input(--kiso).

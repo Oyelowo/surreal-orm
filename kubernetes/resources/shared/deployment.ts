@@ -18,6 +18,10 @@ import {
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
 
 
+export const APPLICATION_AUTOMERGE_ANNOTATION = {
+  "selfmanaged.oyelowo.com/managed": "true"
+}
+
 const { ENVIRONMENT } = getEnvironmentVariables()
 export class ServiceDeployment<
   AN extends AppName,

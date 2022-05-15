@@ -44,11 +44,11 @@ jobs:
       - name: Install pulumi
         uses: pulumi/setup-pulumi@v2
         with:
-          pulumi-version: 3.31.0
+          pulumi-version: 3.32.1
       - run: |
-          # make manifests_development_no_sealed_secrets
-          # make manifests_staging_no_sealed_secrets
-          make manifests_production_no_sealed_secrets
+          # make generate_manifests_ci environment=development
+          # make generate_manifests_ci environment=staging
+          make generate_manifests_ci environment=production
 
       - name: Commit files
         run: |

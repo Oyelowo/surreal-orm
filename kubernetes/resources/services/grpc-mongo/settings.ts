@@ -5,7 +5,7 @@ import { getSecretsForApp } from "../../../scripts/secretsManagement/getSecretsF
 const environmentVariables = getEnvironmentVariables();
 const environment = environmentVariables.ENVIRONMENT;
 // TODO: Rethink this abstraction for secret
-const secretsFromLocalConfigs = getSecretsForApp("grpc-mongo");
+const secretsFromLocalConfigs = getSecretsForApp("grpc-mongo", environment);
 
 export const grpcMongoSettings: AppConfigs<"grpc-mongo", "mongodb", "applications"> = {
   kubeConfig: {
