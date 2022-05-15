@@ -12,6 +12,7 @@ import { promptSecretsKeepingConfirmations } from "./utils/promptSecretsKeepingC
 async function main() {
     const { environment } = await promptEnvironmentSelection();
     await promptKubernetesClusterSwitch(environment);
+    
     const { keepPlainSecretsInput, keepUnsealedSecretManifestsOutput } = await promptSecretsKeepingConfirmations();
 
     await bootstrapCluster(environment);
