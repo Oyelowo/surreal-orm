@@ -1,8 +1,7 @@
-import { ENVIRONMENTS_ALL } from './utils/sealedSecrets';
+import { ENVIRONMENTS_ALL } from "./utils/sealedSecrets";
 import yargs from "yargs";
-import { generateManifests } from './utils/generateManifests';
-import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
-
+import { generateManifests } from "./utils/generateManifests";
+import { getImageTagsFromDir } from "./utils/getImageTagsFromDir";
 
 export const ARGV = yargs(process.argv.slice(2))
     .options({
@@ -15,12 +14,12 @@ export const ARGV = yargs(process.argv.slice(2))
     })
     .parseSync();
 
-
-(async () => {
+async function main() {
     const imageTags = await getImageTagsFromDir();
     await generateManifests({
         environment: ARGV.environment,
-        imageTags
+        imageTags,
     });
 }
-)()
+
+main();
