@@ -29,7 +29,7 @@ export function setupPlainSecretTSFiles() {
   });
 }
 
-export function clearUnsealedInputTsSecretFilesContents() {
+export function clearPlainInputTsSecretFilesContents() {
   ENVIRONMENTS.forEach((env) => {
     createSecretsConfigFile(env, true);
   });

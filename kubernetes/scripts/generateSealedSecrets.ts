@@ -1,6 +1,6 @@
 import sh from "shelljs";
 import {
-    clearUnsealedInputTsSecretFilesContents,
+    clearPlainInputTsSecretFilesContents,
     setupPlainSecretTSFiles,
 } from "./secretsManagement/setupSecrets";
 import { generateAllSealedSecrets } from "./utils/generateAllSealedSecrets";
@@ -42,7 +42,7 @@ async function main() {
     }
 
     if (!keepPlainSecretsInput) {
-        clearUnsealedInputTsSecretFilesContents();
+        clearPlainInputTsSecretFilesContents();
     }
 
     if (!keepUnsealedSecretManifestsOutput) {

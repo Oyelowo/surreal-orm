@@ -1,4 +1,4 @@
-import { clearUnsealedInputTsSecretFilesContents } from "./secretsManagement/setupSecrets";
+import { clearPlainInputTsSecretFilesContents } from "./secretsManagement/setupSecrets";
 import { bootstrapCluster } from "./utils/bootstrapCluster";
 import { promptKubernetesClusterSwitch } from "./utils/promptKubernetesClusterSwitch";
 import {
@@ -17,7 +17,7 @@ async function main() {
     await bootstrapCluster(environment);
 
     if (!keepPlainSecretsInput) {
-        clearUnsealedInputTsSecretFilesContents();
+        clearPlainInputTsSecretFilesContents();
     }
 
     if (!keepUnsealedSecretManifestsOutput) {
