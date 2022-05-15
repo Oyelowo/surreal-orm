@@ -5,7 +5,7 @@ import p from "path";
 import c from "chalk";
 
 import {
-  getAllUnsealedSecretsPaths,
+  getSecretManifestsPaths,
   getSecretPathsInfo,
 } from "./sealedSecrets";
 import { getFilePathsThatMatch } from "./shared";
@@ -24,7 +24,7 @@ export interface GenSealedSecretsProps {
 export async function generateAllSealedSecrets({
   environment,
 }: GenSealedSecretsProps) {
-  getAllUnsealedSecretsPaths(environment).forEach(generateSealedSecret);
+  getSecretManifestsPaths(environment).forEach(generateSealedSecret);
 }
 
 function generateSealedSecret(unsealedSecretFilePath: string) {

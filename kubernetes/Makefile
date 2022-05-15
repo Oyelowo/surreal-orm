@@ -4,15 +4,20 @@ setup:
 install:
 	npm i
 
+# EXAMPLE USAGE: make generate_manifests_ci environment=local
+# environment options: local, development, staging, production
 generate_manifests_ci:
 	npx ts-node scripts/generateManifestsCI.ts --environment=$(environment)
-# npx ts-node scripts/generateManifestsCI.ts -e local
-# npx ts-node scripts/bootstrap.ts --e=local --gss=yes
 
-# If you want to keep unsealed secrets output(-kuso) or keep unsealed secrets input(--kiso).
-# If you ever use these flags, make sure the files are cleared and sensitive secrets are not left behind
-# npx ts-node scripts/bootstrap.ts --e=local -gss -kuso -kusi
-# npx ts-node scripts/bootstrap.ts -environment=local --generate-sealed-secrets --keep-unsealed-secrets-output --keep-unsealed-secrets-input
+
+bootstrap_cluster:
+	npx ts-node scripts/bootstrapCluster.ts
+
+generate_all_sealed_secrets:
+	npx ts-node scripts/generateSealedSecrets.ts
+
+generate_applications_sealed_secrets:
+	npx ts-node scripts/generateApplicationsSealedSecrets.ts
 
 manifests_development_with_sealed_secrets:
 # Example usage: make manifests_development_with_sealed_secrets tag=github-sha  

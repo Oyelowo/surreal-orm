@@ -35,7 +35,7 @@ export function getSecretPathsInfo({ unsealedSecretFilePath }: { unsealedSecretF
   } as const;
 }
 
-export function getAllUnsealedSecretsPaths(environment: Environment) {
+export function getSecretManifestsPaths(environment: Environment) {
   const contextDir = getGeneratedEnvManifestsDir(environment);
   const unsealedSecretsFilePathsForEnv = getFilePathsThatMatch({
     contextDir,
@@ -88,7 +88,7 @@ export async function promptEnvironmentSelection() {
 
 
 export function removeAllPlainSecrets(environment: Environment) {
-  getAllUnsealedSecretsPaths(environment).map(unsealedSecretFilePath => {
+  getSecretManifestsPaths(environment).map(unsealedSecretFilePath => {
     sh.echo(
       c.blueBright(
         `Removing unsealed plain secret manifest ${unsealedSecretFilePath}`

@@ -1,6 +1,6 @@
 import { promptKubernetesClusterSwitch } from "./promptKubernetesClusterSwitch";
 import {
-  getAllUnsealedSecretsPaths,
+  getSecretManifestsPaths,
   getSecretPathsInfo,
   SEALED_SECRETS_CONTROLLER_NAME,
 } from "./sealedSecrets";
@@ -22,7 +22,7 @@ import { getFilePathsThatMatch } from "./shared";
 
 async function updateSelfManagedSecrets() {
   await promptKubernetesClusterSwitch("production");
-  const unsealedSecretsFilePathsForEnv = getAllUnsealedSecretsPaths("production");
+  const unsealedSecretsFilePathsForEnv = getSecretManifestsPaths("production");
   console.log("unsealedSecretsFilePathsForEnv", unsealedSecretsFilePathsForEnv);
 
   for (const unsealedSecretFilePath of unsealedSecretsFilePathsForEnv) {

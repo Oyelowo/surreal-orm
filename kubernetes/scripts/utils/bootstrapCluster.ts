@@ -7,12 +7,7 @@ import {
   getResourceAbsolutePath,
   ResourceName,
 } from "../../resources/shared/manifestsDirectory";
-import yargs from "yargs/yargs";
-import c from "chalk";
-import inquirer from "inquirer";
 import sh from "shelljs";
-import util from "util";
-
 /* 
 TODO: ADD INSTRUCTION ON HOW THIS WORKS
 */
@@ -27,15 +22,9 @@ import {
   generateManifests,
 } from "./generateManifests";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
-import { promptKubernetesClusterSwitch } from "./promptKubernetesClusterSwitch";
 import { generateAllSealedSecrets } from "./generateAllSealedSecrets";
-import { promptEnvironmentSelection } from "./sealedSecrets";
 
-
-
-export async function bootstrapCluster() {
-  const { environment } = await promptEnvironmentSelection()
-  await promptKubernetesClusterSwitch(environment)
+export async function bootstrapCluster(environment: Environment) {
 
   const imageTags = await getImageTagsFromDir();
 
