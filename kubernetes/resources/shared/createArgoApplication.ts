@@ -18,6 +18,7 @@ import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
 import { getEnvironmentVariables } from "./validations";
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
+import { APPLICATION_AUTOMERGE_ANNOTATION } from "./constants";
 // import { argoAppsOfApp } from "../infrastructure/argocd";
 
 // export const argocdApplicationsInfraProvider = new k8s.Provider(
@@ -203,7 +204,12 @@ export const argoCDApplicationsSecret = new kx.Secret(
     stringData: {
       ...secrets,
     },
-    metadata,
+    metadata: {
+      ...metadata,
+      annotations: {
+        ...APPLICATION_AUTOMERGE_ANNOTATION
+      }
+    },
   },
   { provider: providerArgoCDApplicationsParent }
 );
