@@ -63,7 +63,7 @@ export async function promptSealedSecretsMergingOptions() {
     const answers = await inquirer.prompt<Record<typeof optionName, typeof options[number]>>({
         type: "list",
         name: optionName,
-        message: chalk.bgRedBright`Sealed secret generation options‼️‼️‼️‼️`,
+        message: chalk.blueBright`Sealed secret generation options‼️‼️‼️‼️`,
         choices,
         default: options[0]
     });
