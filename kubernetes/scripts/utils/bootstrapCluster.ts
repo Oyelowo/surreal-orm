@@ -17,7 +17,7 @@ import { ArgumentTypes } from "../../../typescript/apps/web/utils/typescript";
 // This would read the name of the app = name of deployment in manifests to determine the sealed secrets  to regenerate and override
 import path from "path";
 import { Environment } from "../../resources/shared/types/own-types";
-import { setupUnsealedSecretFiles } from "../secretsManagement/setupSecrets";
+import { setupPlainSecretTSFiles } from "../secretsManagement/setupSecrets";
 import {
   generateManifests,
 } from "./generateManifests";
@@ -33,7 +33,7 @@ export async function bootstrapCluster(environment: Environment) {
     imageTags,
   });
 
-  setupUnsealedSecretFiles();
+  setupPlainSecretTSFiles();
 
   /*
        This requires the above step with initial cluster setup making sure that the sealed secret controller is
@@ -67,7 +67,6 @@ export async function bootstrapCluster(environment: Environment) {
   applyResourceManifests("linkerd", environment);
   applyResourceManifests("linkerd-viz", environment);
 
-  // TODO: separate sealed secrets deletion step
   await generateAllSealedSecrets({
     environment,
   });

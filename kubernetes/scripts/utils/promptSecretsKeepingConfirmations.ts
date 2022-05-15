@@ -1,7 +1,6 @@
 import inquirer from "inquirer";
 import chalk from "chalk";
 
-const name = "cluster";
 
 export async function promptSecretsKeepingConfirmations() {
     const keepPlainSecretsInput = "keepPlainSecretsInput"

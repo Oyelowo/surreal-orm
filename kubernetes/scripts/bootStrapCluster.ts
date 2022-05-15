@@ -2,31 +2,28 @@ import { clearUnsealedInputTsSecretFilesContents } from "./secretsManagement/set
 import { bootstrapCluster } from "./utils/bootstrapCluster";
 import { promptKubernetesClusterSwitch } from "./utils/promptKubernetesClusterSwitch";
 import {
-  promptEnvironmentSelection,
-  getSecretManifestsPaths,
+    promptEnvironmentSelection,
+    getSecretManifestsPaths,
 } from "./utils/sealedSecrets";
 import sh from "shelljs";
 import { promptSecretsKeepingConfirmations } from "./utils/promptSecretsKeepingConfirmations";
 
 
 async function main() {
-  const { environment } = await promptEnvironmentSelection();
-  await promptKubernetesClusterSwitch(environment);
-  const { keepPlainSecretsInput, keepUnsealedSecretManifestsOutput } =
-    await promptSecretsKeepingConfirmations();
-  console.log({ keepPlainSecretsInput, keepUnsealedSecretManifestsOutput });
+    const { environment } = await promptEnvironmentSelection();
+    await promptKubernetesClusterSwitch(environment);
+    const { keepPlainSecretsInput, keepUnsealedSecretManifestsOutput } = await promptSecretsKeepingConfirmations();
 
-  await bootstrapCluster(environment);
+    await bootstrapCluster(environment);
 
-  if (!keepPlainSecretsInput) {
-    clearUnsealedInputTsSecretFilesContents();
-  }
+    if (!keepPlainSecretsInput) {
+        clearUnsealedInputTsSecretFilesContents();
+    }
 
-  if (!keepUnsealedSecretManifestsOutput) {
-    getSecretManifestsPaths(environment).forEach((SecretPath) => {
-      sh.rm("-rf", SecretPath);
-    });
-  }
+    if (!keepUnsealedSecretManifestsOutput) {
+        const removeSecret = (path: string) => sh.rm("-rf", path);
+        getSecretManifestsPaths(environment).forEach(removeSecret);
+    }
 };
 
 main()

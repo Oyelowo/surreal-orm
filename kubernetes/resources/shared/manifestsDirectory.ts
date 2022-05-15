@@ -16,7 +16,7 @@ export const getManifestsBaseDir = () => {
   return MANIFESTS_DIR;
 };
 
-export const getUnsealedSecretsConfigFilesBaseDir = () => {
+export const getPlainSecretsConfigFilesBaseDir = () => {
   return path.join(getMainBaseDir(), ".secrets");
 };
 

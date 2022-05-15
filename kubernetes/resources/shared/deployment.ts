@@ -16,11 +16,10 @@ import {
   getPathToResource,
 } from "./manifestsDirectory";
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
+import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
 
 
-export const APPLICATION_AUTOMERGE_ANNOTATION = {
-  "selfmanaged.oyelowo.com/managed": "true"
-}
+
 
 const { ENVIRONMENT } = getEnvironmentVariables()
 export class ServiceDeployment<
@@ -83,7 +82,8 @@ export class ServiceDeployment<
         metadata: {
           ...metadata,
           annotations: {
-            "sealedsecrets.bitnami.com/managed": "true"
+            "sealedsecrets.bitnami.com/managed": "true",
+            ...APPLICATION_AUTOMERGE_ANNOTATION
           }
         },
       },

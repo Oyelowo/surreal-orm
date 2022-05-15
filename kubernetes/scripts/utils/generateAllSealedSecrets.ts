@@ -24,7 +24,7 @@ export interface GenSealedSecretsProps {
 export async function generateAllSealedSecrets({
   environment,
 }: GenSealedSecretsProps) {
-  getSecretManifestsPaths(environment).forEach(generateSealedSecret);
+  getSecretManifestsPaths(environment)?.forEach(generateSealedSecret);
 }
 
 function generateSealedSecret(unsealedSecretFilePath: string) {

@@ -9,18 +9,18 @@ import path from "path";
 import c from "chalk";
 
 import { Environment } from "../../resources/shared/types/own-types";
-import { getUnsealedSecretsConfigFilesBaseDir } from "./../../resources/shared/manifestsDirectory";
+import { getPlainSecretsConfigFilesBaseDir } from "./../../resources/shared/manifestsDirectory";
 import { secretsLocalSample, secretsSample } from "./secretsSample";
 
 const ENVIRONMENTS: Environment[] = ["local", "development", "staging", "production"];
-const UNSEALED_SECRETS_CONFIGS_DIR = getUnsealedSecretsConfigFilesBaseDir();
+const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 export type Secrets = z.infer<typeof secretsSchema>;
 const SECRETS_TYPE = "Secrets" as const; // This should be same as the secrets type above
 
-type SecretUnseatFilePath = `${typeof UNSEALED_SECRETS_CONFIGS_DIR}/${Environment}.ts`;
+type SecretUnseatFilePath = `${typeof PLAIN_SECRETS_CONFIGS_DIR}/${Environment}.ts`;
 
-export function setupUnsealedSecretFiles() {
-  fs.mkdir(UNSEALED_SECRETS_CONFIGS_DIR, (err) => {
+export function setupPlainSecretTSFiles() {
+  fs.mkdir(PLAIN_SECRETS_CONFIGS_DIR, (err) => {
     console.info(`Unsealed secrets directory already created`);
   });
 
@@ -72,7 +72,7 @@ const secretsSchema = z.object({
 });
 
 function getFilePath(environment: Environment): SecretUnseatFilePath {
-  return `${UNSEALED_SECRETS_CONFIGS_DIR}/${environment}.ts`;
+  return `${PLAIN_SECRETS_CONFIGS_DIR}/${environment}.ts`;
 }
 
 async function createSecretsConfigFile(environment: Environment, resetConfigs: boolean) {

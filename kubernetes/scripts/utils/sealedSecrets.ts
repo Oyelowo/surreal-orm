@@ -35,7 +35,7 @@ export function getSecretPathsInfo({ unsealedSecretFilePath }: { unsealedSecretF
   } as const;
 }
 
-export function getSecretManifestsPaths(environment: Environment) {
+export function getSecretManifestsPaths(environment: Environment) : string[]{
   const contextDir = getGeneratedEnvManifestsDir(environment);
   const unsealedSecretsFilePathsForEnv = getFilePathsThatMatch({
     contextDir,

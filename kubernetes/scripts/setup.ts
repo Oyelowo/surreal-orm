@@ -1,2 +1,3 @@
-import { setupUnsealedSecretFiles } from "./secretsManagement/setupSecrets";
-setupUnsealedSecretFiles();
+import { setupPlainSecretTSFiles } from "./secretsManagement/setupSecrets";
+
+setupPlainSecretTSFiles();
