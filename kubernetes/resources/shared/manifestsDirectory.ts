@@ -1,4 +1,4 @@
-import { AppName, Environment } from "./types/own-types";
+import { ServiceName, Environment, ResourceName, ResourceType } from "./types/own-types";
 import path from "path";
 import sh from "shelljs";
 import * as k8s from "@pulumi/kubernetes";
@@ -25,50 +25,13 @@ export const getGeneratedEnvManifestsDir = (environment: Environment) => {
   return path.join(MANIFESTS_DIR, "generated", environment);
 };
 
-const argo = [
-  "argocd-applications-children-infrastructure",
-  "argocd-applications-children-services",
-  "argocd-applications-parents",
-] as const
-
-export type ArgoApplicationResourceName = typeof argo[number];
-
-const InfrastructureNames = [
-  "namespace-names",
-  "sealed-secrets",
-  "cert-manager",
-  "nginx-ingress",
-  "linkerd",
-  "linkerd-viz",
-  "argocd",
-  // "argocd-parent-applications",
-  ...argo,
-  // "services-argocd-applications",
-  // "infrastructure-argocd-applications",
-  // "service",
-] as const;
-
-export type InfrastructureName = typeof InfrastructureNames[number];
-// export type ArgoParentApplications = "argocd-parent-applications"
-
-export type ResourceType = "infrastructure" | "services";
-// | ArgoParentApplications;
-
-// We don't want argocd-parent-applications-argocd-parent-applications
-// export type ArgoResourceName = `${Exclude<ResourceType, ArgoParentApplications>}-${ArgoParentApplications}`
-
-export type ResourceName = InfrastructureName | AppName;
 
 export const getPathToResourcesDir = (
   resourceName: ResourceName,
   resourceType: ResourceType,
   environment: Environment
 ) => {
-  return path.join(
-    getGeneratedEnvManifestsDir(environment),
-    resourceType,
-    resourceName
-  );
+  return path.join(getGeneratedEnvManifestsDir(environment), resourceType, resourceName);
   // return `kubernetes/manifests/generated/${environment}/services/${appName}`;
 };
 
@@ -94,8 +57,7 @@ function getResourceProperties<T>(
     case "react-web":
     case "graphql-mongo":
     case "graphql-postgres":
-    case "grpc-mongo":
- {
+    case "grpc-mongo": {
       return onGetResourceProperties("services");
     }
 
@@ -108,12 +70,11 @@ function getResourceProperties<T>(
     case "nginx-ingress":
     case "argocd-applications-children-infrastructure":
     case "argocd-applications-children-services":
-    case "argocd-applications-parents":
-    // case "services-argocd-applications":
-    // case "infrastructure-argocd-applications":
-       {
-      return onGetResourceProperties("infrastructure");
-    }
+    case "argocd-applications-parents": // case "services-argocd-applications":
+      // case "infrastructure-argocd-applications":
+      {
+        return onGetResourceProperties("infrastructure");
+      }
   }
   return assertUnreachable(resourceName);
 }

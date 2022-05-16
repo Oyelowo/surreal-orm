@@ -1,3 +1,4 @@
+import { ResourceName } from './../../resources/shared/types/own-types';
 /* 
 ADD INSTRUCTION HERE
  */
@@ -14,7 +15,8 @@ import { secretsLocalSample, secretsSample } from "./secretsSample";
 
 const ENVIRONMENTS: Environment[] = ["local", "development", "staging", "production"];
 const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
-export type Secrets = z.infer<typeof secretsSchema>;
+// export type Secrets = z.infer<typeof secretsSchema>;
+
 const SECRETS_TYPE = "Secrets" as const; // This should be same as the secrets type above
 
 type SecretUnseatFilePath = `${typeof PLAIN_SECRETS_CONFIGS_DIR}/${Environment}.ts`;
@@ -37,39 +39,41 @@ export function clearPlainInputTsSecretFilesContents() {
 //
 
 // HELPERS
-const secretsSchema = z.object({
-  "graphql-mongo": z.object({
-    MONGODB_USERNAME: z.string().nonempty(),
-    MONGODB_PASSWORD: z.string().nonempty(),
-    MONGODB_ROOT_USERNAME: z.string().nonempty(),
-    MONGODB_ROOT_PASSWORD: z.string().nonempty(),
-    REDIS_USERNAME: z.string().nonempty(),
-    REDIS_PASSWORD: z.string().nonempty(),
-  }),
-  "grpc-mongo": z.object({
-    MONGODB_USERNAME: z.string().nonempty(),
-    MONGODB_PASSWORD: z.string().nonempty(),
-    MONGODB_ROOT_USERNAME: z.string().nonempty(),
-    MONGODB_ROOT_PASSWORD: z.string().nonempty(),
-  }),
-  "graphql-postgres": z.object({
-    POSTGRES_USERNAME: z.string().nonempty(),
-    POSTGRES_PASSWORD: z.string().nonempty(),
-  }),
-  "react-web": z.object({
-    GITHUB_CLIENT_ID: z.string().nonempty(),
-    GITHUB_CLIENT_SECRET: z.string().nonempty(),
-    GOOGLE_CLIENT_ID: z.string().nonempty(),
-    GOOGLE_CLIENT_SECRET: z.string().nonempty(),
-  }),
-  argocd: z.object({
-    ADMIN_PASSWORD: z.string().nonempty(),
-    type: z.literal("git"),
-    url: z.literal("https://github.com/Oyelowo/modern-distributed-app-template"),
-    username: z.literal("Oyelowo"),
-    password: z.string().nonempty(),
-  }),
-});
+type SecretsSchema = {
+  "graphql-mongo": {
+    MONGODB_USERNAME: string;
+    MONGODB_PASSWORD: string;
+    MONGODB_ROOT_USERNAME: string;
+    MONGODB_ROOT_PASSWORD: string;
+    REDIS_USERNAME: string;
+    REDIS_PASSWORD: string;
+  },
+  "grpc-mongo": {
+    MONGODB_USERNAME: string;
+    MONGODB_PASSWORD: string;
+    MONGODB_ROOT_USERNAME: string;
+    MONGODB_ROOT_PASSWORD: string;
+  },
+  "graphql-postgres": {
+    POSTGRES_USERNAME: string;
+    POSTGRES_PASSWORD: string;
+  },
+  "react-web": {
+    GITHUB_CLIENT_ID: string;
+    GITHUB_CLIENT_SECRET: string;
+    GOOGLE_CLIENT_ID: string;
+    GOOGLE_CLIENT_SECRET: string;
+  },
+  argocd: {
+    ADMIN_PASSWORD: string;
+    type: "git",
+    url: "https://github.com/Oyelowo/modern-distributed-app-template",
+    username: "Oyelowo",
+    password: string,
+  },
+};
+
+export type Secrets = Partial<Record<ResourceName, {}>> & SecretsSchema;
 
 function getFilePath(environment: Environment): SecretUnseatFilePath {
   return `${PLAIN_SECRETS_CONFIGS_DIR}/${environment}.ts`;

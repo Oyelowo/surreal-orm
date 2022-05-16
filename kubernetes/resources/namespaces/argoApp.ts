@@ -1,10 +1,10 @@
-import { createArgocdChildrenApplication } from "../shared/createArgoApplication";
+import { createArgocdApplication } from "../shared/createArgoApplication";
 import { namespaceNames } from "./util";
 
 
-export const namespacesArgoApps = createArgocdChildrenApplication({
+export const namespacesArgoApps = createArgocdApplication({
     // resourceType: "namespaces",
-    argoResourceType: "argocd-applications-children-infrastructure",
+    sourceResourceName: "argocd-applications-children-infrastructure",
     resourceName: "namespace-names",
     namespace: namespaceNames.default
 });

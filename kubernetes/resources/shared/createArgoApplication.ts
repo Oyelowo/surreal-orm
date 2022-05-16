@@ -1,94 +1,38 @@
-import { v4 as uuid } from "uuid";
-import path from "path";
 import { NamespaceName, namespaceNames } from "./../namespaces/util";
-import {
-  ResourceName,
-  getResourceRelativePath,
-  getResourceProvider,
-  ResourceType,
-  ArgoApplicationResourceName,
-} from "./manifestsDirectory";
-import { CustomResourceOptions } from "@pulumi/pulumi";
+import { getResourceRelativePath, getResourceProvider } from "./manifestsDirectory";
+import { CustomResourceOptions, Resource } from "@pulumi/pulumi";
 import * as argocd from "../../crd2pulumi/argocd";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
 import { getEnvironmentVariables } from "./validations";
 import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
 import { APPLICATION_AUTOMERGE_ANNOTATION } from "./constants";
-// import { argoAppsOfApp } from "../infrastructure/argocd";
+import { ArgocdAppResourceName, ResourceName } from "./types/own-types";
 
-// export const argocdApplicationsInfraProvider = new k8s.Provider(
-//   argocdApplicationsName + "infrastructure",
-//   {
-//     renderYamlToDirectory: getArgocdInfraApplicationsDir(
-//       getEnvironmentVariables().ENVIRONMENT
-//     ),
-//   }
-// );
+const { ENVIRONMENT } = getEnvironmentVariables();
 
-// export const argocdApplicationsServicesProvider = new k8s.Provider(
-//   argocdApplicationsName + "services",
-//   {
-//     renderYamlToDirectory: getArgocdServicesApplicationsDir(
-//       getEnvironmentVariables().ENVIRONMENT
-//     ),
-//   }
-// );
 
-// export const argocdApplicationsNamespaceNamesProvider = new k8s.Provider(
-//   argocdApplicationsName + "namespacesnames",
-//   {
-//     renderYamlToDirectory: getNamespacesNamesArgoAppDir(
-//       getEnvironmentVariables().ENVIRONMENT
-//     ),
-//   }
-// );
-
-// export const argoAppsParentsProvider = new k8s.Provider(
-//   argocdApplicationsName + "argoAppsParents",
-//   {
-//     renderYamlToDirectory: getArgoAppsParentsDir(
-//       getEnvironmentVariables().ENVIRONMENT
-//     ),
-//   }
-// );
-
-// const providers: Record<ResourceType, k8s.Provider> = {
-//   infrastructure: argocdApplicationsInfraProvider,
-//   services: argocdApplicationsServicesProvider,
-//   namespaces: argocdApplicationsNamespaceNamesProvider,
-//   argo_applications_parents: argoAppsParentsProvider,
-// };
-// const getArgoAppDir = (resourceType: ResourceType) => {
-//   return providers[resourceType];
-// };
 type Metadata = {};
 
 type ArgocdApplicationProps = {
-  name: string;
-  labels?: Record<string, string>;
   namespace: NamespaceName;
-  sourcePath: string;
-  provider: k8s.Provider;
+  sourceResourceName: ArgocdAppResourceName;
+  resourceName: ResourceName;
+  parent?: Resource;
 };
 
-function createArgocdApplication({
-  name,
+// TODO: Add jsdoc to describe the parameters
+export function createArgocdApplication({
+  resourceName,
+  sourceResourceName,
   namespace,
-  labels,
-  provider,
-  sourcePath,
+  parent
 }: ArgocdApplicationProps) {
-  const metadata = {
-    name,
-    namespace,
-    labels,
-  };
   const argocdApplication = new argocd.argoproj.v1alpha1.Application(
-    name,
+    resourceName,
     {
       metadata: {
-        name: name,
+        name: resourceName,
         namespace: namespaceNames.argocd,
         annotations: {
           finalizers: ["resources-finalizer.argocd.argoproj.io"] as any,
@@ -99,11 +43,11 @@ function createArgocdApplication({
         project: "default",
         destination: {
           server: "https://kubernetes.default.svc",
-          namespace: metadata.namespace,
+          namespace,
         },
         source: {
           repoURL: "https://github.com/Oyelowo/modern-distributed-app-template",
-          path: sourcePath,
+          path: getResourceRelativePath(sourceResourceName, ENVIRONMENT),
           targetRevision: "HEAD",
           directory: {
             recurse: true,
@@ -118,41 +62,16 @@ function createArgocdApplication({
       },
     },
     {
-      provider,
+      provider: getResourceProvider(resourceName, ENVIRONMENT),
+      parent
     }
   );
 
   return argocdApplication;
 }
 
-type ArgocdChildrenApplicationProps = {
-  argoResourceType: ArgoApplicationResourceName;
-  resourceName: ResourceName;
-  // resourceName: ResourceName;
-  labels?: Record<string, string>;
-  namespace: NamespaceName;
-  opts?: CustomResourceOptions | undefined;
-  isParentApp?: boolean;
-};
 
-const { ENVIRONMENT } = getEnvironmentVariables();
 
-// export function createArgocdChildrenApplication({
-export function createArgocdChildrenApplication({
-  argoResourceType,
-  resourceName,
-  namespace,
-  labels,
-}: ArgocdChildrenApplicationProps): argocd.argoproj.v1alpha1.Application {
-  return createArgocdApplication({
-    name: resourceName,
-    namespace,
-    labels,
-    sourcePath: getResourceRelativePath(resourceName, ENVIRONMENT),
-    // provider: getArgocdChildrenResourcesProvider(resourceName, ENVIRONMENT),
-    provider: getResourceProvider(argoResourceType, ENVIRONMENT),
-  });
-}
 
 const metadata: Omit<Metadata, "argoApplicationName" | "resourceType"> = {
   name: "argocd-applications-secret",
@@ -161,7 +80,6 @@ const metadata: Omit<Metadata, "argoApplicationName" | "resourceType"> = {
     "argocd.argoproj.io/secret-type": "repository",
   },
 };
-
 
 const secrets = getSecretsForApp("argocd", ENVIRONMENT);
 export const argoCDApplicationsSecret = new kx.Secret(
@@ -173,8 +91,8 @@ export const argoCDApplicationsSecret = new kx.Secret(
     metadata: {
       ...metadata,
       annotations: {
-        ...APPLICATION_AUTOMERGE_ANNOTATION
-      }
+        ...APPLICATION_AUTOMERGE_ANNOTATION,
+      },
     },
   },
   { provider: getResourceProvider("argocd-applications-parents", ENVIRONMENT) }

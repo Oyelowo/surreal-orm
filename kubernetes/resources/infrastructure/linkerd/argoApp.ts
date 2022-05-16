@@ -1,19 +1,17 @@
-import { createArgocdChildrenApplication } from "../../shared/createArgoApplication";
+import { createArgocdApplication } from "../../shared/createArgoApplication";
 
 
 // App that deploys Linkerd2 resources themselves
 /* Linkerd2 APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
-export const Linkerd2Application = createArgocdChildrenApplication({
-  // resourceType: "infrastructure",
-  argoResourceType: "argocd-applications-children-infrastructure",
+export const Linkerd2Application = createArgocdApplication({
+  sourceResourceName: "argocd-applications-children-infrastructure",
   resourceName: "linkerd",
   namespace: "linkerd"
 });
 
 
-export const LinkerdVizApplication = createArgocdChildrenApplication({
-  // resourceType: "infrastructure",
-  argoResourceType: "argocd-applications-children-infrastructure",
+export const LinkerdVizApplication = createArgocdApplication({
+  sourceResourceName: "argocd-applications-children-infrastructure",
   resourceName: "linkerd-viz",
   namespace: "linkerd-viz"
 });

@@ -6,12 +6,12 @@ import * as pulumi from "@pulumi/pulumi";
 import { NoUnion } from "./types/own-types";
 import {
   AppConfigs,
-  AppName,
+  ServiceName,
   DBType,
   NamespaceOfApps,
 } from "./types/own-types";
 import * as argocd from "../../crd2pulumi/argocd";
-import { createArgocdChildrenApplication } from "./createArgoApplication";
+import { createArgocdApplication } from "./createArgoApplication";
 import {
   getPathToResource,
 } from "./manifestsDirectory";
@@ -23,7 +23,7 @@ import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
 
 const { ENVIRONMENT } = getEnvironmentVariables()
 export class ServiceDeployment<
-  AN extends AppName,
+  AN extends ServiceName,
   DBT extends DBType,
   NS extends NamespaceOfApps
   > extends pulumi.ComponentResource {
@@ -160,14 +160,11 @@ export class ServiceDeployment<
       ],
     });
 
-    this.argocdApplication = createArgocdChildrenApplication({
+    this.argocdApplication = createArgocdApplication({
       namespace: metadata.namespace,
-      // resourceType: "services",
       resourceName: this.appName,
-      argoResourceType: "argocd-applications-children-services",
-      opts: {
-        parent: this,
-      },
+      sourceResourceName: "argocd-applications-children-services",
+      parent: this,
     });
 
     const useLoadBalancer = new pulumi.Config("useLoadBalancer") ?? false;

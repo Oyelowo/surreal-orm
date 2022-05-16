@@ -29,16 +29,37 @@ export type Memory = `${number}${| "E"
 
 export type CPU = `${number}${"m"}`;
 
-export type AppName =
+export type ResourceType = "infrastructure" | "services";
+
+export type ServiceName =
   | "graphql-mongo"
   | "graphql-postgres"
   | "grpc-mongo"
   | "react-web"
-  | "argocd"
-// | "ingress-controller"
-// | "sealed-secrets";
 
-export interface Settings<TAppName extends AppName> {
+
+export type ArgocdAppResourceName =
+  | `argocd-applications-children-${ResourceType}`
+  | "argocd-applications-parents";
+
+const InfrastructureNames = [
+  "namespace-names",
+  "sealed-secrets",
+  "cert-manager",
+  "nginx-ingress",
+  "linkerd",
+  "linkerd-viz",
+  "argocd",
+] as const;
+
+export type InfrastructureName = typeof InfrastructureNames[number];
+
+// A resource can have multiple kubernetes objects/resources e.g linkerd 
+// e.g linkerd can have different 
+export type ResourceName = InfrastructureName | ServiceName | ArgocdAppResourceName;
+
+
+export interface Settings<TAppName extends ServiceName> {
   requestMemory: Memory;
   requestCpu: CPU;
   limitMemory: Memory;
@@ -69,7 +90,7 @@ type DoesNotHaveDb = "doesNotHaveDb";
 
 export type DBType = MongoDb | PostgresDb | DoesNotHaveDb;
 
-export type MongoDbEnvVars<DBN extends `${AppName}-database`, NS extends NamespaceOfApps> = {
+export type MongoDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
   dbType: MongoDb;
   MONGODB_NAME: DBN;
   MONGODB_USERNAME: string;
@@ -82,7 +103,7 @@ export type MongoDbEnvVars<DBN extends `${AppName}-database`, NS extends Namespa
   MONGODB_ROOT_PASSWORD: string;
 };
 
-export type PostgresDbEnvVars<DBN extends `${AppName}-database`, NS extends NamespaceOfApps> = {
+export type PostgresDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
   dbType: PostgresDb;
   POSTGRES_NAME: DBN;
   POSTGRES_DATABASE_NAME: DBN;
@@ -94,24 +115,24 @@ export type PostgresDbEnvVars<DBN extends `${AppName}-database`, NS extends Name
   POSTGRES_STORAGE_CLASS: string;
 };
 
-type ServiceName<AN extends AppName> = `${AN}-redis`;
-type ServiceNameWithSuffix<AN extends AppName> = `${ServiceName<AN>}-master`;
+type RedisServiceName<AN extends ServiceName> = `${AN}-redis`;
+type RedisServiceNameWithSuffix<AN extends ServiceName> = `${RedisServiceName<AN>}-master`;
 
-export type RedisDbEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
+export type RedisDbEnvVars<AN extends ServiceName, NS extends NamespaceOfApps> = {
   REDIS_USERNAME?: string;
   REDIS_PASSWORD?: string;
-  REDIS_HOST?: `${ServiceNameWithSuffix<AN>}.${NS}`; // The application will also need this
-  REDIS_SERVICE_NAME?: ServiceName<AN>; // THIS is used redis helm chart config itself which adds a suffix(e.g master)
-  REDIS_SERVICE_NAME_WITH_SUFFIX?: ServiceNameWithSuffix<AN>;
+  REDIS_HOST?: `${RedisServiceNameWithSuffix<AN>}.${NS}`; // The application will also need this
+  REDIS_SERVICE_NAME?: RedisServiceName<AN>; // THIS is used redis helm chart config itself which adds a suffix(e.g master)
+  REDIS_SERVICE_NAME_WITH_SUFFIX?: RedisServiceNameWithSuffix<AN>;
   REDIS_PORT?: "6379";
 };
 
-type DatabaseEnvVars<DBN extends `${AppName}-database`, NS extends NamespaceOfApps> =
+type DatabaseEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> =
   | MongoDbEnvVars<DBN, NS>
   | PostgresDbEnvVars<DBN, NS>
   | { dbType: DoesNotHaveDb };
 
-export type AppEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
+export type AppEnvVars<AN extends ServiceName, NS extends NamespaceOfApps> = {
   APP_ENVIRONMENT: Environment;
   APP_HOST: "0.0.0.0";
   APP_PORT: "8000" | "50051" | "3000";
@@ -132,12 +153,12 @@ export type AppEnvVars<AN extends AppName, NS extends NamespaceOfApps> = {
   RedisDbEnvVars<AN, NS>;
 
 type EnvironmentVariables<
-  AN extends AppName,
+  AN extends ServiceName,
   NS extends NamespaceOfApps,
   DBT extends DBType
   > = Extract<AppEnvVars<AN, NS>, { dbType: DBT }>;
 
-export type AppConfigs<AN extends AppName, DBT extends DBType, NS extends NamespaceOfApps> = {
+export type AppConfigs<AN extends ServiceName, DBT extends DBType, NS extends NamespaceOfApps> = {
   kubeConfig: Settings<NoUnion<AN>>;
   envVars: Omit<EnvironmentVariables<AN, NS, DBT>, "dbType">;
   metadata: {
