@@ -25,7 +25,15 @@ export const getGeneratedEnvManifestsDir = (environment: Environment) => {
   return path.join(MANIFESTS_DIR, "generated", environment);
 };
 
-const argoApplicationsNames = [
+const argo = [
+  "argocd-applications-children-infrastructure",
+  "argocd-applications-children-services",
+  "argocd-applications-parents",
+] as const
+
+export type ArgoApplicationResourceName = typeof argo[number];
+
+const InfrastructureNames = [
   "namespace-names",
   "sealed-secrets",
   "cert-manager",
@@ -34,22 +42,22 @@ const argoApplicationsNames = [
   "linkerd-viz",
   "argocd",
   // "argocd-parent-applications",
-  // "argocd-children-applications",
-  "services-argocd-applications",
-  "infrastructure-argocd-applications",
+  ...argo,
+  // "services-argocd-applications",
+  // "infrastructure-argocd-applications",
   // "service",
 ] as const;
 
-export type ArgoApplicationName = typeof argoApplicationsNames[number];
+export type InfrastructureName = typeof InfrastructureNames[number];
 // export type ArgoParentApplications = "argocd-parent-applications"
 
-export type ResourceType = "infrastructure" | "services" | "namespaces";
+export type ResourceType = "infrastructure" | "services";
 // | ArgoParentApplications;
 
 // We don't want argocd-parent-applications-argocd-parent-applications
 // export type ArgoResourceName = `${Exclude<ResourceType, ArgoParentApplications>}-${ArgoParentApplications}`
 
-export type ResourceName = ArgoApplicationName | AppName;
+export type ResourceName = InfrastructureName | AppName;
 
 export const getPathToResourcesDir = (
   resourceName: ResourceName,
@@ -87,7 +95,7 @@ function getResourceProperties<T>(
     case "graphql-mongo":
     case "graphql-postgres":
     case "grpc-mongo":
-    case "services-argocd-applications": {
+ {
       return onGetResourceProperties("services");
     }
 
@@ -98,7 +106,12 @@ function getResourceProperties<T>(
     case "linkerd-viz":
     case "namespace-names":
     case "nginx-ingress":
-    case "infrastructure-argocd-applications": {
+    case "argocd-applications-children-infrastructure":
+    case "argocd-applications-children-services":
+    case "argocd-applications-parents":
+    // case "services-argocd-applications":
+    // case "infrastructure-argocd-applications":
+       {
       return onGetResourceProperties("infrastructure");
     }
   }
@@ -152,6 +165,7 @@ export function getResourceRelativePath(
   const pathAbsolute = getResourceAbsolutePath(resourceName, environment);
   return getRepoPathFromAbsolutePath(pathAbsolute);
 }
+
 export function getResourceProvider(
   resourceName: ResourceName,
   environment: Environment
@@ -162,46 +176,3 @@ export function getResourceProvider(
     });
   });
 }
-
-/* 
-// We want argo-applications to be in the same folder
-// resources may be for
-          kubernetes/manifests/generated/local/infrastructure/linkerd
-          kubernetes/manifests/generated/local/infrastructure/cert-manager
-   
-    The argo applications will be in:
-          kubernetes/manifests/generated/local/infrastructure/argo-applications/(application-argo-linkerd, application-argo-cert-manager)
- */
-
-const ARGO_APPLICATIONS_DIR_NAME = "argo-children-applications";
-export function getArgocdChildrenApplicationsAbsolutePath(
-  resourceType: ResourceType,
-  environment: Environment
-) {
-  return path.join(
-    getPathToResourceType({ resourceType, environment }),
-    ARGO_APPLICATIONS_DIR_NAME
-  );
-}
-
-export function getArgocdChildrenResourcesProvider(
-  resourceName: ResourceName,
-  environment: Environment
-): k8s.Provider {
-  return getResourceProperties(resourceName, (resourceType) => {
-    return new k8s.Provider(`${resourceType}-${resourceName}-${uuid()}`, {
-      renderYamlToDirectory: getArgocdChildrenApplicationsAbsolutePath(
-        resourceType,
-        environment
-      ),
-    });
-  });
-}
-
-export const getArgocdParentApplicationsPath = (environment: Environment) => path.join(
-  getPathToResourceType({
-    resourceType: "infrastructure",
-    environment,
-  }),
-  "argocd-parents-applications"
-);

@@ -1,14 +1,13 @@
-import { providerArgoCDApplicationsParent } from './../../shared/createArgoApplication';
 import { namespaceNames } from "./../../namespaces/util";
 // import { getEnvironmentVariables } from './../../shared/validations';
 import c from "chalk";
 import path from "path";
 import { getSecretsForApp } from "../../../scripts/secretsManagement/getSecretsForApp";
-import { getArgocdParentApplicationsPath } from "../../shared/manifestsDirectory";
 import { Environment } from "../../shared/types/own-types";
 import sh from "shelljs";
 import * as kx from "@pulumi/kubernetesx";
 import { getEnvironmentVariables } from "../../shared/validations";
+import { getResourceProvider } from "../../shared/manifestsDirectory";
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 const DOCKER_SERVER = "ghcr.io";
@@ -75,7 +74,7 @@ export const dockerRegistry = new kx.Secret("docker-registry", {
         // ".dockerconfigjson": JSON.stringify(dataRaw)
         ".dockerconfigjson": toBase64(JSON.stringify(dataRaw))
     },
-}, { provider: providerArgoCDApplicationsParent });
+}, { provider: getResourceProvider("argocd-applications-parents", ENVIRONMENT) });
 
 /* 
 apiVersion: v1

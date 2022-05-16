@@ -5,6 +5,7 @@ import { createArgocdChildrenApplication } from "../../shared/createArgoApplicat
 /* Linkerd2 APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const Linkerd2Application = createArgocdChildrenApplication({
   // resourceType: "infrastructure",
+  argoResourceType: "argocd-applications-children-infrastructure",
   resourceName: "linkerd",
   namespace: "linkerd"
 });
@@ -12,6 +13,7 @@ export const Linkerd2Application = createArgocdChildrenApplication({
 
 export const LinkerdVizApplication = createArgocdChildrenApplication({
   // resourceType: "infrastructure",
+  argoResourceType: "argocd-applications-children-infrastructure",
   resourceName: "linkerd-viz",
   namespace: "linkerd-viz"
 });

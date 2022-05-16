@@ -1,4 +1,4 @@
-import { createArgocdParentsApplication } from '../../shared/createArgoApplication';
+import { createArgocdChildrenApplication } from '../../shared/createArgoApplication';
 import { getEnvironmentVariables } from '../../shared/validations';
 // import { createContainerRegistrySecret } from './docker';
 
@@ -6,17 +6,23 @@ import { getEnvironmentVariables } from '../../shared/validations';
 export * from "./argocdBitnami";
 // // export * from "./argocdOfficial";
 
-export const argoInfrastructureParentApplications = createArgocdParentsApplication({
-    name: "infrastructure-parent-application",
+export const argoInfrastructureParentApplications = createArgocdChildrenApplication({
+    argoResourceType: "argocd-applications-parents",
+    resourceName: "argocd-applications-children-infrastructure",
+    // name: "infrastructure-parent-application",
     namespace: "argocd",
-    resourceType: "infrastructure",
+    // resourceType: "infrastructure",
 
 })
 
-export const argoServicesParentApplications = createArgocdParentsApplication({
-    name: "infrastructure-services-application",
+export const argoServicesParentApplications = createArgocdChildrenApplication({
+    // resourceDir
+    argoResourceType: "argocd-applications-parents",
+    // SourceResourceDir
+    resourceName: "argocd-applications-children-services",
+    // name: "infrastructure-services-application",
     namespace: "argocd",
-    resourceType: "services",
+    // resourceType: "services",
 
 })
 

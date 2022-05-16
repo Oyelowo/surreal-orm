@@ -5,12 +5,8 @@ import {
   ResourceName,
   getResourceRelativePath,
   getResourceProvider,
-  getArgocdChildrenResourcesProvider,
-  getPathToResourceType,
-  getArgocdChildrenApplicationsAbsolutePath,
   ResourceType,
-  getRepoPathFromAbsolutePath,
-  getArgocdParentApplicationsPath,
+  ArgoApplicationResourceName,
 } from "./manifestsDirectory";
 import { CustomResourceOptions } from "@pulumi/pulumi";
 import * as argocd from "../../crd2pulumi/argocd";
@@ -130,7 +126,9 @@ function createArgocdApplication({
 }
 
 type ArgocdChildrenApplicationProps = {
+  argoResourceType: ArgoApplicationResourceName;
   resourceName: ResourceName;
+  // resourceName: ResourceName;
   labels?: Record<string, string>;
   namespace: NamespaceName;
   opts?: CustomResourceOptions | undefined;
@@ -139,7 +137,9 @@ type ArgocdChildrenApplicationProps = {
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 
+// export function createArgocdChildrenApplication({
 export function createArgocdChildrenApplication({
+  argoResourceType,
   resourceName,
   namespace,
   labels,
@@ -149,44 +149,11 @@ export function createArgocdChildrenApplication({
     namespace,
     labels,
     sourcePath: getResourceRelativePath(resourceName, ENVIRONMENT),
-    provider: getArgocdChildrenResourcesProvider(resourceName, ENVIRONMENT),
+    // provider: getArgocdChildrenResourcesProvider(resourceName, ENVIRONMENT),
+    provider: getResourceProvider(argoResourceType, ENVIRONMENT),
   });
 }
 
-type ArgocdParentsApplicationProps = {
-  name: string;
-  resourceType: ResourceType;
-  labels?: Record<string, string>;
-  namespace: NamespaceName;
-  opts?: CustomResourceOptions | undefined;
-  isParentApp?: boolean;
-};
-
-
-
-export const providerArgoCDApplicationsParent = new k8s.Provider(
-  `argocd-parents-applications-${uuid()}`,
-  {
-    renderYamlToDirectory: getArgocdParentApplicationsPath(ENVIRONMENT),
-  }
-);
-
-export function createArgocdParentsApplication({
-  namespace,
-  resourceType,
-  name,
-  labels,
-}: ArgocdParentsApplicationProps): argocd.argoproj.v1alpha1.Application {
-  return createArgocdApplication({
-    name,
-    namespace,
-    labels,
-    sourcePath: getRepoPathFromAbsolutePath(
-      getArgocdChildrenApplicationsAbsolutePath(resourceType, ENVIRONMENT)
-    ),
-    provider: providerArgoCDApplicationsParent,
-  });
-}
 const metadata: Omit<Metadata, "argoApplicationName" | "resourceType"> = {
   name: "argocd-applications-secret",
   namespace: namespaceNames.argocd,
@@ -197,7 +164,6 @@ const metadata: Omit<Metadata, "argoApplicationName" | "resourceType"> = {
 
 
 const secrets = getSecretsForApp("argocd", ENVIRONMENT);
-
 export const argoCDApplicationsSecret = new kx.Secret(
   `argocd-secret`,
   {
@@ -211,5 +177,5 @@ export const argoCDApplicationsSecret = new kx.Secret(
       }
     },
   },
-  { provider: providerArgoCDApplicationsParent }
+  { provider: getResourceProvider("argocd-applications-parents", ENVIRONMENT) }
 );

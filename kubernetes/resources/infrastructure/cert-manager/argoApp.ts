@@ -3,6 +3,7 @@ import { createArgocdChildrenApplication } from "../../shared/createArgoApplicat
 
 export const certManagerApplication = createArgocdChildrenApplication({
   // resourceType: "infrastructure",
+  argoResourceType: "argocd-applications-children-infrastructure",
   resourceName: "cert-manager",
-  namespace: "cert-manager"
+  namespace: "cert-manager",
 });
