@@ -21,6 +21,8 @@ type PlainInputSecretsFilePath =
 export function setupPlainSecretTSFiles() {
   sh.mkdir(PLAIN_SECRETS_CONFIGS_DIR);
   ENVIRONMENTS.forEach(createSecretsConfigFile);
+  sh.exec(`npx prettier --write ${PLAIN_SECRETS_CONFIGS_DIR}`);
+
 }
 
 export function clearPlainInputTsSecretFilesContents() {
@@ -48,11 +50,11 @@ async function createSecretsConfigFile(environment: Environment) {
   sh.exec(`echo "$(echo '// @ts-nocheck'; cat ${filePath})" > ${filePath}`);
   // TODO: This check can be improved to check the serialized content against the sample
   const secretsExists = !!sh.cat(filePath)?.stdout?.trim();
-
+  // console.log({ filePath });
   if (secretsExists) {
     try {
       sh.exec("npx ts-node ./scripts/secretsManagement/merge.ts");
-    } catch (error) {}
+    } catch (error) { }
     return;
   }
 
