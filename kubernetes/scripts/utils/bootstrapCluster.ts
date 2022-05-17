@@ -18,14 +18,11 @@ import { ArgumentTypes } from "../../../typescript/apps/web/utils/typescript";
 import path from "path";
 import { Environment } from "../../resources/shared/types/own-types";
 import { setupPlainSecretTSFiles } from "../secretsManagement/setupSecrets";
-import {
-  generateManifests,
-} from "./generateManifests";
+import { generateManifests } from "./generateManifests";
 import { getImageTagsFromDir } from "./getImageTagsFromDir";
 import { generateAllSealedSecrets } from "./generateAllSealedSecrets";
 
 export async function bootstrapCluster(environment: Environment) {
-
   const imageTags = await getImageTagsFromDir();
 
   await generateManifests({
@@ -76,21 +73,22 @@ export async function bootstrapCluster(environment: Environment) {
   // TODO: Split bootstrap process from restart from update
   sh.exec(`kubectl -n argocd rollout restart deployment argocd-argo-cd-server`);
 
-
   // TODO: Only apply this in non prod environment
-  sh.exec(`kubectl apply -R -f ${getArgocdParentApplicationsPath(environment)}`);
+  sh.exec(
+    `kubectl apply -R -f ${getArgocdParentApplicationsPath(environment)}`
+  );
 }
 
-
-
-function applyResourceManifests(resourceName: ResourceName, environment: Environment) {
+function applyResourceManifests(
+  resourceName: ResourceName,
+  environment: Environment
+) {
   const resourceDir = getResourceAbsolutePath(resourceName, environment);
-  const applyManifests = (dir: string) => sh.exec(`kubectl apply -R -f  ${path.join(resourceDir, dir)}`);
-  ["sealed-secrets", "0-crd", "1-manifest"].forEach(applyManifests)
-
+  const applyManifests = (dir: string) =>
+    sh.exec(`kubectl apply -R -f  ${path.join(resourceDir, dir)}`);
+  ["sealed-secrets", "0-crd", "1-manifest"].forEach(applyManifests);
 
   // sh.exec(`kubectl apply -R -f  ${resourceDir}/sealed-secrets`);
   // sh.exec(`kubectl apply -R -f  ${resourceDir}/0-crd`);
   // sh.exec(`kubectl apply -R -f  ${resourceDir}/1-manifest`);
 }
-

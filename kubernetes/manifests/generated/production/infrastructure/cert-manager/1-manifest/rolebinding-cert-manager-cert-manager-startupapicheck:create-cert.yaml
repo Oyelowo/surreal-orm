@@ -22,6 +22,6 @@ roleRef:
   kind: Role
   name: cert-manager-startupapicheck:create-cert
 subjects:
-- kind: ServiceAccount
-  name: cert-manager-startupapicheck
-  namespace: cert-manager
+  - kind: ServiceAccount
+    name: cert-manager-startupapicheck
+    namespace: cert-manager

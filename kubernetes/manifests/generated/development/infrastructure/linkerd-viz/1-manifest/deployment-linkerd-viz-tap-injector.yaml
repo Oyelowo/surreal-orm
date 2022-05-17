@@ -28,40 +28,40 @@ spec:
         linkerd.io/extension: viz
     spec:
       containers:
-      - args:
-        - injector
-        - -tap-service-name=tap.linkerd-viz.serviceaccount.identity.linkerd.cluster.local
-        - -log-level=info
-        - -log-format=plain
-        - -enable-pprof=false
-        image: cr.l5d.io/linkerd/tap:stable-2.11.2
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          httpGet:
-            path: /ping
-            port: 9995
-          initialDelaySeconds: 10
-        name: tap-injector
-        ports:
-        - containerPort: 8443
+        - args:
+            - injector
+            - -tap-service-name=tap.linkerd-viz.serviceaccount.identity.linkerd.cluster.local
+            - -log-level=info
+            - -log-format=plain
+            - -enable-pprof=false
+          image: cr.l5d.io/linkerd/tap:stable-2.11.2
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 9995
+            initialDelaySeconds: 10
           name: tap-injector
-        - containerPort: 9995
-          name: admin-http
-        readinessProbe:
-          failureThreshold: 7
-          httpGet:
-            path: /ready
-            port: 9995
-        securityContext:
-          runAsUser: 2103
-        volumeMounts:
-        - mountPath: /var/run/linkerd/tls
-          name: tls
-          readOnly: true
+          ports:
+            - containerPort: 8443
+              name: tap-injector
+            - containerPort: 9995
+              name: admin-http
+          readinessProbe:
+            failureThreshold: 7
+            httpGet:
+              path: /ready
+              port: 9995
+          securityContext:
+            runAsUser: 2103
+          volumeMounts:
+            - mountPath: /var/run/linkerd/tls
+              name: tls
+              readOnly: true
       nodeSelector:
         kubernetes.io/os: linux
       serviceAccountName: tap-injector
       volumes:
-      - name: tls
-        secret:
-          secretName: tap-injector-k8s-tls
+        - name: tls
+          secret:
+            secretName: tap-injector-k8s-tls

@@ -15,26 +15,26 @@ metadata:
     helm.sh/chart: cert-manager-v1.8.0
   name: cert-manager-webhook
 webhooks:
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: cert-manager-webhook
-      namespace: cert-manager
-      path: /mutate
-  failurePolicy: Fail
-  matchPolicy: Equivalent
-  name: webhook.cert-manager.io
-  rules:
-  - apiGroups:
-    - cert-manager.io
-    - acme.cert-manager.io
-    apiVersions:
-    - v1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - '*/*'
-  sideEffects: None
-  timeoutSeconds: 10
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: cert-manager-webhook
+        namespace: cert-manager
+        path: /mutate
+    failurePolicy: Fail
+    matchPolicy: Equivalent
+    name: webhook.cert-manager.io
+    rules:
+      - apiGroups:
+          - cert-manager.io
+          - acme.cert-manager.io
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - "*/*"
+    sideEffects: None
+    timeoutSeconds: 10

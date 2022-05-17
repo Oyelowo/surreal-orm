@@ -1,15 +1,18 @@
-import { helmChartsInfo } from './../../shared/helmChartInfo';
+import { helmChartsInfo } from "./../../shared/helmChartInfo";
 import * as k8s from "@pulumi/kubernetes";
 import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial } from "../../shared/types/own-types";
 import { CertManagerValuesJetspack } from "../../shared/types/helm-charts/certManagerValuesJetspack";
-import { certManagerProvider } from './settings';
+import { certManagerProvider } from "./settings";
 
 const certManagerValues: DeepPartial<CertManagerValuesJetspack> = {
   installCRDs: true,
 };
 
-const { repo, certManager: { chart, version } } = helmChartsInfo.jetspackRepo;
+const {
+  repo,
+  certManager: { chart, version },
+} = helmChartsInfo.jetspackRepo;
 export const certManagerHelm = new k8s.helm.v3.Chart(
   "cert-manager",
   {

@@ -4,6317 +4,6321 @@
 import * as pulumi from "@pulumi/pulumi";
 import { input as inputs, output as outputs } from "../types";
 
-import {ObjectMeta} from "../meta/v1";
+import { ObjectMeta } from "../meta/v1";
 
 export namespace argoproj {
-    export namespace v1alpha1 {
-        /**
-         * AppProjectSpec is the specification of an AppProject
-         */
-        export interface AppProjectSpec {
-            /**
-             * ClusterResourceBlacklist contains list of blacklisted cluster level resources
-             */
-            clusterResourceBlacklist?: outputs.argoproj.v1alpha1.AppProjectSpecClusterResourceBlacklist[];
-            /**
-             * ClusterResourceWhitelist contains list of whitelisted cluster level resources
-             */
-            clusterResourceWhitelist?: outputs.argoproj.v1alpha1.AppProjectSpecClusterResourceWhitelist[];
-            /**
-             * Description contains optional project description
-             */
-            description?: string;
-            /**
-             * Destinations contains list of destinations available for deployment
-             */
-            destinations?: outputs.argoproj.v1alpha1.AppProjectSpecDestinations[];
-            /**
-             * NamespaceResourceBlacklist contains list of blacklisted namespace level resources
-             */
-            namespaceResourceBlacklist?: outputs.argoproj.v1alpha1.AppProjectSpecNamespaceResourceBlacklist[];
-            /**
-             * NamespaceResourceWhitelist contains list of whitelisted namespace level resources
-             */
-            namespaceResourceWhitelist?: outputs.argoproj.v1alpha1.AppProjectSpecNamespaceResourceWhitelist[];
-            /**
-             * OrphanedResources specifies if controller should monitor orphaned resources of apps in this project
-             */
-            orphanedResources?: outputs.argoproj.v1alpha1.AppProjectSpecOrphanedResources;
-            /**
-             * Roles are user defined RBAC roles associated with this project
-             */
-            roles?: outputs.argoproj.v1alpha1.AppProjectSpecRoles[];
-            /**
-             * SignatureKeys contains a list of PGP key IDs that commits in Git must be signed with in order to be allowed for sync
-             */
-            signatureKeys?: outputs.argoproj.v1alpha1.AppProjectSpecSignatureKeys[];
-            /**
-             * SourceRepos contains list of repository URLs which can be used for deployment
-             */
-            sourceRepos?: string[];
-            /**
-             * SyncWindows controls when syncs can be run for apps in this project
-             */
-            syncWindows?: outputs.argoproj.v1alpha1.AppProjectSpecSyncWindows[];
-        }
-
-        /**
-         * GroupKind specifies a Group and a Kind, but does not force a version.  This is useful for identifying concepts during lookup stages without having partially valid types
-         */
-        export interface AppProjectSpecClusterResourceBlacklist {
-            group: string;
-            kind: string;
-        }
-
-        /**
-         * GroupKind specifies a Group and a Kind, but does not force a version.  This is useful for identifying concepts during lookup stages without having partially valid types
-         */
-        export interface AppProjectSpecClusterResourceWhitelist {
-            group: string;
-            kind: string;
-        }
-
-        /**
-         * ApplicationDestination holds information about the application's destination
-         */
-        export interface AppProjectSpecDestinations {
-            /**
-             * Name is an alternate way of specifying the target cluster by its symbolic name
-             */
-            name?: string;
-            /**
-             * Namespace specifies the target namespace for the application's resources. The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
-             */
-            namespace?: string;
-            /**
-             * Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
-             */
-            server?: string;
-        }
-
-        /**
-         * GroupKind specifies a Group and a Kind, but does not force a version.  This is useful for identifying concepts during lookup stages without having partially valid types
-         */
-        export interface AppProjectSpecNamespaceResourceBlacklist {
-            group: string;
-            kind: string;
-        }
-
-        /**
-         * GroupKind specifies a Group and a Kind, but does not force a version.  This is useful for identifying concepts during lookup stages without having partially valid types
-         */
-        export interface AppProjectSpecNamespaceResourceWhitelist {
-            group: string;
-            kind: string;
-        }
-
-        /**
-         * OrphanedResources specifies if controller should monitor orphaned resources of apps in this project
-         */
-        export interface AppProjectSpecOrphanedResources {
-            /**
-             * Ignore contains a list of resources that are to be excluded from orphaned resources monitoring
-             */
-            ignore?: outputs.argoproj.v1alpha1.AppProjectSpecOrphanedResourcesIgnore[];
-            /**
-             * Warn indicates if warning condition should be created for apps which have orphaned resources
-             */
-            warn?: boolean;
-        }
-
-        /**
-         * OrphanedResourceKey is a reference to a resource to be ignored from
-         */
-        export interface AppProjectSpecOrphanedResourcesIgnore {
-            group?: string;
-            kind?: string;
-            name?: string;
-        }
-
-        /**
-         * ProjectRole represents a role that has access to a project
-         */
-        export interface AppProjectSpecRoles {
-            /**
-             * Description is a description of the role
-             */
-            description?: string;
-            /**
-             * Groups are a list of OIDC group claims bound to this role
-             */
-            groups?: string[];
-            /**
-             * JWTTokens are a list of generated JWT tokens bound to this role
-             */
-            jwtTokens?: outputs.argoproj.v1alpha1.AppProjectSpecRolesJwtTokens[];
-            /**
-             * Name is a name for this role
-             */
-            name: string;
-            /**
-             * Policies Stores a list of casbin formatted strings that define access policies for the role in the project
-             */
-            policies?: string[];
-        }
-
-        /**
-         * JWTToken holds the issuedAt and expiresAt values of a token
-         */
-        export interface AppProjectSpecRolesJwtTokens {
-            exp?: number;
-            iat: number;
-            id?: string;
-        }
-
-        /**
-         * SignatureKey is the specification of a key required to verify commit signatures with
-         */
-        export interface AppProjectSpecSignatureKeys {
-            /**
-             * The ID of the key in hexadecimal notation
-             */
-            keyID: string;
-        }
-
-        /**
-         * SyncWindow contains the kind, time, duration and attributes that are used to assign the syncWindows to apps
-         */
-        export interface AppProjectSpecSyncWindows {
-            /**
-             * Applications contains a list of applications that the window will apply to
-             */
-            applications?: string[];
-            /**
-             * Clusters contains a list of clusters that the window will apply to
-             */
-            clusters?: string[];
-            /**
-             * Duration is the amount of time the sync window will be open
-             */
-            duration?: string;
-            /**
-             * Kind defines if the window allows or blocks syncs
-             */
-            kind?: string;
-            /**
-             * ManualSync enables manual syncs when they would otherwise be blocked
-             */
-            manualSync?: boolean;
-            /**
-             * Namespaces contains a list of namespaces that the window will apply to
-             */
-            namespaces?: string[];
-            /**
-             * Schedule is the time the window will begin, specified in cron format
-             */
-            schedule?: string;
-            /**
-             * TimeZone of the sync that will be applied to the schedule
-             */
-            timeZone?: string;
-        }
-
-        /**
-         * AppProjectStatus contains status information for AppProject CRs
-         */
-        export interface AppProjectStatus {
-            /**
-             * JWTTokensByRole contains a list of JWT tokens issued for a given role
-             */
-            jwtTokensByRole?: {[key: string]: outputs.argoproj.v1alpha1.AppProjectStatusJwtTokensByRole};
-        }
-
-        /**
-         * JWTTokens represents a list of JWT tokens
-         */
-        export interface AppProjectStatusJwtTokensByRole {
-            items?: outputs.argoproj.v1alpha1.AppProjectStatusJwtTokensByRoleItems[];
-        }
-
-        /**
-         * JWTToken holds the issuedAt and expiresAt values of a token
-         */
-        export interface AppProjectStatusJwtTokensByRoleItems {
-            exp?: number;
-            iat: number;
-            id?: string;
-        }
-
-        /**
-         * Operation contains information about a requested or running operation
-         */
-        export interface ApplicationOperation {
-            /**
-             * Info is a list of informational items for this operation
-             */
-            info?: outputs.argoproj.v1alpha1.ApplicationOperationInfo[];
-            /**
-             * InitiatedBy contains information about who initiated the operations
-             */
-            initiatedBy?: outputs.argoproj.v1alpha1.ApplicationOperationInitiatedBy;
-            /**
-             * Retry controls the strategy to apply if a sync fails
-             */
-            retry?: outputs.argoproj.v1alpha1.ApplicationOperationRetry;
-            /**
-             * Sync contains parameters for the operation
-             */
-            sync?: outputs.argoproj.v1alpha1.ApplicationOperationSync;
-        }
-
-        export interface ApplicationOperationInfo {
-            name: string;
-            value: string;
-        }
-
-        /**
-         * InitiatedBy contains information about who initiated the operations
-         */
-        export interface ApplicationOperationInitiatedBy {
-            /**
-             * Automated is set to true if operation was initiated automatically by the application controller.
-             */
-            automated?: boolean;
-            /**
-             * Username contains the name of a user who started operation
-             */
-            username?: string;
-        }
-
-        /**
-         * Retry controls the strategy to apply if a sync fails
-         */
-        export interface ApplicationOperationRetry {
-            /**
-             * Backoff controls how to backoff on subsequent retries of failed syncs
-             */
-            backoff?: outputs.argoproj.v1alpha1.ApplicationOperationRetryBackoff;
-            /**
-             * Limit is the maximum number of attempts for retrying a failed sync. If set to 0, no retries will be performed.
-             */
-            limit?: number;
-        }
-
-        /**
-         * Backoff controls how to backoff on subsequent retries of failed syncs
-         */
-        export interface ApplicationOperationRetryBackoff {
-            /**
-             * Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
-             */
-            duration?: string;
-            /**
-             * Factor is a factor to multiply the base duration after each failed retry
-             */
-            factor?: number;
-            /**
-             * MaxDuration is the maximum amount of time allowed for the backoff strategy
-             */
-            maxDuration?: string;
-        }
-
-        /**
-         * Sync contains parameters for the operation
-         */
-        export interface ApplicationOperationSync {
-            /**
-             * DryRun specifies to perform a `kubectl apply --dry-run` without actually performing the sync
-             */
-            dryRun?: boolean;
-            /**
-             * Manifests is an optional field that overrides sync source with a local directory for development
-             */
-            manifests?: string[];
-            /**
-             * Prune specifies to delete resources from the cluster that are no longer tracked in git
-             */
-            prune?: boolean;
-            /**
-             * Resources describes which resources shall be part of the sync
-             */
-            resources?: outputs.argoproj.v1alpha1.ApplicationOperationSyncResources[];
-            /**
-             * Revision is the revision (Git) or chart version (Helm) which to sync the application to If omitted, will use the revision specified in app spec.
-             */
-            revision?: string;
-            /**
-             * Source overrides the source definition set in the application. This is typically set in a Rollback operation and is nil during a Sync operation
-             */
-            source?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSource;
-            /**
-             * SyncOptions provide per-sync sync-options, e.g. Validate=false
-             */
-            syncOptions?: string[];
-            /**
-             * SyncStrategy describes how to perform the sync
-             */
-            syncStrategy?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSyncStrategy;
-        }
-
-        /**
-         * SyncOperationResource contains resources to sync.
-         */
-        export interface ApplicationOperationSyncResources {
-            group?: string;
-            kind: string;
-            name: string;
-            namespace?: string;
-        }
-
-        /**
-         * Source overrides the source definition set in the application. This is typically set in a Rollback operation and is nil during a Sync operation
-         */
-        export interface ApplicationOperationSyncSource {
-            /**
-             * Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
-             */
-            chart?: string;
-            /**
-             * Directory holds path/directory specific options
-             */
-            directory?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceDirectory;
-            /**
-             * Helm holds helm specific options
-             */
-            helm?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceHelm;
-            /**
-             * Ksonnet holds ksonnet specific options
-             */
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceKsonnet;
-            /**
-             * Kustomize holds kustomize specific options
-             */
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceKustomize;
-            /**
-             * Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
-             */
-            path?: string;
-            /**
-             * ConfigManagementPlugin holds config management plugin specific options
-             */
-            plugin?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourcePlugin;
-            /**
-             * RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
-             */
-            repoURL: string;
-            /**
-             * TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
-             */
-            targetRevision?: string;
-        }
-
-        /**
-         * Directory holds path/directory specific options
-         */
-        export interface ApplicationOperationSyncSourceDirectory {
-            /**
-             * Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
-             */
-            exclude?: string;
-            /**
-             * Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
-             */
-            include?: string;
-            /**
-             * Jsonnet holds options specific to Jsonnet
-             */
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceDirectoryJsonnet;
-            /**
-             * Recurse specifies whether to scan a directory recursively for manifests
-             */
-            recurse?: boolean;
-        }
-
-        /**
-         * Jsonnet holds options specific to Jsonnet
-         */
-        export interface ApplicationOperationSyncSourceDirectoryJsonnet {
-            /**
-             * ExtVars is a list of Jsonnet External Variables
-             */
-            extVars?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceDirectoryJsonnetExtVars[];
-            /**
-             * Additional library search dirs
-             */
-            libs?: string[];
-            /**
-             * TLAS is a list of Jsonnet Top-level Arguments
-             */
-            tlas?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceDirectoryJsonnetTlas[];
-        }
-
-        /**
-         * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-         */
-        export interface ApplicationOperationSyncSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-         */
-        export interface ApplicationOperationSyncSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Helm holds helm specific options
-         */
-        export interface ApplicationOperationSyncSourceHelm {
-            /**
-             * FileParameters are file parameters to the helm template
-             */
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceHelmFileParameters[];
-            /**
-             * IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
-             */
-            ignoreMissingValueFiles?: boolean;
-            /**
-             * Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
-             */
-            parameters?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceHelmParameters[];
-            /**
-             * PassCredentials pass credentials to all domains (Helm's --pass-credentials)
-             */
-            passCredentials?: boolean;
-            /**
-             * ReleaseName is the Helm release name to use. If omitted it will use the application name
-             */
-            releaseName?: string;
-            /**
-             * SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
-             */
-            skipCrds?: boolean;
-            /**
-             * ValuesFiles is a list of Helm value files to use when generating a template
-             */
-            valueFiles?: string[];
-            /**
-             * Values specifies Helm values to be passed to helm template, typically defined as a block
-             */
-            values?: string;
-            /**
-             * Version is the Helm version to use for templating (either "2" or "3")
-             */
-            version?: string;
-        }
-
-        /**
-         * HelmFileParameter is a file parameter that's passed to helm template during manifest generation
-         */
-        export interface ApplicationOperationSyncSourceHelmFileParameters {
-            /**
-             * Name is the name of the Helm parameter
-             */
-            name?: string;
-            /**
-             * Path is the path to the file containing the values for the Helm parameter
-             */
-            path?: string;
-        }
-
-        /**
-         * HelmParameter is a parameter that's passed to helm template during manifest generation
-         */
-        export interface ApplicationOperationSyncSourceHelmParameters {
-            /**
-             * ForceString determines whether to tell Helm to interpret booleans and numbers as strings
-             */
-            forceString?: boolean;
-            /**
-             * Name is the name of the Helm parameter
-             */
-            name?: string;
-            /**
-             * Value is the value for the Helm parameter
-             */
-            value?: string;
-        }
-
-        /**
-         * Ksonnet holds ksonnet specific options
-         */
-        export interface ApplicationOperationSyncSourceKsonnet {
-            /**
-             * Environment is a ksonnet application environment name
-             */
-            environment?: string;
-            /**
-             * Parameters are a list of ksonnet component parameter override values
-             */
-            parameters?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceKsonnetParameters[];
-        }
-
-        /**
-         * KsonnetParameter is a ksonnet component parameter
-         */
-        export interface ApplicationOperationSyncSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Kustomize holds kustomize specific options
-         */
-        export interface ApplicationOperationSyncSourceKustomize {
-            /**
-             * CommonAnnotations is a list of additional annotations to add to rendered manifests
-             */
-            commonAnnotations?: {[key: string]: string};
-            /**
-             * CommonLabels is a list of additional labels to add to rendered manifests
-             */
-            commonLabels?: {[key: string]: string};
-            /**
-             * ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
-             */
-            forceCommonAnnotations?: boolean;
-            /**
-             * ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
-             */
-            forceCommonLabels?: boolean;
-            /**
-             * Images is a list of Kustomize image override specifications
-             */
-            images?: string[];
-            /**
-             * NamePrefix is a prefix appended to resources for Kustomize apps
-             */
-            namePrefix?: string;
-            /**
-             * NameSuffix is a suffix appended to resources for Kustomize apps
-             */
-            nameSuffix?: string;
-            /**
-             * Version controls which version of Kustomize to use for rendering manifests
-             */
-            version?: string;
-        }
-
-        /**
-         * ConfigManagementPlugin holds config management plugin specific options
-         */
-        export interface ApplicationOperationSyncSourcePlugin {
-            /**
-             * Env is a list of environment variable entries
-             */
-            env?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourcePluginEnv[];
-            name?: string;
-        }
-
-        /**
-         * EnvEntry represents an entry in the application's environment
-         */
-        export interface ApplicationOperationSyncSourcePluginEnv {
-            /**
-             * Name is the name of the variable, usually expressed in uppercase
-             */
-            name: string;
-            /**
-             * Value is the value of the variable
-             */
-            value: string;
-        }
-
-        /**
-         * SyncStrategy describes how to perform the sync
-         */
-        export interface ApplicationOperationSyncSyncStrategy {
-            /**
-             * Apply will perform a `kubectl apply` to perform the sync.
-             */
-            apply?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSyncStrategyApply;
-            /**
-             * Hook will submit any referenced resources to perform the sync. This is the default strategy
-             */
-            hook?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSyncStrategyHook;
-        }
-
-        /**
-         * Apply will perform a `kubectl apply` to perform the sync.
-         */
-        export interface ApplicationOperationSyncSyncStrategyApply {
-            /**
-             * Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.
-             */
-            force?: boolean;
-        }
-
-        /**
-         * Hook will submit any referenced resources to perform the sync. This is the default strategy
-         */
-        export interface ApplicationOperationSyncSyncStrategyHook {
-            /**
-             * Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.
-             */
-            force?: boolean;
-        }
-
-        export interface ApplicationSetSpec {
-            generators: outputs.argoproj.v1alpha1.ApplicationSetSpecGenerators[];
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecSyncPolicy;
-            template: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplate;
-        }
-
-        export interface ApplicationSetSpecGenerators {
-            clusterDecisionResource?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResource;
-            clusters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusters;
-            git?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGit;
-            list?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsList;
-            matrix?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrix;
-            merge?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMerge;
-            pullRequest?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequest;
-            scmProvider?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProvider;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResource {
-            configMapRef: string;
-            labelSelector?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceLabelSelector;
-            name?: string;
-            requeueAfterSeconds?: number;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplate;
-            values?: {[key: string]: string};
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceLabelSelector {
-            matchExpressions?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceLabelSelectorMatchExpressions[];
-            matchLabels?: {[key: string]: string};
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceLabelSelectorMatchExpressions {
-            key: string;
-            operator: string;
-            values?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusters {
-            selector?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersSelector;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplate;
-            values?: {[key: string]: string};
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersSelector {
-            matchExpressions?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersSelectorMatchExpressions[];
-            matchLabels?: {[key: string]: string};
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersSelectorMatchExpressions {
-            key: string;
-            operator: string;
-            values?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGit {
-            directories?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitDirectories[];
-            files?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitFiles[];
-            repoURL: string;
-            requeueAfterSeconds?: number;
-            revision: string;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitDirectories {
-            exclude?: boolean;
-            path: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitFiles {
-            path: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsList {
-            elements: {[key: string]: any}[];
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrix {
-            generators: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGenerators[];
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGenerators {
-            clusterDecisionResource?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResource;
-            clusters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusters;
-            git?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGit;
-            list?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsList;
-            matrix?: {[key: string]: any};
-            merge?: {[key: string]: any};
-            pullRequest?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequest;
-            scmProvider?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProvider;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResource {
-            configMapRef: string;
-            labelSelector?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceLabelSelector;
-            name?: string;
-            requeueAfterSeconds?: number;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplate;
-            values?: {[key: string]: string};
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceLabelSelector {
-            matchExpressions?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceLabelSelectorMatchExpressions[];
-            matchLabels?: {[key: string]: string};
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceLabelSelectorMatchExpressions {
-            key: string;
-            operator: string;
-            values?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusters {
-            selector?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersSelector;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplate;
-            values?: {[key: string]: string};
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersSelector {
-            matchExpressions?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersSelectorMatchExpressions[];
-            matchLabels?: {[key: string]: string};
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersSelectorMatchExpressions {
-            key: string;
-            operator: string;
-            values?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGit {
-            directories?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitDirectories[];
-            files?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitFiles[];
-            repoURL: string;
-            requeueAfterSeconds?: number;
-            revision: string;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitDirectories {
-            exclude?: boolean;
-            path: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitFiles {
-            path: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsList {
-            elements: {[key: string]: any}[];
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequest {
-            github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestGithub;
-            requeueAfterSeconds?: number;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestGithub {
-            api?: string;
-            labels?: string[];
-            owner: string;
-            repo: string;
-            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestGithubTokenRef;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestGithubTokenRef {
-            key: string;
-            secretName: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProvider {
-            cloneProtocol?: string;
-            filters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderFilters[];
-            github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGithub;
-            gitlab?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGitlab;
-            requeueAfterSeconds?: number;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderFilters {
-            branchMatch?: string;
-            labelMatch?: string;
-            pathsExist?: string[];
-            repositoryMatch?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGithub {
-            allBranches?: boolean;
-            api?: string;
-            organization: string;
-            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGithubTokenRef;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGithubTokenRef {
-            key: string;
-            secretName: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGitlab {
-            allBranches?: boolean;
-            api?: string;
-            group: string;
-            includeSubgroups?: boolean;
-            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGitlabTokenRef;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGitlabTokenRef {
-            key: string;
-            secretName: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMerge {
-            generators: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGenerators[];
-            mergeKeys: string[];
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGenerators {
-            clusterDecisionResource?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResource;
-            clusters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusters;
-            git?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGit;
-            list?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsList;
-            matrix?: {[key: string]: any};
-            merge?: {[key: string]: any};
-            pullRequest?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequest;
-            scmProvider?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProvider;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResource {
-            configMapRef: string;
-            labelSelector?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceLabelSelector;
-            name?: string;
-            requeueAfterSeconds?: number;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplate;
-            values?: {[key: string]: string};
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceLabelSelector {
-            matchExpressions?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceLabelSelectorMatchExpressions[];
-            matchLabels?: {[key: string]: string};
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceLabelSelectorMatchExpressions {
-            key: string;
-            operator: string;
-            values?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusters {
-            selector?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersSelector;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplate;
-            values?: {[key: string]: string};
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersSelector {
-            matchExpressions?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersSelectorMatchExpressions[];
-            matchLabels?: {[key: string]: string};
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersSelectorMatchExpressions {
-            key: string;
-            operator: string;
-            values?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGit {
-            directories?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitDirectories[];
-            files?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitFiles[];
-            repoURL: string;
-            requeueAfterSeconds?: number;
-            revision: string;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitDirectories {
-            exclude?: boolean;
-            path: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitFiles {
-            path: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsList {
-            elements: {[key: string]: any}[];
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequest {
-            github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestGithub;
-            requeueAfterSeconds?: number;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestGithub {
-            api?: string;
-            labels?: string[];
-            owner: string;
-            repo: string;
-            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestGithubTokenRef;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestGithubTokenRef {
-            key: string;
-            secretName: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProvider {
-            cloneProtocol?: string;
-            filters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderFilters[];
-            github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGithub;
-            gitlab?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGitlab;
-            requeueAfterSeconds?: number;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderFilters {
-            branchMatch?: string;
-            labelMatch?: string;
-            pathsExist?: string[];
-            repositoryMatch?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGithub {
-            allBranches?: boolean;
-            api?: string;
-            organization: string;
-            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGithubTokenRef;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGithubTokenRef {
-            key: string;
-            secretName: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGitlab {
-            allBranches?: boolean;
-            api?: string;
-            group: string;
-            includeSubgroups?: boolean;
-            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGitlabTokenRef;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGitlabTokenRef {
-            key: string;
-            secretName: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequest {
-            github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestGithub;
-            requeueAfterSeconds?: number;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestGithub {
-            api?: string;
-            labels?: string[];
-            owner: string;
-            repo: string;
-            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestGithubTokenRef;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestGithubTokenRef {
-            key: string;
-            secretName: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProvider {
-            cloneProtocol?: string;
-            filters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderFilters[];
-            github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderGithub;
-            gitlab?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderGitlab;
-            requeueAfterSeconds?: number;
-            template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplate;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderFilters {
-            branchMatch?: string;
-            labelMatch?: string;
-            pathsExist?: string[];
-            repositoryMatch?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderGithub {
-            allBranches?: boolean;
-            api?: string;
-            organization: string;
-            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderGithubTokenRef;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderGithubTokenRef {
-            key: string;
-            secretName: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderGitlab {
-            allBranches?: boolean;
-            api?: string;
-            group: string;
-            includeSubgroups?: boolean;
-            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderGitlabTokenRef;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderGitlabTokenRef {
-            key: string;
-            secretName: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetSpecSyncPolicy {
-            preserveResourcesOnDeletion?: boolean;
-        }
-
-        export interface ApplicationSetSpecTemplate {
-            metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateMetadata;
-            spec: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpec;
-        }
-
-        export interface ApplicationSetSpecTemplateMetadata {
-            annotations?: {[key: string]: string};
-            finalizers?: string[];
-            labels?: {[key: string]: string};
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpec {
-            destination: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecDestination;
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecIgnoreDifferences[];
-            info?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecInfo[];
-            project: string;
-            revisionHistoryLimit?: number;
-            source: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSource;
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSyncPolicy;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecDestination {
-            name?: string;
-            namespace?: string;
-            server?: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSource {
-            chart?: string;
-            directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceDirectory;
-            helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceKsonnet;
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceKustomize;
-            path?: string;
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourcePlugin;
-            repoURL: string;
-            targetRevision?: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceDirectory {
-            exclude?: string;
-            include?: string;
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceDirectoryJsonnet;
-            recurse?: boolean;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceDirectoryJsonnet {
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceDirectoryJsonnetExtVars[];
-            libs?: string[];
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceHelm {
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceHelmFileParameters[];
-            ignoreMissingValueFiles?: boolean;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceHelmParameters[];
-            passCredentials?: boolean;
-            releaseName?: string;
-            skipCrds?: boolean;
-            valueFiles?: string[];
-            values?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceHelmFileParameters {
-            name?: string;
-            path?: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceHelmParameters {
-            forceString?: boolean;
-            name?: string;
-            value?: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceKustomize {
-            commonAnnotations?: {[key: string]: string};
-            commonLabels?: {[key: string]: string};
-            forceCommonAnnotations?: boolean;
-            forceCommonLabels?: boolean;
-            images?: string[];
-            namePrefix?: string;
-            nameSuffix?: string;
-            version?: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourcePlugin {
-            env?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourcePluginEnv {
-            name: string;
-            value: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSyncPolicy {
-            automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSyncPolicyAutomated;
-            retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSyncPolicyRetry;
-            syncOptions?: string[];
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSyncPolicyAutomated {
-            allowEmpty?: boolean;
-            prune?: boolean;
-            selfHeal?: boolean;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSyncPolicyRetry {
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSyncPolicyRetryBackoff;
-            limit?: number;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSyncPolicyRetryBackoff {
-            duration?: string;
-            factor?: number;
-            maxDuration?: string;
-        }
-
-        export interface ApplicationSetStatus {
-            conditions?: outputs.argoproj.v1alpha1.ApplicationSetStatusConditions[];
-        }
-
-        export interface ApplicationSetStatusConditions {
-            lastTransitionTime?: string;
-            message: string;
-            reason: string;
-            status: string;
-            type: string;
-        }
-
-        /**
-         * ApplicationSpec represents desired application state. Contains link to repository with application definition and additional parameters link definition revision.
-         */
-        export interface ApplicationSpec {
-            /**
-             * Destination is a reference to the target Kubernetes server and namespace
-             */
-            destination: outputs.argoproj.v1alpha1.ApplicationSpecDestination;
-            /**
-             * IgnoreDifferences is a list of resources and their fields which should be ignored during comparison
-             */
-            ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSpecIgnoreDifferences[];
-            /**
-             * Info contains a list of information (URLs, email addresses, and plain text) that relates to the application
-             */
-            info?: outputs.argoproj.v1alpha1.ApplicationSpecInfo[];
-            /**
-             * Project is a reference to the project this application belongs to. The empty string means that application belongs to the 'default' project.
-             */
-            project: string;
-            /**
-             * RevisionHistoryLimit limits the number of items kept in the application's revision history, which is used for informational purposes as well as for rollbacks to previous versions. This should only be changed in exceptional circumstances. Setting to zero will store no history. This will reduce storage used. Increasing will increase the space used to store the history, so we do not recommend increasing it. Default is 10.
-             */
-            revisionHistoryLimit?: number;
-            /**
-             * Source is a reference to the location of the application's manifests or chart
-             */
-            source: outputs.argoproj.v1alpha1.ApplicationSpecSource;
-            /**
-             * SyncPolicy controls when and how a sync will be performed
-             */
-            syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSpecSyncPolicy;
-        }
-
-        /**
-         * Destination is a reference to the target Kubernetes server and namespace
-         */
-        export interface ApplicationSpecDestination {
-            /**
-             * Name is an alternate way of specifying the target cluster by its symbolic name
-             */
-            name?: string;
-            /**
-             * Namespace specifies the target namespace for the application's resources. The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
-             */
-            namespace?: string;
-            /**
-             * Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
-             */
-            server?: string;
-        }
-
-        /**
-         * ResourceIgnoreDifferences contains resource filter and list of json paths which should be ignored during comparison with live state.
-         */
-        export interface ApplicationSpecIgnoreDifferences {
-            group?: string;
-            jqPathExpressions?: string[];
-            jsonPointers?: string[];
-            kind: string;
-            /**
-             * ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the desired state defined in the SCM and won't be displayed in diffs
-             */
-            managedFieldsManagers?: string[];
-            name?: string;
-            namespace?: string;
-        }
-
-        export interface ApplicationSpecInfo {
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Source is a reference to the location of the application's manifests or chart
-         */
-        export interface ApplicationSpecSource {
-            /**
-             * Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
-             */
-            chart?: string;
-            /**
-             * Directory holds path/directory specific options
-             */
-            directory?: outputs.argoproj.v1alpha1.ApplicationSpecSourceDirectory;
-            /**
-             * Helm holds helm specific options
-             */
-            helm?: outputs.argoproj.v1alpha1.ApplicationSpecSourceHelm;
-            /**
-             * Ksonnet holds ksonnet specific options
-             */
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSpecSourceKsonnet;
-            /**
-             * Kustomize holds kustomize specific options
-             */
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationSpecSourceKustomize;
-            /**
-             * Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
-             */
-            path?: string;
-            /**
-             * ConfigManagementPlugin holds config management plugin specific options
-             */
-            plugin?: outputs.argoproj.v1alpha1.ApplicationSpecSourcePlugin;
-            /**
-             * RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
-             */
-            repoURL: string;
-            /**
-             * TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
-             */
-            targetRevision?: string;
-        }
-
-        /**
-         * Directory holds path/directory specific options
-         */
-        export interface ApplicationSpecSourceDirectory {
-            /**
-             * Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
-             */
-            exclude?: string;
-            /**
-             * Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
-             */
-            include?: string;
-            /**
-             * Jsonnet holds options specific to Jsonnet
-             */
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationSpecSourceDirectoryJsonnet;
-            /**
-             * Recurse specifies whether to scan a directory recursively for manifests
-             */
-            recurse?: boolean;
-        }
-
-        /**
-         * Jsonnet holds options specific to Jsonnet
-         */
-        export interface ApplicationSpecSourceDirectoryJsonnet {
-            /**
-             * ExtVars is a list of Jsonnet External Variables
-             */
-            extVars?: outputs.argoproj.v1alpha1.ApplicationSpecSourceDirectoryJsonnetExtVars[];
-            /**
-             * Additional library search dirs
-             */
-            libs?: string[];
-            /**
-             * TLAS is a list of Jsonnet Top-level Arguments
-             */
-            tlas?: outputs.argoproj.v1alpha1.ApplicationSpecSourceDirectoryJsonnetTlas[];
-        }
-
-        /**
-         * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-         */
-        export interface ApplicationSpecSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-         */
-        export interface ApplicationSpecSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Helm holds helm specific options
-         */
-        export interface ApplicationSpecSourceHelm {
-            /**
-             * FileParameters are file parameters to the helm template
-             */
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationSpecSourceHelmFileParameters[];
-            /**
-             * IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
-             */
-            ignoreMissingValueFiles?: boolean;
-            /**
-             * Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
-             */
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSpecSourceHelmParameters[];
-            /**
-             * PassCredentials pass credentials to all domains (Helm's --pass-credentials)
-             */
-            passCredentials?: boolean;
-            /**
-             * ReleaseName is the Helm release name to use. If omitted it will use the application name
-             */
-            releaseName?: string;
-            /**
-             * SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
-             */
-            skipCrds?: boolean;
-            /**
-             * ValuesFiles is a list of Helm value files to use when generating a template
-             */
-            valueFiles?: string[];
-            /**
-             * Values specifies Helm values to be passed to helm template, typically defined as a block
-             */
-            values?: string;
-            /**
-             * Version is the Helm version to use for templating (either "2" or "3")
-             */
-            version?: string;
-        }
-
-        /**
-         * HelmFileParameter is a file parameter that's passed to helm template during manifest generation
-         */
-        export interface ApplicationSpecSourceHelmFileParameters {
-            /**
-             * Name is the name of the Helm parameter
-             */
-            name?: string;
-            /**
-             * Path is the path to the file containing the values for the Helm parameter
-             */
-            path?: string;
-        }
-
-        /**
-         * HelmParameter is a parameter that's passed to helm template during manifest generation
-         */
-        export interface ApplicationSpecSourceHelmParameters {
-            /**
-             * ForceString determines whether to tell Helm to interpret booleans and numbers as strings
-             */
-            forceString?: boolean;
-            /**
-             * Name is the name of the Helm parameter
-             */
-            name?: string;
-            /**
-             * Value is the value for the Helm parameter
-             */
-            value?: string;
-        }
-
-        /**
-         * Ksonnet holds ksonnet specific options
-         */
-        export interface ApplicationSpecSourceKsonnet {
-            /**
-             * Environment is a ksonnet application environment name
-             */
-            environment?: string;
-            /**
-             * Parameters are a list of ksonnet component parameter override values
-             */
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSpecSourceKsonnetParameters[];
-        }
-
-        /**
-         * KsonnetParameter is a ksonnet component parameter
-         */
-        export interface ApplicationSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Kustomize holds kustomize specific options
-         */
-        export interface ApplicationSpecSourceKustomize {
-            /**
-             * CommonAnnotations is a list of additional annotations to add to rendered manifests
-             */
-            commonAnnotations?: {[key: string]: string};
-            /**
-             * CommonLabels is a list of additional labels to add to rendered manifests
-             */
-            commonLabels?: {[key: string]: string};
-            /**
-             * ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
-             */
-            forceCommonAnnotations?: boolean;
-            /**
-             * ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
-             */
-            forceCommonLabels?: boolean;
-            /**
-             * Images is a list of Kustomize image override specifications
-             */
-            images?: string[];
-            /**
-             * NamePrefix is a prefix appended to resources for Kustomize apps
-             */
-            namePrefix?: string;
-            /**
-             * NameSuffix is a suffix appended to resources for Kustomize apps
-             */
-            nameSuffix?: string;
-            /**
-             * Version controls which version of Kustomize to use for rendering manifests
-             */
-            version?: string;
-        }
-
-        /**
-         * ConfigManagementPlugin holds config management plugin specific options
-         */
-        export interface ApplicationSpecSourcePlugin {
-            /**
-             * Env is a list of environment variable entries
-             */
-            env?: outputs.argoproj.v1alpha1.ApplicationSpecSourcePluginEnv[];
-            name?: string;
-        }
-
-        /**
-         * EnvEntry represents an entry in the application's environment
-         */
-        export interface ApplicationSpecSourcePluginEnv {
-            /**
-             * Name is the name of the variable, usually expressed in uppercase
-             */
-            name: string;
-            /**
-             * Value is the value of the variable
-             */
-            value: string;
-        }
-
-        /**
-         * SyncPolicy controls when and how a sync will be performed
-         */
-        export interface ApplicationSpecSyncPolicy {
-            /**
-             * Automated will keep an application synced to the target revision
-             */
-            automated?: outputs.argoproj.v1alpha1.ApplicationSpecSyncPolicyAutomated;
-            /**
-             * Retry controls failed sync retry behavior
-             */
-            retry?: outputs.argoproj.v1alpha1.ApplicationSpecSyncPolicyRetry;
-            /**
-             * Options allow you to specify whole app sync-options
-             */
-            syncOptions?: string[];
-        }
-
-        /**
-         * Automated will keep an application synced to the target revision
-         */
-        export interface ApplicationSpecSyncPolicyAutomated {
-            /**
-             * AllowEmpty allows apps have zero live resources (default: false)
-             */
-            allowEmpty?: boolean;
-            /**
-             * Prune specifies whether to delete resources from the cluster that are not found in the sources anymore as part of automated sync (default: false)
-             */
-            prune?: boolean;
-            /**
-             * SelfHeal specifes whether to revert resources back to their desired state upon modification in the cluster (default: false)
-             */
-            selfHeal?: boolean;
-        }
-
-        /**
-         * Retry controls failed sync retry behavior
-         */
-        export interface ApplicationSpecSyncPolicyRetry {
-            /**
-             * Backoff controls how to backoff on subsequent retries of failed syncs
-             */
-            backoff?: outputs.argoproj.v1alpha1.ApplicationSpecSyncPolicyRetryBackoff;
-            /**
-             * Limit is the maximum number of attempts for retrying a failed sync. If set to 0, no retries will be performed.
-             */
-            limit?: number;
-        }
-
-        /**
-         * Backoff controls how to backoff on subsequent retries of failed syncs
-         */
-        export interface ApplicationSpecSyncPolicyRetryBackoff {
-            /**
-             * Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
-             */
-            duration?: string;
-            /**
-             * Factor is a factor to multiply the base duration after each failed retry
-             */
-            factor?: number;
-            /**
-             * MaxDuration is the maximum amount of time allowed for the backoff strategy
-             */
-            maxDuration?: string;
-        }
-
-        /**
-         * ApplicationStatus contains status information for the application
-         */
-        export interface ApplicationStatus {
-            /**
-             * Conditions is a list of currently observed application conditions
-             */
-            conditions?: outputs.argoproj.v1alpha1.ApplicationStatusConditions[];
-            /**
-             * Health contains information about the application's current health status
-             */
-            health?: outputs.argoproj.v1alpha1.ApplicationStatusHealth;
-            /**
-             * History contains information about the application's sync history
-             */
-            history?: outputs.argoproj.v1alpha1.ApplicationStatusHistory[];
-            /**
-             * ObservedAt indicates when the application state was updated without querying latest git state Deprecated: controller no longer updates ObservedAt field
-             */
-            observedAt?: string;
-            /**
-             * OperationState contains information about any ongoing operations, such as a sync
-             */
-            operationState?: outputs.argoproj.v1alpha1.ApplicationStatusOperationState;
-            /**
-             * ReconciledAt indicates when the application state was reconciled using the latest git version
-             */
-            reconciledAt?: string;
-            /**
-             * Resources is a list of Kubernetes resources managed by this application
-             */
-            resources?: outputs.argoproj.v1alpha1.ApplicationStatusResources[];
-            /**
-             * SourceType specifies the type of this application
-             */
-            sourceType?: string;
-            /**
-             * Summary contains a list of URLs and container images used by this application
-             */
-            summary?: outputs.argoproj.v1alpha1.ApplicationStatusSummary;
-            /**
-             * Sync contains information about the application's current sync status
-             */
-            sync?: outputs.argoproj.v1alpha1.ApplicationStatusSync;
-        }
-
-        /**
-         * ApplicationCondition contains details about an application condition, which is usally an error or warning
-         */
-        export interface ApplicationStatusConditions {
-            /**
-             * LastTransitionTime is the time the condition was last observed
-             */
-            lastTransitionTime?: string;
-            /**
-             * Message contains human-readable message indicating details about condition
-             */
-            message: string;
-            /**
-             * Type is an application condition type
-             */
-            type: string;
-        }
-
-        /**
-         * Health contains information about the application's current health status
-         */
-        export interface ApplicationStatusHealth {
-            /**
-             * Message is a human-readable informational message describing the health status
-             */
-            message?: string;
-            /**
-             * Status holds the status code of the application or resource
-             */
-            status?: string;
-        }
-
-        /**
-         * RevisionHistory contains history information about a previous sync
-         */
-        export interface ApplicationStatusHistory {
-            /**
-             * DeployStartedAt holds the time the sync operation started
-             */
-            deployStartedAt?: string;
-            /**
-             * DeployedAt holds the time the sync operation completed
-             */
-            deployedAt: string;
-            /**
-             * ID is an auto incrementing identifier of the RevisionHistory
-             */
-            id: number;
-            /**
-             * Revision holds the revision the sync was performed against
-             */
-            revision: string;
-            /**
-             * Source is a reference to the application source used for the sync operation
-             */
-            source?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySource;
-        }
-
-        /**
-         * Source is a reference to the application source used for the sync operation
-         */
-        export interface ApplicationStatusHistorySource {
-            /**
-             * Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
-             */
-            chart?: string;
-            /**
-             * Directory holds path/directory specific options
-             */
-            directory?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceDirectory;
-            /**
-             * Helm holds helm specific options
-             */
-            helm?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceHelm;
-            /**
-             * Ksonnet holds ksonnet specific options
-             */
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceKsonnet;
-            /**
-             * Kustomize holds kustomize specific options
-             */
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceKustomize;
-            /**
-             * Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
-             */
-            path?: string;
-            /**
-             * ConfigManagementPlugin holds config management plugin specific options
-             */
-            plugin?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourcePlugin;
-            /**
-             * RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
-             */
-            repoURL: string;
-            /**
-             * TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
-             */
-            targetRevision?: string;
-        }
-
-        /**
-         * Directory holds path/directory specific options
-         */
-        export interface ApplicationStatusHistorySourceDirectory {
-            /**
-             * Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
-             */
-            exclude?: string;
-            /**
-             * Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
-             */
-            include?: string;
-            /**
-             * Jsonnet holds options specific to Jsonnet
-             */
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceDirectoryJsonnet;
-            /**
-             * Recurse specifies whether to scan a directory recursively for manifests
-             */
-            recurse?: boolean;
-        }
-
-        /**
-         * Jsonnet holds options specific to Jsonnet
-         */
-        export interface ApplicationStatusHistorySourceDirectoryJsonnet {
-            /**
-             * ExtVars is a list of Jsonnet External Variables
-             */
-            extVars?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceDirectoryJsonnetExtVars[];
-            /**
-             * Additional library search dirs
-             */
-            libs?: string[];
-            /**
-             * TLAS is a list of Jsonnet Top-level Arguments
-             */
-            tlas?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceDirectoryJsonnetTlas[];
-        }
-
-        /**
-         * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-         */
-        export interface ApplicationStatusHistorySourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-         */
-        export interface ApplicationStatusHistorySourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Helm holds helm specific options
-         */
-        export interface ApplicationStatusHistorySourceHelm {
-            /**
-             * FileParameters are file parameters to the helm template
-             */
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceHelmFileParameters[];
-            /**
-             * IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
-             */
-            ignoreMissingValueFiles?: boolean;
-            /**
-             * Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
-             */
-            parameters?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceHelmParameters[];
-            /**
-             * PassCredentials pass credentials to all domains (Helm's --pass-credentials)
-             */
-            passCredentials?: boolean;
-            /**
-             * ReleaseName is the Helm release name to use. If omitted it will use the application name
-             */
-            releaseName?: string;
-            /**
-             * SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
-             */
-            skipCrds?: boolean;
-            /**
-             * ValuesFiles is a list of Helm value files to use when generating a template
-             */
-            valueFiles?: string[];
-            /**
-             * Values specifies Helm values to be passed to helm template, typically defined as a block
-             */
-            values?: string;
-            /**
-             * Version is the Helm version to use for templating (either "2" or "3")
-             */
-            version?: string;
-        }
-
-        /**
-         * HelmFileParameter is a file parameter that's passed to helm template during manifest generation
-         */
-        export interface ApplicationStatusHistorySourceHelmFileParameters {
-            /**
-             * Name is the name of the Helm parameter
-             */
-            name?: string;
-            /**
-             * Path is the path to the file containing the values for the Helm parameter
-             */
-            path?: string;
-        }
-
-        /**
-         * HelmParameter is a parameter that's passed to helm template during manifest generation
-         */
-        export interface ApplicationStatusHistorySourceHelmParameters {
-            /**
-             * ForceString determines whether to tell Helm to interpret booleans and numbers as strings
-             */
-            forceString?: boolean;
-            /**
-             * Name is the name of the Helm parameter
-             */
-            name?: string;
-            /**
-             * Value is the value for the Helm parameter
-             */
-            value?: string;
-        }
-
-        /**
-         * Ksonnet holds ksonnet specific options
-         */
-        export interface ApplicationStatusHistorySourceKsonnet {
-            /**
-             * Environment is a ksonnet application environment name
-             */
-            environment?: string;
-            /**
-             * Parameters are a list of ksonnet component parameter override values
-             */
-            parameters?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceKsonnetParameters[];
-        }
-
-        /**
-         * KsonnetParameter is a ksonnet component parameter
-         */
-        export interface ApplicationStatusHistorySourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Kustomize holds kustomize specific options
-         */
-        export interface ApplicationStatusHistorySourceKustomize {
-            /**
-             * CommonAnnotations is a list of additional annotations to add to rendered manifests
-             */
-            commonAnnotations?: {[key: string]: string};
-            /**
-             * CommonLabels is a list of additional labels to add to rendered manifests
-             */
-            commonLabels?: {[key: string]: string};
-            /**
-             * ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
-             */
-            forceCommonAnnotations?: boolean;
-            /**
-             * ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
-             */
-            forceCommonLabels?: boolean;
-            /**
-             * Images is a list of Kustomize image override specifications
-             */
-            images?: string[];
-            /**
-             * NamePrefix is a prefix appended to resources for Kustomize apps
-             */
-            namePrefix?: string;
-            /**
-             * NameSuffix is a suffix appended to resources for Kustomize apps
-             */
-            nameSuffix?: string;
-            /**
-             * Version controls which version of Kustomize to use for rendering manifests
-             */
-            version?: string;
-        }
-
-        /**
-         * ConfigManagementPlugin holds config management plugin specific options
-         */
-        export interface ApplicationStatusHistorySourcePlugin {
-            /**
-             * Env is a list of environment variable entries
-             */
-            env?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourcePluginEnv[];
-            name?: string;
-        }
-
-        /**
-         * EnvEntry represents an entry in the application's environment
-         */
-        export interface ApplicationStatusHistorySourcePluginEnv {
-            /**
-             * Name is the name of the variable, usually expressed in uppercase
-             */
-            name: string;
-            /**
-             * Value is the value of the variable
-             */
-            value: string;
-        }
-
-        /**
-         * OperationState contains information about any ongoing operations, such as a sync
-         */
-        export interface ApplicationStatusOperationState {
-            /**
-             * FinishedAt contains time of operation completion
-             */
-            finishedAt?: string;
-            /**
-             * Message holds any pertinent messages when attempting to perform operation (typically errors).
-             */
-            message?: string;
-            /**
-             * Operation is the original requested operation
-             */
-            operation: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperation;
-            /**
-             * Phase is the current phase of the operation
-             */
-            phase: string;
-            /**
-             * RetryCount contains time of operation retries
-             */
-            retryCount?: number;
-            /**
-             * StartedAt contains time of operation start
-             */
-            startedAt: string;
-            /**
-             * SyncResult is the result of a Sync operation
-             */
-            syncResult?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResult;
-        }
-
-        /**
-         * Operation is the original requested operation
-         */
-        export interface ApplicationStatusOperationStateOperation {
-            /**
-             * Info is a list of informational items for this operation
-             */
-            info?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationInfo[];
-            /**
-             * InitiatedBy contains information about who initiated the operations
-             */
-            initiatedBy?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationInitiatedBy;
-            /**
-             * Retry controls the strategy to apply if a sync fails
-             */
-            retry?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationRetry;
-            /**
-             * Sync contains parameters for the operation
-             */
-            sync?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSync;
-        }
-
-        export interface ApplicationStatusOperationStateOperationInfo {
-            name: string;
-            value: string;
-        }
-
-        /**
-         * InitiatedBy contains information about who initiated the operations
-         */
-        export interface ApplicationStatusOperationStateOperationInitiatedBy {
-            /**
-             * Automated is set to true if operation was initiated automatically by the application controller.
-             */
-            automated?: boolean;
-            /**
-             * Username contains the name of a user who started operation
-             */
-            username?: string;
-        }
-
-        /**
-         * Retry controls the strategy to apply if a sync fails
-         */
-        export interface ApplicationStatusOperationStateOperationRetry {
-            /**
-             * Backoff controls how to backoff on subsequent retries of failed syncs
-             */
-            backoff?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationRetryBackoff;
-            /**
-             * Limit is the maximum number of attempts for retrying a failed sync. If set to 0, no retries will be performed.
-             */
-            limit?: number;
-        }
-
-        /**
-         * Backoff controls how to backoff on subsequent retries of failed syncs
-         */
-        export interface ApplicationStatusOperationStateOperationRetryBackoff {
-            /**
-             * Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
-             */
-            duration?: string;
-            /**
-             * Factor is a factor to multiply the base duration after each failed retry
-             */
-            factor?: number;
-            /**
-             * MaxDuration is the maximum amount of time allowed for the backoff strategy
-             */
-            maxDuration?: string;
-        }
-
-        /**
-         * Sync contains parameters for the operation
-         */
-        export interface ApplicationStatusOperationStateOperationSync {
-            /**
-             * DryRun specifies to perform a `kubectl apply --dry-run` without actually performing the sync
-             */
-            dryRun?: boolean;
-            /**
-             * Manifests is an optional field that overrides sync source with a local directory for development
-             */
-            manifests?: string[];
-            /**
-             * Prune specifies to delete resources from the cluster that are no longer tracked in git
-             */
-            prune?: boolean;
-            /**
-             * Resources describes which resources shall be part of the sync
-             */
-            resources?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncResources[];
-            /**
-             * Revision is the revision (Git) or chart version (Helm) which to sync the application to If omitted, will use the revision specified in app spec.
-             */
-            revision?: string;
-            /**
-             * Source overrides the source definition set in the application. This is typically set in a Rollback operation and is nil during a Sync operation
-             */
-            source?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSource;
-            /**
-             * SyncOptions provide per-sync sync-options, e.g. Validate=false
-             */
-            syncOptions?: string[];
-            /**
-             * SyncStrategy describes how to perform the sync
-             */
-            syncStrategy?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSyncStrategy;
-        }
-
-        /**
-         * SyncOperationResource contains resources to sync.
-         */
-        export interface ApplicationStatusOperationStateOperationSyncResources {
-            group?: string;
-            kind: string;
-            name: string;
-            namespace?: string;
-        }
-
-        /**
-         * Source overrides the source definition set in the application. This is typically set in a Rollback operation and is nil during a Sync operation
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSource {
-            /**
-             * Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
-             */
-            chart?: string;
-            /**
-             * Directory holds path/directory specific options
-             */
-            directory?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceDirectory;
-            /**
-             * Helm holds helm specific options
-             */
-            helm?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceHelm;
-            /**
-             * Ksonnet holds ksonnet specific options
-             */
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceKsonnet;
-            /**
-             * Kustomize holds kustomize specific options
-             */
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceKustomize;
-            /**
-             * Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
-             */
-            path?: string;
-            /**
-             * ConfigManagementPlugin holds config management plugin specific options
-             */
-            plugin?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourcePlugin;
-            /**
-             * RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
-             */
-            repoURL: string;
-            /**
-             * TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
-             */
-            targetRevision?: string;
-        }
-
-        /**
-         * Directory holds path/directory specific options
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSourceDirectory {
-            /**
-             * Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
-             */
-            exclude?: string;
-            /**
-             * Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
-             */
-            include?: string;
-            /**
-             * Jsonnet holds options specific to Jsonnet
-             */
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceDirectoryJsonnet;
-            /**
-             * Recurse specifies whether to scan a directory recursively for manifests
-             */
-            recurse?: boolean;
-        }
-
-        /**
-         * Jsonnet holds options specific to Jsonnet
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSourceDirectoryJsonnet {
-            /**
-             * ExtVars is a list of Jsonnet External Variables
-             */
-            extVars?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceDirectoryJsonnetExtVars[];
-            /**
-             * Additional library search dirs
-             */
-            libs?: string[];
-            /**
-             * TLAS is a list of Jsonnet Top-level Arguments
-             */
-            tlas?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceDirectoryJsonnetTlas[];
-        }
-
-        /**
-         * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Helm holds helm specific options
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSourceHelm {
-            /**
-             * FileParameters are file parameters to the helm template
-             */
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceHelmFileParameters[];
-            /**
-             * IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
-             */
-            ignoreMissingValueFiles?: boolean;
-            /**
-             * Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
-             */
-            parameters?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceHelmParameters[];
-            /**
-             * PassCredentials pass credentials to all domains (Helm's --pass-credentials)
-             */
-            passCredentials?: boolean;
-            /**
-             * ReleaseName is the Helm release name to use. If omitted it will use the application name
-             */
-            releaseName?: string;
-            /**
-             * SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
-             */
-            skipCrds?: boolean;
-            /**
-             * ValuesFiles is a list of Helm value files to use when generating a template
-             */
-            valueFiles?: string[];
-            /**
-             * Values specifies Helm values to be passed to helm template, typically defined as a block
-             */
-            values?: string;
-            /**
-             * Version is the Helm version to use for templating (either "2" or "3")
-             */
-            version?: string;
-        }
-
-        /**
-         * HelmFileParameter is a file parameter that's passed to helm template during manifest generation
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSourceHelmFileParameters {
-            /**
-             * Name is the name of the Helm parameter
-             */
-            name?: string;
-            /**
-             * Path is the path to the file containing the values for the Helm parameter
-             */
-            path?: string;
-        }
-
-        /**
-         * HelmParameter is a parameter that's passed to helm template during manifest generation
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSourceHelmParameters {
-            /**
-             * ForceString determines whether to tell Helm to interpret booleans and numbers as strings
-             */
-            forceString?: boolean;
-            /**
-             * Name is the name of the Helm parameter
-             */
-            name?: string;
-            /**
-             * Value is the value for the Helm parameter
-             */
-            value?: string;
-        }
-
-        /**
-         * Ksonnet holds ksonnet specific options
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSourceKsonnet {
-            /**
-             * Environment is a ksonnet application environment name
-             */
-            environment?: string;
-            /**
-             * Parameters are a list of ksonnet component parameter override values
-             */
-            parameters?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceKsonnetParameters[];
-        }
-
-        /**
-         * KsonnetParameter is a ksonnet component parameter
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Kustomize holds kustomize specific options
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSourceKustomize {
-            /**
-             * CommonAnnotations is a list of additional annotations to add to rendered manifests
-             */
-            commonAnnotations?: {[key: string]: string};
-            /**
-             * CommonLabels is a list of additional labels to add to rendered manifests
-             */
-            commonLabels?: {[key: string]: string};
-            /**
-             * ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
-             */
-            forceCommonAnnotations?: boolean;
-            /**
-             * ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
-             */
-            forceCommonLabels?: boolean;
-            /**
-             * Images is a list of Kustomize image override specifications
-             */
-            images?: string[];
-            /**
-             * NamePrefix is a prefix appended to resources for Kustomize apps
-             */
-            namePrefix?: string;
-            /**
-             * NameSuffix is a suffix appended to resources for Kustomize apps
-             */
-            nameSuffix?: string;
-            /**
-             * Version controls which version of Kustomize to use for rendering manifests
-             */
-            version?: string;
-        }
-
-        /**
-         * ConfigManagementPlugin holds config management plugin specific options
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSourcePlugin {
-            /**
-             * Env is a list of environment variable entries
-             */
-            env?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourcePluginEnv[];
-            name?: string;
-        }
-
-        /**
-         * EnvEntry represents an entry in the application's environment
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSourcePluginEnv {
-            /**
-             * Name is the name of the variable, usually expressed in uppercase
-             */
-            name: string;
-            /**
-             * Value is the value of the variable
-             */
-            value: string;
-        }
-
-        /**
-         * SyncStrategy describes how to perform the sync
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSyncStrategy {
-            /**
-             * Apply will perform a `kubectl apply` to perform the sync.
-             */
-            apply?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSyncStrategyApply;
-            /**
-             * Hook will submit any referenced resources to perform the sync. This is the default strategy
-             */
-            hook?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSyncStrategyHook;
-        }
-
-        /**
-         * Apply will perform a `kubectl apply` to perform the sync.
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSyncStrategyApply {
-            /**
-             * Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.
-             */
-            force?: boolean;
-        }
-
-        /**
-         * Hook will submit any referenced resources to perform the sync. This is the default strategy
-         */
-        export interface ApplicationStatusOperationStateOperationSyncSyncStrategyHook {
-            /**
-             * Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.
-             */
-            force?: boolean;
-        }
-
-        /**
-         * SyncResult is the result of a Sync operation
-         */
-        export interface ApplicationStatusOperationStateSyncResult {
-            /**
-             * Resources contains a list of sync result items for each individual resource in a sync operation
-             */
-            resources?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultResources[];
-            /**
-             * Revision holds the revision this sync operation was performed to
-             */
-            revision: string;
-            /**
-             * Source records the application source information of the sync, used for comparing auto-sync
-             */
-            source?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSource;
-        }
-
-        /**
-         * ResourceResult holds the operation result details of a specific resource
-         */
-        export interface ApplicationStatusOperationStateSyncResultResources {
-            /**
-             * Group specifies the API group of the resource
-             */
-            group: string;
-            /**
-             * HookPhase contains the state of any operation associated with this resource OR hook This can also contain values for non-hook resources.
-             */
-            hookPhase?: string;
-            /**
-             * HookType specifies the type of the hook. Empty for non-hook resources
-             */
-            hookType?: string;
-            /**
-             * Kind specifies the API kind of the resource
-             */
-            kind: string;
-            /**
-             * Message contains an informational or error message for the last sync OR operation
-             */
-            message?: string;
-            /**
-             * Name specifies the name of the resource
-             */
-            name: string;
-            /**
-             * Namespace specifies the target namespace of the resource
-             */
-            namespace: string;
-            /**
-             * Status holds the final result of the sync. Will be empty if the resources is yet to be applied/pruned and is always zero-value for hooks
-             */
-            status?: string;
-            /**
-             * SyncPhase indicates the particular phase of the sync that this result was acquired in
-             */
-            syncPhase?: string;
-            /**
-             * Version specifies the API version of the resource
-             */
-            version: string;
-        }
-
-        /**
-         * Source records the application source information of the sync, used for comparing auto-sync
-         */
-        export interface ApplicationStatusOperationStateSyncResultSource {
-            /**
-             * Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
-             */
-            chart?: string;
-            /**
-             * Directory holds path/directory specific options
-             */
-            directory?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceDirectory;
-            /**
-             * Helm holds helm specific options
-             */
-            helm?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceHelm;
-            /**
-             * Ksonnet holds ksonnet specific options
-             */
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceKsonnet;
-            /**
-             * Kustomize holds kustomize specific options
-             */
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceKustomize;
-            /**
-             * Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
-             */
-            path?: string;
-            /**
-             * ConfigManagementPlugin holds config management plugin specific options
-             */
-            plugin?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourcePlugin;
-            /**
-             * RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
-             */
-            repoURL: string;
-            /**
-             * TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
-             */
-            targetRevision?: string;
-        }
-
-        /**
-         * Directory holds path/directory specific options
-         */
-        export interface ApplicationStatusOperationStateSyncResultSourceDirectory {
-            /**
-             * Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
-             */
-            exclude?: string;
-            /**
-             * Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
-             */
-            include?: string;
-            /**
-             * Jsonnet holds options specific to Jsonnet
-             */
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceDirectoryJsonnet;
-            /**
-             * Recurse specifies whether to scan a directory recursively for manifests
-             */
-            recurse?: boolean;
-        }
-
-        /**
-         * Jsonnet holds options specific to Jsonnet
-         */
-        export interface ApplicationStatusOperationStateSyncResultSourceDirectoryJsonnet {
-            /**
-             * ExtVars is a list of Jsonnet External Variables
-             */
-            extVars?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceDirectoryJsonnetExtVars[];
-            /**
-             * Additional library search dirs
-             */
-            libs?: string[];
-            /**
-             * TLAS is a list of Jsonnet Top-level Arguments
-             */
-            tlas?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceDirectoryJsonnetTlas[];
-        }
-
-        /**
-         * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-         */
-        export interface ApplicationStatusOperationStateSyncResultSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-         */
-        export interface ApplicationStatusOperationStateSyncResultSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Helm holds helm specific options
-         */
-        export interface ApplicationStatusOperationStateSyncResultSourceHelm {
-            /**
-             * FileParameters are file parameters to the helm template
-             */
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceHelmFileParameters[];
-            /**
-             * IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
-             */
-            ignoreMissingValueFiles?: boolean;
-            /**
-             * Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
-             */
-            parameters?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceHelmParameters[];
-            /**
-             * PassCredentials pass credentials to all domains (Helm's --pass-credentials)
-             */
-            passCredentials?: boolean;
-            /**
-             * ReleaseName is the Helm release name to use. If omitted it will use the application name
-             */
-            releaseName?: string;
-            /**
-             * SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
-             */
-            skipCrds?: boolean;
-            /**
-             * ValuesFiles is a list of Helm value files to use when generating a template
-             */
-            valueFiles?: string[];
-            /**
-             * Values specifies Helm values to be passed to helm template, typically defined as a block
-             */
-            values?: string;
-            /**
-             * Version is the Helm version to use for templating (either "2" or "3")
-             */
-            version?: string;
-        }
-
-        /**
-         * HelmFileParameter is a file parameter that's passed to helm template during manifest generation
-         */
-        export interface ApplicationStatusOperationStateSyncResultSourceHelmFileParameters {
-            /**
-             * Name is the name of the Helm parameter
-             */
-            name?: string;
-            /**
-             * Path is the path to the file containing the values for the Helm parameter
-             */
-            path?: string;
-        }
-
-        /**
-         * HelmParameter is a parameter that's passed to helm template during manifest generation
-         */
-        export interface ApplicationStatusOperationStateSyncResultSourceHelmParameters {
-            /**
-             * ForceString determines whether to tell Helm to interpret booleans and numbers as strings
-             */
-            forceString?: boolean;
-            /**
-             * Name is the name of the Helm parameter
-             */
-            name?: string;
-            /**
-             * Value is the value for the Helm parameter
-             */
-            value?: string;
-        }
-
-        /**
-         * Ksonnet holds ksonnet specific options
-         */
-        export interface ApplicationStatusOperationStateSyncResultSourceKsonnet {
-            /**
-             * Environment is a ksonnet application environment name
-             */
-            environment?: string;
-            /**
-             * Parameters are a list of ksonnet component parameter override values
-             */
-            parameters?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceKsonnetParameters[];
-        }
-
-        /**
-         * KsonnetParameter is a ksonnet component parameter
-         */
-        export interface ApplicationStatusOperationStateSyncResultSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Kustomize holds kustomize specific options
-         */
-        export interface ApplicationStatusOperationStateSyncResultSourceKustomize {
-            /**
-             * CommonAnnotations is a list of additional annotations to add to rendered manifests
-             */
-            commonAnnotations?: {[key: string]: string};
-            /**
-             * CommonLabels is a list of additional labels to add to rendered manifests
-             */
-            commonLabels?: {[key: string]: string};
-            /**
-             * ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
-             */
-            forceCommonAnnotations?: boolean;
-            /**
-             * ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
-             */
-            forceCommonLabels?: boolean;
-            /**
-             * Images is a list of Kustomize image override specifications
-             */
-            images?: string[];
-            /**
-             * NamePrefix is a prefix appended to resources for Kustomize apps
-             */
-            namePrefix?: string;
-            /**
-             * NameSuffix is a suffix appended to resources for Kustomize apps
-             */
-            nameSuffix?: string;
-            /**
-             * Version controls which version of Kustomize to use for rendering manifests
-             */
-            version?: string;
-        }
-
-        /**
-         * ConfigManagementPlugin holds config management plugin specific options
-         */
-        export interface ApplicationStatusOperationStateSyncResultSourcePlugin {
-            /**
-             * Env is a list of environment variable entries
-             */
-            env?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourcePluginEnv[];
-            name?: string;
-        }
-
-        /**
-         * EnvEntry represents an entry in the application's environment
-         */
-        export interface ApplicationStatusOperationStateSyncResultSourcePluginEnv {
-            /**
-             * Name is the name of the variable, usually expressed in uppercase
-             */
-            name: string;
-            /**
-             * Value is the value of the variable
-             */
-            value: string;
-        }
-
-        /**
-         * ResourceStatus holds the current sync and health status of a resource TODO: describe members of this type
-         */
-        export interface ApplicationStatusResources {
-            group?: string;
-            /**
-             * HealthStatus contains information about the currently observed health state of an application or resource
-             */
-            health?: outputs.argoproj.v1alpha1.ApplicationStatusResourcesHealth;
-            hook?: boolean;
-            kind?: string;
-            name?: string;
-            namespace?: string;
-            requiresPruning?: boolean;
-            /**
-             * SyncStatusCode is a type which represents possible comparison results
-             */
-            status?: string;
-            version?: string;
-        }
-
-        /**
-         * HealthStatus contains information about the currently observed health state of an application or resource
-         */
-        export interface ApplicationStatusResourcesHealth {
-            /**
-             * Message is a human-readable informational message describing the health status
-             */
-            message?: string;
-            /**
-             * Status holds the status code of the application or resource
-             */
-            status?: string;
-        }
-
-        /**
-         * Summary contains a list of URLs and container images used by this application
-         */
-        export interface ApplicationStatusSummary {
-            /**
-             * ExternalURLs holds all external URLs of application child resources.
-             */
-            externalURLs?: string[];
-            /**
-             * Images holds all images of application child resources.
-             */
-            images?: string[];
-        }
-
-        /**
-         * Sync contains information about the application's current sync status
-         */
-        export interface ApplicationStatusSync {
-            /**
-             * ComparedTo contains information about what has been compared
-             */
-            comparedTo?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedTo;
-            /**
-             * Revision contains information about the revision the comparison has been performed to
-             */
-            revision?: string;
-            /**
-             * Status is the sync state of the comparison
-             */
-            status: string;
-        }
-
-        /**
-         * ComparedTo contains information about what has been compared
-         */
-        export interface ApplicationStatusSyncComparedTo {
-            /**
-             * Destination is a reference to the application's destination used for comparison
-             */
-            destination: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToDestination;
-            /**
-             * Source is a reference to the application's source used for comparison
-             */
-            source: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSource;
-        }
-
-        /**
-         * Destination is a reference to the application's destination used for comparison
-         */
-        export interface ApplicationStatusSyncComparedToDestination {
-            /**
-             * Name is an alternate way of specifying the target cluster by its symbolic name
-             */
-            name?: string;
-            /**
-             * Namespace specifies the target namespace for the application's resources. The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
-             */
-            namespace?: string;
-            /**
-             * Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
-             */
-            server?: string;
-        }
-
-        /**
-         * Source is a reference to the application's source used for comparison
-         */
-        export interface ApplicationStatusSyncComparedToSource {
-            /**
-             * Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
-             */
-            chart?: string;
-            /**
-             * Directory holds path/directory specific options
-             */
-            directory?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceDirectory;
-            /**
-             * Helm holds helm specific options
-             */
-            helm?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceHelm;
-            /**
-             * Ksonnet holds ksonnet specific options
-             */
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceKsonnet;
-            /**
-             * Kustomize holds kustomize specific options
-             */
-            kustomize?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceKustomize;
-            /**
-             * Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
-             */
-            path?: string;
-            /**
-             * ConfigManagementPlugin holds config management plugin specific options
-             */
-            plugin?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourcePlugin;
-            /**
-             * RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
-             */
-            repoURL: string;
-            /**
-             * TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
-             */
-            targetRevision?: string;
-        }
-
-        /**
-         * Directory holds path/directory specific options
-         */
-        export interface ApplicationStatusSyncComparedToSourceDirectory {
-            /**
-             * Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
-             */
-            exclude?: string;
-            /**
-             * Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
-             */
-            include?: string;
-            /**
-             * Jsonnet holds options specific to Jsonnet
-             */
-            jsonnet?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceDirectoryJsonnet;
-            /**
-             * Recurse specifies whether to scan a directory recursively for manifests
-             */
-            recurse?: boolean;
-        }
-
-        /**
-         * Jsonnet holds options specific to Jsonnet
-         */
-        export interface ApplicationStatusSyncComparedToSourceDirectoryJsonnet {
-            /**
-             * ExtVars is a list of Jsonnet External Variables
-             */
-            extVars?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceDirectoryJsonnetExtVars[];
-            /**
-             * Additional library search dirs
-             */
-            libs?: string[];
-            /**
-             * TLAS is a list of Jsonnet Top-level Arguments
-             */
-            tlas?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceDirectoryJsonnetTlas[];
-        }
-
-        /**
-         * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-         */
-        export interface ApplicationStatusSyncComparedToSourceDirectoryJsonnetExtVars {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-         */
-        export interface ApplicationStatusSyncComparedToSourceDirectoryJsonnetTlas {
-            code?: boolean;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Helm holds helm specific options
-         */
-        export interface ApplicationStatusSyncComparedToSourceHelm {
-            /**
-             * FileParameters are file parameters to the helm template
-             */
-            fileParameters?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceHelmFileParameters[];
-            /**
-             * IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
-             */
-            ignoreMissingValueFiles?: boolean;
-            /**
-             * Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
-             */
-            parameters?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceHelmParameters[];
-            /**
-             * PassCredentials pass credentials to all domains (Helm's --pass-credentials)
-             */
-            passCredentials?: boolean;
-            /**
-             * ReleaseName is the Helm release name to use. If omitted it will use the application name
-             */
-            releaseName?: string;
-            /**
-             * SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
-             */
-            skipCrds?: boolean;
-            /**
-             * ValuesFiles is a list of Helm value files to use when generating a template
-             */
-            valueFiles?: string[];
-            /**
-             * Values specifies Helm values to be passed to helm template, typically defined as a block
-             */
-            values?: string;
-            /**
-             * Version is the Helm version to use for templating (either "2" or "3")
-             */
-            version?: string;
-        }
-
-        /**
-         * HelmFileParameter is a file parameter that's passed to helm template during manifest generation
-         */
-        export interface ApplicationStatusSyncComparedToSourceHelmFileParameters {
-            /**
-             * Name is the name of the Helm parameter
-             */
-            name?: string;
-            /**
-             * Path is the path to the file containing the values for the Helm parameter
-             */
-            path?: string;
-        }
-
-        /**
-         * HelmParameter is a parameter that's passed to helm template during manifest generation
-         */
-        export interface ApplicationStatusSyncComparedToSourceHelmParameters {
-            /**
-             * ForceString determines whether to tell Helm to interpret booleans and numbers as strings
-             */
-            forceString?: boolean;
-            /**
-             * Name is the name of the Helm parameter
-             */
-            name?: string;
-            /**
-             * Value is the value for the Helm parameter
-             */
-            value?: string;
-        }
-
-        /**
-         * Ksonnet holds ksonnet specific options
-         */
-        export interface ApplicationStatusSyncComparedToSourceKsonnet {
-            /**
-             * Environment is a ksonnet application environment name
-             */
-            environment?: string;
-            /**
-             * Parameters are a list of ksonnet component parameter override values
-             */
-            parameters?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceKsonnetParameters[];
-        }
-
-        /**
-         * KsonnetParameter is a ksonnet component parameter
-         */
-        export interface ApplicationStatusSyncComparedToSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
-        /**
-         * Kustomize holds kustomize specific options
-         */
-        export interface ApplicationStatusSyncComparedToSourceKustomize {
-            /**
-             * CommonAnnotations is a list of additional annotations to add to rendered manifests
-             */
-            commonAnnotations?: {[key: string]: string};
-            /**
-             * CommonLabels is a list of additional labels to add to rendered manifests
-             */
-            commonLabels?: {[key: string]: string};
-            /**
-             * ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
-             */
-            forceCommonAnnotations?: boolean;
-            /**
-             * ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
-             */
-            forceCommonLabels?: boolean;
-            /**
-             * Images is a list of Kustomize image override specifications
-             */
-            images?: string[];
-            /**
-             * NamePrefix is a prefix appended to resources for Kustomize apps
-             */
-            namePrefix?: string;
-            /**
-             * NameSuffix is a suffix appended to resources for Kustomize apps
-             */
-            nameSuffix?: string;
-            /**
-             * Version controls which version of Kustomize to use for rendering manifests
-             */
-            version?: string;
-        }
-
-        /**
-         * ConfigManagementPlugin holds config management plugin specific options
-         */
-        export interface ApplicationStatusSyncComparedToSourcePlugin {
-            /**
-             * Env is a list of environment variable entries
-             */
-            env?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourcePluginEnv[];
-            name?: string;
-        }
-
-        /**
-         * EnvEntry represents an entry in the application's environment
-         */
-        export interface ApplicationStatusSyncComparedToSourcePluginEnv {
-            /**
-             * Name is the name of the variable, usually expressed in uppercase
-             */
-            name: string;
-            /**
-             * Value is the value of the variable
-             */
-            value: string;
-        }
+  export namespace v1alpha1 {
+    /**
+     * AppProjectSpec is the specification of an AppProject
+     */
+    export interface AppProjectSpec {
+      /**
+       * ClusterResourceBlacklist contains list of blacklisted cluster level resources
+       */
+      clusterResourceBlacklist?: outputs.argoproj.v1alpha1.AppProjectSpecClusterResourceBlacklist[];
+      /**
+       * ClusterResourceWhitelist contains list of whitelisted cluster level resources
+       */
+      clusterResourceWhitelist?: outputs.argoproj.v1alpha1.AppProjectSpecClusterResourceWhitelist[];
+      /**
+       * Description contains optional project description
+       */
+      description?: string;
+      /**
+       * Destinations contains list of destinations available for deployment
+       */
+      destinations?: outputs.argoproj.v1alpha1.AppProjectSpecDestinations[];
+      /**
+       * NamespaceResourceBlacklist contains list of blacklisted namespace level resources
+       */
+      namespaceResourceBlacklist?: outputs.argoproj.v1alpha1.AppProjectSpecNamespaceResourceBlacklist[];
+      /**
+       * NamespaceResourceWhitelist contains list of whitelisted namespace level resources
+       */
+      namespaceResourceWhitelist?: outputs.argoproj.v1alpha1.AppProjectSpecNamespaceResourceWhitelist[];
+      /**
+       * OrphanedResources specifies if controller should monitor orphaned resources of apps in this project
+       */
+      orphanedResources?: outputs.argoproj.v1alpha1.AppProjectSpecOrphanedResources;
+      /**
+       * Roles are user defined RBAC roles associated with this project
+       */
+      roles?: outputs.argoproj.v1alpha1.AppProjectSpecRoles[];
+      /**
+       * SignatureKeys contains a list of PGP key IDs that commits in Git must be signed with in order to be allowed for sync
+       */
+      signatureKeys?: outputs.argoproj.v1alpha1.AppProjectSpecSignatureKeys[];
+      /**
+       * SourceRepos contains list of repository URLs which can be used for deployment
+       */
+      sourceRepos?: string[];
+      /**
+       * SyncWindows controls when syncs can be run for apps in this project
+       */
+      syncWindows?: outputs.argoproj.v1alpha1.AppProjectSpecSyncWindows[];
     }
+
+    /**
+     * GroupKind specifies a Group and a Kind, but does not force a version.  This is useful for identifying concepts during lookup stages without having partially valid types
+     */
+    export interface AppProjectSpecClusterResourceBlacklist {
+      group: string;
+      kind: string;
+    }
+
+    /**
+     * GroupKind specifies a Group and a Kind, but does not force a version.  This is useful for identifying concepts during lookup stages without having partially valid types
+     */
+    export interface AppProjectSpecClusterResourceWhitelist {
+      group: string;
+      kind: string;
+    }
+
+    /**
+     * ApplicationDestination holds information about the application's destination
+     */
+    export interface AppProjectSpecDestinations {
+      /**
+       * Name is an alternate way of specifying the target cluster by its symbolic name
+       */
+      name?: string;
+      /**
+       * Namespace specifies the target namespace for the application's resources. The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
+       */
+      namespace?: string;
+      /**
+       * Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
+       */
+      server?: string;
+    }
+
+    /**
+     * GroupKind specifies a Group and a Kind, but does not force a version.  This is useful for identifying concepts during lookup stages without having partially valid types
+     */
+    export interface AppProjectSpecNamespaceResourceBlacklist {
+      group: string;
+      kind: string;
+    }
+
+    /**
+     * GroupKind specifies a Group and a Kind, but does not force a version.  This is useful for identifying concepts during lookup stages without having partially valid types
+     */
+    export interface AppProjectSpecNamespaceResourceWhitelist {
+      group: string;
+      kind: string;
+    }
+
+    /**
+     * OrphanedResources specifies if controller should monitor orphaned resources of apps in this project
+     */
+    export interface AppProjectSpecOrphanedResources {
+      /**
+       * Ignore contains a list of resources that are to be excluded from orphaned resources monitoring
+       */
+      ignore?: outputs.argoproj.v1alpha1.AppProjectSpecOrphanedResourcesIgnore[];
+      /**
+       * Warn indicates if warning condition should be created for apps which have orphaned resources
+       */
+      warn?: boolean;
+    }
+
+    /**
+     * OrphanedResourceKey is a reference to a resource to be ignored from
+     */
+    export interface AppProjectSpecOrphanedResourcesIgnore {
+      group?: string;
+      kind?: string;
+      name?: string;
+    }
+
+    /**
+     * ProjectRole represents a role that has access to a project
+     */
+    export interface AppProjectSpecRoles {
+      /**
+       * Description is a description of the role
+       */
+      description?: string;
+      /**
+       * Groups are a list of OIDC group claims bound to this role
+       */
+      groups?: string[];
+      /**
+       * JWTTokens are a list of generated JWT tokens bound to this role
+       */
+      jwtTokens?: outputs.argoproj.v1alpha1.AppProjectSpecRolesJwtTokens[];
+      /**
+       * Name is a name for this role
+       */
+      name: string;
+      /**
+       * Policies Stores a list of casbin formatted strings that define access policies for the role in the project
+       */
+      policies?: string[];
+    }
+
+    /**
+     * JWTToken holds the issuedAt and expiresAt values of a token
+     */
+    export interface AppProjectSpecRolesJwtTokens {
+      exp?: number;
+      iat: number;
+      id?: string;
+    }
+
+    /**
+     * SignatureKey is the specification of a key required to verify commit signatures with
+     */
+    export interface AppProjectSpecSignatureKeys {
+      /**
+       * The ID of the key in hexadecimal notation
+       */
+      keyID: string;
+    }
+
+    /**
+     * SyncWindow contains the kind, time, duration and attributes that are used to assign the syncWindows to apps
+     */
+    export interface AppProjectSpecSyncWindows {
+      /**
+       * Applications contains a list of applications that the window will apply to
+       */
+      applications?: string[];
+      /**
+       * Clusters contains a list of clusters that the window will apply to
+       */
+      clusters?: string[];
+      /**
+       * Duration is the amount of time the sync window will be open
+       */
+      duration?: string;
+      /**
+       * Kind defines if the window allows or blocks syncs
+       */
+      kind?: string;
+      /**
+       * ManualSync enables manual syncs when they would otherwise be blocked
+       */
+      manualSync?: boolean;
+      /**
+       * Namespaces contains a list of namespaces that the window will apply to
+       */
+      namespaces?: string[];
+      /**
+       * Schedule is the time the window will begin, specified in cron format
+       */
+      schedule?: string;
+      /**
+       * TimeZone of the sync that will be applied to the schedule
+       */
+      timeZone?: string;
+    }
+
+    /**
+     * AppProjectStatus contains status information for AppProject CRs
+     */
+    export interface AppProjectStatus {
+      /**
+       * JWTTokensByRole contains a list of JWT tokens issued for a given role
+       */
+      jwtTokensByRole?: {
+        [
+          key: string
+        ]: outputs.argoproj.v1alpha1.AppProjectStatusJwtTokensByRole;
+      };
+    }
+
+    /**
+     * JWTTokens represents a list of JWT tokens
+     */
+    export interface AppProjectStatusJwtTokensByRole {
+      items?: outputs.argoproj.v1alpha1.AppProjectStatusJwtTokensByRoleItems[];
+    }
+
+    /**
+     * JWTToken holds the issuedAt and expiresAt values of a token
+     */
+    export interface AppProjectStatusJwtTokensByRoleItems {
+      exp?: number;
+      iat: number;
+      id?: string;
+    }
+
+    /**
+     * Operation contains information about a requested or running operation
+     */
+    export interface ApplicationOperation {
+      /**
+       * Info is a list of informational items for this operation
+       */
+      info?: outputs.argoproj.v1alpha1.ApplicationOperationInfo[];
+      /**
+       * InitiatedBy contains information about who initiated the operations
+       */
+      initiatedBy?: outputs.argoproj.v1alpha1.ApplicationOperationInitiatedBy;
+      /**
+       * Retry controls the strategy to apply if a sync fails
+       */
+      retry?: outputs.argoproj.v1alpha1.ApplicationOperationRetry;
+      /**
+       * Sync contains parameters for the operation
+       */
+      sync?: outputs.argoproj.v1alpha1.ApplicationOperationSync;
+    }
+
+    export interface ApplicationOperationInfo {
+      name: string;
+      value: string;
+    }
+
+    /**
+     * InitiatedBy contains information about who initiated the operations
+     */
+    export interface ApplicationOperationInitiatedBy {
+      /**
+       * Automated is set to true if operation was initiated automatically by the application controller.
+       */
+      automated?: boolean;
+      /**
+       * Username contains the name of a user who started operation
+       */
+      username?: string;
+    }
+
+    /**
+     * Retry controls the strategy to apply if a sync fails
+     */
+    export interface ApplicationOperationRetry {
+      /**
+       * Backoff controls how to backoff on subsequent retries of failed syncs
+       */
+      backoff?: outputs.argoproj.v1alpha1.ApplicationOperationRetryBackoff;
+      /**
+       * Limit is the maximum number of attempts for retrying a failed sync. If set to 0, no retries will be performed.
+       */
+      limit?: number;
+    }
+
+    /**
+     * Backoff controls how to backoff on subsequent retries of failed syncs
+     */
+    export interface ApplicationOperationRetryBackoff {
+      /**
+       * Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+       */
+      duration?: string;
+      /**
+       * Factor is a factor to multiply the base duration after each failed retry
+       */
+      factor?: number;
+      /**
+       * MaxDuration is the maximum amount of time allowed for the backoff strategy
+       */
+      maxDuration?: string;
+    }
+
+    /**
+     * Sync contains parameters for the operation
+     */
+    export interface ApplicationOperationSync {
+      /**
+       * DryRun specifies to perform a `kubectl apply --dry-run` without actually performing the sync
+       */
+      dryRun?: boolean;
+      /**
+       * Manifests is an optional field that overrides sync source with a local directory for development
+       */
+      manifests?: string[];
+      /**
+       * Prune specifies to delete resources from the cluster that are no longer tracked in git
+       */
+      prune?: boolean;
+      /**
+       * Resources describes which resources shall be part of the sync
+       */
+      resources?: outputs.argoproj.v1alpha1.ApplicationOperationSyncResources[];
+      /**
+       * Revision is the revision (Git) or chart version (Helm) which to sync the application to If omitted, will use the revision specified in app spec.
+       */
+      revision?: string;
+      /**
+       * Source overrides the source definition set in the application. This is typically set in a Rollback operation and is nil during a Sync operation
+       */
+      source?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSource;
+      /**
+       * SyncOptions provide per-sync sync-options, e.g. Validate=false
+       */
+      syncOptions?: string[];
+      /**
+       * SyncStrategy describes how to perform the sync
+       */
+      syncStrategy?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSyncStrategy;
+    }
+
+    /**
+     * SyncOperationResource contains resources to sync.
+     */
+    export interface ApplicationOperationSyncResources {
+      group?: string;
+      kind: string;
+      name: string;
+      namespace?: string;
+    }
+
+    /**
+     * Source overrides the source definition set in the application. This is typically set in a Rollback operation and is nil during a Sync operation
+     */
+    export interface ApplicationOperationSyncSource {
+      /**
+       * Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
+       */
+      chart?: string;
+      /**
+       * Directory holds path/directory specific options
+       */
+      directory?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceDirectory;
+      /**
+       * Helm holds helm specific options
+       */
+      helm?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceHelm;
+      /**
+       * Ksonnet holds ksonnet specific options
+       */
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceKsonnet;
+      /**
+       * Kustomize holds kustomize specific options
+       */
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceKustomize;
+      /**
+       * Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
+       */
+      path?: string;
+      /**
+       * ConfigManagementPlugin holds config management plugin specific options
+       */
+      plugin?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourcePlugin;
+      /**
+       * RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
+       */
+      repoURL: string;
+      /**
+       * TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
+       */
+      targetRevision?: string;
+    }
+
+    /**
+     * Directory holds path/directory specific options
+     */
+    export interface ApplicationOperationSyncSourceDirectory {
+      /**
+       * Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
+       */
+      exclude?: string;
+      /**
+       * Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
+       */
+      include?: string;
+      /**
+       * Jsonnet holds options specific to Jsonnet
+       */
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceDirectoryJsonnet;
+      /**
+       * Recurse specifies whether to scan a directory recursively for manifests
+       */
+      recurse?: boolean;
+    }
+
+    /**
+     * Jsonnet holds options specific to Jsonnet
+     */
+    export interface ApplicationOperationSyncSourceDirectoryJsonnet {
+      /**
+       * ExtVars is a list of Jsonnet External Variables
+       */
+      extVars?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceDirectoryJsonnetExtVars[];
+      /**
+       * Additional library search dirs
+       */
+      libs?: string[];
+      /**
+       * TLAS is a list of Jsonnet Top-level Arguments
+       */
+      tlas?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceDirectoryJsonnetTlas[];
+    }
+
+    /**
+     * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
+     */
+    export interface ApplicationOperationSyncSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
+     */
+    export interface ApplicationOperationSyncSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Helm holds helm specific options
+     */
+    export interface ApplicationOperationSyncSourceHelm {
+      /**
+       * FileParameters are file parameters to the helm template
+       */
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceHelmFileParameters[];
+      /**
+       * IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
+       */
+      ignoreMissingValueFiles?: boolean;
+      /**
+       * Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
+       */
+      parameters?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceHelmParameters[];
+      /**
+       * PassCredentials pass credentials to all domains (Helm's --pass-credentials)
+       */
+      passCredentials?: boolean;
+      /**
+       * ReleaseName is the Helm release name to use. If omitted it will use the application name
+       */
+      releaseName?: string;
+      /**
+       * SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
+       */
+      skipCrds?: boolean;
+      /**
+       * ValuesFiles is a list of Helm value files to use when generating a template
+       */
+      valueFiles?: string[];
+      /**
+       * Values specifies Helm values to be passed to helm template, typically defined as a block
+       */
+      values?: string;
+      /**
+       * Version is the Helm version to use for templating (either "2" or "3")
+       */
+      version?: string;
+    }
+
+    /**
+     * HelmFileParameter is a file parameter that's passed to helm template during manifest generation
+     */
+    export interface ApplicationOperationSyncSourceHelmFileParameters {
+      /**
+       * Name is the name of the Helm parameter
+       */
+      name?: string;
+      /**
+       * Path is the path to the file containing the values for the Helm parameter
+       */
+      path?: string;
+    }
+
+    /**
+     * HelmParameter is a parameter that's passed to helm template during manifest generation
+     */
+    export interface ApplicationOperationSyncSourceHelmParameters {
+      /**
+       * ForceString determines whether to tell Helm to interpret booleans and numbers as strings
+       */
+      forceString?: boolean;
+      /**
+       * Name is the name of the Helm parameter
+       */
+      name?: string;
+      /**
+       * Value is the value for the Helm parameter
+       */
+      value?: string;
+    }
+
+    /**
+     * Ksonnet holds ksonnet specific options
+     */
+    export interface ApplicationOperationSyncSourceKsonnet {
+      /**
+       * Environment is a ksonnet application environment name
+       */
+      environment?: string;
+      /**
+       * Parameters are a list of ksonnet component parameter override values
+       */
+      parameters?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourceKsonnetParameters[];
+    }
+
+    /**
+     * KsonnetParameter is a ksonnet component parameter
+     */
+    export interface ApplicationOperationSyncSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Kustomize holds kustomize specific options
+     */
+    export interface ApplicationOperationSyncSourceKustomize {
+      /**
+       * CommonAnnotations is a list of additional annotations to add to rendered manifests
+       */
+      commonAnnotations?: { [key: string]: string };
+      /**
+       * CommonLabels is a list of additional labels to add to rendered manifests
+       */
+      commonLabels?: { [key: string]: string };
+      /**
+       * ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
+       */
+      forceCommonAnnotations?: boolean;
+      /**
+       * ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
+       */
+      forceCommonLabels?: boolean;
+      /**
+       * Images is a list of Kustomize image override specifications
+       */
+      images?: string[];
+      /**
+       * NamePrefix is a prefix appended to resources for Kustomize apps
+       */
+      namePrefix?: string;
+      /**
+       * NameSuffix is a suffix appended to resources for Kustomize apps
+       */
+      nameSuffix?: string;
+      /**
+       * Version controls which version of Kustomize to use for rendering manifests
+       */
+      version?: string;
+    }
+
+    /**
+     * ConfigManagementPlugin holds config management plugin specific options
+     */
+    export interface ApplicationOperationSyncSourcePlugin {
+      /**
+       * Env is a list of environment variable entries
+       */
+      env?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSourcePluginEnv[];
+      name?: string;
+    }
+
+    /**
+     * EnvEntry represents an entry in the application's environment
+     */
+    export interface ApplicationOperationSyncSourcePluginEnv {
+      /**
+       * Name is the name of the variable, usually expressed in uppercase
+       */
+      name: string;
+      /**
+       * Value is the value of the variable
+       */
+      value: string;
+    }
+
+    /**
+     * SyncStrategy describes how to perform the sync
+     */
+    export interface ApplicationOperationSyncSyncStrategy {
+      /**
+       * Apply will perform a `kubectl apply` to perform the sync.
+       */
+      apply?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSyncStrategyApply;
+      /**
+       * Hook will submit any referenced resources to perform the sync. This is the default strategy
+       */
+      hook?: outputs.argoproj.v1alpha1.ApplicationOperationSyncSyncStrategyHook;
+    }
+
+    /**
+     * Apply will perform a `kubectl apply` to perform the sync.
+     */
+    export interface ApplicationOperationSyncSyncStrategyApply {
+      /**
+       * Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.
+       */
+      force?: boolean;
+    }
+
+    /**
+     * Hook will submit any referenced resources to perform the sync. This is the default strategy
+     */
+    export interface ApplicationOperationSyncSyncStrategyHook {
+      /**
+       * Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.
+       */
+      force?: boolean;
+    }
+
+    export interface ApplicationSetSpec {
+      generators: outputs.argoproj.v1alpha1.ApplicationSetSpecGenerators[];
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecSyncPolicy;
+      template: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplate;
+    }
+
+    export interface ApplicationSetSpecGenerators {
+      clusterDecisionResource?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResource;
+      clusters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusters;
+      git?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGit;
+      list?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsList;
+      matrix?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrix;
+      merge?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMerge;
+      pullRequest?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequest;
+      scmProvider?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProvider;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResource {
+      configMapRef: string;
+      labelSelector?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceLabelSelector;
+      name?: string;
+      requeueAfterSeconds?: number;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplate;
+      values?: { [key: string]: string };
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceLabelSelector {
+      matchExpressions?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceLabelSelectorMatchExpressions[];
+      matchLabels?: { [key: string]: string };
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceLabelSelectorMatchExpressions {
+      key: string;
+      operator: string;
+      values?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClusters {
+      selector?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersSelector;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplate;
+      values?: { [key: string]: string };
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersSelector {
+      matchExpressions?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersSelectorMatchExpressions[];
+      matchLabels?: { [key: string]: string };
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersSelectorMatchExpressions {
+      key: string;
+      operator: string;
+      values?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGit {
+      directories?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitDirectories[];
+      files?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitFiles[];
+      repoURL: string;
+      requeueAfterSeconds?: number;
+      revision: string;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitDirectories {
+      exclude?: boolean;
+      path: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitFiles {
+      path: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsGitTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsList {
+      elements: { [key: string]: any }[];
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsListTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrix {
+      generators: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGenerators[];
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGenerators {
+      clusterDecisionResource?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResource;
+      clusters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusters;
+      git?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGit;
+      list?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsList;
+      matrix?: { [key: string]: any };
+      merge?: { [key: string]: any };
+      pullRequest?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequest;
+      scmProvider?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProvider;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResource {
+      configMapRef: string;
+      labelSelector?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceLabelSelector;
+      name?: string;
+      requeueAfterSeconds?: number;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplate;
+      values?: { [key: string]: string };
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceLabelSelector {
+      matchExpressions?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceLabelSelectorMatchExpressions[];
+      matchLabels?: { [key: string]: string };
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceLabelSelectorMatchExpressions {
+      key: string;
+      operator: string;
+      values?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusters {
+      selector?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersSelector;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplate;
+      values?: { [key: string]: string };
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersSelector {
+      matchExpressions?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersSelectorMatchExpressions[];
+      matchLabels?: { [key: string]: string };
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersSelectorMatchExpressions {
+      key: string;
+      operator: string;
+      values?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGit {
+      directories?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitDirectories[];
+      files?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitFiles[];
+      repoURL: string;
+      requeueAfterSeconds?: number;
+      revision: string;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitDirectories {
+      exclude?: boolean;
+      path: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitFiles {
+      path: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsList {
+      elements: { [key: string]: any }[];
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequest {
+      github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestGithub;
+      requeueAfterSeconds?: number;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestGithub {
+      api?: string;
+      labels?: string[];
+      owner: string;
+      repo: string;
+      tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestGithubTokenRef;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestGithubTokenRef {
+      key: string;
+      secretName: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullRequestTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProvider {
+      cloneProtocol?: string;
+      filters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderFilters[];
+      github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGithub;
+      gitlab?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGitlab;
+      requeueAfterSeconds?: number;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderFilters {
+      branchMatch?: string;
+      labelMatch?: string;
+      pathsExist?: string[];
+      repositoryMatch?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGithub {
+      allBranches?: boolean;
+      api?: string;
+      organization: string;
+      tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGithubTokenRef;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGithubTokenRef {
+      key: string;
+      secretName: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGitlab {
+      allBranches?: boolean;
+      api?: string;
+      group: string;
+      includeSubgroups?: boolean;
+      tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGitlabTokenRef;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderGitlabTokenRef {
+      key: string;
+      secretName: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmProviderTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMerge {
+      generators: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGenerators[];
+      mergeKeys: string[];
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGenerators {
+      clusterDecisionResource?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResource;
+      clusters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusters;
+      git?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGit;
+      list?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsList;
+      matrix?: { [key: string]: any };
+      merge?: { [key: string]: any };
+      pullRequest?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequest;
+      scmProvider?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProvider;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResource {
+      configMapRef: string;
+      labelSelector?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceLabelSelector;
+      name?: string;
+      requeueAfterSeconds?: number;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplate;
+      values?: { [key: string]: string };
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceLabelSelector {
+      matchExpressions?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceLabelSelectorMatchExpressions[];
+      matchLabels?: { [key: string]: string };
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceLabelSelectorMatchExpressions {
+      key: string;
+      operator: string;
+      values?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterDecisionResourceTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusters {
+      selector?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersSelector;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplate;
+      values?: { [key: string]: string };
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersSelector {
+      matchExpressions?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersSelectorMatchExpressions[];
+      matchLabels?: { [key: string]: string };
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersSelectorMatchExpressions {
+      key: string;
+      operator: string;
+      values?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGit {
+      directories?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitDirectories[];
+      files?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitFiles[];
+      repoURL: string;
+      requeueAfterSeconds?: number;
+      revision: string;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitDirectories {
+      exclude?: boolean;
+      path: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitFiles {
+      path: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsList {
+      elements: { [key: string]: any }[];
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequest {
+      github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestGithub;
+      requeueAfterSeconds?: number;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestGithub {
+      api?: string;
+      labels?: string[];
+      owner: string;
+      repo: string;
+      tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestGithubTokenRef;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestGithubTokenRef {
+      key: string;
+      secretName: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullRequestTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProvider {
+      cloneProtocol?: string;
+      filters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderFilters[];
+      github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGithub;
+      gitlab?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGitlab;
+      requeueAfterSeconds?: number;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderFilters {
+      branchMatch?: string;
+      labelMatch?: string;
+      pathsExist?: string[];
+      repositoryMatch?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGithub {
+      allBranches?: boolean;
+      api?: string;
+      organization: string;
+      tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGithubTokenRef;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGithubTokenRef {
+      key: string;
+      secretName: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGitlab {
+      allBranches?: boolean;
+      api?: string;
+      group: string;
+      includeSubgroups?: boolean;
+      tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGitlabTokenRef;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderGitlabTokenRef {
+      key: string;
+      secretName: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmProviderTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequest {
+      github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestGithub;
+      requeueAfterSeconds?: number;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestGithub {
+      api?: string;
+      labels?: string[];
+      owner: string;
+      repo: string;
+      tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestGithubTokenRef;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestGithubTokenRef {
+      key: string;
+      secretName: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsPullRequestTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProvider {
+      cloneProtocol?: string;
+      filters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderFilters[];
+      github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderGithub;
+      gitlab?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderGitlab;
+      requeueAfterSeconds?: number;
+      template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplate;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderFilters {
+      branchMatch?: string;
+      labelMatch?: string;
+      pathsExist?: string[];
+      repositoryMatch?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderGithub {
+      allBranches?: boolean;
+      api?: string;
+      organization: string;
+      tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderGithubTokenRef;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderGithubTokenRef {
+      key: string;
+      secretName: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderGitlab {
+      allBranches?: boolean;
+      api?: string;
+      group: string;
+      includeSubgroups?: boolean;
+      tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderGitlabTokenRef;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderGitlabTokenRef {
+      key: string;
+      secretName: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecGeneratorsScmProviderTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetSpecSyncPolicy {
+      preserveResourcesOnDeletion?: boolean;
+    }
+
+    export interface ApplicationSetSpecTemplate {
+      metadata: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateMetadata;
+      spec: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpec;
+    }
+
+    export interface ApplicationSetSpecTemplateMetadata {
+      annotations?: { [key: string]: string };
+      finalizers?: string[];
+      labels?: { [key: string]: string };
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpec {
+      destination: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecDestination;
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecIgnoreDifferences[];
+      info?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecInfo[];
+      project: string;
+      revisionHistoryLimit?: number;
+      source: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSource;
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSyncPolicy;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecDestination {
+      name?: string;
+      namespace?: string;
+      server?: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSource {
+      chart?: string;
+      directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceDirectory;
+      helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceHelm;
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceKsonnet;
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceKustomize;
+      path?: string;
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourcePlugin;
+      repoURL: string;
+      targetRevision?: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSourceDirectory {
+      exclude?: string;
+      include?: string;
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceDirectoryJsonnet;
+      recurse?: boolean;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSourceDirectoryJsonnet {
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceDirectoryJsonnetExtVars[];
+      libs?: string[];
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSourceHelm {
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceHelmFileParameters[];
+      ignoreMissingValueFiles?: boolean;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceHelmParameters[];
+      passCredentials?: boolean;
+      releaseName?: string;
+      skipCrds?: boolean;
+      valueFiles?: string[];
+      values?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSourceHelmFileParameters {
+      name?: string;
+      path?: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSourceHelmParameters {
+      forceString?: boolean;
+      name?: string;
+      value?: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSourceKsonnet {
+      environment?: string;
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceKsonnetParameters[];
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSourceKustomize {
+      commonAnnotations?: { [key: string]: string };
+      commonLabels?: { [key: string]: string };
+      forceCommonAnnotations?: boolean;
+      forceCommonLabels?: boolean;
+      images?: string[];
+      namePrefix?: string;
+      nameSuffix?: string;
+      version?: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSourcePlugin {
+      env?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSourcePluginEnv {
+      name: string;
+      value: string;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSyncPolicy {
+      automated?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSyncPolicyAutomated;
+      retry?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSyncPolicyRetry;
+      syncOptions?: string[];
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSyncPolicyAutomated {
+      allowEmpty?: boolean;
+      prune?: boolean;
+      selfHeal?: boolean;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSyncPolicyRetry {
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSyncPolicyRetryBackoff;
+      limit?: number;
+    }
+
+    export interface ApplicationSetSpecTemplateSpecSyncPolicyRetryBackoff {
+      duration?: string;
+      factor?: number;
+      maxDuration?: string;
+    }
+
+    export interface ApplicationSetStatus {
+      conditions?: outputs.argoproj.v1alpha1.ApplicationSetStatusConditions[];
+    }
+
+    export interface ApplicationSetStatusConditions {
+      lastTransitionTime?: string;
+      message: string;
+      reason: string;
+      status: string;
+      type: string;
+    }
+
+    /**
+     * ApplicationSpec represents desired application state. Contains link to repository with application definition and additional parameters link definition revision.
+     */
+    export interface ApplicationSpec {
+      /**
+       * Destination is a reference to the target Kubernetes server and namespace
+       */
+      destination: outputs.argoproj.v1alpha1.ApplicationSpecDestination;
+      /**
+       * IgnoreDifferences is a list of resources and their fields which should be ignored during comparison
+       */
+      ignoreDifferences?: outputs.argoproj.v1alpha1.ApplicationSpecIgnoreDifferences[];
+      /**
+       * Info contains a list of information (URLs, email addresses, and plain text) that relates to the application
+       */
+      info?: outputs.argoproj.v1alpha1.ApplicationSpecInfo[];
+      /**
+       * Project is a reference to the project this application belongs to. The empty string means that application belongs to the 'default' project.
+       */
+      project: string;
+      /**
+       * RevisionHistoryLimit limits the number of items kept in the application's revision history, which is used for informational purposes as well as for rollbacks to previous versions. This should only be changed in exceptional circumstances. Setting to zero will store no history. This will reduce storage used. Increasing will increase the space used to store the history, so we do not recommend increasing it. Default is 10.
+       */
+      revisionHistoryLimit?: number;
+      /**
+       * Source is a reference to the location of the application's manifests or chart
+       */
+      source: outputs.argoproj.v1alpha1.ApplicationSpecSource;
+      /**
+       * SyncPolicy controls when and how a sync will be performed
+       */
+      syncPolicy?: outputs.argoproj.v1alpha1.ApplicationSpecSyncPolicy;
+    }
+
+    /**
+     * Destination is a reference to the target Kubernetes server and namespace
+     */
+    export interface ApplicationSpecDestination {
+      /**
+       * Name is an alternate way of specifying the target cluster by its symbolic name
+       */
+      name?: string;
+      /**
+       * Namespace specifies the target namespace for the application's resources. The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
+       */
+      namespace?: string;
+      /**
+       * Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
+       */
+      server?: string;
+    }
+
+    /**
+     * ResourceIgnoreDifferences contains resource filter and list of json paths which should be ignored during comparison with live state.
+     */
+    export interface ApplicationSpecIgnoreDifferences {
+      group?: string;
+      jqPathExpressions?: string[];
+      jsonPointers?: string[];
+      kind: string;
+      /**
+       * ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the desired state defined in the SCM and won't be displayed in diffs
+       */
+      managedFieldsManagers?: string[];
+      name?: string;
+      namespace?: string;
+    }
+
+    export interface ApplicationSpecInfo {
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Source is a reference to the location of the application's manifests or chart
+     */
+    export interface ApplicationSpecSource {
+      /**
+       * Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
+       */
+      chart?: string;
+      /**
+       * Directory holds path/directory specific options
+       */
+      directory?: outputs.argoproj.v1alpha1.ApplicationSpecSourceDirectory;
+      /**
+       * Helm holds helm specific options
+       */
+      helm?: outputs.argoproj.v1alpha1.ApplicationSpecSourceHelm;
+      /**
+       * Ksonnet holds ksonnet specific options
+       */
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationSpecSourceKsonnet;
+      /**
+       * Kustomize holds kustomize specific options
+       */
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationSpecSourceKustomize;
+      /**
+       * Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
+       */
+      path?: string;
+      /**
+       * ConfigManagementPlugin holds config management plugin specific options
+       */
+      plugin?: outputs.argoproj.v1alpha1.ApplicationSpecSourcePlugin;
+      /**
+       * RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
+       */
+      repoURL: string;
+      /**
+       * TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
+       */
+      targetRevision?: string;
+    }
+
+    /**
+     * Directory holds path/directory specific options
+     */
+    export interface ApplicationSpecSourceDirectory {
+      /**
+       * Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
+       */
+      exclude?: string;
+      /**
+       * Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
+       */
+      include?: string;
+      /**
+       * Jsonnet holds options specific to Jsonnet
+       */
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationSpecSourceDirectoryJsonnet;
+      /**
+       * Recurse specifies whether to scan a directory recursively for manifests
+       */
+      recurse?: boolean;
+    }
+
+    /**
+     * Jsonnet holds options specific to Jsonnet
+     */
+    export interface ApplicationSpecSourceDirectoryJsonnet {
+      /**
+       * ExtVars is a list of Jsonnet External Variables
+       */
+      extVars?: outputs.argoproj.v1alpha1.ApplicationSpecSourceDirectoryJsonnetExtVars[];
+      /**
+       * Additional library search dirs
+       */
+      libs?: string[];
+      /**
+       * TLAS is a list of Jsonnet Top-level Arguments
+       */
+      tlas?: outputs.argoproj.v1alpha1.ApplicationSpecSourceDirectoryJsonnetTlas[];
+    }
+
+    /**
+     * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
+     */
+    export interface ApplicationSpecSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
+     */
+    export interface ApplicationSpecSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Helm holds helm specific options
+     */
+    export interface ApplicationSpecSourceHelm {
+      /**
+       * FileParameters are file parameters to the helm template
+       */
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationSpecSourceHelmFileParameters[];
+      /**
+       * IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
+       */
+      ignoreMissingValueFiles?: boolean;
+      /**
+       * Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
+       */
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSpecSourceHelmParameters[];
+      /**
+       * PassCredentials pass credentials to all domains (Helm's --pass-credentials)
+       */
+      passCredentials?: boolean;
+      /**
+       * ReleaseName is the Helm release name to use. If omitted it will use the application name
+       */
+      releaseName?: string;
+      /**
+       * SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
+       */
+      skipCrds?: boolean;
+      /**
+       * ValuesFiles is a list of Helm value files to use when generating a template
+       */
+      valueFiles?: string[];
+      /**
+       * Values specifies Helm values to be passed to helm template, typically defined as a block
+       */
+      values?: string;
+      /**
+       * Version is the Helm version to use for templating (either "2" or "3")
+       */
+      version?: string;
+    }
+
+    /**
+     * HelmFileParameter is a file parameter that's passed to helm template during manifest generation
+     */
+    export interface ApplicationSpecSourceHelmFileParameters {
+      /**
+       * Name is the name of the Helm parameter
+       */
+      name?: string;
+      /**
+       * Path is the path to the file containing the values for the Helm parameter
+       */
+      path?: string;
+    }
+
+    /**
+     * HelmParameter is a parameter that's passed to helm template during manifest generation
+     */
+    export interface ApplicationSpecSourceHelmParameters {
+      /**
+       * ForceString determines whether to tell Helm to interpret booleans and numbers as strings
+       */
+      forceString?: boolean;
+      /**
+       * Name is the name of the Helm parameter
+       */
+      name?: string;
+      /**
+       * Value is the value for the Helm parameter
+       */
+      value?: string;
+    }
+
+    /**
+     * Ksonnet holds ksonnet specific options
+     */
+    export interface ApplicationSpecSourceKsonnet {
+      /**
+       * Environment is a ksonnet application environment name
+       */
+      environment?: string;
+      /**
+       * Parameters are a list of ksonnet component parameter override values
+       */
+      parameters?: outputs.argoproj.v1alpha1.ApplicationSpecSourceKsonnetParameters[];
+    }
+
+    /**
+     * KsonnetParameter is a ksonnet component parameter
+     */
+    export interface ApplicationSpecSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Kustomize holds kustomize specific options
+     */
+    export interface ApplicationSpecSourceKustomize {
+      /**
+       * CommonAnnotations is a list of additional annotations to add to rendered manifests
+       */
+      commonAnnotations?: { [key: string]: string };
+      /**
+       * CommonLabels is a list of additional labels to add to rendered manifests
+       */
+      commonLabels?: { [key: string]: string };
+      /**
+       * ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
+       */
+      forceCommonAnnotations?: boolean;
+      /**
+       * ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
+       */
+      forceCommonLabels?: boolean;
+      /**
+       * Images is a list of Kustomize image override specifications
+       */
+      images?: string[];
+      /**
+       * NamePrefix is a prefix appended to resources for Kustomize apps
+       */
+      namePrefix?: string;
+      /**
+       * NameSuffix is a suffix appended to resources for Kustomize apps
+       */
+      nameSuffix?: string;
+      /**
+       * Version controls which version of Kustomize to use for rendering manifests
+       */
+      version?: string;
+    }
+
+    /**
+     * ConfigManagementPlugin holds config management plugin specific options
+     */
+    export interface ApplicationSpecSourcePlugin {
+      /**
+       * Env is a list of environment variable entries
+       */
+      env?: outputs.argoproj.v1alpha1.ApplicationSpecSourcePluginEnv[];
+      name?: string;
+    }
+
+    /**
+     * EnvEntry represents an entry in the application's environment
+     */
+    export interface ApplicationSpecSourcePluginEnv {
+      /**
+       * Name is the name of the variable, usually expressed in uppercase
+       */
+      name: string;
+      /**
+       * Value is the value of the variable
+       */
+      value: string;
+    }
+
+    /**
+     * SyncPolicy controls when and how a sync will be performed
+     */
+    export interface ApplicationSpecSyncPolicy {
+      /**
+       * Automated will keep an application synced to the target revision
+       */
+      automated?: outputs.argoproj.v1alpha1.ApplicationSpecSyncPolicyAutomated;
+      /**
+       * Retry controls failed sync retry behavior
+       */
+      retry?: outputs.argoproj.v1alpha1.ApplicationSpecSyncPolicyRetry;
+      /**
+       * Options allow you to specify whole app sync-options
+       */
+      syncOptions?: string[];
+    }
+
+    /**
+     * Automated will keep an application synced to the target revision
+     */
+    export interface ApplicationSpecSyncPolicyAutomated {
+      /**
+       * AllowEmpty allows apps have zero live resources (default: false)
+       */
+      allowEmpty?: boolean;
+      /**
+       * Prune specifies whether to delete resources from the cluster that are not found in the sources anymore as part of automated sync (default: false)
+       */
+      prune?: boolean;
+      /**
+       * SelfHeal specifes whether to revert resources back to their desired state upon modification in the cluster (default: false)
+       */
+      selfHeal?: boolean;
+    }
+
+    /**
+     * Retry controls failed sync retry behavior
+     */
+    export interface ApplicationSpecSyncPolicyRetry {
+      /**
+       * Backoff controls how to backoff on subsequent retries of failed syncs
+       */
+      backoff?: outputs.argoproj.v1alpha1.ApplicationSpecSyncPolicyRetryBackoff;
+      /**
+       * Limit is the maximum number of attempts for retrying a failed sync. If set to 0, no retries will be performed.
+       */
+      limit?: number;
+    }
+
+    /**
+     * Backoff controls how to backoff on subsequent retries of failed syncs
+     */
+    export interface ApplicationSpecSyncPolicyRetryBackoff {
+      /**
+       * Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+       */
+      duration?: string;
+      /**
+       * Factor is a factor to multiply the base duration after each failed retry
+       */
+      factor?: number;
+      /**
+       * MaxDuration is the maximum amount of time allowed for the backoff strategy
+       */
+      maxDuration?: string;
+    }
+
+    /**
+     * ApplicationStatus contains status information for the application
+     */
+    export interface ApplicationStatus {
+      /**
+       * Conditions is a list of currently observed application conditions
+       */
+      conditions?: outputs.argoproj.v1alpha1.ApplicationStatusConditions[];
+      /**
+       * Health contains information about the application's current health status
+       */
+      health?: outputs.argoproj.v1alpha1.ApplicationStatusHealth;
+      /**
+       * History contains information about the application's sync history
+       */
+      history?: outputs.argoproj.v1alpha1.ApplicationStatusHistory[];
+      /**
+       * ObservedAt indicates when the application state was updated without querying latest git state Deprecated: controller no longer updates ObservedAt field
+       */
+      observedAt?: string;
+      /**
+       * OperationState contains information about any ongoing operations, such as a sync
+       */
+      operationState?: outputs.argoproj.v1alpha1.ApplicationStatusOperationState;
+      /**
+       * ReconciledAt indicates when the application state was reconciled using the latest git version
+       */
+      reconciledAt?: string;
+      /**
+       * Resources is a list of Kubernetes resources managed by this application
+       */
+      resources?: outputs.argoproj.v1alpha1.ApplicationStatusResources[];
+      /**
+       * SourceType specifies the type of this application
+       */
+      sourceType?: string;
+      /**
+       * Summary contains a list of URLs and container images used by this application
+       */
+      summary?: outputs.argoproj.v1alpha1.ApplicationStatusSummary;
+      /**
+       * Sync contains information about the application's current sync status
+       */
+      sync?: outputs.argoproj.v1alpha1.ApplicationStatusSync;
+    }
+
+    /**
+     * ApplicationCondition contains details about an application condition, which is usally an error or warning
+     */
+    export interface ApplicationStatusConditions {
+      /**
+       * LastTransitionTime is the time the condition was last observed
+       */
+      lastTransitionTime?: string;
+      /**
+       * Message contains human-readable message indicating details about condition
+       */
+      message: string;
+      /**
+       * Type is an application condition type
+       */
+      type: string;
+    }
+
+    /**
+     * Health contains information about the application's current health status
+     */
+    export interface ApplicationStatusHealth {
+      /**
+       * Message is a human-readable informational message describing the health status
+       */
+      message?: string;
+      /**
+       * Status holds the status code of the application or resource
+       */
+      status?: string;
+    }
+
+    /**
+     * RevisionHistory contains history information about a previous sync
+     */
+    export interface ApplicationStatusHistory {
+      /**
+       * DeployStartedAt holds the time the sync operation started
+       */
+      deployStartedAt?: string;
+      /**
+       * DeployedAt holds the time the sync operation completed
+       */
+      deployedAt: string;
+      /**
+       * ID is an auto incrementing identifier of the RevisionHistory
+       */
+      id: number;
+      /**
+       * Revision holds the revision the sync was performed against
+       */
+      revision: string;
+      /**
+       * Source is a reference to the application source used for the sync operation
+       */
+      source?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySource;
+    }
+
+    /**
+     * Source is a reference to the application source used for the sync operation
+     */
+    export interface ApplicationStatusHistorySource {
+      /**
+       * Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
+       */
+      chart?: string;
+      /**
+       * Directory holds path/directory specific options
+       */
+      directory?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceDirectory;
+      /**
+       * Helm holds helm specific options
+       */
+      helm?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceHelm;
+      /**
+       * Ksonnet holds ksonnet specific options
+       */
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceKsonnet;
+      /**
+       * Kustomize holds kustomize specific options
+       */
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceKustomize;
+      /**
+       * Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
+       */
+      path?: string;
+      /**
+       * ConfigManagementPlugin holds config management plugin specific options
+       */
+      plugin?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourcePlugin;
+      /**
+       * RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
+       */
+      repoURL: string;
+      /**
+       * TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
+       */
+      targetRevision?: string;
+    }
+
+    /**
+     * Directory holds path/directory specific options
+     */
+    export interface ApplicationStatusHistorySourceDirectory {
+      /**
+       * Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
+       */
+      exclude?: string;
+      /**
+       * Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
+       */
+      include?: string;
+      /**
+       * Jsonnet holds options specific to Jsonnet
+       */
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceDirectoryJsonnet;
+      /**
+       * Recurse specifies whether to scan a directory recursively for manifests
+       */
+      recurse?: boolean;
+    }
+
+    /**
+     * Jsonnet holds options specific to Jsonnet
+     */
+    export interface ApplicationStatusHistorySourceDirectoryJsonnet {
+      /**
+       * ExtVars is a list of Jsonnet External Variables
+       */
+      extVars?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceDirectoryJsonnetExtVars[];
+      /**
+       * Additional library search dirs
+       */
+      libs?: string[];
+      /**
+       * TLAS is a list of Jsonnet Top-level Arguments
+       */
+      tlas?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceDirectoryJsonnetTlas[];
+    }
+
+    /**
+     * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
+     */
+    export interface ApplicationStatusHistorySourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
+     */
+    export interface ApplicationStatusHistorySourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Helm holds helm specific options
+     */
+    export interface ApplicationStatusHistorySourceHelm {
+      /**
+       * FileParameters are file parameters to the helm template
+       */
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceHelmFileParameters[];
+      /**
+       * IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
+       */
+      ignoreMissingValueFiles?: boolean;
+      /**
+       * Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
+       */
+      parameters?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceHelmParameters[];
+      /**
+       * PassCredentials pass credentials to all domains (Helm's --pass-credentials)
+       */
+      passCredentials?: boolean;
+      /**
+       * ReleaseName is the Helm release name to use. If omitted it will use the application name
+       */
+      releaseName?: string;
+      /**
+       * SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
+       */
+      skipCrds?: boolean;
+      /**
+       * ValuesFiles is a list of Helm value files to use when generating a template
+       */
+      valueFiles?: string[];
+      /**
+       * Values specifies Helm values to be passed to helm template, typically defined as a block
+       */
+      values?: string;
+      /**
+       * Version is the Helm version to use for templating (either "2" or "3")
+       */
+      version?: string;
+    }
+
+    /**
+     * HelmFileParameter is a file parameter that's passed to helm template during manifest generation
+     */
+    export interface ApplicationStatusHistorySourceHelmFileParameters {
+      /**
+       * Name is the name of the Helm parameter
+       */
+      name?: string;
+      /**
+       * Path is the path to the file containing the values for the Helm parameter
+       */
+      path?: string;
+    }
+
+    /**
+     * HelmParameter is a parameter that's passed to helm template during manifest generation
+     */
+    export interface ApplicationStatusHistorySourceHelmParameters {
+      /**
+       * ForceString determines whether to tell Helm to interpret booleans and numbers as strings
+       */
+      forceString?: boolean;
+      /**
+       * Name is the name of the Helm parameter
+       */
+      name?: string;
+      /**
+       * Value is the value for the Helm parameter
+       */
+      value?: string;
+    }
+
+    /**
+     * Ksonnet holds ksonnet specific options
+     */
+    export interface ApplicationStatusHistorySourceKsonnet {
+      /**
+       * Environment is a ksonnet application environment name
+       */
+      environment?: string;
+      /**
+       * Parameters are a list of ksonnet component parameter override values
+       */
+      parameters?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourceKsonnetParameters[];
+    }
+
+    /**
+     * KsonnetParameter is a ksonnet component parameter
+     */
+    export interface ApplicationStatusHistorySourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Kustomize holds kustomize specific options
+     */
+    export interface ApplicationStatusHistorySourceKustomize {
+      /**
+       * CommonAnnotations is a list of additional annotations to add to rendered manifests
+       */
+      commonAnnotations?: { [key: string]: string };
+      /**
+       * CommonLabels is a list of additional labels to add to rendered manifests
+       */
+      commonLabels?: { [key: string]: string };
+      /**
+       * ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
+       */
+      forceCommonAnnotations?: boolean;
+      /**
+       * ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
+       */
+      forceCommonLabels?: boolean;
+      /**
+       * Images is a list of Kustomize image override specifications
+       */
+      images?: string[];
+      /**
+       * NamePrefix is a prefix appended to resources for Kustomize apps
+       */
+      namePrefix?: string;
+      /**
+       * NameSuffix is a suffix appended to resources for Kustomize apps
+       */
+      nameSuffix?: string;
+      /**
+       * Version controls which version of Kustomize to use for rendering manifests
+       */
+      version?: string;
+    }
+
+    /**
+     * ConfigManagementPlugin holds config management plugin specific options
+     */
+    export interface ApplicationStatusHistorySourcePlugin {
+      /**
+       * Env is a list of environment variable entries
+       */
+      env?: outputs.argoproj.v1alpha1.ApplicationStatusHistorySourcePluginEnv[];
+      name?: string;
+    }
+
+    /**
+     * EnvEntry represents an entry in the application's environment
+     */
+    export interface ApplicationStatusHistorySourcePluginEnv {
+      /**
+       * Name is the name of the variable, usually expressed in uppercase
+       */
+      name: string;
+      /**
+       * Value is the value of the variable
+       */
+      value: string;
+    }
+
+    /**
+     * OperationState contains information about any ongoing operations, such as a sync
+     */
+    export interface ApplicationStatusOperationState {
+      /**
+       * FinishedAt contains time of operation completion
+       */
+      finishedAt?: string;
+      /**
+       * Message holds any pertinent messages when attempting to perform operation (typically errors).
+       */
+      message?: string;
+      /**
+       * Operation is the original requested operation
+       */
+      operation: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperation;
+      /**
+       * Phase is the current phase of the operation
+       */
+      phase: string;
+      /**
+       * RetryCount contains time of operation retries
+       */
+      retryCount?: number;
+      /**
+       * StartedAt contains time of operation start
+       */
+      startedAt: string;
+      /**
+       * SyncResult is the result of a Sync operation
+       */
+      syncResult?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResult;
+    }
+
+    /**
+     * Operation is the original requested operation
+     */
+    export interface ApplicationStatusOperationStateOperation {
+      /**
+       * Info is a list of informational items for this operation
+       */
+      info?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationInfo[];
+      /**
+       * InitiatedBy contains information about who initiated the operations
+       */
+      initiatedBy?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationInitiatedBy;
+      /**
+       * Retry controls the strategy to apply if a sync fails
+       */
+      retry?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationRetry;
+      /**
+       * Sync contains parameters for the operation
+       */
+      sync?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSync;
+    }
+
+    export interface ApplicationStatusOperationStateOperationInfo {
+      name: string;
+      value: string;
+    }
+
+    /**
+     * InitiatedBy contains information about who initiated the operations
+     */
+    export interface ApplicationStatusOperationStateOperationInitiatedBy {
+      /**
+       * Automated is set to true if operation was initiated automatically by the application controller.
+       */
+      automated?: boolean;
+      /**
+       * Username contains the name of a user who started operation
+       */
+      username?: string;
+    }
+
+    /**
+     * Retry controls the strategy to apply if a sync fails
+     */
+    export interface ApplicationStatusOperationStateOperationRetry {
+      /**
+       * Backoff controls how to backoff on subsequent retries of failed syncs
+       */
+      backoff?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationRetryBackoff;
+      /**
+       * Limit is the maximum number of attempts for retrying a failed sync. If set to 0, no retries will be performed.
+       */
+      limit?: number;
+    }
+
+    /**
+     * Backoff controls how to backoff on subsequent retries of failed syncs
+     */
+    export interface ApplicationStatusOperationStateOperationRetryBackoff {
+      /**
+       * Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+       */
+      duration?: string;
+      /**
+       * Factor is a factor to multiply the base duration after each failed retry
+       */
+      factor?: number;
+      /**
+       * MaxDuration is the maximum amount of time allowed for the backoff strategy
+       */
+      maxDuration?: string;
+    }
+
+    /**
+     * Sync contains parameters for the operation
+     */
+    export interface ApplicationStatusOperationStateOperationSync {
+      /**
+       * DryRun specifies to perform a `kubectl apply --dry-run` without actually performing the sync
+       */
+      dryRun?: boolean;
+      /**
+       * Manifests is an optional field that overrides sync source with a local directory for development
+       */
+      manifests?: string[];
+      /**
+       * Prune specifies to delete resources from the cluster that are no longer tracked in git
+       */
+      prune?: boolean;
+      /**
+       * Resources describes which resources shall be part of the sync
+       */
+      resources?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncResources[];
+      /**
+       * Revision is the revision (Git) or chart version (Helm) which to sync the application to If omitted, will use the revision specified in app spec.
+       */
+      revision?: string;
+      /**
+       * Source overrides the source definition set in the application. This is typically set in a Rollback operation and is nil during a Sync operation
+       */
+      source?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSource;
+      /**
+       * SyncOptions provide per-sync sync-options, e.g. Validate=false
+       */
+      syncOptions?: string[];
+      /**
+       * SyncStrategy describes how to perform the sync
+       */
+      syncStrategy?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSyncStrategy;
+    }
+
+    /**
+     * SyncOperationResource contains resources to sync.
+     */
+    export interface ApplicationStatusOperationStateOperationSyncResources {
+      group?: string;
+      kind: string;
+      name: string;
+      namespace?: string;
+    }
+
+    /**
+     * Source overrides the source definition set in the application. This is typically set in a Rollback operation and is nil during a Sync operation
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSource {
+      /**
+       * Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
+       */
+      chart?: string;
+      /**
+       * Directory holds path/directory specific options
+       */
+      directory?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceDirectory;
+      /**
+       * Helm holds helm specific options
+       */
+      helm?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceHelm;
+      /**
+       * Ksonnet holds ksonnet specific options
+       */
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceKsonnet;
+      /**
+       * Kustomize holds kustomize specific options
+       */
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceKustomize;
+      /**
+       * Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
+       */
+      path?: string;
+      /**
+       * ConfigManagementPlugin holds config management plugin specific options
+       */
+      plugin?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourcePlugin;
+      /**
+       * RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
+       */
+      repoURL: string;
+      /**
+       * TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
+       */
+      targetRevision?: string;
+    }
+
+    /**
+     * Directory holds path/directory specific options
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSourceDirectory {
+      /**
+       * Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
+       */
+      exclude?: string;
+      /**
+       * Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
+       */
+      include?: string;
+      /**
+       * Jsonnet holds options specific to Jsonnet
+       */
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceDirectoryJsonnet;
+      /**
+       * Recurse specifies whether to scan a directory recursively for manifests
+       */
+      recurse?: boolean;
+    }
+
+    /**
+     * Jsonnet holds options specific to Jsonnet
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSourceDirectoryJsonnet {
+      /**
+       * ExtVars is a list of Jsonnet External Variables
+       */
+      extVars?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceDirectoryJsonnetExtVars[];
+      /**
+       * Additional library search dirs
+       */
+      libs?: string[];
+      /**
+       * TLAS is a list of Jsonnet Top-level Arguments
+       */
+      tlas?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceDirectoryJsonnetTlas[];
+    }
+
+    /**
+     * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Helm holds helm specific options
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSourceHelm {
+      /**
+       * FileParameters are file parameters to the helm template
+       */
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceHelmFileParameters[];
+      /**
+       * IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
+       */
+      ignoreMissingValueFiles?: boolean;
+      /**
+       * Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
+       */
+      parameters?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceHelmParameters[];
+      /**
+       * PassCredentials pass credentials to all domains (Helm's --pass-credentials)
+       */
+      passCredentials?: boolean;
+      /**
+       * ReleaseName is the Helm release name to use. If omitted it will use the application name
+       */
+      releaseName?: string;
+      /**
+       * SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
+       */
+      skipCrds?: boolean;
+      /**
+       * ValuesFiles is a list of Helm value files to use when generating a template
+       */
+      valueFiles?: string[];
+      /**
+       * Values specifies Helm values to be passed to helm template, typically defined as a block
+       */
+      values?: string;
+      /**
+       * Version is the Helm version to use for templating (either "2" or "3")
+       */
+      version?: string;
+    }
+
+    /**
+     * HelmFileParameter is a file parameter that's passed to helm template during manifest generation
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSourceHelmFileParameters {
+      /**
+       * Name is the name of the Helm parameter
+       */
+      name?: string;
+      /**
+       * Path is the path to the file containing the values for the Helm parameter
+       */
+      path?: string;
+    }
+
+    /**
+     * HelmParameter is a parameter that's passed to helm template during manifest generation
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSourceHelmParameters {
+      /**
+       * ForceString determines whether to tell Helm to interpret booleans and numbers as strings
+       */
+      forceString?: boolean;
+      /**
+       * Name is the name of the Helm parameter
+       */
+      name?: string;
+      /**
+       * Value is the value for the Helm parameter
+       */
+      value?: string;
+    }
+
+    /**
+     * Ksonnet holds ksonnet specific options
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSourceKsonnet {
+      /**
+       * Environment is a ksonnet application environment name
+       */
+      environment?: string;
+      /**
+       * Parameters are a list of ksonnet component parameter override values
+       */
+      parameters?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourceKsonnetParameters[];
+    }
+
+    /**
+     * KsonnetParameter is a ksonnet component parameter
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Kustomize holds kustomize specific options
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSourceKustomize {
+      /**
+       * CommonAnnotations is a list of additional annotations to add to rendered manifests
+       */
+      commonAnnotations?: { [key: string]: string };
+      /**
+       * CommonLabels is a list of additional labels to add to rendered manifests
+       */
+      commonLabels?: { [key: string]: string };
+      /**
+       * ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
+       */
+      forceCommonAnnotations?: boolean;
+      /**
+       * ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
+       */
+      forceCommonLabels?: boolean;
+      /**
+       * Images is a list of Kustomize image override specifications
+       */
+      images?: string[];
+      /**
+       * NamePrefix is a prefix appended to resources for Kustomize apps
+       */
+      namePrefix?: string;
+      /**
+       * NameSuffix is a suffix appended to resources for Kustomize apps
+       */
+      nameSuffix?: string;
+      /**
+       * Version controls which version of Kustomize to use for rendering manifests
+       */
+      version?: string;
+    }
+
+    /**
+     * ConfigManagementPlugin holds config management plugin specific options
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSourcePlugin {
+      /**
+       * Env is a list of environment variable entries
+       */
+      env?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSourcePluginEnv[];
+      name?: string;
+    }
+
+    /**
+     * EnvEntry represents an entry in the application's environment
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSourcePluginEnv {
+      /**
+       * Name is the name of the variable, usually expressed in uppercase
+       */
+      name: string;
+      /**
+       * Value is the value of the variable
+       */
+      value: string;
+    }
+
+    /**
+     * SyncStrategy describes how to perform the sync
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSyncStrategy {
+      /**
+       * Apply will perform a `kubectl apply` to perform the sync.
+       */
+      apply?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSyncStrategyApply;
+      /**
+       * Hook will submit any referenced resources to perform the sync. This is the default strategy
+       */
+      hook?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateOperationSyncSyncStrategyHook;
+    }
+
+    /**
+     * Apply will perform a `kubectl apply` to perform the sync.
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSyncStrategyApply {
+      /**
+       * Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.
+       */
+      force?: boolean;
+    }
+
+    /**
+     * Hook will submit any referenced resources to perform the sync. This is the default strategy
+     */
+    export interface ApplicationStatusOperationStateOperationSyncSyncStrategyHook {
+      /**
+       * Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.
+       */
+      force?: boolean;
+    }
+
+    /**
+     * SyncResult is the result of a Sync operation
+     */
+    export interface ApplicationStatusOperationStateSyncResult {
+      /**
+       * Resources contains a list of sync result items for each individual resource in a sync operation
+       */
+      resources?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultResources[];
+      /**
+       * Revision holds the revision this sync operation was performed to
+       */
+      revision: string;
+      /**
+       * Source records the application source information of the sync, used for comparing auto-sync
+       */
+      source?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSource;
+    }
+
+    /**
+     * ResourceResult holds the operation result details of a specific resource
+     */
+    export interface ApplicationStatusOperationStateSyncResultResources {
+      /**
+       * Group specifies the API group of the resource
+       */
+      group: string;
+      /**
+       * HookPhase contains the state of any operation associated with this resource OR hook This can also contain values for non-hook resources.
+       */
+      hookPhase?: string;
+      /**
+       * HookType specifies the type of the hook. Empty for non-hook resources
+       */
+      hookType?: string;
+      /**
+       * Kind specifies the API kind of the resource
+       */
+      kind: string;
+      /**
+       * Message contains an informational or error message for the last sync OR operation
+       */
+      message?: string;
+      /**
+       * Name specifies the name of the resource
+       */
+      name: string;
+      /**
+       * Namespace specifies the target namespace of the resource
+       */
+      namespace: string;
+      /**
+       * Status holds the final result of the sync. Will be empty if the resources is yet to be applied/pruned and is always zero-value for hooks
+       */
+      status?: string;
+      /**
+       * SyncPhase indicates the particular phase of the sync that this result was acquired in
+       */
+      syncPhase?: string;
+      /**
+       * Version specifies the API version of the resource
+       */
+      version: string;
+    }
+
+    /**
+     * Source records the application source information of the sync, used for comparing auto-sync
+     */
+    export interface ApplicationStatusOperationStateSyncResultSource {
+      /**
+       * Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
+       */
+      chart?: string;
+      /**
+       * Directory holds path/directory specific options
+       */
+      directory?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceDirectory;
+      /**
+       * Helm holds helm specific options
+       */
+      helm?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceHelm;
+      /**
+       * Ksonnet holds ksonnet specific options
+       */
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceKsonnet;
+      /**
+       * Kustomize holds kustomize specific options
+       */
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceKustomize;
+      /**
+       * Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
+       */
+      path?: string;
+      /**
+       * ConfigManagementPlugin holds config management plugin specific options
+       */
+      plugin?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourcePlugin;
+      /**
+       * RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
+       */
+      repoURL: string;
+      /**
+       * TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
+       */
+      targetRevision?: string;
+    }
+
+    /**
+     * Directory holds path/directory specific options
+     */
+    export interface ApplicationStatusOperationStateSyncResultSourceDirectory {
+      /**
+       * Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
+       */
+      exclude?: string;
+      /**
+       * Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
+       */
+      include?: string;
+      /**
+       * Jsonnet holds options specific to Jsonnet
+       */
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceDirectoryJsonnet;
+      /**
+       * Recurse specifies whether to scan a directory recursively for manifests
+       */
+      recurse?: boolean;
+    }
+
+    /**
+     * Jsonnet holds options specific to Jsonnet
+     */
+    export interface ApplicationStatusOperationStateSyncResultSourceDirectoryJsonnet {
+      /**
+       * ExtVars is a list of Jsonnet External Variables
+       */
+      extVars?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceDirectoryJsonnetExtVars[];
+      /**
+       * Additional library search dirs
+       */
+      libs?: string[];
+      /**
+       * TLAS is a list of Jsonnet Top-level Arguments
+       */
+      tlas?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceDirectoryJsonnetTlas[];
+    }
+
+    /**
+     * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
+     */
+    export interface ApplicationStatusOperationStateSyncResultSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
+     */
+    export interface ApplicationStatusOperationStateSyncResultSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Helm holds helm specific options
+     */
+    export interface ApplicationStatusOperationStateSyncResultSourceHelm {
+      /**
+       * FileParameters are file parameters to the helm template
+       */
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceHelmFileParameters[];
+      /**
+       * IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
+       */
+      ignoreMissingValueFiles?: boolean;
+      /**
+       * Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
+       */
+      parameters?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceHelmParameters[];
+      /**
+       * PassCredentials pass credentials to all domains (Helm's --pass-credentials)
+       */
+      passCredentials?: boolean;
+      /**
+       * ReleaseName is the Helm release name to use. If omitted it will use the application name
+       */
+      releaseName?: string;
+      /**
+       * SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
+       */
+      skipCrds?: boolean;
+      /**
+       * ValuesFiles is a list of Helm value files to use when generating a template
+       */
+      valueFiles?: string[];
+      /**
+       * Values specifies Helm values to be passed to helm template, typically defined as a block
+       */
+      values?: string;
+      /**
+       * Version is the Helm version to use for templating (either "2" or "3")
+       */
+      version?: string;
+    }
+
+    /**
+     * HelmFileParameter is a file parameter that's passed to helm template during manifest generation
+     */
+    export interface ApplicationStatusOperationStateSyncResultSourceHelmFileParameters {
+      /**
+       * Name is the name of the Helm parameter
+       */
+      name?: string;
+      /**
+       * Path is the path to the file containing the values for the Helm parameter
+       */
+      path?: string;
+    }
+
+    /**
+     * HelmParameter is a parameter that's passed to helm template during manifest generation
+     */
+    export interface ApplicationStatusOperationStateSyncResultSourceHelmParameters {
+      /**
+       * ForceString determines whether to tell Helm to interpret booleans and numbers as strings
+       */
+      forceString?: boolean;
+      /**
+       * Name is the name of the Helm parameter
+       */
+      name?: string;
+      /**
+       * Value is the value for the Helm parameter
+       */
+      value?: string;
+    }
+
+    /**
+     * Ksonnet holds ksonnet specific options
+     */
+    export interface ApplicationStatusOperationStateSyncResultSourceKsonnet {
+      /**
+       * Environment is a ksonnet application environment name
+       */
+      environment?: string;
+      /**
+       * Parameters are a list of ksonnet component parameter override values
+       */
+      parameters?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourceKsonnetParameters[];
+    }
+
+    /**
+     * KsonnetParameter is a ksonnet component parameter
+     */
+    export interface ApplicationStatusOperationStateSyncResultSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Kustomize holds kustomize specific options
+     */
+    export interface ApplicationStatusOperationStateSyncResultSourceKustomize {
+      /**
+       * CommonAnnotations is a list of additional annotations to add to rendered manifests
+       */
+      commonAnnotations?: { [key: string]: string };
+      /**
+       * CommonLabels is a list of additional labels to add to rendered manifests
+       */
+      commonLabels?: { [key: string]: string };
+      /**
+       * ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
+       */
+      forceCommonAnnotations?: boolean;
+      /**
+       * ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
+       */
+      forceCommonLabels?: boolean;
+      /**
+       * Images is a list of Kustomize image override specifications
+       */
+      images?: string[];
+      /**
+       * NamePrefix is a prefix appended to resources for Kustomize apps
+       */
+      namePrefix?: string;
+      /**
+       * NameSuffix is a suffix appended to resources for Kustomize apps
+       */
+      nameSuffix?: string;
+      /**
+       * Version controls which version of Kustomize to use for rendering manifests
+       */
+      version?: string;
+    }
+
+    /**
+     * ConfigManagementPlugin holds config management plugin specific options
+     */
+    export interface ApplicationStatusOperationStateSyncResultSourcePlugin {
+      /**
+       * Env is a list of environment variable entries
+       */
+      env?: outputs.argoproj.v1alpha1.ApplicationStatusOperationStateSyncResultSourcePluginEnv[];
+      name?: string;
+    }
+
+    /**
+     * EnvEntry represents an entry in the application's environment
+     */
+    export interface ApplicationStatusOperationStateSyncResultSourcePluginEnv {
+      /**
+       * Name is the name of the variable, usually expressed in uppercase
+       */
+      name: string;
+      /**
+       * Value is the value of the variable
+       */
+      value: string;
+    }
+
+    /**
+     * ResourceStatus holds the current sync and health status of a resource TODO: describe members of this type
+     */
+    export interface ApplicationStatusResources {
+      group?: string;
+      /**
+       * HealthStatus contains information about the currently observed health state of an application or resource
+       */
+      health?: outputs.argoproj.v1alpha1.ApplicationStatusResourcesHealth;
+      hook?: boolean;
+      kind?: string;
+      name?: string;
+      namespace?: string;
+      requiresPruning?: boolean;
+      /**
+       * SyncStatusCode is a type which represents possible comparison results
+       */
+      status?: string;
+      version?: string;
+    }
+
+    /**
+     * HealthStatus contains information about the currently observed health state of an application or resource
+     */
+    export interface ApplicationStatusResourcesHealth {
+      /**
+       * Message is a human-readable informational message describing the health status
+       */
+      message?: string;
+      /**
+       * Status holds the status code of the application or resource
+       */
+      status?: string;
+    }
+
+    /**
+     * Summary contains a list of URLs and container images used by this application
+     */
+    export interface ApplicationStatusSummary {
+      /**
+       * ExternalURLs holds all external URLs of application child resources.
+       */
+      externalURLs?: string[];
+      /**
+       * Images holds all images of application child resources.
+       */
+      images?: string[];
+    }
+
+    /**
+     * Sync contains information about the application's current sync status
+     */
+    export interface ApplicationStatusSync {
+      /**
+       * ComparedTo contains information about what has been compared
+       */
+      comparedTo?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedTo;
+      /**
+       * Revision contains information about the revision the comparison has been performed to
+       */
+      revision?: string;
+      /**
+       * Status is the sync state of the comparison
+       */
+      status: string;
+    }
+
+    /**
+     * ComparedTo contains information about what has been compared
+     */
+    export interface ApplicationStatusSyncComparedTo {
+      /**
+       * Destination is a reference to the application's destination used for comparison
+       */
+      destination: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToDestination;
+      /**
+       * Source is a reference to the application's source used for comparison
+       */
+      source: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSource;
+    }
+
+    /**
+     * Destination is a reference to the application's destination used for comparison
+     */
+    export interface ApplicationStatusSyncComparedToDestination {
+      /**
+       * Name is an alternate way of specifying the target cluster by its symbolic name
+       */
+      name?: string;
+      /**
+       * Namespace specifies the target namespace for the application's resources. The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
+       */
+      namespace?: string;
+      /**
+       * Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
+       */
+      server?: string;
+    }
+
+    /**
+     * Source is a reference to the application's source used for comparison
+     */
+    export interface ApplicationStatusSyncComparedToSource {
+      /**
+       * Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
+       */
+      chart?: string;
+      /**
+       * Directory holds path/directory specific options
+       */
+      directory?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceDirectory;
+      /**
+       * Helm holds helm specific options
+       */
+      helm?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceHelm;
+      /**
+       * Ksonnet holds ksonnet specific options
+       */
+      ksonnet?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceKsonnet;
+      /**
+       * Kustomize holds kustomize specific options
+       */
+      kustomize?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceKustomize;
+      /**
+       * Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
+       */
+      path?: string;
+      /**
+       * ConfigManagementPlugin holds config management plugin specific options
+       */
+      plugin?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourcePlugin;
+      /**
+       * RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
+       */
+      repoURL: string;
+      /**
+       * TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
+       */
+      targetRevision?: string;
+    }
+
+    /**
+     * Directory holds path/directory specific options
+     */
+    export interface ApplicationStatusSyncComparedToSourceDirectory {
+      /**
+       * Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
+       */
+      exclude?: string;
+      /**
+       * Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
+       */
+      include?: string;
+      /**
+       * Jsonnet holds options specific to Jsonnet
+       */
+      jsonnet?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceDirectoryJsonnet;
+      /**
+       * Recurse specifies whether to scan a directory recursively for manifests
+       */
+      recurse?: boolean;
+    }
+
+    /**
+     * Jsonnet holds options specific to Jsonnet
+     */
+    export interface ApplicationStatusSyncComparedToSourceDirectoryJsonnet {
+      /**
+       * ExtVars is a list of Jsonnet External Variables
+       */
+      extVars?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceDirectoryJsonnetExtVars[];
+      /**
+       * Additional library search dirs
+       */
+      libs?: string[];
+      /**
+       * TLAS is a list of Jsonnet Top-level Arguments
+       */
+      tlas?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceDirectoryJsonnetTlas[];
+    }
+
+    /**
+     * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
+     */
+    export interface ApplicationStatusSyncComparedToSourceDirectoryJsonnetExtVars {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * JsonnetVar represents a variable to be passed to jsonnet during manifest generation
+     */
+    export interface ApplicationStatusSyncComparedToSourceDirectoryJsonnetTlas {
+      code?: boolean;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Helm holds helm specific options
+     */
+    export interface ApplicationStatusSyncComparedToSourceHelm {
+      /**
+       * FileParameters are file parameters to the helm template
+       */
+      fileParameters?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceHelmFileParameters[];
+      /**
+       * IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
+       */
+      ignoreMissingValueFiles?: boolean;
+      /**
+       * Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
+       */
+      parameters?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceHelmParameters[];
+      /**
+       * PassCredentials pass credentials to all domains (Helm's --pass-credentials)
+       */
+      passCredentials?: boolean;
+      /**
+       * ReleaseName is the Helm release name to use. If omitted it will use the application name
+       */
+      releaseName?: string;
+      /**
+       * SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
+       */
+      skipCrds?: boolean;
+      /**
+       * ValuesFiles is a list of Helm value files to use when generating a template
+       */
+      valueFiles?: string[];
+      /**
+       * Values specifies Helm values to be passed to helm template, typically defined as a block
+       */
+      values?: string;
+      /**
+       * Version is the Helm version to use for templating (either "2" or "3")
+       */
+      version?: string;
+    }
+
+    /**
+     * HelmFileParameter is a file parameter that's passed to helm template during manifest generation
+     */
+    export interface ApplicationStatusSyncComparedToSourceHelmFileParameters {
+      /**
+       * Name is the name of the Helm parameter
+       */
+      name?: string;
+      /**
+       * Path is the path to the file containing the values for the Helm parameter
+       */
+      path?: string;
+    }
+
+    /**
+     * HelmParameter is a parameter that's passed to helm template during manifest generation
+     */
+    export interface ApplicationStatusSyncComparedToSourceHelmParameters {
+      /**
+       * ForceString determines whether to tell Helm to interpret booleans and numbers as strings
+       */
+      forceString?: boolean;
+      /**
+       * Name is the name of the Helm parameter
+       */
+      name?: string;
+      /**
+       * Value is the value for the Helm parameter
+       */
+      value?: string;
+    }
+
+    /**
+     * Ksonnet holds ksonnet specific options
+     */
+    export interface ApplicationStatusSyncComparedToSourceKsonnet {
+      /**
+       * Environment is a ksonnet application environment name
+       */
+      environment?: string;
+      /**
+       * Parameters are a list of ksonnet component parameter override values
+       */
+      parameters?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourceKsonnetParameters[];
+    }
+
+    /**
+     * KsonnetParameter is a ksonnet component parameter
+     */
+    export interface ApplicationStatusSyncComparedToSourceKsonnetParameters {
+      component?: string;
+      name: string;
+      value: string;
+    }
+
+    /**
+     * Kustomize holds kustomize specific options
+     */
+    export interface ApplicationStatusSyncComparedToSourceKustomize {
+      /**
+       * CommonAnnotations is a list of additional annotations to add to rendered manifests
+       */
+      commonAnnotations?: { [key: string]: string };
+      /**
+       * CommonLabels is a list of additional labels to add to rendered manifests
+       */
+      commonLabels?: { [key: string]: string };
+      /**
+       * ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
+       */
+      forceCommonAnnotations?: boolean;
+      /**
+       * ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
+       */
+      forceCommonLabels?: boolean;
+      /**
+       * Images is a list of Kustomize image override specifications
+       */
+      images?: string[];
+      /**
+       * NamePrefix is a prefix appended to resources for Kustomize apps
+       */
+      namePrefix?: string;
+      /**
+       * NameSuffix is a suffix appended to resources for Kustomize apps
+       */
+      nameSuffix?: string;
+      /**
+       * Version controls which version of Kustomize to use for rendering manifests
+       */
+      version?: string;
+    }
+
+    /**
+     * ConfigManagementPlugin holds config management plugin specific options
+     */
+    export interface ApplicationStatusSyncComparedToSourcePlugin {
+      /**
+       * Env is a list of environment variable entries
+       */
+      env?: outputs.argoproj.v1alpha1.ApplicationStatusSyncComparedToSourcePluginEnv[];
+      name?: string;
+    }
+
+    /**
+     * EnvEntry represents an entry in the application's environment
+     */
+    export interface ApplicationStatusSyncComparedToSourcePluginEnv {
+      /**
+       * Name is the name of the variable, usually expressed in uppercase
+       */
+      name: string;
+      /**
+       * Value is the value of the variable
+       */
+      value: string;
+    }
+  }
 }

@@ -13,7 +13,11 @@ import util from "util";
 
 export const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = "sealed-secrets";
 
-export function getSecretPathsInfo({ unsealedSecretFilePath }: { unsealedSecretFilePath: string; }) {
+export function getSecretPathsInfo({
+  unsealedSecretFilePath,
+}: {
+  unsealedSecretFilePath: string;
+}) {
   const appManifestsDir = p.dirname(unsealedSecretFilePath);
   // The path format is: kubernetes/manifests/generated/production/applications/graphql-mongo/1-manifest
   // and we want as basedir: kubernetes/manifests/generated/production/applications/graphql-mongo
@@ -35,7 +39,7 @@ export function getSecretPathsInfo({ unsealedSecretFilePath }: { unsealedSecretF
   } as const;
 }
 
-export function getSecretManifestsPaths(environment: Environment) : string[]{
+export function getSecretManifestsPaths(environment: Environment): string[] {
   const contextDir = getGeneratedEnvManifestsDir(environment);
   const unsealedSecretsFilePathsForEnv = getFilePathsThatMatch({
     contextDir,
@@ -44,13 +48,17 @@ export function getSecretManifestsPaths(environment: Environment) : string[]{
   return unsealedSecretsFilePathsForEnv;
 }
 
-
-
-
-export const ENVIRONMENTS_ALL: Environment[] = ["local", "production", "staging", "development"]
+export const ENVIRONMENTS_ALL: Environment[] = [
+  "local",
+  "production",
+  "staging",
+  "development",
+];
 export async function promptEnvironmentSelection() {
-  const choices = ENVIRONMENTS_ALL
-    .flatMap((env) => [env, new inquirer.Separator()]);
+  const choices = ENVIRONMENTS_ALL.flatMap((env) => [
+    env,
+    new inquirer.Separator(),
+  ]);
 
   const name = "environment";
   const answers: Record<typeof name, Environment> = await inquirer.prompt([
@@ -64,9 +72,8 @@ export async function promptEnvironmentSelection() {
     } as const,
   ]);
 
-  return answers
+  return answers;
 }
-
 
 // export function getSecretEnvironmentArgs() {
 //   const ARGV = yargs(process.argv.slice(2))
@@ -86,9 +93,8 @@ export async function promptEnvironmentSelection() {
 //   return ARGV
 // }
 
-
 export function removeAllPlainSecrets(environment: Environment) {
-  getSecretManifestsPaths(environment).map(unsealedSecretFilePath => {
+  getSecretManifestsPaths(environment).map((unsealedSecretFilePath) => {
     sh.echo(
       c.blueBright(
         `Removing unsealed plain secret manifest ${unsealedSecretFilePath}`
@@ -96,5 +102,5 @@ export function removeAllPlainSecrets(environment: Environment) {
     );
     // Delete unsealed plain secret if specified
     sh.rm("-rf", unsealedSecretFilePath);
-  })
+  });
 }

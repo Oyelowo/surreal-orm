@@ -3,10 +3,17 @@ import { AppConfigs } from "../../shared/types/own-types";
 import { getSecretsForResource } from "../../../scripts/secretsManagement/getSecretsForApp";
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
-const secretsFromLocalConfigs = getSecretsForResource("graphql-mongo", environment);
+const secretsFromLocalConfigs = getSecretsForResource(
+  "graphql-mongo",
+  environment
+);
 
 // TODO: ADD A NEW KEY - SECRETS TO THE config which would accept secrets from the global secrets config used to generate manifests
-export const graphqlMongoSettings: AppConfigs<"graphql-mongo", "mongodb", "applications"> = {
+export const graphqlMongoSettings: AppConfigs<
+  "graphql-mongo",
+  "mongodb",
+  "applications"
+> = {
   kubeConfig: {
     requestMemory: "70Mi",
     requestCpu: "100m",
@@ -14,7 +21,9 @@ export const graphqlMongoSettings: AppConfigs<"graphql-mongo", "mongodb", "appli
     limitCpu: "100m",
     replicaCount: 2,
     host: "0.0.0.0",
-    image: `ghcr.io/oyelowo/graphql-mongo:${getEnvironmentVariables().IMAGE_TAG_GRAPHQL_MONGO}`,
+    image: `ghcr.io/oyelowo/graphql-mongo:${
+      getEnvironmentVariables().IMAGE_TAG_GRAPHQL_MONGO
+    }`,
   },
 
   envVars: {

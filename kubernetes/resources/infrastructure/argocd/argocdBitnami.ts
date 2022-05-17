@@ -1,23 +1,24 @@
-import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant';
-import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
+import { DOMAIN_NAME_SUB_ARGOCD } from "../ingress/constant";
+import { annotations, INGRESS_CLASSNAME_NGINX } from "../ingress/ingressRules";
 import * as k8s from "@pulumi/kubernetes";
 import { namespaceNames } from "../../namespaces/util";
 import { ArgocdHelmValuesBitnami } from "../../shared/types/helm-charts/argocdHelmValuesBitnami";
 import { DeepPartial } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
-import { argocdProvider } from './settings';
-import { helmChartsInfo } from '../../shared/helmChartInfo';
-
+import { argocdProvider } from "./settings";
+import { helmChartsInfo } from "../../shared/helmChartInfo";
 
 // TODO: Use this everywhere
-const STORAGE_CLASS = "linode-block-storage-retain"
+const STORAGE_CLASS = "linode-block-storage-retain";
 const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
   config: {
     secret: {
-      create: true, argocdServerAdminPassword: "oyelowo", annotations: {
-        "sealedsecrets.bitnami.com/managed": "true"
-      }
-    }
+      create: true,
+      argocdServerAdminPassword: "oyelowo",
+      annotations: {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+    },
   },
   global: {
     storageClass:
@@ -34,15 +35,17 @@ const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
     },
     // Ingress-controller already handles TLS. Argocd does too which causes collision. Disable argo from doing that
     // https://stackoverflow.com/questions/49856754/nginx-ingress-too-many-redirects-when-force-ssl-is-enabled
-    extraArgs: ["--insecure"] as any[]
+    extraArgs: ["--insecure"] as any[],
   },
   dex: {
     enabled: false,
   },
 };
 
-
-const { repo, argocd: { chart, version } } = helmChartsInfo.bitnamiRepo;
+const {
+  repo,
+  argocd: { chart, version },
+} = helmChartsInfo.bitnamiRepo;
 export const argocdHelm = new k8s.helm.v3.Chart(
   "argocd",
   {

@@ -1,16 +1,15 @@
-import sh from 'shelljs';
+import sh from "shelljs";
 // import { getMerged } from "./merge";
 import { setupPlainSecretTSFiles, getContent, Secrets } from "./setupSecrets";
 
-
 try {
-    setupPlainSecretTSFiles()
-    // sh.exec("npx ts-node ./scripts/secretsManagement/merge.ts")
+  setupPlainSecretTSFiles();
+  // sh.exec("npx ts-node ./scripts/secretsManagement/merge.ts")
 } catch (error) {
-    // const p = getContent("staging", getMerged("staging"))
-    // const k: Secrets = getMerged("staging")
-    // sh.exec(`echo ${p} > ./.secrets/staging`)
-    // sh.exec("npx ts-node ./scripts/secretsManagement/merge.ts")
+  // const p = getContent("staging", getMerged("staging"))
+  // const k: Secrets = getMerged("staging")
+  // sh.exec(`echo ${p} > ./.secrets/staging`)
+  // sh.exec("npx ts-node ./scripts/secretsManagement/merge.ts")
 }
 
 // // getMerged("staging")

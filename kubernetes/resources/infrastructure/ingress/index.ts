@@ -24,7 +24,6 @@ export * from "./argoApp";
 //   pathToAppManifests: ingressControllerControllerDir,
 // });
 
-
 // const metadataIngressRules: Metadata = {
 //   name: "ingress-controller-application",
 //   namespace: namespaceNames.applications,

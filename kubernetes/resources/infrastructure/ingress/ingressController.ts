@@ -6,7 +6,6 @@ import { RecursivePartial } from "../../shared/types/own-types";
 import { nginxIngressProvider } from "./settings";
 import { helmChartsInfo } from "../../shared/helmChartInfo";
 
-
 // Install the NGINX ingress controller to our cluster. The controller
 // consists of a Pod and a Service. Install it and configure the controller
 // to publish the load balancer IP address on each Ingress so that
@@ -23,17 +22,21 @@ import { helmChartsInfo } from "../../shared/helmChartInfo";
 //   { provider: provider }
 // );
 
-const { repo, nginxIngress: { chart, version } } = helmChartsInfo.bitnamiRepo;
-const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> = {
-  // containerPorts: {
-  //   http: 8000,
-  //   https: 443,
-  // },
-  fullnameOverride: chart,
-  commonAnnotations: {
-    "linkerd.io/inject": "enabled",
-  }
-};
+const {
+  repo,
+  nginxIngress: { chart, version },
+} = helmChartsInfo.bitnamiRepo;
+const ingressControllerValues: RecursivePartial<IngressControllerValuesBitnami> =
+  {
+    // containerPorts: {
+    //   http: 8000,
+    //   https: 443,
+    // },
+    fullnameOverride: chart,
+    commonAnnotations: {
+      "linkerd.io/inject": "enabled",
+    },
+  };
 // nginx-ingress-controller
 // K3s also comes with a traefik ingress controoler. Disable that if using this
 export const ingressNginxController = new k8s.helm.v3.Chart(

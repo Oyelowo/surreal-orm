@@ -10,32 +10,32 @@ metadata:
     linkerd.io/control-plane-ns: linkerd
   name: linkerd-sp-validator-webhook-config
 webhooks:
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURUVENDQWpXZ0F3SUJBZ0lSQVBFNThnc1YrNUpNWGtOZ0RrUnBYNVF3RFFZSktvWklodmNOQVFFTEJRQXcKS3pFcE1DY0dBMVVFQXhNZ2JHbHVhMlZ5WkMxemNDMTJZV3hwWkdGMGIzSXViR2x1YTJWeVpDNXpkbU13SGhjTgpNakl3TlRFMU1ETTFOekk1V2hjTk1qTXdOVEUxTURNMU56STVXakFyTVNrd0p3WURWUVFERXlCc2FXNXJaWEprCkxYTndMWFpoYkdsa1lYUnZjaTVzYVc1clpYSmtMbk4yWXpDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVAKQURDQ0FRb0NnZ0VCQU9vRG1NWGVhTjZ0eFJnMklaU09IN082cXZWSnFmUkx3czY5L2hBdWZhcnRoQlJuZ2loUQpCTnZ6c05sRVpRWHpnaEVPbyt1SktuZUhoOURnOUVHTU45bkpvMFp5Y0hlaG9lNk05cFlZKy81Vmh0cWFXV20wCkRhNkRyL3dqSEl6SUdjWkYxT3NlcFRXL0NNRlJhcXlDdnlHNTVFT01rZ3YyQnU0OEZBUDNPZXU5UlkwL25tenoKaSs2eEN2eU0zZFVxVk4wYlRVWmxCRUZOdkR3aGFHQks1eTFoY2ZaTmNJUVYzUDlldjhRbURjd0VHTlpNMmtmcwphbWpYWU9kRHNCQXNKd0grUTJzMkl2SUZHNUlEK2F3MXlhNk5UZVdjSXVVQ3ZnMlJ0RzlXa2FndXBsVmtqKzl4Cjl3cXd0aXFLcjFqNHRiWmdtMzJMOUxtNkNuaGI4bEtsVFVzQ0F3RUFBYU5zTUdvd0RnWURWUjBQQVFIL0JBUUQKQWdXZ01CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFNQmdOVkhSTUJBZjhFQWpBQQpNQ3NHQTFVZEVRUWtNQ0tDSUd4cGJtdGxjbVF0YzNBdGRtRnNhV1JoZEc5eUxteHBibXRsY21RdWMzWmpNQTBHCkNTcUdTSWIzRFFFQkN3VUFBNElCQVFDY2JtbnJUdXhsM2tBVjl5S1c4K0dCQ0d3QmVzeDFsNFdIRTBZYnVnUHYKc3lhR2FxNXBhUHc2bzlVZjA0ZUlTT3ZGS1pFc3hxNzFMYXArTnVGOUFGV3d5ZUhFTG8yWVIwWS92NzNnUkRTVgptNm1SNlZZQmpKWStCRFZ2cmx5bDQ3MzNKV0hUZVVNSHZkdmJHeEdHQTQ3ZmFhMkR4V1JrUWtKaTR1V0xDTEV5CjhOb2J4WUYxMUQ1c1d0cHdhRXk1ZVJFUkw4b2RYdDNMVHQydE9ucFh0enB1WFB4bjh4bWM2dTlvNllETG55YTAKWkViUHA2M0JVeEp6TlFBL2thTzB2amxwNXBwZ2NJQjVTS1FCbXNLbitaU3BKZmpMTUovQ2RwNEwzTWZUV0hyUgoxajg0SzRHK2kra28vY0RjNllEd2FnTTRkb2pCYWR2MDd3S3l6YU1FT2YxLwotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t
-    service:
-      name: linkerd-sp-validator
-      namespace: linkerd
-      path: /
-  failurePolicy: Ignore
-  name: linkerd-sp-validator.linkerd.io
-  namespaceSelector:
-    matchExpressions:
-    - key: config.linkerd.io/admission-webhooks
-      operator: NotIn
-      values:
-      - disabled
-  rules:
-  - apiGroups:
-    - linkerd.io
-    apiVersions:
-    - v1alpha1
-    - v1alpha2
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - serviceprofiles
-  sideEffects: None
+  - admissionReviewVersions:
+      - v1
+      - v1beta1
+    clientConfig:
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURUVENDQWpXZ0F3SUJBZ0lSQVBFNThnc1YrNUpNWGtOZ0RrUnBYNVF3RFFZSktvWklodmNOQVFFTEJRQXcKS3pFcE1DY0dBMVVFQXhNZ2JHbHVhMlZ5WkMxemNDMTJZV3hwWkdGMGIzSXViR2x1YTJWeVpDNXpkbU13SGhjTgpNakl3TlRFMU1ETTFOekk1V2hjTk1qTXdOVEUxTURNMU56STVXakFyTVNrd0p3WURWUVFERXlCc2FXNXJaWEprCkxYTndMWFpoYkdsa1lYUnZjaTVzYVc1clpYSmtMbk4yWXpDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVAKQURDQ0FRb0NnZ0VCQU9vRG1NWGVhTjZ0eFJnMklaU09IN082cXZWSnFmUkx3czY5L2hBdWZhcnRoQlJuZ2loUQpCTnZ6c05sRVpRWHpnaEVPbyt1SktuZUhoOURnOUVHTU45bkpvMFp5Y0hlaG9lNk05cFlZKy81Vmh0cWFXV20wCkRhNkRyL3dqSEl6SUdjWkYxT3NlcFRXL0NNRlJhcXlDdnlHNTVFT01rZ3YyQnU0OEZBUDNPZXU5UlkwL25tenoKaSs2eEN2eU0zZFVxVk4wYlRVWmxCRUZOdkR3aGFHQks1eTFoY2ZaTmNJUVYzUDlldjhRbURjd0VHTlpNMmtmcwphbWpYWU9kRHNCQXNKd0grUTJzMkl2SUZHNUlEK2F3MXlhNk5UZVdjSXVVQ3ZnMlJ0RzlXa2FndXBsVmtqKzl4Cjl3cXd0aXFLcjFqNHRiWmdtMzJMOUxtNkNuaGI4bEtsVFVzQ0F3RUFBYU5zTUdvd0RnWURWUjBQQVFIL0JBUUQKQWdXZ01CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFNQmdOVkhSTUJBZjhFQWpBQQpNQ3NHQTFVZEVRUWtNQ0tDSUd4cGJtdGxjbVF0YzNBdGRtRnNhV1JoZEc5eUxteHBibXRsY21RdWMzWmpNQTBHCkNTcUdTSWIzRFFFQkN3VUFBNElCQVFDY2JtbnJUdXhsM2tBVjl5S1c4K0dCQ0d3QmVzeDFsNFdIRTBZYnVnUHYKc3lhR2FxNXBhUHc2bzlVZjA0ZUlTT3ZGS1pFc3hxNzFMYXArTnVGOUFGV3d5ZUhFTG8yWVIwWS92NzNnUkRTVgptNm1SNlZZQmpKWStCRFZ2cmx5bDQ3MzNKV0hUZVVNSHZkdmJHeEdHQTQ3ZmFhMkR4V1JrUWtKaTR1V0xDTEV5CjhOb2J4WUYxMUQ1c1d0cHdhRXk1ZVJFUkw4b2RYdDNMVHQydE9ucFh0enB1WFB4bjh4bWM2dTlvNllETG55YTAKWkViUHA2M0JVeEp6TlFBL2thTzB2amxwNXBwZ2NJQjVTS1FCbXNLbitaU3BKZmpMTUovQ2RwNEwzTWZUV0hyUgoxajg0SzRHK2kra28vY0RjNllEd2FnTTRkb2pCYWR2MDd3S3l6YU1FT2YxLwotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t
+      service:
+        name: linkerd-sp-validator
+        namespace: linkerd
+        path: /
+    failurePolicy: Ignore
+    name: linkerd-sp-validator.linkerd.io
+    namespaceSelector:
+      matchExpressions:
+        - key: config.linkerd.io/admission-webhooks
+          operator: NotIn
+          values:
+            - disabled
+    rules:
+      - apiGroups:
+          - linkerd.io
+        apiVersions:
+          - v1alpha1
+          - v1alpha2
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - serviceprofiles
+    sideEffects: None

@@ -20,6 +20,9 @@ const environmentVariablesValidator = z
   })
   .and(imageTagsObjectValidator);
 
-export type EnvironmentVariables = z.infer<typeof environmentVariablesValidator>;
+export type EnvironmentVariables = z.infer<
+  typeof environmentVariablesValidator
+>;
 
-export const getEnvironmentVariables = () => environmentVariablesValidator.parse(process.env);
+export const getEnvironmentVariables = () =>
+  environmentVariablesValidator.parse(process.env);

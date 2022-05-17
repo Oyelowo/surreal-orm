@@ -4,7 +4,6 @@
 // import { DNS_NAME_LINODE_BASE } from "./constant"
 // import { provider } from "./settings";
 
-
 // export const SECRET_NAME_NGINX = "nginx-ingress-tls";
 
 // export const certificateNginx = new cm.v1.Certificate("certificate-nginx", {

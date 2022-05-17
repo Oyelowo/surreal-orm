@@ -7,7 +7,11 @@ const environment = environmentVariables.ENVIRONMENT;
 // TODO: Rethink this abstraction for secret
 const secretsFromLocalConfigs = getSecretsForApp("grpc-mongo", environment);
 
-export const grpcMongoSettings: AppConfigs<"grpc-mongo", "mongodb", "applications"> = {
+export const grpcMongoSettings: AppConfigs<
+  "grpc-mongo",
+  "mongodb",
+  "applications"
+> = {
   kubeConfig: {
     requestMemory: "70Mi",
     requestCpu: "100m",

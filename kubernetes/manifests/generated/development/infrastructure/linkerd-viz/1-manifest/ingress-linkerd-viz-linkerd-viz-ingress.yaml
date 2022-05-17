@@ -12,17 +12,17 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: linkerd.oyedev.com
-    http:
-      paths:
-      - backend:
-          service:
-            name: web
-            port:
-              number: 8084
-        path: /
-        pathType: Prefix
+    - host: linkerd.oyedev.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: web
+                port:
+                  number: 8084
+            path: /
+            pathType: Prefix
   tls:
-  - hosts:
-    - linkerd.oyedev.com
-    secretName: linkerd-nginx-ingress-tls
+    - hosts:
+        - linkerd.oyedev.com
+      secretName: linkerd-nginx-ingress-tls

@@ -15,10 +15,10 @@ metadata:
   namespace: default
 spec:
   ports:
-  - name: http
-    port: 80
-    protocol: TCP
-    targetPort: http
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
   selector:
     app.kubernetes.io/component: default-backend
     app.kubernetes.io/instance: nginx-ingress-controller

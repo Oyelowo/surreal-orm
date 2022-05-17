@@ -1,5 +1,3 @@
-
-
 // NOTE: I initially was encoding the secrets in base64 but it turns out
 // that bitnami sealed secrets not only handles encryption but base64 encoding of the
 // secrets before encrypting them
@@ -39,12 +37,11 @@ export const secretsSample = {
   "argocd-applications-children-services": {},
   "argocd-applications-parents": {},
   "cert-manager": {},
-  "linkerd": {},
+  linkerd: {},
   "linkerd-viz": {},
   "namespace-names": {},
   "nginx-ingress": {},
-  "sealed-secrets": {}
+  "sealed-secrets": {},
 };
-
 
 // Record<ResourceName, Record<string, string>>

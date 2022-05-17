@@ -15,6 +15,6 @@ roleRef:
   kind: ClusterRole
   name: linkerd-policy
 subjects:
-- kind: ServiceAccount
-  name: linkerd-destination
-  namespace: linkerd
+  - kind: ServiceAccount
+    name: linkerd-destination
+    namespace: linkerd

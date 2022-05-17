@@ -18,6 +18,6 @@ roleRef:
   kind: ClusterRole
   name: cert-manager-controller-ingress-shim
 subjects:
-- kind: ServiceAccount
-  name: cert-manager
-  namespace: cert-manager
+  - kind: ServiceAccount
+    name: cert-manager
+    namespace: cert-manager

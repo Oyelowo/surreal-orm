@@ -15,19 +15,19 @@ metadata:
   name: cert-manager:leaderelection
   namespace: kube-system
 rules:
-- apiGroups:
-  - coordination.k8s.io
-  resourceNames:
-  - cert-manager-controller
-  resources:
-  - leases
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
-  - coordination.k8s.io
-  resources:
-  - leases
-  verbs:
-  - create
+  - apiGroups:
+      - coordination.k8s.io
+    resourceNames:
+      - cert-manager-controller
+    resources:
+      - leases
+    verbs:
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create

@@ -14,10 +14,10 @@ metadata:
   namespace: argocd
 spec:
   ports:
-  - name: tcp-controller
-    port: 8082
-    protocol: TCP
-    targetPort: controller
+    - name: tcp-controller
+      port: 8082
+      protocol: TCP
+      targetPort: controller
   selector:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: argocd

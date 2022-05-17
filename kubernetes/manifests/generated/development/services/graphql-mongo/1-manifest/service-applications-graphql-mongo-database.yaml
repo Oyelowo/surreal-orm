@@ -15,9 +15,9 @@ metadata:
 spec:
   clusterIP: None
   ports:
-  - name: mongodb
-    port: 27017
-    targetPort: mongodb
+    - name: mongodb
+      port: 27017
+      targetPort: mongodb
   publishNotReadyAddresses: true
   selector:
     app.kubernetes.io/component: mongodb

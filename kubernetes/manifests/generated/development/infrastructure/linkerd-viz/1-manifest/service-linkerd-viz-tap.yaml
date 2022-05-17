@@ -14,12 +14,12 @@ metadata:
   namespace: linkerd-viz
 spec:
   ports:
-  - name: grpc
-    port: 8088
-    targetPort: 8088
-  - name: apiserver
-    port: 443
-    targetPort: apiserver
+    - name: grpc
+      port: 8088
+      targetPort: 8088
+    - name: apiserver
+      port: 443
+      targetPort: apiserver
   selector:
     component: tap
     linkerd.io/extension: viz

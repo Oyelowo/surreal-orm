@@ -1,5 +1,3 @@
-
-
 import * as z from "zod";
 import { secretsSample } from "../../../scripts/secretsManagement/secretsSample";
 import { NamespaceName } from "../../namespaces/util";
@@ -14,7 +12,8 @@ export type Environment = z.infer<typeof appEnvironmentsSchema>;
 // This might change but make it the environment for now.
 export type NamespaceOfApps = NamespaceName;
 
-export type Memory = `${number}${| "E"
+export type Memory = `${number}${
+  | "E"
   | "P"
   | "T"
   | "G"
@@ -36,8 +35,7 @@ export type ServiceName =
   | "graphql-mongo"
   | "graphql-postgres"
   | "grpc-mongo"
-  | "react-web"
-
+  | "react-web";
 
 export type ArgocdAppResourceName =
   | `argocd-applications-children-${ResourceType}`
@@ -55,10 +53,12 @@ const InfrastructureNames = [
 
 export type InfrastructureName = typeof InfrastructureNames[number];
 
-// A resource can have multiple kubernetes objects/resources e.g linkerd 
-// e.g linkerd can have different 
-export type ResourceName = InfrastructureName | ServiceName | ArgocdAppResourceName;
-
+// A resource can have multiple kubernetes objects/resources e.g linkerd
+// e.g linkerd can have different
+export type ResourceName =
+  | InfrastructureName
+  | ServiceName
+  | ArgocdAppResourceName;
 
 export interface Settings<TAppName extends ServiceName> {
   requestMemory: Memory;
@@ -72,17 +72,19 @@ export interface Settings<TAppName extends ServiceName> {
 
 export type RecursivePartial<T> = {
   [P in keyof T]?: T[P] extends (infer U)[]
-  ? RecursivePartial<U>[]
-  : T[P] extends object | undefined
-  ? RecursivePartial<T[P]>
-  : T[P];
+    ? RecursivePartial<U>[]
+    : T[P] extends object | undefined
+    ? RecursivePartial<T[P]>
+    : T[P];
 };
 
 // make all properties optional recursively including nested objects.
 // keep in mind that this should be used on json / plain objects only.
 // otherwise, it will make class methods optional as well.
 export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends Array<infer I> ? Array<DeepPartial<I>> : DeepPartial<T[P]>;
+  [P in keyof T]?: T[P] extends Array<infer I>
+    ? Array<DeepPartial<I>>
+    : DeepPartial<T[P]>;
 };
 
 type MongoDb = "mongodb";
@@ -91,7 +93,10 @@ type DoesNotHaveDb = "doesNotHaveDb";
 
 export type DBType = MongoDb | PostgresDb | DoesNotHaveDb;
 
-export type MongoDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
+export type MongoDbEnvVars<
+  DBN extends `${ServiceName}-database`,
+  NS extends NamespaceOfApps
+> = {
   dbType: MongoDb;
   MONGODB_NAME: DBN;
   MONGODB_USERNAME: string;
@@ -104,7 +109,10 @@ export type MongoDbEnvVars<DBN extends `${ServiceName}-database`, NS extends Nam
   MONGODB_ROOT_PASSWORD: string;
 };
 
-export type PostgresDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
+export type PostgresDbEnvVars<
+  DBN extends `${ServiceName}-database`,
+  NS extends NamespaceOfApps
+> = {
   dbType: PostgresDb;
   POSTGRES_NAME: DBN;
   POSTGRES_DATABASE_NAME: DBN;
@@ -117,9 +125,13 @@ export type PostgresDbEnvVars<DBN extends `${ServiceName}-database`, NS extends 
 };
 
 type RedisServiceName<AN extends ServiceName> = `${AN}-redis`;
-type RedisServiceNameWithSuffix<AN extends ServiceName> = `${RedisServiceName<AN>}-master`;
+type RedisServiceNameWithSuffix<AN extends ServiceName> =
+  `${RedisServiceName<AN>}-master`;
 
-export type RedisDbEnvVars<AN extends ServiceName, NS extends NamespaceOfApps> = {
+export type RedisDbEnvVars<
+  AN extends ServiceName,
+  NS extends NamespaceOfApps
+> = {
   REDIS_USERNAME?: string;
   REDIS_PASSWORD?: string;
   REDIS_HOST?: `${RedisServiceNameWithSuffix<AN>}.${NS}`; // The application will also need this
@@ -128,7 +140,10 @@ export type RedisDbEnvVars<AN extends ServiceName, NS extends NamespaceOfApps> =
   REDIS_PORT?: "6379";
 };
 
-type DatabaseEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> =
+type DatabaseEnvVars<
+  DBN extends `${ServiceName}-database`,
+  NS extends NamespaceOfApps
+> =
   | MongoDbEnvVars<DBN, NS>
   | PostgresDbEnvVars<DBN, NS>
   | { dbType: DoesNotHaveDb };
@@ -157,9 +172,13 @@ type EnvironmentVariables<
   AN extends ServiceName,
   NS extends NamespaceOfApps,
   DBT extends DBType
-  > = Extract<AppEnvVars<AN, NS>, { dbType: DBT }>;
+> = Extract<AppEnvVars<AN, NS>, { dbType: DBT }>;
 
-export type AppConfigs<AN extends ServiceName, DBT extends DBType, NS extends NamespaceOfApps> = {
+export type AppConfigs<
+  AN extends ServiceName,
+  DBT extends DBType,
+  NS extends NamespaceOfApps
+> = {
   kubeConfig: Settings<NoUnion<AN>>;
   envVars: Omit<EnvironmentVariables<AN, NS, DBT>, "dbType">;
   metadata: {
@@ -168,4 +187,8 @@ export type AppConfigs<AN extends ServiceName, DBT extends DBType, NS extends Na
   };
 };
 
-export type NoUnion<T, U = T> = T extends U ? ([U] extends [T] ? T : never) : never;
+export type NoUnion<T, U = T> = T extends U
+  ? [U] extends [T]
+    ? T
+    : never
+  : never;

@@ -16,6 +16,6 @@ roleRef:
   kind: Role
   name: extension-apiserver-authentication-reader
 subjects:
-- kind: ServiceAccount
-  name: tap
-  namespace: linkerd-viz
+  - kind: ServiceAccount
+    name: tap
+    namespace: linkerd-viz

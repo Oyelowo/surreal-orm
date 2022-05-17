@@ -1,4 +1,9 @@
-import { ServiceName, Environment, ResourceName, ResourceType } from "./types/own-types";
+import {
+  ServiceName,
+  Environment,
+  ResourceName,
+  ResourceType,
+} from "./types/own-types";
 import path from "path";
 import sh from "shelljs";
 import * as k8s from "@pulumi/kubernetes";
@@ -25,13 +30,16 @@ export const getGeneratedEnvManifestsDir = (environment: Environment) => {
   return path.join(MANIFESTS_DIR, "generated", environment);
 };
 
-
 export const getPathToResourcesDir = (
   resourceName: ResourceName,
   resourceType: ResourceType,
   environment: Environment
 ) => {
-  return path.join(getGeneratedEnvManifestsDir(environment), resourceType, resourceName);
+  return path.join(
+    getGeneratedEnvManifestsDir(environment),
+    resourceType,
+    resourceName
+  );
   // return `kubernetes/manifests/generated/${environment}/services/${appName}`;
 };
 
@@ -70,11 +78,10 @@ function getResourceProperties<T>(
     case "nginx-ingress":
     case "argocd-applications-children-infrastructure":
     case "argocd-applications-children-services":
-    case "argocd-applications-parents": // case "services-argocd-applications":
-      // case "infrastructure-argocd-applications":
-      {
-        return onGetResourceProperties("infrastructure");
-      }
+    case "argocd-applications-parents": // case "infrastructure-argocd-applications": // case "services-argocd-applications":
+    {
+      return onGetResourceProperties("infrastructure");
+    }
   }
   return assertUnreachable(resourceName);
 }

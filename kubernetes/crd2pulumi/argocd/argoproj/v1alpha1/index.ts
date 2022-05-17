@@ -15,18 +15,18 @@ import { Application } from "./application";
 import { ApplicationSet } from "./applicationSet";
 
 const _module = {
-    version: utilities.getVersion(),
-    construct: (name: string, type: string, urn: string): pulumi.Resource => {
-        switch (type) {
-            case "kubernetes:argoproj.io/v1alpha1:AppProject":
-                return new AppProject(name, <any>undefined, { urn })
-            case "kubernetes:argoproj.io/v1alpha1:Application":
-                return new Application(name, <any>undefined, { urn })
-            case "kubernetes:argoproj.io/v1alpha1:ApplicationSet":
-                return new ApplicationSet(name, <any>undefined, { urn })
-            default:
-                throw new Error(`unknown resource type ${type}`);
-        }
-    },
+  version: utilities.getVersion(),
+  construct: (name: string, type: string, urn: string): pulumi.Resource => {
+    switch (type) {
+      case "kubernetes:argoproj.io/v1alpha1:AppProject":
+        return new AppProject(name, <any>undefined, { urn });
+      case "kubernetes:argoproj.io/v1alpha1:Application":
+        return new Application(name, <any>undefined, { urn });
+      case "kubernetes:argoproj.io/v1alpha1:ApplicationSet":
+        return new ApplicationSet(name, <any>undefined, { urn });
+      default:
+        throw new Error(`unknown resource type ${type}`);
+    }
+  },
 };
-pulumi.runtime.registerResourceModule("crds", "argoproj.io/v1alpha1", _module)
+pulumi.runtime.registerResourceModule("crds", "argoproj.io/v1alpha1", _module);

@@ -1,11 +1,11 @@
-import { ResourceName } from './../../shared/manifestsDirectory';
-import { helmChartsInfo } from './../../shared/helmChartInfo';
+import { ResourceName } from "./../../shared/manifestsDirectory";
+import { helmChartsInfo } from "./../../shared/helmChartInfo";
 import { Linkerd2HelmValues } from "../../shared/types/helm-charts/linkerd2HelmValues";
 import * as k8s from "@pulumi/kubernetes";
 
 import { namespaceNames } from "../../namespaces/util";
 import { DeepPartial } from "../../shared/types/own-types";
-import { linkerdProvider } from './settings';
+import { linkerdProvider } from "./settings";
 /* 
  --set-file identityTrustAnchorsPEM=ca.crt \
   --set-file identity.issuer.tls.crtPEM=issuer.crt \
@@ -24,7 +24,7 @@ const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
   // identityTrustDomain
   // installNamespace: false,
   podAnnotations: {
-    "sealedsecrets.bitnami.com/managed": "true"
+    "sealedsecrets.bitnami.com/managed": "true",
   },
   identity: {
     externalCA: true,
@@ -34,7 +34,7 @@ const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
       //   crtPEM: "",
       //   keyPEM: "",
       // },
-    }
+    },
   },
   // proxyInit:{
   //   runAsRoot: true
@@ -43,7 +43,10 @@ const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
 };
 
 // const resourceName: ResourceName = "linkerd";
-const { repo, linkerd2: { chart, version } } = helmChartsInfo.linkerdRepo;
+const {
+  repo,
+  linkerd2: { chart, version },
+} = helmChartsInfo.linkerdRepo;
 export const linkerd = new k8s.helm.v3.Chart(
   chart,
   {

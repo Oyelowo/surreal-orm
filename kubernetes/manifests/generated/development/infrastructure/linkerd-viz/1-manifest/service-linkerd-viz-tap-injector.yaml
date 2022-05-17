@@ -13,9 +13,9 @@ metadata:
   namespace: linkerd-viz
 spec:
   ports:
-  - name: tap-injector
-    port: 443
-    targetPort: tap-injector
+    - name: tap-injector
+      port: 443
+      targetPort: tap-injector
   selector:
     component: tap-injector
     linkerd.io/extension: viz

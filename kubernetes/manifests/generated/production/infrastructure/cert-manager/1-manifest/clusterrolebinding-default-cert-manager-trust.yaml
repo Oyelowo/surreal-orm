@@ -16,6 +16,6 @@ roleRef:
   kind: ClusterRole
   name: cert-manager-trust
 subjects:
-- kind: ServiceAccount
-  name: cert-manager-trust
-  namespace: cert-manager
+  - kind: ServiceAccount
+    name: cert-manager-trust
+    namespace: cert-manager

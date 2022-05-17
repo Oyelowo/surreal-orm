@@ -14,24 +14,24 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: oyelowo.dev
-    http:
-      paths:
-      - backend:
-          service:
-            name: react-web
-            port:
-              number: 3000
-        path: /
-        pathType: Prefix
-      - backend:
-          service:
-            name: graphql-mongo
-            port:
-              number: 8000
-        path: /graphql
-        pathType: Prefix
+    - host: oyelowo.dev
+      http:
+        paths:
+          - backend:
+              service:
+                name: react-web
+                port:
+                  number: 3000
+            path: /
+            pathType: Prefix
+          - backend:
+              service:
+                name: graphql-mongo
+                port:
+                  number: 8000
+            path: /graphql
+            pathType: Prefix
   tls:
-  - hosts:
-    - oyelowo.dev
-    secretName: nginx-ingress-tls
+    - hosts:
+        - oyelowo.dev
+      secretName: nginx-ingress-tls

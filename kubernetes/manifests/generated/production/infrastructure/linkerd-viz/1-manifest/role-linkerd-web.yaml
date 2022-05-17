@@ -12,31 +12,31 @@ metadata:
   name: web
   namespace: linkerd
 rules:
-- apiGroups:
-  - ""
-  resourceNames:
-  - linkerd-config
-  resources:
-  - configmaps
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  - configmaps
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - serviceaccounts
-  - pods
-  verbs:
-  - list
-- apiGroups:
-  - apps
-  resources:
-  - replicasets
-  verbs:
-  - list
+  - apiGroups:
+      - ""
+    resourceNames:
+      - linkerd-config
+    resources:
+      - configmaps
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - configmaps
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts
+      - pods
+    verbs:
+      - list
+  - apiGroups:
+      - apps
+    resources:
+      - replicasets
+    verbs:
+      - list

@@ -9,11 +9,11 @@ metadata:
     linkerd.io/extension: viz
   name: linkerd-tap-injector
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-  - list
-  - watch
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch

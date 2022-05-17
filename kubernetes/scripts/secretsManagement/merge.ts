@@ -9,26 +9,28 @@ import { SECRET_DEVELOPMENT } from "./../../.secrets/development";
 import { SECRET_PRODUCTION } from "./../../.secrets/production";
 
 import R from "ramda";
-import { getPlainSecretInputFilePath, Secrets, getContent } from "./setupSecrets";
-
+import {
+  getPlainSecretInputFilePath,
+  Secrets,
+  getContent,
+} from "./setupSecrets";
 
 export function getMerged(environment: Environment) {
+  const kk: Record<Environment, Secrets> = {
+    local: SECRET_LOCAL,
+    development: SECRET_DEVELOPMENT,
+    staging: SECRET_STAGING,
+    production: SECRET_PRODUCTION,
+  };
 
-    const kk: Record<Environment, Secrets> = {
-        local: SECRET_LOCAL,
-        development: SECRET_DEVELOPMENT,
-        staging: SECRET_STAGING,
-        production: SECRET_PRODUCTION,
-    };
+  const existingContent = kk[environment] ?? {};
+  const secrets = R.mergeDeepLeft(existingContent, secretsSample);
+  const filePath = getPlainSecretInputFilePath(environment);
+  const content = getContent({ environment, secrets });
 
-    const existingContent = kk[environment] ?? {}
-    const secrets = R.mergeDeepLeft(existingContent, secretsSample);
-    const filePath = getPlainSecretInputFilePath(environment);
-    const content = getContent({ environment, secrets });
-
-    sh.exec(`echo ${content} > ${filePath}`);
-    // return content
-    // sh.touch(getFilePath(environment))
+  sh.exec(`echo ${content} > ${filePath}`);
+  // return content
+  // sh.touch(getFilePath(environment))
 }
 
 ENVIRONMENTS_ALL.forEach(getMerged);

@@ -14,9 +14,9 @@ metadata:
   namespace: linkerd-viz
 spec:
   ports:
-  - name: admin-http
-    port: 9090
-    targetPort: 9090
+    - name: admin-http
+      port: 9090
+      targetPort: 9090
   selector:
     component: prometheus
     linkerd.io/extension: viz

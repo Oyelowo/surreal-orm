@@ -10,31 +10,31 @@ metadata:
     linkerd.io/control-plane-ns: linkerd
   name: linkerd-proxy-injector-webhook-config
 webhooks:
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURVekNDQWp1Z0F3SUJBZ0lSQU5TZUptL0VoVktaaFh5OVRDcElyR3d3RFFZSktvWklodmNOQVFFTEJRQXcKTFRFck1Da0dBMVVFQXhNaWJHbHVhMlZ5WkMxd2NtOTRlUzFwYm1wbFkzUnZjaTVzYVc1clpYSmtMbk4yWXpBZQpGdzB5TWpBMU1UVXdNelUzTWpoYUZ3MHlNekExTVRVd016VTNNamhhTUMweEt6QXBCZ05WQkFNVElteHBibXRsCmNtUXRjSEp2ZUhrdGFXNXFaV04wYjNJdWJHbHVhMlZ5WkM1emRtTXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUEKQTRJQkR3QXdnZ0VLQW9JQkFRQ3pBWURlWjBsQnBWaG9kUVZKRFBIMUhFNDJSRnVBdXFaOVRtSTBTVk1KdXlGNApGckZTbWovL2lqd3dhcTFMTTNTR21mQXhvbUI4TGpRUVdLbTlvQ29pUk5WTDNpYitmWFBtbm9nK2tjNWt4d0pkCm4wNnM1SVRFVjA1aW9rbGZjbjU4MDNuZUgxOG52YXV3bXp0aVBQZG5QNU8zVGVUN2kvYUYxbzh3NHptSUxET2cKbm4vZnNRRWcwSHFyRkppU0l2NDZWNzZlUzRzdFJreEFJL0JHdVozRTJwMS9vSWF1QTlGMURhb21abUlxVDNpUAppdmNycWEzWERnT3g5Zlcrb2gxN3VPUnR3T1pwZTlIcEFHUkprSTZ3STduQS9zVnd0NEp6Qml4VnhJYWlnTFY3CjYrTmpiL3E1MTgrblVMWnY5bHFac254VVhqaEJxL0VwbDVsbnFrbmRBZ01CQUFHamJqQnNNQTRHQTFVZER3RUIKL3dRRUF3SUZvREFkQmdOVkhTVUVGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0RBWURWUjBUQVFILwpCQUl3QURBdEJnTlZIUkVFSmpBa2dpSnNhVzVyWlhKa0xYQnliM2g1TFdsdWFtVmpkRzl5TG14cGJtdGxjbVF1CmMzWmpNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUNjYlRTU3F0UjQ3RzhRdExQUVRjNVZyWWhrVjRyWVUvSmYKTzVnUDRjSk4xZHNVVkRoL1ZMaWlsdnkzMTdySTRKRUNQc3FYVDR3QlFLUU1yS3pnT3hwUmJRRXc4NlByNlBHcQpkb1JGRlFHQ1IvNGEyOFVyQlVJZmVZZnFmVDNLUFZrUFp0U1ZvQXJRVUh2M0xXYUVrOFlPdlpjUVlnOFZOMkRZCkRZQXNiWGtvOWpWM3VJMTZJM1NQdStSWUVtZGFCRHdqK3owUGFUd0o1K0ZGSUhXNFI5allPRVNWUFhEVXRxS1MKZkthTE9sSTB1NUt1Z0VsQVNaLzI5YjdReDlzTUpmQ0syWHJUdGhpUGtqN01SV2RJUGJHcHJ6bUVKdVBONGdmOQpGaWUyVFBPdzlEaGwzbWs3cWpSbEhzRzhDczNONFVkWi9xS0tuSStlazFkSmhzQWxGNVhhCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=
-    service:
-      name: linkerd-proxy-injector
-      namespace: linkerd
-      path: /
-  failurePolicy: Ignore
-  name: linkerd-proxy-injector.linkerd.io
-  namespaceSelector:
-    matchExpressions:
-    - key: config.linkerd.io/admission-webhooks
-      operator: NotIn
-      values:
-      - disabled
-  rules:
-  - apiGroups:
-    - ""
-    apiVersions:
-    - v1
-    operations:
-    - CREATE
-    resources:
-    - pods
-    - services
-  sideEffects: None
+  - admissionReviewVersions:
+      - v1
+      - v1beta1
+    clientConfig:
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURVekNDQWp1Z0F3SUJBZ0lSQU5TZUptL0VoVktaaFh5OVRDcElyR3d3RFFZSktvWklodmNOQVFFTEJRQXcKTFRFck1Da0dBMVVFQXhNaWJHbHVhMlZ5WkMxd2NtOTRlUzFwYm1wbFkzUnZjaTVzYVc1clpYSmtMbk4yWXpBZQpGdzB5TWpBMU1UVXdNelUzTWpoYUZ3MHlNekExTVRVd016VTNNamhhTUMweEt6QXBCZ05WQkFNVElteHBibXRsCmNtUXRjSEp2ZUhrdGFXNXFaV04wYjNJdWJHbHVhMlZ5WkM1emRtTXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUEKQTRJQkR3QXdnZ0VLQW9JQkFRQ3pBWURlWjBsQnBWaG9kUVZKRFBIMUhFNDJSRnVBdXFaOVRtSTBTVk1KdXlGNApGckZTbWovL2lqd3dhcTFMTTNTR21mQXhvbUI4TGpRUVdLbTlvQ29pUk5WTDNpYitmWFBtbm9nK2tjNWt4d0pkCm4wNnM1SVRFVjA1aW9rbGZjbjU4MDNuZUgxOG52YXV3bXp0aVBQZG5QNU8zVGVUN2kvYUYxbzh3NHptSUxET2cKbm4vZnNRRWcwSHFyRkppU0l2NDZWNzZlUzRzdFJreEFJL0JHdVozRTJwMS9vSWF1QTlGMURhb21abUlxVDNpUAppdmNycWEzWERnT3g5Zlcrb2gxN3VPUnR3T1pwZTlIcEFHUkprSTZ3STduQS9zVnd0NEp6Qml4VnhJYWlnTFY3CjYrTmpiL3E1MTgrblVMWnY5bHFac254VVhqaEJxL0VwbDVsbnFrbmRBZ01CQUFHamJqQnNNQTRHQTFVZER3RUIKL3dRRUF3SUZvREFkQmdOVkhTVUVGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0RBWURWUjBUQVFILwpCQUl3QURBdEJnTlZIUkVFSmpBa2dpSnNhVzVyWlhKa0xYQnliM2g1TFdsdWFtVmpkRzl5TG14cGJtdGxjbVF1CmMzWmpNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUNjYlRTU3F0UjQ3RzhRdExQUVRjNVZyWWhrVjRyWVUvSmYKTzVnUDRjSk4xZHNVVkRoL1ZMaWlsdnkzMTdySTRKRUNQc3FYVDR3QlFLUU1yS3pnT3hwUmJRRXc4NlByNlBHcQpkb1JGRlFHQ1IvNGEyOFVyQlVJZmVZZnFmVDNLUFZrUFp0U1ZvQXJRVUh2M0xXYUVrOFlPdlpjUVlnOFZOMkRZCkRZQXNiWGtvOWpWM3VJMTZJM1NQdStSWUVtZGFCRHdqK3owUGFUd0o1K0ZGSUhXNFI5allPRVNWUFhEVXRxS1MKZkthTE9sSTB1NUt1Z0VsQVNaLzI5YjdReDlzTUpmQ0syWHJUdGhpUGtqN01SV2RJUGJHcHJ6bUVKdVBONGdmOQpGaWUyVFBPdzlEaGwzbWs3cWpSbEhzRzhDczNONFVkWi9xS0tuSStlazFkSmhzQWxGNVhhCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=
+      service:
+        name: linkerd-proxy-injector
+        namespace: linkerd
+        path: /
+    failurePolicy: Ignore
+    name: linkerd-proxy-injector.linkerd.io
+    namespaceSelector:
+      matchExpressions:
+        - key: config.linkerd.io/admission-webhooks
+          operator: NotIn
+          values:
+            - disabled
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+        resources:
+          - pods
+          - services
+    sideEffects: None

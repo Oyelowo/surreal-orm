@@ -1,4 +1,4 @@
-import { Environment } from '../../resources/shared/types/own-types';
+import { Environment } from "../../resources/shared/types/own-types";
 import inquirer from "inquirer";
 import sh from "shelljs";
 import util from "util";
@@ -9,7 +9,10 @@ import chalk from "chalk";
 Prompt cluster selection
 */
 export async function promptKubernetesClusterSwitch(environment: Environment) {
-  const kubernetesContexts = sh.exec("kubectl config get-contexts --output=name", { silent: true });
+  const kubernetesContexts = sh.exec(
+    "kubectl config get-contexts --output=name",
+    { silent: true }
+  );
   const choices = kubernetesContexts.stdout
     .trim()
     .split("\n")
@@ -24,13 +27,16 @@ export async function promptKubernetesClusterSwitch(environment: Environment) {
         `🆘Select the ${environment.toLocaleUpperCase()} cluster ‼️‼️‼️‼️`
       ),
       choices: choices,
-      default: choices.find(
-        (s) => ["local", "K3d", "minikube"].includes(String(s))
+      default: choices.find((s) =>
+        ["local", "K3d", "minikube"].includes(String(s))
       ),
       pageSize: 20,
     },
   ]);
 
-  const selectContext = sh.exec(`kubectl config use-context ${answers.cluster}`, { silent: true });
+  const selectContext = sh.exec(
+    `kubectl config use-context ${answers.cluster}`,
+    { silent: true }
+  );
   sh.echo(chalk.greenBright(`${selectContext.stdout} 🎉`));
 }

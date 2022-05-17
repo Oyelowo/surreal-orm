@@ -10,9 +10,9 @@ metadata:
     linkerd.io/extension: viz
   name: linkerd-linkerd-viz-web-api
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - list
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - list

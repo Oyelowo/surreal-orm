@@ -32,49 +32,49 @@ spec:
         namespace: linkerd-viz
     spec:
       containers:
-      - args:
-        - --log.level=info
-        - --log.format=logfmt
-        - --config.file=/etc/prometheus/prometheus.yml
-        - --storage.tsdb.path=/data
-        - --storage.tsdb.retention.time=6h
-        image: prom/prometheus:v2.19.3
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          httpGet:
-            path: /-/healthy
-            port: 9090
-          initialDelaySeconds: 30
-          timeoutSeconds: 30
-        name: prometheus
-        ports:
-        - containerPort: 9090
-          name: admin-http
-        readinessProbe:
-          httpGet:
-            path: /-/ready
-            port: 9090
-          initialDelaySeconds: 30
-          timeoutSeconds: 30
-        securityContext:
-          runAsGroup: 65534
-          runAsNonRoot: true
-          runAsUser: 65534
-        volumeMounts:
-        - mountPath: /data
-          name: data
-        - mountPath: /etc/prometheus/prometheus.yml
-          name: prometheus-config
-          readOnly: true
-          subPath: prometheus.yml
+        - args:
+            - --log.level=info
+            - --log.format=logfmt
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/data
+            - --storage.tsdb.retention.time=6h
+          image: prom/prometheus:v2.19.3
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+          name: prometheus
+          ports:
+            - containerPort: 9090
+              name: admin-http
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+          securityContext:
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+          volumeMounts:
+            - mountPath: /data
+              name: data
+            - mountPath: /etc/prometheus/prometheus.yml
+              name: prometheus-config
+              readOnly: true
+              subPath: prometheus.yml
       nodeSelector:
         kubernetes.io/os: linux
       securityContext:
         fsGroup: 65534
       serviceAccountName: prometheus
       volumes:
-      - emptyDir: {}
-        name: data
-      - configMap:
+        - emptyDir: {}
+          name: data
+        - configMap:
+            name: prometheus-config
           name: prometheus-config
-        name: prometheus-config

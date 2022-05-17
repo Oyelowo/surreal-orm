@@ -14,10 +14,10 @@ metadata:
   namespace: argocd
 spec:
   ports:
-  - name: tcp-repo-server
-    port: 8081
-    protocol: TCP
-    targetPort: repo-server
+    - name: tcp-repo-server
+      port: 8081
+      protocol: TCP
+      targetPort: repo-server
   selector:
     app.kubernetes.io/component: repo-server
     app.kubernetes.io/instance: argocd

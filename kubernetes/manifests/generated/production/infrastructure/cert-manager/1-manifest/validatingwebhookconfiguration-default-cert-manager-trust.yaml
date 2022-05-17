@@ -14,25 +14,25 @@ metadata:
     helm.sh/chart: cert-manager-trust-v0.1.1
   name: cert-manager-trust
 webhooks:
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    service:
-      name: cert-manager-trust
-      namespace: cert-manager
-      path: /validate
-  failurePolicy: Fail
-  name: trust.cert-manager.io
-  rules:
-  - apiGroups:
-    - trust.cert-manager.io
-    apiVersions:
-    - '*'
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - '*/*'
-  sideEffects: None
-  timeoutSeconds: 5
+  - admissionReviewVersions:
+      - v1
+      - v1beta1
+    clientConfig:
+      service:
+        name: cert-manager-trust
+        namespace: cert-manager
+        path: /validate
+    failurePolicy: Fail
+    name: trust.cert-manager.io
+    rules:
+      - apiGroups:
+          - trust.cert-manager.io
+        apiVersions:
+          - "*"
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - "*/*"
+    sideEffects: None
+    timeoutSeconds: 5

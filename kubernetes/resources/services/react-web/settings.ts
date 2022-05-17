@@ -4,7 +4,11 @@ import { AppConfigs } from "../../shared/types/own-types";
 import { getEnvironmentVariables } from "../../shared/validations";
 import { getFQDNFromSettings } from "../../shared/helpers";
 
-export const reactWebSettings: AppConfigs<"react-web", "doesNotHaveDb", "applications"> = {
+export const reactWebSettings: AppConfigs<
+  "react-web",
+  "doesNotHaveDb",
+  "applications"
+> = {
   kubeConfig: {
     requestMemory: "70Mi",
     requestCpu: "100m",
@@ -12,7 +16,9 @@ export const reactWebSettings: AppConfigs<"react-web", "doesNotHaveDb", "applica
     limitCpu: "100m",
     replicaCount: 2,
     host: "0.0.0.0",
-    image: `ghcr.io/oyelowo/react-web:${getEnvironmentVariables().IMAGE_TAG_REACT_WEB}`,
+    image: `ghcr.io/oyelowo/react-web:${
+      getEnvironmentVariables().IMAGE_TAG_REACT_WEB
+    }`,
   },
 
   envVars: {
@@ -22,7 +28,8 @@ export const reactWebSettings: AppConfigs<"react-web", "doesNotHaveDb", "applica
     // TODO: Add from environment variables
     GITHUB_CLIENT_ID: "89c19374f7e7b5b35164",
     GITHUB_CLIENT_SECRET: "129488cc92e2d2f91e3a5a024086396c48c65339",
-    GOOGLE_CLIENT_ID: "855174209543-6m0f088e55d3mevhnr8bs0qjap8j6g0g.apps.googleusercontent.com",
+    GOOGLE_CLIENT_ID:
+      "855174209543-6m0f088e55d3mevhnr8bs0qjap8j6g0g.apps.googleusercontent.com",
     GOOGLE_CLIENT_SECRET: "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",
     NEXTAUTH_URL: getFQDNFromSettings(graphqlMongoSettings), // Get Url mongoFQDN
     GRAPHQL_MONGO_URL: getFQDNFromSettings(graphqlMongoSettings), // Get Url mongoFQDN

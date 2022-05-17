@@ -32,36 +32,36 @@ spec:
         namespace: linkerd-viz
     spec:
       containers:
-      - args:
-        - -linkerd-metrics-api-addr=metrics-api.linkerd-viz.svc.cluster.local:8085
-        - -cluster-domain=cluster.local
-        - -grafana-addr=grafana.linkerd-viz.svc.cluster.local:3000
-        - -controller-namespace=linkerd
-        - -viz-namespace=linkerd-viz
-        - -log-level=info
-        - -log-format=plain
-        - -enforced-host=^(localhost|127\.0\.0\.1|web\.linkerd-viz\.svc\.cluster\.local|web\.linkerd-viz\.svc|\[::1\])(:\d+)?$
-        - -enable-pprof=false
-        image: cr.l5d.io/linkerd/web:stable-2.11.2
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          httpGet:
-            path: /ping
-            port: 9994
-          initialDelaySeconds: 10
-        name: web
-        ports:
-        - containerPort: 8084
-          name: http
-        - containerPort: 9994
-          name: admin-http
-        readinessProbe:
-          failureThreshold: 7
-          httpGet:
-            path: /ready
-            port: 9994
-        securityContext:
-          runAsUser: 2103
+        - args:
+            - -linkerd-metrics-api-addr=metrics-api.linkerd-viz.svc.cluster.local:8085
+            - -cluster-domain=cluster.local
+            - -grafana-addr=grafana.linkerd-viz.svc.cluster.local:3000
+            - -controller-namespace=linkerd
+            - -viz-namespace=linkerd-viz
+            - -log-level=info
+            - -log-format=plain
+            - -enforced-host=^(localhost|127\.0\.0\.1|web\.linkerd-viz\.svc\.cluster\.local|web\.linkerd-viz\.svc|\[::1\])(:\d+)?$
+            - -enable-pprof=false
+          image: cr.l5d.io/linkerd/web:stable-2.11.2
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 9994
+            initialDelaySeconds: 10
+          name: web
+          ports:
+            - containerPort: 8084
+              name: http
+            - containerPort: 9994
+              name: admin-http
+          readinessProbe:
+            failureThreshold: 7
+            httpGet:
+              path: /ready
+              port: 9994
+          securityContext:
+            runAsUser: 2103
       nodeSelector:
         kubernetes.io/os: linux
       serviceAccountName: web

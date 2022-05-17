@@ -9,9 +9,9 @@ metadata:
   name: linkerd-identity-trust-roots
 spec:
   sources:
-  - secret:
-      key: ca.crt
-      name: linkerd-identity-trust-roots
+    - secret:
+        key: ca.crt
+        name: linkerd-identity-trust-roots
   target:
     configMap:
       key: ca-bundle.crt

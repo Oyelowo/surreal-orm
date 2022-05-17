@@ -31,15 +31,15 @@ spec:
         helm.sh/chart: cert-manager-v1.8.0
     spec:
       containers:
-      - args:
-        - check
-        - api
-        - --wait=1m
-        image: quay.io/jetstack/cert-manager-ctl:v1.8.0
-        imagePullPolicy: IfNotPresent
-        name: cert-manager
-        securityContext:
-          allowPrivilegeEscalation: false
+        - args:
+            - check
+            - api
+            - --wait=1m
+          image: quay.io/jetstack/cert-manager-ctl:v1.8.0
+          imagePullPolicy: IfNotPresent
+          name: cert-manager
+          securityContext:
+            allowPrivilegeEscalation: false
       restartPolicy: OnFailure
       securityContext:
         runAsNonRoot: true

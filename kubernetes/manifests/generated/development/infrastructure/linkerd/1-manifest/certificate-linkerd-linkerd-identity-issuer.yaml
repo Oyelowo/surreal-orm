@@ -11,7 +11,7 @@ metadata:
 spec:
   commonName: identity.linkerd.cluster.local
   dnsNames:
-  - identity.linkerd.cluster.local
+    - identity.linkerd.cluster.local
   duration: 48h
   isCA: true
   issuerRef:
@@ -22,7 +22,7 @@ spec:
   renewBefore: 25h
   secretName: linkerd-identity-issuer
   usages:
-  - cert sign
-  - crl sign
-  - server auth
-  - client auth
+    - cert sign
+    - crl sign
+    - server auth
+    - client auth

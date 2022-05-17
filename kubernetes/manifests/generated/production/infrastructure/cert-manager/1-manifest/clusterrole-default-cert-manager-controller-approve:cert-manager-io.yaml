@@ -14,12 +14,12 @@ metadata:
     helm.sh/chart: cert-manager-v1.8.0
   name: cert-manager-controller-approve:cert-manager-io
 rules:
-- apiGroups:
-  - cert-manager.io
-  resourceNames:
-  - issuers.cert-manager.io/*
-  - clusterissuers.cert-manager.io/*
-  resources:
-  - signers
-  verbs:
-  - approve
+  - apiGroups:
+      - cert-manager.io
+    resourceNames:
+      - issuers.cert-manager.io/*
+      - clusterissuers.cert-manager.io/*
+    resources:
+      - signers
+    verbs:
+      - approve

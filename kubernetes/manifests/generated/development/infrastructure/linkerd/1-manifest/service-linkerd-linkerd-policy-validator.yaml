@@ -13,9 +13,9 @@ metadata:
   namespace: linkerd
 spec:
   ports:
-  - name: policy-https
-    port: 443
-    targetPort: policy-https
+    - name: policy-https
+      port: 443
+      targetPort: policy-https
   selector:
     linkerd.io/control-plane-component: destination
   type: ClusterIP

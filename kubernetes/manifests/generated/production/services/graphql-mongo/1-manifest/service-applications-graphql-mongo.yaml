@@ -10,10 +10,10 @@ metadata:
   namespace: applications
 spec:
   ports:
-  - name: graphql-mongo-http
-    port: 8000
-    protocol: TCP
-    targetPort: 8000
+    - name: graphql-mongo-http
+      port: 8000
+      protocol: TCP
+      targetPort: 8000
   selector:
     app: graphql
   type: ClusterIP

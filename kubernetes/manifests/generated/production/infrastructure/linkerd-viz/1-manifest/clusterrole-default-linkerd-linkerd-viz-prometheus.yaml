@@ -10,13 +10,13 @@ metadata:
     linkerd.io/extension: viz
   name: linkerd-linkerd-viz-prometheus
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - nodes
-  - nodes/proxy
-  - pods
-  verbs:
-  - get
-  - list
-  - watch
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+      - nodes/proxy
+      - pods
+    verbs:
+      - get
+      - list
+      - watch

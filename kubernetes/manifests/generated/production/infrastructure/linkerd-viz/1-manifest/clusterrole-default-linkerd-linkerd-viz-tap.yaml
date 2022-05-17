@@ -10,37 +10,37 @@ metadata:
     linkerd.io/extension: viz
   name: linkerd-linkerd-viz-tap
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - services
-  - replicationcontrollers
-  - namespaces
-  - nodes
-  verbs:
-  - list
-  - get
-  - watch
-- apiGroups:
-  - extensions
-  - apps
-  resources:
-  - daemonsets
-  - deployments
-  - replicasets
-  - statefulsets
-  verbs:
-  - list
-  - get
-  - watch
-- apiGroups:
-  - extensions
-  - batch
-  resources:
-  - cronjobs
-  - jobs
-  verbs:
-  - list
-  - get
-  - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - services
+      - replicationcontrollers
+      - namespaces
+      - nodes
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - extensions
+      - apps
+    resources:
+      - daemonsets
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - extensions
+      - batch
+    resources:
+      - cronjobs
+      - jobs
+    verbs:
+      - list
+      - get
+      - watch

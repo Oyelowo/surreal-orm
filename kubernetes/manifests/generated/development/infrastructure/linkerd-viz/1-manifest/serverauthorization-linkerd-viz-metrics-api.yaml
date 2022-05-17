@@ -15,7 +15,7 @@ spec:
   client:
     meshTLS:
       serviceAccounts:
-      - name: web
-      - name: prometheus
+        - name: web
+        - name: prometheus
   server:
     name: metrics-api

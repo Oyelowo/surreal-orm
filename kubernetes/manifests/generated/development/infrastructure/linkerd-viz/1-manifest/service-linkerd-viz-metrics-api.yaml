@@ -13,9 +13,9 @@ metadata:
   namespace: linkerd-viz
 spec:
   ports:
-  - name: http
-    port: 8085
-    targetPort: 8085
+    - name: http
+      port: 8085
+      targetPort: 8085
   selector:
     component: metrics-api
     linkerd.io/extension: viz

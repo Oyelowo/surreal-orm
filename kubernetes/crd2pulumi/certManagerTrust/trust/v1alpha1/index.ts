@@ -11,14 +11,18 @@ export * from "./bundle";
 import { Bundle } from "./bundle";
 
 const _module = {
-    version: utilities.getVersion(),
-    construct: (name: string, type: string, urn: string): pulumi.Resource => {
-        switch (type) {
-            case "kubernetes:trust.cert-manager.io/v1alpha1:Bundle":
-                return new Bundle(name, <any>undefined, { urn })
-            default:
-                throw new Error(`unknown resource type ${type}`);
-        }
-    },
+  version: utilities.getVersion(),
+  construct: (name: string, type: string, urn: string): pulumi.Resource => {
+    switch (type) {
+      case "kubernetes:trust.cert-manager.io/v1alpha1:Bundle":
+        return new Bundle(name, <any>undefined, { urn });
+      default:
+        throw new Error(`unknown resource type ${type}`);
+    }
+  },
 };
-pulumi.runtime.registerResourceModule("crds", "trust.cert-manager.io/v1alpha1", _module)
+pulumi.runtime.registerResourceModule(
+  "crds",
+  "trust.cert-manager.io/v1alpha1",
+  _module
+);

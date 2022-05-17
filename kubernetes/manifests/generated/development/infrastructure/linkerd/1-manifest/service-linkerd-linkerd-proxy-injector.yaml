@@ -14,9 +14,9 @@ metadata:
   namespace: linkerd
 spec:
   ports:
-  - name: proxy-injector
-    port: 443
-    targetPort: proxy-injector
+    - name: proxy-injector
+      port: 443
+      targetPort: proxy-injector
   selector:
     linkerd.io/control-plane-component: proxy-injector
   type: ClusterIP

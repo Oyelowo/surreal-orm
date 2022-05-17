@@ -14,7 +14,7 @@ metadata:
   namespace: cert-manager
 spec:
   dnsNames:
-  - cert-manager-trust.cert-manager.svc
+    - cert-manager-trust.cert-manager.svc
   issuerRef:
     name: cert-manager-trust
   revisionHistoryLimit: 1

@@ -13,9 +13,9 @@ metadata:
   namespace: linkerd
 spec:
   ports:
-  - name: sp-validator
-    port: 443
-    targetPort: sp-validator
+    - name: sp-validator
+      port: 443
+      targetPort: sp-validator
   selector:
     linkerd.io/control-plane-component: destination
   type: ClusterIP

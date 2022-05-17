@@ -5,7 +5,11 @@ import { getSecretsForApp } from "../../../scripts/secretsManagement/getSecretsF
 const environment = getEnvironmentVariables().ENVIRONMENT;
 const secretsFromLocalConfigs = getSecretsForApp("graphql-postgres");
 
-export const graphqlPostgresSettings: AppConfigs<"graphql-postgres", "postgresdb", "applications"> = {
+export const graphqlPostgresSettings: AppConfigs<
+  "graphql-postgres",
+  "postgresdb",
+  "applications"
+> = {
   kubeConfig: {
     requestMemory: "70Mi",
     requestCpu: "100m",
@@ -13,7 +17,9 @@ export const graphqlPostgresSettings: AppConfigs<"graphql-postgres", "postgresdb
     limitCpu: "100m",
     replicaCount: 3,
     host: "0.0.0.0",
-    image: `ghcr.io/oyelowo/graphql-postgres:${getEnvironmentVariables().IMAGE_TAG_GRAPHQL_POSTGRES}`,
+    image: `ghcr.io/oyelowo/graphql-postgres:${
+      getEnvironmentVariables().IMAGE_TAG_GRAPHQL_POSTGRES
+    }`,
   },
 
   envVars: {

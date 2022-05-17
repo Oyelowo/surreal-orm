@@ -1,4 +1,4 @@
-import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker';
+import { DOCKER_REGISTRY_KEY } from "./../infrastructure/argocd/docker";
 import { getEnvironmentVariables } from "./validations";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
@@ -12,21 +12,16 @@ import {
 } from "./types/own-types";
 import * as argocd from "../../crd2pulumi/argocd";
 import { createArgocdApplication } from "./createArgoApplication";
-import {
-  getPathToResource,
-} from "./manifestsDirectory";
+import { getPathToResource } from "./manifestsDirectory";
 import { getSecretsForResource } from "../../scripts/secretsManagement/getSecretsForApp";
-import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
+import { APPLICATION_AUTOMERGE_ANNOTATION } from "./constants";
 
-
-
-
-const { ENVIRONMENT } = getEnvironmentVariables()
+const { ENVIRONMENT } = getEnvironmentVariables();
 export class ServiceDeployment<
   AN extends ServiceName,
   DBT extends DBType,
   NS extends NamespaceOfApps
-  > extends pulumi.ComponentResource {
+> extends pulumi.ComponentResource {
   public readonly deployment: kx.Deployment;
   public readonly configMaps: kx.ConfigMap;
   public readonly secret: kx.Secret;
@@ -83,8 +78,8 @@ export class ServiceDeployment<
           ...metadata,
           annotations: {
             "sealedsecrets.bitnami.com/managed": "true",
-            ...APPLICATION_AUTOMERGE_ANNOTATION
-          }
+            ...APPLICATION_AUTOMERGE_ANNOTATION,
+          },
         },
       },
       // //TODO: Confirm why secret has a separate provider

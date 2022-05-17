@@ -1,4 +1,3 @@
-
 import {
   getSecretManifestsPaths,
   getSecretPathsInfo,
@@ -57,11 +56,12 @@ export function mergeSecretToSealedSecret({
   // users to only provide the secret value they need for specific application
   // rather than providing all the values. Since after the bootstrapping,
   // we would only mostly be updating application secrets, this would
-  // handle most usecases of updating secrets. When we need to 
+  // handle most usecases of updating secrets. When we need to
   // update secrets managed by third-party, we can just generate all
-  // the sealed secrets and only commit the portions we need but this 
+  // the sealed secrets and only commit the portions we need but this
   // should not be a common case.
-  const isSelfManaged = annotations[APPLICATION_AUTOMERGE_ANNOTATION_KEY] === "true";
+  const isSelfManaged =
+    annotations[APPLICATION_AUTOMERGE_ANNOTATION_KEY] === "true";
 
   if (!isSelfManaged) return;
 
@@ -104,7 +104,9 @@ export function mergeSecretToSealedSecret({
     },
   };
 
-  sh.exec(`echo '${yaml.dump(updatedSealedSecrets)}' > ${sealedSecretFilePath}`);
+  sh.exec(
+    `echo '${yaml.dump(updatedSealedSecrets)}' > ${sealedSecretFilePath}`
+  );
 
   // Something as simple as this would have worked but kubeseal doesnt handle merging properly
   // When there is a key in the new secret but not in the existing sealed secret, it throws an error

@@ -11,19 +11,20 @@ export * from "./provider";
 import * as argoproj from "./argoproj";
 import * as types from "./types";
 
-export {
-    argoproj,
-    types,
-};
+export { argoproj, types };
 
 import { Provider } from "./provider";
 
 pulumi.runtime.registerResourcePackage("crds", {
-    version: utilities.getVersion(),
-    constructProvider: (name: string, type: string, urn: string): pulumi.ProviderResource => {
-        if (type !== "pulumi:providers:crds") {
-            throw new Error(`unknown provider type ${type}`);
-        }
-        return new Provider(name, <any>undefined, { urn });
-    },
+  version: utilities.getVersion(),
+  constructProvider: (
+    name: string,
+    type: string,
+    urn: string
+  ): pulumi.ProviderResource => {
+    if (type !== "pulumi:providers:crds") {
+      throw new Error(`unknown provider type ${type}`);
+    }
+    return new Provider(name, <any>undefined, { urn });
+  },
 });

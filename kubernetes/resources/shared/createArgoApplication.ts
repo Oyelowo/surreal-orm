@@ -1,5 +1,8 @@
 import { NamespaceName, namespaceNames } from "./../namespaces/util";
-import { getResourceRelativePath, getResourceProvider } from "./manifestsDirectory";
+import {
+  getResourceRelativePath,
+  getResourceProvider,
+} from "./manifestsDirectory";
 import { CustomResourceOptions, Resource } from "@pulumi/pulumi";
 import * as argocd from "../../crd2pulumi/argocd";
 import * as k8s from "@pulumi/kubernetes";
@@ -10,7 +13,6 @@ import { APPLICATION_AUTOMERGE_ANNOTATION } from "./constants";
 import { ArgocdAppResourceName, ResourceName } from "./types/own-types";
 
 const { ENVIRONMENT } = getEnvironmentVariables();
-
 
 type Metadata = {};
 
@@ -26,7 +28,7 @@ export function createArgocdApplication({
   resourceName,
   sourceResourceName,
   namespace,
-  parent
+  parent,
 }: ArgocdApplicationProps) {
   const argocdApplication = new argocd.argoproj.v1alpha1.Application(
     resourceName,
@@ -63,15 +65,12 @@ export function createArgocdApplication({
     },
     {
       provider: getResourceProvider(resourceName, ENVIRONMENT),
-      parent
+      parent,
     }
   );
 
   return argocdApplication;
 }
-
-
-
 
 const metadata: Omit<Metadata, "argoApplicationName" | "resourceType"> = {
   name: "argocd-applications-secret",

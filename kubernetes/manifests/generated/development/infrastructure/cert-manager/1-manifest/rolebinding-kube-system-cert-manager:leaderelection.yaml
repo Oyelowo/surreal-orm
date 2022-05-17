@@ -19,7 +19,7 @@ roleRef:
   kind: Role
   name: cert-manager:leaderelection
 subjects:
-- apiGroup: ""
-  kind: ServiceAccount
-  name: cert-manager
-  namespace: cert-manager
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: cert-manager
+    namespace: cert-manager

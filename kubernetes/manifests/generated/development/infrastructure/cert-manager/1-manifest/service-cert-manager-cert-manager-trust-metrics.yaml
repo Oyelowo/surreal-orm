@@ -15,10 +15,10 @@ metadata:
   namespace: cert-manager
 spec:
   ports:
-  - name: metrics
-    port: 9402
-    protocol: TCP
-    targetPort: 9402
+    - name: metrics
+      port: 9402
+      protocol: TCP
+      targetPort: 9402
   selector:
     app: cert-manager-trust
   type: ClusterIP

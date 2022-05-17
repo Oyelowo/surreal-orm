@@ -17,6 +17,6 @@ roleRef:
   kind: ClusterRole
   name: nginx-ingress-controller
 subjects:
-- kind: ServiceAccount
-  name: nginx-ingress-controller
-  namespace: default
+  - kind: ServiceAccount
+    name: nginx-ingress-controller
+    namespace: default

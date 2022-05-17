@@ -10,61 +10,61 @@ metadata:
     linkerd.io/extension: viz
   name: linkerd-linkerd-viz-metrics-api
 rules:
-- apiGroups:
-  - extensions
-  - apps
-  resources:
-  - daemonsets
-  - deployments
-  - replicasets
-  - statefulsets
-  verbs:
-  - list
-  - get
-  - watch
-- apiGroups:
-  - extensions
-  - batch
-  resources:
-  - cronjobs
-  - jobs
-  verbs:
-  - list
-  - get
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - endpoints
-  - services
-  - replicationcontrollers
-  - namespaces
-  verbs:
-  - list
-  - get
-  - watch
-- apiGroups:
-  - linkerd.io
-  resources:
-  - serviceprofiles
-  verbs:
-  - list
-  - get
-  - watch
-- apiGroups:
-  - split.smi-spec.io
-  resources:
-  - trafficsplits
-  verbs:
-  - list
-  - get
-  - watch
-- apiGroups:
-  - policy.linkerd.io
-  resources:
-  - servers
-  - serverauthorizations
-  verbs:
-  - list
-  - get
+  - apiGroups:
+      - extensions
+      - apps
+    resources:
+      - daemonsets
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - extensions
+      - batch
+    resources:
+      - cronjobs
+      - jobs
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - endpoints
+      - services
+      - replicationcontrollers
+      - namespaces
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - linkerd.io
+    resources:
+      - serviceprofiles
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - split.smi-spec.io
+    resources:
+      - trafficsplits
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - policy.linkerd.io
+    resources:
+      - servers
+      - serverauthorizations
+    verbs:
+      - list
+      - get

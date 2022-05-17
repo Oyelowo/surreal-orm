@@ -14,5 +14,5 @@ spec:
       name: letsencrypt-cluster-issuer-key
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     solvers:
-    - http01:
-        ingress: {}
+      - http01:
+          ingress: {}

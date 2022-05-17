@@ -17,6 +17,6 @@ roleRef:
   kind: ClusterRole
   name: argocd-argo-cd-server
 subjects:
-- kind: ServiceAccount
-  name: argocd-argo-cd-argocd-server
-  namespace: argocd
+  - kind: ServiceAccount
+    name: argocd-argo-cd-argocd-server
+    namespace: argocd

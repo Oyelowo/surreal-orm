@@ -9,15 +9,15 @@ metadata:
     linkerd.io/control-plane-ns: linkerd
   name: linkerd-heartbeat
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - list
-- apiGroups:
-  - linkerd.io
-  resources:
-  - serviceprofiles
-  verbs:
-  - list
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - list
+  - apiGroups:
+      - linkerd.io
+    resources:
+      - serviceprofiles
+    verbs:
+      - list

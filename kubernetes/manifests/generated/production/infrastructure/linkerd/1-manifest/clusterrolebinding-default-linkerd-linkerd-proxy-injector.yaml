@@ -14,7 +14,7 @@ roleRef:
   kind: ClusterRole
   name: linkerd-linkerd-proxy-injector
 subjects:
-- apiGroup: ""
-  kind: ServiceAccount
-  name: linkerd-proxy-injector
-  namespace: linkerd
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: linkerd-proxy-injector
+    namespace: linkerd

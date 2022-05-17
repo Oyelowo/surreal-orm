@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-import { getManifestsBaseDir, getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory';
+import {
+  getManifestsBaseDir,
+  getGeneratedEnvManifestsDir,
+} from "../../resources/shared/manifestsDirectory";
 
 /* 
 TODO: ADD INSTRUCTION ON HOW THIS WORKS
@@ -34,7 +37,9 @@ export async function getImageTagsFromDir(): Promise<ImageTags> {
     return [imageTagKey, imageTagValue];
   });
 
-  const imageTagsObject = imageTagsObjectValidator.parse(Object.fromEntries(imageTagsList));
+  const imageTagsObject = imageTagsObjectValidator.parse(
+    Object.fromEntries(imageTagsList)
+  );
 
   return imageTagsObject;
 }

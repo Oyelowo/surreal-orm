@@ -16,6 +16,6 @@ roleRef:
   kind: Role
   name: web
 subjects:
-- kind: ServiceAccount
-  name: web
-  namespace: linkerd-viz
+  - kind: ServiceAccount
+    name: web
+    namespace: linkerd-viz

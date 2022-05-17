@@ -15,10 +15,10 @@ metadata:
   namespace: cert-manager
 spec:
   ports:
-  - name: webhook
-    port: 443
-    protocol: TCP
-    targetPort: 6443
+    - name: webhook
+      port: 443
+      protocol: TCP
+      targetPort: 6443
   selector:
     app: cert-manager-trust
   type: ClusterIP

@@ -14,8 +14,8 @@ metadata:
 spec:
   clusterIP: None
   ports:
-  - name: grpc
-    port: 8086
-    targetPort: 8086
+    - name: grpc
+      port: 8086
+      targetPort: 8086
   selector:
     linkerd.io/control-plane-component: destination

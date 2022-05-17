@@ -10,15 +10,15 @@ metadata:
   namespace: linkerd-viz
 spec:
   routes:
-  - condition:
-      method: POST
-      pathRegex: /api/v1/query
-    name: POST /api/v1/query
-  - condition:
-      method: GET
-      pathRegex: /api/v1/query_range
-    name: GET /api/v1/query_range
-  - condition:
-      method: GET
-      pathRegex: /api/v1/series
-    name: GET /api/v1/series
+    - condition:
+        method: POST
+        pathRegex: /api/v1/query
+      name: POST /api/v1/query
+    - condition:
+        method: GET
+        pathRegex: /api/v1/query_range
+      name: GET /api/v1/query_range
+    - condition:
+        method: GET
+        pathRegex: /api/v1/series
+      name: GET /api/v1/series

@@ -15,20 +15,20 @@ metadata:
   name: cert-manager-cainjector:leaderelection
   namespace: kube-system
 rules:
-- apiGroups:
-  - coordination.k8s.io
-  resourceNames:
-  - cert-manager-cainjector-leader-election
-  - cert-manager-cainjector-leader-election-core
-  resources:
-  - leases
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
-  - coordination.k8s.io
-  resources:
-  - leases
-  verbs:
-  - create
+  - apiGroups:
+      - coordination.k8s.io
+    resourceNames:
+      - cert-manager-cainjector-leader-election
+      - cert-manager-cainjector-leader-election-core
+    resources:
+      - leases
+    verbs:
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create

@@ -12,20 +12,20 @@ import * as acme from "./acme";
 import * as certmanager from "./certmanager";
 import * as types from "./types";
 
-export {
-    acme,
-    certmanager,
-    types,
-};
+export { acme, certmanager, types };
 
 import { Provider } from "./provider";
 
 pulumi.runtime.registerResourcePackage("crds", {
-    version: utilities.getVersion(),
-    constructProvider: (name: string, type: string, urn: string): pulumi.ProviderResource => {
-        if (type !== "pulumi:providers:crds") {
-            throw new Error(`unknown provider type ${type}`);
-        }
-        return new Provider(name, <any>undefined, { urn });
-    },
+  version: utilities.getVersion(),
+  constructProvider: (
+    name: string,
+    type: string,
+    urn: string
+  ): pulumi.ProviderResource => {
+    if (type !== "pulumi:providers:crds") {
+      throw new Error(`unknown provider type ${type}`);
+    }
+    return new Provider(name, <any>undefined, { urn });
+  },
 });

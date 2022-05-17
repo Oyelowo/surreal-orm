@@ -32,61 +32,61 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/component: default-backend
-                  app.kubernetes.io/instance: nginx-ingress-controller
-                  app.kubernetes.io/name: nginx-ingress-controller
-              namespaces:
-              - default
-              topologyKey: kubernetes.io/hostname
-            weight: 1
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: default-backend
+                    app.kubernetes.io/instance: nginx-ingress-controller
+                    app.kubernetes.io/name: nginx-ingress-controller
+                namespaces:
+                  - default
+                topologyKey: kubernetes.io/hostname
+              weight: 1
       containers:
-      - image: docker.io/bitnami/nginx:1.21.6-debian-10-r81
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /healthz
-            port: http
-            scheme: HTTP
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-        name: default-backend
-        ports:
-        - containerPort: 8080
-          name: http
-          protocol: TCP
-        readinessProbe:
-          failureThreshold: 6
-          httpGet:
-            path: /healthz
-            port: http
-            scheme: HTTP
-          initialDelaySeconds: 0
-          periodSeconds: 5
-          successThreshold: 1
-          timeoutSeconds: 5
-        resources:
-          limits: {}
-          requests: {}
-        securityContext:
-          runAsUser: 1001
-        volumeMounts:
-        - mountPath: /opt/bitnami/nginx/conf/bitnami/
-          name: nginx-config-volume
-          readOnly: true
+        - image: docker.io/bitnami/nginx:1.21.6-debian-10-r81
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: default-backend
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /healthz
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits: {}
+            requests: {}
+          securityContext:
+            runAsUser: 1001
+          volumeMounts:
+            - mountPath: /opt/bitnami/nginx/conf/bitnami/
+              name: nginx-config-volume
+              readOnly: true
       securityContext:
         fsGroup: 1001
       serviceAccountName: nginx-ingress-controller
       terminationGracePeriodSeconds: 60
       volumes:
-      - configMap:
-          items:
-          - key: defaultBackend.conf
-            path: defaultBackend.conf
-          name: nginx-ingress-controller-default-backend
-        name: nginx-config-volume
+        - configMap:
+            items:
+              - key: defaultBackend.conf
+                path: defaultBackend.conf
+            name: nginx-ingress-controller-default-backend
+          name: nginx-config-volume

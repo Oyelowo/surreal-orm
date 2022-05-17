@@ -13,16 +13,20 @@ import { Challenge } from "./challenge";
 import { Order } from "./order";
 
 const _module = {
-    version: utilities.getVersion(),
-    construct: (name: string, type: string, urn: string): pulumi.Resource => {
-        switch (type) {
-            case "kubernetes:acme.cert-manager.io/v1:Challenge":
-                return new Challenge(name, <any>undefined, { urn })
-            case "kubernetes:acme.cert-manager.io/v1:Order":
-                return new Order(name, <any>undefined, { urn })
-            default:
-                throw new Error(`unknown resource type ${type}`);
-        }
-    },
+  version: utilities.getVersion(),
+  construct: (name: string, type: string, urn: string): pulumi.Resource => {
+    switch (type) {
+      case "kubernetes:acme.cert-manager.io/v1:Challenge":
+        return new Challenge(name, <any>undefined, { urn });
+      case "kubernetes:acme.cert-manager.io/v1:Order":
+        return new Order(name, <any>undefined, { urn });
+      default:
+        throw new Error(`unknown resource type ${type}`);
+    }
+  },
 };
-pulumi.runtime.registerResourceModule("crds", "acme.cert-manager.io/v1", _module)
+pulumi.runtime.registerResourceModule(
+  "crds",
+  "acme.cert-manager.io/v1",
+  _module
+);

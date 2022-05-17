@@ -32,47 +32,47 @@ spec:
         namespace: linkerd-viz
     spec:
       containers:
-      - env:
-        - name: GF_PATHS_DATA
-          value: /data
-        - name: GODEBUG
-          value: netdns=go
-        image: cr.l5d.io/linkerd/grafana:stable-2.11.2
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          httpGet:
-            path: /api/health
-            port: 3000
-          initialDelaySeconds: 30
-        name: grafana
-        ports:
-        - containerPort: 3000
-          name: http
-        readinessProbe:
-          httpGet:
-            path: /api/health
-            port: 3000
-        securityContext:
-          runAsUser: 472
-        volumeMounts:
-        - mountPath: /data
-          name: data
-        - mountPath: /etc/grafana
-          name: grafana-config
-          readOnly: true
+        - env:
+            - name: GF_PATHS_DATA
+              value: /data
+            - name: GODEBUG
+              value: netdns=go
+          image: cr.l5d.io/linkerd/grafana:stable-2.11.2
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 30
+          name: grafana
+          ports:
+            - containerPort: 3000
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+          securityContext:
+            runAsUser: 472
+          volumeMounts:
+            - mountPath: /data
+              name: data
+            - mountPath: /etc/grafana
+              name: grafana-config
+              readOnly: true
       nodeSelector:
         kubernetes.io/os: linux
       serviceAccountName: grafana
       volumes:
-      - emptyDir: {}
-        name: data
-      - configMap:
-          items:
-          - key: grafana.ini
-            path: grafana.ini
-          - key: datasources.yaml
-            path: provisioning/datasources/datasources.yaml
-          - key: dashboards.yaml
-            path: provisioning/dashboards/dashboards.yaml
+        - emptyDir: {}
+          name: data
+        - configMap:
+            items:
+              - key: grafana.ini
+                path: grafana.ini
+              - key: datasources.yaml
+                path: provisioning/datasources/datasources.yaml
+              - key: dashboards.yaml
+                path: provisioning/dashboards/dashboards.yaml
+            name: grafana-config
           name: grafana-config
-        name: grafana-config

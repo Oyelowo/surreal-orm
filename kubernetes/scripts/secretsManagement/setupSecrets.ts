@@ -7,10 +7,16 @@ import { Environment } from "../../resources/shared/types/own-types";
 import { getPlainSecretsConfigFilesBaseDir } from "./../../resources/shared/manifestsDirectory";
 import { secretsSample } from "./secretsSample";
 
-const ENVIRONMENTS: Environment[] = ["local", "development", "staging", "production"];
+const ENVIRONMENTS: Environment[] = [
+  "local",
+  "development",
+  "staging",
+  "production",
+];
 const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 
-type PlainInputSecretsFilePath = `${typeof PLAIN_SECRETS_CONFIGS_DIR}/${Environment}.ts`;
+type PlainInputSecretsFilePath =
+  `${typeof PLAIN_SECRETS_CONFIGS_DIR}/${Environment}.ts`;
 
 export function setupPlainSecretTSFiles() {
   sh.mkdir(PLAIN_SECRETS_CONFIGS_DIR);
@@ -18,13 +24,16 @@ export function setupPlainSecretTSFiles() {
 }
 
 export function clearPlainInputTsSecretFilesContents() {
-  const removeSecret = (env: Environment) => sh.rm("-rf", getPlainSecretInputFilePath(env));
+  const removeSecret = (env: Environment) =>
+    sh.rm("-rf", getPlainSecretInputFilePath(env));
   ENVIRONMENTS.forEach(removeSecret);
 
   setupPlainSecretTSFiles();
 }
 
-export function getPlainSecretInputFilePath(environment: Environment): PlainInputSecretsFilePath {
+export function getPlainSecretInputFilePath(
+  environment: Environment
+): PlainInputSecretsFilePath {
   return `${PLAIN_SECRETS_CONFIGS_DIR}/${environment}.ts`;
 }
 
@@ -64,6 +73,8 @@ export function getContent({
   return JSON.stringify(`
     import {${SECRETS_TYPE}} from "../${thisFileRelativeDir}/${thisFileName}";
     
-     export const SECRET_${environment.toUpperCase()}: ${SECRETS_TYPE} = ${JSON.stringify(secrets)};
+     export const SECRET_${environment.toUpperCase()}: ${SECRETS_TYPE} = ${JSON.stringify(
+    secrets
+  )};
     `);
 }

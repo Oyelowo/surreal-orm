@@ -1,4 +1,7 @@
-import { Environment, ResourceName } from "./../../resources/shared/types/own-types";
+import {
+  Environment,
+  ResourceName,
+} from "./../../resources/shared/types/own-types";
 import { SECRET_DEVELOPMENT } from "../../.secrets/development";
 import { SECRET_LOCAL } from "../../.secrets/local";
 import { SECRET_PRODUCTION } from "../../.secrets/production";
@@ -12,7 +15,8 @@ const secretRecord: Record<Environment, Secrets> = {
   local: SECRET_LOCAL,
 };
 
-type AppSecrets<App extends ResourceName> = typeof secretRecord[Environment][App];
+type AppSecrets<App extends ResourceName> =
+  typeof secretRecord[Environment][App];
 
 export function getSecretsForResource<Resource extends ResourceName>(
   resourceName: Resource,

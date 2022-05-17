@@ -4,10 +4,7 @@ import { Environment } from "../../resources/shared/types/own-types";
 import p from "path";
 import c from "chalk";
 
-import {
-  getSecretManifestsPaths,
-  getSecretPathsInfo,
-} from "./sealedSecrets";
+import { getSecretManifestsPaths, getSecretPathsInfo } from "./sealedSecrets";
 import { getFilePathsThatMatch } from "./shared";
 import { SEALED_SECRETS_CONTROLLER_NAME } from "./sealedSecrets";
 
@@ -61,4 +58,3 @@ function generateSealedSecret(unsealedSecretFilePath: string) {
     )
   );
 }
-

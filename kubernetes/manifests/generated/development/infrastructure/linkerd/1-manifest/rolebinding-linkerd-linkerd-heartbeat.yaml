@@ -14,6 +14,6 @@ roleRef:
   kind: Role
   name: linkerd-heartbeat
 subjects:
-- kind: ServiceAccount
-  name: linkerd-heartbeat
-  namespace: linkerd
+  - kind: ServiceAccount
+    name: linkerd-heartbeat
+    namespace: linkerd

@@ -15,9 +15,9 @@ metadata:
 spec:
   clusterIP: None
   ports:
-  - name: tcp-mongodb
-    port: 27017
-    targetPort: mongodb
+    - name: tcp-mongodb
+      port: 27017
+      targetPort: mongodb
   selector:
     app.kubernetes.io/component: arbiter
     app.kubernetes.io/instance: graphql-mongo-database

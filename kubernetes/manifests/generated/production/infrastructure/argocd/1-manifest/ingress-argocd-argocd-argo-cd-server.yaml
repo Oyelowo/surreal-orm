@@ -18,17 +18,17 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: argocd.oyelowo.dev
-    http:
-      paths:
-      - backend:
-          service:
-            name: argocd-argo-cd-server
-            port:
-              name: https
-        path: /
-        pathType: Prefix
+    - host: argocd.oyelowo.dev
+      http:
+        paths:
+          - backend:
+              service:
+                name: argocd-argo-cd-server
+                port:
+                  name: https
+            path: /
+            pathType: Prefix
   tls:
-  - hosts:
-    - argocd.oyelowo.dev
-    secretName: argocd.oyelowo.dev-tls
+    - hosts:
+        - argocd.oyelowo.dev
+      secretName: argocd.oyelowo.dev-tls
