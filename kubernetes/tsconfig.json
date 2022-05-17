@@ -1,29 +1,29 @@
 {
-  "compilerOptions": {
-    "strict": true,
-    "outDir": "bin",
-    "target": "ES2022",
-    "lib": ["ESNext"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "experimentalDecorators": true,
-    "pretty": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "types": ["node"],
-    "typeRoots": ["node_modules/@types"]
-  },
-  "files": [
-    "index.ts",
-    "scripts/secretsSample.ts",
-    "scripts/utils/bootstrapCluster.ts",
-    "./scripts/generateSealedSecretsManifests.scripts/utils/generateManifests.tssts.ts",
-    "scripts/utils/sealedSecrets.ts",
-    "scripts/utils/generateAllSealedSecrets.ts",
-    "scripts/utils/generateAllSealedSecrets.ts"
-  ]
+    "compilerOptions": {
+        "strict": true,
+        "outDir": "bin",
+        "target": "ES2022",
+        "lib": ["ESNext"],
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "experimentalDecorators": true,
+        "pretty": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitReturns": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "types": ["node"],
+        "typeRoots": ["node_modules/@types"]
+    },
+    "files": [
+        "index.ts",
+        "scripts/secretsSample.ts",
+        "scripts/utils/bootstrapCluster.ts",
+        "./scripts/generateSealedSecretsManifests.scripts/utils/generateManifests.tssts.ts",
+        "scripts/utils/sealedSecrets.ts",
+        "scripts/utils/generateAllSealedSecrets.ts",
+        "scripts/utils/generateAllSealedSecrets.ts"
+    ]
 }

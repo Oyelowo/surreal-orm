@@ -1,6 +1,6 @@
-import { getResourceProvider } from "../../shared/manifestsDirectory";
-import { getEnvironmentVariables } from "../../shared/validations";
+import { getResourceProvider } from '../../shared/manifestsDirectory'
+import { getEnvironmentVariables } from '../../shared/validations'
 
-const { ENVIRONMENT } = getEnvironmentVariables();
+const { ENVIRONMENT } = getEnvironmentVariables()
 // export const { provider } = getResourceProperties("argocd", ENVIRONMENT);
-export const argocdProvider = getResourceProvider("argocd", ENVIRONMENT);
+export const argocdProvider = getResourceProvider('argocd', ENVIRONMENT)

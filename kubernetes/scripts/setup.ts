@@ -1,3 +1,3 @@
-import { setupPlainSecretTSFiles } from "./secretsManagement/setupSecrets";
+import { setupPlainSecretTSFiles } from './secretsManagement/setupSecrets'
 
-setupPlainSecretTSFiles();
+setupPlainSecretTSFiles()

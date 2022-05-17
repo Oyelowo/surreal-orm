@@ -1,75 +1,75 @@
 apiVersion: skaffold/v2beta27
 kind: Config
 metadata:
-  name: kubernetes
+    name: kubernetes
 build:
-  local:
-    concurrency: 0
-    tryImportMissing: false
-    useDockerCLI: false
-    useBuildkit: true
-  # platforms: ["linux/amd64"]
-  # platforms: ["linux/amd64", "linux/arm64"]
-  artifacts:
-    - image: ghcr.io/oyelowo/react-web
-      context: ../typescript
-      docker:
-        dockerfile: Dockerfile.development
-        target: web
-        noCache: false
-        squash: false
+    local:
+        concurrency: 0
+        tryImportMissing: false
+        useDockerCLI: false
+        useBuildkit: true
+    # platforms: ["linux/amd64"]
+    # platforms: ["linux/amd64", "linux/arm64"]
+    artifacts:
+        - image: ghcr.io/oyelowo/react-web
+          context: ../typescript
+          docker:
+              dockerfile: Dockerfile.development
+              target: web
+              noCache: false
+              squash: false
 
-    - image: ghcr.io/oyelowo/graphql-mongo
-      context: ../rust
-      docker:
-        dockerfile: Dockerfile.development
-        target: graphql-mongo
-        noCache: false
-        squash: false
+        - image: ghcr.io/oyelowo/graphql-mongo
+          context: ../rust
+          docker:
+              dockerfile: Dockerfile.development
+              target: graphql-mongo
+              noCache: false
+              squash: false
+        #   requires:
+        #     - image: builder-base
+        #       alias: BASE
+
+        - image: ghcr.io/oyelowo/graphql-postgres
+          context: ../rust
+          docker:
+              dockerfile: Dockerfile.development
+              target: graphql-postgres
+              noCache: false
+              squash: false
     #   requires:
     #     - image: builder-base
     #       alias: BASE
 
-    - image: ghcr.io/oyelowo/graphql-postgres
-      context: ../rust
-      docker:
-        dockerfile: Dockerfile.development
-        target: graphql-postgres
-        noCache: false
-        squash: false
-  #   requires:
-  #     - image: builder-base
-  #       alias: BASE
+    # - image: ghcr.io/oyelowo/grpc-mongo
+    #   context: ../rust
+    #   docker:
+    #     dockerfile: Dockerfile.development
+    #     target: grpc-mongo
+    #     noCache: false
+    #     squash: false
+    #   requires:
+    #     - image: builder-base
+    #       alias: BASE
 
-  # - image: ghcr.io/oyelowo/grpc-mongo
-  #   context: ../rust
-  #   docker:
-  #     dockerfile: Dockerfile.development
-  #     target: grpc-mongo
-  #     noCache: false
-  #     squash: false
-  #   requires:
-  #     - image: builder-base
-  #       alias: BASE
-
-  # - image: builder-base
-  #   context: ../rust
-  #   docker:
-  #     dockerfile: Dockerfile.development
-  #     target: builder-base
-  #     noCache: false
-  #     squash: false
-  # buildpacks:
-  #   builder: gcr.io/buildpacks/builder:v1
+    # - image: builder-base
+    #   context: ../rust
+    #   docker:
+    #     dockerfile: Dockerfile.development
+    #     target: builder-base
+    #     noCache: false
+    #     squash: false
+    # buildpacks:
+    #   builder: gcr.io/buildpacks/builder:v1
 
 deploy:
-  kubectl:
-    manifests:
-      - manifests/generated/local/namespaces/**/*
-      - manifests/generated/local/infrastructure/sealed-secrets/**/*
-      - manifests/generated/local/infrastructure/nginx-ingress/**/*
-      - manifests/generated/local/infrastructure/**/**/*
-      - manifests/generated/local/services/**/**/*
+    kubectl:
+        manifests:
+            - manifests/generated/local/namespaces/**/*
+            - manifests/generated/local/infrastructure/sealed-secrets/**/*
+            - manifests/generated/local/infrastructure/nginx-ingress/**/*
+            - manifests/generated/local/infrastructure/**/**/*
+            - manifests/generated/local/services/**/**/*
 # portForward:
 #   - resourceType: service
 #     resourceName: react-web

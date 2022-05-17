@@ -1,17 +1,17 @@
-import { namespaceNames } from "./../../namespaces/util";
+import { namespaceNames } from './../../namespaces/util'
 // import { getEnvironmentVariables } from './../../shared/validations';
-import c from "chalk";
-import path from "path";
-import { getSecretsForResource } from "../../../scripts/secretsManagement/getSecretsForApp";
-import { Environment } from "../../shared/types/own-types";
-import sh from "shelljs";
-import * as kx from "@pulumi/kubernetesx";
-import { getEnvironmentVariables } from "../../shared/validations";
-import { getResourceProvider } from "../../shared/manifestsDirectory";
+import c from 'chalk'
+import path from 'path'
+import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp'
+import { Environment } from '../../shared/types/own-types'
+import sh from 'shelljs'
+import * as kx from '@pulumi/kubernetesx'
+import { getEnvironmentVariables } from '../../shared/validations'
+import { getResourceProvider } from '../../shared/manifestsDirectory'
 
-const { ENVIRONMENT } = getEnvironmentVariables();
-const DOCKER_SERVER = "ghcr.io";
-export const DOCKER_REGISTRY_KEY = "my-registry-key";
+const { ENVIRONMENT } = getEnvironmentVariables()
+const DOCKER_SERVER = 'ghcr.io'
+export const DOCKER_REGISTRY_KEY = 'my-registry-key'
 
 // export function createContainerRegistrySecret(environment: Environment): void {
 //     const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } =
@@ -44,42 +44,41 @@ export const DOCKER_REGISTRY_KEY = "my-registry-key";
 // }
 
 interface DockerRawData {
-  auths: {
-    "ghrc.io": { username: string; password: string; auth: string };
-  };
+    auths: {
+        'ghrc.io': { username: string; password: string; auth: string }
+    }
 }
 
-const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } =
-  getSecretsForResource("argocd", ENVIRONMENT);
+const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = getSecretsForResource('argocd', ENVIRONMENT)
 const dataRaw: DockerRawData = {
-  auths: {
-    "ghrc.io": {
-      username: DOCKER_USERNAME,
-      password: DOCKER_PASSWORD,
-      auth: toBase64(`${DOCKER_USERNAME}:${DOCKER_PASSWORD}`),
+    auths: {
+        'ghrc.io': {
+            username: DOCKER_USERNAME,
+            password: DOCKER_PASSWORD,
+            auth: toBase64(`${DOCKER_USERNAME}:${DOCKER_PASSWORD}`),
+        },
     },
-  },
-};
+}
 function toBase64(text: string) {
-  return Buffer.from(text).toString("base64");
+    return Buffer.from(text).toString('base64')
 }
 
 export const dockerRegistry = new kx.Secret(
-  "docker-registry",
-  {
-    type: "kubernetes.io/dockerconfigjson",
-    metadata: {
-      name: "docker-registry-applications",
-      namespace: namespaceNames.applications,
-    },
+    'docker-registry',
+    {
+        type: 'kubernetes.io/dockerconfigjson',
+        metadata: {
+            name: 'docker-registry-applications',
+            namespace: namespaceNames.applications,
+        },
 
-    data: {
-      // ".dockerconfigjson": JSON.stringify(dataRaw)
-      ".dockerconfigjson": toBase64(JSON.stringify(dataRaw)),
+        data: {
+            // ".dockerconfigjson": JSON.stringify(dataRaw)
+            '.dockerconfigjson': toBase64(JSON.stringify(dataRaw)),
+        },
     },
-  },
-  { provider: getResourceProvider("argocd-applications-parents", ENVIRONMENT) }
-);
+    { provider: getResourceProvider('argocd-applications-parents', ENVIRONMENT) }
+)
 
 /* 
 apiVersion: v1
