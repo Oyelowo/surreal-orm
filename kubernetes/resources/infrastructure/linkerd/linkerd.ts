@@ -1,11 +1,10 @@
-import { ResourceName } from './../../shared/manifestsDirectory'
-import { helmChartsInfo } from './../../shared/helmChartInfo'
-import { Linkerd2HelmValues } from '../../shared/types/helm-charts/linkerd2HelmValues'
 import * as k8s from '@pulumi/kubernetes'
-
 import { namespaceNames } from '../../namespaces/util'
+import { Linkerd2HelmValues } from '../../shared/types/helm-charts/linkerd2HelmValues'
 import { DeepPartial } from '../../shared/types/own-types'
+import { helmChartsInfo } from './../../shared/helmChartInfo'
 import { linkerdProvider } from './settings'
+
 /* 
  --set-file identityTrustAnchorsPEM=ca.crt \
   --set-file identity.issuer.tls.crtPEM=issuer.crt \

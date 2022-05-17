@@ -1,3 +1,5 @@
+import chalk from 'chalk'
+import inquirer from 'inquirer'
 import sh from 'shelljs'
 import { clearPlainInputTsSecretFilesContents, setupPlainSecretTSFiles } from './secretsManagement/setupSecrets'
 import { generateAllSealedSecrets } from './utils/generateAllSealedSecrets'
@@ -7,8 +9,6 @@ import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSw
 import { promptSecretsKeepingConfirmations } from './utils/promptSecretsKeepingConfirmations'
 import { getSecretManifestsPaths, promptEnvironmentSelection } from './utils/sealedSecrets'
 import { updateAppSealedSecrets } from './utils/updateApplicationsSecrets'
-import inquirer from 'inquirer'
-import chalk from 'chalk'
 
 async function main() {
     const { generateSecretsOptions } = await promptSealedSecretsMergingOptions()

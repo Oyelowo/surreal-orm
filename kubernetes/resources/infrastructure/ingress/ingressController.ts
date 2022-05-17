@@ -1,10 +1,9 @@
-import { getEnvironmentVariables } from '../../shared/validations'
-
 import * as k8s from '@pulumi/kubernetes'
+import { helmChartsInfo } from '../../shared/helmChartInfo'
 import { IngressControllerValuesBitnami } from '../../shared/types/helm-charts/ingressControllerValuesBitnami'
 import { RecursivePartial } from '../../shared/types/own-types'
 import { nginxIngressProvider } from './settings'
-import { helmChartsInfo } from '../../shared/helmChartInfo'
+
 
 // Install the NGINX ingress controller to our cluster. The controller
 // consists of a Pod and a Service. Install it and configure the controller

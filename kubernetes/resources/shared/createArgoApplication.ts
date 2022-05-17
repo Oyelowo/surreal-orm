@@ -1,13 +1,12 @@
-import { NamespaceName, namespaceNames } from './../namespaces/util'
-import { getResourceRelativePath, getResourceProvider } from './manifestsDirectory'
-import { CustomResourceOptions, Resource } from '@pulumi/pulumi'
-import * as argocd from '../../crd2pulumi/argocd'
-import * as k8s from '@pulumi/kubernetes'
 import * as kx from '@pulumi/kubernetesx'
-import { getEnvironmentVariables } from './validations'
+import { Resource } from '@pulumi/pulumi'
+import * as argocd from '../../crd2pulumi/argocd'
 import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp'
+import { NamespaceName, namespaceNames } from './../namespaces/util'
 import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants'
+import { getResourceProvider, getResourceRelativePath } from './manifestsDirectory'
 import { ArgocdAppResourceName, ResourceName } from './types/own-types'
+import { getEnvironmentVariables } from './validations'
 
 const { ENVIRONMENT } = getEnvironmentVariables()
 

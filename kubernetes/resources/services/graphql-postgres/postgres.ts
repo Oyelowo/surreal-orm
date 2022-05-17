@@ -1,10 +1,10 @@
-import { graphqlPostgres } from './index'
-import { postgresdbHelmValuesBitnami } from '../../shared/types/helm-charts/postgresdbHelmValuesBitnami'
 import * as k8s from '@pulumi/kubernetes'
-
-import { DeepPartial } from '../../shared/types/own-types'
-import { graphqlPostgresSettings } from './settings'
 import { namespaceNames } from '../../namespaces/util'
+import { postgresdbHelmValuesBitnami } from '../../shared/types/helm-charts/postgresdbHelmValuesBitnami'
+import { DeepPartial } from '../../shared/types/own-types'
+import { graphqlPostgres } from './index'
+import { graphqlPostgresSettings } from './settings'
+
 
 const { envVars } = graphqlPostgresSettings
 

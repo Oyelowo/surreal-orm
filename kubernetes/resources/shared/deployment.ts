@@ -1,15 +1,14 @@
-import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker'
-import { getEnvironmentVariables } from './validations'
 import * as k8s from '@pulumi/kubernetes'
 import * as kx from '@pulumi/kubernetesx'
 import * as pulumi from '@pulumi/pulumi'
-import { NoUnion } from './types/own-types'
-import { AppConfigs, ServiceName, DBType, NamespaceOfApps } from './types/own-types'
 import * as argocd from '../../crd2pulumi/argocd'
+import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp'
+import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker'
+import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants'
 import { createArgocdApplication } from './createArgoApplication'
 import { getPathToResource } from './manifestsDirectory'
-import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp'
-import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants'
+import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from './types/own-types'
+import { getEnvironmentVariables } from './validations'
 
 const { ENVIRONMENT } = getEnvironmentVariables()
 export class ServiceDeployment<

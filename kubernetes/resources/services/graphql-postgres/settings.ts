@@ -1,9 +1,9 @@
-import { getEnvironmentVariables } from '../../shared/validations'
+import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp'
 import { AppConfigs } from '../../shared/types/own-types'
-import { getSecretsForApp } from '../../../scripts/secretsManagement/getSecretsForApp'
+import { getEnvironmentVariables } from '../../shared/validations'
 
 const environment = getEnvironmentVariables().ENVIRONMENT
-const secretsFromLocalConfigs = getSecretsForApp('graphql-postgres')
+// const secretsFromLocalConfigs = getSecretsForResource('graphql-postgres', environment)
 
 export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'postgresdb', 'applications'> = {
     kubeConfig: {

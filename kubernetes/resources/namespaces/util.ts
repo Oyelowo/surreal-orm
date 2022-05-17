@@ -1,7 +1,3 @@
-// export const devNamespaceName = devNamespace.metadata.name as unknown as string;
-// type Keys = keyof typeof KeyToVal;
-// type Values = typeof KeyToVal[Keys];
-
 export type NamespaceName =
     | 'applications'
     | 'argocd'

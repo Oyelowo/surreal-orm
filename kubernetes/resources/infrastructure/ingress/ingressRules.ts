@@ -1,13 +1,13 @@
-import { getEnvironmentVariables } from '../../shared/validations'
 import * as k8s from '@pulumi/kubernetes'
-
+import { namespaceNames } from '../../namespaces/util'
 import { graphqlMongoSettings } from '../../services/graphql-mongo/settings'
 import { reactWebSettings } from '../../services/react-web/settings'
-import { namespaceNames } from '../../namespaces/util'
 import { NginxConfiguration } from '../../shared/types/nginxConfigurations'
-import { DOMAIN_NAME_BASE } from './constant'
+import { getEnvironmentVariables } from '../../shared/validations'
 import { CLUSTER_ISSUER_NAME } from '../cert-manager'
+import { DOMAIN_NAME_BASE } from './constant'
 import { nginxIngressProvider } from './settings'
+
 
 const { ENVIRONMENT } = getEnvironmentVariables()
 

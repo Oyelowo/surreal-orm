@@ -1,5 +1,5 @@
-import inquirer from 'inquirer'
 import chalk from 'chalk'
+import inquirer from 'inquirer'
 
 export async function promptSecretsKeepingConfirmations() {
     const keepPlainSecretsInput = 'keepPlainSecretsInput'

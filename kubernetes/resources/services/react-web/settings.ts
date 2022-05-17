@@ -1,8 +1,7 @@
-import { graphqlMongoSettings } from '../graphql-mongo/settings'
-import { namespaceNames } from '../../namespaces/util'
+import { getFQDNFromSettings } from '../../shared/helpers'
 import { AppConfigs } from '../../shared/types/own-types'
 import { getEnvironmentVariables } from '../../shared/validations'
-import { getFQDNFromSettings } from '../../shared/helpers'
+import { graphqlMongoSettings } from '../graphql-mongo/settings'
 
 export const reactWebSettings: AppConfigs<'react-web', 'doesNotHaveDb', 'applications'> = {
     kubeConfig: {

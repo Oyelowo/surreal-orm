@@ -1,8 +1,8 @@
-import { Environment, ResourceName } from './../../resources/shared/types/own-types'
 import { SECRET_DEVELOPMENT } from '../../.secrets/development'
 import { SECRET_LOCAL } from '../../.secrets/local'
 import { SECRET_PRODUCTION } from '../../.secrets/production'
 import { SECRET_STAGING } from '../../.secrets/staging'
+import { Environment, ResourceName } from './../../resources/shared/types/own-types'
 import { Secrets } from './setupSecrets'
 
 export const secretRecord: Record<Environment, Secrets> = {

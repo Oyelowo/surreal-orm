@@ -1,8 +1,6 @@
-import { namespaceNames } from './util'
-import * as k8s from '@pulumi/kubernetes'
 import { Namespace } from '@pulumi/kubernetes/core/v1'
 import { namespacesNamesProvider } from './settings'
-// import { createArgocdApplication } from "./createArgoApplication";
+import { namespaceNames } from './util'
 
 export const resourceNamespaces = Object.entries(namespaceNames).map(([_k, namespace]) => {
     const resourceNamespace = new Namespace(

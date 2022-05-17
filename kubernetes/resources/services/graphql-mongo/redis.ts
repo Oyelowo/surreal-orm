@@ -1,11 +1,11 @@
+import * as k8s from '@pulumi/kubernetes'
+import { namespaceNames } from '../../namespaces/util'
+import { RedisHelmValuesBitnami } from '../../shared/types/helm-charts/redisHelmValuesBitnami'
+import { DeepPartial } from '../../shared/types/own-types'
+import { getEnvironmentVariables } from '../../shared/validations'
 import { graphqlMongo } from './index'
 import { graphqlMongoSettings } from './settings'
-import { getEnvironmentVariables } from '../../shared/validations'
-import { RedisHelmValuesBitnami } from '../../shared/types/helm-charts/redisHelmValuesBitnami'
-import * as k8s from '@pulumi/kubernetes'
 
-import { namespaceNames } from '../../namespaces/util'
-import { DeepPartial } from '../../shared/types/own-types'
 
 const { envVars } = graphqlMongoSettings
 

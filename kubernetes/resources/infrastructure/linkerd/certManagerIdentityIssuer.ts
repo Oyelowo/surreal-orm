@@ -1,7 +1,7 @@
-import { linkerdProvider } from './settings'
-import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer'
-import { namespaceNames } from '../../namespaces/util'
 import * as cm from '../../../crd2pulumi/certManager/certmanager'
+import { namespaceNames } from '../../namespaces/util'
+import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer'
+import { linkerdProvider } from './settings'
 
 // IDENTITY CERTIFICATE WHICH ISSUES THE SECRETS FOR GENERATING CERTIFICATE FOR PODS PROXIES
 // NOTE: this should be in linkerd namespace where the identity service

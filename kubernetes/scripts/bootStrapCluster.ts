@@ -1,9 +1,9 @@
+import sh from 'shelljs'
 import { clearPlainInputTsSecretFilesContents } from './secretsManagement/setupSecrets'
 import { bootstrapCluster } from './utils/bootstrapCluster'
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch'
-import { promptEnvironmentSelection, getSecretManifestsPaths } from './utils/sealedSecrets'
-import sh from 'shelljs'
 import { promptSecretsKeepingConfirmations } from './utils/promptSecretsKeepingConfirmations'
+import { getSecretManifestsPaths, promptEnvironmentSelection } from './utils/sealedSecrets'
 
 async function main() {
     const { environment } = await promptEnvironmentSelection()

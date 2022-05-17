@@ -1,11 +1,11 @@
-import { graphqlMongo } from './index'
-import { MongodbHelmValuesBitnami } from '../../shared/types/helm-charts/MongodbHelmValuesBitnami'
 import * as k8s from '@pulumi/kubernetes'
-
 import { namespaceNames } from '../../namespaces/util'
+import { MongodbHelmValuesBitnami } from '../../shared/types/helm-charts/MongodbHelmValuesBitnami'
 import { DeepPartial } from '../../shared/types/own-types'
-import { graphqlMongoSettings } from './settings'
 import { getEnvironmentVariables } from '../../shared/validations'
+import { graphqlMongo } from './index'
+import { graphqlMongoSettings } from './settings'
+
 
 const { envVars } = graphqlMongoSettings
 
@@ -87,7 +87,7 @@ In order to retain your Block Storage Volume and its data, even after the associ
         rootPassword: envVars.MONGODB_ROOT_PASSWORD,
         replicaSetKey: 'Ld1My4Q1s4', // TODO
         // array of
-        // ...mappedCredentials,
+        ...mappedCredentials,
         username: envVars.MONGODB_USERNAME,
         password: envVars.MONGODB_PASSWORD,
         // usernames: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],

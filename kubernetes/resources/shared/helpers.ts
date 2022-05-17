@@ -1,6 +1,6 @@
-import { AppConfigs } from './types/own-types'
 import * as kx from '@pulumi/kubernetesx'
 import * as pulumi from '@pulumi/pulumi'
+import { AppConfigs } from './types/own-types'
 
 // TODO: Load values.yaml from helm bitnami repo
 // Convert yaml to json

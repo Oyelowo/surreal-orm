@@ -1,6 +1,6 @@
-import { certManagerProvider } from './../cert-manager/settings'
-import { namespaceNames } from '../../namespaces/util'
 import * as cm from '../../../crd2pulumi/certManager/certmanager'
+import { namespaceNames } from '../../namespaces/util'
+import { certManagerProvider } from './../cert-manager/settings'
 
 // ROOT TRUST ANCHOR CERTIFICATES AND CLUSTER ISSUE
 

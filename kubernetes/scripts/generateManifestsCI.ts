@@ -1,7 +1,7 @@
-import { ENVIRONMENTS_ALL } from './utils/sealedSecrets'
 import yargs from 'yargs'
 import { generateManifests } from './utils/generateManifests'
 import { getImageTagsFromDir } from './utils/getImageTagsFromDir'
+import { ENVIRONMENTS_ALL } from './utils/sealedSecrets'
 
 export const ARGV = yargs(process.argv.slice(2))
     .options({
