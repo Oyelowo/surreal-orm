@@ -4,3 +4,4 @@ coverage
 node_modules
 crd2pulumi
 manifests
+k3d.yaml
