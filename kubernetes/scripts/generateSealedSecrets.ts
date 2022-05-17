@@ -10,7 +10,6 @@ import { promptKubernetesClusterSwitch } from "./utils/promptKubernetesClusterSw
 import { promptSecretsKeepingConfirmations } from "./utils/promptSecretsKeepingConfirmations";
 import {
   getSecretManifestsPaths,
-  getSecretPathsInfo,
   promptEnvironmentSelection,
 } from "./utils/sealedSecrets";
 import { updateAppSealedSecrets } from "./utils/updateApplicationsSecrets";
@@ -32,7 +31,7 @@ async function main() {
     imageTags,
   });
 
-  // setupPlainSecretTSFiles();
+  setupPlainSecretTSFiles();
 
   if (generateSecretsOptions === "Generate all secrets") {
     generateAllSealedSecrets({ environment });
