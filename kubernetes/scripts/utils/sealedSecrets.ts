@@ -1,12 +1,10 @@
-import { getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory'
-import { Environment, ResourceName } from '../../resources/shared/types/own-types'
-import p from 'path'
-import { getFilePathsThatMatch } from './shared'
-import yargs from 'yargs/yargs'
 import c from 'chalk'
 import inquirer from 'inquirer'
+import p from 'path'
 import sh from 'shelljs'
-import util from 'util'
+import { getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory'
+import { Environment, ResourceName } from '../../resources/shared/types/own-types'
+import { getFilePathsThatMatch } from './shared'
 
 export const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets'
 

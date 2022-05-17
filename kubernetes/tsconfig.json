@@ -11,6 +11,8 @@
         "pretty": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
         "forceConsistentCasingInFileNames": true,
         "resolveJsonModule": true,
         "esModuleInterop": true,

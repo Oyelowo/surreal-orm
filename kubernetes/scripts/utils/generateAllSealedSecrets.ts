@@ -1,12 +1,8 @@
-import { getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory'
+import c from 'chalk'
 import sh from 'shelljs'
 import { Environment } from '../../resources/shared/types/own-types'
-import p from 'path'
-import c from 'chalk'
+import { getSecretManifestsPaths, getSecretPathsInfo, SEALED_SECRETS_CONTROLLER_NAME } from './sealedSecrets'
 
-import { getSecretManifestsPaths, getSecretPathsInfo } from './sealedSecrets'
-import { getFilePathsThatMatch } from './shared'
-import { SEALED_SECRETS_CONTROLLER_NAME } from './sealedSecrets'
 
 /*
 GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PULUMI.

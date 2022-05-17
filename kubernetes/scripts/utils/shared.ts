@@ -1,11 +1,8 @@
-import { SecretTemplate } from '../../resources/shared/types/SecretTemplate'
-import { SealedSecretTemplate } from '../../resources/shared/types/sealedSecretTemplate'
-import { getGeneratedEnvManifestsDir, getMainBaseDir } from '../../resources/shared/manifestsDirectory'
-import { ImageTags } from '../../resources/shared/validations'
-import sh, { ShellString } from 'shelljs'
-import { Environment } from '../../resources/shared/types/own-types'
 import c from 'chalk'
 import fs from 'fs'
+import sh, { ShellString } from 'shelljs'
+import { Environment } from '../../resources/shared/types/own-types'
+import { ImageTags } from '../../resources/shared/validations'
 
 const ENVIRONMENT_KEY = 'ENVIRONMENT'
 export function getEnvVarsForScript(environment: Environment, imageTags: ImageTags) {

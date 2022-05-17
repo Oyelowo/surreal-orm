@@ -1,8 +1,7 @@
-import { Environment } from '../../resources/shared/types/own-types'
+import chalk from 'chalk'
 import inquirer from 'inquirer'
 import sh from 'shelljs'
-import util from 'util'
-import chalk from 'chalk'
+import { Environment } from '../../resources/shared/types/own-types'
 // import { ARGV } from "./bootstrap";
 
 /* 

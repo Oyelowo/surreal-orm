@@ -1,26 +1,20 @@
-#!/usr/bin / env ts - node
-
-import { helmChartsInfo } from '../../resources/shared/helmChartInfo'
-import { namespaceNames } from '../../resources/namespaces/util'
-import {
-    getArgocdParentApplicationsPath,
-    getResourceAbsolutePath,
-    ResourceName,
-} from '../../resources/shared/manifestsDirectory'
-import sh from 'shelljs'
-/* 
-TODO: ADD INSTRUCTION ON HOW THIS WORKS
-*/
-// TODO: Maybe setup base argocd app that deploys other argocd apps?
-import { ArgumentTypes } from '../../../typescript/apps/web/utils/typescript'
+#!/usr/bin/env ts-node
 // TODO: Allow the selections of applications to regenerate secret for. This should be done with inquirer prompt.
 // This would read the name of the app = name of deployment in manifests to determine the sealed secrets  to regenerate and override
-import path from 'path'
-import { Environment } from '../../resources/shared/types/own-types'
-import { setupPlainSecretTSFiles } from '../secretsManagement/setupSecrets'
-import { generateManifests } from './generateManifests'
-import { getImageTagsFromDir } from './getImageTagsFromDir'
-import { generateAllSealedSecrets } from './generateAllSealedSecrets'
+import path from 'path';
+import sh from 'shelljs';
+import { namespaceNames } from '../../resources/namespaces/util';
+import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
+import {
+    getResourceAbsolutePath
+} from '../../resources/shared/manifestsDirectory';
+import { Environment, ResourceName } from '../../resources/shared/types/own-types';
+import { setupPlainSecretTSFiles } from '../secretsManagement/setupSecrets';
+import { getPathToResource } from './../../resources/shared/manifestsDirectory';
+import { generateAllSealedSecrets } from './generateAllSealedSecrets';
+import { generateManifests } from './generateManifests';
+import { getImageTagsFromDir } from './getImageTagsFromDir';
+
 
 export async function bootstrapCluster(environment: Environment) {
     const imageTags = await getImageTagsFromDir()
@@ -68,13 +62,13 @@ export async function bootstrapCluster(environment: Environment) {
     sh.exec(`kubectl -n argocd rollout restart deployment argocd-argo-cd-server`)
 
     // TODO: Only apply this in non prod environment
-    sh.exec(`kubectl apply -R -f ${getArgocdParentApplicationsPath(environment)}`)
+    sh.exec(`kubectl apply -R -f ${getPathToResource({ environment, resourceType: "infrastructure", resourceName: "argocd-applications-parents" })}`)
 }
 
 function applyResourceManifests(resourceName: ResourceName, environment: Environment) {
     const resourceDir = getResourceAbsolutePath(resourceName, environment)
     const applyManifests = (dir: string) => sh.exec(`kubectl apply -R -f  ${path.join(resourceDir, dir)}`)
-    ;['sealed-secrets', '0-crd', '1-manifest'].forEach(applyManifests)
+        ;['sealed-secrets', '0-crd', '1-manifest'].forEach(applyManifests)
 
     // sh.exec(`kubectl apply -R -f  ${resourceDir}/sealed-secrets`);
     // sh.exec(`kubectl apply -R -f  ${resourceDir}/0-crd`);
