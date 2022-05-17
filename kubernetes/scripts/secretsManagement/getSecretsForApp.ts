@@ -8,7 +8,7 @@ import { SECRET_PRODUCTION } from "../../.secrets/production";
 import { SECRET_STAGING } from "../../.secrets/staging";
 import { Secrets } from "./setupSecrets";
 
-const secretRecord: Record<Environment, Secrets> = {
+export const secretRecord: Record<Environment, Secrets> = {
   production: SECRET_PRODUCTION,
   staging: SECRET_STAGING,
   development: SECRET_DEVELOPMENT,

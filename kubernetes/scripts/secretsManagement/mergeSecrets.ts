@@ -5,28 +5,15 @@ import { ENVIRONMENTS_ALL } from "../utils/sealedSecrets";
 import { Environment } from "../../resources/shared/types/own-types";
 import sh from "shelljs";
 import { secretsSample } from "./secretsSample";
-
-import { SECRET_LOCAL } from "../../.secrets/local";
-import { SECRET_STAGING } from "../../.secrets/staging";
-import { SECRET_DEVELOPMENT } from "../../.secrets/development";
-import { SECRET_PRODUCTION } from "../../.secrets/production";
-
 import R from "ramda";
 import {
   getPlainSecretInputFilePath,
-  Secrets,
   getPlainSecretsContent,
 } from "./setupSecrets";
+import { secretRecord } from "./getSecretsForApp";
 
-function getMerged(environment: Environment) {
-  const secretsByEnv: Record<Environment, Secrets> = {
-    local: SECRET_LOCAL,
-    development: SECRET_DEVELOPMENT,
-    staging: SECRET_STAGING,
-    production: SECRET_PRODUCTION,
-  };
-
-  const existingContent = secretsByEnv[environment] ?? {};
+function mergeWithExistingSecrets(environment: Environment) {
+  const existingContent = secretRecord[environment] ?? {};
   const secrets = R.mergeDeepLeft(existingContent, secretsSample);
   const filePath = getPlainSecretInputFilePath(environment);
   const content = getPlainSecretsContent({ environment, secrets });
@@ -35,6 +22,6 @@ function getMerged(environment: Environment) {
 }
 
 function main() {
-  ENVIRONMENTS_ALL.forEach(getMerged);
+  ENVIRONMENTS_ALL.forEach(mergeWithExistingSecrets);
 }
-main()
+main();
