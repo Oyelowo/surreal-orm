@@ -78,8 +78,7 @@ function getResourceProperties<T>(
     case "nginx-ingress":
     case "argocd-applications-children-infrastructure":
     case "argocd-applications-children-services":
-    case "argocd-applications-parents": // case "infrastructure-argocd-applications": // case "services-argocd-applications":
-    {
+    case "argocd-applications-parents": {
       return onGetResourceProperties("infrastructure");
     }
   }

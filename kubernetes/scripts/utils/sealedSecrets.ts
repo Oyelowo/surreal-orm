@@ -1,8 +1,8 @@
+import { getGeneratedEnvManifestsDir } from "../../resources/shared/manifestsDirectory";
 import {
-  getGeneratedEnvManifestsDir,
+  Environment,
   ResourceName,
-} from "../../resources/shared/manifestsDirectory";
-import { Environment } from "../../resources/shared/types/own-types";
+} from "../../resources/shared/types/own-types";
 import p from "path";
 import { getFilePathsThatMatch } from "./shared";
 import yargs from "yargs/yargs";
