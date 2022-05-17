@@ -1,8 +1,7 @@
-import { ServiceName, Environment, ResourceName, ResourceType } from './types/own-types'
-import path from 'path'
-import sh from 'shelljs'
 import * as k8s from '@pulumi/kubernetes'
+import path from 'path'
 import { v4 as uuid } from 'uuid'
+import { Environment, ResourceName, ResourceType } from './types/own-types'
 
 // TODO:  Unify all the resourceType/resourceName path utils into a singular function e.g
 // 12th May, 2022: Get base dir for all kubernetes code: For now from the repo/monorepo root, it is: ./kubernetes
@@ -76,7 +75,7 @@ function getResourceProperties<T>(
     return assertUnreachable(resourceName)
 }
 
-export function assertUnreachable(x: never): never {
+export function assertUnreachable(_: never): never {
     throw new Error("Didn't expect to get here")
 }
 
