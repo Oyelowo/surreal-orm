@@ -1,7 +1,7 @@
 /* 
 TODO: ADD INSTRUCTION HERE
 */
-import c from 'chalk';
+import c from "chalk";
 import sh from "shelljs";
 import path from "path";
 import { Environment } from "../../resources/shared/types/own-types";
@@ -23,7 +23,6 @@ export function setupPlainSecretTSFiles() {
   sh.mkdir(PLAIN_SECRETS_CONFIGS_DIR);
   ENVIRONMENTS.forEach(createSecretsConfigFile);
   sh.exec(`npx prettier --write ${PLAIN_SECRETS_CONFIGS_DIR}`);
-
 }
 
 export function clearPlainInputTsSecretFilesContents() {
@@ -45,7 +44,10 @@ export type Secrets = typeof secretsSample;
 
 async function createSecretsConfigFile(environment: Environment) {
   const filePath = getPlainSecretInputFilePath(environment);
-  const content = getPlainSecretsContent({ environment, secrets: secretsSample });
+  const content = getPlainSecretsContent({
+    environment,
+    secrets: secretsSample,
+  });
 
   sh.mkdir(path.dirname(filePath));
   sh.touch(filePath);
@@ -53,13 +55,16 @@ async function createSecretsConfigFile(environment: Environment) {
   // TODO: This check can be improved to check the serialized content against the sample
   const secretsExists = !!sh.cat(filePath)?.stdout?.trim();
 
-  const createSecrets = () => sh.exec(`echo ${content} > ${filePath}`)
+  const createSecrets = () => sh.exec(`echo ${content} > ${filePath}`);
   const mergeSecrets = () => {
-    const exec = sh.exec("npx ts-node ./scripts/secretsManagement/mergeSecrets.ts", { silent: true });
+    const exec = sh.exec(
+      "npx ts-node ./scripts/secretsManagement/mergeSecrets.ts",
+      { silent: true }
+    );
     if (!exec.stderr.includes("Error: Cannot find module")) {
       console.error(c.redBright(exec.stderr));
     }
-  }
+  };
 
   secretsExists ? mergeSecrets() : createSecrets();
 }
