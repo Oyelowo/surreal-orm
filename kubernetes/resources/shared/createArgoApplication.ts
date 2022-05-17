@@ -5,7 +5,7 @@ import * as argocd from "../../crd2pulumi/argocd";
 import * as k8s from "@pulumi/kubernetes";
 import * as kx from "@pulumi/kubernetesx";
 import { getEnvironmentVariables } from "./validations";
-import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
+import { getSecretsForResource } from "../../scripts/secretsManagement/getSecretsForApp";
 import { APPLICATION_AUTOMERGE_ANNOTATION } from "./constants";
 import { ArgocdAppResourceName, ResourceName } from "./types/own-types";
 
@@ -81,7 +81,7 @@ const metadata: Omit<Metadata, "argoApplicationName" | "resourceType"> = {
   },
 };
 
-const secrets = getSecretsForApp("argocd", ENVIRONMENT);
+const secrets = getSecretsForResource("argocd", ENVIRONMENT);
 export const argoCDApplicationsSecret = new kx.Secret(
   `argocd-secret`,
   {

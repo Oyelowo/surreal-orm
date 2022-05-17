@@ -1,9 +1,9 @@
 import { getEnvironmentVariables } from "../../shared/validations";
 import { AppConfigs } from "../../shared/types/own-types";
-import { getSecretsForApp } from "../../../scripts/secretsManagement/getSecretsForApp";
+import { getSecretsForResource } from "../../../scripts/secretsManagement/getSecretsForApp";
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
-const secretsFromLocalConfigs = getSecretsForApp("graphql-mongo", environment);
+const secretsFromLocalConfigs = getSecretsForResource("graphql-mongo", environment);
 
 // TODO: ADD A NEW KEY - SECRETS TO THE config which would accept secrets from the global secrets config used to generate manifests
 export const graphqlMongoSettings: AppConfigs<"graphql-mongo", "mongodb", "applications"> = {

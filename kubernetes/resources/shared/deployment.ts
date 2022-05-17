@@ -15,7 +15,7 @@ import { createArgocdApplication } from "./createArgoApplication";
 import {
   getPathToResource,
 } from "./manifestsDirectory";
-import { getSecretsForApp } from "../../scripts/secretsManagement/getSecretsForApp";
+import { getSecretsForResource } from "../../scripts/secretsManagement/getSecretsForApp";
 import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
 
 
@@ -70,7 +70,7 @@ export class ServiceDeployment<
       { provider: this.getProvider(), parent: this }
     );
 
-    const secrets = getSecretsForApp(this.appName, ENVIRONMENT);
+    const secrets = getSecretsForResource(this.appName, ENVIRONMENT);
     // Create a Kubernetes Secret.
     this.secret = new kx.Secret(
       `${resourceName}-secret`,
@@ -200,7 +200,7 @@ export class ServiceDeployment<
 
    */
   #secretsObjectToEnv = (secretInstance: kx.Secret) => {
-    const secretObject = getSecretsForApp(this.appName, ENVIRONMENT);
+    const secretObject = getSecretsForResource(this.appName, ENVIRONMENT);
     const keyValueEntries = Object.keys(secretObject).map((key) => [
       key,
       secretInstance.asEnvValue(key),

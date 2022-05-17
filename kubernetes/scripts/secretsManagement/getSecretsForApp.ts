@@ -1,11 +1,9 @@
 import { Environment, ResourceName } from "./../../resources/shared/types/own-types";
-import { ServiceName } from "../../resources/shared/types/own-types";
-import { Secrets } from "./setupSecrets";
-import { getEnvironmentVariables } from "../../resources/shared/validations";
 import { SECRET_DEVELOPMENT } from "../../.secrets/development";
 import { SECRET_LOCAL } from "../../.secrets/local";
 import { SECRET_PRODUCTION } from "../../.secrets/production";
 import { SECRET_STAGING } from "../../.secrets/staging";
+import { Secrets } from "./setupSecrets";
 
 const secretRecord: Record<Environment, Secrets> = {
   production: SECRET_PRODUCTION,
@@ -16,10 +14,9 @@ const secretRecord: Record<Environment, Secrets> = {
 
 type AppSecrets<App extends ResourceName> = typeof secretRecord[Environment][App];
 
-export function getSecretsForApp<App extends ResourceName>(
-  appName: App,
+export function getSecretsForResource<Resource extends ResourceName>(
+  resourceName: Resource,
   environment: Environment
-): AppSecrets<App> {
-  // return secretRecord[getEnvironmentVariables().ENVIRONMENT][appName];
-  return secretRecord[environment][appName];
+): AppSecrets<Resource> {
+  return secretRecord[environment][resourceName];
 }

@@ -2,7 +2,7 @@ import { namespaceNames } from "./../../namespaces/util";
 // import { getEnvironmentVariables } from './../../shared/validations';
 import c from "chalk";
 import path from "path";
-import { getSecretsForApp } from "../../../scripts/secretsManagement/getSecretsForApp";
+import { getSecretsForResource } from "../../../scripts/secretsManagement/getSecretsForApp";
 import { Environment } from "../../shared/types/own-types";
 import sh from "shelljs";
 import * as kx from "@pulumi/kubernetesx";
@@ -49,7 +49,7 @@ interface DockerRawData {
     };
 }
 
-const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = getSecretsForApp("argocd", ENVIRONMENT);
+const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = getSecretsForResource("argocd", ENVIRONMENT);
 const dataRaw: DockerRawData = {
     auths: {
         "ghrc.io": {

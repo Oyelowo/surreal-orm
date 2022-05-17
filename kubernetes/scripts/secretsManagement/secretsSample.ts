@@ -1,9 +1,9 @@
-import { Secrets } from "./setupSecrets";
+
 
 // NOTE: I initially was encoding the secrets in base64 but it turns out
 // that bitnami sealed secrets not only handles encryption but base64 encoding of the
 // secrets before encrypting them
-export const secretsSample: Secrets = {
+export const secretsSample = {
   "graphql-mongo": {
     MONGODB_USERNAME: "",
     MONGODB_PASSWORD: "",
@@ -35,38 +35,16 @@ export const secretsSample: Secrets = {
     username: "Oyelowo",
     password: "my-password-or-personal-access-token",
   },
-} as const;
+  "argocd-applications-children-infrastructure": {},
+  "argocd-applications-children-services": {},
+  "argocd-applications-parents": {},
+  "cert-manager": {},
+  "linkerd": {},
+  "linkerd-viz": {},
+  "namespace-names": {},
+  "nginx-ingress": {},
+  "sealed-secrets": {}
+};
 
-export const secretsLocalSample: Secrets = {
-  "graphql-mongo": {
-    MONGODB_USERNAME: "username",
-    MONGODB_PASSWORD: "password",
-    MONGODB_ROOT_USERNAME: "root_username",
-    MONGODB_ROOT_PASSWORD: "root_password",
-    REDIS_USERNAME: "username",
-    REDIS_PASSWORD: "password",
-  },
-  "grpc-mongo": {
-    MONGODB_USERNAME: "username",
-    MONGODB_PASSWORD: "password",
-    MONGODB_ROOT_USERNAME: "root_username",
-    MONGODB_ROOT_PASSWORD: "root_password",
-  },
-  "graphql-postgres": {
-    POSTGRES_USERNAME: "username",
-    POSTGRES_PASSWORD: "password",
-  },
-  "react-web": {
-    GITHUB_CLIENT_ID: "",
-    GITHUB_CLIENT_SECRET: "",
-    GOOGLE_CLIENT_ID: "",
-    GOOGLE_CLIENT_SECRET: "",
-  },
-  argocd: {
-    ADMIN_PASSWORD: "12345",
-    type: "git",
-    url: "https://github.com/Oyelowo/modern-distributed-app-template",
-    username: "Oyelowo",
-    password: "my-password-or-personal-access-token",
-  },
-} as const;
+
+// Record<ResourceName, Record<string, string>>

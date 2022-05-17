@@ -9,6 +9,7 @@
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^14.18.12",
     "@types/prompt": "^1.1.2",
+    "@types/ramda": "^0.28.12",
     "@types/shelljs": "^0.8.11",
     "@types/uuid": "^8.3.4",
     "@types/yargs": "^17.0.10",
@@ -29,6 +30,7 @@
     "json-schema-to-ts": "^1.6.5",
     "patch-package": "^6.4.7",
     "prompt": "^1.2.2",
+    "ramda": "^0.28.0",
     "shelljs": "^0.8.5",
     "yargs": "^17.4.0",
     "zod": "^3.14.3"

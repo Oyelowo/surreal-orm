@@ -1,6 +1,7 @@
 
 
 import * as z from "zod";
+import { secretsSample } from "../../../scripts/secretsManagement/secretsSample";
 import { NamespaceName } from "../../namespaces/util";
 export const appEnvironmentsSchema = z.union([
   z.literal("local"),
