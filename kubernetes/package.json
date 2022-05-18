@@ -2,7 +2,8 @@
     "name": "oye",
     "scripts": {
         "postinstall": "patch-package && make setup",
-        "lint": "npx eslint .",
+        "lint": "npx eslint . --ext .js,.ts",
+        "lint-fix": "npx eslint . --ext .js,.ts",
         "prettier": "npx prettier --write .",
         "prettier-ci": "npx prettier --check ."
     },
