@@ -3,7 +3,7 @@ import { namespaceNames } from '../../namespaces/util';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 import { SealedSecretsHelmValuesBitnami } from '../../shared/types/helm-charts/sealedSecretsHelmValuesBitnami';
 import { DeepPartial } from '../../shared/types/own-types';
-import { resourceName, sealedSecretsProvider } from './settings';
+import { sealedSecretsResourceName, sealedSecretsProvider } from './settings';
 
 const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {
     // nameOverride: "mongodb-graphql",
@@ -13,7 +13,7 @@ const sealedSecretsValues: DeepPartial<SealedSecretsHelmValuesBitnami> = {
 kubeseal --controller-name sealed-secrets <args>
 Alternatively, you can override fullnameOverride on the helm chart install.
   */
-    fullnameOverride: resourceName,
+    fullnameOverride: sealedSecretsResourceName,
     podAnnotations: {
         // ...getArgoAppSyncWaveAnnotation("sealed-secrets"),
     },
@@ -30,7 +30,7 @@ const {
     sealedSecrets: { chart, version },
 } = helmChartsInfo.sealedSecrets;
 export const sealedSecret = new k8s.helm.v3.Chart(
-    resourceName,
+    sealedSecretsResourceName,
     {
         chart,
         fetchOpts: {

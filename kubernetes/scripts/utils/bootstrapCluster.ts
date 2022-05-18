@@ -1,14 +1,13 @@
 #!/usr/bin/env ts-node
-// TODO: Allow the selections of applications to regenerate secret for. This should be done with inquirer prompt.
-// This would read the name of the app = name of deployment in manifests to determine the sealed secrets  to regenerate and override
+
 import path from 'path';
 import sh from 'shelljs';
+import { sealedSecretsResourceName } from '../../resources/infrastructure/sealed-secrets/settings';
 import { namespaceNames } from '../../resources/namespaces/util';
 import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
 import { getResourceAbsolutePath } from '../../resources/shared/manifestsDirectory';
 import { Environment, ResourceName } from '../../resources/shared/types/own-types';
 import { setupPlainSecretTSFiles } from '../secretsManagement/setupSecrets';
-import { getPathToResource } from './../../resources/shared/manifestsDirectory';
 import { generateAllSealedSecrets } from './generateAllSealedSecrets';
 import { generateManifests } from './generateManifests';
 import { getImageTagsFromDir } from './getImageTagsFromDir';
@@ -74,9 +73,5 @@ function applyResourceManifests(resourceName: ResourceName, environment: Environ
         sh.exec(`kubectl apply -R -f  ${subDirPath}`);
     };
 
-    ['sealed-secrets', '0-crd', '1-manifest'].forEach(applyManifests);
-
-    // sh.exec(`kubectl apply -R -f  ${resourceDir}/sealed-secrets`);
-    // sh.exec(`kubectl apply -R -f  ${resourceDir}/0-crd`);
-    // sh.exec(`kubectl apply -R -f  ${resourceDir}/1-manifest`);
+    [sealedSecretsResourceName, '0-crd', '1-manifest'].forEach(applyManifests);
 }

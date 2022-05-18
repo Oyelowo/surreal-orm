@@ -53,21 +53,3 @@ export async function promptEnvironmentSelection() {
 
     return answers;
 }
-
-// export function getSecretEnvironmentArgs() {
-//   const ARGV = yargs(process.argv.slice(2))
-//     .options({
-//       e: {
-//         alias: "environment",
-//         choices: [
-//           "local",
-//           "development",
-//           "staging",
-//           "production",
-//         ] as Environment[],
-//         describe: "The environment you're generating the manifests for.",
-//         demandOption: true,
-//       },
-//     }).parseSync()
-//   return ARGV
-// }
