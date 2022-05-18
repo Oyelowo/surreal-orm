@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"argoproj.io/v1alpha1","kind":"Application","metadata":{"annotations":{"finalizers":["resources-finalizer.argocd.argoproj.io"]},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"react-web","namespace":"argocd"},"spec":{"destination":{"namespace":"applications","server":"https://kubernetes.default.svc"},"project":"default","source":{"directory":{"recurse":true},"path":"kubernetes/manifests/generated/production/services/react-web","repoURL":"https://github.com/Oyelowo/modern-distributed-app-template","targetRevision":"HEAD"}}}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: react-web
+  namespace: argocd
+spec:
+  destination:
+    namespace: applications
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    directory:
+      recurse: true
+    path: kubernetes/manifests/generated/production/services/react-web
+    repoURL: https://github.com/Oyelowo/modern-distributed-app-template
+    targetRevision: HEAD

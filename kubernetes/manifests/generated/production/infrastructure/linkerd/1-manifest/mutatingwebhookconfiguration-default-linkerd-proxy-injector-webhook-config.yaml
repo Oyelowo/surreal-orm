@@ -1,0 +1,40 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"admissionregistration.k8s.io/v1","kind":"MutatingWebhookConfiguration","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi","linkerd.io/control-plane-component":"proxy-injector","linkerd.io/control-plane-ns":"linkerd"},"name":"linkerd-proxy-injector-webhook-config"},"webhooks":[{"admissionReviewVersions":["v1","v1beta1"],"clientConfig":{"caBundle":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURVekNDQWp1Z0F3SUJBZ0lSQUo5MkZha3BRU1pjdXNOVXRDREo4OVF3RFFZSktvWklodmNOQVFFTEJRQXcKTFRFck1Da0dBMVVFQXhNaWJHbHVhMlZ5WkMxd2NtOTRlUzFwYm1wbFkzUnZjaTVzYVc1clpYSmtMbk4yWXpBZQpGdzB5TWpBMU1UZ3lNREE0TURoYUZ3MHlNekExTVRneU1EQTRNRGhhTUMweEt6QXBCZ05WQkFNVElteHBibXRsCmNtUXRjSEp2ZUhrdGFXNXFaV04wYjNJdWJHbHVhMlZ5WkM1emRtTXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUEKQTRJQkR3QXdnZ0VLQW9JQkFRQ2xZNE50T0hLOW1HYUQ1akJVWGV2TDdDNmo5dUpuTklaSThOcEVqb1NneURFTAoyaVE0SXJ0ektvN0NLaDYyYWpaQ0pLUktOc04yTHRESmtSRFdDV1pweVZMNXBmWTRES3FjNG92OXRXbFdVNGEyCjBoejEyTmwybkZFT2JpRFJ5RTViTXB3N0VkNGlRT3FjUkxBRnVkZnRIOWJVeE9uQnl3VGxUd3FPUGpUUzU3V1MKYXkzV0FaV0UrTUxveTNvYlRISHc5anN2MWNoVFU3RjRaRTdmK1JXVzdEVDQ4ZVdqU0YyUDVDNFl0a3p0VjREdAp1QS9LVjdHL1JCVmNaaEJvOXJJSThWYVBiaWZnWkwzWGRod0g5UXdNcTEzNXB4UmVFdWNXdHZFUVVKU0Y3L09pCmRNZWZKS25qZWt1WnlKK2JCRitQaFUra2o4eUtyd3NBd2dEZnFXKzVBZ01CQUFHamJqQnNNQTRHQTFVZER3RUIKL3dRRUF3SUZvREFkQmdOVkhTVUVGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0RBWURWUjBUQVFILwpCQUl3QURBdEJnTlZIUkVFSmpBa2dpSnNhVzVyWlhKa0xYQnliM2g1TFdsdWFtVmpkRzl5TG14cGJtdGxjbVF1CmMzWmpNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUNGK3R0cWt0KzhnN2E4eXNoS0Q3dys4VU5nSVBCY2lZRjYKSU5xNE1CRys2aXhZWHpzRWVkdWNhR0ZZTjEwOTNuTDM5LzQ5TVMyZUIrRTQzMDF6VE9IZVpFQ29Qd240eEJ6RwpjSDg5RFg4YjBoc0xyK09GL3IrWHJySG1pejgrRDdacEpQcVBTMVNaRXNVMDRwS2hyQ0lxTEQzZkdpUHNTVDV5CklOa1UxRXluNnl6Z0UxYXpvOWxORWN0djZGOUR0bVI5VnBBM1o3R2lCQXkzQ0xQOHg5bEdqOGFiSitBZkZuNm0KSVFwNjZ3dFlsaVp2UDMwRnlsQ0h0T0c0Z2RQNXV4S2g1QURiR2FPS0VNV3grNzBESlA0NDI2MlZsMGE2ekZMSAp1T2dxME5XbGY5b2tpRnlwRlVsOTBITWRNOUFDQkdrZk1YSnRVY3pkOHNKZmdJUjFucGpPCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=","service":{"name":"linkerd-proxy-injector","namespace":"linkerd","path":"/"}},"failurePolicy":"Ignore","name":"linkerd-proxy-injector.linkerd.io","namespaceSelector":{"matchExpressions":[{"key":"config.linkerd.io/admission-webhooks","operator":"NotIn","values":["disabled"]}]},"rules":[{"apiGroups":[""],"apiVersions":["v1"],"operations":["CREATE"],"resources":["pods","services"]}],"sideEffects":"None"}]}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+    linkerd.io/control-plane-component: proxy-injector
+    linkerd.io/control-plane-ns: linkerd
+  name: linkerd-proxy-injector-webhook-config
+webhooks:
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURVekNDQWp1Z0F3SUJBZ0lSQUo5MkZha3BRU1pjdXNOVXRDREo4OVF3RFFZSktvWklodmNOQVFFTEJRQXcKTFRFck1Da0dBMVVFQXhNaWJHbHVhMlZ5WkMxd2NtOTRlUzFwYm1wbFkzUnZjaTVzYVc1clpYSmtMbk4yWXpBZQpGdzB5TWpBMU1UZ3lNREE0TURoYUZ3MHlNekExTVRneU1EQTRNRGhhTUMweEt6QXBCZ05WQkFNVElteHBibXRsCmNtUXRjSEp2ZUhrdGFXNXFaV04wYjNJdWJHbHVhMlZ5WkM1emRtTXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUEKQTRJQkR3QXdnZ0VLQW9JQkFRQ2xZNE50T0hLOW1HYUQ1akJVWGV2TDdDNmo5dUpuTklaSThOcEVqb1NneURFTAoyaVE0SXJ0ektvN0NLaDYyYWpaQ0pLUktOc04yTHRESmtSRFdDV1pweVZMNXBmWTRES3FjNG92OXRXbFdVNGEyCjBoejEyTmwybkZFT2JpRFJ5RTViTXB3N0VkNGlRT3FjUkxBRnVkZnRIOWJVeE9uQnl3VGxUd3FPUGpUUzU3V1MKYXkzV0FaV0UrTUxveTNvYlRISHc5anN2MWNoVFU3RjRaRTdmK1JXVzdEVDQ4ZVdqU0YyUDVDNFl0a3p0VjREdAp1QS9LVjdHL1JCVmNaaEJvOXJJSThWYVBiaWZnWkwzWGRod0g5UXdNcTEzNXB4UmVFdWNXdHZFUVVKU0Y3L09pCmRNZWZKS25qZWt1WnlKK2JCRitQaFUra2o4eUtyd3NBd2dEZnFXKzVBZ01CQUFHamJqQnNNQTRHQTFVZER3RUIKL3dRRUF3SUZvREFkQmdOVkhTVUVGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0RBWURWUjBUQVFILwpCQUl3QURBdEJnTlZIUkVFSmpBa2dpSnNhVzVyWlhKa0xYQnliM2g1TFdsdWFtVmpkRzl5TG14cGJtdGxjbVF1CmMzWmpNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUNGK3R0cWt0KzhnN2E4eXNoS0Q3dys4VU5nSVBCY2lZRjYKSU5xNE1CRys2aXhZWHpzRWVkdWNhR0ZZTjEwOTNuTDM5LzQ5TVMyZUIrRTQzMDF6VE9IZVpFQ29Qd240eEJ6RwpjSDg5RFg4YjBoc0xyK09GL3IrWHJySG1pejgrRDdacEpQcVBTMVNaRXNVMDRwS2hyQ0lxTEQzZkdpUHNTVDV5CklOa1UxRXluNnl6Z0UxYXpvOWxORWN0djZGOUR0bVI5VnBBM1o3R2lCQXkzQ0xQOHg5bEdqOGFiSitBZkZuNm0KSVFwNjZ3dFlsaVp2UDMwRnlsQ0h0T0c0Z2RQNXV4S2g1QURiR2FPS0VNV3grNzBESlA0NDI2MlZsMGE2ekZMSAp1T2dxME5XbGY5b2tpRnlwRlVsOTBITWRNOUFDQkdrZk1YSnRVY3pkOHNKZmdJUjFucGpPCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=
+    service:
+      name: linkerd-proxy-injector
+      namespace: linkerd
+      path: /
+  failurePolicy: Ignore
+  name: linkerd-proxy-injector.linkerd.io
+  namespaceSelector:
+    matchExpressions:
+    - key: config.linkerd.io/admission-webhooks
+      operator: NotIn
+      values:
+      - disabled
+  rules:
+  - apiGroups:
+    - ""
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    resources:
+    - pods
+    - services
+  sideEffects: None

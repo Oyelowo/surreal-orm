@@ -1,0 +1,19 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRoleBinding","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi","component":"metrics-api","linkerd.io/extension":"viz"},"name":"linkerd-linkerd-viz-metrics-api"},"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"ClusterRole","name":"linkerd-linkerd-viz-metrics-api"},"subjects":[{"kind":"ServiceAccount","name":"metrics-api","namespace":"linkerd-viz"}]}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+    component: metrics-api
+    linkerd.io/extension: viz
+  name: linkerd-linkerd-viz-metrics-api
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: linkerd-linkerd-viz-metrics-api
+subjects:
+- kind: ServiceAccount
+  name: metrics-api
+  namespace: linkerd-viz
