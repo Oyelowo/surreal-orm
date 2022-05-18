@@ -34,7 +34,7 @@ export function isFileEmpty (fileName: string, ignoreWhitespace = true): Promise
         return
       }
 
-      resolve((!ignoreWhitespace && data.length == 0) || (ignoreWhitespace && !!String(data).match(/^\s*$/)))
+      resolve((!ignoreWhitespace && data.length === 0) || (ignoreWhitespace && !!String(data).match(/^\s*$/)))
     })
   })
 }

@@ -1,16 +1,11 @@
-import { namespaceNames } from './../../namespaces/util'
-// import { getEnvironmentVariables } from './../../shared/validations';
-import c from 'chalk'
-import path from 'path'
-import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp'
-import { Environment } from '../../shared/types/own-types'
-import sh from 'shelljs'
 import * as kx from '@pulumi/kubernetesx'
-import { getEnvironmentVariables } from '../../shared/validations'
+import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp'
 import { getResourceProvider } from '../../shared/manifestsDirectory'
+import { getEnvironmentVariables } from '../../shared/validations'
+import { namespaceNames } from './../../namespaces/util'
 
 const { ENVIRONMENT } = getEnvironmentVariables()
-const DOCKER_SERVER = 'ghcr.io'
+// const DOCKER_SERVER = 'ghcr.io'
 export const DOCKER_REGISTRY_KEY = 'my-registry-key'
 
 // export function createContainerRegistrySecret(environment: Environment): void {
