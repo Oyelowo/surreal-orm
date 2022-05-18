@@ -10,7 +10,6 @@ import { getEnvironmentVariables } from './validations';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 
-type Metadata = {};
 
 type ArgocdApplicationProps = {
     namespace: NamespaceName;
@@ -68,7 +67,7 @@ export function createArgocdApplication({
     return argocdApplication;
 }
 
-const metadata: Omit<Metadata, 'argoApplicationName' | 'resourceType'> = {
+const metadata = {
     name: 'argocd-applications-secret',
     namespace: namespaceNames.argocd,
     labels: {

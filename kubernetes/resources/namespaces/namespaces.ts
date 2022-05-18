@@ -2,7 +2,7 @@ import { Namespace } from '@pulumi/kubernetes/core/v1';
 import { namespacesNamesProvider } from './settings';
 import { namespaceNames } from './util';
 
-export const resourceNamespaces = Object.entries(namespaceNames).map(([_k, namespace]) => {
+export const resourceNamespaces = Object.entries(namespaceNames).map(([_key, namespace]) => {
     const resourceNamespace = new Namespace(
         namespace,
         {
