@@ -1,7 +1,7 @@
 import { createArgocdApplication } from '../../shared/createArgoApplication';
 
 export const ingressControllerApplication = createArgocdApplication({
-    resourceName: 'nginx-ingress',
-    sourceResourceName: 'argocd-applications-children-infrastructure',
+    resourceName: 'argocd-applications-children-infrastructure',
+    sourceResourceName: 'nginx-ingress',
     namespace: 'default',
 });

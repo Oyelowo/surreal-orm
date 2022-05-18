@@ -12,8 +12,9 @@ const { ENVIRONMENT } = getEnvironmentVariables();
 
 type ArgocdApplicationProps = {
     namespace: NamespaceName;
-    sourceResourceName: ArgocdAppResourceName;
+    // sourceResourceName: ArgocdAppResourceName;
     resourceName: ResourceName;
+    sourceResourceName: ResourceName;
     parent?: Resource;
 };
 

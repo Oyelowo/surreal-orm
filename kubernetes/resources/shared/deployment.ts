@@ -15,7 +15,7 @@ export class ServiceDeployment<
     AN extends ServiceName,
     DBT extends DBType,
     NS extends NamespaceOfApps
-> extends pulumi.ComponentResource {
+    > extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
@@ -151,8 +151,8 @@ export class ServiceDeployment<
 
         this.argocdApplication = createArgocdApplication({
             namespace: metadata.namespace,
-            resourceName: this.appName,
-            sourceResourceName: 'argocd-applications-children-services',
+            resourceName: 'argocd-applications-children-services',
+            sourceResourceName: this.appName,
             parent: this,
         });
 

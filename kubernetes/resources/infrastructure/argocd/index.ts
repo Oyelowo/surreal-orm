@@ -10,8 +10,8 @@ export const argoInfrastructureParentApplications = createArgocdApplication({
     namespace: 'argocd',
 });
 
-export const argoServicesParentApplications = createArgocdApplication({
-    resourceName: 'argocd-applications-parents',
-    sourceResourceName: 'argocd-applications-children-services',
-    namespace: 'argocd',
-});
+// export const argoServicesParentApplications = createArgocdApplication({
+//     resourceName: 'argocd-applications-parents',
+//     sourceResourceName: 'argocd-applications-children-services',
+//     namespace: 'argocd',
+// });

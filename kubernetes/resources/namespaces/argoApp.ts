@@ -2,7 +2,7 @@ import { createArgocdApplication } from '../shared/createArgoApplication';
 import { namespaceNames } from './util';
 
 export const namespacesArgoApps = createArgocdApplication({
-    resourceName: 'namespace-names',
-    sourceResourceName: 'argocd-applications-children-infrastructure',
+    resourceName: 'argocd-applications-children-infrastructure',
+    sourceResourceName: 'namespace-names',
     namespace: namespaceNames.default,
 });
