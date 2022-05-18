@@ -1,7 +1,7 @@
 import { createArgocdApplication } from '../../shared/createArgoApplication';
 
 export const certManagerApplication = createArgocdApplication({
-    sourceResourceName: 'argocd-applications-children-infrastructure',
     resourceName: 'cert-manager',
+    sourceResourceName: 'argocd-applications-children-infrastructure',
     namespace: 'cert-manager',
 });

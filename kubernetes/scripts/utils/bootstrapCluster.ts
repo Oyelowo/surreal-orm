@@ -59,13 +59,7 @@ export async function bootstrapCluster(environment: Environment) {
     sh.exec('kubectl -n argocd rollout restart deployment argocd-argo-cd-server');
 
     // TODO: Only apply this in non prod environment
-    sh.exec(
-        `kubectl apply -R -f ${getPathToResource({
-            environment,
-            resourceType: 'infrastructure',
-            resourceName: 'argocd-applications-parents',
-        })}`
-    );
+    applyResourceManifests("argocd-applications-parents", environment)
 }
 
 function applyResourceManifests(resourceName: ResourceName, environment: Environment) {
