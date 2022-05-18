@@ -30,57 +30,57 @@
 
 // type Props = Record<`${Repo}Repo`, BitnamiRepoCharts | JetspackRepoCharts | LinkerdRepoCharts
 export const helmChartsInfo = {
-    bitnamiRepo: {
-        repo: 'https://charts.bitnami.com/bitnami',
-        certManager: {
-            chart: 'cert-manager',
-            version: '0.5.0',
-        },
-        nginxIngress: {
-            chart: 'nginx-ingress-controller',
-            version: '9.1.26',
-        },
-        argocd: {
-            chart: 'argo-cd',
-            version: '3.1.16',
-        },
+  bitnamiRepo: {
+    repo: 'https://charts.bitnami.com/bitnami',
+    certManager: {
+      chart: 'cert-manager',
+      version: '0.5.0'
     },
+    nginxIngress: {
+      chart: 'nginx-ingress-controller',
+      version: '9.1.26'
+    },
+    argocd: {
+      chart: 'argo-cd',
+      version: '3.1.16'
+    }
+  },
+  sealedSecrets: {
+    repo: 'https://bitnami-labs.github.io/sealed-secrets',
     sealedSecrets: {
-        repo: 'https://bitnami-labs.github.io/sealed-secrets',
-        sealedSecrets: {
-            chart: 'sealed-secrets',
-            version: '2.1.7',
-        },
+      chart: 'sealed-secrets',
+      version: '2.1.7'
+    }
+  },
+  jetspackRepo: {
+    repo: 'https://charts.jetstack.io',
+    certManager: {
+      chart: 'cert-manager',
+      version: 'v1.8.0'
     },
-    jetspackRepo: {
-        repo: 'https://charts.jetstack.io',
-        certManager: {
-            chart: 'cert-manager',
-            version: 'v1.8.0',
-        },
-        certManagerTrust: {
-            chart: 'cert-manager-trust',
-            version: 'v0.1.1',
-        },
+    certManagerTrust: {
+      chart: 'cert-manager-trust',
+      version: 'v0.1.1'
+    }
+  },
+  linkerdRepo: {
+    repo: 'https://helm.linkerd.io/stable',
+    linkerd2: {
+      chart: 'linkerd2',
+      version: '2.11.2'
     },
-    linkerdRepo: {
-        repo: 'https://helm.linkerd.io/stable',
-        linkerd2: {
-            chart: 'linkerd2',
-            version: '2.11.2',
-        },
-        linkerdViz: {
-            chart: 'linkerd-viz',
-            version: '2.11.2',
-        },
-    },
-    argoRepo: {
-        repo: 'https://argoproj.github.io/argo-helm',
-        argoCD: {
-            chart: 'argo-cd',
-            version: '4.5.3',
-        },
-    },
+    linkerdViz: {
+      chart: 'linkerd-viz',
+      version: '2.11.2'
+    }
+  },
+  argoRepo: {
+    repo: 'https://argoproj.github.io/argo-helm',
+    argoCD: {
+      chart: 'argo-cd',
+      version: '4.5.3'
+    }
+  }
 } as const
 
 // export const helmChartsMetadata = {

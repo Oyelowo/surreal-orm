@@ -71,7 +71,7 @@ export type NginxConfiguration = {
     'nginx.ingress.kubernetes.io/proxy-ssl-verify-depth': number
     'nginx.ingress.kubernetes.io/proxy-ssl-server-name': string
     'nginx.ingress.kubernetes.io/enable-rewrite-log': 'true' | 'false'
-    'nginx.ingress.kubernetes.io/rewrite-target': string //URI;
+    'nginx.ingress.kubernetes.io/rewrite-target': string // URI;
     'nginx.ingress.kubernetes.io/satisfy': string
     'nginx.ingress.kubernetes.io/server-alias': string
     'nginx.ingress.kubernetes.io/server-snippet': string

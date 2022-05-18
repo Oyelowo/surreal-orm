@@ -51,36 +51,36 @@ interface DockerRawData {
 
 const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = getSecretsForResource('argocd', ENVIRONMENT)
 const dataRaw: DockerRawData = {
-    auths: {
-        'ghrc.io': {
-            username: DOCKER_USERNAME,
-            password: DOCKER_PASSWORD,
-            auth: toBase64(`${DOCKER_USERNAME}:${DOCKER_PASSWORD}`),
-        },
-    },
+  auths: {
+    'ghrc.io': {
+      username: DOCKER_USERNAME,
+      password: DOCKER_PASSWORD,
+      auth: toBase64(`${DOCKER_USERNAME}:${DOCKER_PASSWORD}`)
+    }
+  }
 }
-function toBase64(text: string) {
-    return Buffer.from(text).toString('base64')
+function toBase64 (text: string) {
+  return Buffer.from(text).toString('base64')
 }
 
 export const dockerRegistry = new kx.Secret(
-    'docker-registry',
-    {
-        type: 'kubernetes.io/dockerconfigjson',
-        metadata: {
-            name: 'docker-registry-applications',
-            namespace: namespaceNames.applications,
-        },
-
-        data: {
-            // ".dockerconfigjson": JSON.stringify(dataRaw)
-            '.dockerconfigjson': toBase64(JSON.stringify(dataRaw)),
-        },
+  'docker-registry',
+  {
+    type: 'kubernetes.io/dockerconfigjson',
+    metadata: {
+      name: 'docker-registry-applications',
+      namespace: namespaceNames.applications
     },
-    { provider: getResourceProvider('argocd-applications-parents', ENVIRONMENT) }
+
+    data: {
+      // ".dockerconfigjson": JSON.stringify(dataRaw)
+      '.dockerconfigjson': toBase64(JSON.stringify(dataRaw))
+    }
+  },
+  { provider: getResourceProvider('argocd-applications-parents', ENVIRONMENT) }
 )
 
-/* 
+/*
 apiVersion: v1
 data:
   .dockerconfigjson: eyJhdXRocyI6eyJnaHJjLmlvIjp7InVzZXJuYW1lIjoib3llIiwicGFzc3dvcmQiOiIxMjM0IiwiYXV0aCI6ImIzbGxPakV5TXpRPSJ9fX0=

@@ -6,17 +6,17 @@ import { Environment, ResourceName } from './../../resources/shared/types/own-ty
 import { Secrets } from './setupSecrets'
 
 export const secretRecord: Record<Environment, Secrets> = {
-    production: SECRET_PRODUCTION,
-    staging: SECRET_STAGING,
-    development: SECRET_DEVELOPMENT,
-    local: SECRET_LOCAL,
+  production: SECRET_PRODUCTION,
+  staging: SECRET_STAGING,
+  development: SECRET_DEVELOPMENT,
+  local: SECRET_LOCAL
 }
 
 type AppSecrets<App extends ResourceName> = typeof secretRecord[Environment][App]
 
-export function getSecretsForResource<Resource extends ResourceName>(
-    resourceName: Resource,
-    environment: Environment
+export function getSecretsForResource<Resource extends ResourceName> (
+  resourceName: Resource,
+  environment: Environment
 ): AppSecrets<Resource> {
-    return secretRecord[environment][resourceName]
+  return secretRecord[environment][resourceName]
 }

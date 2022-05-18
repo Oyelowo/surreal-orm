@@ -5,7 +5,6 @@ import { DeepPartial } from '../../shared/types/own-types'
 import { graphqlPostgres } from './index'
 import { graphqlPostgresSettings } from './settings'
 
-
 const { envVars } = graphqlPostgresSettings
 type Credentials = {
     usernames: string[]
@@ -13,118 +12,118 @@ type Credentials = {
     databases: string[]
 }
 const credentials = [
-    {
-        username: envVars.POSTGRES_USERNAME,
-        password: envVars.POSTGRES_PASSWORD,
-        database: envVars.POSTGRES_NAME,
-    },
-    {
-        username: 'username1',
-        password: 'password1',
-        database: 'database1',
-    },
-    {
-        username: 'username2',
-        password: 'password2',
-        database: 'database2',
-    },
-    {
-        username: 'username3',
-        password: 'password3',
-        database: 'database1',
-    },
-    {
-        username: 'username4',
-        password: 'password4',
-        database: 'database2',
-    },
+  {
+    username: envVars.POSTGRES_USERNAME,
+    password: envVars.POSTGRES_PASSWORD,
+    database: envVars.POSTGRES_NAME
+  },
+  {
+    username: 'username1',
+    password: 'password1',
+    database: 'database1'
+  },
+  {
+    username: 'username2',
+    password: 'password2',
+    database: 'database2'
+  },
+  {
+    username: 'username3',
+    password: 'password3',
+    database: 'database1'
+  },
+  {
+    username: 'username4',
+    password: 'password4',
+    database: 'database2'
+  }
 ]
 
 const mappedCredentials = credentials.reduce<Credentials>(
-    (acc, val) => {
-        acc.usernames.push(val.username)
-        acc.passwords.push(val.password)
-        acc.databases.push(val.database)
-        return acc
-    },
-    {
-        usernames: [],
-        passwords: [],
-        databases: [],
-    }
+  (acc, val) => {
+    acc.usernames.push(val.username)
+    acc.passwords.push(val.password)
+    acc.databases.push(val.database)
+    return acc
+  },
+  {
+    usernames: [],
+    passwords: [],
+    databases: []
+  }
 )
 
 const postgresValues: DeepPartial<postgresdbHaHelmValuesBitnami> = {
-    // useStatefulSet: true,
-    // architecture: "replicaset",
+  // useStatefulSet: true,
+  // architecture: "replicaset",
+  // replicaCount: 3,
+  // nameOverride: "postgres-database",
+  // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
+  fullnameOverride: envVars.POSTGRES_SERVICE_NAME,
+  postgresql: {
     // replicaCount: 3,
-    // nameOverride: "postgres-database",
-    // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
-    fullnameOverride: envVars.POSTGRES_SERVICE_NAME,
-    postgresql: {
-        // replicaCount: 3,
-        // containerPort,
-        username: envVars.POSTGRES_USERNAME,
-        //pgHbaConfiguration: "",
-        postgresPassword: envVars.POSTGRES_PASSWORD,
-        database: envVars.POSTGRES_DATABASE_NAME,
-        password: envVars.POSTGRES_PASSWORD,
-        // repmgrPassword: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
-        // repmgrDatabase: graphqlPostgresEnvironmentVariables.POSTGRES_DATABASE_NAME,
-        // existingSecret: "",
-    },
+    // containerPort,
+    username: envVars.POSTGRES_USERNAME,
+    // pgHbaConfiguration: "",
+    postgresPassword: envVars.POSTGRES_PASSWORD,
+    database: envVars.POSTGRES_DATABASE_NAME,
+    password: envVars.POSTGRES_PASSWORD
+    // repmgrPassword: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
+    // repmgrDatabase: graphqlPostgresEnvironmentVariables.POSTGRES_DATABASE_NAME,
+    // existingSecret: "",
+  },
+  pgpool: {
+    // existingSecret: "",
+    // customUsers: "",
+    // usernames: "",
+    // passwords: "",
+    // adminPassword: "",
+    // adminUsername: "",
+    replicaCount: 2
+  },
+  global: {
+    // namespaceOverride: devNamespaceName,
+    // imagePullSecrets: [],
+    // storageClass: "",
     pgpool: {
-        // existingSecret: "",
-        // customUsers: "",
-        // usernames: "",
-        // passwords: "",
-        // adminPassword: "",
-        // adminUsername: "",
-        replicaCount: 2,
+      // adminUsername: "",
+      // adminPassword: "",
+      // existingSecret: "",
     },
-    global: {
-        // namespaceOverride: devNamespaceName,
-        // imagePullSecrets: [],
-        //storageClass: "",
-        pgpool: {
-            // adminUsername: "",
-            // adminPassword: "",
-            // existingSecret: "",
-        },
-        postgresql: {
-            // username: "",
-            // password: "",
-            // database: "",
-            // repmgrUsername: "",
-            // repmgrPassword: "",
-            // repmgrDatabase: "",
-            // existingSecret: "",
-        },
-        ldap: {},
+    postgresql: {
+      // username: "",
+      // password: "",
+      // database: "",
+      // repmgrUsername: "",
+      // repmgrPassword: "",
+      // repmgrDatabase: "",
+      // existingSecret: "",
     },
-    service: {
-        type: 'ClusterIP',
-        port: Number(envVars.POSTGRES_PORT),
-        // portName: "mongo-graphql",
-        // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
-    },
+    ldap: {}
+  },
+  service: {
+    type: 'ClusterIP',
+    port: Number(envVars.POSTGRES_PORT)
+    // portName: "mongo-graphql",
+    // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
+  }
 }
 
 // `http://${name}.${namespace}:${port}`;
 export const graphqlPostgresPostgresdbHA = new k8s.helm.v3.Chart(
-    'postgres-ha',
-    {
-        chart: 'postgresql-ha',
-        fetchOpts: {
-            repo: 'https://charts.bitnami.com/bitnami',
-        },
-        version: '8.4.0',
-        values: postgresValues,
-        namespace: namespaceNames.applications,
-        // By default Release resource will wait till all created resources
-        // are available. Set this to true to skip waiting on resources being
-        // available.
-        skipAwait: false,
+  'postgres-ha',
+  {
+    chart: 'postgresql-ha',
+    fetchOpts: {
+      repo: 'https://charts.bitnami.com/bitnami'
     },
-    { provider: graphqlPostgres.getProvider() }
+    version: '8.4.0',
+    values: postgresValues,
+    namespace: namespaceNames.applications,
+    // By default Release resource will wait till all created resources
+    // are available. Set this to true to skip waiting on resources being
+    // available.
+    skipAwait: false
+  },
+  { provider: graphqlPostgres.getProvider() }
 )

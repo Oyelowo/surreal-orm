@@ -1,10 +1,10 @@
 import * as z from 'zod'
 import { NamespaceName } from '../../namespaces/util'
 export const appEnvironmentsSchema = z.union([
-    z.literal('local'),
-    z.literal('development'),
-    z.literal('staging'),
-    z.literal('production'),
+  z.literal('local'),
+  z.literal('development'),
+  z.literal('staging'),
+  z.literal('production')
 ])
 
 export type Environment = z.infer<typeof appEnvironmentsSchema>
@@ -22,13 +22,13 @@ export type ServiceName = 'graphql-mongo' | 'graphql-postgres' | 'grpc-mongo' | 
 export type ArgocdAppResourceName = `argocd-applications-children-${ResourceType}` | 'argocd-applications-parents'
 
 const InfrastructureNames = [
-    'namespace-names',
-    'sealed-secrets',
-    'cert-manager',
-    'nginx-ingress',
-    'linkerd',
-    'linkerd-viz',
-    'argocd',
+  'namespace-names',
+  'sealed-secrets',
+  'cert-manager',
+  'nginx-ingress',
+  'linkerd',
+  'linkerd-viz',
+  'argocd'
 ] as const
 
 export type InfrastructureName = typeof InfrastructureNames[number]

@@ -12,13 +12,13 @@ type CamelCase<S extends string> = S extends `${infer P1}-${infer P2}${infer P3}
     : Lowercase<S>
 
 export const namespaceNames: Record<CamelCase<NamespaceName>, NamespaceName> = {
-    applications: 'applications',
-    argocd: 'argocd',
-    certManager: 'cert-manager',
-    linkerd: 'linkerd',
-    linkerdViz: 'linkerd-viz',
-    default: 'default',
-    // Default namespace that comes with the deployment
-    kubeSystem: 'kube-system',
-    // infrastructure: "infrastructure",
+  applications: 'applications',
+  argocd: 'argocd',
+  certManager: 'cert-manager',
+  linkerd: 'linkerd',
+  linkerdViz: 'linkerd-viz',
+  default: 'default',
+  // Default namespace that comes with the deployment
+  kubeSystem: 'kube-system'
+  // infrastructure: "infrastructure",
 } as const

@@ -6,30 +6,30 @@ import { CertManagerValuesJetspack } from '../../shared/types/helm-charts/certMa
 import { certManagerProvider } from './settings'
 
 const certManagerValues: DeepPartial<CertManagerValuesJetspack> = {
-    installCRDs: true,
+  installCRDs: true
 }
 
 const {
-    repo,
-    certManager: { chart, version },
+  repo,
+  certManager: { chart, version }
 } = helmChartsInfo.jetspackRepo
 export const certManagerHelm = new k8s.helm.v3.Chart(
-    'cert-manager',
-    {
-        chart,
-        fetchOpts: {
-            // repo: "https://charts.jetstack.io",
-            repo,
-        },
-        // version: "1.8.0",
-        version,
-        values: certManagerValues,
-        namespace: namespaceNames.certManager,
-        // namespace: devNamespaceName,
-        // By default Release resource will wait till all created resources
-        // are available. Set this to true to skip waiting on resources being
-        // available.
-        skipAwait: false,
+  'cert-manager',
+  {
+    chart,
+    fetchOpts: {
+      // repo: "https://charts.jetstack.io",
+      repo
     },
-    { provider: certManagerProvider }
+    // version: "1.8.0",
+    version,
+    values: certManagerValues,
+    namespace: namespaceNames.certManager,
+    // namespace: devNamespaceName,
+    // By default Release resource will wait till all created resources
+    // are available. Set this to true to skip waiting on resources being
+    // available.
+    skipAwait: false
+  },
+  { provider: certManagerProvider }
 )

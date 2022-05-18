@@ -15,7 +15,3 @@ export * from './resources/services/graphql-mongo'
 // TYPESCRIPT WORKSPACE APPS
 // Web app. Nextjs with client and server support. Server is at /api
 export * from './resources/services/react-web'
-
-
-
-

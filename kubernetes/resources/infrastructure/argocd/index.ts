@@ -5,13 +5,13 @@ export * from './argocdBitnami'
 // // export * from "./argocdOfficial";
 
 export const argoInfrastructureParentApplications = createArgocdApplication({
-    sourceResourceName: 'argocd-applications-parents',
-    resourceName: 'argocd-applications-children-infrastructure',
-    namespace: 'argocd',
+  sourceResourceName: 'argocd-applications-parents',
+  resourceName: 'argocd-applications-children-infrastructure',
+  namespace: 'argocd'
 })
 
 export const argoServicesParentApplications = createArgocdApplication({
-    sourceResourceName: 'argocd-applications-parents',
-    resourceName: 'argocd-applications-children-services',
-    namespace: 'argocd',
+  sourceResourceName: 'argocd-applications-parents',
+  resourceName: 'argocd-applications-children-services',
+  namespace: 'argocd'
 })
