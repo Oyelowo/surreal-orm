@@ -49,10 +49,10 @@ export interface Settings<TAppName extends ServiceName> {
 
 export type RecursivePartial<T> = {
     [P in keyof T]?: T[P] extends (infer U)[]
-        ? RecursivePartial<U>[]
-        : T[P] extends object | undefined
-        ? RecursivePartial<T[P]>
-        : T[P]
+    ? RecursivePartial<U>[]
+    : T[P] extends object | undefined
+    ? RecursivePartial<T[P]>
+    : T[P]
 }
 
 // make all properties optional recursively including nested objects.
@@ -135,6 +135,8 @@ type EnvironmentVariables<AN extends ServiceName, NS extends NamespaceOfApps, DB
     { dbType: DBT }
 >
 
+export type NoUnion<T, U = T> = T extends U ? ([U] extends [T] ? T : never) : never
+
 export type AppConfigs<AN extends ServiceName, DBT extends DBType, NS extends NamespaceOfApps> = {
     kubeConfig: Settings<NoUnion<AN>>
     envVars: Omit<EnvironmentVariables<AN, NS, DBT>, 'dbType'>
@@ -143,5 +145,3 @@ export type AppConfigs<AN extends ServiceName, DBT extends DBType, NS extends Na
         namespace: NS
     }
 }
-
-export type NoUnion<T, U = T> = T extends U ? ([U] extends [T] ? T : never) : never

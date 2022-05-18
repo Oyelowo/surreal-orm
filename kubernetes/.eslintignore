@@ -5,3 +5,4 @@ node_modules
 crd2pulumi
 manifests
 k3d.yaml
+resources/shared/types/helm-charts
