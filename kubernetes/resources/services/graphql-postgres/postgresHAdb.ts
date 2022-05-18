@@ -6,52 +6,52 @@ import { graphqlPostgres } from './index'
 import { graphqlPostgresSettings } from './settings'
 
 const { envVars } = graphqlPostgresSettings
-type Credentials = {
-    usernames: string[]
-    passwords: string[]
-    databases: string[]
-}
-const credentials = [
-  {
-    username: envVars.POSTGRES_USERNAME,
-    password: envVars.POSTGRES_PASSWORD,
-    database: envVars.POSTGRES_NAME
-  },
-  {
-    username: 'username1',
-    password: 'password1',
-    database: 'database1'
-  },
-  {
-    username: 'username2',
-    password: 'password2',
-    database: 'database2'
-  },
-  {
-    username: 'username3',
-    password: 'password3',
-    database: 'database1'
-  },
-  {
-    username: 'username4',
-    password: 'password4',
-    database: 'database2'
-  }
-]
+// type Credentials = {
+//     usernames: string[]
+//     passwords: string[]
+//     databases: string[]
+// }
+// const credentials = [
+//   {
+//     username: envVars.POSTGRES_USERNAME,
+//     password: envVars.POSTGRES_PASSWORD,
+//     database: envVars.POSTGRES_NAME
+//   },
+//   {
+//     username: 'username1',
+//     password: 'password1',
+//     database: 'database1'
+//   },
+//   {
+//     username: 'username2',
+//     password: 'password2',
+//     database: 'database2'
+//   },
+//   {
+//     username: 'username3',
+//     password: 'password3',
+//     database: 'database1'
+//   },
+//   {
+//     username: 'username4',
+//     password: 'password4',
+//     database: 'database2'
+//   }
+// ]
 
-const mappedCredentials = credentials.reduce<Credentials>(
-  (acc, val) => {
-    acc.usernames.push(val.username)
-    acc.passwords.push(val.password)
-    acc.databases.push(val.database)
-    return acc
-  },
-  {
-    usernames: [],
-    passwords: [],
-    databases: []
-  }
-)
+// const mappedCredentials = credentials.reduce<Credentials>(
+//   (acc, val) => {
+//     acc.usernames.push(val.username)
+//     acc.passwords.push(val.password)
+//     acc.databases.push(val.database)
+//     return acc
+//   },
+//   {
+//     usernames: [],
+//     passwords: [],
+//     databases: []
+//   }
+// )
 
 const postgresValues: DeepPartial<postgresdbHaHelmValuesBitnami> = {
   // useStatefulSet: true,
