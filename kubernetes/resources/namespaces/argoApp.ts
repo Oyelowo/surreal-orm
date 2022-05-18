@@ -5,4 +5,4 @@ export const namespacesArgoApps = createArgocdApplication({
     sourceApplication: 'namespace-names',
     outputSubDirName: 'argocd-applications-children-infrastructure',
     namespace: namespaceNames.default,
-});x
+})
