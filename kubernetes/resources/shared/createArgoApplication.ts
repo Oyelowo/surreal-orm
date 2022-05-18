@@ -10,7 +10,6 @@ import { getEnvironmentVariables } from './validations';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 
-
 type ArgocdApplicationProps = {
     namespace: NamespaceName;
     sourceResourceName: ArgocdAppResourceName;
