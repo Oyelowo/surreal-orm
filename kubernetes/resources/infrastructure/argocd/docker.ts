@@ -1,12 +1,12 @@
-import * as kx from '@pulumi/kubernetesx'
-import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp'
-import { getResourceProvider } from '../../shared/manifestsDirectory'
-import { getEnvironmentVariables } from '../../shared/validations'
-import { namespaceNames } from './../../namespaces/util'
+import * as kx from '@pulumi/kubernetesx';
+import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp';
+import { getResourceProvider } from '../../shared/manifestsDirectory';
+import { getEnvironmentVariables } from '../../shared/validations';
+import { namespaceNames } from './../../namespaces/util';
 
-const { ENVIRONMENT } = getEnvironmentVariables()
+const { ENVIRONMENT } = getEnvironmentVariables();
 // const DOCKER_SERVER = 'ghcr.io'
-export const DOCKER_REGISTRY_KEY = 'my-registry-key'
+export const DOCKER_REGISTRY_KEY = 'my-registry-key';
 
 // export function createContainerRegistrySecret(environment: Environment): void {
 //     const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } =
@@ -40,40 +40,40 @@ export const DOCKER_REGISTRY_KEY = 'my-registry-key'
 
 interface DockerRawData {
     auths: {
-        'ghrc.io': { username: string; password: string; auth: string }
-    }
+        'ghrc.io': { username: string; password: string; auth: string };
+    };
 }
 
-const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = getSecretsForResource('argocd', ENVIRONMENT)
+const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = getSecretsForResource('argocd', ENVIRONMENT);
 const dataRaw: DockerRawData = {
-  auths: {
-    'ghrc.io': {
-      username: DOCKER_USERNAME,
-      password: DOCKER_PASSWORD,
-      auth: toBase64(`${DOCKER_USERNAME}:${DOCKER_PASSWORD}`)
-    }
-  }
-}
-function toBase64 (text: string) {
-  return Buffer.from(text).toString('base64')
+    auths: {
+        'ghrc.io': {
+            username: DOCKER_USERNAME,
+            password: DOCKER_PASSWORD,
+            auth: toBase64(`${DOCKER_USERNAME}:${DOCKER_PASSWORD}`),
+        },
+    },
+};
+function toBase64(text: string) {
+    return Buffer.from(text).toString('base64');
 }
 
 export const dockerRegistry = new kx.Secret(
-  'docker-registry',
-  {
-    type: 'kubernetes.io/dockerconfigjson',
-    metadata: {
-      name: 'docker-registry-applications',
-      namespace: namespaceNames.applications
-    },
+    'docker-registry',
+    {
+        type: 'kubernetes.io/dockerconfigjson',
+        metadata: {
+            name: 'docker-registry-applications',
+            namespace: namespaceNames.applications,
+        },
 
-    data: {
-      // ".dockerconfigjson": JSON.stringify(dataRaw)
-      '.dockerconfigjson': toBase64(JSON.stringify(dataRaw))
-    }
-  },
-  { provider: getResourceProvider('argocd-applications-parents', ENVIRONMENT) }
-)
+        data: {
+            // ".dockerconfigjson": JSON.stringify(dataRaw)
+            '.dockerconfigjson': toBase64(JSON.stringify(dataRaw)),
+        },
+    },
+    { provider: getResourceProvider('argocd-applications-parents', ENVIRONMENT) }
+);
 
 /*
 apiVersion: v1
