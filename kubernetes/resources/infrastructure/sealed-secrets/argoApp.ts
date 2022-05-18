@@ -4,7 +4,7 @@ import { createArgocdApplication } from '../../shared/createArgoApplication';
 // App that deploys sealedSecretsController resources themselves
 /* sealedSecretsController APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const sealedSecretsControllerApplication = createArgocdApplication({
-    resourceName: 'argocd-applications-children-infrastructure',
-    sourceResourceName: 'sealed-secrets',
+    sourceApplication: 'sealed-secrets',
+    outputSubDirName: 'argocd-applications-children-infrastructure',
     namespace: namespaceNames.default,
 });

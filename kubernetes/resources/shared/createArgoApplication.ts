@@ -13,23 +13,25 @@ const { ENVIRONMENT } = getEnvironmentVariables();
 type ArgocdApplicationProps = {
     namespace: NamespaceName;
     // sourceResourceName: ArgocdAppResourceName;
-    resourceName: ResourceName;
-    sourceResourceName: ResourceName;
+    // resourceName: ResourceName;
+    outputSubDirName: ResourceName;
+    sourceApplication: ResourceName;
     parent?: Resource;
 };
 
 // TODO: Add jsdoc to describe the parameters
 export function createArgocdApplication({
-    resourceName,
-    sourceResourceName,
+    // resourceName,
+    sourceApplication,
+    outputSubDirName,
     namespace,
     parent,
 }: ArgocdApplicationProps) {
     const argocdApplication = new argocd.argoproj.v1alpha1.Application(
-        resourceName,
+        sourceApplication,
         {
             metadata: {
-                name: resourceName,
+                name: sourceApplication,
                 namespace: namespaceNames.argocd,
                 annotations: {
                     finalizers: ['resources-finalizer.argocd.argoproj.io'] as any,
@@ -44,7 +46,7 @@ export function createArgocdApplication({
                 },
                 source: {
                     repoURL: 'https://github.com/Oyelowo/modern-distributed-app-template',
-                    path: getResourceRelativePath(sourceResourceName, ENVIRONMENT),
+                    path: getResourceRelativePath(sourceApplication, ENVIRONMENT),
                     targetRevision: 'HEAD',
                     directory: {
                         recurse: true,
@@ -59,7 +61,7 @@ export function createArgocdApplication({
             },
         },
         {
-            provider: getResourceProvider(resourceName, ENVIRONMENT),
+            provider: getResourceProvider(outputSubDirName, ENVIRONMENT),
             parent,
         }
     );

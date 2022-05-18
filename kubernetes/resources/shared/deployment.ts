@@ -150,9 +150,9 @@ export class ServiceDeployment<
         });
 
         this.argocdApplication = createArgocdApplication({
+            sourceApplication: this.appName,
+            outputSubDirName: 'argocd-applications-children-services',
             namespace: metadata.namespace,
-            resourceName: 'argocd-applications-children-services',
-            sourceResourceName: this.appName,
             parent: this,
         });
 

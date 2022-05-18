@@ -5,13 +5,13 @@ export * from './argocdBitnami';
 // // export * from "./argocdOfficial";
 
 export const argoInfrastructureParentApplications = createArgocdApplication({
-    resourceName: 'argocd-applications-parents',
-    sourceResourceName: 'argocd-applications-children-infrastructure',
+    sourceApplication: 'argocd-applications-children-infrastructure',
+    outputSubDirName: 'argocd-applications-parents',
     namespace: 'argocd',
 });
 
-// export const argoServicesParentApplications = createArgocdApplication({
-//     resourceName: 'argocd-applications-parents',
-//     sourceResourceName: 'argocd-applications-children-services',
-//     namespace: 'argocd',
-// });
+export const argoServicesParentApplications = createArgocdApplication({
+    sourceApplication: 'argocd-applications-children-services',
+    outputSubDirName: 'argocd-applications-parents',
+    namespace: 'argocd',
+});
