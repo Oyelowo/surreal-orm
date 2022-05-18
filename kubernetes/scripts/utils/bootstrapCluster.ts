@@ -59,12 +59,21 @@ export async function bootstrapCluster(environment: Environment) {
     sh.exec('kubectl -n argocd rollout restart deployment argocd-argo-cd-server');
 
     // TODO: Only apply this in non prod environment
-    applyResourceManifests("argocd-applications-parents", environment)
+    applyResourceManifests('argocd-applications-parents', environment);
 }
 
 function applyResourceManifests(resourceName: ResourceName, environment: Environment) {
     const resourceDir = getResourceAbsolutePath(resourceName, environment);
-    const applyManifests = (dir: string) => sh.exec(`kubectl apply -R -f  ${path.join(resourceDir, dir)}`);
+
+    const applyManifests = (subDir: string) => {
+        const subDirPath = path.join(resourceDir, subDir);
+        const manifestsCount = Number(sh.exec(`ls ${subDirPath} | wc -l`).stdout.trim());
+        const isEmptyDir = manifestsCount === 0;
+        if (isEmptyDir) return;
+
+        sh.exec(`kubectl apply -R -f  ${subDirPath}`);
+    };
+
     ['sealed-secrets', '0-crd', '1-manifest'].forEach(applyManifests);
 
     // sh.exec(`kubectl apply -R -f  ${resourceDir}/sealed-secrets`);
