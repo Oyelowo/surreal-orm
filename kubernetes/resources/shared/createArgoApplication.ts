@@ -52,12 +52,12 @@ export function createArgocdApplication({
                         recurse: true,
                     },
                 },
-                // syncPolicy: {
-                //   automated: {
-                //     prune: true,
-                //     selfHeal: true,
-                //   },
-                // },
+                syncPolicy: {
+                    automated: {
+                        prune: true,
+                        selfHeal: true,
+                    },
+                },
             },
         },
         {
