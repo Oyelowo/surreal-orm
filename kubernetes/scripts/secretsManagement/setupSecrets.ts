@@ -42,19 +42,21 @@ async function createSecretsConfigFile(environment: Environment) {
     const tsNoCheckMsg = '// @ts-nocheck';
     // TODO: This check can be improved to check the serialized content against the sample
     const secretsContent = sh.cat(filePath)?.stdout?.trim();
-    const secretsExists = !!secretsContent && !secretsContent.includes(tsNoCheckMsg);
+    const secretsExists = !!secretsContent;
+
 
     const createSecrets = () => {
         sh.mkdir(path.dirname(filePath));
         sh.touch(filePath);
-        sh.exec(`echo "$(echo '${tsNoCheckMsg}'; cat ${filePath})" > ${filePath}`);
         sh.exec(`echo ${content} > ${filePath}`);
     };
 
     const mergeSecrets = () => {
+        // Disable typechecking first so that it can do the merging without typescript erroring out
+        sh.exec(`echo "$(echo '${tsNoCheckMsg}'; cat ${filePath})" > ${filePath}`);
         const exec = sh.exec('npx ts-node ./scripts/secretsManagement/mergeSecrets.ts', { silent: true });
         if (!exec.stderr.includes('Error: Cannot find module')) {
-            console.error(c.redBright(exec.stderr));
+            console.warn(c.yellowBright(exec.stderr));
         }
     };
 
