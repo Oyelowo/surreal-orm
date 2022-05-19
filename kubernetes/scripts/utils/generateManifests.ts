@@ -39,15 +39,15 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     // Pulumi needs some environment variables set for generating deployments with image tag
     /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
      */
-    handleShellError(
-        sh.exec(
-            `
+
+    sh.exec(
+        `
     ${getEnvVarsForScript(environment, imageTags)}
     export PULUMI_CONFIG_PASSPHRASE="not-needed" 
     pulumi up --yes --skip-preview --stack dev
    `
-        )
-    );
+    )
+
 
     sh.rm('-rf', './login');
 }
