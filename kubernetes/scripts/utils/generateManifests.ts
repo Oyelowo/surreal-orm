@@ -46,7 +46,6 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     export PULUMI_CONFIG_PASSPHRASE="not-needed" 
     pulumi up --yes --skip-preview --stack dev
    `,
-        { silent: true }
     );
 
     if (exec.stderr) {
