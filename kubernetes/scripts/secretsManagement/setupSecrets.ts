@@ -14,7 +14,6 @@ const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 type PlainInputSecretsFilePath = `${typeof PLAIN_SECRETS_CONFIGS_DIR}/${Environment}.ts`;
 
 export function setupPlainSecretTSFiles() {
-    sh.mkdir(PLAIN_SECRETS_CONFIGS_DIR);
     ENVIRONMENTS.forEach(createSecretsConfigFile);
     sh.exec(`npx prettier --write ${PLAIN_SECRETS_CONFIGS_DIR}`);
 }
@@ -40,13 +39,18 @@ async function createSecretsConfigFile(environment: Environment) {
         secrets: secretsSample,
     });
 
-    sh.mkdir(path.dirname(filePath));
-    sh.touch(filePath);
-    sh.exec(`echo "$(echo '// @ts-nocheck'; cat ${filePath})" > ${filePath}`);
+    const tsNoCheckMsg = '// @ts-nocheck';
     // TODO: This check can be improved to check the serialized content against the sample
-    const secretsExists = !!sh.cat(filePath)?.stdout?.trim();
+    const secretsContent = sh.cat(filePath)?.stdout?.trim();
+    const secretsExists = !!secretsContent && !secretsContent.includes(tsNoCheckMsg);
 
-    const createSecrets = () => sh.exec(`echo ${content} > ${filePath}`);
+    const createSecrets = () => {
+        sh.mkdir(path.dirname(filePath));
+        sh.touch(filePath);
+        sh.exec(`echo "$(echo '${tsNoCheckMsg}'; cat ${filePath})" > ${filePath}`);
+        sh.exec(`echo ${content} > ${filePath}`);
+    };
+
     const mergeSecrets = () => {
         const exec = sh.exec('npx ts-node ./scripts/secretsManagement/mergeSecrets.ts', { silent: true });
         if (!exec.stderr.includes('Error: Cannot find module')) {
