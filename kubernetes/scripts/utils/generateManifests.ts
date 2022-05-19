@@ -40,14 +40,18 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
      */
 
-    sh.exec(
+    const exec = sh.exec(
         `
     ${getEnvVarsForScript(environment, imageTags)}
     export PULUMI_CONFIG_PASSPHRASE="not-needed" 
     pulumi up --yes --skip-preview --stack dev
-   `
-    )
+   `,
+        { silent: true }
+    );
 
+    if (exec.stderr) {
+        console.warn(c.yellowBright(exec.stderr));
+    }
 
     sh.rm('-rf', './login');
 }
