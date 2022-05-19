@@ -2,7 +2,6 @@
 
 import path from 'path';
 import sh from 'shelljs';
-import { sealedSecretsResourceName } from '../../resources/infrastructure/sealed-secrets/settings';
 import { namespaceNames } from '../../resources/namespaces/util';
 import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
 import { getResourceAbsolutePath } from '../../resources/shared/manifestsDirectory';
@@ -73,5 +72,6 @@ function applyResourceManifests(resourceName: ResourceName, environment: Environ
         sh.exec(`kubectl apply -R -f  ${subDirPath}`);
     };
 
-    [sealedSecretsResourceName, '0-crd', '1-manifest'].forEach(applyManifests);
+    const sealedSecrets: ResourceName = 'sealed-secrets';
+    [sealedSecrets, '0-crd', '1-manifest'].forEach(applyManifests);
 }

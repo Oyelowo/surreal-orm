@@ -44,7 +44,6 @@ async function createSecretsConfigFile(environment: Environment) {
     const secretsContent = sh.cat(filePath)?.stdout?.trim();
     const secretsExists = !!secretsContent;
 
-
     const createSecrets = () => {
         sh.mkdir(path.dirname(filePath));
         sh.touch(filePath);
