@@ -32,7 +32,7 @@ function generateSealedSecret(unsealedSecretFilePath: string) {
         `kubeseal --controller-name ${SEALED_SECRETS_CONTROLLER_NAME} < ${unsealedSecretFilePath} -o yaml >${sealedSecretFilePath}`,
         { silent: true }
     );
-
+    //  TODO: inject annotations that this is being managed by the sealed secrets controller.
     sh.echo(c.greenBright(kubeSeal.stdout));
     if (kubeSeal.stderr) {
         sh.echo(`Error sealing secrets: ${c.redBright(kubeSeal.stderr)}`);
