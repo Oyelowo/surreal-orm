@@ -1,11 +1,10 @@
-use crate::app::error::ResolverError;
 
 use super::{model::User, AuthGuard};
 
 use anyhow::Context as ContextAnyhow;
 use async_graphql::*;
 use chrono::{DateTime, Utc};
-use common::my_time;
+use common::{my_time, error_handling::ApiHttpStatus};
 use futures::stream::StreamExt;
 use mongodb::{
     bson::oid::ObjectId,
@@ -33,7 +32,7 @@ impl UserQueryRoot {
         let user = User::find_one(db, doc! {"_id": id}, find_one_options)
             .await?
             .context("User not found")
-            .map_err(|_| ResolverError::NotFound.extend());
+            .map_err(|_| ApiHttpStatus::NotFound("User not found".into()).extend());
 
         user
     }

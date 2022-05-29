@@ -1,7 +1,5 @@
-pub(crate) mod error;
 pub(crate) mod post;
 pub(crate) mod user;
-mod error2;
 
 use anyhow::Context;
 use mongodb::Database;

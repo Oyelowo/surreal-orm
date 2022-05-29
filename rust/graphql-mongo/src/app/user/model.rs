@@ -3,7 +3,7 @@ use async_graphql::{
     ComplexObject, Context, Enum, ErrorExtensions, FieldResult, Guard, InputObject, SimpleObject,
 };
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
-use common::authentication::TypedSession;
+use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
 use log::info;
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
@@ -15,10 +15,7 @@ use wither::{
     WitherError,
 };
 
-use crate::{
-    app::{error::ApiHttpError, post::Post},
-    configs::model_cursor_to_vec,
-};
+use crate::{app::post::Post, configs::model_cursor_to_vec};
 
 #[derive(
     Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate, Debug,
@@ -191,7 +188,7 @@ impl RoleGuard {
 
 pub struct AuthGuard;
 
-type Ress<T> = Result<T, ApiHttpError>;
+type Ress<T> = Result<T, ApiHttpStatus>;
 #[async_trait::async_trait]
 impl Guard for AuthGuard {
     async fn check(&self, ctx: &Context<'_>) -> FieldResult<()> {
@@ -199,13 +196,13 @@ impl Guard for AuthGuard {
 
         let maybe_user_id = session
             .get_user_id::<ObjectId>()
-            .map_err(|_e| ApiHttpError::Unauthorized("Unauthorized".into()))?;
+            .map_err(|_e| ApiHttpStatus::Unauthorized("Unauthorized".into()))?;
 
         if maybe_user_id.is_some() {
             info!("Successfully authenticated: {:?}", maybe_user_id);
             Ok(())
         } else {
-            Err(ApiHttpError::Unauthorized("".into()).extend())
+            Err(ApiHttpStatus::Unauthorized("".into()).extend())
         }
     }
 }
@@ -217,9 +214,9 @@ impl User {
 
         let user_id = session
             .get_user_id()
-            .map_err(|e| ApiHttpError::Unauthorized("User unauthorized".into()).extend())?
+            .map_err(|e| ApiHttpStatus::Unauthorized("User unauthorized".into()).extend())?
             .ok_or_else(|| {
-                ApiHttpError::Unauthorized("Unauthorized. Sign in and try again".into()).extend()
+                ApiHttpStatus::Unauthorized("Unauthorized. Sign in and try again".into()).extend()
             })?;
 
         let user = Self::find_by_id(db, &user_id).await;
@@ -230,7 +227,7 @@ impl User {
         User::find_one(db, doc! { "_id": id }, None)
             .await?
             .context("Failed to find user")
-            .map_err(|_e| ApiHttpError::NotFound("User not found".into()).extend())
+            .map_err(|_e| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
 
     pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Option<Self> {

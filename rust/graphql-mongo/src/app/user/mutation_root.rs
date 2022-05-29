@@ -1,9 +1,11 @@
 use anyhow::Context as ContextAnyhow;
-use common::authentication::{
-    TypedSession, {generate_password_hash, validate_password, PasswordHashPHC, PasswordPlain},
+use common::{
+    authentication::{
+        TypedSession, {generate_password_hash, validate_password, PasswordHashPHC, PasswordPlain},
+    },
+    error_handling::ApiHttpStatus,
 };
-
-use crate::app::error::ResolverError;
+use log::error;
 
 use super::{AccountOauth, Role, SignInCredentials, SignOutMessage, User};
 use async_graphql::*;
@@ -57,7 +59,7 @@ impl UserMutationRoot {
         let db = ctx.data_unchecked::<Database>();
         let password_hash = generate_password_hash(user.password.context("Invalid password")?)
             .await
-            .map_err(|_| ResolverError::ServerError("Something went wrong".into()))?;
+            .map_err(|_| ApiHttpStatus::BadRequest("Password badly formed".into()))?;
 
         let mut user = User::builder()
             .created_at(Utc::now())
@@ -73,9 +75,10 @@ impl UserMutationRoot {
             .password(Some(password_hash.into()))
             .build();
 
-        user.save(db, None)
-            .await
-            .map_err(|_| ResolverError::BadRequest.extend())?;
+        user.save(db, None).await.map_err(|e| {
+            error!("{:?}", e.to_string());
+            ApiHttpStatus::BadRequest("Unable to save your data. Try again later".into()).extend()
+        })?;
         Ok(user)
     }
 
@@ -90,7 +93,7 @@ impl UserMutationRoot {
 
         let maybe_user_id = session
             .get_user_id()
-            .map_err(|_| ResolverError::NotFound.extend())?;
+            .map_err(|_| ApiHttpStatus::NotFound("User not found".into()).extend())?;
 
         // Return user if found from session
         let user = match maybe_user_id {
@@ -99,16 +102,22 @@ impl UserMutationRoot {
                 session.renew();
                 user
             }
-            // If not found from session, handle fresg signin flow
+            // If not found from session, handle fresh signin flow
             None => {
                 let user = User::find_by_username(db, sign_in_credentials.username)
                     .await
-                    .context("Failed to find user")?;
+                    .with_context(|| "Failed to find user")
+                    .map_err(|e| {
+                        ApiHttpStatus::Unauthorized("Username does not exist".into()).extend()
+                    })?;
+
                 let password_hash = &user
                     .password
                     .clone()
-                    .context("Unauthenticated")
-                    .map_err(|_| ResolverError::Unauthorized.extend())?;
+                    .with_context(|| "Unauthenticated")
+                    .map_err(|_| {
+                        ApiHttpStatus::Unauthorized("Invalid Credentials".into()).extend()
+                    })?;
 
                 let plain_password = PasswordPlain::new(sign_in_credentials.password);
                 let hashed_password = PasswordHashPHC::new(password_hash);
@@ -119,7 +128,7 @@ impl UserMutationRoot {
                     session.insert_user_id(&id).expect("Failed");
                     Ok(user)
                 } else {
-                    Err(ResolverError::Unauthorized.extend())
+                    Err(ApiHttpStatus::Unauthorized("Invalid credentials".into()).extend())
                 }
             }
         };
@@ -141,9 +150,7 @@ impl UserMutationRoot {
         let session = ctx.data::<TypedSession>()?;
 
         // ALREADY LOGGED IN OAUTH USER
-        let maybe_user_id = session
-            .get_user_id()
-            .map_err(|_| ResolverError::NotFound.extend())?;
+        let maybe_user_id = session.get_user_id()?;
 
         // Return user if found from session
         let user = match maybe_user_id {
@@ -181,12 +188,14 @@ impl UserMutationRoot {
                 let user = user
                     .find_or_replace_account_oauth(db, provider, provider_account_id)
                     .await
-                    .map_err(|_| ResolverError::BadRequest.extend())?;
+                    .map_err(|_| {
+                        ApiHttpStatus::Unauthorized("Invalid credentials".into()).extend()
+                    })?;
 
                 let user_id = user
                     .id(ctx)
                     .await?
-                    .ok_or(ResolverError::BadRequest.extend())?;
+                    .ok_or(ApiHttpStatus::Unauthorized("Invalid credentials".into()).extend())?;
 
                 session.insert_user_id(&user_id)?;
                 Ok(user)
@@ -199,20 +208,19 @@ impl UserMutationRoot {
     async fn sign_out(&self, ctx: &async_graphql::Context<'_>) -> FieldResult<SignOutMessage> {
         let session = ctx.data::<TypedSession>()?;
 
-        let maybe_user = session
-            .get_user_id()
-            .map_err(|_| ResolverError::NotFound.extend())?;
+        let maybe_user = session.get_user_id().map_err(|_| {
+            ApiHttpStatus::Unauthorized("Not Authorized. Please log in.".into()).extend()
+        })?;
 
         match maybe_user {
             Some(user_id) => {
                 session.clear();
                 Ok(SignOutMessage {
-                    message: "successfully signed out".into(),
+                    message: "Successfully signed out".into(),
                     user_id,
                 })
             }
-            None => Err(ResolverError::BadRequest)
-                .extend_err(|_, e| e.set("reason", "Already Logged out")),
+            None => Err(ApiHttpStatus::BadRequest("Already Logged out".into()).extend()),
         }
     }
 }
