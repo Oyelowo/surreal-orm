@@ -91,9 +91,7 @@ impl UserMutationRoot {
         let db = ctx.data_unchecked::<Database>();
         let session = ctx.data::<TypedSession>()?;
 
-        let maybe_user_id = session
-            .get_user_id()
-            .map_err(|_| ApiHttpStatus::NotFound("User not found".into()).extend())?;
+        let maybe_user_id = session.get_user_id()?;
 
         // Return user if found from session
         let user = match maybe_user_id {
@@ -174,9 +172,6 @@ impl UserMutationRoot {
                     .first_name(account_clone.profile.first_name)
                     .last_name(account_clone.profile.last_name)
                     .email(account_clone.profile.email)
-                    // .first_name(account.profile.first_name)
-                    // .last_name(account.profile.last_name)
-                    // .email(account.profile.email)
                     .social_media(vec![])
                     .roles(vec![Role::User])
                     .age(None)
@@ -208,9 +203,7 @@ impl UserMutationRoot {
     async fn sign_out(&self, ctx: &async_graphql::Context<'_>) -> FieldResult<SignOutMessage> {
         let session = ctx.data::<TypedSession>()?;
 
-        let maybe_user = session.get_user_id().map_err(|_| {
-            ApiHttpStatus::Unauthorized("Not Authorized. Please log in.".into()).extend()
-        })?;
+        let maybe_user = session.get_user_id()?;
 
         match maybe_user {
             Some(user_id) => {

@@ -15,7 +15,10 @@ use wither::{
     WitherError,
 };
 
-use crate::{app::post::Post, configs::model_cursor_to_vec};
+use crate::{
+    app::post::Post,
+    configs::{model_cursor_to_vec, MONGO_ID_KEY},
+};
 
 #[derive(
     Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate, Debug,
@@ -224,7 +227,7 @@ impl User {
     }
 
     pub async fn find_by_id(db: &Database, id: &ObjectId) -> FieldResult<Self> {
-        User::find_one(db, doc! { "_id": id }, None)
+        User::find_one(db, doc! { MONGO_ID_KEY: id }, None)
             .await?
             .context("Failed to find user")
             .map_err(|_e| ApiHttpStatus::NotFound("User not found".into()).extend())
