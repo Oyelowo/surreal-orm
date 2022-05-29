@@ -7,8 +7,7 @@ pub mod utils;
 
 pub use macros::{calculator, helpers};
 pub use util_module_alternative::greeter_alt::alt_good_morning;
-pub use utils::{greet::good_morning, local_function, maths};
-// pub use authentication;
+pub use utils::{good_morning, local_function, maths};
 
 #[macro_use]
 // extern crate ;

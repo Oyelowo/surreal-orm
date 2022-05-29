@@ -1,8 +1,9 @@
 mod export_data;
-pub mod greet;
+mod greet;
 pub mod maths;
 
 pub use export_data::*;
+pub use greet::*;
 
 pub fn local_function() {
     greet::good_morning();

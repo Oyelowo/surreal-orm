@@ -1,7 +1,6 @@
 use anyhow::Context as ContextAnyhow;
 use common::authentication::{
-    password::{generate_password_hash, validate_password, PasswordHashPHC, PasswordPlain},
-    session_state::TypedSession,
+    TypedSession, {generate_password_hash, validate_password, PasswordHashPHC, PasswordPlain},
 };
 
 use crate::app::error::ResolverError;

@@ -8,7 +8,7 @@ use async_graphql::{
     Data,
 };
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
-use common::authentication::session_state::TypedSession;
+use common::authentication::TypedSession;
 use serde::Deserialize;
 
 use super::configuration::Environment;

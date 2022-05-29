@@ -7,7 +7,6 @@ use secrecy::{ExposeSecret, Secret};
 use thiserror;
 use tokio::task::JoinHandle;
 use tracing;
-// use tracing_subscriber;
 
 pub struct PasswordPlain(Secret<String>);
 
@@ -73,7 +72,7 @@ fn create_password_hash(password: PasswordPlain) -> anyhow::Result<PasswordHashP
     let salt = SaltString::generate(&mut rand::thread_rng());
 
     let params = Params::new(15000, 2, 1, None).context("Error building Argon2 parameters")?;
-    // let hasher = Argon2::default();
+
     let hasher = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
     let password_hash = hasher
         .hash_password(password.to_bytes(), &salt)

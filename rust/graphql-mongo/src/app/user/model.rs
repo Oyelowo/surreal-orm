@@ -3,7 +3,7 @@ use async_graphql::{
     ComplexObject, Context, Enum, ErrorExtensions, FieldResult, Guard, InputObject, SimpleObject,
 };
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
-use common::authentication::session_state::TypedSession;
+use common::authentication::TypedSession;
 use log::info;
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
