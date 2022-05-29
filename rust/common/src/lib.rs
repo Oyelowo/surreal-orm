@@ -1,10 +1,9 @@
-// Don't export all utils module directly, let pub use do the selective exporting, so u expose only what's necessary by default
-// pub mod utils;
 pub mod authentication;
+pub mod error_handling;
 mod macros;
+pub mod my_time;
 mod util_module_alternative;
 pub mod utils;
-pub mod my_time;
 
 pub use macros::{calculator, helpers};
 pub use util_module_alternative::greeter_alt::alt_good_morning;

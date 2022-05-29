@@ -10,6 +10,7 @@ version = "0.1.0"
 actix-session = "0.6.2"
 actix-web = "4.0.1"
 anyhow = "1.0.57"
+async-graphql = "4.0.1"
 argon2 = { version = "0.4.0", features = ["std"] }
 chrono = { version = "0.4.19", features = ["serde"] }
 chrono-tz = "0.6.1"
