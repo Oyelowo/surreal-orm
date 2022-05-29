@@ -2,9 +2,8 @@ use std::ops::Deref;
 
 use actix_session::Session;
 use send_wrapper::SendWrapper;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use uuid::Uuid;
-use wither::bson::oid::ObjectId;
+use serde::{de::DeserializeOwned, Serialize};
+
 #[derive(Clone, Debug)]
 struct Shared<T>(pub Option<SendWrapper<T>>);
 
@@ -34,12 +33,6 @@ pub enum TypedSessionError {
 }
 
 type TypedSessionResult<T> = Result<T, TypedSessionError>;
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum Id {
-    Uuid(Uuid),
-    ObjectId(ObjectId),
-}
 
 /*
 TODO:
