@@ -10,7 +10,7 @@ impl Migrating for Post {
     fn migrations() -> Vec<Box<dyn wither::Migration<Post>>> {
         vec![
             // Box::new(wither::IntervalMigration {
-            //     name: "copy-authorId-to_-uthorIds-field".to_string(),
+            //     name: "copy-authorId-to_authorIds-field".to_string(),
             //     // NOTE: use a logical time here. A day after your deployment date, or the like.
             //     threshold: chrono::Utc.ymd(2022, 4, 1).and_hms(1, 0, 0),
             //     filter: doc! {"authorIds": doc!{"$exists": true}},

@@ -14,7 +14,6 @@ use wither::{
     prelude::Model,
     WitherError,
 };
-// use bson::DateTime;
 
 use crate::{
     app::{error::ResolverError, post::Post},
@@ -35,11 +34,11 @@ pub struct User {
     pub id: Option<ObjectId>,
 
     // Created_at should only be set once when creating the field, it should be ignored at other times
+    // make it possible do just do created_at(value) instead of created_at(Some(value)) at the call site
+    // Skip only from input but available for output. Can be useful for sorting on the client side
     #[serde(with = "ts_nanoseconds_option")] // not really necessary
     #[builder(default, setter(strip_option))]
-    // make it possible do just do created_at(value) instead of created_at(Some(value)) at the call site
     #[graphql(skip_input)]
-    // Skip only from input but available for output. Can be useful for sorting on the client side
     pub created_at: Option<DateTime<Utc>>,
 
     #[serde(with = "ts_nanoseconds_option")]
@@ -55,24 +54,21 @@ pub struct User {
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub username: String,
 
-    // I intentionally not strip option here because I want it to be explicit that user is not specifying password
-    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    // I intentionally not strip option here because I want 
+    // it to be explicit that user is not specifying password e.g when using Oauth login
+    #[validate(length(min = 1))]
     #[graphql(skip_output)]
     pub password: Option<String>,
 
-    // #[builder(default, setter(strip_option))]
-    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    #[validate(length(min = 1))]
     pub first_name: String,
 
-    // #[builder(default, setter(strip_option))]
-    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    #[validate(length(min = 1))]
     pub last_name: String,
 
-    // #[builder(default, setter(strip_option))]
     #[validate(email)]
     pub email: String,
 
-    // #[builder(default, setter(strip_option))]
     #[graphql(skip_input)]
     pub email_verified_at: Option<DateTime<Utc>>,
 
@@ -82,7 +78,6 @@ pub struct User {
     #[serde(default)]
     pub social_media: Vec<String>,
 
-    // #[serde(default)]
     #[graphql(skip_input)]
     pub roles: Vec<Role>,
 
@@ -123,7 +118,7 @@ pub struct ProfileOauth {
 }
 
 /*
-
+EXAMPLE ON HOW TO QUERY MONGO_DB:
 https://docs.mongodb.com/manual/tutorial/query-documents/
 { status: "D" }
 SELECT * FROM inventory WHERE status = "D"
@@ -145,10 +140,11 @@ In the following example, the compound query document selects all documents in t
 { status: "A", $or: [ { qty: { $lt: 30 } }, { item: /^p/ } ] }
 SELECT * FROM inventory WHERE status = "A" AND ( qty < 30 OR item LIKE "p%")
 */
+
 #[ComplexObject]
 impl User {
+    #[graphql(guard = "RoleGuard::new(Role::Admin).or(AuthGuard)")]
     async fn posts(&self, ctx: &Context<'_>) -> FieldResult<Vec<Post>> {
-        // AuthGuard
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = ctx.data_unchecked::<Database>();
         let cursor = Post::find(db, doc! {"posterId": self.id}, None).await?;
@@ -188,9 +184,9 @@ impl Guard for RoleGuard {
 }
 
 impl RoleGuard {
-    // fn new(role: Role) -> Self {
-    //     Self { role }
-    // }
+    fn new(role: Role) -> Self {
+        Self { role }
+    }
 }
 
 pub struct AuthGuard;
@@ -226,19 +222,7 @@ impl User {
         let user = Self::find_by_id(db, &user_id).await;
         user
     }
-    // pub fn and_has_role(&self, scope: Role) -> FieldResult<&Self> {
-    //     if !self.roles.contains(&scope) {
-    //         return Err(ResolverError::Unauthorized.extend());
-    //     }
-    //     Ok(self)
-    // }
 
-    // pub fn from_ctx<'a>(ctx: &'a Context) -> FieldResult<&'a Self> {
-    //     ctx.data::<User>()
-    //         .map_err(|_| ResolverError::NotFound.extend())
-    // }
-
-    //TODO: Better error handling
     pub async fn find_by_id(db: &Database, id: &ObjectId) -> FieldResult<Self> {
         User::find_one(db, doc! { "_id": id }, None)
             .await?
@@ -251,15 +235,16 @@ impl User {
             .await
             .expect("Failed to find user by username")
     }
-    // pub async fn find_by_account_oauth(
-    //     db: &Database,
-    //     provider: impl Into<String>,
-    //     provider_account_id: impl Into<String>,
-    // ) -> Option<Self> {
-    //     User::find_one(db, doc! { "accounts": {"$elemMatch": {"provider": provider.into(), "providerAccountId": provider_account_id.into()}} }, None)
-    //         .await
-    //         .expect("Failed to find user by username")
-    // }
+
+    pub async fn _find_by_account_oauth(
+        db: &Database,
+        provider: impl Into<String>,
+        provider_account_id: impl Into<String>,
+    ) -> Option<Self> {
+        User::find_one(db, doc! { "accounts": {"$elemMatch": {"provider": provider.into(), "providerAccountId": provider_account_id.into()}} }, None)
+            .await
+            .expect("Failed to find user by username")
+    }
 
     pub async fn find_or_replace_account_oauth(
         mut self,
@@ -274,29 +259,6 @@ impl User {
     }
 }
 
-// No need to redefine. The simpleobject doubles as InputObject. This can still be used for other inputs if need be.
-// // pub type UserInput = User;
-// #[derive(InputObject, TypedBuilder)]
-// pub struct UserInput {
-//     pub last_name: String,
-//     pub first_name: String,
-//     pub email: String,
-//     pub social_media: Vec<String>,
-//     pub age: u8,
-// }
-
-/*
-
-fn validate_unique_username(username: &str) -> std::result::Result<(), ValidationError> {
-    if username == "xXxShad0wxXx" {
-        // the value of the username will automatically be added later
-        return Err(ValidationError::new("terrible_username"));
-    }
-
-    Ok(())
-}
-*/
-
 #[derive(SimpleObject)]
 pub struct SignOutMessage {
     pub message: String,
@@ -304,6 +266,8 @@ pub struct SignOutMessage {
 }
 
 /*
+NEXT-AUTH metadata.
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")

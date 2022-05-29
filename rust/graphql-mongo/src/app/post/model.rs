@@ -9,7 +9,7 @@ use wither::{
     prelude::Model,
 };
 
-use crate::app::user::User;
+use crate::{app::user::User, configs::MONGO_ID_KEY};
 
 #[derive(
     Model, SimpleObject, InputObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,
@@ -23,13 +23,14 @@ pub struct Post {
     #[graphql(skip_input)]
     pub id: Option<ObjectId>,
 
-    // #[graphql(skip_input)] This will usually come from session/jwt token / oauth token but making it inputable in graphql for testing purposes in the meantime.
+    // This will usually come from session/jwt token / oauth token
+    #[graphql(skip_input)]
     pub poster_id: ObjectId,
 
-    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    #[validate(length(min = 1))]
     pub title: String,
 
-    #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
+    #[validate(length(min = 1))]
     pub content: String,
 }
 
@@ -38,27 +39,8 @@ impl Post {
     async fn poster(&self, ctx: &Context<'_>) -> anyhow::Result<Option<User>> {
         // TODO: Use dataloader to batch user
         let db = ctx.data_unchecked::<Database>();
-        let poster = User::find_one(db, doc! {"_id": self.poster_id}, None).await?;
+
+        let poster = User::find_one(db, doc! {MONGO_ID_KEY: self.poster_id}, None).await?;
         Ok(poster)
     }
 }
-
-// pub type PostInput = Post;
-// #[derive(InputObject, TypedBuilder)]
-// pub struct PostInput {
-//     pub poster_id: ObjectId,
-//     pub title: String,
-//     pub content: String,
-// }
-
-/*
-
-fn validate_unique_postname(postname: &str) -> std::result::Result<(), ValidationError> {
-    if postname == "xXxShad0wxXx" {
-        // the value of the postname will automatically be added later
-        return Err(ValidationError::new("terrible_postname"));
-    }
-
-    Ok(())
-}
-*/

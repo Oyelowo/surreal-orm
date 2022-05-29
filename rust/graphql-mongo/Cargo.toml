@@ -76,6 +76,7 @@ secrecy = "0.8.0"
 send_wrapper = { version = "0.5.0", features = ["futures"] }
 thiserror = "1.0.31"
 urlencoding = "2.1.0"
+lazy_static = "1.4.0"
 
 async-trait = "0.1.53"
 config = "0.13.1"

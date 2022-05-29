@@ -18,6 +18,8 @@ use common::utils;
 
 use std::path::Path;
 
+pub static MONGO_ID_KEY: &str = "_id";
+
 pub struct Token(pub String);
 
 fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {

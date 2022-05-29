@@ -10,6 +10,10 @@ use actix_web::{
 use graphql_mongo::configs::{gql_playground, index, index_ws, Configs, Environment, GraphQlApp};
 use log::info;
 
+#[macro_use]
+extern crate lazy_static;
+
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     env_logger::init();

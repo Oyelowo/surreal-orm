@@ -85,14 +85,13 @@ impl UserMutationRoot {
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "sign in credentials")] sign_in_credentials: SignInCredentials,
     ) -> FieldResult<User> {
-        // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
-        // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = ctx.data_unchecked::<Database>();
         let session = ctx.data::<TypedSession>()?;
 
         let maybe_user_id = session
             .get_user_id()
             .map_err(|_| ResolverError::NotFound.extend())?;
+
         // Return user if found from session
         let k = match maybe_user_id {
             Some(ref user_id) => {

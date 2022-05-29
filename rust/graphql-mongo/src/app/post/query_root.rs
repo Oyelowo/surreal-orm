@@ -1,4 +1,4 @@
-use crate::configs::model_cursor_to_vec;
+use crate::configs::{model_cursor_to_vec, MONGO_ID_KEY};
 
 use super::model::Post;
 
@@ -25,7 +25,7 @@ impl PostQueryRoot {
             .read_concern(ReadConcern::majority())
             .build();
 
-        let post = Post::find_one(db, doc! {"_id": id}, find_one_options).await?;
+        let post = Post::find_one(db, doc! {MONGO_ID_KEY: id}, find_one_options).await?;
 
         Ok(post)
     }

@@ -12,21 +12,12 @@ impl PostMutationRoot {
     async fn create_post(
         &self,
         ctx: &Context<'_>,
-        #[graphql(desc = "user data")] post_input: Post,
+        #[graphql(desc = "user data")] mut post_input: Post,
     ) -> anyhow::Result<Post> {
         post_input.validate()?;
-
         let db = ctx.data_unchecked::<Database>();
-        let mut post = Post::builder()
-            .poster_id(post_input.poster_id)
-            .title(post_input.title)
-            .content(post_input.content)
-            .build();
+        post_input.save(db, None).await?;
 
-        // post.validate()?;
-
-        post.save(db, None).await?;
-
-        Ok(post)
+        Ok(post_input)
     }
 }
