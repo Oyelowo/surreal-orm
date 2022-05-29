@@ -2,6 +2,7 @@ use std::ops::Deref;
 
 use actix_session::Session;
 use send_wrapper::SendWrapper;
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use uuid::Uuid;
 use wither::bson::oid::ObjectId;
 #[derive(Clone, Debug)]
@@ -34,6 +35,12 @@ pub enum TypedSessionError {
 
 type TypedSessionResult<T> = Result<T, TypedSessionError>;
 
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Id {
+    Uuid(Uuid),
+    ObjectId(ObjectId),
+}
+
 /*
 TODO:
 This is somewhat like a hack: https://github.com/async-graphql/async-graphql/issues/426
@@ -54,22 +61,16 @@ impl TypedSession {
         self.0.renew();
     }
 
-    pub fn insert_user_object_id(&self, user_id: &ObjectId) -> TypedSessionResult<()> {
+    pub fn insert_user_id<T: Serialize>(&self, user_id: &T) -> TypedSessionResult<()> {
         Ok(self.0.insert(Self::USER_ID_KEY, user_id)?)
     }
 
-    pub fn get_user_object_id(&self) -> TypedSessionResult<Option<ObjectId>> {
-        let user_id = self.0.get::<ObjectId>(Self::USER_ID_KEY)?;
+    pub fn get_user_id<T>(&self) -> TypedSessionResult<Option<T>>
+    where
+        T: DeserializeOwned,
+    {
+        let user_id = self.0.get::<T>(Self::USER_ID_KEY)?;
         Ok(user_id)
-    }
-
-    pub fn insert_user_uuid(&self, user_id: Uuid) -> TypedSessionResult<()> {
-        self.0.insert(Self::USER_ID_KEY, user_id)?;
-        Ok(())
-    }
-
-    pub fn get_user_uuid(&self) -> TypedSessionResult<Option<Uuid>> {
-        Ok(self.0.get::<Uuid>(Self::USER_ID_KEY)?)
     }
 
     pub fn clear(&self) {

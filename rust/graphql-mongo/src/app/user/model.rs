@@ -201,7 +201,7 @@ impl Guard for AuthGuard {
         let session = ctx.data::<TypedSession>()?;
 
         let maybe_user_id = session
-            .get_user_object_id()
+            .get_user_id::<ObjectId>()
             .map_err(|_e| ResolverError::InvalidCredentials.extend())?;
 
         if maybe_user_id.is_some() {
@@ -219,7 +219,7 @@ impl User {
         let db = ctx.data::<Database>()?;
 
         let user_id = session
-            .get_user_object_id()
+            .get_user_id()
             .map_err(|_| ResolverError::NotFound.extend())?
             .ok_or_else(|| ResolverError::NotFound.extend())?;
 

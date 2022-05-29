@@ -91,7 +91,7 @@ impl UserMutationRoot {
         let session = ctx.data::<TypedSession>()?;
 
         let maybe_user_id = session
-            .get_user_object_id()
+            .get_user_id()
             .map_err(|_| ResolverError::NotFound.extend())?;
         // Return user if found from session
         let k = match maybe_user_id {
@@ -118,7 +118,7 @@ impl UserMutationRoot {
                 if password_verified {
                     // let k = user.id?;
                     let id = user.id.expect("no");
-                    session.insert_user_object_id(&id).expect("Failed");
+                    session.insert_user_id(&id).expect("Failed");
                     // session.insert_user_role(user.roles).expect("Failed");
                     Ok(user)
                 } else {
@@ -148,7 +148,7 @@ impl UserMutationRoot {
 
         // ALREADY LOGGED IN OAUTH USER
         let maybe_user_id = session
-            .get_user_object_id()
+            .get_user_id()
             .map_err(|_| ResolverError::NotFound.extend())?;
         // Return user if found from session
         let user = match maybe_user_id {
@@ -194,7 +194,7 @@ impl UserMutationRoot {
                     .ok_or(ResolverError::BadRequest.extend())?;
 
                 session
-                    .insert_user_object_id(&user_id)
+                    .insert_user_id(&user_id)
                     .expect("Bad things happen");
                 Ok(user)
 
@@ -267,7 +267,7 @@ impl UserMutationRoot {
         let session = ctx.data::<TypedSession>()?;
 
         let maybe_user = session
-            .get_user_object_id()
+            .get_user_id()
             .map_err(|_| ResolverError::NotFound.extend())?;
 
         match maybe_user {
