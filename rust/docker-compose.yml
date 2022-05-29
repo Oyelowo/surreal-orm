@@ -129,7 +129,7 @@ services:
     # container_name: mongoclient
     hostname: mongoclient
     depends_on:
-      - mongodb
+      - mongodb-graphql-mongo
     ports:
       - 3300:3000
 
