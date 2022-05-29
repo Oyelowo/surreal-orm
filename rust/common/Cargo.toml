@@ -11,6 +11,8 @@ actix-session = "0.6.2"
 actix-web = "4.0.1"
 anyhow = "1.0.57"
 argon2 = { version = "0.4.0", features = ["std"] }
+chrono = { version = "0.4.19", features = ["serde"] }
+chrono-tz = "0.6.1"
 futures = "0.3.21"
 hmac = { version = "0.12.1", features = ["std"] }
 log = "0.4.17"

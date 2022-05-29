@@ -4,6 +4,7 @@ pub mod authentication;
 mod macros;
 mod util_module_alternative;
 pub mod utils;
+pub mod my_time;
 
 pub use macros::{calculator, helpers};
 pub use util_module_alternative::greeter_alt::alt_good_morning;

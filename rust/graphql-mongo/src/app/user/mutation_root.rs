@@ -93,7 +93,7 @@ impl UserMutationRoot {
             .map_err(|_| ResolverError::NotFound.extend())?;
 
         // Return user if found from session
-        let k = match maybe_user_id {
+        let user = match maybe_user_id {
             Some(ref user_id) => {
                 let user = User::find_by_id(db, user_id).await;
                 session.renew();
@@ -115,10 +115,8 @@ impl UserMutationRoot {
                 let password_verified = validate_password(plain_password, hashed_password).await?;
 
                 if password_verified {
-                    // let k = user.id?;
                     let id = user.id.expect("no");
                     session.insert_user_id(&id).expect("Failed");
-                    // session.insert_user_role(user.roles).expect("Failed");
                     Ok(user)
                 } else {
                     Err(ResolverError::Unauthorized.extend())
@@ -126,8 +124,7 @@ impl UserMutationRoot {
             }
         };
 
-        let p = k.expect("trttrtrt");
-        Ok(p)
+        user
     }
 
     // TODO: Improve all errors using error extension
@@ -140,8 +137,6 @@ impl UserMutationRoot {
         // our cookie session to the client
         // let was_in_headers = ctx.insert_http_header(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 
-        // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
-        // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = ctx.data_unchecked::<Database>();
         let session = ctx.data::<TypedSession>()?;
 
@@ -149,6 +144,7 @@ impl UserMutationRoot {
         let maybe_user_id = session
             .get_user_id()
             .map_err(|_| ResolverError::NotFound.extend())?;
+
         // Return user if found from session
         let user = match maybe_user_id {
             Some(ref user_id) => {
@@ -186,81 +182,21 @@ impl UserMutationRoot {
                     .find_or_replace_account_oauth(db, provider, provider_account_id)
                     .await
                     .map_err(|_| ResolverError::BadRequest.extend())?;
+
                 let user_id = user
                     .id(ctx)
-                    .await
-                    .expect("bad")
+                    .await?
                     .ok_or(ResolverError::BadRequest.extend())?;
 
-                session.insert_user_id(&user_id).expect("Bad things happen");
+                session.insert_user_id(&user_id)?;
                 Ok(user)
-
-                /*                 let user_by_account = User::find_by_account_oauth(
-                                   db,
-                                   &account.provider,
-                                   &account.provider_account_id,
-                               )
-                               .await;
-                               // REVISITING OAUTH USER
-                               // TODO: Update user data here if account payload is provided, to ensure user data is up-to-date
-                               if let Some(user) = user_by_account {
-                                   let id = user.id.expect("no");
-                                   session.insert_user_object_id(&id).map_err(|_| {
-                                       ResolverError::ServerError("Failed to create session".into())
-                                   })?;
-                                   println!("USER stored user={:?}, id={:#}", user, id);
-                                   // session.renew();
-                                   return Ok(user);
-                               } else {
-                                   // match user_by_account {
-                                   //     Some(user) => Ok(user),
-                                   //     None=>
-                                   // }\\
-
-                                   // let acc = AccountOauth::builder().access_token(account.access_token).provider(account.provider).
-
-                                   // FIRST TIME OAUTH USER
-                                   let mut user = User::builder()
-                                       .created_at(Utc::now())
-                                       .username(format!(
-                                           "{}-{}",
-                                           &account.provider, &account.provider_account_id
-                                       ))
-                                       .first_name(profile.first_name)
-                                       .last_name(profile.last_name)
-                                       .email(profile.email)
-                                       .social_media(vec![])
-                                       .roles(vec![Role::User])
-                                       .age(None)
-                                       .accounts(vec![account])
-                                       .email_verified_at(None)
-                                       .password(None)
-                                       .build();
-
-                                   user.save(db, None).await.map_err(|_| {
-                                       ResolverError::BadRequest
-                                           .extend_with(|_, e| e.set("reason", "User Already Exists"))
-                                   })?;
-                                   // Ok(user)
-
-                                   let id = user.id.expect("no");
-                                   session.insert_user_object_id(&id).expect("Failed");
-                                   // session.insert_user_role(user.roles).expect("Failed");
-                                   // session.renew();
-                                   Ok(user)
-                               }
-                */
             }
         };
 
-        // let p = k.expect("trttrtrt");
         user
     }
 
     async fn sign_out(&self, ctx: &async_graphql::Context<'_>) -> FieldResult<SignOutMessage> {
-        // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
-        // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
-        // let db = ctx.data_unchecked::<Database>();
         let session = ctx.data::<TypedSession>()?;
 
         let maybe_user = session

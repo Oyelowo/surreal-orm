@@ -4,12 +4,15 @@ use super::{model::User, AuthGuard};
 
 use anyhow::Context as ContextAnyhow;
 use async_graphql::*;
+use chrono::{DateTime, Utc};
+use common::my_time;
 use futures::stream::StreamExt;
 use mongodb::{
     bson::oid::ObjectId,
     options::{FindOneOptions, FindOptions, ReadConcern},
     Database,
 };
+use serde::{Deserialize, Serialize};
 use wither::{bson::doc, prelude::Model};
 
 #[derive(Default)]
@@ -74,21 +77,12 @@ impl UserQueryRoot {
 
     #[graphql(guard = "AuthGuard")]
     async fn session(&self, ctx: &Context<'_>) -> FieldResult<Session> {
-        // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
-        // let user = Self::from_ctx(ctx)?.and_has_role(Role::Admin);
-        // let session = ctx
-        //     .data::<TypedSession>()
-        //     .map_err(|_| ResolverError::ServerError("Failed to get session".into()))?;
-        // let uid = User::from_ctx(ctx);
-
         let User {
             username, email, ..
         } = User::get_current_user(ctx).await?;
-        // let user = User::from_ctx(ctx)?;
-        // let username = user.username.clone();
-        // let email = user.email.clone();
+
         Ok(Session {
-            expires_in: "uid".to_string(),
+            expires_at: my_time::get_session_expiry(),
             user: SessionUser {
                 name: username,
                 email,
@@ -98,28 +92,14 @@ impl UserQueryRoot {
     }
 }
 
-// #[serde(rename_all = "camelCase")]
-// #[graphql(complex)]
-// #[graphql(input_name = "UserInput")]
-#[derive(SimpleObject, InputObject)]
+#[derive(SimpleObject, InputObject, Serialize, Deserialize)]
 struct Session {
     user: SessionUser,
-    expires_in: String,
+    expires_at: DateTime<Utc>,
 }
-#[derive(SimpleObject, InputObject)]
+#[derive(SimpleObject, InputObject, Serialize, Deserialize)]
 struct SessionUser {
     name: String,
     email: String,
     image: String,
 }
-
-/*
-{
-    user?: {
-        name?: string | null;
-        email?: string | null;
-        image?: string | null;
-    };
-    expires: ISODateString;
-}
-*/

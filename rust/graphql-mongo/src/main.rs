@@ -7,12 +7,9 @@ use actix_web::{
     web, App, HttpServer,
 };
 
+use common::my_time;
 use graphql_mongo::configs::{gql_playground, index, index_ws, Configs, Environment, GraphQlApp};
 use log::info;
-
-#[macro_use]
-extern crate lazy_static;
-
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -65,7 +62,7 @@ async fn main() -> anyhow::Result<()> {
                 SessionMiddleware::builder(RedisActorSessionStore::new(redis.get_url()), redis_key)
                     .cookie_name("oyelowo-session".into())
                     .session_length(SessionLength::Predetermined {
-                        max_session_length: Some(Duration::days(180)),
+                        max_session_length: Some(my_time::get_session_duration()),
                     })
                     .cookie_http_only(true)
                     .cookie_path("/".into())
