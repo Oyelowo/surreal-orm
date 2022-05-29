@@ -1,5 +1,5 @@
 use actix_web::cookie::time::Duration as DurationCookie;
-use chrono::{DateTime, Utc, Duration as DurationChrono};
+use chrono::{DateTime, Duration as DurationChrono, Utc};
 
 const EXPIRES_IN_DAY: u8 = 180;
 
