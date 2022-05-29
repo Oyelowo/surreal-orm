@@ -1,11 +1,9 @@
 use std::ops::Deref;
 
 use actix_session::Session;
-use actix_web::Error;
 use send_wrapper::SendWrapper;
 use uuid::Uuid;
 use wither::bson::oid::ObjectId;
-
 #[derive(Clone, Debug)]
 struct Shared<T>(pub Option<SendWrapper<T>>);
 
@@ -24,6 +22,17 @@ impl<T> Deref for Shared<T> {
 }
 
 type SessionShared = Shared<actix_session::Session>;
+
+#[derive(Debug, thiserror::Error)]
+pub enum TypedSessionError {
+    #[error("Failed to parse data")]
+    ParsingFailure(#[from] serde_json::Error),
+
+    #[error(transparent)]
+    Unknown(#[from] anyhow::Error), // source and Display delegate to anyhow::Error
+}
+
+type TypedSessionResult<T> = Result<T, TypedSessionError>;
 
 /*
 TODO:
@@ -45,24 +54,22 @@ impl TypedSession {
         self.0.renew();
     }
 
-    // fn from_ctx(ctx: Context) -> Self {
-    //
-    // }
-
-    pub fn insert_user_object_id(&self, user_id: &ObjectId) -> Result<(), Error> {
-        self.0.insert(Self::USER_ID_KEY, user_id)
+    pub fn insert_user_object_id(&self, user_id: &ObjectId) -> TypedSessionResult<()> {
+        Ok(self.0.insert(Self::USER_ID_KEY, user_id)?)
     }
 
-    pub fn get_user_object_id(&self) -> Result<Option<ObjectId>, Error> {
-        self.0.get::<ObjectId>(Self::USER_ID_KEY)
+    pub fn get_user_object_id(&self) -> TypedSessionResult<Option<ObjectId>> {
+        let user_id = self.0.get::<ObjectId>(Self::USER_ID_KEY)?;
+        Ok(user_id)
     }
 
-    pub fn insert_user_uuid(&self, user_id: Uuid) -> Result<(), Error> {
-        self.0.insert(Self::USER_ID_KEY, user_id)
+    pub fn insert_user_uuid(&self, user_id: Uuid) -> TypedSessionResult<()> {
+        self.0.insert(Self::USER_ID_KEY, user_id)?;
+        Ok(())
     }
 
-    pub fn get_user_uuid(&self) -> Result<Option<Uuid>, Error> {
-        self.0.get::<Uuid>(Self::USER_ID_KEY)
+    pub fn get_user_uuid(&self) -> TypedSessionResult<Option<Uuid>> {
+        Ok(self.0.get::<Uuid>(Self::USER_ID_KEY)?)
     }
 
     pub fn clear(&self) {

@@ -7,7 +7,7 @@ use mongodb::{
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 
-#[derive(PartialEq, Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Environment {
     Local,
@@ -16,7 +16,7 @@ pub enum Environment {
     Production,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub struct ApplicationConfigs {
     #[serde(deserialize_with = "deserialize_number_from_string")]

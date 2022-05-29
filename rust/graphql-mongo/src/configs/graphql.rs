@@ -1,4 +1,4 @@
-use actix_session::UserSession;
+use actix_session::SessionExt;
 use actix_web::http::header::HeaderMap;
 use actix_web::{get, post, web, HttpRequest, HttpResponse};
 

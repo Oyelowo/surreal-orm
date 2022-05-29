@@ -1,13 +1,13 @@
 use actix_cors::Cors;
-use actix_redis::RedisSession;
+use actix_session::{storage::RedisActorSessionStore, SessionLength, SessionMiddleware};
 use actix_web::{
-    cookie::{self, time::Duration, Key},
+    cookie::{time::Duration, Key, SameSite},
     http,
     middleware::Logger,
     web, App, HttpServer,
 };
 
-use graphql_mongo::configs::{gql_playground, index, index_ws, Configs, GraphQlApp};
+use graphql_mongo::configs::{gql_playground, index, index_ws, Configs, Environment, GraphQlApp};
 use log::info;
 
 #[tokio::main]
@@ -50,6 +50,7 @@ async fn main() -> anyhow::Result<()> {
         // authentication cookies for any user!
         // Generate key with the command `openssl rand -base64 32`
         let redis_key = Key::from("string".to_string().repeat(256).as_bytes());
+
         App::new()
             .wrap(cors)
             // .wrap(TracingLogger::default())
@@ -57,16 +58,18 @@ async fn main() -> anyhow::Result<()> {
             .wrap(Logger::default())
             .wrap(
                 // https://javascript.info/cookie#:~:text=Cookies%20are%20usually%20set%20by,using%20the%20Cookie%20HTTP%2Dheader.
-                // RedisSession::new(redis.get_url(), &[0; 32])
-                RedisSession::new(redis.get_url(), redis_key.master())
-                    .cookie_name("oyelowo-session")
-                    .cookie_max_age(Duration::days(180))
+                SessionMiddleware::builder(RedisActorSessionStore::new(redis.get_url()), redis_key)
+                    .cookie_name("oyelowo-session".into())
+                    .session_length(SessionLength::Predetermined {
+                        max_session_length: Some(Duration::days(180)),
+                    })
                     .cookie_http_only(true)
-                    .cookie_path("/")
+                    .cookie_path("/".into())
                     // .cookie_domain(domain)
-                    // .cookie_secure() // Enable in prod only
+                    .cookie_secure(matches!(application.environment, Environment::Production)) // Enable in prod only
                     // allow the cookie only from the current domain
-                    .cookie_same_site(cookie::SameSite::Strict),
+                    .cookie_same_site(SameSite::Strict)
+                    .build(), //
             )
             .app_data(web::Data::new(schema.clone()))
             .service(gql_playground)
