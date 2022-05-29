@@ -16,7 +16,7 @@ use wither::{
 };
 
 use crate::{
-    app::{error::ResolverError, post::Post},
+    app::{error::ApiHttpError, post::Post},
     configs::model_cursor_to_vec,
 };
 
@@ -54,7 +54,7 @@ pub struct User {
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
     pub username: String,
 
-    // I intentionally not strip option here because I want 
+    // I intentionally not strip option here because I want
     // it to be explicit that user is not specifying password e.g when using Oauth login
     #[validate(length(min = 1))]
     #[graphql(skip_output)]
@@ -191,6 +191,7 @@ impl RoleGuard {
 
 pub struct AuthGuard;
 
+type Ress<T> = Result<T, ApiHttpError>;
 #[async_trait::async_trait]
 impl Guard for AuthGuard {
     async fn check(&self, ctx: &Context<'_>) -> FieldResult<()> {
@@ -198,13 +199,13 @@ impl Guard for AuthGuard {
 
         let maybe_user_id = session
             .get_user_id::<ObjectId>()
-            .map_err(|_e| ResolverError::InvalidCredentials.extend())?;
+            .map_err(|_e| ApiHttpError::Unauthorized("Unauthorized".into()))?;
 
         if maybe_user_id.is_some() {
             info!("Successfully authenticated: {:?}", maybe_user_id);
             Ok(())
         } else {
-            Err(ResolverError::Forbidden.extend())
+            Err(ApiHttpError::Unauthorized("".into()).extend())
         }
     }
 }
@@ -216,8 +217,10 @@ impl User {
 
         let user_id = session
             .get_user_id()
-            .map_err(|_| ResolverError::NotFound.extend())?
-            .ok_or_else(|| ResolverError::NotFound.extend())?;
+            .map_err(|e| ApiHttpError::Unauthorized("User unauthorized".into()).extend())?
+            .ok_or_else(|| {
+                ApiHttpError::Unauthorized("Unauthorized. Sign in and try again".into()).extend()
+            })?;
 
         let user = Self::find_by_id(db, &user_id).await;
         user
@@ -227,7 +230,7 @@ impl User {
         User::find_one(db, doc! { "_id": id }, None)
             .await?
             .context("Failed to find user")
-            .map_err(|_e| ResolverError::NotFound.extend())
+            .map_err(|_e| ApiHttpError::NotFound("User not found".into()).extend())
     }
 
     pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Option<Self> {
