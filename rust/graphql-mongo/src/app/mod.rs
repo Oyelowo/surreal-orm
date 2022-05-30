@@ -1,7 +1,6 @@
 pub(crate) mod post;
 pub(crate) mod user;
 
-use anyhow::Context;
 use common::sync_mongo_models;
 use mongodb::Database;
 use post::{Post, PostMutationRoot, PostQueryRoot, PostSubscriptionRoot};

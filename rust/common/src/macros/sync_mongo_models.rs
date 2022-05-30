@@ -1,8 +1,8 @@
-// use anyhow::Context;
 
 #[macro_export]
 macro_rules! sync_mongo_models {
     ($db:expr; $($model:ty),*) => {
+        use anyhow::Context;
         /*
         Does this for all the models
          User::sync(db)
