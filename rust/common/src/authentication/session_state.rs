@@ -1,8 +1,11 @@
-use std::ops::Deref;
-
+use crate::{error_handling::ApiHttpStatus::*, my_time};
 use actix_session::Session;
+use async_graphql::{Context, ErrorExtensions, Result};
+use chrono::{DateTime, Utc};
+use log::warn;
 use send_wrapper::SendWrapper;
 use serde::{de::DeserializeOwned, Serialize};
+use std::ops::Deref;
 
 #[derive(Clone, Debug)]
 struct Shared<T>(pub Option<SendWrapper<T>>);
@@ -50,6 +53,14 @@ impl TypedSession {
         Self(Shared::new(session))
     }
 
+    pub fn from_ctx<'a>(ctx: &'a Context<'_>) -> Result<&'a Self> {
+        let session = ctx.data::<Self>().map_err(|e| {
+            warn!("{e:?}");
+            InternalServerError("Something went wrong while getting session".into()).extend()
+        });
+        session
+    }
+
     pub fn renew(&self) {
         self.0.renew();
     }
@@ -58,15 +69,24 @@ impl TypedSession {
         Ok(self.0.insert(Self::USER_ID_KEY, user_id)?)
     }
 
-    pub fn get_user_id<T>(&self) -> TypedSessionResult<Option<T>>
+    pub fn get_user_id<T>(&self) -> Result<T>
     where
         T: DeserializeOwned,
     {
-        let user_id = self.0.get::<T>(Self::USER_ID_KEY)?;
-        Ok(user_id)
+        self.0
+            .get::<T>(Self::USER_ID_KEY)
+            .map_err(|_| {
+                InternalServerError("Something wen wrong while trying to get your session".into())
+                    .extend()
+            })?
+            .ok_or_else(|| Unauthorized("Not logged in. Please sign in.".into()).extend())
     }
 
     pub fn clear(&self) {
         self.0.clear()
+    }
+
+    pub fn get_expiry() -> DateTime<Utc> {
+        my_time::get_session_expiry()
     }
 }
