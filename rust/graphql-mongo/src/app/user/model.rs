@@ -1,10 +1,8 @@
 use anyhow::Context as ErrorContext;
-use async_graphql::{
-    ComplexObject, Context, Enum, ErrorExtensions, FieldResult, Guard, InputObject, SimpleObject,
-};
+use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
-use log::info;
+use log::{info, warn};
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -17,7 +15,7 @@ use wither::{
 
 use crate::{
     app::post::Post,
-    configs::{model_cursor_to_vec, MONGO_ID_KEY},
+    configs::{get_db_from_ctx, model_cursor_to_vec, MONGO_ID_KEY},
 };
 
 #[derive(
@@ -144,15 +142,20 @@ SELECT * FROM inventory WHERE status = "A" AND ( qty < 30 OR item LIKE "p%")
 #[ComplexObject]
 impl User {
     #[graphql(guard = "RoleGuard::new(Role::Admin).or(AuthGuard)")]
-    async fn posts(&self, ctx: &Context<'_>) -> FieldResult<Vec<Post>> {
+    async fn posts(&self, ctx: &Context<'_>) -> Result<Vec<Post>> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = ctx.data_unchecked::<Database>();
         let cursor = Post::find(db, doc! {"posterId": self.id}, None).await?;
-        Ok(model_cursor_to_vec(cursor).await?)
+        model_cursor_to_vec(cursor)
+            .await
+            .map_err(|_| ApiHttpStatus::NotFound("Post not found".into()).extend())
     }
-    async fn post_count(&self, ctx: &Context<'_>) -> FieldResult<usize> {
-        let post_count = self.posts(ctx).await?.len();
-        Ok(post_count)
+
+    async fn post_count(&self, ctx: &Context<'_>) -> Result<usize> {
+        self.posts(ctx).await.map(|p| p.len()).map_err(|_| {
+            ApiHttpStatus::UnprocessableEntity("Problem occured while getting posts".into())
+                .extend()
+        })
     }
 }
 
@@ -174,11 +177,14 @@ struct RoleGuard {
 
 #[async_trait::async_trait]
 impl Guard for RoleGuard {
-    async fn check(&self, ctx: &Context<'_>) -> FieldResult<()> {
+    async fn check(&self, ctx: &Context<'_>) -> Result<()> {
         if ctx.data_opt::<Role>() == Some(&self.role) {
             Ok(())
         } else {
-            Err("Forbidden".into())
+            Err(ApiHttpStatus::Unauthorized(
+                "You are not authourized to carry out that request.".into(),
+            )
+            .extend())
         }
     }
 }
@@ -191,62 +197,44 @@ impl RoleGuard {
 
 pub struct AuthGuard;
 
-type Ress<T> = Result<T, ApiHttpStatus>;
 #[async_trait::async_trait]
 impl Guard for AuthGuard {
-    async fn check(&self, ctx: &Context<'_>) -> FieldResult<()> {
-        let session = ctx.data::<TypedSession>()?;
-
-        let maybe_user_id = session
+    async fn check(&self, ctx: &Context<'_>) -> Result<()> {
+        TypedSession::from_ctx(ctx)?
             .get_user_id::<ObjectId>()
-            .map_err(|_e| ApiHttpStatus::Unauthorized("Unauthorized".into()))?;
-
-        if maybe_user_id.is_some() {
-            info!("Successfully authenticated: {:?}", maybe_user_id);
-            Ok(())
-        } else {
-            Err(ApiHttpStatus::Unauthorized("".into()).extend())
-        }
+            .map(|_| ())
     }
 }
 
 impl User {
-    pub async fn get_current_user(ctx: &Context<'_>) -> FieldResult<User> {
-        let session = ctx.data::<TypedSession>()?;
-        let db = ctx.data::<Database>()?;
-
-        let user_id = session
-            .get_user_id()
-            .map_err(|e| ApiHttpStatus::Unauthorized("User unauthorized".into()).extend())?
-            .ok_or_else(|| {
-                ApiHttpStatus::Unauthorized("Unauthorized. Sign in and try again".into()).extend()
-            })?;
+    pub async fn get_current_user(ctx: &Context<'_>) -> Result<User> {
+        let db = get_db_from_ctx(ctx)?;
+        let user_id = TypedSession::from_ctx(ctx)?.get_user_id::<ObjectId>()?;
 
         let user = Self::find_by_id(db, &user_id).await;
         user
     }
 
-    pub async fn find_by_id(db: &Database, id: &ObjectId) -> FieldResult<Self> {
+    pub async fn find_by_id(db: &Database, id: &ObjectId) -> Result<Self> {
         User::find_one(db, doc! { MONGO_ID_KEY: id }, None)
             .await?
-            .context("Failed to find user")
-            .map_err(|_e| ApiHttpStatus::NotFound("User not found".into()).extend())
+            .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
 
-    pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Option<Self> {
+    pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Result<Self> {
         User::find_one(db, doc! { "username": username.into() }, None)
-            .await
-            .expect("Failed to find user by username")
+            .await?
+            .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
 
     pub async fn _find_by_account_oauth(
         db: &Database,
         provider: impl Into<String>,
         provider_account_id: impl Into<String>,
-    ) -> Option<Self> {
+    ) -> Result<Self> {
         User::find_one(db, doc! { "accounts": {"$elemMatch": {"provider": provider.into(), "providerAccountId": provider_account_id.into()}} }, None)
-            .await
-            .expect("Failed to find user by username")
+        .await?
+        .ok_or_else(||ApiHttpStatus::NotFound("User not found".into()).extend())
     }
 
     pub async fn find_or_replace_account_oauth(

@@ -1,11 +1,12 @@
 use anyhow::Context as ContextAnyhow;
+use bson::oid::ObjectId;
 use common::{
     authentication::{
         TypedSession, {generate_password_hash, validate_password, PasswordHashPHC, PasswordPlain},
     },
     error_handling::ApiHttpStatus,
 };
-use log::error;
+use log::{error, warn};
 
 use super::{AccountOauth, Role, SignInCredentials, SignOutMessage, User};
 use async_graphql::*;
@@ -82,16 +83,14 @@ impl UserMutationRoot {
         Ok(user)
     }
 
-    // TODO: Improve all errors using error extension
     async fn sign_in(
         &self,
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "sign in credentials")] sign_in_credentials: SignInCredentials,
     ) -> FieldResult<User> {
-        let db = ctx.data_unchecked::<Database>();
-        let session = ctx.data::<TypedSession>()?;
-
-        let maybe_user_id = session.get_user_id()?;
+        let db = ctx.data::<Database>()?;
+        let session = TypedSession::from_ctx(ctx)?;
+        let maybe_user_id = session.get_user_id::<ObjectId>().ok();
 
         // Return user if found from session
         let user = match maybe_user_id {
@@ -102,32 +101,26 @@ impl UserMutationRoot {
             }
             // If not found from session, handle fresh signin flow
             None => {
-                let user = User::find_by_username(db, sign_in_credentials.username)
-                    .await
-                    .with_context(|| "Failed to find user")
-                    .map_err(|e| {
-                        ApiHttpStatus::Unauthorized("Username does not exist".into()).extend()
-                    })?;
+                let user = User::find_by_username(db, sign_in_credentials.username).await?;
 
-                let password_hash = &user
-                    .password
-                    .clone()
-                    .with_context(|| "Unauthenticated")
-                    .map_err(|_| {
-                        ApiHttpStatus::Unauthorized("Invalid Credentials".into()).extend()
-                    })?;
+                let password_hash = &user.password.clone().ok_or_else(|| {
+                    error!("Password does not exist for normal signed in user 🤔");
+                    ApiHttpStatus::Unauthorized("Invalid Credentials".into()).extend()
+                })?;
 
                 let plain_password = PasswordPlain::new(sign_in_credentials.password);
                 let hashed_password = PasswordHashPHC::new(password_hash);
-                let password_verified = validate_password(plain_password, hashed_password).await?;
+                validate_password(plain_password, hashed_password).await?;
 
-                if password_verified {
-                    let id = user.id.expect("no");
-                    session.insert_user_id(&id).expect("Failed");
-                    Ok(user)
-                } else {
-                    Err(ApiHttpStatus::Unauthorized("Invalid credentials".into()).extend())
-                }
+                let id = user.id.ok_or_else(|| {
+                    ApiHttpStatus::InternalServerError("Malformed id".into()).extend()
+                })?;
+
+                session.insert_user_id(&id).map_err(|e| {
+                    warn!("{e:?}");
+                    ApiHttpStatus::InternalServerError("Error handling us".into()).extend()
+                })?;
+                Ok(user)
             }
         };
 
@@ -148,7 +141,7 @@ impl UserMutationRoot {
         let session = ctx.data::<TypedSession>()?;
 
         // ALREADY LOGGED IN OAUTH USER
-        let maybe_user_id = session.get_user_id()?;
+        let maybe_user_id = session.get_user_id::<ObjectId>().ok();
 
         // Return user if found from session
         let user = match maybe_user_id {
@@ -201,19 +194,13 @@ impl UserMutationRoot {
     }
 
     async fn sign_out(&self, ctx: &async_graphql::Context<'_>) -> FieldResult<SignOutMessage> {
-        let session = ctx.data::<TypedSession>()?;
+        let session = TypedSession::from_ctx(ctx)?;
+        let user_id = session.get_user_id()?;
 
-        let maybe_user = session.get_user_id()?;
-
-        match maybe_user {
-            Some(user_id) => {
-                session.clear();
-                Ok(SignOutMessage {
-                    message: "Successfully signed out".into(),
-                    user_id,
-                })
-            }
-            None => Err(ApiHttpStatus::BadRequest("Already Logged out".into()).extend()),
-        }
+        session.clear();
+        Ok(SignOutMessage {
+            message: "Successfully signed out".into(),
+            user_id,
+        })
     }
 }

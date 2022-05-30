@@ -1,5 +1,6 @@
 use async_graphql::*;
 
+use common::error_handling::ApiHttpStatus;
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -9,7 +10,10 @@ use wither::{
     prelude::Model,
 };
 
-use crate::{app::user::User, configs::MONGO_ID_KEY};
+use crate::{
+    app::user::User,
+    configs::{get_db_from_ctx, MONGO_ID_KEY},
+};
 
 #[derive(
     Model, SimpleObject, InputObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,
@@ -36,11 +40,13 @@ pub struct Post {
 
 #[ComplexObject]
 impl Post {
-    async fn poster(&self, ctx: &Context<'_>) -> anyhow::Result<Option<User>> {
+    async fn poster(&self, ctx: &Context<'_>) -> Result<User> {
         // TODO: Use dataloader to batch user
-        let db = ctx.data_unchecked::<Database>();
+        let db = get_db_from_ctx(ctx)?;
 
-        let poster = User::find_one(db, doc! {MONGO_ID_KEY: self.poster_id}, None).await?;
-        Ok(poster)
+        User::find_one(db, doc! {MONGO_ID_KEY: self.poster_id}, None)
+            .await?
+            .ok_or_else(|| ApiHttpStatus::NotFound("".into()))
+            .extend()
     }
 }

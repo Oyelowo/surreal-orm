@@ -1,4 +1,5 @@
-use async_graphql::{Context, Result, Subscription};
+use async_graphql::*;
+use common::error_handling::ApiHttpStatus;
 use futures_util::Stream;
 
 use crate::configs::Token;
@@ -10,7 +11,7 @@ pub struct PostSubscriptionRoot;
 impl PostSubscriptionRoot {
     async fn values(&self, ctx: &Context<'_>) -> Result<impl Stream<Item = i32>> {
         if ctx.data::<Token>()?.0 != "123456" {
-            return Err("Forbidden".into());
+            return Err(ApiHttpStatus::Forbidden("Forbidden".into()).extend());
         }
         Ok(futures_util::stream::once(async move { 10 }))
     }

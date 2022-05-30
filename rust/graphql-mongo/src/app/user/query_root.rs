@@ -1,9 +1,10 @@
+use crate::configs::{get_db_from_ctx, model_cursor_to_vec, MONGO_ID_KEY};
+
 use super::{model::User, AuthGuard};
 
-use anyhow::Context as ContextAnyhow;
 use async_graphql::*;
 use chrono::{DateTime, Utc};
-use common::{error_handling::ApiHttpStatus, my_time};
+use common::{authentication::TypedSession, error_handling::ApiHttpStatus, my_time};
 use futures::stream::StreamExt;
 use mongodb::{
     bson::oid::ObjectId,
@@ -22,23 +23,22 @@ impl UserQueryRoot {
         &self,
         ctx: &Context<'_>,
         #[graphql(desc = "id of the User")] id: ObjectId,
-    ) -> FieldResult<User> {
-        let db = ctx.data_unchecked::<Database>();
+    ) -> Result<User> {
+        let db = get_db_from_ctx(ctx)?;
         let find_one_options = FindOneOptions::builder()
             .read_concern(ReadConcern::majority())
             .build();
 
-        let user = User::find_one(db, doc! {"_id": id}, find_one_options)
+        let user = User::find_one(db, doc! {MONGO_ID_KEY: id}, find_one_options)
             .await?
-            .context("User not found")
-            .map_err(|_| ApiHttpStatus::NotFound("User not found".into()).extend());
+            .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend());
 
         user
     }
 
     #[graphql(guard = "AuthGuard")]
-    async fn users(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<User>> {
-        let db = ctx.data_unchecked::<Database>();
+    async fn users(&self, ctx: &Context<'_>) -> Result<Vec<User>> {
+        let db = get_db_from_ctx(ctx)?;
         // let pipeline = vec![
         //     //    doc! {
         //     //       // filter on movie title:
@@ -55,32 +55,20 @@ impl UserQueryRoot {
         // ];
         // let mut cursor = User::collection(db).aggregate(pipeline, None).await?;
 
-        // let users = User::find(db, None, None)
-        //     .await?
-        //     .map(|u| u.expect("coulnd not get user") )
-        //     .collect::<Vec<User>>()
-        //     .await;
-
         let find_option = FindOptions::builder().sort(doc! {"createdAt": -1}).build();
 
-        let mut cursor = User::find(db, None, find_option).await?;
-
-        let mut users = vec![];
-        while let Some(user) = cursor.next().await {
-            users.push(user?);
-        }
-
-        Ok(users)
+        let cursor = User::find(db, None, find_option).await?;
+        model_cursor_to_vec(cursor).await
     }
 
     #[graphql(guard = "AuthGuard")]
-    async fn session(&self, ctx: &Context<'_>) -> FieldResult<Session> {
+    async fn session(&self, ctx: &Context<'_>) -> Result<Session> {
         let User {
             username, email, ..
         } = User::get_current_user(ctx).await?;
 
         Ok(Session {
-            expires_at: my_time::get_session_expiry(),
+            expires_at: TypedSession::get_expiry(),
             user: SessionUser {
                 name: username,
                 email,
