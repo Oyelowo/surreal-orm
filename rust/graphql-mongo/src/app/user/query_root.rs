@@ -4,12 +4,11 @@ use super::{model::User, AuthGuard};
 
 use async_graphql::*;
 use chrono::{DateTime, Utc};
-use common::{authentication::TypedSession, error_handling::ApiHttpStatus, my_time};
-use futures::stream::StreamExt;
+use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
+
 use mongodb::{
     bson::oid::ObjectId,
     options::{FindOneOptions, FindOptions, ReadConcern},
-    Database,
 };
 use serde::{Deserialize, Serialize};
 use wither::{bson::doc, prelude::Model};

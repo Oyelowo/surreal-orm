@@ -1,7 +1,7 @@
 use actix_cors::Cors;
 use actix_session::{storage::RedisActorSessionStore, SessionLength, SessionMiddleware};
 use actix_web::{
-    cookie::{time::Duration, Key, SameSite},
+    cookie::{Key, SameSite},
     http,
     middleware::Logger,
     web, App, HttpServer,

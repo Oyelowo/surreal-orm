@@ -8,7 +8,6 @@ use log::warn;
 use mongodb::{
     bson::oid::ObjectId,
     options::{FindOneOptions, ReadConcern},
-    Database,
 };
 use wither::{bson::doc, prelude::Model};
 

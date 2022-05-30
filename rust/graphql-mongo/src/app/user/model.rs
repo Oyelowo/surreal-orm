@@ -1,8 +1,6 @@
-use anyhow::Context as ErrorContext;
 use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
-use log::{info, warn};
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;

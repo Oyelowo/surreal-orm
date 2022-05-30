@@ -35,12 +35,11 @@ pub async fn model_cursor_to_vec<T: Model>(mut cursor: ModelCursor<T>) -> Result
 }
 
 pub fn get_db_from_ctx<'a>(ctx: &'a Context<'_>) -> Result<&'a Database> {
-    let db = ctx.data::<Database>().map_err(|e| {
+    ctx.data::<Database>().map_err(|e| {
         warn!("{e:?}");
         ApiHttpStatus::InternalServerError(
             "Something went wrong while fetching your data. Please try again later".into(),
         )
         .extend()
-    });
-    return db;
+    })
 }
