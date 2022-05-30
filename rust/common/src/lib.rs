@@ -5,7 +5,7 @@ pub mod my_time;
 mod util_module_alternative;
 pub mod utils;
 
-pub use macros::{calculator, helpers};
+pub use macros::{calculator, helpers, sync_mongo_models};
 pub use util_module_alternative::greeter_alt::alt_good_morning;
 pub use utils::{good_morning, local_function, maths};
 

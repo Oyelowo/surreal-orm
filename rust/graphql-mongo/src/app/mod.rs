@@ -2,6 +2,7 @@ pub(crate) mod post;
 pub(crate) mod user;
 
 use anyhow::Context;
+use common::sync_mongo_models;
 use mongodb::Database;
 use post::{Post, PostMutationRoot, PostQueryRoot, PostSubscriptionRoot};
 use user::{User, UserMutationRoot, UserQueryRoot, UserSubscriptionRoot};
@@ -9,14 +10,9 @@ use user::{User, UserMutationRoot, UserQueryRoot, UserSubscriptionRoot};
 use async_graphql::{MergedObject, MergedSubscription, Schema, SchemaBuilder};
 use wither::Model;
 
-//pub use crate::app;
-
 // Add new models here
 pub async fn sync_mongo_models(db: &Database) -> anyhow::Result<()> {
-    // Todo: Make this repetitive work into a macro_rules or function macro if need be. e.g sync_mongo_models!(db; User, Post)
-    User::sync(db).await.expect("Problem syncing users");
-    // Post::sync(db).await.context("problem syncing post")?;
-    Post::sync(db).await.context(get_error_message::<Post>())?;
+    sync_mongo_models!(db; User, Post);
     Ok(())
 }
 
@@ -40,10 +36,6 @@ pub fn get_my_graphql_schema() -> SchemaBuilder<Query, Mutation, Subscription> {
         Mutation::default(),
         Subscription::default(),
     )
-}
-
-fn get_error_message<T: Model>() -> String {
-    format!("problem syncing {:?}", T::COLLECTION_NAME)
 }
 
 #[derive(thiserror::Error, Debug)]
