@@ -89,7 +89,7 @@ fn create_password_hash(password: PasswordPlain) -> anyhow::Result<PasswordHashP
 pub async fn validate_password(
     plain_password: PasswordPlain,
     expected_password_hash: PasswordHashPHC,
-) -> anyhow::Result<bool, PasswordError> {
+) -> anyhow::Result<(), PasswordError> {
     // This executes before spawning the new thread
     spawn_blocking_with_tracing(move || {
         verify_password_hash(plain_password, expected_password_hash)
@@ -98,7 +98,7 @@ pub async fn validate_password(
     .context("Failed to spawn blocking task.")
     .map_err(PasswordError::UnexpectedError)??;
 
-    Ok(true)
+    Ok(())
 }
 
 #[tracing::instrument(
