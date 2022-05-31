@@ -1,7 +1,7 @@
 
 #[macro_export]
 macro_rules! sync_mongo_models {
-    ($db:expr; $($model:ty),*) => {
+    ($db:expr; $($model:ident),*) => {
         use anyhow::Context;
         /*
         Does this for all the models
@@ -9,6 +9,6 @@ macro_rules! sync_mongo_models {
         .await
         .with_context(|| "Problem syncing users")?;
          */
-       $( <$model>::sync($db).await.with_context(|| format!("Problem syncing {}", <$model>::COLLECTION_NAME))?;)*
+       $( $model::sync($db).await.with_context(|| format!("Problem syncing {}", $model::COLLECTION_NAME))?;)*
     };
 }
