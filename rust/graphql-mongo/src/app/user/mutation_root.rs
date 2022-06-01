@@ -8,11 +8,12 @@ use common::{
 };
 use log::{error, warn};
 
+use crate::configs::get_db_from_ctx;
+
 use super::{AccountOauth, Role, SignInCredentials, SignOutMessage, User};
 use async_graphql::*;
 use chrono::Utc;
 
-use mongodb::Database;
 use validator::Validate;
 use wither::Model;
 
@@ -25,9 +26,9 @@ impl UserMutationRoot {
         &self,
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "user data")] user_input: User,
-    ) -> anyhow::Result<User> {
+    ) -> Result<User> {
         user_input.validate()?;
-        let db = ctx.data_unchecked::<Database>();
+        let db = get_db_from_ctx(ctx)?;
 
         let mut user = User::builder()
             .created_at(Utc::now())
@@ -54,13 +55,14 @@ impl UserMutationRoot {
         &self,
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "Sign Up credentials")] user: User,
-    ) -> FieldResult<User> {
+    ) -> Result<User> {
         user.validate()?;
 
-        let db = ctx.data_unchecked::<Database>();
-        let password_hash = generate_password_hash(user.password.context("Invalid password")?)
-            .await
-            .map_err(|_| ApiHttpStatus::BadRequest("Password badly formed".into()))?;
+        let db = get_db_from_ctx(ctx)?;
+        let password_hash =
+            generate_password_hash(user.password.with_context(|| "Invalid password")?)
+                .await
+                .map_err(|_| ApiHttpStatus::BadRequest("Password badly formed".into()))?;
 
         let mut user = User::builder()
             .created_at(Utc::now())
@@ -87,8 +89,8 @@ impl UserMutationRoot {
         &self,
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "sign in credentials")] sign_in_credentials: SignInCredentials,
-    ) -> FieldResult<User> {
-        let db = ctx.data::<Database>()?;
+    ) -> Result<User> {
+        let db = get_db_from_ctx(ctx)?;
         let session = TypedSession::from_ctx(ctx)?;
         let maybe_user_id = session.get_user_id::<ObjectId>().ok();
 
@@ -132,13 +134,13 @@ impl UserMutationRoot {
         &self,
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "user account credentials")] account: AccountOauth,
-    ) -> FieldResult<User> {
+    ) -> Result<User> {
         // TODO: Limit this call to only server. Our nextjs server will call this during oauth flow and the relay
         // our cookie session to the client
         // let was_in_headers = ctx.insert_http_header(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 
-        let db = ctx.data_unchecked::<Database>();
-        let session = ctx.data::<TypedSession>()?;
+        let db = get_db_from_ctx(ctx)?;
+        let session = TypedSession::from_ctx(ctx)?;
 
         // ALREADY LOGGED IN OAUTH USER
         let maybe_user_id = session.get_user_id::<ObjectId>().ok();
@@ -193,7 +195,7 @@ impl UserMutationRoot {
         user
     }
 
-    async fn sign_out(&self, ctx: &async_graphql::Context<'_>) -> FieldResult<SignOutMessage> {
+    async fn sign_out(&self, ctx: &async_graphql::Context<'_>) -> Result<SignOutMessage> {
         let session = TypedSession::from_ctx(ctx)?;
         let user_id = session.get_user_id()?;
 
