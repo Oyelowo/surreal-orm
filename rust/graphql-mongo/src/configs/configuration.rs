@@ -1,10 +1,12 @@
+use std::process;
+
 use anyhow::Context;
 use mongodb::{
     options::{ClientOptions, Credential, ServerAddress},
     Client, Database,
 };
 
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 
 #[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
@@ -76,20 +78,6 @@ impl DatabaseConfigs {
             .database(&self.name);
         Ok(db)
     }
-
-    // pub fn get_url(&self) -> String {
-    //     let Self {
-    //         host,
-    //         port,
-    //         username,
-    //         password,
-    //         ..
-    //     } = self;
-
-    //     Url::parse(format!("mongodb://{username}:{password}@{host}:{port}/").as_str())
-    //         .expect("Problem passing mongodb uri")
-    //         .into()
-    // }
 }
 
 #[derive(Deserialize, Debug, Default, Clone)]
@@ -138,22 +126,22 @@ pub struct Configs {
 
 impl Configs {
     pub fn init() -> Self {
-        let application = envy::prefixed("APP_")
-            .from_env::<ApplicationConfigs>()
-            .unwrap_or_else(|e| panic!("Failed config. Error: {:?}", e));
-        // FIXME: Use as above once docker/kube is properly setup
-        let database = envy::prefixed("MONGODB_")
-            .from_env::<DatabaseConfigs>()
-            .expect("problem with mongo db environment variables(s)");
-
-        let redis = envy::prefixed("REDIS_")
-            .from_env::<RedisConfigs>()
-            .expect("problem with redis environment variables(s)");
-
         Self {
-            application,
-            database,
-            redis,
+            application: get_config("APP_"),
+            database: get_config("MONGODB_"),
+            redis: get_config("REDIS_"),
         }
     }
+}
+
+fn get_config<T: DeserializeOwned>(config_prefix: &str) -> T {
+    envy::prefixed(config_prefix)
+        .from_env::<T>()
+        .unwrap_or_else(|e| {
+            log::error!(
+                "problem with {config_prefix:?} environment variables(s). 
+            Check that the prefix is correctly spelled and the configs are complete. Error {e:?}"
+            );
+            process::exit(1);
+        })
 }
