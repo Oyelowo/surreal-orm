@@ -1,6 +1,6 @@
-use graphql_mongo::configs::GraphQlApp;
+use graphql_mongo::utils;
 
 fn main() {
     let path = format!("{}/generated/schema.graphql", env!("CARGO_PKG_NAME"));
-    GraphQlApp::generate_schema(path);
+    utils::graphql::generate_schema(path);
 }

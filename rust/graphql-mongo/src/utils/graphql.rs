@@ -1,47 +1,24 @@
 use actix_session::SessionExt;
-use actix_web::http::header::HeaderMap;
+
 use actix_web::{get, post, web, HttpRequest, HttpResponse};
 
 use async_graphql::{
     http::{playground_source, GraphQLPlaygroundConfig},
-    Data, ErrorExtensions, Result, Schema,
+    Data, Schema,
 };
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 use common::authentication::TypedSession;
-use common::error_handling::ApiHttpStatus;
-use log::warn;
+
 use serde::Deserialize;
 
-use super::configuration::Environment;
+use super::configuration::{self, Environment};
+
+use super::token::Token;
 use crate::app::{get_my_graphql_schema, sync_mongo_models, MyGraphQLSchema};
-use crate::configs::Configs;
 use common::utils;
 extern crate derive_more;
-use derive_more::From;
+
 use std::path::Path;
-
-pub static MONGO_ID_KEY: &str = "_id";
-
-#[derive(From, PartialEq)]
-pub struct Token(pub String);
-
-impl Token {
-    pub fn from_ctx<'a>(ctx: &'a async_graphql::Context<'_>) -> Result<&'a Self> {
-        return ctx.data::<Self>().map_err(|e| {
-            warn!("{e:?}");
-            ApiHttpStatus::InternalServerError("Something went wrong while getting session".into())
-                .extend()
-        });
-    }
-
-    fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
-        // This should probably include some validations
-        // of the token and its expiry date and maybe refreshing the token or something
-        headers
-            .get("Token")
-            .and_then(|value| value.to_str().map(|s| Token(s.to_string())).ok())
-    }
-}
 
 #[post("/graphql")]
 pub async fn index(
@@ -65,7 +42,7 @@ pub async fn index(
     schema.execute(request).await.into()
 }
 
-pub async fn on_connection_init(value: serde_json::Value) -> async_graphql::Result<Data> {
+async fn on_connection_init(value: serde_json::Value) -> async_graphql::Result<Data> {
     #[derive(Deserialize)]
     struct Payload {
         token: String,
@@ -110,35 +87,30 @@ pub async fn gql_playground() -> HttpResponse {
         .body(source)
 }
 
-pub struct GraphQlApp;
+pub async fn setup_graphql() -> anyhow::Result<MyGraphQLSchema> {
+    let application = configuration::get_app_config();
+    let database = configuration::get_db_config();
 
-impl GraphQlApp {
-    pub async fn setup() -> anyhow::Result<MyGraphQLSchema> {
-        let application = Configs::get_app_config();
-        let database = Configs::get_db_config();
+    use Environment::*;
+    let (limit_depth, limit_complexity) = match application.environment {
+        Local | Development | Staging => (usize::max_value(), usize::max_value()),
+        Production => (8, 200),
+    };
 
-        use Environment::*;
-        let (limit_depth, limit_complexity) = match application.environment {
-            Local | Development | Staging => (usize::max_value(), usize::max_value()),
-            Production => (8, 200),
-        };
+    let db = database.get_database()?;
 
-        let db = database.get_database()?;
+    sync_mongo_models(&db).await?;
 
-        sync_mongo_models(&db).await?;
+    let schema = get_my_graphql_schema()
+        .data(db)
+        .limit_depth(limit_depth) // This and also limit_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
+        .limit_complexity(limit_complexity)
+        .finish();
 
-        let schema = get_my_graphql_schema()
-            .data(db)
-            .limit_depth(limit_depth) // This and also limit_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
-            .limit_complexity(limit_complexity)
-            .finish();
-
-        Ok(schema)
-    }
-
-    pub fn generate_schema(path: impl AsRef<Path>) {
-        let data = &get_my_graphql_schema().finish().sdl();
-        utils::write_data_to_path(data, path);
-    }
+    Ok(schema)
 }
-// TEsTING for session
+
+pub fn generate_schema(path: impl AsRef<Path>) {
+    let data = &get_my_graphql_schema().finish().sdl();
+    utils::write_data_to_path(data, path);
+}

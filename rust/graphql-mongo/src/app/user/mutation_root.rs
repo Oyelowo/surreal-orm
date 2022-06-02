@@ -8,7 +8,7 @@ use common::{
 };
 use log::{error, warn};
 
-use crate::configs::get_db_from_ctx;
+use crate::utils::mongodb::get_db_from_ctx;
 
 use super::{AccountOauth, Role, SignInCredentials, SignOutMessage, User};
 use async_graphql::*;

@@ -11,7 +11,7 @@ use wither::{
 
 use crate::{
     app::user::User,
-    configs::{get_db_from_ctx, MONGO_ID_KEY},
+    utils::mongodb::{get_db_from_ctx, MONGO_ID_KEY},
 };
 
 #[derive(

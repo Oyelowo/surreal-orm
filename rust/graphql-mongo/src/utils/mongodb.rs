@@ -5,6 +5,8 @@ use log::warn;
 use mongodb::Database;
 use wither::{Model, ModelCursor};
 
+pub static MONGO_ID_KEY: &str = "_id";
+
 pub async fn model_cursor_to_vec<T: Model>(mut cursor: ModelCursor<T>) -> Result<Vec<T>> {
     // https://doc.rust-lang.org/rust-by-example/error/iter_result.html
     // This gets all the errors out. So, will still not throw

@@ -2,7 +2,7 @@ use async_graphql::{Context, ErrorExtensions, Result, Subscription};
 use common::error_handling::ApiHttpStatus;
 use futures_util::Stream;
 
-use crate::configs::Token;
+use crate::utils::token::Token;
 
 #[derive(Default)]
 pub struct UserSubscriptionRoot;

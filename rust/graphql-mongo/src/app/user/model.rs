@@ -13,7 +13,7 @@ use wither::{
 
 use crate::{
     app::post::Post,
-    configs::{get_db_from_ctx, model_cursor_to_vec, MONGO_ID_KEY},
+    utils::mongodb::{get_db_from_ctx, model_cursor_to_vec, MONGO_ID_KEY},
 };
 
 #[derive(

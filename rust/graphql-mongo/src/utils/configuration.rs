@@ -1,14 +1,8 @@
 use std::process;
 
-use actix_cors::Cors;
-use actix_session::{storage::RedisActorSessionStore, SessionLength, SessionMiddleware};
-use actix_web::{
-    cookie::{Key, SameSite},
-    http,
-};
+use actix_web::cookie::Key;
 use anyhow::Context;
 
-use common::my_time;
 use mongodb::{
     options::{ClientOptions, Credential, ServerAddress},
     Client, Database,
@@ -156,66 +150,26 @@ impl RedisConfigs {
     }
 }
 
-#[derive(Debug)]
-pub struct Configs {
-    pub application: ApplicationConfigs,
-    pub database: DatabaseConfigs,
-    pub redis: RedisConfigs,
+pub fn get_app_config() -> ApplicationConfigs {
+    get_config("APP_")
 }
 
-impl Configs {
-    pub fn get_app_config() -> ApplicationConfigs {
-        Self::get_config("APP_")
-    }
+pub fn get_db_config() -> DatabaseConfigs {
+    get_config("MONGODB_")
+}
 
-    pub fn get_db_config() -> DatabaseConfigs {
-        Self::get_config("MONGODB_")
-    }
+pub fn get_redis_config() -> RedisConfigs {
+    get_config("REDIS_")
+}
 
-    pub fn get_redis_config() -> RedisConfigs {
-        Self::get_config("REDIS_")
-    }
-
-    fn get_config<T: DeserializeOwned>(config_prefix: &str) -> T {
-        envy::prefixed(config_prefix)
-            .from_env::<T>()
-            .unwrap_or_else(|e| {
-                log::error!(
-                    "problem with {config_prefix:?} environment variables(s). 
+fn get_config<T: DeserializeOwned>(config_prefix: &str) -> T {
+    envy::prefixed(config_prefix)
+        .from_env::<T>()
+        .unwrap_or_else(|e| {
+            log::error!(
+                "problem with {config_prefix:?} environment variables(s). 
                 Check that the prefix is correctly spelt and the configs are complete. Error {e:?}"
-                );
-                process::exit(1);
-            })
-    }
-
-    pub fn get_session_middleware(
-        redis: &RedisConfigs,
-        application: &ApplicationConfigs,
-    ) -> SessionMiddleware<RedisActorSessionStore> {
-        // https://javascript.info/cookie#:~:text=Cookies%20are%20usually%20set%20by,using%20the%20Cookie%20HTTP%2Dheader.
-        SessionMiddleware::builder(
-            RedisActorSessionStore::new(redis.get_url()),
-            redis.get_key(),
-        )
-        .cookie_name("oyelowo-session".into())
-        .session_length(SessionLength::Predetermined {
-            max_session_length: Some(my_time::get_session_duration()),
+            );
+            process::exit(1);
         })
-        .cookie_secure(matches!(
-            application.environment,
-            Environment::Production | Environment::Staging
-        ))
-        .cookie_same_site(SameSite::Strict)
-        .build()
-    }
-
-    /// https://javascript.info/fetch-crossorigin#cors-for-safe-requests
-    /// http://www.ruanyifeng.com/blog/2016/04/cors.html
-    pub fn get_cors() -> Cors {
-        Cors::default()
-            .allow_any_origin() // FIXME: // remove after testing.
-            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
-            .allowed_header(http::header::CONTENT_TYPE)
-            .max_age(3600)
-    }
 }

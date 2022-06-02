@@ -2,20 +2,24 @@ use std::process;
 
 use actix_web::{middleware::Logger, web, App, HttpServer};
 use anyhow::Context;
-use graphql_mongo::configs::{gql_playground, index, index_ws, Configs, GraphQlApp};
+use graphql_mongo::utils::{
+    configuration, cors,
+    graphql::{gql_playground, index, index_ws, setup_graphql},
+    session,
+};
 use log::info;
 use tracing_actix_web::TracingLogger;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     env_logger::init();
-    let application = Configs::get_app_config();
-    let redis = Configs::get_redis_config();
+    let application = configuration::get_app_config();
+    let redis = configuration::get_redis_config();
     let app_url = &application.get_url();
 
     info!("Playground: {}", app_url);
 
-    let schema = GraphQlApp::setup()
+    let schema = setup_graphql()
         .await
         .with_context(|| "Problem setting up graphql")
         .unwrap_or_else(|e| {
@@ -25,10 +29,10 @@ async fn main() -> anyhow::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .wrap(Configs::get_cors())
+            .wrap(cors::get_cors())
             .wrap(TracingLogger::default())
             .wrap(Logger::default())
-            .wrap(Configs::get_session_middleware(&redis, &application))
+            .wrap(session::get_session_middleware(&redis, &application))
             .app_data(web::Data::new(schema.clone()))
             .service(gql_playground)
             .service(index)
