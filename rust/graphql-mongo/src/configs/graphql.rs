@@ -2,30 +2,45 @@ use actix_session::SessionExt;
 use actix_web::http::header::HeaderMap;
 use actix_web::{get, post, web, HttpRequest, HttpResponse};
 
-use async_graphql::Schema;
 use async_graphql::{
     http::{playground_source, GraphQLPlaygroundConfig},
-    Data,
+    Data, ErrorExtensions, Result, Schema,
 };
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 use common::authentication::TypedSession;
+use common::error_handling::ApiHttpStatus;
+use log::warn;
 use serde::Deserialize;
 
 use super::configuration::Environment;
 use crate::app::{get_my_graphql_schema, sync_mongo_models, MyGraphQLSchema};
 use crate::configs::Configs;
 use common::utils;
-
+extern crate derive_more;
+use derive_more::From;
 use std::path::Path;
 
 pub static MONGO_ID_KEY: &str = "_id";
 
+#[derive(From, PartialEq)]
 pub struct Token(pub String);
 
-fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
-    headers
-        .get("Token")
-        .and_then(|value| value.to_str().map(|s| Token(s.to_string())).ok())
+impl Token {
+    pub fn from_ctx<'a>(ctx: &'a async_graphql::Context<'_>) -> Result<&'a Self> {
+        return ctx.data::<Self>().map_err(|e| {
+            warn!("{e:?}");
+            ApiHttpStatus::InternalServerError("Something went wrong while getting session".into())
+                .extend()
+        });
+    }
+
+    fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
+        // This should probably include some validations
+        // of the token and its expiry date and maybe refreshing the token or something
+        headers
+            .get("Token")
+            .and_then(|value| value.to_str().map(|s| Token(s.to_string())).ok())
+    }
 }
 
 #[post("/graphql")]
@@ -38,42 +53,14 @@ pub async fn index(
 ) -> GraphQLResponse {
     let mut request = gql_request.into_inner();
 
-    // let session = TypedSession(req.get_session());
-    // access session data
-    // if let Some(count) = req.get_session().get::<i32>("user_id").unwrap() {
-    //     println!("get_session value: {}", count);
-    //     req.get_session().insert("user_id", "23213");
-    // } else {
-    //     req.get_session().set("user_id", "rere")?;
-    // }
-
-    // let k = req.get_session().get::<i32>("user_id");
-    // let session = SessionShared::new(req.get_session());
-
-    // let session = req.get_session();
-    // let cookier: Arc<Mutex<Option<String>>> = Default::default();
-
-    // cookier.lock().
-    // let p = Arc::new(Mutex::new(req.get_session()));
-    // if let Some(id) = session.get::<ObjectId>("user_id").unwrap_or(None) {
-    //     // let user = User::find_by_id(&db, &id).await.unwrap();
-    //     if let Some(user) = User::find_by_id(&db, &id).await {
-    //         request = request.data(user);
-    //     }
-    // }
-    // if let Some(token) = get_token_from_headers(req.headers()) {
-    //     request = request.data(token);
-    // }
-    // request = request.data(session);
-
-    // let session = Shared::new(session);
-    // //  cookier.lock().await = Some(session);
-    // let sess = req.get_session();
-    // let k = Arc::new(Mutex::new(sess));
-    // let p = k.clone().lock().as_deref().unwrap();
+    // Get session data and stick it into graphql context
     let session = TypedSession::new(req.get_session());
-    request = request.data(session);
-    // request = request.data(req.get_session());
+
+    // If, using, jwt, Stick jwt token from headers into graphql context.
+    // Presently not using it but cookie session managed with redis
+    let token = Token::get_token_from_headers(req.headers());
+
+    request = request.data(session).data(token);
 
     schema.execute(request).await.into()
 }
@@ -98,11 +85,12 @@ pub async fn index_ws(
     req: HttpRequest,
     payload: web::Payload,
 ) -> actix_web::Result<HttpResponse> {
-    // TODO: Add session here
     let mut data = Data::default();
-    if let Some(token) = get_token_from_headers(req.headers()) {
-        data.insert(token)
-    }
+    let session = TypedSession::new(req.get_session());
+    let token = Token::get_token_from_headers(req.headers());
+
+    data.insert(token);
+    data.insert(session);
 
     GraphQLSubscription::new(Schema::clone(&*schema))
         .with_data(data)
