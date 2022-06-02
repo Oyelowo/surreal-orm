@@ -1,4 +1,3 @@
-
 #[macro_export]
 macro_rules! sync_mongo_models {
     ($db:expr; $($model:ident),*) => {
