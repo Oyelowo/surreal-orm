@@ -1,11 +1,20 @@
 use std::process;
 
+use actix_cors::Cors;
+use actix_session::{storage::RedisActorSessionStore, SessionLength, SessionMiddleware};
+use actix_web::{
+    cookie::{Key, SameSite},
+    http,
+};
 use anyhow::Context;
+
+use common::my_time;
 use mongodb::{
     options::{ClientOptions, Credential, ServerAddress},
     Client, Database,
 };
 
+use redis::{ConnectionAddr, ConnectionInfo, RedisConnectionInfo};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 
@@ -88,32 +97,62 @@ pub struct RedisConfigs {
     pub password: String,
     pub host: String,
 
+    /// Generate a random 32 byte key. Note that it is important to use a unique
+    /// private key for every project. Anyone with access to the key can generate
+    /// authentication cookies for any user!
+    /// Generate key with the command `openssl rand -base64 32`
+    pub session_key: String,
+
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
 }
 
 impl RedisConfigs {
+    pub fn get_connection_info(&self) -> ConnectionInfo {
+        let addr = ConnectionAddr::Tcp(self.host.clone(), self.port);
+
+        let redis = RedisConnectionInfo {
+            db: 0,
+            username: None,
+            password: Some(self.password.clone()),
+        };
+        ConnectionInfo { addr, redis }
+    }
+
+    pub fn get_client(self) -> anyhow::Result<redis::Client> {
+        let addr = ConnectionAddr::Tcp(self.host, self.port);
+
+        let redis = RedisConnectionInfo {
+            db: 0,
+            username: None,
+            password: Some(self.password),
+        };
+        let connection_info = ConnectionInfo { addr, redis };
+
+        redis::Client::open(connection_info).with_context(|| "Failed to open connection")
+    }
+
+    /// Generate a random 32 byte key. Note that it is important to use a unique
+    /// private key for every project. Anyone with access to the key can generate
+    /// authentication cookies for any user!
+    /// Generate key with the command `openssl rand -base64 32`
+    pub fn get_key(&self) -> Key {
+        Key::from(self.session_key.repeat(256).as_bytes())
+    }
+
     pub fn get_url(&self) -> String {
         let Self {
             host,
             port,
-            // username,
-            // password,
+            username,
+            password,
             ..
         } = self;
-        // protocol://[user]:[password]@host[:port]. https://github.com/mitsuhiko/redis-rs/issues/144
-        // TODO: Try out including protocol
-        // Url::parse(format!("http://{host}:{port}").as_ref()).expect("Problem parsing application uri")
-        // "redis-database-master.development:6379".into()
-        // TODO: Add password auth
-        // format!("${username}:${password}@{host}:{port}")
-        // Redis seem to not require username
+        let db = 0;
 
-        let url = format!("{host}:{port}");
-        // let url = format!("redis://:{password}@graphql-mongo-redis-master.applications:6379");
-        println!("Redis URL =======>>>>>>>>>>: {}", url);
-        // format!(":{password}@{host}:{port}")
-        url
+        // format!("{host}:{port}")
+        // redis://[<username>][:<password>@]<hostname>[:port][/<db>]
+        format!("redis://{username}:{password}@{host}:{port}/{db}")
     }
 }
 
@@ -125,23 +164,58 @@ pub struct Configs {
 }
 
 impl Configs {
-    pub fn init() -> Self {
-        Self {
-            application: get_config("APP_"),
-            database: get_config("MONGODB_"),
-            redis: get_config("REDIS_"),
-        }
+    pub fn get_app_config() -> ApplicationConfigs {
+        Self::get_config("APP_")
     }
-}
 
-fn get_config<T: DeserializeOwned>(config_prefix: &str) -> T {
-    envy::prefixed(config_prefix)
-        .from_env::<T>()
-        .unwrap_or_else(|e| {
-            log::error!(
-                "problem with {config_prefix:?} environment variables(s). 
-            Check that the prefix is correctly spelled and the configs are complete. Error {e:?}"
-            );
-            process::exit(1);
+    pub fn get_db_config() -> DatabaseConfigs {
+        Self::get_config("MONGODB_")
+    }
+
+    pub fn get_redis_config() -> RedisConfigs {
+        Self::get_config("REDIS_")
+    }
+
+    fn get_config<T: DeserializeOwned>(config_prefix: &str) -> T {
+        envy::prefixed(config_prefix)
+            .from_env::<T>()
+            .unwrap_or_else(|e| {
+                log::error!(
+                    "problem with {config_prefix:?} environment variables(s). 
+                Check that the prefix is correctly spelt and the configs are complete. Error {e:?}"
+                );
+                process::exit(1);
+            })
+    }
+
+    pub fn get_session_middleware(
+        redis: &RedisConfigs,
+        application: &ApplicationConfigs,
+    ) -> SessionMiddleware<RedisActorSessionStore> {
+        // https://javascript.info/cookie#:~:text=Cookies%20are%20usually%20set%20by,using%20the%20Cookie%20HTTP%2Dheader.
+        SessionMiddleware::builder(
+            RedisActorSessionStore::new(redis.get_url()),
+            redis.get_key(),
+        )
+        .cookie_name("oyelowo-session".into())
+        .session_length(SessionLength::Predetermined {
+            max_session_length: Some(my_time::get_session_duration()),
         })
+        .cookie_secure(matches!(
+            application.environment,
+            Environment::Production | Environment::Staging
+        ))
+        .cookie_same_site(SameSite::Strict)
+        .build()
+    }
+
+    /// https://javascript.info/fetch-crossorigin#cors-for-safe-requests
+    /// http://www.ruanyifeng.com/blog/2016/04/cors.html
+    pub fn get_cors() -> Cors {
+        Cors::default()
+            .allow_any_origin() // FIXME: // remove after testing.
+            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+            .allowed_header(http::header::CONTENT_TYPE)
+            .max_age(3600)
+    }
 }

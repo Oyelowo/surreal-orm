@@ -114,11 +114,8 @@ pub struct GraphQlApp;
 
 impl GraphQlApp {
     pub async fn setup() -> anyhow::Result<MyGraphQLSchema> {
-        let Configs {
-            ref application,
-            database,
-            ..
-        } = Configs::init();
+        let application = Configs::get_app_config();
+        let database = Configs::get_db_config();
 
         use Environment::*;
         let (limit_depth, limit_complexity) = match application.environment {
@@ -127,10 +124,6 @@ impl GraphQlApp {
         };
 
         let db = database.get_database()?;
-
-        // let db = Client::with_uri_str(database.get_url())
-        //     .await?
-        //     .database(database.name.as_str());
 
         sync_mongo_models(&db).await?;
 
