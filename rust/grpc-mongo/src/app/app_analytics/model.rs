@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
+use uuid::Uuid;
 use validator::Validate;
 use wither::{
     bson::{doc, oid::ObjectId},
@@ -15,7 +16,7 @@ pub struct UserAppEvent {
     pub id: Option<ObjectId>,
 
     // #[validate(length(min = 1), /*custom = "validate_is_id"*/)]
-    pub user_id: String,
+    pub user_id: Uuid,
 
     #[validate(length(min = 1))]
     pub page: String,

@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
 use bson::{doc, oid::ObjectId};
 use mongodb::options::{FindOneOptions, ReadConcern};
 use tonic::{Response, Status};
@@ -27,6 +27,7 @@ impl AppAnalytics for AnalyticsService {
         &self,
         request: tonic::Request<app_analytics::CreateUserAppEventRequest>,
     ) -> anyhow::Result<tonic::Response<app_analytics::UserAppEventResponse>, tonic::Status> {
+        // let p =tonic::Status::not_found("r");
         let CreateUserAppEventRequest {
             user_id,
             page,
@@ -34,6 +35,10 @@ impl AppAnalytics for AnalyticsService {
             description,
         } = request.into_inner();
         let db = establish_connection().await;
+
+        let user_id = user_id
+            .parse::<uuid::Uuid>()
+            .with_context(|| "Could not parse Id").expect("shouldn't happen but change");
 
         let mut user_app_event = UserAppEvent::builder()
             .user_id(user_id)
@@ -54,7 +59,7 @@ impl AppAnalytics for AnalyticsService {
 
         Ok(Response::new(UserAppEventResponse {
             id,
-            user_id: user_app_event.user_id,
+            user_id: user_app_event.user_id.to_string(),
             page: user_app_event.page,
             event_name: user_app_event.event_name,
             description: user_app_event.description,
@@ -91,7 +96,7 @@ impl AppAnalytics for AnalyticsService {
                 // let k = ObjectId::parse_str(id);
                 let user_app_event_response = UserAppEventResponse {
                     id,
-                    user_id: user.user_id,
+                    user_id: user.user_id.to_string(),
                     event_name: user.event_name,
                     page: user.page,
                     description: user.description,
@@ -124,7 +129,7 @@ impl AppAnalytics for AnalyticsService {
                 let id = event.id.expect("Problem getting event id").to_string();
                 UserAppEventResponse {
                     id,
-                    user_id: event.user_id,
+                    user_id: event.user_id.to_string(),
                     event_name: event.event_name,
                     page: event.page,
                     description: event.description,
