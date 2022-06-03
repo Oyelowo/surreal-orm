@@ -1,14 +1,14 @@
 mod app;
-mod configs;
+mod utils;
 
 use anyhow::Result;
 use app::{app_analytics::AnalyticsApp, greetings::GreeterApp, music::MusicFanApp};
-use configs::Configs;
+use grpc_mongo::utils::configuration;
 use tonic::transport::Server;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let Configs { application, .. } = Configs::init();
+    let application = configuration::get_app_config();
     let addr = application.get_url();
 
     Server::builder()

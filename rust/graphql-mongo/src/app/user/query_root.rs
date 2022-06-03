@@ -1,10 +1,14 @@
-use crate::utils::mongodb::{get_db_from_ctx, model_cursor_to_vec, MONGO_ID_KEY};
+use crate::utils::mongodb::get_db_from_ctx;
 
 use super::{model::User, AuthGuard};
 
 use async_graphql::*;
 use chrono::{DateTime, Utc};
-use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
+use common::{
+    authentication::TypedSession,
+    error_handling::ApiHttpStatus,
+    mongodb::{model_cursor_to_vec, MONGO_ID_KEY},
+};
 
 use mongodb::{
     bson::oid::ObjectId,

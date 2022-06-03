@@ -1,7 +1,7 @@
-use anyhow::{Context, Result};
 use bson::{doc, oid::ObjectId};
+use common::mongodb::model_cursor_to_vec;
 use mongodb::options::{FindOneOptions, ReadConcern};
-use tonic::{Response, Status};
+use tonic::{Request, Response, Status};
 pub mod app_analytics {
     tonic::include_proto!("app_analytics");
 }
@@ -14,20 +14,21 @@ use app_analytics::{
 use validator::Validate;
 use wither::Model;
 
-use crate::configs::{establish_connection, model_cursor_to_vec};
+use crate::utils::connection::establish_connection;
 
 use super::UserAppEvent;
 
 #[derive(Debug, Default)]
 pub struct AnalyticsService;
 
+type TonicResult<T> = anyhow::Result<tonic::Response<T>, tonic::Status>;
+
 #[tonic::async_trait]
 impl AppAnalytics for AnalyticsService {
     async fn create_user_app_event(
         &self,
-        request: tonic::Request<app_analytics::CreateUserAppEventRequest>,
-    ) -> anyhow::Result<tonic::Response<app_analytics::UserAppEventResponse>, tonic::Status> {
-        // let p =tonic::Status::not_found("r");
+        request: Request<CreateUserAppEventRequest>,
+    ) -> TonicResult<UserAppEventResponse> {
         let CreateUserAppEventRequest {
             user_id,
             page,
@@ -36,9 +37,10 @@ impl AppAnalytics for AnalyticsService {
         } = request.into_inner();
         let db = establish_connection().await;
 
-        let user_id = user_id
-            .parse::<uuid::Uuid>()
-            .with_context(|| "Could not parse Id").expect("shouldn't happen but change");
+        let user_id = user_id.parse::<uuid::Uuid>().map_err(|e| {
+            log::error!("{e}");
+            Status::internal("Problem parsing uuid to string")
+        })?;
 
         let mut user_app_event = UserAppEvent::builder()
             .user_id(user_id)
@@ -55,7 +57,11 @@ impl AppAnalytics for AnalyticsService {
             .save(&db, None)
             .await
             .map_err(|_| Status::not_found("User not found"))?;
-        let id = user_app_event.id.expect("id not found").to_string();
+
+        let id = user_app_event
+            .id
+            .map(|id| id.to_string())
+            .ok_or_else(|| Status::internal("Problem parsing uuid to string"))?;
 
         Ok(Response::new(UserAppEventResponse {
             id,
@@ -68,14 +74,13 @@ impl AppAnalytics for AnalyticsService {
 
     async fn get_user_app_event(
         &self,
-        request: tonic::Request<app_analytics::GetUserAppEventRequest>,
-    ) -> Result<tonic::Response<app_analytics::UserAppEventResponse>, tonic::Status> {
+        request: Request<GetUserAppEventRequest>,
+    ) -> TonicResult<UserAppEventResponse> {
         let GetUserAppEventRequest { event_id, user_id } = request.into_inner();
 
         let db = establish_connection().await;
 
         // Validate that it is being called by authorized user if necessary
-
         let find_one_options = FindOneOptions::builder()
             .read_concern(ReadConcern::majority())
             .build();
@@ -87,13 +92,10 @@ impl AppAnalytics for AnalyticsService {
         )
         .await
         .map_err(|_| Status::not_found("User event not found"))?;
-        // .unwrap_or(Err(Status::not_found("user app event not found")));
-        // .expect("Id not found");
 
         match user_found {
             Some(user) => {
                 let id = user.id.expect("Problem getting user event id").to_string();
-                // let k = ObjectId::parse_str(id);
                 let user_app_event_response = UserAppEventResponse {
                     id,
                     user_id: user.user_id.to_string(),
@@ -109,9 +111,8 @@ impl AppAnalytics for AnalyticsService {
 
     async fn get_all_user_app_events(
         &self,
-        request: tonic::Request<app_analytics::GetAllUserAppEventsRequest>,
-    ) -> anyhow::Result<tonic::Response<app_analytics::GetAllUserAppEventsResponse>, tonic::Status>
-    {
+        request: Request<GetAllUserAppEventsRequest>,
+    ) -> TonicResult<GetAllUserAppEventsResponse> {
         let GetAllUserAppEventsRequest { user_id } = request.into_inner();
 
         let db = establish_connection().await;

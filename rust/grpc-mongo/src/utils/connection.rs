@@ -1,9 +1,9 @@
 use mongodb::{Client, Database};
 
-use super::Configs;
+use super::configuration::get_db_config;
 
 pub async fn establish_connection() -> Database {
-    let Configs { database, .. } = Configs::init();
+    let database = get_db_config();
 
     Client::with_uri_str(database.get_url())
         .await

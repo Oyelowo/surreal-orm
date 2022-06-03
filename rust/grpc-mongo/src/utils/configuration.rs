@@ -1,5 +1,6 @@
 use std::net::SocketAddr;
 
+use common::utils::get_config;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 use url::Url;
@@ -65,25 +66,10 @@ impl DatabaseConfigs {
     }
 }
 
-#[derive(Debug)]
-pub struct Configs {
-    pub application: ApplicationConfigs,
-    pub database: DatabaseConfigs,
+pub fn get_app_config() -> ApplicationConfigs {
+    get_config("APP_")
 }
 
-impl Configs {
-    pub fn init() -> Self {
-        let application = envy::prefixed("APP_")
-            .from_env::<ApplicationConfigs>()
-            .unwrap_or_else(|e| panic!("Failed config. Error: {:?}", e));
-        // FIXME: Use as above once docker/kube is properly setup
-        let database = envy::prefixed("MONGODB_")
-            .from_env::<DatabaseConfigs>()
-            .expect("problem with mongo db environment variables(s)");
-
-        Self {
-            application,
-            database,
-        }
-    }
+pub fn get_db_config() -> DatabaseConfigs {
+    get_config("MONGODB_")
 }

@@ -1,6 +1,7 @@
 pub mod authentication;
 pub mod error_handling;
 mod macros;
+pub mod mongodb;
 pub mod my_time;
 mod util_module_alternative;
 pub mod utils;

@@ -1,6 +1,10 @@
 use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
-use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
+use common::{
+    authentication::TypedSession,
+    error_handling::ApiHttpStatus,
+    mongodb::{model_cursor_to_vec, MONGO_ID_KEY},
+};
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -11,10 +15,7 @@ use wither::{
     WitherError,
 };
 
-use crate::{
-    app::post::Post,
-    utils::mongodb::{get_db_from_ctx, model_cursor_to_vec, MONGO_ID_KEY},
-};
+use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
 
 #[derive(
     Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate, Debug,

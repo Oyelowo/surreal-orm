@@ -1,6 +1,6 @@
 use async_graphql::*;
 
-use common::error_handling::ApiHttpStatus;
+use common::{error_handling::ApiHttpStatus, mongodb::MONGO_ID_KEY};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
@@ -9,10 +9,7 @@ use wither::{
     prelude::Model,
 };
 
-use crate::{
-    app::user::User,
-    utils::mongodb::{get_db_from_ctx, MONGO_ID_KEY},
-};
+use crate::{app::user::User, utils::mongodb::get_db_from_ctx};
 
 #[derive(
     Model, SimpleObject, InputObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,

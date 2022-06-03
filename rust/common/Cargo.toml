@@ -9,6 +9,7 @@ version = "0.1.0"
 [dependencies]
 actix-session = "0.6.2"
 actix-web = "4.0.1"
+async-trait = "0.1.56"
 anyhow = "1.0.57"
 async-graphql = "4.0.1"
 argon2 = { version = "0.4.0", features = ["std"] }

@@ -7,11 +7,13 @@ edition = "2021"
 
 
 [dependencies]
+common = { path = "../common" }
 tonic = "0.7.2"
 # tonic = { version = "0.7", default-features = false, features = [
 #     "transport",
 #     "tls",
 # ] }
+log = "0.4.17"
 tonic-web = "0.2"
 prost = "0.10.4"
 base64 = "0.13"
@@ -95,7 +97,6 @@ futures = "0.3.21"
 
 
 [dev-dependencies]
-
 
 
 [build-dependencies]
