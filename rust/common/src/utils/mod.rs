@@ -1,8 +1,10 @@
 mod export_data;
+mod get_config;
 mod greet;
 pub mod maths;
 
 pub use export_data::*;
+pub use get_config::*;
 pub use greet::*;
 
 pub fn local_function() {

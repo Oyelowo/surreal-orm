@@ -1,14 +1,17 @@
 use actix_web::{guard, web, App, HttpServer};
-use graphql_postgres::utils::{index, index_playground, Configs, GraphQlApp};
-// use graphql_postgres::{app, utils};
+use graphql_postgres::utils::{
+    configuration,
+    graphql::{index, index_playground, setup_graphql_schema},
+};
+use log::info;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let app_url = &Configs::init().application_settings.get_url();
+    let app_url = configuration::get_app_config().get_url();
 
-    println!("Playground: {}", app_url);
+    info!("Playground: {:?}", app_url);
 
-    let schema = GraphQlApp::setup()
+    let schema = setup_graphql_schema()
         .await
         .expect("Problem setting up graphql");
 

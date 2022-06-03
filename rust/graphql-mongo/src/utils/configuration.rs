@@ -1,15 +1,14 @@
-use std::process;
-
 use actix_web::cookie::Key;
 use anyhow::Context;
 
+use common::utils::get_config;
 use mongodb::{
     options::{ClientOptions, Credential, ServerAddress},
     Client, Database,
 };
 
 use redis::{ConnectionAddr, ConnectionInfo, RedisConnectionInfo};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 
 #[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
@@ -160,16 +159,4 @@ pub fn get_db_config() -> DatabaseConfigs {
 
 pub fn get_redis_config() -> RedisConfigs {
     get_config("REDIS_")
-}
-
-fn get_config<T: DeserializeOwned>(config_prefix: &str) -> T {
-    envy::prefixed(config_prefix)
-        .from_env::<T>()
-        .unwrap_or_else(|e| {
-            log::error!(
-                "problem with {config_prefix:?} environment variables(s). 
-                Check that the prefix is correctly spelt and the configs are complete. Error {e:?}"
-            );
-            process::exit(1);
-        })
 }

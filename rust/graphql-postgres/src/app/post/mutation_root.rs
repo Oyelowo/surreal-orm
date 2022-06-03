@@ -3,7 +3,7 @@ use crate::utils::postgresdb::get_pg_pool_from_ctx;
 use super::{CreatePostInput, InsertPost, Post, UpdatePostInput};
 use async_graphql::*;
 use ormx::{Insert, Table};
-use sqlx::{types::Uuid, PgPool};
+use sqlx::types::Uuid;
 use validator::Validate;
 
 #[derive(Default)]

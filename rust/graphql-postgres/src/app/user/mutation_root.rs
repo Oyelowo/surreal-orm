@@ -4,7 +4,7 @@ use super::{CreateUserInput, InsertUser, Role, UpdateUserInput, User};
 use async_graphql::*;
 use chrono::Utc;
 use ormx::{Insert, Table};
-use sqlx::PgPool;
+
 use uuid::Uuid;
 use validator::Validate;
 

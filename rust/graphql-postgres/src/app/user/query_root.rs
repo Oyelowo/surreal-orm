@@ -3,7 +3,7 @@ use crate::utils::postgresdb::get_pg_pool_from_ctx;
 use super::model::User;
 
 use async_graphql::*;
-use sqlx::{query_as, PgPool};
+use sqlx::query_as;
 use uuid::Uuid;
 
 #[derive(Default)]

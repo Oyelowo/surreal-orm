@@ -6,7 +6,7 @@ use sqlx::{
         chrono::{DateTime, Utc},
         Uuid,
     },
-    FromRow, PgPool,
+    FromRow,
 };
 use validator::Validate;
 
