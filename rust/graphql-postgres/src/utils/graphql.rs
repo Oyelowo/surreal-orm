@@ -11,7 +11,7 @@ use crate::{
         post::{PostMutationRoot, PostQueryRoot},
         user::{UserMutationRoot, UserQueryRoot},
     },
-    configs::Configs,
+    utils::Configs,
 };
 use sqlx::postgres::PgPoolOptions;
 
