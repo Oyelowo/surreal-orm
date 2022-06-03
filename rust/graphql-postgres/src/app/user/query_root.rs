@@ -1,3 +1,5 @@
+use crate::utils::postgresdb::get_pg_pool_from_ctx;
+
 use super::model::User;
 
 use async_graphql::*;
@@ -11,18 +13,18 @@ pub struct UserQueryRoot;
 impl UserQueryRoot {
     async fn user(
         &self,
-        ctx: &Context<'_>,
+        ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "id of the User")] id: Uuid,
-    ) -> anyhow::Result<User> {
-        let db = ctx.data_unchecked::<PgPool>();
+    ) -> async_graphql::Result<User> {
+        let db = get_pg_pool_from_ctx(ctx)?;
 
         let user = User::by_id(db, &id).await?;
 
         Ok(user)
     }
 
-    async fn users(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<User>> {
-        let db = ctx.data_unchecked::<PgPool>();
+    async fn users(&self, ctx: &async_graphql::Context<'_>) -> async_graphql::Result<Vec<User>> {
+        let db = get_pg_pool_from_ctx(ctx)?;
         // let users = query_as::<_, User>("SELECT * FROM users").fetch_all(db).await?;
         let users = query_as!(
             User,

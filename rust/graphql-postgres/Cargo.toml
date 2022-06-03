@@ -6,7 +6,7 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# common = {path = "../common"}
+common = {path = "../common"}
 actix-rt = { version = "2.7.0", default-features = false, optional = true }
 actix-web = { version = "4.0.1", default-features = false }
 async-graphql = { version = "4.0.1", features = [

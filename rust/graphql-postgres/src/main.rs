@@ -1,7 +1,6 @@
 use actix_web::{guard, web, App, HttpServer};
-use utils::{index, index_playground, Configs, GraphQlApp};
-pub mod app;
-pub mod utils;
+use graphql_postgres::utils::{index, index_playground, Configs, GraphQlApp};
+// use graphql_postgres::{app, utils};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

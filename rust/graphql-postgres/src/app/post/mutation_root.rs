@@ -1,3 +1,5 @@
+use crate::utils::postgresdb::get_pg_pool_from_ctx;
+
 use super::{CreatePostInput, InsertPost, Post, UpdatePostInput};
 use async_graphql::*;
 use ormx::{Insert, Table};
@@ -11,11 +13,11 @@ pub struct PostMutationRoot;
 impl PostMutationRoot {
     async fn create_post(
         &self,
-        ctx: &Context<'_>,
+        ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "id of user")] user_id: Uuid,
         #[graphql(desc = "post data")] post_input: CreatePostInput,
-    ) -> anyhow::Result<Post> {
-        let db = ctx.data_unchecked::<PgPool>();
+    ) -> async_graphql::Result<Post> {
+        let db = get_pg_pool_from_ctx(ctx)?;
         // NOTE: Normally, user id will be retrieved from session or jwt or oauth.
         // but hard code as a parameter for now.
         post_input.validate()?;
@@ -33,12 +35,12 @@ impl PostMutationRoot {
 
     async fn update_post(
         &self,
-        ctx: &Context<'_>,
+        ctx: &async_graphql::Context<'_>,
         id: Uuid,
         post_input: UpdatePostInput,
-    ) -> anyhow::Result<Post> {
+    ) -> async_graphql::Result<Post> {
         post_input.validate()?;
-        let db = ctx.data_unchecked::<PgPool>();
+        let db = get_pg_pool_from_ctx(ctx)?;
         // TODO: validate using async-graphql guard that the updater is the authenticated user i.e post.user_id === session/jwt.user_id
         let mut post = Post::by_id(db, &id).await?;
 

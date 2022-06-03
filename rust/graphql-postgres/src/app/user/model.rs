@@ -10,7 +10,7 @@ use sqlx::{
 };
 use validator::Validate;
 
-use crate::app::post::Post;
+use crate::{app::post::Post, utils::postgresdb::get_pg_pool_from_ctx};
 
 #[derive(SimpleObject, Serialize, Deserialize, Table, FromRow, Validate, Debug)]
 #[graphql(complex)]
@@ -63,13 +63,13 @@ pub struct User {
 
 #[ComplexObject]
 impl User {
-    async fn posts(&self, ctx: &Context<'_>) -> anyhow::Result<Vec<Post>> {
-        let db = ctx.data_unchecked::<PgPool>();
+    async fn posts(&self, ctx: &async_graphql::Context<'_>) -> async_graphql::Result<Vec<Post>> {
+        let db = get_pg_pool_from_ctx(ctx)?;
         let posts = Post::by_user_id(db, &self.id).await?;
         Ok(posts)
     }
 
-    async fn post_count(&self, ctx: &Context<'_>) -> anyhow::Result<usize> {
+    async fn post_count(&self, ctx: &async_graphql::Context<'_>) -> async_graphql::Result<usize> {
         let post_count = self.posts(ctx).await?.len();
         Ok(post_count)
     }

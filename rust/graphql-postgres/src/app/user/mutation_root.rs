@@ -1,3 +1,5 @@
+use crate::utils::postgresdb::get_pg_pool_from_ctx;
+
 use super::{CreateUserInput, InsertUser, Role, UpdateUserInput, User};
 use async_graphql::*;
 use chrono::Utc;
@@ -13,11 +15,11 @@ pub struct UserMutationRoot;
 impl UserMutationRoot {
     async fn create_user(
         &self,
-        ctx: &Context<'_>,
+        ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "user data")] user_input: CreateUserInput,
-    ) -> anyhow::Result<User> {
+    ) -> async_graphql::Result<User> {
         user_input.validate()?;
-        let db = ctx.data_unchecked::<PgPool>();
+        let db = get_pg_pool_from_ctx(ctx)?;
 
         let new_user = InsertUser {
             username: user_input.username,
@@ -45,12 +47,12 @@ impl UserMutationRoot {
 
     async fn update_user(
         &self,
-        ctx: &Context<'_>,
+        ctx: &async_graphql::Context<'_>,
         id: Uuid,
         user_input: UpdateUserInput,
-    ) -> anyhow::Result<User> {
+    ) -> async_graphql::Result<User> {
         // user_input.validate()?;
-        let db = ctx.data_unchecked::<PgPool>();
+        let db = get_pg_pool_from_ctx(ctx)?;
 
         user_input.validate()?;
 
