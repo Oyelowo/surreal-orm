@@ -1,18 +1,23 @@
-ARG BASE_IMAGE=rust:1.61.0
+ARG BASE_IMAGE=rust:1.59.0
 
 FROM $BASE_IMAGE as planner
 WORKDIR /app
 # We only pay the installation cost once,
 # it will be cached from the second build onwards
 RUN cargo install cargo-chef --version 0.1.35
+
 COPY . .
 RUN cargo chef prepare  --recipe-path recipe.json
 
 
 FROM $BASE_IMAGE as  cacher
 WORKDIR /app
+
 RUN cargo install cargo-chef --version 0.1.35
 COPY --from=planner /app/recipe.json recipe.json
+
+# Install cmake which is now necessary for tonic
+RUN apt-get update ; apt-get install -y clang cmake ; rustup component add rustfmt
 # Build dependencies - this is the caching Docker layer! Don't build in release mode for development
 RUN cargo chef cook --release --recipe-path recipe.json 
 

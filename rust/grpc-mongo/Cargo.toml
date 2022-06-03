@@ -8,15 +8,34 @@ edition = "2021"
 
 [dependencies]
 tonic = "0.7.2"
-# tonic-web = "0.2"
+# tonic = { version = "0.7", default-features = false, features = [
+#     "transport",
+#     "tls",
+# ] }
+tonic-web = "0.2"
 prost = "0.10.4"
-# tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+base64 = "0.13"
+bytes = "1.0"
+futures-core = "0.3"
+http = "0.2"
+http-body = "0.4"
+hyper = "0.14"
+pin-project = "1"
+tower-service = "0.3"
+tracing = "0.1"
+
+
+# tokio = { version = "1.18.2", features = ["macros", "rt"] }
+tokio = { version = "1.18.2", features = ["macros", "rt-multi-thread"] }
 anyhow = "1.0.57"
 thiserror = "1.0.31"
 # sqlx = "0.5.11"
 sqlx-cli = "0.5.13"
-sqlx = { version = "0.5.13", features = [ "runtime-tokio-native-tls" , "postgres" ] }
-tokio = { version = "1.18.2", features = ["full"] }
+sqlx = { version = "0.5.13", features = [
+    "runtime-tokio-native-tls",
+    "postgres",
+] }
+# tokio = { version = "1.18.2", features = ["full"] }
 
 mongodb = { version = "2.2.1", features = ["bson-chrono-0_4"] }
 bson = "2.2.0"
@@ -31,7 +50,7 @@ typed-builder = "0.10.0"
 url = "2.2.2"
 uuid = "1.1.0"
 validator = { version = "0.15.0", features = ["derive"] }
-wither = {git = "https://github.com/thedodd/wither", branch = "master"}
+wither = { git = "https://github.com/thedodd/wither", branch = "master" }
 
 async-trait = "0.1.53"
 config = "0.13.1"
@@ -73,6 +92,9 @@ futures = "0.3.21"
 # listenfd = "0.3"
 # # grpc-web example
 # bytes = "1"
+
+
+[dev-dependencies]
 
 
 
