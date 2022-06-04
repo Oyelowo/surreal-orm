@@ -1,6 +1,6 @@
 // For testing macros made here
 
-use hello_macro::{HelloMacro, MyTrait};
+use my_macros::{HelloMacro, MyTrait, SpaceTrait};
 
 #[derive(HelloMacro)]
 struct Pancakes;
@@ -22,14 +22,36 @@ struct Bar {
     age: u8,
 }
 
-fn main() {
-    Pancakes::hello_macro();
-    println!("Hello, world!");
-    println!("Foo::answer() = {}", Foo::answer());
-    println!("Bar::answer() = {}", Bar::answer());
+// #[my_crate(lorem(dolor = "Hello", sit))]
+#[derive(SpaceTrait)]
+// #[mongoye(typee = "Hello")]
+#[mongoye(typee = "Hello", case = "snake")]
+pub struct ConsumingType {
+    #[mongoye(case = "camel")]
+    pub name_of_me: String,
+    #[mongoye(case = "camel")]
+    pub age: u8,
+}
 
-    println!("Foo::level() = {}", Foo::level());
-    println!("Bar::level() = {}", Bar::level());
+pub mod pp {
+    pub const gg: &str = "34";
+}
+
+struct Make {
+    name: &'static str,
+}
+
+fn main() {
+    let ConsumingTypeKeyNames { nameOfMe, age } = ConsumingType::get_field_names();
+    println!("rere{nameOfMe}, {age}")
+    // ConsumingType::get_field_names();
+    // Pancakes::hello_macro();
+    // println!("Hello, world!");
+    // println!("Foo::answer() = {}", Foo::answer());
+    // println!("Bar::answer() = {}", Bar::answer());
+
+    // println!("Foo::level() = {}", Foo::level());
+    // println!("Bar::level() = {}", Bar::level());
 }
 
 #[test]

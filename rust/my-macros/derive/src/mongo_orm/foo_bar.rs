@@ -10,18 +10,6 @@ use quote::{quote};
 use syn::{self, parse_macro_input, DeriveInput};
 use syn::{parse_str, ItemFn};
 
-/*
-pub trait MyTrait {
-    fn answer() -> i32;
-}
-*/
-
-#[derive(Debug, Clone, Copy, Default, FromMeta)]
-#[darling(default)]
-pub struct Levell {
-    answer: Option<i32>,
-    // name: Option<String>,
-}
 
 #[derive(Debug, Clone, Copy, FromMeta)]
 #[darling(default)]
@@ -127,3 +115,9 @@ pub fn generate_foo_bar(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 
     // output.into()
 }
+
+// pub trait MyTrait {
+//     fn answer() -> u32;
+//     fn level() -> &'static str;
+//     // fn name() -> String;
+// }
