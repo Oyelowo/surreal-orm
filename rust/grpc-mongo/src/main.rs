@@ -3,8 +3,8 @@ mod utils;
 
 use anyhow::Result;
 use app::{app_analytics::AnalyticsApp, greetings::GreeterApp, music::MusicFanApp};
-use grpc_mongo::utils::configuration;
 use tonic::transport::Server;
+use utils::configuration;
 
 #[tokio::main]
 async fn main() -> Result<()> {
