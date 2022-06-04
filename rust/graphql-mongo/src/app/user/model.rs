@@ -146,7 +146,7 @@ impl User {
     #[graphql(guard = "RoleGuard::new(Role::Admin).or(AuthGuard)")]
     async fn posts(&self, ctx: &Context<'_>) -> Result<Vec<Post>> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
-        let db = ctx.data_unchecked::<Database>();
+        let db = get_db_from_ctx(ctx)?;
         let cursor = Post::find(db, doc! {"posterId": self.id}, None).await?;
         model_cursor_to_vec(cursor)
             .await
