@@ -5,6 +5,7 @@ use common::{
     error_handling::ApiHttpStatus,
     mongodb::{model_cursor_to_vec, MONGO_ID_KEY},
 };
+use convert_case::{Case, Casing};
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -16,6 +17,8 @@ use wither::{
 };
 
 use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
+
+use super::guards::{AuthGuard, RoleGuard};
 
 #[derive(
     Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate, Debug,
@@ -170,39 +173,20 @@ pub enum Role {
     User,
 }
 
-struct RoleGuard {
-    role: Role,
+#[derive(OneofObject)]
+pub enum UserBy {
+    UserId(ObjectId),
+    Username(String),
+    Address(Address),
+    // #[validate(email)]
+    Email(String),
 }
-
-#[async_trait::async_trait]
-impl Guard for RoleGuard {
-    async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-        if ctx.data_opt::<Role>() == Some(&self.role) {
-            Ok(())
-        } else {
-            Err(ApiHttpStatus::Unauthorized(
-                "You are not authourized to carry out that request.".into(),
-            )
-            .extend())
-        }
-    }
-}
-
-impl RoleGuard {
-    fn new(role: Role) -> Self {
-        Self { role }
-    }
-}
-
-pub struct AuthGuard;
-
-#[async_trait::async_trait]
-impl Guard for AuthGuard {
-    async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-        TypedSession::from_ctx(ctx)?
-            .get_user_id::<ObjectId>()
-            .map(|_| ())
-    }
+#[derive(InputObject, Validate)]
+pub struct Address {
+    street: String,
+    house_number: String,
+    city: String,
+    zip: String,
 }
 
 impl User {
@@ -214,6 +198,26 @@ impl User {
         user
     }
 
+    pub async fn get_user(&self, db: &Database, user_by: UserBy) -> Result<Self> {
+        let search_doc = match user_by {
+            UserBy::UserId(id) => doc! { MONGO_ID_KEY: id },
+            UserBy::Username(user_name) => {
+                let Self { username, .. } = self;
+
+                let doc = doc! { username.to_case(Case::Camel): user_name };
+                doc
+            }
+            UserBy::Address(_) => todo!(),
+            UserBy::Email(_) => todo!(),
+        };
+        // todo!()
+        User::find_one(db, search_doc, None)
+            .await?
+            .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
+    }
+    pub async fn search_users(db: &Database, user_by: Vec<UserBy>) -> Result<Vec<Self>> {
+        todo!()
+    }
     pub async fn find_by_id(db: &Database, id: &ObjectId) -> Result<Self> {
         User::find_one(db, doc! { MONGO_ID_KEY: id }, None)
             .await?

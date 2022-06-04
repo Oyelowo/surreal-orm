@@ -13,6 +13,7 @@ type AccountOauth {
 	sessionState: String
 	profile: ProfileOauth!
 }
+
 input AccountOauthInput {
 	accountType: String!
 	provider: String!
@@ -26,12 +27,18 @@ input AccountOauthInput {
 	sessionState: String
 	profile: ProfileOauthInput!
 }
+
+
 """
 Implement the DateTime<Utc> scalar
 
 The input/output is a string in RFC3339 format.
 """
 scalar DateTime
+
+
+
+
 type Mutation {
 	createUser(userInput: UserInput!): User!
 	"""
@@ -42,21 +49,24 @@ type Mutation {
 	signIn(signInCredentials: SignInCredentials!): User!
 	createOrUpdateUserOauth(account: AccountOauthInput!): User!
 	signOut: SignOutMessage!
-	createPost(postInput: PostInput!): Post!
+	createPost(post: PostInput!): Post!
 }
+
 scalar ObjectId
+
 type Post {
 	id: ObjectId
 	posterId: ObjectId!
 	title: String!
 	content: String!
-	poster: User
+	poster: User!
 }
+
 input PostInput {
-	posterId: ObjectId!
 	title: String!
 	content: String!
 }
+
 type ProfileOauth {
 	firstName: String!
 	lastName: String!
@@ -64,6 +74,7 @@ type ProfileOauth {
 	email: String!
 	emailVerified: Boolean!
 }
+
 input ProfileOauthInput {
 	firstName: String!
 	lastName: String!
@@ -71,37 +82,46 @@ input ProfileOauthInput {
 	email: String!
 	emailVerified: Boolean!
 }
+
 type Query {
 	user(id: ObjectId!): User!
 	users: [User!]!
 	session: Session!
-	post(id: ObjectId!): Post
+	post(id: ObjectId!): Post!
 	posts: [Post!]!
 }
+
 enum Role {
 	ADMIN
 	USER
 }
+
 type Session {
 	user: SessionUser!
-	expiresIn: String!
+	expiresAt: DateTime!
 }
+
 type SessionUser {
 	name: String!
 	email: String!
 	image: String!
 }
+
 input SignInCredentials {
 	username: String!
 	password: String!
 }
+
 type SignOutMessage {
 	message: String!
 	userId: ObjectId!
 }
+
+
 type Subscription {
 	values: Int!
 }
+
 type User {
 	id: ObjectId
 	createdAt: DateTime
@@ -117,6 +137,7 @@ type User {
 	posts: [Post!]!
 	postCount: Int!
 }
+
 input UserInput {
 	username: String!
 	password: String
@@ -126,6 +147,7 @@ input UserInput {
 	age: Int
 	socialMedia: [String!]!
 }
+
 schema {
 	query: Query
 	mutation: Mutation
