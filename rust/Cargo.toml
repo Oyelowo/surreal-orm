@@ -5,5 +5,5 @@ members = [
     "graphql-postgres",
     "grpc-mongo",
     "common",
-    # "my-macros",
+    "my-macros",
 ]
