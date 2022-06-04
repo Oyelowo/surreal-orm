@@ -33,13 +33,17 @@ impl Default for CaseString {
 }
 
 #[derive(Debug, FromField)]
-#[darling(attributes(mongoye))]
+#[darling(attributes(mongoye, serde), forward_attrs(allow, doc, cfg))]
 struct MyFieldReceiver {
     /// Get the ident of the field. For fields in tuple or newtype structs or
     /// enum bodies, this can be `None`.
     ident: Option<syn::Ident>,
     /// This magic field name pulls the type from the input.
     ty: syn::Type,
+    attrs: Vec<syn::Attribute>,
+
+    #[darling(default)]
+    rename: Option<String>,
 
     /// We declare this as an `Option` so that during tokenization we can write
     /// `field.case.unwrap_or(derive_input.case)` to facilitate field-level
@@ -51,7 +55,7 @@ struct MyFieldReceiver {
 }
 
 #[derive(Debug, FromDeriveInput)]
-#[darling(attributes(mongoye), forward_attrs(allow, doc, cfg))]
+#[darling(attributes(mongoye), forward_attrs(allow, doc, cfg, serde))]
 pub struct SpaceTraitOpts {
     ident: syn::Ident,
     attrs: Vec<syn::Attribute>,
@@ -84,49 +88,18 @@ impl ToTokens for SpaceTraitOpts {
         } = *self;
 
         let (imp, _typ, _wher) = generics.split_for_impl();
-        println!("imp {imp:?}");
-        println!("_typ {_typ:?}");
-        println!("_wher {_wher:?}");
+
         let fields = data
             .as_ref()
             .take_struct()
             .expect("Should never be enum")
             .fields;
 
-        let fmt_string = fields
-            .iter()
-            .enumerate()
-            .map(|(i, f)| {
-                // We have to preformat the ident in this case so we can fall back
-                // to the field index for unnamed fields. It's not easy to read,
-                // unfortunately.
-                let ident_str = f.ident.as_ref().map_or_else(
-                    || {
-                        let i = syn::Index::from(i);
-                        quote!(#i)
-                    },
-                    |v| quote!(#v),
-                );
-                // let b = syn::Ident::from_string(format!("{my_struct}Name").as_str()).expect("rererer");
-                // let ident_str = f
-                //     .ident
-                //     .as_ref()
-                //     .map_or_else(|| format!("{i}"), |v| format!("{v}"));
-                quote!(#ident_str: &'static str)
-            })
-            .collect::<Vec<_>>();
-        // .join(",");
-
-        struct Wants {
-            struct_ty: TokenStream,
-            values: TokenStream,
-            // ty:
-        }
-
         let mut struct_ty_fields = vec![];
         let mut struct_values_fields = vec![];
         for (i, f) in fields.into_iter().enumerate() {
             // Fallback to the struct metadata value if not provided for the field
+    
             let field_case = f.case.unwrap_or_else(|| *case);
             // This works with named or indexed fields, so we'll fall back to the index so we can
             // write the output as a key-value pair.
@@ -137,6 +110,8 @@ impl ToTokens for SpaceTraitOpts {
                 },
                 |v| quote!(#v),
             );
+
+            // let field_ident = f.rename.as_ref().map_or_else(||field_ident, |renamed| quote!(#renamed));
 
             let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
             let convert = |case: convert_case::Case| {
@@ -155,11 +130,26 @@ impl ToTokens for SpaceTraitOpts {
             let key_as_ident = syn::Ident::from_string(key_as_str)
                 .expect("Problem converting key string to syntax identifier");
 
-            // struct type used to type the function
-            struct_ty_fields.push(quote!(#key_as_ident: &'static str));
+            match f.rename {
+                Some(ref name) => {
+                    let key_as_str = name.as_str();
+                    let key_as_ident = syn::Ident::from_string(key_as_str)
+                        .expect("Problem converting key string to syntax identifier");
 
-            // struct values themselves
-            struct_values_fields.push(quote!(#key_as_ident: #key_as_str));
+                    // struct type used to type the function
+                    struct_ty_fields.push(quote!(#key_as_ident: &'static str));
+
+                    // struct values themselves
+                    struct_values_fields.push(quote!(#key_as_ident: #key_as_str));
+                }
+                None => {
+                    // struct type used to type the function
+                    struct_ty_fields.push(quote!(#key_as_ident: &'static str));
+
+                    // struct values themselves
+                    struct_values_fields.push(quote!(#key_as_ident: #key_as_str));
+                }
+            }
         }
 
         let struct_name = syn::Ident::new(

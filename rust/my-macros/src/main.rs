@@ -1,6 +1,8 @@
 // For testing macros made here
 
 use my_macros::{HelloMacro, MyTrait, SpaceTrait};
+use serde::{Serialize, Deserialize};
+// use serde::{Serialize, Deserialize};
 
 #[derive(HelloMacro)]
 struct Pancakes;
@@ -23,13 +25,13 @@ struct Bar {
 }
 
 // #[my_crate(lorem(dolor = "Hello", sit))]
-#[derive(SpaceTrait)]
+#[derive(SpaceTrait, Serialize, Deserialize)]
 // #[mongoye(typee = "Hello")]
 #[mongoye(typee = "Hello", case = "snake")]
 pub struct ConsumingType {
-    #[mongoye(case = "camel")]
+    #[serde(rename = "lowo_cool")]
     pub name_of_me: String,
-    #[mongoye(case = "camel")]
+    #[serde(rename = "lmsa")]
     pub age: u8,
 }
 
@@ -42,8 +44,8 @@ struct Make {
 }
 
 fn main() {
-    let ConsumingTypeKeyNames { nameOfMe, age } = ConsumingType::get_field_names();
-    println!("rere{nameOfMe}, {age}")
+    let ConsumingTypeKeyNames { lowo_cool, lmsa } = ConsumingType::get_field_names();
+    // println!("rere{lowo_cool}, {age}")
     // ConsumingType::get_field_names();
     // Pancakes::hello_macro();
     // println!("Hello, world!");
