@@ -1,6 +1,6 @@
 use crate::utils::mongodb::get_db_from_ctx;
 
-use super::{model::User, AuthGuard};
+use super::{model::User, guards::AuthGuard};
 
 use async_graphql::*;
 use chrono::{DateTime, Utc};
