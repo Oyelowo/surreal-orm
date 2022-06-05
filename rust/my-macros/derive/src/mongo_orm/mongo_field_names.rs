@@ -7,6 +7,9 @@ use convert_case::{Case, Casing};
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use quote::quote;
+use serde::{Deserialize, Serialize};
+use std::str::FromStr;
+use strum_macros::EnumString;
 use syn::{self, parse_macro_input, DeriveInput};
 use syn::{parse_str, ItemFn};
 
@@ -18,13 +21,36 @@ pub struct Lorem {
     dolor: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, FromMeta)]
+#[derive(Debug, Clone, Copy, EnumString, FromMeta)]
 #[darling(default)]
 pub enum CaseString {
+    #[strum(serialize = "camelCase")]
     Camel,
+    #[strum(serialize = "snake_case")]
     Snake,
-    Normal,
+    // Normal,
+    #[strum(serialize = "PascalCase")]
+    Pascal,
+
+    #[strum(serialize = "lowercase")]
+    Lower,
+
+    #[strum(serialize = "UPPERCASE")]
+    Upper,
+
+    #[strum(serialize = "SCREAMING_SNAKE_CASE")]
+    ScreamingSnake,
+
+    #[strum(serialize = "kebab-case")]
+    Kebab,
+
+    #[strum(serialize = "SCREAMING-KEBAB-CASE")]
+    ScreamingKebab,
 }
+
+/*
+"lowercase", "UPPERCASE", "PascalCase", "camelCase", "snake_case", "SCREAMING_SNAKE_CASE", "kebab-case", "SCREAMING-KEBAB-CASE"
+*/
 
 impl Default for CaseString {
     fn default() -> Self {
@@ -55,7 +81,7 @@ struct MyFieldReceiver {
 }
 
 #[derive(Debug, FromDeriveInput)]
-#[darling(attributes(mongoye), forward_attrs(allow, doc, cfg, serde))]
+#[darling(attributes(mongoye, serde), forward_attrs(allow, doc, cfg))]
 pub struct SpaceTraitOpts {
     ident: syn::Ident,
     attrs: Vec<syn::Attribute>,
@@ -63,12 +89,16 @@ pub struct SpaceTraitOpts {
     /// Receives the body of the struct or enum. We don't care about
     /// struct fields because we previously told darling we only accept structs.
     data: ast::Data<util::Ignored, MyFieldReceiver>,
+
+    #[darling(default)]
+    rename_all: Option<String>,
+
     // lorem: Lorem,
-    // #[darling(default)]
+    #[darling(default)]
     typee: String,
 
     #[darling(default)]
-    case: CaseString,
+    case: Option<CaseString>,
 }
 
 impl ToTokens for SpaceTraitOpts {
@@ -80,12 +110,23 @@ impl ToTokens for SpaceTraitOpts {
             ref typee,
             ref data,
             ref case,
+            rename_all: ref rename_all_from_serde,
             // ref lorem,
             // ref data,
             // answer,
             // level,
             ..
         } = *self;
+
+        let struct_level_casing = rename_all_from_serde.as_ref().map_or_else(
+            || *case,
+            |case_from_serde| CaseString::from_str(case_from_serde.as_str()).ok(),
+        );
+
+        println!(",kljhgfd{struct_level_casing:?}");
+
+        // .as_ref();
+        // let casing = case.or_else(||p)
 
         let (imp, _typ, _wher) = generics.split_for_impl();
 
@@ -94,13 +135,17 @@ impl ToTokens for SpaceTraitOpts {
             .take_struct()
             .expect("Should never be enum")
             .fields;
-
         let mut struct_ty_fields = vec![];
         let mut struct_values_fields = vec![];
         for (i, f) in fields.into_iter().enumerate() {
-            // Fallback to the struct metadata value if not provided for the field
-    
-            let field_case = f.case.unwrap_or_else(|| *case);
+            // Fallback to the struct metadata value if not provided for the field.
+            // If not provided in both, fallback to camel.
+            let field_case = f
+                .case
+                // .as_ref()
+                .or_else(|| struct_level_casing)
+                .unwrap_or_else(|| CaseString::Camel);
+
             // This works with named or indexed fields, so we'll fall back to the index so we can
             // write the output as a key-value pair.
             let field_ident = f.ident.as_ref().map_or_else(
@@ -121,16 +166,34 @@ impl ToTokens for SpaceTraitOpts {
             };
 
             let key = match field_case {
-                CaseString::Normal => field_identifier_string,
+                // CaseString::Pascal => field_identifier_string,
                 CaseString::Camel => convert(convert_case::Case::Camel),
                 CaseString::Snake => convert(convert_case::Case::Snake),
+                CaseString::Pascal => convert(convert_case::Case::Pascal),
+                CaseString::Lower => convert(convert_case::Case::Lower),
+                CaseString::Upper => convert(convert_case::Case::Upper),
+                CaseString::ScreamingSnake => convert(convert_case::Case::ScreamingSnake),
+                CaseString::Kebab => convert(convert_case::Case::Kebab),
+                CaseString::ScreamingKebab => convert(convert_case::Case::UpperKebab),
+                // _ => todo!(),
             };
 
-            let key_as_str = key.as_str();
-            let key_as_ident = syn::Ident::from_string(key_as_str)
+            let key_clone = key.clone();
+            // Tries to keey the key name at camel if ure using kebab case which cannot be used
+            // as an identifier
+            let key_ident = match field_case {
+                CaseString::Kebab | CaseString::ScreamingKebab => key.to_case(Case::Camel),
+                _ => key,
+            };
+            
+            let key_as_str = key_clone.as_str();
+
+            let key_ident = syn::Ident::from_string(key_ident.as_str())
                 .expect("Problem converting key string to syntax identifier");
 
-            match f.rename {
+            let rename_from_serde = f.rename.as_ref();
+
+            match rename_from_serde {
                 Some(ref name) => {
                     let key_as_str = name.as_str();
                     let key_as_ident = syn::Ident::from_string(key_as_str)
@@ -144,10 +207,10 @@ impl ToTokens for SpaceTraitOpts {
                 }
                 None => {
                     // struct type used to type the function
-                    struct_ty_fields.push(quote!(#key_as_ident: &'static str));
+                    struct_ty_fields.push(quote!(#key_ident: &'static str));
 
                     // struct values themselves
-                    struct_values_fields.push(quote!(#key_as_ident: #key_as_str));
+                    struct_values_fields.push(quote!(#key_ident: #key_as_str));
                 }
             }
         }
@@ -172,14 +235,10 @@ impl ToTokens for SpaceTraitOpts {
                     }
                 }
 
-                // fn level() -> &'static str {
-                //     #kk
-                // }
 
             }
         };
         tokens.extend(mm);
-        // println!("rewrter \n{}", mm.to_string())
     }
 }
 
@@ -189,22 +248,4 @@ pub fn generate_space_trait(input: proc_macro::TokenStream) -> proc_macro::Token
     let input = parse_macro_input!(input);
     let output = SpaceTraitOpts::from_derive_input(&input).expect("Wrong options");
     quote!(#output).into()
-
-    // let {,..} = SpaceTraitOpts::from_derive_input(input).expect("Failed to parse");
-    // Build the trait implementation
-
-    // let name = output.ident;
-    // let kk = name.to_string().to_case(Case::UpperSnake);
-    // let gen = quote! {
-    //     // mod format!("")
-
-    //     impl #name {
-    //         pub fn hello_macro() {
-    //             println!("Hello, Macro! My name is {}!", stringify!(#kk));
-    //         }
-    //     }
-    // };
-    // gen.into()
-
-    // output.into()
 }

@@ -27,11 +27,12 @@ struct Bar {
 // #[my_crate(lorem(dolor = "Hello", sit))]
 #[derive(SpaceTrait, Serialize, Deserialize)]
 // #[mongoye(typee = "Hello")]
-#[mongoye(typee = "Hello", case = "snake")]
+// #[mongoye(typee = "Hello", case = "snake")]
+#[serde(rename_all = "snake_case")]
 pub struct ConsumingType {
-    #[serde(rename = "lowo_cool")]
+    // #[serde(rename = "lowo_cool")]
     pub name_of_me: String,
-    #[serde(rename = "lmsa")]
+    #[serde(rename = "lmsar")]
     pub age: u8,
 }
 
@@ -44,7 +45,10 @@ struct Make {
 }
 
 fn main() {
-    let ConsumingTypeKeyNames { lowo_cool, lmsa } = ConsumingType::get_field_names();
+
+    let ConsumingTypeKeyNames {  name_of_me, lmsar,.. } = ConsumingType::get_field_names();
+
+    println!("rerezzzzzzz{name_of_me}, {lmsar}")
     // println!("rere{lowo_cool}, {age}")
     // ConsumingType::get_field_names();
     // Pancakes::hello_macro();
