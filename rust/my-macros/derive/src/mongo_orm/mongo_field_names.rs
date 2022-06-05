@@ -181,15 +181,15 @@ fn get_key_str_and_ident(
         CaseString::Kebab | CaseString::ScreamingKebab => key.to_case(Case::Camel),
         _ => key.to_string(),
     };
-    let mut key_as_str = key.as_str();
+    let mut key = key.as_str();
     let mut key_ident = syn::Ident::from_string(key_ident.as_str())
         .expect("Problem converting key string to syntax identifier");
     // Prioritize serde renaming for key string
 
     let rename_field_from_serde = f.rename.as_ref();
     if let Some(name) = rename_field_from_serde {
-        key_as_str = name.as_str();
-        key_ident = syn::Ident::from_string(key_as_str)
+        key = name.as_str();
+        key_ident = syn::Ident::from_string(key)
             .expect("Problem converting key string to syntax identifier");
     }
     (key.to_string(), key_ident)
