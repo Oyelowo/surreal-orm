@@ -105,16 +105,9 @@ impl ToTokens for SpaceTraitOpts {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let SpaceTraitOpts {
             ident: ref my_struct,
-            ref attrs,
-            ref generics,
-            ref typee,
             ref data,
             ref case,
             rename_all: ref rename_all_from_serde,
-            // ref lorem,
-            // ref data,
-            // answer,
-            // level,
             ..
         } = *self;
 
@@ -122,13 +115,6 @@ impl ToTokens for SpaceTraitOpts {
             || *case,
             |case_from_serde| CaseString::from_str(case_from_serde.as_str()).ok(),
         );
-
-        println!(",kljhgfd{struct_level_casing:?}");
-
-        // .as_ref();
-        // let casing = case.or_else(||p)
-
-        let (imp, _typ, _wher) = generics.split_for_impl();
 
         let fields = data
             .as_ref()
@@ -142,7 +128,6 @@ impl ToTokens for SpaceTraitOpts {
             // If not provided in both, fallback to camel.
             let field_case = f
                 .case
-                // .as_ref()
                 .or_else(|| struct_level_casing)
                 .unwrap_or_else(|| CaseString::Camel);
 
@@ -155,8 +140,6 @@ impl ToTokens for SpaceTraitOpts {
                 },
                 |v| quote!(#v),
             );
-
-            // let field_ident = f.rename.as_ref().map_or_else(||field_ident, |renamed| quote!(#renamed));
 
             let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
             let convert = |case: convert_case::Case| {
@@ -179,13 +162,13 @@ impl ToTokens for SpaceTraitOpts {
             };
 
             let key_clone = key.clone();
-            // Tries to keey the key name at camel if ure using kebab case which cannot be used
+            // Tries to keep the key name at camel if ure using kebab case which cannot be used
             // as an identifier
             let key_ident = match field_case {
                 CaseString::Kebab | CaseString::ScreamingKebab => key.to_case(Case::Camel),
                 _ => key,
             };
-            
+
             let key_as_str = key_clone.as_str();
 
             let key_ident = syn::Ident::from_string(key_ident.as_str())
