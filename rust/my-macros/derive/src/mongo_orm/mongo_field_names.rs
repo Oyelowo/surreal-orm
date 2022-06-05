@@ -6,7 +6,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use std::str::FromStr;
 use strum_macros::EnumString;
-use syn::{self, parse_macro_input, token::Override};
+use syn::{self, parse_macro_input};
 
 #[derive(Debug, Default, FromMeta)]
 #[darling(default)]
@@ -65,7 +65,7 @@ struct MyFieldReceiver {
 
     #[darling(default)]
     rename: Option<String>,
-    
+
     #[darling(default)]
     skip_serializing_if: util::Ignored,
 
@@ -74,7 +74,6 @@ struct MyFieldReceiver {
 
     #[darling(default)]
     default: util::Ignored,
-
 
     /// We declare this as an `Option` so that during tokenization we can write
     /// `field.case.unwrap_or(derive_input.case)` to facilitate field-level
@@ -225,21 +224,20 @@ fn get_fields(data: &ast::Data<util::Ignored, MyFieldReceiver>) -> Vec<&MyFieldR
 fn get_case_string(f: &MyFieldReceiver, struct_level_casing: Option<CaseString>) -> CaseString {
     // Fallback to the struct metadata value if not provided for the field.
     // If not provided in both, fallback to camel.
-    let field_case = f
-        .case
-        .or_else(|| struct_level_casing)
-        .unwrap_or_else(|| CaseString::Camel);
-    field_case
+    f.case.or(struct_level_casing).unwrap_or(CaseString::Camel)
 }
 
 // fn to_key_case_string(field_case: CaseString, field_identifier_string: ::std::string::String) -> ::std::string::String {
-fn to_key_case_string(field_case: CaseString, field_identifier_string: ::std::string::String) -> ::std::string::String {
+fn to_key_case_string(
+    field_case: CaseString,
+    field_identifier_string: ::std::string::String,
+) -> ::std::string::String {
     let convert = |case: convert_case::Case| {
         convert_case::Converter::new()
             .to_case(case)
             .convert(&field_identifier_string)
     };
-    let key = match field_case {
+    match field_case {
         CaseString::Camel => convert(convert_case::Case::Camel),
         CaseString::Snake => convert(convert_case::Case::Snake),
         CaseString::Pascal => convert(convert_case::Case::Pascal),
@@ -248,8 +246,7 @@ fn to_key_case_string(field_case: CaseString, field_identifier_string: ::std::st
         CaseString::ScreamingSnake => convert(convert_case::Case::ScreamingSnake),
         CaseString::Kebab => convert(convert_case::Case::Kebab),
         CaseString::ScreamingKebab => convert(convert_case::Case::UpperKebab),
-    };
-    key
+    }
 }
 
 pub fn generate_key_names_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
