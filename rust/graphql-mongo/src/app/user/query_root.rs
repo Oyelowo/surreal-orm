@@ -1,6 +1,6 @@
 use crate::utils::mongodb::get_db_from_ctx;
 
-use super::{model::User, guards::AuthGuard};
+use super::{guards::AuthGuard, model::User};
 
 use async_graphql::*;
 use chrono::{DateTime, Utc};
@@ -14,6 +14,7 @@ use mongodb::{
     bson::oid::ObjectId,
     options::{FindOneOptions, FindOptions, ReadConcern},
 };
+use my_macros::KeyNamesGetter;
 use serde::{Deserialize, Serialize};
 use wither::{bson::doc, prelude::Model};
 
@@ -58,7 +59,10 @@ impl UserQueryRoot {
         // ];
         // let mut cursor = User::collection(db).aggregate(pipeline, None).await?;
 
-        let find_option = FindOptions::builder().sort(doc! {"createdAt": -1}).build();
+        let user_keys = User::get_field_names();
+        let find_option = FindOptions::builder()
+            .sort(doc! {user_keys.createdAt: -1})
+            .build();
 
         let cursor = User::find(db, None, find_option).await?;
         model_cursor_to_vec(cursor).await

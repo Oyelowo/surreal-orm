@@ -12,6 +12,7 @@ use mongodb::{
     bson::oid::ObjectId,
     options::{FindOneOptions, ReadConcern},
 };
+use my_macros::KeyNamesGetter;
 use wither::{bson::doc, prelude::Model};
 
 #[derive(Default)]
@@ -29,7 +30,9 @@ impl PostQueryRoot {
             .read_concern(ReadConcern::majority())
             .build();
 
-        Post::find_one(db, doc! {MONGO_ID_KEY: id}, find_one_options)
+        // TODO: Move to model
+        let post_keys = Post::get_field_names();
+        Post::find_one(db, doc! {post_keys._id: id}, find_one_options)
             .await?
             // Lazily evaluate the error:
             // Note: Always use _or_else variant of any helper function cos

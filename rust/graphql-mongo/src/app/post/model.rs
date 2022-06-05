@@ -50,9 +50,9 @@ impl Post {
     async fn poster(&self, ctx: &Context<'_>) -> Result<User> {
         // TODO: Use dataloader to batch user
         let db = get_db_from_ctx(ctx)?;
-        let PostKeyNames { _id, .. } = Post::get_field_names();
+        let post_keys = Post::get_field_names();
 
-        User::find_one(db, doc! {_id: self.poster_id}, None)
+        User::find_one(db, doc! {post_keys._id: self.poster_id}, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("".into()))
             .extend()

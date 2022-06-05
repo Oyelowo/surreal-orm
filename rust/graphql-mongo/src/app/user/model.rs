@@ -1,11 +1,8 @@
 use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::{
-    authentication::TypedSession,
-    error_handling::ApiHttpStatus,
-    mongodb::{model_cursor_to_vec, MONGO_ID_KEY},
+    authentication::TypedSession, error_handling::ApiHttpStatus, mongodb::model_cursor_to_vec,
 };
-use convert_case::{Case, Casing};
 use mongodb::Database;
 use my_macros::KeyNamesGetter;
 use serde::{Deserialize, Serialize};
@@ -97,7 +94,9 @@ pub struct User {
     pub accounts: Vec<AccountOauth>,
 }
 
-#[derive(InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(
+    InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug, Clone, KeyNamesGetter,
+)]
 #[serde(rename_all = "camelCase")]
 #[graphql(input_name = "AccountOauthInput")]
 pub struct AccountOauth {
@@ -212,12 +211,11 @@ impl User {
     }
 
     pub async fn get_user(&self, db: &Database, user_by: UserBy) -> Result<Self> {
+        let uk = User::get_field_names();
         let search_doc = match user_by {
-            UserBy::UserId(id) => doc! { MONGO_ID_KEY: id },
+            UserBy::UserId(id) => doc! { uk._id: id },
             UserBy::Username(user_name) => {
-                let Self { username, .. } = self;
-
-                let doc = doc! { username.to_case(Case::Camel): user_name };
+                let doc = doc! { uk.username: user_name };
                 doc
             }
             UserBy::Address(_) => todo!(),
@@ -232,13 +230,15 @@ impl User {
         todo!()
     }
     pub async fn find_by_id(db: &Database, id: &ObjectId) -> Result<Self> {
-        User::find_one(db, doc! { MONGO_ID_KEY: id }, None)
+        let uk = User::get_field_names();
+        User::find_one(db, doc! { uk._id: id }, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
 
     pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Result<Self> {
-        User::find_one(db, doc! { "username": username.into() }, None)
+        let uk = User::get_field_names();
+        User::find_one(db, doc! { uk.username: username.into() }, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
@@ -248,7 +248,9 @@ impl User {
         provider: impl Into<String>,
         provider_account_id: impl Into<String>,
     ) -> Result<Self> {
-        User::find_one(db, doc! { "accounts": {"$elemMatch": {"provider": provider.into(), "providerAccountId": provider_account_id.into()}} }, None)
+        let uk = User::get_field_names();
+        let acc_keys = AccountOauth::get_field_names();
+        User::find_one(db, doc! { uk.accounts: {"$elemMatch": {acc_keys.provider: provider.into(), acc_keys.providerAccountId: provider_account_id.into()}} }, None)
         .await?
         .ok_or_else(||ApiHttpStatus::NotFound("User not found".into()).extend())
     }
@@ -259,7 +261,9 @@ impl User {
         provider: impl Into<String>,
         provider_account_id: impl Into<String>,
     ) -> Result<Self, WitherError> {
-        let filter = doc! { "accounts": {"$elemMatch": {"provider": provider.into(), "providerAccountId": provider_account_id.into()}}};
+        let user_keys = User::get_field_names();
+        let acc_keys = AccountOauth::get_field_names();
+        let filter = doc! { user_keys.accounts: {"$elemMatch": {acc_keys.provider: provider.into(), acc_keys.providerAccountId: provider_account_id.into()}}};
         User::save(&mut self, db, Some(filter)).await?;
 
         Ok(self)
