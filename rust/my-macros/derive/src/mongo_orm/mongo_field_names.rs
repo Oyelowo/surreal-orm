@@ -116,89 +116,21 @@ impl ToTokens for SpaceTraitOpts {
             |case_from_serde| CaseString::from_str(case_from_serde.as_str()).ok(),
         );
 
-        let fields = data
-            .as_ref()
-            .take_struct()
-            .expect("Should never be enum")
-            .fields;
-        let mut struct_ty_fields = vec![];
-        let mut struct_values_fields = vec![];
+        let fields = get_fields(data);
 
-        for (i, f) in fields.into_iter().enumerate() {
-            // Fallback to the struct metadata value if not provided for the field.
-            // If not provided in both, fallback to camel.
-            let field_case = f
-                .case
-                .or_else(|| struct_level_casing)
-                .unwrap_or_else(|| CaseString::Camel);
-
-            // This works with named or indexed fields, so we'll fall back to the index so we can
-            // write the output as a key-value pair.
-            let field_ident = f.ident.as_ref().map_or_else(
-                || {
-                    let i = syn::Index::from(i);
-                    quote!(#i)
-                },
-                |v| quote!(#v),
-            );
-
-            let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
-            let convert = |case: convert_case::Case| {
-                convert_case::Converter::new()
-                    .to_case(case)
-                    .convert(&field_identifier_string)
-            };
-
-            let key = to_key_case_string(field_case, convert);
-
-            let key_clone = key.clone();
-            // Tries to keep the key name at camel if ure using kebab case which cannot be used
-            // as an identifier
-            let key_ident = match field_case {
-                CaseString::Kebab | CaseString::ScreamingKebab => key.to_case(Case::Camel),
-                _ => key,
-            };
-
-            let key_as_str = key_clone.as_str();
-
-            let key_ident = syn::Ident::from_string(key_ident.as_str())
-                .expect("Problem converting key string to syntax identifier");
-
-            let rename_from_serde = f.rename.as_ref();
-
-            match rename_from_serde {
-                Some(ref name) => {
-                    let key_as_str = name.as_str();
-                    let key_as_ident = syn::Ident::from_string(key_as_str)
-                        .expect("Problem converting key string to syntax identifier");
-
-                    // struct type used to type the function
-                    struct_ty_fields.push(quote!(#key_as_ident: &'static str));
-
-                    // struct values themselves
-                    struct_values_fields.push(quote!(#key_as_ident: #key_as_str));
-                }
-                None => {
-                    // struct type used to type the function
-                    struct_ty_fields.push(quote!(#key_ident: &'static str));
-
-                    // struct values themselves
-                    struct_values_fields.push(quote!(#key_ident: #key_as_str));
-                }
-            }
-        }
+        let (struct_ty_fields, struct_values_fields) =
+            get_struct_types_and_fields(fields, struct_level_casing);
 
         let struct_name = syn::Ident::new(
             format!("{my_struct}KeyNames").as_str(),
             ::proc_macro2::Span::call_site(),
         );
-        // .expect("problem creating ident from struct name string");
 
         let struct_type = quote!(struct #struct_name {
            #( #struct_ty_fields), *
         });
 
-        let mm = quote! {
+        tokens.extend(quote! {
             pub #struct_type
             impl SpaceTrait for #my_struct {
                 type Naam = #struct_name;
@@ -210,16 +142,96 @@ impl ToTokens for SpaceTraitOpts {
 
 
             }
-        };
-        tokens.extend(mm);
+        });
     }
 }
 
+fn get_struct_types_and_fields(
+    fields: Vec<&MyFieldReceiver>,
+    struct_level_casing: Option<CaseString>,
+) -> (Vec<TokenStream>, Vec<TokenStream>) {
+    let mut struct_ty_fields = vec![];
+    let mut struct_values_fields = vec![];
+    for (i, f) in fields.into_iter().enumerate() {
+        let field_case = get_case_string(f, struct_level_casing);
 
-fn to_key_case_string<T>(field_case: CaseString, convert: T) -> String
-where
-    T: Fn(Case) -> String,
-{
+        let field_ident = get_field_identifier(f, i);
+        let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
+
+        let (key_as_str, key_ident) = get_key_str_and_ident(field_case, field_identifier_string, f);
+
+        // struct type used to type the function
+        struct_ty_fields.push(quote!(#key_ident: &'static str));
+
+        // struct values themselves
+        struct_values_fields.push(quote!(#key_ident: #key_as_str));
+    }
+    (struct_ty_fields, struct_values_fields)
+}
+
+fn get_key_str_and_ident(
+    field_case: CaseString,
+    field_identifier_string: String,
+    f: &MyFieldReceiver,
+) -> (String, proc_macro2::Ident) {
+    let key = &to_key_case_string(field_case, field_identifier_string);
+    // Tries to keep the key name at camel if ure using kebab case which cannot be used
+    // as an identifier
+    let key_ident = match field_case {
+        CaseString::Kebab | CaseString::ScreamingKebab => key.to_case(Case::Camel),
+        _ => key.to_string(),
+    };
+    let mut key_as_str = key.as_str();
+    let mut key_ident = syn::Ident::from_string(key_ident.as_str())
+        .expect("Problem converting key string to syntax identifier");
+    // Prioritize serde renaming for key string
+
+    let rename_field_from_serde = f.rename.as_ref();
+    if let Some(name) = rename_field_from_serde {
+        key_as_str = name.as_str();
+        key_ident = syn::Ident::from_string(key_as_str)
+            .expect("Problem converting key string to syntax identifier");
+    }
+    (key.to_string(), key_ident)
+}
+
+fn get_field_identifier(f: &MyFieldReceiver, index: usize) -> TokenStream {
+    // This works with named or indexed fields, so we'll fall back to the index so we can
+    // write the output as a key-value pair.
+    f.ident.as_ref().map_or_else(
+        || {
+            let i = syn::Index::from(index);
+            quote!(#i)
+        },
+        |v| quote!(#v),
+    )
+}
+
+fn get_fields(data: &ast::Data<util::Ignored, MyFieldReceiver>) -> Vec<&MyFieldReceiver> {
+    let fields = data
+        .as_ref()
+        .take_struct()
+        .expect("Should never be enum")
+        .fields;
+    fields
+}
+
+fn get_case_string(f: &MyFieldReceiver, struct_level_casing: Option<CaseString>) -> CaseString {
+    // Fallback to the struct metadata value if not provided for the field.
+    // If not provided in both, fallback to camel.
+    let field_case = f
+        .case
+        .or_else(|| struct_level_casing)
+        .unwrap_or_else(|| CaseString::Camel);
+    field_case
+}
+
+fn to_key_case_string(field_case: CaseString, field_identifier_string: String) -> String {
+    let convert = |case: convert_case::Case| {
+        convert_case::Converter::new()
+            .to_case(case)
+            .convert(&field_identifier_string)
+    };
     let key = match field_case {
         // CaseString::Pascal => field_identifier_string,
         CaseString::Camel => convert(convert_case::Case::Camel),
