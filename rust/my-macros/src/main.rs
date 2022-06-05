@@ -1,6 +1,6 @@
 // For testing macros made here
 
-use my_macros::{HelloMacro, MyTrait, SpaceTrait};
+use my_macros::{HelloMacro, MyTrait, KeyNamesGetter};
 use serde::{Serialize, Deserialize};
 // use serde::{Serialize, Deserialize};
 
@@ -25,14 +25,15 @@ struct Bar {
 }
 
 // #[my_crate(lorem(dolor = "Hello", sit))]
-#[derive(SpaceTrait, Serialize, Deserialize)]
+#[derive(KeyNamesGetter, Serialize, Deserialize)]
 // #[mongoye(typee = "Hello")]
 // #[mongoye(typee = "Hello", case = "snake")]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct ConsumingType {
-    // #[serde(rename = "lowo_cool")]
+    #[serde(rename = "lowo_cool")]
     pub name_of_me: String,
     #[serde(rename = "lmsar")]
+    // #[serde(rename(serialize = "ser_name", deserialize = "de_name"))]
     pub age: u8,
 }
 
@@ -46,10 +47,10 @@ struct Make {
 
 fn main() {
 
-    let ConsumingTypeKeyNames {  name_of_me, lmsar,.. } = ConsumingType::get_field_names();
+    let ConsumingTypeKeyNames {  lowo_cool, lmsar,.. } = ConsumingType::get_field_names();
 
-    println!("rerezzzzzzz{name_of_me}, {lmsar}")
-    // println!("rere{lowo_cool}, {age}")
+    // println!("rerezzzzzzz{name_of_me}, {lmsar}")
+    println!("rere{lowo_cool}, {lmsar}")
     // ConsumingType::get_field_names();
     // Pancakes::hello_macro();
     // println!("Hello, world!");

@@ -59,7 +59,7 @@ impl Default for CaseString {
 }
 
 #[derive(Debug, FromField)]
-#[darling(attributes(mongoye, serde), forward_attrs(allow, doc, cfg))]
+#[darling(attributes(key_getter, serde), forward_attrs(allow, doc, cfg))]
 struct MyFieldReceiver {
     /// Get the ident of the field. For fields in tuple or newtype structs or
     /// enum bodies, this can be `None`.
@@ -81,8 +81,8 @@ struct MyFieldReceiver {
 }
 
 #[derive(Debug, FromDeriveInput)]
-#[darling(attributes(mongoye, serde), forward_attrs(allow, doc, cfg))]
-pub struct SpaceTraitOpts {
+#[darling(attributes(key_getter, serde), forward_attrs(allow, doc, cfg))]
+pub struct KeyNamesGetterOpts {
     ident: syn::Ident,
     attrs: Vec<syn::Attribute>,
     generics: syn::Generics,
@@ -93,7 +93,6 @@ pub struct SpaceTraitOpts {
     #[darling(default)]
     rename_all: Option<String>,
 
-    // lorem: Lorem,
     #[darling(default)]
     typee: String,
 
@@ -101,9 +100,9 @@ pub struct SpaceTraitOpts {
     case: Option<CaseString>,
 }
 
-impl ToTokens for SpaceTraitOpts {
+impl ToTokens for KeyNamesGetterOpts {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let SpaceTraitOpts {
+        let KeyNamesGetterOpts {
             ident: ref my_struct,
             ref data,
             ref case,
@@ -132,9 +131,9 @@ impl ToTokens for SpaceTraitOpts {
 
         tokens.extend(quote! {
             pub #struct_type
-            impl SpaceTrait for #my_struct {
-                type Naam = #struct_name;
-                fn get_field_names() -> Self::Naam {
+            impl KeyNamesGetter for #my_struct {
+                type KeyNames = #struct_name;
+                fn get_field_names() -> Self::KeyNames {
                     #struct_name {
                         #( #struct_values_fields), *
                     }
@@ -247,10 +246,10 @@ fn to_key_case_string(field_case: CaseString, field_identifier_string: String) -
     key
 }
 
-pub fn generate_space_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn generate_key_names_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     // Construct a representation of Rust code as a syntax tree
     // that we can manipulate
     let input = parse_macro_input!(input);
-    let output = SpaceTraitOpts::from_derive_input(&input).expect("Wrong options");
+    let output = KeyNamesGetterOpts::from_derive_input(&input).expect("Wrong options");
     quote!(#output).into()
 }

@@ -15,10 +15,10 @@ pub trait MyTrait {
 
 pub use derive::MyTrait;
 
-pub trait SpaceTrait {
+pub trait KeyNamesGetter {
     // fn name() -> String;
-    type Naam;
-    fn get_field_names() -> Self::Naam;
+    type KeyNames;
+    fn get_field_names() -> Self::KeyNames;
 }
 
-pub use derive::SpaceTrait;
+pub use derive::KeyNamesGetter;
