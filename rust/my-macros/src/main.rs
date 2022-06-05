@@ -178,3 +178,28 @@ fn keys_getter_7() {
     assert_eq!(age_count, "age_count");
     assert_eq!(firstName, "firstName");
 }
+
+#[test]
+fn keys_getter_8() {
+    #[derive(KeyNamesGetter, Serialize, Deserialize)]
+    #[key_getter(rename_all = "kebab-case")]
+    pub struct Consumer {
+        #[warn(non_snake_case)]
+        pub name_of_me: String,
+
+        pub ageCount: u8,
+
+        #[key_getter(case = "camel")]
+        pub first_name: u8,
+    }
+
+    let ConsumerKeyNames {
+        nameOfMe,
+        ageCount,
+        firstName,
+    } = Consumer::get_field_names();
+
+    assert_eq!(nameOfMe, "name-of-me");
+    assert_eq!(ageCount, "age-count");
+    assert_eq!(firstName, "firstName");
+}
