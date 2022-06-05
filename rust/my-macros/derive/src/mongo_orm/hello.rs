@@ -2,11 +2,6 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{self, DeriveInput};
 
-/* 
-pub trait  HelloMacro {
-    fn hello_macro();
-}
-*/
 pub fn generate_hello_macro(input: TokenStream) -> TokenStream {
     // Construct a representation of Rust code as a syntax tree
     // that we can manipulate

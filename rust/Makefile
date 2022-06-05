@@ -4,7 +4,7 @@ gen:
 
 fmt:
 	SQLX_OFFLINE=true cargo fmt --all -- --check
-	# SQLX_OFFLINE=true cargo clippy -fix
+	SQLX_OFFLINE=true cargo clippy --fix
 
 clippy:
 	SQLX_OFFLINE=true cargo clippy -- -D  warnings

@@ -14,10 +14,7 @@ use wither::{
     WitherError,
 };
 
-use crate::{
-    app::post::{Post, PostKeyNames},
-    utils::mongodb::get_db_from_ctx,
-};
+use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
 
 use super::guards::{AuthGuard, RoleGuard};
 
@@ -158,8 +155,8 @@ impl User {
     async fn posts(&self, ctx: &Context<'_>) -> Result<Vec<Post>> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = get_db_from_ctx(ctx)?;
-        let PostKeyNames { _id, posterId, .. } = Post::get_field_names();
-        let cursor = Post::find(db, doc! {posterId: self.id}, None).await?;
+        let post_keys = Post::get_field_names();
+        let cursor = Post::find(db, doc! {post_keys.posterId: self.id}, None).await?;
         model_cursor_to_vec(cursor)
             .await
             .map_err(|_| ApiHttpStatus::NotFound("Post not found".into()).extend())
