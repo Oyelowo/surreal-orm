@@ -7,6 +7,7 @@ use common::{
 };
 use convert_case::{Case, Casing};
 use mongodb::Database;
+use my_macros::KeyNamesGetter;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
@@ -16,12 +17,23 @@ use wither::{
     WitherError,
 };
 
-use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
+use crate::{
+    app::post::{Post, PostKeyNames},
+    utils::mongodb::get_db_from_ctx,
+};
 
 use super::guards::{AuthGuard, RoleGuard};
 
 #[derive(
-    Model, SimpleObject, InputObject, Serialize, Deserialize, TypedBuilder, Validate, Debug,
+    Model,
+    SimpleObject,
+    InputObject,
+    Serialize,
+    Deserialize,
+    TypedBuilder,
+    Validate,
+    Debug,
+    KeyNamesGetter,
 )]
 #[serde(rename_all = "camelCase")]
 #[graphql(complex)]
@@ -147,7 +159,8 @@ impl User {
     async fn posts(&self, ctx: &Context<'_>) -> Result<Vec<Post>> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = get_db_from_ctx(ctx)?;
-        let cursor = Post::find(db, doc! {"posterId": self.id}, None).await?;
+        let PostKeyNames { _id, posterId, .. } = Post::get_field_names();
+        let cursor = Post::find(db, doc! {posterId: self.id}, None).await?;
         model_cursor_to_vec(cursor)
             .await
             .map_err(|_| ApiHttpStatus::NotFound("Post not found".into()).extend())

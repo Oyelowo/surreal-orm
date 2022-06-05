@@ -5,6 +5,6 @@ pub(in crate::app) mod query_root;
 pub(in crate::app) mod subscription_root;
 
 pub use self::{
-    model::*, mutation_root::PostMutationRoot, query_root::PostQueryRoot,
+    model::*, mutation_root::PostMutationRoot, query_root::PostQueryRoot, PostKeyNames,
     subscription_root::PostSubscriptionRoot,
 };

@@ -3,7 +3,7 @@ pub(crate) mod user;
 
 use common::sync_mongo_models;
 use mongodb::Database;
-use post::{Post, PostMutationRoot, PostQueryRoot, PostSubscriptionRoot};
+use post::{Post, PostMutationRoot, PostQueryRoot, PostSubscriptionRoot, PostKeyNames};
 use user::{User, UserMutationRoot, UserQueryRoot, UserSubscriptionRoot};
 
 use async_graphql::{MergedObject, MergedSubscription, Schema, SchemaBuilder};

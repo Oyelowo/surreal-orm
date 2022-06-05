@@ -4,6 +4,8 @@
 // For testing macros made here
 use my_macros::{HelloMacro, KeyNamesGetter, MyTrait};
 use serde::{Deserialize, Serialize};
+// use my_macros::KeyNamesGetter;
+
 // use serde::{Serialize, Deserialize};
 
 #[derive(HelloMacro)]

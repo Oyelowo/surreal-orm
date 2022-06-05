@@ -87,7 +87,7 @@ pub async fn gql_playground() -> HttpResponse {
         .body(source)
 }
 
-pub async fn setup_graphql() -> anyhow::Result<MyGraphQLSchema> {
+pub async fn setup() -> anyhow::Result<MyGraphQLSchema> {
     let application = configuration::get_app_config();
     let database = configuration::get_db_config();
 

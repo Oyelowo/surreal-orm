@@ -7,7 +7,8 @@ version = "0.1.0"
 
 [dependencies]
 # hello-macro-derive = {path = "../hello-macro-derive"}
-derive = {path = "derive"}
+# macro-derive = {path = "./derive"}
+derive = {path = "./derive"}
 syn = "1.0"
 quote = "1.0"
 proc-macro2 = "1.0.32"

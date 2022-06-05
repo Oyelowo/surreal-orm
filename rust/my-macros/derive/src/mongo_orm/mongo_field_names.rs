@@ -6,7 +6,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use std::str::FromStr;
 use strum_macros::EnumString;
-use syn::{self, parse_macro_input};
+use syn::{self, parse_macro_input, token::Override};
 
 #[derive(Debug, Default, FromMeta)]
 #[darling(default)]
@@ -65,6 +65,16 @@ struct MyFieldReceiver {
 
     #[darling(default)]
     rename: Option<String>,
+    
+    #[darling(default)]
+    skip_serializing_if: util::Ignored,
+
+    #[darling(default)]
+    with: util::Ignored,
+
+    #[darling(default)]
+    default: util::Ignored,
+
 
     /// We declare this as an `Option` so that during tokenization we can write
     /// `field.case.unwrap_or(derive_input.case)` to facilitate field-level
@@ -86,10 +96,10 @@ pub struct KeyNamesGetterOpts {
     data: ast::Data<util::Ignored, MyFieldReceiver>,
 
     #[darling(default)]
-    rename_all: Option<String>,
+    rename_all: Option<::std::string::String>,
 
     #[darling(default)]
-    typee: String,
+    typee: ::std::string::String,
 
     #[darling(default)]
     case: Option<CaseString>,
@@ -120,12 +130,12 @@ impl ToTokens for KeyNamesGetterOpts {
             ::proc_macro2::Span::call_site(),
         );
 
-        let struct_type = quote!(struct #struct_name {
+        let struct_type = quote!(pub struct #struct_name {
            #( #struct_ty_fields), *
         });
 
         tokens.extend(quote! {
-            pub #struct_type
+            #struct_type
             impl KeyNamesGetter for #my_struct {
                 type KeyNames = #struct_name;
                 fn get_field_names() -> Self::KeyNames {
@@ -156,7 +166,7 @@ fn get_struct_types_and_fields(
         let (key_as_str, key_ident) = get_key_str_and_ident(field_case, field_identifier_string, f);
 
         // struct type used to type the function
-        struct_ty_fields.push(quote!(#key_ident: &'static str));
+        struct_ty_fields.push(quote!(pub #key_ident: &'static str));
 
         // struct values themselves
         struct_values_fields.push(quote!(#key_ident: #key_as_str));
@@ -167,7 +177,7 @@ fn get_struct_types_and_fields(
 
 fn get_key_str_and_ident(
     field_case: CaseString,
-    field_identifier_string: String,
+    field_identifier_string: ::std::string::String,
     f: &MyFieldReceiver,
 ) -> (String, proc_macro2::Ident) {
     let key = &to_key_case_string(field_case, field_identifier_string);
@@ -222,7 +232,8 @@ fn get_case_string(f: &MyFieldReceiver, struct_level_casing: Option<CaseString>)
     field_case
 }
 
-fn to_key_case_string(field_case: CaseString, field_identifier_string: String) -> String {
+// fn to_key_case_string(field_case: CaseString, field_identifier_string: ::std::string::String) -> ::std::string::String {
+fn to_key_case_string(field_case: CaseString, field_identifier_string: ::std::string::String) -> ::std::string::String {
     let convert = |case: convert_case::Case| {
         convert_case::Converter::new()
             .to_case(case)

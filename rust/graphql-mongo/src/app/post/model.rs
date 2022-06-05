@@ -1,6 +1,8 @@
 use async_graphql::*;
 
 use common::{error_handling::ApiHttpStatus, mongodb::MONGO_ID_KEY};
+use my_macros::*;
+// use my_macros_derive::
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
@@ -12,7 +14,16 @@ use wither::{
 use crate::{app::user::User, utils::mongodb::get_db_from_ctx};
 
 #[derive(
-    Model, SimpleObject, InputObject, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug,
+    KeyNamesGetter,
+    Model,
+    SimpleObject,
+    InputObject,
+    Clone,
+    Serialize,
+    Deserialize,
+    TypedBuilder,
+    Validate,
+    Debug,
 )]
 #[serde(rename_all = "camelCase")]
 #[graphql(input_name = "PostInput")]
@@ -39,8 +50,9 @@ impl Post {
     async fn poster(&self, ctx: &Context<'_>) -> Result<User> {
         // TODO: Use dataloader to batch user
         let db = get_db_from_ctx(ctx)?;
+        let PostKeyNames { _id, .. } = Post::get_field_names();
 
-        User::find_one(db, doc! {MONGO_ID_KEY: self.poster_id}, None)
+        User::find_one(db, doc! {_id: self.poster_id}, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("".into()))
             .extend()
