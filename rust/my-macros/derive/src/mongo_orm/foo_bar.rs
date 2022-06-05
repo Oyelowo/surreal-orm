@@ -2,14 +2,10 @@
 // which causes the fields to trigger an unwanted dead code warning.
 #![allow(dead_code)]
 
-use std::any::Any;
-
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
-use quote::{quote};
-use syn::{self, parse_macro_input, DeriveInput};
-use syn::{parse_str, ItemFn};
-
+use quote::quote;
+use syn::{self, parse_macro_input};
 
 #[derive(Debug, Clone, Copy, FromMeta)]
 #[darling(default)]
@@ -34,7 +30,6 @@ struct MyFieldReceiver {
     /// This magic field name pulls the type from the input.
     ty: syn::Type,
 
-    
     /// We declare this as an `Option` so that during tokenization we can write
     /// `field.volume.unwrap_or(derive_input.volume)` to facilitate field-level
     /// overrides of struct-level settings.
@@ -51,7 +46,6 @@ struct MyInputReceiver {
     /// struct fields because we previously told darling we only accept structs.
     data: ast::Data<util::Ignored, MyFieldReceiver>,
 
-
     /// The Input Receiver demands a volume, so use `Volume::Normal` if the
     /// caller doesn't provide one.
     #[darling(default)]
@@ -60,7 +54,6 @@ struct MyInputReceiver {
     #[darling(default)]
     answer: u32,
 }
-
 
 impl ToTokens for MyInputReceiver {
     fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -91,7 +84,7 @@ impl ToTokens for MyInputReceiver {
 
         let kk = format!("My level is: {:?}", level);
 
-        tokens.extend(quote!{
+        tokens.extend(quote! {
             impl MyTrait for #my_struct {
                 fn answer() -> u32 {
                     #answer

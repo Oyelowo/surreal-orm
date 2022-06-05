@@ -1,17 +1,12 @@
 #![allow(dead_code)]
 
-use std::any::Any;
-use std::fmt::format;
-
 use convert_case::{Case, Casing};
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use quote::quote;
-use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use strum_macros::EnumString;
-use syn::{self, parse_macro_input, DeriveInput};
-use syn::{parse_str, ItemFn};
+use syn::{self, parse_macro_input};
 
 #[derive(Debug, Default, FromMeta)]
 #[darling(default)]
@@ -151,6 +146,7 @@ fn get_struct_types_and_fields(
 ) -> (Vec<TokenStream>, Vec<TokenStream>) {
     let mut struct_ty_fields = vec![];
     let mut struct_values_fields = vec![];
+
     for (i, f) in fields.into_iter().enumerate() {
         let field_case = get_case_string(f, struct_level_casing);
 
@@ -165,6 +161,7 @@ fn get_struct_types_and_fields(
         // struct values themselves
         struct_values_fields.push(quote!(#key_ident: #key_as_str));
     }
+
     (struct_ty_fields, struct_values_fields)
 }
 
@@ -178,20 +175,20 @@ fn get_key_str_and_ident(
     // as an identifier
     let key_ident = match field_case {
         CaseString::Kebab | CaseString::ScreamingKebab => key.to_case(Case::Camel),
-        _ => key.to_string(),
+        _ => ::std::string::ToString::to_string(key),
     };
     let mut key = key.as_str();
     let mut key_ident = syn::Ident::from_string(key_ident.as_str())
         .expect("Problem converting key string to syntax identifier");
-    // Prioritize serde renaming for key string
 
+    // Prioritize serde renaming for key string
     let rename_field_from_serde = f.rename.as_ref();
     if let Some(name) = rename_field_from_serde {
         key = name.as_str();
         key_ident = syn::Ident::from_string(key)
             .expect("Problem converting key string to syntax identifier");
     }
-    (key.to_string(), key_ident)
+    (::std::string::ToString::to_string(key), key_ident)
 }
 
 fn get_field_identifier(f: &MyFieldReceiver, index: usize) -> TokenStream {
@@ -232,7 +229,6 @@ fn to_key_case_string(field_case: CaseString, field_identifier_string: String) -
             .convert(&field_identifier_string)
     };
     let key = match field_case {
-        // CaseString::Pascal => field_identifier_string,
         CaseString::Camel => convert(convert_case::Case::Camel),
         CaseString::Snake => convert(convert_case::Case::Snake),
         CaseString::Pascal => convert(convert_case::Case::Pascal),
@@ -241,7 +237,6 @@ fn to_key_case_string(field_case: CaseString, field_identifier_string: String) -
         CaseString::ScreamingSnake => convert(convert_case::Case::ScreamingSnake),
         CaseString::Kebab => convert(convert_case::Case::Kebab),
         CaseString::ScreamingKebab => convert(convert_case::Case::UpperKebab),
-        // _ => todo!(),
     };
     key
 }
