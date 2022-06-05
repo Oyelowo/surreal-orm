@@ -72,6 +72,10 @@ pub struct User {
     #[validate(length(min = 1))]
     pub last_name: String,
 
+    #[validate(length(min = 1))]
+    #[builder(default, setter(strip_option))]
+    pub city: Option<String>,
+
     #[validate(email)]
     pub email: String,
 
@@ -207,7 +211,7 @@ impl User {
         user
     }
 
-    pub async fn get_user(&self, db: &Database, user_by: UserBy) -> Result<Self> {
+    pub async fn _get_user(&self, db: &Database, user_by: UserBy) -> Result<Self> {
         let uk = User::get_field_names();
         let search_doc = match user_by {
             UserBy::UserId(id) => doc! { uk._id: id },
@@ -215,17 +219,18 @@ impl User {
                 let doc = doc! { uk.username: user_name };
                 doc
             }
-            UserBy::Address(_) => todo!(),
-            UserBy::Email(_) => todo!(),
+            // Temporary
+            UserBy::Address(add) => doc! { uk.city: add.city },
+            UserBy::Email(email) => doc! { uk.email: email },
         };
         // todo!()
         User::find_one(db, search_doc, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
-    pub async fn search_users(db: &Database, user_by: Vec<UserBy>) -> Result<Vec<Self>> {
-        todo!()
-    }
+    // pub async fn _search_users(db: &Database, user_by: Vec<UserBy>) -> Result<Vec<Self>> {
+    //     todo!()
+    // }
     pub async fn find_by_id(db: &Database, id: &ObjectId) -> Result<Self> {
         let uk = User::get_field_names();
         User::find_one(db, doc! { uk._id: id }, None)

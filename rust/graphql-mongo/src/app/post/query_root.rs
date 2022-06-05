@@ -3,10 +3,7 @@ use crate::utils::mongodb::get_db_from_ctx;
 use super::model::Post;
 
 use async_graphql::*;
-use common::{
-    error_handling::ApiHttpStatus,
-    mongodb::{model_cursor_to_vec, MONGO_ID_KEY},
-};
+use common::{error_handling::ApiHttpStatus, mongodb::model_cursor_to_vec};
 use log::warn;
 use mongodb::{
     bson::oid::ObjectId,
