@@ -1,6 +1,7 @@
 use bson::{doc, oid::ObjectId};
 use common::mongodb::model_cursor_to_vec;
 use mongodb::options::{FindOneOptions, ReadConcern};
+use my_macros::KeyNamesGetter;
 use tonic::{Request, Response, Status};
 pub mod app_analytics {
     tonic::include_proto!("app_analytics");
@@ -117,10 +118,12 @@ impl AppAnalytics for AnalyticsService {
 
         let db = establish_connection().await;
 
-        let user_app_event_found = UserAppEvent::find(&db, doc! {"userId": user_id}, None)
-            .await
-            .map_err(|_| Status::not_found("User data not found"))
-            .expect("Problem finding user");
+        let user_app_event_keys = UserAppEvent::get_field_names();
+        let user_app_event_found =
+            UserAppEvent::find(&db, doc! {user_app_event_keys.userId: user_id}, None)
+                .await
+                .map_err(|_| Status::not_found("User data not found"))
+                .expect("Problem finding user");
 
         let user_app_event = model_cursor_to_vec(user_app_event_found)
             .await

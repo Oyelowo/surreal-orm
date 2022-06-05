@@ -8,6 +8,7 @@ edition = "2021"
 
 [dependencies]
 common = { path = "../common" }
+my-macros = { path = "../my-macros" }
 tonic = "0.7.2"
 # tonic = { version = "0.7", default-features = false, features = [
 #     "transport",
