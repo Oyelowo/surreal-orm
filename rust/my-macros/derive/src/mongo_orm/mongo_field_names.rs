@@ -8,14 +8,8 @@ use std::str::FromStr;
 use strum_macros::EnumString;
 use syn::{self, parse_macro_input};
 
-#[derive(Debug, Default, FromMeta)]
-#[darling(default)]
-pub struct Lorem {
-    #[darling(rename = "sit")]
-    ipsum: bool,
-    dolor: Option<String>,
-}
-
+/// Options: "lowercase", "UPPERCASE", "PascalCase", "camelCase", "snake_case",
+/// "SCREAMING_SNAKE_CASE", "kebab-case", "SCREAMING-KEBAB-CASE"
 #[derive(Debug, Clone, Copy, EnumString, FromMeta)]
 #[darling(default)]
 pub enum CaseString {
@@ -42,10 +36,6 @@ pub enum CaseString {
     #[strum(serialize = "SCREAMING-KEBAB-CASE")]
     ScreamingKebab,
 }
-
-/*
-"lowercase", "UPPERCASE", "PascalCase", "camelCase", "snake_case", "SCREAMING_SNAKE_CASE", "kebab-case", "SCREAMING-KEBAB-CASE"
-*/
 
 impl Default for CaseString {
     fn default() -> Self {
