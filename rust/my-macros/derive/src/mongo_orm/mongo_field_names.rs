@@ -123,6 +123,7 @@ impl ToTokens for SpaceTraitOpts {
             .fields;
         let mut struct_ty_fields = vec![];
         let mut struct_values_fields = vec![];
+
         for (i, f) in fields.into_iter().enumerate() {
             // Fallback to the struct metadata value if not provided for the field.
             // If not provided in both, fallback to camel.
@@ -148,18 +149,7 @@ impl ToTokens for SpaceTraitOpts {
                     .convert(&field_identifier_string)
             };
 
-            let key = match field_case {
-                // CaseString::Pascal => field_identifier_string,
-                CaseString::Camel => convert(convert_case::Case::Camel),
-                CaseString::Snake => convert(convert_case::Case::Snake),
-                CaseString::Pascal => convert(convert_case::Case::Pascal),
-                CaseString::Lower => convert(convert_case::Case::Lower),
-                CaseString::Upper => convert(convert_case::Case::Upper),
-                CaseString::ScreamingSnake => convert(convert_case::Case::ScreamingSnake),
-                CaseString::Kebab => convert(convert_case::Case::Kebab),
-                CaseString::ScreamingKebab => convert(convert_case::Case::UpperKebab),
-                // _ => todo!(),
-            };
+            let key = to_key_case_string(field_case, convert);
 
             let key_clone = key.clone();
             // Tries to keep the key name at camel if ure using kebab case which cannot be used
@@ -223,6 +213,26 @@ impl ToTokens for SpaceTraitOpts {
         };
         tokens.extend(mm);
     }
+}
+
+
+fn to_key_case_string<T>(field_case: CaseString, convert: T) -> String
+where
+    T: Fn(Case) -> String,
+{
+    let key = match field_case {
+        // CaseString::Pascal => field_identifier_string,
+        CaseString::Camel => convert(convert_case::Case::Camel),
+        CaseString::Snake => convert(convert_case::Case::Snake),
+        CaseString::Pascal => convert(convert_case::Case::Pascal),
+        CaseString::Lower => convert(convert_case::Case::Lower),
+        CaseString::Upper => convert(convert_case::Case::Upper),
+        CaseString::ScreamingSnake => convert(convert_case::Case::ScreamingSnake),
+        CaseString::Kebab => convert(convert_case::Case::Kebab),
+        CaseString::ScreamingKebab => convert(convert_case::Case::UpperKebab),
+        // _ => todo!(),
+    };
+    key
 }
 
 pub fn generate_space_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
