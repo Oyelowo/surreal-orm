@@ -115,7 +115,7 @@ fn keys_getter_4() {
 #[test]
 fn keys_getter_5() {
     #[derive(KeyNamesGetter, Serialize, Deserialize)]
-    #[serde(rename_all = "snake_case")]
+    #[key_getter(rename_all = "snake_case")]
     pub struct Consumer {
         #[warn(non_snake_case)]
         pub nameOfMe: String,
@@ -132,19 +132,49 @@ fn keys_getter_5() {
 #[test]
 fn keys_getter_6() {
     #[derive(KeyNamesGetter, Serialize, Deserialize)]
-    #[serde(rename_all = "snake_case")]
+    #[key_getter(rename_all = "snake_case")]
     pub struct Consumer {
         #[warn(non_snake_case)]
         pub name_of_me: String,
 
         pub ageCount: u8,
+
+        #[key_getter(rename = "username")]
+        pub first_name: u8,
     }
 
     let ConsumerKeyNames {
         name_of_me,
         age_count,
+        username,
     } = Consumer::get_field_names();
 
     assert_eq!(name_of_me, "name_of_me");
     assert_eq!(age_count, "age_count");
+    assert_eq!(username, "username");
+}
+
+#[test]
+fn keys_getter_7() {
+    #[derive(KeyNamesGetter, Serialize, Deserialize)]
+    #[key_getter(rename_all = "snake_case")]
+    pub struct Consumer {
+        #[warn(non_snake_case)]
+        pub name_of_me: String,
+
+        pub ageCount: u8,
+
+        #[key_getter(case = "camel")]
+        pub first_name: u8,
+    }
+
+    let ConsumerKeyNames {
+        name_of_me,
+        age_count,
+        firstName,
+    } = Consumer::get_field_names();
+
+    assert_eq!(name_of_me, "name_of_me");
+    assert_eq!(age_count, "age_count");
+    assert_eq!(firstName, "firstName");
 }
