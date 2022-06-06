@@ -146,22 +146,34 @@ fn get_struct_types_and_fields(
     let mut struct_ty_fields = vec![];
     let mut struct_values_fields = vec![];
 
-    for (i, f) in fields.into_iter().enumerate() {
-        let field_case = get_case_string(f, struct_level_casing);
-
-        let field_ident = get_field_identifier(f, i);
-        let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
-
-        let (key_as_str, key_ident) = get_key_str_and_ident(field_case, field_identifier_string, f);
-
-        // struct type used to type the function
-        struct_ty_fields.push(quote!(pub #key_ident: &'static str));
-
-        // struct values themselves
-        struct_values_fields.push(quote!(#key_ident: #key_as_str));
-    }
+    fields.into_iter().enumerate().for_each(|(i, f)| {
+        create_fields_types_and_values(
+            f,
+            struct_level_casing,
+            i,
+            &mut struct_ty_fields,
+            &mut struct_values_fields,
+        );
+    });
 
     (struct_ty_fields, struct_values_fields)
+}
+
+fn create_fields_types_and_values(
+    f: &MyFieldReceiver,
+    struct_level_casing: Option<CaseString>,
+    i: usize,
+    struct_ty_fields: &mut Vec<TokenStream>,
+    struct_values_fields: &mut Vec<TokenStream>,
+) {
+    let field_case = get_case_string(f, struct_level_casing);
+    let field_ident = get_field_identifier(f, i);
+    let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
+    let (key_as_str, key_ident) = get_key_str_and_ident(field_case, field_identifier_string, f);
+    // struct type used to type the function
+    struct_ty_fields.push(quote!(pub #key_ident: &'static str));
+    // struct values themselves
+    struct_values_fields.push(quote!(#key_ident: #key_as_str));
 }
 
 fn get_key_str_and_ident(
