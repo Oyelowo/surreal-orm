@@ -162,12 +162,12 @@ fn keys_getter_8() {
     }
 
     let ConsumerKeyNames {
-        nameOfMe,
+        name_of_me,
         ageCount,
         firstName,
     } = Consumer::get_field_names();
 
-    assert_eq!(nameOfMe, "name-of-me");
+    assert_eq!(name_of_me, "name-of-me");
     assert_eq!(ageCount, "age-count");
     assert_eq!(firstName, "firstName");
 }

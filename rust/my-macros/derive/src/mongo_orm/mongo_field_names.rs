@@ -214,7 +214,7 @@ fn create_fields_types_and_values(
     let field_case = get_case_string(f, struct_level_casing);
     let field_ident = get_field_identifier(f, i);
     let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
-    let (key_as_str, key_ident) = get_key_str_and_ident(field_case, field_identifier_string, f);
+    let (key_as_str, key_ident) = get_key_str_and_ident(&field_case, &field_identifier_string, f);
     // struct type used to type the function
     store
         .struct_ty_fields
@@ -226,19 +226,22 @@ fn create_fields_types_and_values(
 }
 
 fn get_key_str_and_ident(
-    field_case: CaseString,
-    field_identifier_string: ::std::string::String,
+    field_case: &CaseString,
+    field_identifier_string: &::std::string::String,
     f: &MyFieldReceiver,
 ) -> (String, proc_macro2::Ident) {
-    let key = &to_key_case_string(field_case, field_identifier_string);
-    // Tries to keep the key name at camel if ure using kebab case which cannot be used
-    // as an identifier
-    let key_ident = match field_case {
-        CaseString::Kebab | CaseString::ScreamingKebab => key.to_case(Case::Camel),
-        _ => ::std::string::ToString::to_string(key),
-    };
+    let key = to_key_case_string(field_case, field_identifier_string);
     let mut key = key.as_str();
-    let mut key_ident = syn::Ident::from_string(key_ident.as_str())
+
+    let key_ident = match field_case {
+        // Tries to keep the key name ident as written in the struct
+        //  if ure using kebab case which cannot be used as an identifier
+        // Field rename attribute overrides this
+        CaseString::Kebab | CaseString::ScreamingKebab => field_identifier_string,
+        _ => key,
+    };
+
+    let mut key_ident = syn::Ident::from_string(key_ident)
         .expect("Problem converting key string to syntax identifier");
 
     // Prioritize serde renaming for key string
@@ -281,13 +284,13 @@ fn get_case_string(f: &MyFieldReceiver, struct_level_casing: Option<CaseString>)
 
 // fn to_key_case_string(field_case: CaseString, field_identifier_string: ::std::string::String) -> ::std::string::String {
 fn to_key_case_string(
-    field_case: CaseString,
-    field_identifier_string: ::std::string::String,
+    field_case: &CaseString,
+    field_identifier_string: &::std::string::String,
 ) -> ::std::string::String {
     let convert = |case: convert_case::Case| {
         convert_case::Converter::new()
             .to_case(case)
-            .convert(&field_identifier_string)
+            .convert(field_identifier_string)
     };
     match field_case {
         CaseString::Camel => convert(convert_case::Case::Camel),
