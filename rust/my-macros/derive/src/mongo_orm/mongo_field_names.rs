@@ -46,39 +46,37 @@ impl Default for CaseString {
 #[derive(Debug)]
 pub struct Rename {
     serialize: String,
-    deserialize: Option<String>,
 }
 
+/// This enables us to handle potentially nested values i.e
+///   #[serde(rename = "simple_name")]
+///    or
+///   #[serde(rename(serialize = "age"))]
+///  #[serde(rename(serialize = "ser_name_nested", deserialize = "deser_name_nested"))]
+/// However, We dont care about deserialized name from serde, so we just ignore that.
 impl FromMeta for Rename {
+    fn from_string(value: &str) -> darling::Result<Self> {
+        Ok(Self {
+            serialize: value.into(),
+        })
+    }
+
     fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
         #[derive(FromMeta)]
         struct FullRename {
             serialize: String,
+
             #[darling(default)]
-            deserialize: Option<String>,
+            deserialize: util::Ignored, // Ignore deserialize since we only care about the serialized string
         }
 
         impl From<FullRename> for Rename {
             fn from(v: FullRename) -> Self {
-                let FullRename {
-                    serialize,
-                    deserialize,
-                } = v;
-                Self {
-                    serialize,
-                    deserialize,
-                }
+                let FullRename { serialize, .. } = v;
+                Self { serialize }
             }
         }
         FullRename::from_list(items).map(Rename::from)
-    }
-
-    fn from_string(value: &str) -> darling::Result<Self> {
-        // Err(darling::Error::unexpected_type("string"))
-        Ok(Self {
-            serialize: value.into(),
-            deserialize: Some(value.into()),
-        })
     }
 }
 
