@@ -43,6 +43,91 @@ impl Default for CaseString {
     }
 }
 
+#[derive(Debug)]
+pub struct Rename {
+    serialize: String,
+    deserialize: String,
+}
+
+impl FromMeta for Rename {
+    // fn from_nested_meta(item: &syn::NestedMeta) -> darling::Result<Self> {
+    //     (match *item {
+    //         syn::NestedMeta::Lit(ref lit) => Self::from_value(lit),
+    //         syn::NestedMeta::Meta(ref mi) => Self::from_meta(mi),
+    //     })
+    //     .map_err(|e| e.with_span(item))
+    // }
+
+    // fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
+    //     (match *item {
+    //         syn::Meta::Path(_) => Self::from_word(),
+    //         syn::Meta::List(ref value) => Self::from_list(
+    //             &value
+    //                 .nested
+    //                 .iter()
+    //                 .cloned()
+    //                 .collect::<Vec<syn::NestedMeta>>()[..],
+    //         ),
+    //         syn::Meta::NameValue(ref value) => Self::from_value(&value.lit),
+    //     })
+    //     .map_err(|e| e.with_span(item))
+    // }
+
+    // fn from_word() -> darling::Result<Self> {
+    //     Err(darling::Error::unsupported_format("word"))
+    // }
+
+    fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
+        #[derive(FromMeta)]
+        struct FullRename {
+            serialize: String,
+            deserialize: String,
+        }
+
+        impl From<FullRename> for Rename {
+            fn from(v: FullRename) -> Self {
+                let FullRename {
+                    serialize,
+                    deserialize,
+                } = v;
+                Self {
+                    serialize,
+                    deserialize,
+                }
+            }
+        }
+        FullRename::from_list(items).map(Rename::from)
+
+        // Err(darling::Error::unsupported_format("list"))
+    }
+
+    // fn from_value(value: &syn::Lit) -> darling::Result<Self> {
+    //     (match *value {
+    //         syn::Lit::Bool(ref b) => Self::from_bool(b.value),
+    //         syn::Lit::Str(ref s) => Self::from_string(&s.value()),
+    //         syn::Lit::Char(ref ch) => Self::from_char(ch.value()),
+    //         _ => Err(darling::Error::unexpected_lit_type(value)),
+    //     })
+    //     .map_err(|e| e.with_span(value))
+    // }
+
+    // fn from_char(value: char) -> darling::Result<Self> {
+    //     Err(darling::Error::unexpected_type("char"))
+    // }
+
+    fn from_string(value: &str) -> darling::Result<Self> {
+        // Err(darling::Error::unexpected_type("string"))
+        Ok(Self {
+            serialize: value.into(),
+            deserialize: value.into(),
+        })
+    }
+
+    // fn from_bool(value: bool) -> darling::Result<Self> {
+    //     Err(darling::Error::unexpected_type("bool"))
+    // }
+}
+
 #[derive(Debug, FromField)]
 #[darling(attributes(key_getter, serde), forward_attrs(allow, doc, cfg))]
 struct MyFieldReceiver {
@@ -54,7 +139,7 @@ struct MyFieldReceiver {
     attrs: Vec<syn::Attribute>,
 
     #[darling(default)]
-    rename: Option<String>,
+    rename: Option<Rename>,
 
     #[darling(default)]
     skip_serializing_if: util::Ignored,
@@ -207,7 +292,8 @@ fn get_key_str_and_ident(
     // Prioritize serde renaming for key string
     let rename_field_from_serde = f.rename.as_ref();
     if let Some(name) = rename_field_from_serde {
-        key = name.as_str();
+        // We only care about the serialized string
+        key = name.serialize.as_str();
         key_ident = syn::Ident::from_string(key)
             .expect("Problem converting key string to syntax identifier");
     }
