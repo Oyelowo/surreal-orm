@@ -46,7 +46,7 @@ impl Default for CaseString {
 #[derive(Debug)]
 pub struct Rename {
     serialize: String,
-    deserialize: String,
+    deserialize: Option<String>,
 }
 
 impl FromMeta for Rename {
@@ -81,7 +81,8 @@ impl FromMeta for Rename {
         #[derive(FromMeta)]
         struct FullRename {
             serialize: String,
-            deserialize: String,
+            #[darling(default)]
+            deserialize: Option<String>,
         }
 
         impl From<FullRename> for Rename {
@@ -119,7 +120,7 @@ impl FromMeta for Rename {
         // Err(darling::Error::unexpected_type("string"))
         Ok(Self {
             serialize: value.into(),
-            deserialize: value.into(),
+            deserialize: Some(value.into()),
         })
     }
 
