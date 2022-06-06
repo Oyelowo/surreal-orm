@@ -1,10 +1,12 @@
-use crate::utils::postgresdb::get_pg_pool_from_ctx;
+use crate::utils::postgresdb::{get_pg_connection_from_ctx, get_pg_pool_from_ctx};
 
-use super::{CreateUserInput, InsertUser, Role, UpdateUserInput, User};
+use super::{Role, User, UserActiveModel};
+// use super::{CreateUserInput, InsertUser, Role, UpdateUserInput, User};
 use async_graphql::*;
 use chrono::Utc;
 use ormx::{Insert, Table};
 
+use sea_orm::ActiveModelTrait;
 use uuid::Uuid;
 use validator::Validate;
 
@@ -16,20 +18,22 @@ impl UserMutationRoot {
     async fn create_user(
         &self,
         ctx: &async_graphql::Context<'_>,
-        #[graphql(desc = "user data")] user_input: CreateUserInput,
+        #[graphql(desc = "user data")] user_input: User,
     ) -> async_graphql::Result<User> {
         user_input.validate()?;
-        let db = get_pg_pool_from_ctx(ctx)?;
-
-        let new_user = InsertUser {
-            username: user_input.username,
-            first_name: user_input.first_name,
-            last_name: user_input.last_name,
-            email: user_input.email,
-            role: Role::User,
-            age: user_input.age,
-            disabled: Some("nothing".into()), // age: user_input.age,
-        };
+        // let db = get_pg_pool_from_ctx(ctx)?;
+        let db = get_pg_connection_from_ctx(ctx)?;
+        let p = serde_json::to_value(user_input)?;
+        let user = UserActiveModel::from_json(p)?.insert(db).await?;
+        // let new_user = InsertUser {
+        //     username: user_input.username,
+        //     first_name: user_input.first_name,
+        //     last_name: user_input.last_name,
+        //     email: user_input.email,
+        //     role: Role::User,
+        //     age: user_input.age,
+        //     disabled: Some("nothing".into()), // age: user_input.age,
+        // };
 
         // This is necessary because ormx currently uses two transactions to enable insertion and selection
         // of latest inserted row for MySQL cos MySQL does not currently support returning from latest inserted
@@ -38,9 +42,9 @@ impl UserMutationRoot {
         // It might be possible still achieve this within a transaction in MySQL tho.
         // Check the link for more info.
         // https://github.com/NyxCode/ormx/issues/22
-        let connection = &mut *db.acquire().await?;
+        // let connection = &mut *db.acquire().await?;
 
-        let user = new_user.insert(connection).await?;
+        // let user = new_user.insert(connection).await?;
 
         Ok(user)
     }

@@ -4,7 +4,7 @@ macro_rules! sum{
     ($a:expr)=>{
         $a
     };
-// second arm in case of two arument are passed and stop recursion in case of odd number ofarguments
+// second arm in case two arguments are passed and stop recursion in case of odd number ofarguments
     ($a:expr,$b:expr)=>{
         {
             $a+$b
