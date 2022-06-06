@@ -214,22 +214,27 @@ fn create_fields_types_and_values(
     let field_case = get_case_string(f, struct_level_casing);
     let field_ident = get_field_identifier(f, i);
     let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
-    let (key_as_str, key_ident) = get_key_str_and_ident(&field_case, &field_identifier_string, f);
+    // let (key_as_str, key_ident) = get_key_str_and_ident(&field_case, &field_identifier_string, f);
+    let FieldFormat { serialized, ident } =
+        get_key_str_and_ident(&field_case, &field_identifier_string, f);
+        
     // struct type used to type the function
     store
         .struct_ty_fields
-        .push(quote!(pub #key_ident: &'static str));
+        .push(quote!(pub #ident: &'static str));
     // struct values themselves
-    store
-        .struct_values_fields
-        .push(quote!(#key_ident: #key_as_str));
+    store.struct_values_fields.push(quote!(#ident: #serialized));
 }
 
+struct FieldFormat {
+    serialized: ::std::string::String,
+    ident: syn::Ident,
+}
 fn get_key_str_and_ident(
     field_case: &CaseString,
     field_identifier_string: &::std::string::String,
     f: &MyFieldReceiver,
-) -> (String, proc_macro2::Ident) {
+) -> FieldFormat {
     let key = to_key_case_string(field_case, field_identifier_string);
     let mut key = key.as_str();
 
@@ -252,7 +257,20 @@ fn get_key_str_and_ident(
         key_ident = syn::Ident::from_string(key)
             .expect("Problem converting key string to syntax identifier");
     }
-    (::std::string::ToString::to_string(key), key_ident)
+    FieldFormat {
+        /*
+        Ident format is the name used in the code
+        e.g struct User{
+             user_name: String    // Here: user_name is ident and the serialized version by serde is serialized_Format
+        }
+        This is what we use as the key name and is mostly same as the serialized format
+        except in the case of kebab-case serialized format in whcih case we fallback
+        to the original ident format as written exactly in the code except when a use
+        uses rename attribute on the field, in which case that takes precedence.
+        */
+        ident: key_ident,
+        serialized: ::std::string::ToString::to_string(key),
+    }
 }
 
 fn get_field_identifier(f: &MyFieldReceiver, index: usize) -> TokenStream {
