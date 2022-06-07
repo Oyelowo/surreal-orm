@@ -1,7 +1,7 @@
 use async_graphql::*;
 
 use common::error_handling::ApiHttpStatus;
-use my_macros::*;
+use my_macros::FieldsGetter;
 // use my_macros_derive::
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -14,7 +14,7 @@ use wither::{
 use crate::{app::user::User, utils::mongodb::get_db_from_ctx};
 
 #[derive(
-    KeyNamesGetter,
+    FieldsGetter,
     Model,
     SimpleObject,
     InputObject,
@@ -50,7 +50,7 @@ impl Post {
     async fn poster(&self, ctx: &Context<'_>) -> Result<User> {
         // TODO: Use dataloader to batch user
         let db = get_db_from_ctx(ctx)?;
-        let post_keys = Post::get_field_names();
+        let post_keys = Post::get_fields_serialized();
 
         User::find_one(db, doc! {post_keys._id: self.poster_id}, None)
             .await?

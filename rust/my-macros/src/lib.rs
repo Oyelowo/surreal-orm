@@ -1,3 +1,12 @@
+pub use derive::FieldsGetter;
+
+pub trait FieldsGetter {
+    type Fields;
+    fn get_fields_serialized() -> Self::Fields;
+}
+
+// Examples
+
 pub trait HelloMacro {
     fn hello_macro();
 }
@@ -13,10 +22,3 @@ pub trait MyTrait {
 }
 
 pub use derive::MyTrait;
-
-pub trait FieldsGetter {
-    type Fields;
-    fn get_fields_serialized() -> Self::Fields;
-}
-
-pub use derive::FieldsGetter;

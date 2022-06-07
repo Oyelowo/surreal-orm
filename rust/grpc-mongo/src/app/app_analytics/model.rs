@@ -1,4 +1,4 @@
-use my_macros::KeyNamesGetter;
+use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use uuid::Uuid;
@@ -9,7 +9,7 @@ use wither::{
 };
 
 // rename to appuserevent
-#[derive(Model, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug, KeyNamesGetter)]
+#[derive(Model, Clone, Serialize, Deserialize, TypedBuilder, Validate, Debug, FieldsGetter)]
 #[serde(rename_all = "camelCase")]
 pub struct UserAppEvent {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]

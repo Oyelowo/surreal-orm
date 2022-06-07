@@ -14,7 +14,7 @@ use mongodb::{
     bson::oid::ObjectId,
     options::{FindOneOptions, FindOptions, ReadConcern},
 };
-use my_macros::KeyNamesGetter;
+use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
 use wither::{bson::doc, prelude::Model};
 
@@ -59,7 +59,7 @@ impl UserQueryRoot {
         // ];
         // let mut cursor = User::collection(db).aggregate(pipeline, None).await?;
 
-        let user_keys = User::get_field_names();
+        let user_keys = User::get_fields_serialized();
         let find_option = FindOptions::builder()
             .sort(doc! {user_keys.createdAt: -1})
             .build();

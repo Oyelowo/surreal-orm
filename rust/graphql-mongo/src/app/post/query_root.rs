@@ -9,7 +9,7 @@ use mongodb::{
     bson::oid::ObjectId,
     options::{FindOneOptions, ReadConcern},
 };
-use my_macros::KeyNamesGetter;
+use my_macros::FieldsGetter;
 use wither::{bson::doc, prelude::Model};
 
 #[derive(Default)]
@@ -28,7 +28,7 @@ impl PostQueryRoot {
             .build();
 
         // TODO: Move to model
-        let post_keys = Post::get_field_names();
+        let post_keys = Post::get_fields_serialized();
         Post::find_one(db, doc! {post_keys._id: id}, find_one_options)
             .await?
             // Lazily evaluate the error:

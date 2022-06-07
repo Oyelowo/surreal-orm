@@ -4,7 +4,7 @@ use common::{
     authentication::TypedSession, error_handling::ApiHttpStatus, mongodb::model_cursor_to_vec,
 };
 use mongodb::Database;
-use my_macros::KeyNamesGetter;
+use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
@@ -27,7 +27,7 @@ use super::guards::{AuthGuard, RoleGuard};
     TypedBuilder,
     Validate,
     Debug,
-    KeyNamesGetter,
+    FieldsGetter,
 )]
 #[serde(rename_all = "camelCase")]
 #[graphql(complex)]
@@ -96,7 +96,7 @@ pub struct User {
 }
 
 #[derive(
-    InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug, Clone, KeyNamesGetter,
+    InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug, Clone, FieldsGetter,
 )]
 #[serde(rename_all = "camelCase")]
 #[graphql(input_name = "AccountOauthInput")]
@@ -159,7 +159,7 @@ impl User {
     async fn posts(&self, ctx: &Context<'_>) -> Result<Vec<Post>> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = get_db_from_ctx(ctx)?;
-        let post_keys = Post::get_field_names();
+        let post_keys = Post::get_fields_serialized();
         let cursor = Post::find(db, doc! {post_keys.posterId: self.id}, None).await?;
         model_cursor_to_vec(cursor)
             .await
@@ -212,7 +212,7 @@ impl User {
     }
 
     pub async fn _get_user(&self, db: &Database, user_by: UserBy) -> Result<Self> {
-        let uk = User::get_field_names();
+        let uk = User::get_fields_serialized();
         let search_doc = match user_by {
             UserBy::UserId(id) => doc! { uk._id: id },
             UserBy::Username(user_name) => {
@@ -232,14 +232,14 @@ impl User {
     //     todo!()
     // }
     pub async fn find_by_id(db: &Database, id: &ObjectId) -> Result<Self> {
-        let uk = User::get_field_names();
+        let uk = User::get_fields_serialized();
         User::find_one(db, doc! { uk._id: id }, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
 
     pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Result<Self> {
-        let uk = User::get_field_names();
+        let uk = User::get_fields_serialized();
         User::find_one(db, doc! { uk.username: username.into() }, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
@@ -250,8 +250,8 @@ impl User {
         provider: impl Into<String>,
         provider_account_id: impl Into<String>,
     ) -> Result<Self> {
-        let uk = User::get_field_names();
-        let acc_keys = AccountOauth::get_field_names();
+        let uk = User::get_fields_serialized();
+        let acc_keys = AccountOauth::get_fields_serialized();
         User::find_one(db, doc! { uk.accounts: {"$elemMatch": {acc_keys.provider: provider.into(), acc_keys.providerAccountId: provider_account_id.into()}} }, None)
         .await?
         .ok_or_else(||ApiHttpStatus::NotFound("User not found".into()).extend())
@@ -263,8 +263,8 @@ impl User {
         provider: impl Into<String>,
         provider_account_id: impl Into<String>,
     ) -> Result<Self, WitherError> {
-        let user_keys = User::get_field_names();
-        let acc_keys = AccountOauth::get_field_names();
+        let user_keys = User::get_fields_serialized();
+        let acc_keys = AccountOauth::get_fields_serialized();
         let filter = doc! { user_keys.accounts: {"$elemMatch": {acc_keys.provider: provider.into(), acc_keys.providerAccountId: provider_account_id.into()}}};
         User::save(&mut self, db, Some(filter)).await?;
 

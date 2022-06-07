@@ -112,7 +112,6 @@ pub struct FieldsGetterOpts {
     /// struct fields because we previously told darling we only accept structs.
     data: ast::Data<util::Ignored, MyFieldReceiver>,
 
-    
     #[darling(default)]
     rename_all: Option<Rename>,
 }
