@@ -1,6 +1,5 @@
 use async_graphql::*;
 
-use ormx::{self, Patch, Table};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{
@@ -68,8 +67,10 @@ pub enum Relation {
 impl ActiveModelBehavior for ActiveModel {}
 
 pub type Post = Model;
+pub type PostColumns = Column;
 pub type PostEntity = Entity;
 pub type PostActiveModel = ActiveModel;
+
 #[ComplexObject]
 impl Post {
     async fn poster(&self, ctx: &Context<'_>) -> anyhow::Result<User> {
