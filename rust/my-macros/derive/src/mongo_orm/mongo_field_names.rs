@@ -100,14 +100,6 @@ struct MyFieldReceiver {
 
     #[darling(default)]
     default: util::Ignored,
-
-    /// We declare this as an `Option` so that during tokenization we can write
-    /// `field.case.unwrap_or(derive_input.case)` to facilitate field-level
-    /// overrides of struct-level settings. I.O.W, if this is not provided
-    /// at field level, we can fall back to the struct level settings by doing
-    /// field.case.unwrap_or(struct_level.case). struct_level is from derive_input
-    #[darling(default)]
-    case: Option<String>,
 }
 
 #[derive(Debug, FromDeriveInput)]
@@ -120,14 +112,9 @@ pub struct KeyNamesGetterOpts {
     /// struct fields because we previously told darling we only accept structs.
     data: ast::Data<util::Ignored, MyFieldReceiver>,
 
+    
     #[darling(default)]
     rename_all: Option<::std::string::String>,
-
-    #[darling(default)]
-    typee: ::std::string::String,
-
-    #[darling(default)]
-    case: Option<String>,
 }
 
 impl ToTokens for KeyNamesGetterOpts {
@@ -135,18 +122,14 @@ impl ToTokens for KeyNamesGetterOpts {
         let KeyNamesGetterOpts {
             ident: ref my_struct,
             ref data,
-            ref case,
-            rename_all: ref rename_all_from_serde,
+            ref rename_all,
             ..
         } = *self;
 
-        let struct_level_casing = rename_all_from_serde.as_ref().map_or_else(
-            || {
-                case.as_ref()
-                    .and_then(|c| CaseString::from_str(c.as_str()).ok())
-            },
-            |case_from_serde| CaseString::from_str(case_from_serde.as_str()).ok(),
-        );
+        let struct_level_casing = rename_all
+            .as_ref()
+            .map(|case| CaseString::from_str(case.as_str()).ok())
+            .expect("invalid casing");
 
         let fields = get_fields(data);
 
@@ -213,10 +196,10 @@ fn create_fields_types_and_values(
     i: usize,
     store: &mut FieldStore,
 ) {
-    let field_case = get_case_string(f, struct_level_casing);
+    let field_case = struct_level_casing.expect("rerer");
     let field_ident = get_field_identifier(f, i);
     let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
-    // let (key_as_str, key_ident) = get_key_str_and_ident(&field_case, &field_identifier_string, f);
+
     let FieldFormat { serialized, ident } =
         get_key_str_and_ident(&field_case, &field_identifier_string, f);
 
@@ -224,6 +207,7 @@ fn create_fields_types_and_values(
     store
         .struct_ty_fields
         .push(quote!(pub #ident: &'static str));
+
     // struct values themselves
     store.struct_values_fields.push(quote!(#ident: #serialized));
 }
@@ -294,21 +278,6 @@ fn get_fields(data: &ast::Data<util::Ignored, MyFieldReceiver>) -> Vec<&MyFieldR
         .expect("Should never be enum")
         .fields;
     fields
-}
-
-fn get_case_string(f: &MyFieldReceiver, struct_level_casing: Option<CaseString>) -> CaseString {
-    let error_message = "Invalid case in case attribute. The options are:
-        lowercase, UPPERCASE, PascalCase, camelCase, snake_case,
-    SCREAMING_SNAKE_CASE, kebab-case, SCREAMING-KEBAB-CASE
-    ";
-
-    // Fallback to the struct metadata value if not provided for the field.
-    // If not provided in both, fallback to camel.
-    f.case
-        .as_ref()
-        .map(|case| CaseString::from_str(case.as_str()).expect(error_message))
-        .or(struct_level_casing)
-        .unwrap_or(CaseString::Camel)
 }
 
 // fn to_key_case_string(field_case: CaseString, field_identifier_string: ::std::string::String) -> ::std::string::String {

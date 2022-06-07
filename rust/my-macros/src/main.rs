@@ -130,21 +130,22 @@ fn keys_getter_7() {
         #[warn(non_snake_case)]
         pub name_of_me: String,
 
+        #[serde(rename = "age")]
         pub ageCount: u8,
 
-        #[key_getter(case = "camelCase")]
+        #[key_getter(rename = "username")]
         pub first_name: u8,
     }
 
     let ConsumerKeyNames {
         name_of_me,
-        age_count,
-        firstName,
+        age,
+        username,
     } = Consumer::get_field_names();
 
     assert_eq!(name_of_me, "name_of_me");
-    assert_eq!(age_count, "age_count");
-    assert_eq!(firstName, "firstName");
+    assert_eq!(age, "age");
+    assert_eq!(username, "username");
 }
 
 #[test]
@@ -157,19 +158,19 @@ fn keys_getter_8() {
 
         pub ageCount: u8,
 
-        #[key_getter(case = "camelCase")]
+        #[key_getter(rename = "anotherName")]
         pub first_name: u8,
     }
 
     let ConsumerKeyNames {
         name_of_me,
         ageCount,
-        firstName,
+        anotherName,
     } = Consumer::get_field_names();
 
     assert_eq!(name_of_me, "name-of-me");
     assert_eq!(ageCount, "age-count");
-    assert_eq!(firstName, "firstName");
+    assert_eq!(anotherName, "anotherName");
 }
 
 #[test]
