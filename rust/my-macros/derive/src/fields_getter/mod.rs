@@ -1,3 +1,3 @@
-mod fields_getter;
+mod trait_generator;
 
-pub use fields_getter::generate_fields_getter_trait;
+pub use trait_generator::generate_fields_getter_trait;
