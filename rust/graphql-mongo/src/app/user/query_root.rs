@@ -1,6 +1,6 @@
 use crate::utils::mongodb::get_db_from_ctx;
 
-use super::{guards::AuthGuard, model::User};
+use super::{guards::AuthGuard, model::User, UserBy};
 
 use async_graphql::*;
 use chrono::{DateTime, Utc};
@@ -13,6 +13,7 @@ use common::{
 use mongodb::{
     bson::oid::ObjectId,
     options::{FindOneOptions, FindOptions, ReadConcern},
+    Database,
 };
 use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
@@ -32,12 +33,19 @@ impl UserQueryRoot {
         let find_one_options = FindOneOptions::builder()
             .read_concern(ReadConcern::majority())
             .build();
+        let user_key = User::get_fields_serialized();
 
-        let user = User::find_one(db, doc! {MONGO_ID_KEY: id}, find_one_options)
+        let user = User::find_one(db, doc! {user_key._id: id}, find_one_options)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend());
 
         user
+    }
+
+    pub async fn get_user(&self, ctx: &Context<'_>, user_by: UserBy) -> Result<User> {
+        let db = get_db_from_ctx(ctx)?;
+
+        User::get_user(db, user_by).await
     }
 
     #[graphql(guard = "AuthGuard")]

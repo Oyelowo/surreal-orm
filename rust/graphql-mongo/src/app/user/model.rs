@@ -211,7 +211,7 @@ impl User {
         user
     }
 
-    pub async fn _get_user(&self, db: &Database, user_by: UserBy) -> Result<Self> {
+    pub async fn get_user(db: &Database, user_by: UserBy) -> Result<Self> {
         let uk = User::get_fields_serialized();
         let search_doc = match user_by {
             UserBy::UserId(id) => doc! { uk._id: id },
@@ -220,7 +220,7 @@ impl User {
                 doc
             }
             // Temporary
-            UserBy::Address(add) => doc! { uk.city: add.city },
+            UserBy::Address(address) => doc! { uk.city: address.city },
             UserBy::Email(email) => doc! { uk.email: email },
         };
         // todo!()

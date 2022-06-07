@@ -2,7 +2,6 @@ use async_graphql::*;
 
 use common::error_handling::ApiHttpStatus;
 use my_macros::FieldsGetter;
-// use my_macros_derive::
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
