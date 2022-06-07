@@ -1,5 +1,12 @@
 #![allow(dead_code)]
 
+use super::{
+    helpers::{
+        get_field_identifier, get_field_str_and_ident, get_fields, get_struct_types_and_fields,
+        FieldStore,
+    },
+    types::CaseString,
+};
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use quote::quote;
@@ -7,44 +14,9 @@ use std::str::FromStr;
 use strum_macros::EnumString;
 use syn::{self, parse_macro_input};
 
-/// Options: "lowercase", "UPPERCASE", "PascalCase", "camelCase", "snake_case",
-/// "SCREAMING_SNAKE_CASE", "kebab-case", "SCREAMING-KEBAB-CASE"
-#[derive(Debug, Clone, Copy, EnumString, FromMeta)]
-#[darling(default)]
-pub enum CaseString {
-    #[strum(serialize = "camelCase")]
-    Camel,
-    #[strum(serialize = "snake_case")]
-    Snake,
-    // Normal,
-    #[strum(serialize = "PascalCase")]
-    Pascal,
-
-    #[strum(serialize = "lowercase")]
-    Lower,
-
-    #[strum(serialize = "UPPERCASE")]
-    Upper,
-
-    #[strum(serialize = "SCREAMING_SNAKE_CASE")]
-    ScreamingSnake,
-
-    #[strum(serialize = "kebab-case")]
-    Kebab,
-
-    #[strum(serialize = "SCREAMING-KEBAB-CASE")]
-    ScreamingKebab,
-}
-
-impl Default for CaseString {
-    fn default() -> Self {
-        CaseString::Camel
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Rename {
-    serialize: String,
+    pub(crate) serialize: String,
 }
 
 /// This enables us to handle potentially nested values i.e
@@ -54,13 +26,13 @@ pub struct Rename {
 ///  #[serde(rename(serialize = "ser_name_nested", deserialize = "deser_name_nested"))]
 /// However, We dont care about deserialized name from serde, so we just ignore that.
 impl FromMeta for Rename {
-    fn from_string(value: &str) -> darling::Result<Self> {
+    fn from_string(value: &str) -> ::darling::Result<Self> {
         Ok(Self {
             serialize: value.into(),
         })
     }
 
-    fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
+    fn from_list(items: &[syn::NestedMeta]) -> ::darling::Result<Self> {
         #[derive(FromMeta)]
         struct FullRename {
             serialize: String,
@@ -81,25 +53,25 @@ impl FromMeta for Rename {
 
 #[derive(Debug, FromField)]
 #[darling(attributes(field_getter, serde), forward_attrs(allow, doc, cfg))]
-struct MyFieldReceiver {
+pub(crate) struct MyFieldReceiver {
     /// Get the ident of the field. For fields in tuple or newtype structs or
     /// enum bodies, this can be `None`.
-    ident: Option<syn::Ident>,
+    pub(crate) ident: ::std::option::Option<syn::Ident>,
     /// This magic field name pulls the type from the input.
     ty: syn::Type,
     attrs: Vec<syn::Attribute>,
 
     #[darling(default)]
-    rename: Option<Rename>,
+    pub(crate) rename: ::std::option::Option<Rename>,
 
     #[darling(default)]
-    skip_serializing_if: util::Ignored,
+    skip_serializing_if: ::darling::util::Ignored,
 
     #[darling(default)]
-    with: util::Ignored,
+    with: ::darling::util::Ignored,
 
     #[darling(default)]
-    default: util::Ignored,
+    default: ::darling::util::Ignored,
 }
 
 #[derive(Debug, FromDeriveInput)]
@@ -110,10 +82,10 @@ pub struct FieldsGetterOpts {
     generics: syn::Generics,
     /// Receives the body of the struct or enum. We don't care about
     /// struct fields because we previously told darling we only accept structs.
-    data: ast::Data<util::Ignored, MyFieldReceiver>,
+    data: ast::Data<util::Ignored, self::MyFieldReceiver>,
 
     #[darling(default)]
-    rename_all: Option<Rename>,
+    rename_all: ::std::option::Option<Rename>,
 }
 
 impl ToTokens for FieldsGetterOpts {
@@ -125,10 +97,9 @@ impl ToTokens for FieldsGetterOpts {
             ..
         } = *self;
 
-        let struct_level_casing = rename_all
-            .as_ref()
-            .map(|case| CaseString::from_str(case.serialize.as_str()).ok())
-            .expect("invalid casing");
+        let struct_level_casing = rename_all.as_ref().map(|case| {
+            CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
+        });
 
         let fields = get_fields(data);
 
@@ -162,150 +133,14 @@ impl ToTokens for FieldsGetterOpts {
     }
 }
 
-#[derive(Debug, Default)]
-struct FieldStore {
-    struct_ty_fields: Vec<TokenStream>,
-    struct_values_fields: Vec<TokenStream>,
-}
-
-fn get_struct_types_and_fields(
-    fields: Vec<&MyFieldReceiver>,
-    struct_level_casing: Option<CaseString>,
-) -> FieldStore {
-    let mut field_store = FieldStore::default();
-
-    fields
-        .into_iter()
-        .enumerate()
-        .for_each(|(index, field_receiver)| {
-            create_fields_types_and_values(
-                field_receiver,
-                struct_level_casing,
-                index,
-                &mut field_store,
-            );
-        });
-
-    field_store
-}
-
-fn create_fields_types_and_values(
-    f: &MyFieldReceiver,
-    struct_level_casing: Option<CaseString>,
-    i: usize,
-    store: &mut FieldStore,
-) {
-    let field_case = struct_level_casing.expect("rerer");
-    let field_ident = get_field_identifier(f, i);
-    let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
-
-    let FieldFormat { serialized, ident } =
-        get_field_str_and_ident(&field_case, &field_identifier_string, f);
-
-    // struct type used to type the function
-    store
-        .struct_ty_fields
-        .push(quote!(pub #ident: &'static str));
-
-    // struct values themselves
-    store.struct_values_fields.push(quote!(#ident: #serialized));
-}
-
-struct FieldFormat {
-    serialized: ::std::string::String,
-    ident: syn::Ident,
-}
-fn get_field_str_and_ident(
-    field_case: &CaseString,
-    field_identifier_string: &::std::string::String,
-    f: &MyFieldReceiver,
-) -> FieldFormat {
-    let field = to_case_string(field_case, field_identifier_string);
-    let mut field = field.as_str();
-
-    let field_ident = match field_case {
-        // Tries to keep the field name ident as written in the struct
-        //  if ure using kebab case which cannot be used as an identifier
-        // Field rename attribute overrides this
-        CaseString::Kebab | CaseString::ScreamingKebab => field_identifier_string,
-        _ => field,
-    };
-
-    let mut field_ident = syn::Ident::from_string(field_ident)
-        .expect("Problem converting field string to syntax identifier");
-
-    // Prioritize serde renaming for field string
-    let rename_field_from_serde = f.rename.as_ref();
-    if let Some(name) = rename_field_from_serde {
-        // We only care about the serialized string
-        field = name.serialize.as_str();
-        field_ident = syn::Ident::from_string(field)
-            .expect("Problem converting field string to syntax identifier");
-    }
-    FieldFormat {
-        /*
-        Ident format is the name used in the code
-        e.g struct User{
-             user_name: String    // Here: user_name is ident and the serialized version by serde is serialized_Format
-        }
-        This is what we use as the field name and is mostly same as the serialized format
-        except in the case of kebab-case serialized format in whcih case we fallback
-        to the original ident format as written exactly in the code except when a use
-        uses rename attribute on the field, in which case that takes precedence.
-        */
-        ident: field_ident,
-        serialized: ::std::string::ToString::to_string(field),
-    }
-}
-
-fn get_field_identifier(f: &MyFieldReceiver, index: usize) -> TokenStream {
-    // This works with named or indexed fields, so we'll fall back to the index so we can
-    // write the output as a key-value pair.
-    // the index is really not necessary since our models will nevel be tuple struct
-    // but leaving it as is anyways
-    f.ident.as_ref().map_or_else(
-        || {
-            let i = syn::Index::from(index);
-            quote!(#i)
-        },
-        |v| quote!(#v),
-    )
-}
-
-fn get_fields(data: &ast::Data<util::Ignored, MyFieldReceiver>) -> Vec<&MyFieldReceiver> {
-    let fields = data
-        .as_ref()
-        .take_struct()
-        .expect("Should never be enum")
-        .fields;
-    fields
-}
-
-fn to_case_string(
-    field_case: &CaseString,
-    field_identifier_string: &::std::string::String,
-) -> ::std::string::String {
-    let convert = |case: convert_case::Case| {
-        convert_case::Converter::new()
-            .to_case(case)
-            .convert(field_identifier_string)
-    };
-    match field_case {
-        CaseString::Camel => convert(convert_case::Case::Camel),
-        CaseString::Snake => convert(convert_case::Case::Snake),
-        CaseString::Pascal => convert(convert_case::Case::Pascal),
-        CaseString::Lower => convert(convert_case::Case::Lower),
-        CaseString::Upper => convert(convert_case::Case::Upper),
-        CaseString::ScreamingSnake => convert(convert_case::Case::ScreamingSnake),
-        CaseString::Kebab => convert(convert_case::Case::Kebab),
-        CaseString::ScreamingKebab => convert(convert_case::Case::UpperKebab),
-    }
-}
-
 pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     // Construct a representation of Rust code as a syntax tree
     // that we can manipulate
     let input = parse_macro_input!(input);
-    let output = FieldsGetterOpts::from_derive_input(&input).expect("Wrong options");
+    // let output = FieldsGetterOpts::from_derive_input(&input).expect("Wrong options");
+    let output = match FieldsGetterOpts::from_derive_input(&input) {
+        Ok(out) => out,
+        Err(err) => return proc_macro::TokenStream::from(err.write_errors()),
+    };
     quote!(#output).into()
 }
