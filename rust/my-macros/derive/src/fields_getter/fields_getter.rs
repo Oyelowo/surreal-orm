@@ -80,7 +80,7 @@ impl FromMeta for Rename {
 }
 
 #[derive(Debug, FromField)]
-#[darling(attributes(key_getter, serde), forward_attrs(allow, doc, cfg))]
+#[darling(attributes(field_getter, serde), forward_attrs(allow, doc, cfg))]
 struct MyFieldReceiver {
     /// Get the ident of the field. For fields in tuple or newtype structs or
     /// enum bodies, this can be `None`.
@@ -103,8 +103,8 @@ struct MyFieldReceiver {
 }
 
 #[derive(Debug, FromDeriveInput)]
-#[darling(attributes(key_getter, serde), forward_attrs(allow, doc, cfg))]
-pub struct KeyNamesGetterOpts {
+#[darling(attributes(field_getter, serde), forward_attrs(allow, doc, cfg))]
+pub struct FieldsGetterOpts {
     ident: syn::Ident,
     attrs: Vec<syn::Attribute>,
     generics: syn::Generics,
@@ -117,9 +117,9 @@ pub struct KeyNamesGetterOpts {
     rename_all: Option<Rename>,
 }
 
-impl ToTokens for KeyNamesGetterOpts {
+impl ToTokens for FieldsGetterOpts {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let KeyNamesGetterOpts {
+        let FieldsGetterOpts {
             ident: ref my_struct,
             ref data,
             ref rename_all,
@@ -139,7 +139,7 @@ impl ToTokens for KeyNamesGetterOpts {
         } = get_struct_types_and_fields(fields, struct_level_casing);
 
         let struct_name = syn::Ident::new(
-            format!("{my_struct}KeyNames").as_str(),
+            format!("{my_struct}Fields").as_str(),
             ::proc_macro2::Span::call_site(),
         );
 
@@ -149,9 +149,9 @@ impl ToTokens for KeyNamesGetterOpts {
 
         tokens.extend(quote! {
             #struct_type
-            impl KeyNamesGetter for #my_struct {
-                type KeyNames = #struct_name;
-                fn get_field_names() -> Self::KeyNames {
+            impl FieldsGetter for #my_struct {
+                type Fields = #struct_name;
+                fn get_fields_serialized() -> Self::Fields {
                     #struct_name {
                         #( #struct_values_fields), *
                     }
@@ -201,7 +201,7 @@ fn create_fields_types_and_values(
     let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
 
     let FieldFormat { serialized, ident } =
-        get_key_str_and_ident(&field_case, &field_identifier_string, f);
+        get_field_str_and_ident(&field_case, &field_identifier_string, f);
 
     // struct type used to type the function
     store
@@ -216,32 +216,32 @@ struct FieldFormat {
     serialized: ::std::string::String,
     ident: syn::Ident,
 }
-fn get_key_str_and_ident(
+fn get_field_str_and_ident(
     field_case: &CaseString,
     field_identifier_string: &::std::string::String,
     f: &MyFieldReceiver,
 ) -> FieldFormat {
-    let key = to_key_case_string(field_case, field_identifier_string);
-    let mut key = key.as_str();
+    let field = to_case_string(field_case, field_identifier_string);
+    let mut field = field.as_str();
 
-    let key_ident = match field_case {
-        // Tries to keep the key name ident as written in the struct
+    let field_ident = match field_case {
+        // Tries to keep the field name ident as written in the struct
         //  if ure using kebab case which cannot be used as an identifier
         // Field rename attribute overrides this
         CaseString::Kebab | CaseString::ScreamingKebab => field_identifier_string,
-        _ => key,
+        _ => field,
     };
 
-    let mut key_ident = syn::Ident::from_string(key_ident)
-        .expect("Problem converting key string to syntax identifier");
+    let mut field_ident = syn::Ident::from_string(field_ident)
+        .expect("Problem converting field string to syntax identifier");
 
-    // Prioritize serde renaming for key string
+    // Prioritize serde renaming for field string
     let rename_field_from_serde = f.rename.as_ref();
     if let Some(name) = rename_field_from_serde {
         // We only care about the serialized string
-        key = name.serialize.as_str();
-        key_ident = syn::Ident::from_string(key)
-            .expect("Problem converting key string to syntax identifier");
+        field = name.serialize.as_str();
+        field_ident = syn::Ident::from_string(field)
+            .expect("Problem converting field string to syntax identifier");
     }
     FieldFormat {
         /*
@@ -249,19 +249,21 @@ fn get_key_str_and_ident(
         e.g struct User{
              user_name: String    // Here: user_name is ident and the serialized version by serde is serialized_Format
         }
-        This is what we use as the key name and is mostly same as the serialized format
+        This is what we use as the field name and is mostly same as the serialized format
         except in the case of kebab-case serialized format in whcih case we fallback
         to the original ident format as written exactly in the code except when a use
         uses rename attribute on the field, in which case that takes precedence.
         */
-        ident: key_ident,
-        serialized: ::std::string::ToString::to_string(key),
+        ident: field_ident,
+        serialized: ::std::string::ToString::to_string(field),
     }
 }
 
 fn get_field_identifier(f: &MyFieldReceiver, index: usize) -> TokenStream {
     // This works with named or indexed fields, so we'll fall back to the index so we can
     // write the output as a key-value pair.
+    // the index is really not necessary since our models will nevel be tuple struct
+    // but leaving it as is anyways
     f.ident.as_ref().map_or_else(
         || {
             let i = syn::Index::from(index);
@@ -280,8 +282,7 @@ fn get_fields(data: &ast::Data<util::Ignored, MyFieldReceiver>) -> Vec<&MyFieldR
     fields
 }
 
-// fn to_key_case_string(field_case: CaseString, field_identifier_string: ::std::string::String) -> ::std::string::String {
-fn to_key_case_string(
+fn to_case_string(
     field_case: &CaseString,
     field_identifier_string: &::std::string::String,
 ) -> ::std::string::String {
@@ -302,10 +303,10 @@ fn to_key_case_string(
     }
 }
 
-pub fn generate_key_names_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     // Construct a representation of Rust code as a syntax tree
     // that we can manipulate
     let input = parse_macro_input!(input);
-    let output = KeyNamesGetterOpts::from_derive_input(&input).expect("Wrong options");
+    let output = FieldsGetterOpts::from_derive_input(&input).expect("Wrong options");
     quote!(#output).into()
 }
