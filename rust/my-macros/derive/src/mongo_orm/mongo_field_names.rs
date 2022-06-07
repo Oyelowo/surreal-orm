@@ -114,7 +114,7 @@ pub struct KeyNamesGetterOpts {
 
     
     #[darling(default)]
-    rename_all: Option<::std::string::String>,
+    rename_all: Option<Rename>,
 }
 
 impl ToTokens for KeyNamesGetterOpts {
@@ -128,7 +128,7 @@ impl ToTokens for KeyNamesGetterOpts {
 
         let struct_level_casing = rename_all
             .as_ref()
-            .map(|case| CaseString::from_str(case.as_str()).ok())
+            .map(|case| CaseString::from_str(case.serialize.as_str()).ok())
             .expect("invalid casing");
 
         let fields = get_fields(data);

@@ -18,7 +18,8 @@ struct Foo {
 }
 
 #[derive(KeyNamesGetter, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
+#[serde(rename_all(serialize = "snake_case"))]
 pub struct ConsumingType {
     // #[serde(rename = "lowo_cool")]
     #[serde(rename(serialize = "lowo_cool", deserialize = "lowo_cool"))]
@@ -177,6 +178,59 @@ fn keys_getter_8() {
 fn handle_nested_values() {
     #[derive(KeyNamesGetter, Serialize, Deserialize)]
     #[key_getter(rename_all = "camelCase")]
+    pub struct Consumer {
+        #[serde(rename(serialize = "lowo_cool", deserialize = "lowo_cool"))]
+        pub name_of_me: String,
+
+        #[serde(rename(serialize = "age"))]
+        pub ageCount: u8,
+
+        #[serde(rename = "simple_name")]
+        pub first_name: u8,
+    }
+
+    let ConsumerKeyNames {
+        lowo_cool,
+        age,
+        simple_name,
+    } = Consumer::get_field_names();
+
+    assert_eq!(lowo_cool, "lowo_cool");
+    assert_eq!(age, "age");
+    assert_eq!(simple_name, "simple_name");
+}
+
+#[test]
+fn handle_nested_values_at_struct_lvel() {
+    #[derive(KeyNamesGetter, Serialize, Deserialize)]
+    #[serde(rename_all(serialize = "camelCase"))]
+    pub struct Consumer {
+        #[serde(rename(serialize = "lowo_cool", deserialize = "lowo_cool"))]
+        pub name_of_me: String,
+
+        #[serde(rename(serialize = "age"))]
+        pub ageCount: u8,
+
+        #[serde(rename = "simple_name")]
+        pub first_name: u8,
+    }
+
+    let ConsumerKeyNames {
+        lowo_cool,
+        age,
+        simple_name,
+    } = Consumer::get_field_names();
+
+    assert_eq!(lowo_cool, "lowo_cool");
+    assert_eq!(age, "age");
+    assert_eq!(simple_name, "simple_name");
+}
+
+
+#[test]
+fn handle_nested_values_at_struct_level_but_ignore_deserialize() {
+    #[derive(KeyNamesGetter, Serialize, Deserialize)]
+    #[serde(rename_all(serialize = "camelCase", deserialize = "camelCase"))]
     pub struct Consumer {
         #[serde(rename(serialize = "lowo_cool", deserialize = "lowo_cool"))]
         pub name_of_me: String,
