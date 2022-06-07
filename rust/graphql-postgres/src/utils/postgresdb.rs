@@ -13,7 +13,9 @@ pub fn get_pg_pool_from_ctx<'a>(ctx: &'a Context<'_>) -> async_graphql::Result<&
         .extend()
     })
 }
-pub fn get_pg_connection_from_ctx<'a>(ctx: &'a Context<'_>) -> async_graphql::Result<&'a DatabaseConnection> {
+pub fn get_pg_connection_from_ctx<'a>(
+    ctx: &'a Context<'_>,
+) -> async_graphql::Result<&'a DatabaseConnection> {
     ctx.data::<DatabaseConnection>().map_err(|e| {
         warn!("{e:?}");
         ApiHttpStatus::InternalServerError(

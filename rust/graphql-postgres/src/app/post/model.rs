@@ -3,12 +3,9 @@ use async_graphql::*;
 use common::error_handling::ApiHttpStatus;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use sqlx::{
-    types::{
-        chrono::{DateTime, Utc},
-        Uuid,
-    },
-    PgPool,
+use sqlx::types::{
+    chrono::{DateTime, Utc},
+    Uuid,
 };
 use validator::Validate;
 

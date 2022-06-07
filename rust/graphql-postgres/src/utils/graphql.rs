@@ -64,7 +64,7 @@ pub async fn setup_graphql_schema() -> anyhow::Result<MyGraphQLSchema> {
         .max_lifetime(Duration::from_secs(8))
         .sqlx_logging(true);
 
-        // let k = Database::from(connection_pool); 
+    // let k = Database::from(connection_pool);
     let db = Database::connect(opt).await?;
     // opt.
 

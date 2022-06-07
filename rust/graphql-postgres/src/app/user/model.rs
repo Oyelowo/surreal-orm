@@ -13,7 +13,7 @@ use validator::Validate;
 
 use crate::{
     app::post::{Post, PostColumns, PostEntity},
-    utils::postgresdb::{get_pg_connection_from_ctx, get_pg_pool_from_ctx},
+    utils::postgresdb::get_pg_connection_from_ctx,
 };
 
 #[derive(

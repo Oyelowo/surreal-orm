@@ -1,7 +1,4 @@
-use crate::{
-    app::user::UserEntity,
-    utils::postgresdb::{get_pg_connection_from_ctx, get_pg_pool_from_ctx},
-};
+use crate::{app::user::UserEntity, utils::postgresdb::get_pg_connection_from_ctx};
 
 use super::{User, UserActiveModel};
 
