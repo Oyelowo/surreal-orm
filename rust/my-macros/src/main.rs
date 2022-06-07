@@ -132,7 +132,7 @@ fn keys_getter_7() {
 
         pub ageCount: u8,
 
-        #[key_getter(case = "camel")]
+        #[key_getter(case = "camelCase")]
         pub first_name: u8,
     }
 
@@ -157,7 +157,7 @@ fn keys_getter_8() {
 
         pub ageCount: u8,
 
-        #[key_getter(case = "camel")]
+        #[key_getter(case = "camelCase")]
         pub first_name: u8,
     }
 

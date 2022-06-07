@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 
-use convert_case::{Case, Casing};
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use quote::quote;
@@ -108,7 +107,7 @@ struct MyFieldReceiver {
     /// at field level, we can fall back to the struct level settings by doing
     /// field.case.unwrap_or(struct_level.case). struct_level is from derive_input
     #[darling(default)]
-    case: Option<CaseString>,
+    case: Option<String>,
 }
 
 #[derive(Debug, FromDeriveInput)]
@@ -128,7 +127,7 @@ pub struct KeyNamesGetterOpts {
     typee: ::std::string::String,
 
     #[darling(default)]
-    case: Option<CaseString>,
+    case: Option<String>,
 }
 
 impl ToTokens for KeyNamesGetterOpts {
@@ -142,7 +141,10 @@ impl ToTokens for KeyNamesGetterOpts {
         } = *self;
 
         let struct_level_casing = rename_all_from_serde.as_ref().map_or_else(
-            || *case,
+            || {
+                case.as_ref()
+                    .and_then(|c| CaseString::from_str(c.as_str()).ok())
+            },
             |case_from_serde| CaseString::from_str(case_from_serde.as_str()).ok(),
         );
 
@@ -217,7 +219,7 @@ fn create_fields_types_and_values(
     // let (key_as_str, key_ident) = get_key_str_and_ident(&field_case, &field_identifier_string, f);
     let FieldFormat { serialized, ident } =
         get_key_str_and_ident(&field_case, &field_identifier_string, f);
-        
+
     // struct type used to type the function
     store
         .struct_ty_fields
@@ -295,9 +297,18 @@ fn get_fields(data: &ast::Data<util::Ignored, MyFieldReceiver>) -> Vec<&MyFieldR
 }
 
 fn get_case_string(f: &MyFieldReceiver, struct_level_casing: Option<CaseString>) -> CaseString {
+    let error_message = "Invalid case in case attribute. The options are:
+        lowercase, UPPERCASE, PascalCase, camelCase, snake_case,
+    SCREAMING_SNAKE_CASE, kebab-case, SCREAMING-KEBAB-CASE
+    ";
+
     // Fallback to the struct metadata value if not provided for the field.
     // If not provided in both, fallback to camel.
-    f.case.or(struct_level_casing).unwrap_or(CaseString::Camel)
+    f.case
+        .as_ref()
+        .map(|case| CaseString::from_str(case.as_str()).expect(error_message))
+        .or(struct_level_casing)
+        .unwrap_or(CaseString::Camel)
 }
 
 // fn to_key_case_string(field_case: CaseString, field_identifier_string: ::std::string::String) -> ::std::string::String {
