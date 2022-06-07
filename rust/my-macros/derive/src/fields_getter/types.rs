@@ -1,13 +1,6 @@
 #![allow(dead_code)]
 
-use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
-use proc_macro2::TokenStream;
-use quote::quote;
-use std::str::FromStr;
 use strum_macros::EnumString;
-use syn::{self, parse_macro_input};
-
-
 
 /// Options: "lowercase", "UPPERCASE", "PascalCase", "camelCase", "snake_case",
 /// "SCREAMING_SNAKE_CASE", "kebab-case", "SCREAMING-KEBAB-CASE"
@@ -36,7 +29,7 @@ pub(crate) enum CaseString {
     #[strum(serialize = "SCREAMING-KEBAB-CASE")]
     ScreamingKebab,
 
-    Untouched
+    Untouched,
 }
 
 impl Default for CaseString {

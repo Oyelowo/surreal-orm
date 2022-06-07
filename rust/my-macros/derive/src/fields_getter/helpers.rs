@@ -1,12 +1,11 @@
 #![allow(dead_code)]
 
-use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
+use darling::{ast, util};
 use proc_macro2::{Span, TokenStream, TokenTree};
 use proc_macro_crate::{crate_name, FoundCrate};
 use quote::quote;
-use std::str::FromStr;
-use strum_macros::EnumString;
-use syn::{self, parse_macro_input, Ident};
+
+use syn::{self, Ident};
 
 use super::{trait_generator::MyFieldReceiver, types::CaseString};
 
@@ -75,10 +74,8 @@ pub(crate) fn get_field_str_and_ident(
     let field_ident = match field_case {
         // Tries to keep the field name ident as written in the struct
         //  if ure using kebab case which cannot be used as an identifier.
-        // Also, if rename_all attribute is not specified to change the casing,
-        // it defaults to exactly how the fields are written out.
         // However, Field rename attribute overrides this
-        Kebab | ScreamingKebab | Untouched => field_identifier_string,
+        Kebab | ScreamingKebab => field_identifier_string,
         _ => field,
     };
 
@@ -89,19 +86,18 @@ pub(crate) fn get_field_str_and_ident(
     if let ::std::option::Option::Some(name) = rename_field_from_serde {
         // We only care about the serialized string
         field = name.serialize.as_str();
-        field_ident = syn::Ident::from_string(field)
-            .expect("Problem converting field string to syntax identifier");
+        field_ident = syn::Ident::new(field, ::proc_macro2::Span::call_site());
     }
     FieldFormat {
         /*
         Ident format is the name used in the code
         e.g struct User{
-             user_name: String    // Here: user_name is ident and the serialized version by serde is serialized_Format
+             user_name: String    // Here: user_name is ident and the serialized format by serde is "user_name"
         }
         This is what we use as the field name and is mostly same as the serialized format
         except in the case of kebab-case serialized format in whcih case we fallback
         to the original ident format as written exactly in the code except when a use
-        uses rename attribute on the field, in which case that takes precedence.
+        uses rename attribute on a specific field, in which case that takes precedence.
         */
         ident: field_ident,
         serialized: ::std::string::ToString::to_string(field),
@@ -143,6 +139,9 @@ pub(crate) fn to_case_string(
             .convert(field_identifier_string)
     };
     match field_case {
+        // Also, if rename_all attribute is not specified to change the casing,
+        // it defaults to exactly how the fields are written out.
+        // However, Field rename attribute overrides this
         CaseString::Untouched => field_identifier_string.to_string(),
         CaseString::Camel => convert(convert_case::Case::Camel),
         CaseString::Snake => convert(convert_case::Case::Snake),

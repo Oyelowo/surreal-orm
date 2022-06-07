@@ -1,17 +1,14 @@
 #![allow(dead_code)]
 
 use super::{
-    helpers::{
-        get_field_identifier, get_field_str_and_ident, get_fields, get_struct_types_and_fields,
-        FieldStore,
-    },
+    helpers::{get_fields, get_struct_types_and_fields, FieldStore},
     types::CaseString,
 };
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use quote::quote;
 use std::str::FromStr;
-use strum_macros::EnumString;
+
 use syn::{self, parse_macro_input};
 
 #[derive(Debug, Clone)]
