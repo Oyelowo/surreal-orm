@@ -15,7 +15,7 @@ struct Foo {
 }
 
 #[derive(FieldsGetter, Serialize, Deserialize)]
-// #[field_getter(rename_all(serialize = "snake_case"))]
+#[field_getter(rename_all(serialize = "snake_case"))]
 // #[serde(rename_all = "camelCase")]
 pub struct ConsumingType {
     // #[serde(rename = "lowo_cool")]

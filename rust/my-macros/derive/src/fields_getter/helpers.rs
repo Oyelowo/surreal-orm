@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
-use proc_macro2::{TokenStream, Span, TokenTree};
-use proc_macro_crate::{FoundCrate, crate_name};
+use proc_macro2::{Span, TokenStream, TokenTree};
+use proc_macro_crate::{crate_name, FoundCrate};
 use quote::quote;
 use std::str::FromStr;
 use strum_macros::EnumString;
@@ -43,7 +43,7 @@ pub(crate) fn create_fields_types_and_values(
     i: usize,
     store: &mut FieldStore,
 ) {
-    let field_case = struct_level_casing.expect("rerer");
+    let field_case = struct_level_casing.unwrap_or(CaseString::Untouched);
     let field_ident = get_field_identifier(f, i);
     let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
 
@@ -71,16 +71,18 @@ pub(crate) fn get_field_str_and_ident(
     let field = to_case_string(field_case, field_identifier_string);
     let mut field = field.as_str();
 
+    use CaseString::*;
     let field_ident = match field_case {
         // Tries to keep the field name ident as written in the struct
-        //  if ure using kebab case which cannot be used as an identifier
-        // Field rename attribute overrides this
-        CaseString::Kebab | CaseString::ScreamingKebab => field_identifier_string,
+        //  if ure using kebab case which cannot be used as an identifier.
+        // Also, if rename_all attribute is not specified to change the casing,
+        // it defaults to exactly how the fields are written out.
+        // However, Field rename attribute overrides this
+        Kebab | ScreamingKebab | Untouched => field_identifier_string,
         _ => field,
     };
 
-    let mut field_ident = syn::Ident::from_string(field_ident)
-        .expect("Problem converting field string to syntax identifier");
+    let mut field_ident = syn::Ident::new(field_ident, ::proc_macro2::Span::call_site());
 
     // Prioritize serde renaming for field string
     let rename_field_from_serde = f.rename.as_ref();
@@ -141,6 +143,7 @@ pub(crate) fn to_case_string(
             .convert(field_identifier_string)
     };
     match field_case {
+        CaseString::Untouched => field_identifier_string.to_string(),
         CaseString::Camel => convert(convert_case::Case::Camel),
         CaseString::Snake => convert(convert_case::Case::Snake),
         CaseString::Pascal => convert(convert_case::Case::Pascal),
@@ -151,7 +154,6 @@ pub(crate) fn to_case_string(
         CaseString::ScreamingKebab => convert(convert_case::Case::UpperKebab),
     }
 }
-
 
 pub fn get_crate_name(internal: bool) -> TokenStream {
     if internal {

@@ -35,6 +35,8 @@ pub(crate) enum CaseString {
 
     #[strum(serialize = "SCREAMING-KEBAB-CASE")]
     ScreamingKebab,
+
+    Untouched
 }
 
 impl Default for CaseString {

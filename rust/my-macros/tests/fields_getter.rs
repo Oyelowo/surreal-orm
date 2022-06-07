@@ -5,6 +5,20 @@ use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
 
 #[test]
+fn ddefault_to_how_fields_are_written_if_no_rename_all_struct_attribute_specified() {
+    #[derive(FieldsGetter, Serialize, Deserialize)]
+    pub struct Consumer {
+        pub name_of_me: String,
+
+        pub age: u8,
+    }
+
+    let ConsumerFields { name_of_me, age } = Consumer::get_fields_serialized();
+
+    assert_eq!(name_of_me, "name_of_me");
+    assert_eq!(age, "age");
+}
+
 fn keys_getter_1() {
     #[derive(FieldsGetter, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
