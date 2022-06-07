@@ -5,6 +5,7 @@ use actix_web::{web, HttpResponse};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use common::utils;
+use sea_orm::{ConnectOptions, Database};
 
 use super::configuration::Environment;
 use crate::app::{get_my_graphql_schema, MyGraphQLSchema};
@@ -55,10 +56,23 @@ pub async fn setup_graphql_schema() -> anyhow::Result<MyGraphQLSchema> {
         .connect_timeout(Duration::from_secs(15))
         .connect_lazy_with(database.with_db());
 
+    let mut opt = ConnectOptions::new("protocol://username:password@host/database".to_owned());
+    opt.max_connections(100)
+        .min_connections(5)
+        .connect_timeout(Duration::from_secs(8))
+        .idle_timeout(Duration::from_secs(8))
+        .max_lifetime(Duration::from_secs(8))
+        .sqlx_logging(true);
+
+    // let k = Database::from(connection_pool);
+    let db = Database::connect(opt).await?;
+    // opt.
+
     sqlx::migrate!("./migrations").run(&connection_pool).await?;
 
     let schema = get_my_graphql_schema()
         .data(connection_pool)
+        .data(db)
         .limit_depth(limit_depth) // This and also limi_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
         .limit_complexity(limit_complexity)
         .finish();

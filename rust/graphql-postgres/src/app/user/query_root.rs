@@ -1,8 +1,9 @@
-use crate::utils::postgresdb::get_pg_pool_from_ctx;
+use crate::utils::postgresdb::{get_pg_connection_from_ctx, get_pg_pool_from_ctx};
 
-use super::model::User;
+use super::{model::User, UserEntity};
 
 use async_graphql::*;
+use sea_orm::EntityTrait;
 use sqlx::query_as;
 use uuid::Uuid;
 
@@ -16,9 +17,9 @@ impl UserQueryRoot {
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "id of the User")] id: Uuid,
     ) -> async_graphql::Result<User> {
-        let db = get_pg_pool_from_ctx(ctx)?;
+        let db = get_pg_connection_from_ctx(ctx)?;
 
-        let user = User::by_id(db, &id).await?;
+        let user = UserEntity::find_by_id(id).one(db).await?.expect("msg");
 
         Ok(user)
     }

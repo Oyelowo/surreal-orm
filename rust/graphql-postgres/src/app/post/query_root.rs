@@ -1,8 +1,9 @@
-use crate::utils::postgresdb::get_pg_pool_from_ctx;
+use crate::utils::postgresdb::{get_pg_connection_from_ctx, get_pg_pool_from_ctx};
 
-use super::model::Post;
+use super::model::{Post, PostEntity};
 
 use async_graphql::*;
+use sea_orm::EntityTrait;
 use sqlx::types::Uuid;
 
 #[derive(Default)]
@@ -15,8 +16,11 @@ impl PostQueryRoot {
         ctx: &async_graphql::Context<'_>,
         id: Uuid,
     ) -> async_graphql::Result<Post> {
-        let db = get_pg_pool_from_ctx(ctx)?;
-        let post = Post::by_id(db, &id).await?;
+        let db = get_pg_connection_from_ctx(ctx)?;
+        let post = PostEntity::find_by_id(id)
+            .one(db)
+            .await?
+            .expect("User not found handle this with proepr error message using my Error enum");
         Ok(post)
     }
 

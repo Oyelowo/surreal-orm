@@ -1,10 +1,13 @@
-use crate::utils::postgresdb::get_pg_pool_from_ctx;
+use crate::{app::user::UserEntity, utils::postgresdb::get_pg_connection_from_ctx};
 
-use super::{CreateUserInput, InsertUser, Role, UpdateUserInput, User};
+use super::{User, UserActiveModel};
+
 use async_graphql::*;
-use chrono::Utc;
-use ormx::{Insert, Table};
 
+use common::error_handling::ApiHttpStatus;
+
+use log::error;
+use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 use uuid::Uuid;
 use validator::Validate;
 
@@ -16,31 +19,13 @@ impl UserMutationRoot {
     async fn create_user(
         &self,
         ctx: &async_graphql::Context<'_>,
-        #[graphql(desc = "user data")] user_input: CreateUserInput,
+        #[graphql(desc = "user data")] user_input: User,
     ) -> async_graphql::Result<User> {
         user_input.validate()?;
-        let db = get_pg_pool_from_ctx(ctx)?;
 
-        let new_user = InsertUser {
-            username: user_input.username,
-            first_name: user_input.first_name,
-            last_name: user_input.last_name,
-            email: user_input.email,
-            role: Role::User,
-            age: user_input.age,
-            disabled: Some("nothing".into()), // age: user_input.age,
-        };
-
-        // This is necessary because ormx currently uses two transactions to enable insertion and selection
-        // of latest inserted row for MySQL cos MySQL does not currently support returning from latest inserted
-        // within a query like POSTGRES does. Thus, we need to require the connection for the pool for this second
-        // selection even though we are not using MySQL. Until this issue is worked around...
-        // It might be possible still achieve this within a transaction in MySQL tho.
-        // Check the link for more info.
-        // https://github.com/NyxCode/ormx/issues/22
-        let connection = &mut *db.acquire().await?;
-
-        let user = new_user.insert(connection).await?;
+        let db = get_pg_connection_from_ctx(ctx)?;
+        let p = serde_json::to_value(user_input)?;
+        let user = UserActiveModel::from_json(p)?.insert(db).await?;
 
         Ok(user)
     }
@@ -49,24 +34,32 @@ impl UserMutationRoot {
         &self,
         ctx: &async_graphql::Context<'_>,
         id: Uuid,
-        user_input: UpdateUserInput,
+        user_input: User,
     ) -> async_graphql::Result<User> {
-        // user_input.validate()?;
-        let db = get_pg_pool_from_ctx(ctx)?;
+        user_input.validate()?;
+        let db = get_pg_connection_from_ctx(ctx)?;
 
         user_input.validate()?;
 
         // Extract user id from session or decoded token whichever way authentication is implemented
         // id = IdFromSession
 
-        let mut user = User::by_id(db, &id).await?;
+        let updated_user = UserActiveModel::from_json(serde_json::to_value(user_input)?)?;
+        let user = UserEntity::find_by_id(id).one(db).await?;
 
-        user.set_last_login(db, Some(Utc::now())).await?;
-        // user.email = "".into;
-        user.patch(db, user_input).await?;
-
-        log::info!("reload the user, in case it has been modified");
-        user.reload(db).await?;
+        let user = UserActiveModel {
+            id: Set(user.unwrap().id),
+            ..updated_user
+        }
+        .update(db)
+        .await
+        .map_err(|e| {
+            error!("Problem updating user data. Error: {e}");
+            ApiHttpStatus::InternalServerError(
+                "Could not update your user data. Try again later".into(),
+            )
+            .extend()
+        })?;
 
         Ok(user)
     }
