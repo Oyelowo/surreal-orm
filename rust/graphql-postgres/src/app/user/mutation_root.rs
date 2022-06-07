@@ -9,6 +9,7 @@ use async_graphql::*;
 
 use common::error_handling::ApiHttpStatus;
 
+use log::error;
 use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 use uuid::Uuid;
 use validator::Validate;
@@ -56,6 +57,7 @@ impl UserMutationRoot {
         .update(db)
         .await
         .map_err(|e| {
+            error!("Problem updating user data. Error: {e}");
             ApiHttpStatus::InternalServerError(
                 "Could not update your user data. Try again later".into(),
             )

@@ -5,15 +5,12 @@ use super::{guards::AuthGuard, model::User, UserBy};
 use async_graphql::*;
 use chrono::{DateTime, Utc};
 use common::{
-    authentication::TypedSession,
-    error_handling::ApiHttpStatus,
-    mongodb::{model_cursor_to_vec, MONGO_ID_KEY},
+    authentication::TypedSession, error_handling::ApiHttpStatus, mongodb::model_cursor_to_vec,
 };
 
 use mongodb::{
     bson::oid::ObjectId,
     options::{FindOneOptions, FindOptions, ReadConcern},
-    Database,
 };
 use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};

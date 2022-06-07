@@ -1,5 +1,6 @@
 use async_graphql::*;
 
+use common::error_handling::ApiHttpStatus;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{
@@ -11,7 +12,10 @@ use sqlx::{
 };
 use validator::Validate;
 
-use crate::app::user::User;
+use crate::{
+    app::user::{User, UserEntity},
+    utils::postgresdb::get_pg_connection_from_ctx,
+};
 
 #[derive(
     Clone,
@@ -73,34 +77,14 @@ pub type PostActiveModel = ActiveModel;
 
 #[ComplexObject]
 impl Post {
-    async fn poster(&self, ctx: &Context<'_>) -> anyhow::Result<User> {
+    async fn poster(&self, ctx: &Context<'_>) -> Result<User> {
         // // TODO: Use dataloader to batch user
-        // let db = ctx.data_unchecked::<PgPool>();
-        // let poster = User::by_id(db, &self.user_id).await?;
-        // Ok(poster)
-        todo!()
+        let db = get_pg_connection_from_ctx(ctx)?;
+        UserEntity::find_by_id(self.user_id)
+            .one(db)
+            .await?
+            .ok_or_else(|| {
+                ApiHttpStatus::NotFound("User not found. Try again later".into()).extend()
+            })
     }
 }
-
-// pub type PostInput = Post;
-// #[derive(InputObject, Validate, Patch)]
-// #[ormx(table_name = "posts", table = Post, id = "id")]
-// pub struct CreatePostInput {
-//     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
-//     pub title: String,
-
-//     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
-//     pub content: String,
-// }
-
-// pub type UpdatePostInput = CreatePostInput;
-/*
-fn validate_unique_postname(postname: &str) -> std::result::Result<(), ValidationError> {
-    if postname == "xXxShad0wxXx" {
-        // the value of the postname will automatically be added later
-        return Err(ValidationError::new("terrible_postname"));
-    }
-
-    Ok(())
-}
-*/
