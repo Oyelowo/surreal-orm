@@ -16,7 +16,6 @@ impl PostQueryRoot {
         ctx: &async_graphql::Context<'_>,
         id: Uuid,
     ) -> async_graphql::Result<Post> {
-        // let db = get_pg_pool_from_ctx(ctx)?;
         let db = get_pg_connection_from_ctx(ctx)?;
         let post = PostEntity::find_by_id(id)
             .one(db)

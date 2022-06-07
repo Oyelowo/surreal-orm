@@ -8,15 +8,12 @@ use sqlx::{
     },
     FromRow,
 };
-// use chrono::{DateTime, Utc};
+
 use validator::Validate;
 
 use crate::{
-    app::post::{self, Post, PostColumns, PostEntity},
-    utils::{
-        graphql,
-        postgresdb::{get_pg_connection_from_ctx, get_pg_pool_from_ctx},
-    },
+    app::post::{Post, PostColumns, PostEntity},
+    utils::postgresdb::{get_pg_connection_from_ctx, get_pg_pool_from_ctx},
 };
 
 #[derive(
@@ -39,7 +36,7 @@ pub struct Model {
     pub id: Uuid,
 
     #[sea_orm(default)]
-    pub created_at: Option<DateTime<Utc>>,
+    pub created_at: DateTime<Utc>,
 
     #[graphql(skip_input)]
     #[sea_orm(default)]
@@ -62,11 +59,11 @@ pub struct Model {
     pub email: String,
 
     #[validate(range(min = 18, max = 160))]
-    pub age: i16,
+    pub age: i16, // Should be u8 but pleasing sqlx for now till i update my db model
 
     #[graphql(skip_input)]
     #[sea_orm(custom_type)]
-    pub role: Role,
+    pub role: Option<Role>,
 
     pub disabled: Option<String>,
 

@@ -1,3 +1,5 @@
+use std::process;
+
 use actix_web::{guard, web, App, HttpServer};
 use graphql_postgres::utils::{
     configuration,
@@ -11,9 +13,10 @@ async fn main() -> anyhow::Result<()> {
 
     info!("Playground: {:?}", app_url);
 
-    let schema = setup_graphql_schema()
-        .await
-        .expect("Problem setting up graphql");
+    let schema = setup_graphql_schema().await.map_err(|e| {
+        log::error!("Problem setting up graphql. Error: {e}");
+        process::exit(-1)
+    });
 
     HttpServer::new(move || {
         App::new()

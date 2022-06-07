@@ -1,14 +1,13 @@
 use crate::{
-    app::{post::Post, user::UserEntity},
+    app::user::UserEntity,
     utils::postgresdb::{get_pg_connection_from_ctx, get_pg_pool_from_ctx},
 };
 
-use super::{Role, User, UserActiveModel};
-// use super::{CreateUserInput, InsertUser, Role, UpdateUserInput, User};
+use super::{User, UserActiveModel};
+
 use async_graphql::*;
-use chrono::Utc;
+
 use common::error_handling::ApiHttpStatus;
-use ormx::{Insert, Table};
 
 use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 use uuid::Uuid;

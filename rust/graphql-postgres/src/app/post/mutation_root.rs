@@ -1,7 +1,6 @@
-use crate::utils::postgresdb::{get_pg_connection_from_ctx, get_pg_pool_from_ctx};
+use crate::utils::postgresdb::get_pg_connection_from_ctx;
 
 use super::{model::PostActiveModel, Post, PostEntity};
-// use super::{CreatePostInput, InsertPost, Post, UpdatePostInput};
 use async_graphql::*;
 use common::error_handling::ApiHttpStatus;
 use sea_orm::{ActiveModelTrait, EntityTrait, Set};
@@ -16,25 +15,22 @@ impl PostMutationRoot {
     async fn create_post(
         &self,
         ctx: &async_graphql::Context<'_>,
-        #[graphql(desc = "id of user")] user_id: Uuid,
-        #[graphql(desc = "post data")] post_input: Post,
+        #[graphql(desc = "post input")] post_input: Post,
     ) -> async_graphql::Result<Post> {
         let db = get_pg_connection_from_ctx(ctx)?;
         // NOTE: Normally, user id will be retrieved from session or jwt or oauth.
         // but hard code as a parameter for now.
         post_input.validate()?;
-        let p = serde_json::to_value(post_input)?;
-        let k = PostActiveModel::from_json(p)?.insert(db).await?;
-        // let new_post = super::model::ActiveModel {
-        //     user_id: sea_orm::ActiveValue::Set(user_id),
-        //     title: sea_orm::ActiveValue::Set(post_input.title),
-        //     content: sea_orm::ActiveValue::Set(post_input.content),
-        //     ..Default::default()
-        // }
-        // .insert(db)
-        // .await?;
-
-        Ok(k)
+        let post = serde_json::to_value(post_input)?;
+        PostActiveModel::from_json(post)?
+            .insert(db)
+            .await
+            .map_err(|_| {
+                ApiHttpStatus::InternalServerError(
+                    "Could not create your user data. Try again later".into(),
+                )
+                .extend()
+            })
     }
 
     async fn update_post(
