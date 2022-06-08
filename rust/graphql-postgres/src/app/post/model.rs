@@ -53,16 +53,21 @@ pub struct Model {
     pub content: String,
 }
 
+// UserColumn
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    // #[sea_orm(has_many = "super::fruit::Entity")]
-    // Fruit,
-    //     #[sea_orm(
-    //     belongs_to = "Entity",
-    //     from = "super::super::user::Column::UserId",
-    //     to = "Column::Id"
-    // )]
-    // User
+    #[sea_orm(
+        belongs_to = "super::super::user::Entity",
+        from = "Column::UserId",
+        to = "super::super::user::Column::Id"
+    )]
+    User,
+}
+
+impl Related<super::super::user::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::User.def()
+    }
 }
 
 impl ActiveModelBehavior for ActiveModel {}

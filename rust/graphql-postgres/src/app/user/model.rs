@@ -71,10 +71,23 @@ pub struct Model {
 }
 // use super::super::post::Entity
 
+
+// #[derive(Copy, Clone, Debug, EnumIter)]
+// pub enum Relation {
+//     Fruit,
+// }
+
+
 #[derive(Debug, Clone, Copy, EnumIter, DeriveRelation)]
 pub enum Relation {
-    // #[sea_orm(has_many = "super::super::post::Entity")]
-    // Post,
+    #[sea_orm(has_many = "super::super::post::Entity")]
+    Post,
+}
+
+impl Related<super::super::post::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Post.def()
+    }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
