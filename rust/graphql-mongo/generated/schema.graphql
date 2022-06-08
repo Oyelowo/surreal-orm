@@ -1,3 +1,5 @@
+directive @oneOf on INPUT_OBJECT
+
 type AccountOauth {
 	id: String!
 	userId: String!
@@ -26,6 +28,13 @@ input AccountOauthInput {
 	idToken: String
 	sessionState: String
 	profile: ProfileOauthInput!
+}
+
+input Address {
+	street: String!
+	houseNumber: String!
+	city: String!
+	zip: String!
 }
 
 
@@ -85,6 +94,7 @@ input ProfileOauthInput {
 
 type Query {
 	user(id: ObjectId!): User!
+	getUser(userBy: UserBy!): User!
 	users: [User!]!
 	session: Session!
 	post(id: ObjectId!): Post!
@@ -128,6 +138,7 @@ type User {
 	username: String!
 	firstName: String!
 	lastName: String!
+	city: String
 	email: String!
 	emailVerifiedAt: DateTime
 	age: Int
@@ -138,11 +149,19 @@ type User {
 	postCount: Int!
 }
 
+input UserBy @oneof {
+	userId: ObjectId
+	username: String
+	address: Address
+	email: String
+}
+
 input UserInput {
 	username: String!
 	password: String
 	firstName: String!
 	lastName: String!
+	city: String
 	email: String!
 	age: Int
 	socialMedia: [String!]!
