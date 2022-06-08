@@ -9,10 +9,7 @@ use sqlx::types::{
 };
 use validator::Validate;
 
-use crate::{
-    app::user::{User, UserEntity},
-    utils::postgresdb::get_pg_connection_from_ctx,
-};
+use crate::{app::user::user, utils::postgresdb::get_pg_connection_from_ctx};
 
 #[derive(
     Clone,
@@ -57,14 +54,25 @@ pub struct Model {
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::super::user::Entity",
+        belongs_to = "user::Entity",
         from = "Column::UserId",
-        to = "super::super::user::Column::Id"
+        to = "user::Column::Id"
     )]
     User,
 }
 
-impl Related<super::super::user::Entity> for Entity {
+// impl RelationTrait for Relation {
+//     fn def(&self) -> RelationDef {
+//         match self {
+//             Self::User => Entity::belongs_to(user::Entity)
+//                 .from(Column::UserId)
+//                 .to(user::Column::Id)
+//                 .into(),
+//         }
+//     }
+// }
+
+impl Related<user::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::User.def()
     }
@@ -73,16 +81,15 @@ impl Related<super::super::user::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 pub type Post = Model;
-pub type PostColumns = Column;
 pub type PostEntity = Entity;
 pub type PostActiveModel = ActiveModel;
 
 #[ComplexObject]
 impl Post {
-    async fn poster(&self, ctx: &Context<'_>) -> Result<User> {
+    async fn poster(&self, ctx: &Context<'_>) -> Result<user::Model> {
         // // TODO: Use dataloader to batch user
         let db = get_pg_connection_from_ctx(ctx)?;
-        UserEntity::find_by_id(self.user_id)
+        user::Entity::find_by_id(self.user_id)
             .one(db)
             .await?
             .ok_or_else(|| {

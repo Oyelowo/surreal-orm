@@ -12,7 +12,7 @@ use sqlx::{
 use validator::Validate;
 
 use crate::{
-    app::post::{Post, PostColumns, PostEntity},
+    app::post::{self, Post},
     utils::postgresdb::get_pg_connection_from_ctx,
 };
 
@@ -27,7 +27,7 @@ use crate::{
     Validate,
     Debug,
 )]
-#[graphql(complex, input_name = "UserInput")]
+#[graphql(complex, input_name = "UserInput", name = "User")]
 #[sea_orm(table_name = "users")]
 pub struct Model {
     #[sea_orm(primary_key)]
@@ -69,22 +69,14 @@ pub struct Model {
 
     pub last_login: Option<DateTime<Utc>>,
 }
-// use super::super::post::Entity
-
-
-// #[derive(Copy, Clone, Debug, EnumIter)]
-// pub enum Relation {
-//     Fruit,
-// }
-
 
 #[derive(Debug, Clone, Copy, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::super::post::Entity")]
+    #[sea_orm(has_many = "post::Entity")]
     Post,
 }
 
-impl Related<super::super::post::Entity> for Entity {
+impl Related<post::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Post.def()
     }
@@ -92,18 +84,14 @@ impl Related<super::super::post::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub type User = Model;
-pub type UserEntity = Entity;
-pub type UserActiveModel = ActiveModel;
-
 #[ComplexObject]
-impl User {
+impl Model {
     async fn posts(&self, ctx: &async_graphql::Context<'_>) -> async_graphql::Result<Vec<Post>> {
         let db = get_pg_connection_from_ctx(ctx)?;
         let id = format!("{}", self.id);
-        let posts = PostEntity::find()
-            .filter(PostColumns::UserId.contains(id.as_str()))
-            .order_by_asc(PostColumns::CreatedAt)
+        let posts = post::Entity::find()
+            .filter(post::Column::UserId.contains(id.as_str()))
+            .order_by_asc(post::Column::CreatedAt)
             .all(db)
             .await?;
 
@@ -144,17 +132,3 @@ impl Default for Role {
         Self::User
     }
 }
-
-// pub type UserInput = User;
-
-/*
-
-fn validate_unique_username(username: &str) -> std::result::Result<(), ValidationError> {
-    if username == "xXxShad0wxXx" {
-        // the value of the username will automatically be added later
-        return Err(ValidationError::new("terrible_username"));
-    }
-
-    Ok(())
-}
-*/

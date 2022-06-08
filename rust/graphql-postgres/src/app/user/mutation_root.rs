@@ -1,6 +1,6 @@
-use crate::{app::user::UserEntity, utils::postgresdb::get_pg_connection_from_ctx};
+use crate::utils::postgresdb::get_pg_connection_from_ctx;
 
-use super::{User, UserActiveModel};
+use super::user;
 
 use async_graphql::*;
 
@@ -19,13 +19,13 @@ impl UserMutationRoot {
     async fn create_user(
         &self,
         ctx: &async_graphql::Context<'_>,
-        #[graphql(desc = "user data")] user_input: User,
-    ) -> async_graphql::Result<User> {
+        #[graphql(desc = "user data")] user_input: user::Model,
+    ) -> async_graphql::Result<user::Model> {
         user_input.validate()?;
 
         let db = get_pg_connection_from_ctx(ctx)?;
         let p = serde_json::to_value(user_input)?;
-        let user = UserActiveModel::from_json(p)?.insert(db).await?;
+        let user = user::ActiveModel::from_json(p)?.insert(db).await?;
 
         Ok(user)
     }
@@ -34,8 +34,8 @@ impl UserMutationRoot {
         &self,
         ctx: &async_graphql::Context<'_>,
         id: Uuid,
-        user_input: User,
-    ) -> async_graphql::Result<User> {
+        user_input: user::Model,
+    ) -> async_graphql::Result<user::Model> {
         user_input.validate()?;
         let db = get_pg_connection_from_ctx(ctx)?;
 
@@ -44,10 +44,10 @@ impl UserMutationRoot {
         // Extract user id from session or decoded token whichever way authentication is implemented
         // id = IdFromSession
 
-        let updated_user = UserActiveModel::from_json(serde_json::to_value(user_input)?)?;
-        let user = UserEntity::find_by_id(id).one(db).await?;
+        let updated_user = user::ActiveModel::from_json(serde_json::to_value(user_input)?)?;
+        let user = user::Entity::find_by_id(id).one(db).await?;
 
-        let user = UserActiveModel {
+        let user = user::ActiveModel {
             id: Set(user.unwrap().id),
             ..updated_user
         }
