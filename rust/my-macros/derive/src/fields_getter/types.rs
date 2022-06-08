@@ -29,11 +29,11 @@ pub(crate) enum CaseString {
     #[strum(serialize = "SCREAMING-KEBAB-CASE")]
     ScreamingKebab,
 
-    Untouched,
+    None,
 }
 
 impl Default for CaseString {
     fn default() -> Self {
-        CaseString::Camel
+        CaseString::None
     }
 }

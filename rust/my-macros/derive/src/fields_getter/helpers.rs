@@ -42,7 +42,7 @@ pub(crate) fn create_fields_types_and_values(
     i: usize,
     store: &mut FieldStore,
 ) {
-    let field_case = struct_level_casing.unwrap_or(CaseString::Untouched);
+    let field_case = struct_level_casing.unwrap_or(CaseString::None);
     let field_ident = get_field_identifier(f, i);
     let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
 
@@ -138,19 +138,21 @@ pub(crate) fn to_case_string(
             .to_case(case)
             .convert(field_identifier_string)
     };
+    use convert_case::Case;
+    use CaseString::*;
     match field_case {
         // Also, if rename_all attribute is not specified to change the casing,
         // it defaults to exactly how the fields are written out.
         // However, Field rename attribute overrides this
-        CaseString::Untouched => field_identifier_string.to_string(),
-        CaseString::Camel => convert(convert_case::Case::Camel),
-        CaseString::Snake => convert(convert_case::Case::Snake),
-        CaseString::Pascal => convert(convert_case::Case::Pascal),
-        CaseString::Lower => convert(convert_case::Case::Lower),
-        CaseString::Upper => convert(convert_case::Case::Upper),
-        CaseString::ScreamingSnake => convert(convert_case::Case::ScreamingSnake),
-        CaseString::Kebab => convert(convert_case::Case::Kebab),
-        CaseString::ScreamingKebab => convert(convert_case::Case::UpperKebab),
+        None => field_identifier_string.to_string(),
+        Camel => convert(Case::Camel),
+        Snake => convert(Case::Snake),
+        Pascal => convert(Case::Pascal),
+        Lower => convert(Case::Lower),
+        Upper => convert(Case::Upper),
+        ScreamingSnake => convert(Case::ScreamingSnake),
+        Kebab => convert(Case::Kebab),
+        ScreamingKebab => convert(Case::UpperKebab),
     }
 }
 
