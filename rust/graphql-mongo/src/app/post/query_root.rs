@@ -3,7 +3,8 @@ use crate::utils::mongodb::get_db_from_ctx;
 use super::model::Post;
 
 use async_graphql::*;
-use common::{error_handling::ApiHttpStatus, mongodb::model_cursor_to_vec};
+use common::error_handling::ApiHttpStatus;
+use futures_util::TryStreamExt;
 use log::warn;
 use mongodb::{
     bson::oid::ObjectId,
@@ -40,11 +41,14 @@ impl PostQueryRoot {
 
     async fn posts(&self, ctx: &Context<'_>) -> Result<Vec<Post>> {
         let db = get_db_from_ctx(ctx)?;
-        let cursor = Post::find(db, None, None).await?;
-        model_cursor_to_vec(cursor).await.map_err(|e| {
-            // We don't want to expose our server internals to the end user.
-            warn!("{e:?}");
-            ApiHttpStatus::BadRequest("Could not fetch posts. Try again later".into()).extend()
-        })
+        Post::find(db, None, None)
+            .await?
+            .try_collect()
+            .await
+            .map_err(|e| {
+                // We don't want to expose our server internals to the end user.
+                warn!("{e:?}");
+                ApiHttpStatus::BadRequest("Could not fetch posts. Try again later".into()).extend()
+            })
     }
 }

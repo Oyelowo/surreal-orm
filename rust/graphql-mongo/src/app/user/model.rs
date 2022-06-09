@@ -1,8 +1,7 @@
 use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
-use common::{
-    authentication::TypedSession, error_handling::ApiHttpStatus, mongodb::model_cursor_to_vec,
-};
+use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
+use futures_util::TryStreamExt;
 use mongodb::Database;
 use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
@@ -160,8 +159,9 @@ impl User {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = get_db_from_ctx(ctx)?;
         let post_keys = Post::get_fields_serialized();
-        let cursor = Post::find(db, doc! {post_keys.posterId: self.id}, None).await?;
-        model_cursor_to_vec(cursor)
+        Post::find(db, doc! {post_keys.posterId: self.id}, None)
+            .await?
+            .try_collect()
             .await
             .map_err(|_| ApiHttpStatus::NotFound("Post not found".into()).extend())
     }

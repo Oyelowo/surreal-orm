@@ -4,10 +4,10 @@ use super::{guards::AuthGuard, model::User, UserBy};
 
 use async_graphql::*;
 use chrono::{DateTime, Utc};
-use common::{
-    authentication::TypedSession, error_handling::ApiHttpStatus, mongodb::model_cursor_to_vec,
-};
+use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
 
+use futures_util::TryStreamExt;
+use log::warn;
 use mongodb::{
     bson::oid::ObjectId,
     options::{FindOneOptions, FindOptions, ReadConcern},
@@ -69,8 +69,15 @@ impl UserQueryRoot {
             .sort(doc! {user_keys.createdAt: -1})
             .build();
 
-        let cursor = User::find(db, None, find_option).await?;
-        model_cursor_to_vec(cursor).await
+        User::find(db, None, find_option)
+            .await?
+            .try_collect()
+            .await
+            .map_err(|e| {
+                // We don't want to expose our server internals to the end user.
+                warn!("{e:?}");
+                ApiHttpStatus::BadRequest("Could not fetch users. Try again later".into()).extend()
+            })
     }
 
     #[graphql(guard = "AuthGuard")]

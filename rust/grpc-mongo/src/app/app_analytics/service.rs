@@ -1,5 +1,5 @@
 use bson::{doc, oid::ObjectId};
-use common::mongodb::model_cursor_to_vec;
+use futures::TryStreamExt;
 use mongodb::options::{FindOneOptions, ReadConcern};
 use my_macros::FieldsGetter;
 use tonic::{Request, Response, Status};
@@ -125,7 +125,8 @@ impl AppAnalytics for AnalyticsService {
                 .map_err(|_| Status::not_found("User data not found"))
                 .expect("Problem finding user");
 
-        let user_app_event = model_cursor_to_vec(user_app_event_found)
+        let user_app_event = user_app_event_found
+            .try_collect::<Vec<UserAppEvent>>()
             .await
             .map_err(|_| Status::aborted("problem converting"))?
             .into_iter()
