@@ -1,13 +1,10 @@
 use std::path::Path;
 use std::time::Duration;
 
-use actix_web::{web, HttpResponse};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
-use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use common::utils;
 use sea_orm::{ConnectOptions, Database};
 
-use super::configuration::Environment;
 use crate::app::{get_my_graphql_schema, MyGraphQLSchema};
 
 use crate::utils::configuration;
@@ -80,7 +77,7 @@ pub async fn setup_graphql_schema() -> anyhow::Result<MyGraphQLSchema> {
     Ok(schema)
 }
 
-pub fn generate_schema(path: impl AsRef<Path>) {
+pub fn d(path: impl AsRef<Path>) {
     let data = &get_my_graphql_schema().finish().sdl();
     utils::write_data_to_path(data, path);
 }
