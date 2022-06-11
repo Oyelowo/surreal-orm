@@ -79,6 +79,25 @@ impl Related<user::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+impl Entity {
+    pub fn find_by_id(id: Uuid) -> Select<Entity> {
+        Self::find().filter(Column::Id.eq(id))
+    }
+
+    pub fn find_by_user_id(user_id: Uuid) -> Select<Entity> {
+        Self::find()
+            .filter(Column::UserId.eq(user_id))
+            .order_by_asc(Column::CreatedAt)
+    }
+
+    pub fn find_by_username(username: &str) -> Select<Entity> {
+        Self::find().filter(Column::Title.eq(username))
+    }
+
+    pub fn delete_by_id(id: Uuid) -> DeleteMany<Entity> {
+        Self::delete_many().filter(Column::Id.eq(id))
+    }
+}
 
 pub type Post = Model;
 pub type PostEntity = Entity;

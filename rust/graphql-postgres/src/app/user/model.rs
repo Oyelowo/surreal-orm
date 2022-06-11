@@ -1,5 +1,5 @@
 use async_graphql::*;
-use sea_orm::{entity::prelude::*, QueryOrder};
+use sea_orm::{entity::prelude::*, DeleteMany, QueryOrder};
 use serde::{Deserialize, Serialize};
 use sqlx::{
     types::{
@@ -86,17 +86,26 @@ impl Related<post::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
+impl Entity {
+    pub fn find_by_id(id: Uuid) -> Select<Entity> {
+        Self::find().filter(Column::Id.eq(id))
+    }
+
+    pub fn find_by_username(username: &str) -> Select<Entity> {
+        Self::find().filter(Column::Title.eq(username))
+    }
+
+    pub fn delete_by_id(id: Uuid) -> DeleteMany<Entity> {
+        Self::delete_many().filter(Column::Id.eq(id))
+    }
+}
+
 #[ComplexObject]
 impl Model {
     async fn posts(&self, ctx: &async_graphql::Context<'_>) -> async_graphql::Result<Vec<Post>> {
         let db = get_pg_connection_from_ctx(ctx)?;
         let id = format!("{}", self.id);
-        let posts = post::Entity::find()
-            .filter(post::Column::UserId.contains(id.as_str()))
-            .order_by_asc(post::Column::CreatedAt)
-            .all(db)
-            .await?;
-
+        let posts = post::Entity::find_by_user_id(id).all(db).await?;
         Ok(posts)
     }
 
