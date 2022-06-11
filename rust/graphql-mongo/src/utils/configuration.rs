@@ -1,29 +1,15 @@
-use std::process;
-
-use anyhow::Context;
-
-use common::utils::get_config;
-use mongodb::{
-    options::{ClientOptions, Credential, ServerAddress},
-    Client, Database,
-};
-use poem::session::{CookieConfig, RedisStorage, ServerSession};
-use redis::aio::ConnectionManager;
-
-use redis::{ConnectionAddr, ConnectionInfo, RedisConnectionInfo};
+use common::configurations::utils::get_env_vars_by_prefix;
 use serde::{Deserialize, Serialize};
-use serde_aux::prelude::deserialize_number_from_string;
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub struct ExternalApiConfigs {
-    pub github_secret: Stirng,
+    pub github_secret: String,
     pub github_client_id: String,
 }
 
-impl ApplicationConfigs {
-    pub fn get() -> ApplicationConfigs {
-        get_config("EXTERNAL_API_")
+impl ExternalApiConfigs {
+    pub fn get() -> ExternalApiConfigs {
+        get_env_vars_by_prefix("EXTERNAL_API_")
     }
 }

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 
-use super::utils::{get_config, Configurable};
+use super::utils::{get_env_vars_by_prefix, Configurable};
 
 #[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
@@ -23,7 +23,7 @@ pub struct ApplicationConfigs {
 
 impl Configurable for ApplicationConfigs {
     fn get() -> Self {
-        get_config("APP_")
+        get_env_vars_by_prefix("APP_")
     }
 }
 

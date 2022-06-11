@@ -1,4 +1,4 @@
-use super::utils::{get_config, Configurable};
+use super::utils::{get_env_vars_by_prefix, Configurable};
 use anyhow::Context;
 use mongodb::{
     options::{ClientOptions, Credential, ServerAddress},
@@ -24,7 +24,7 @@ pub struct MongodbConfigs {
 
 impl Configurable for MongodbConfigs {
     fn get() -> Self {
-        get_config("MONGODB_")
+        get_env_vars_by_prefix("MONGODB_")
     }
 }
 
