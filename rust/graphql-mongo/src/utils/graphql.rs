@@ -8,11 +8,15 @@ use poem::{
 
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig, ALL_WEBSOCKET_PROTOCOLS};
 use async_graphql_poem::{GraphQLProtocol, GraphQLRequest, GraphQLResponse, GraphQLWebSocket};
-use common::authentication::TypedSession;
+use common::{
+    authentication::TypedSession,
+    configurations::{
+        application::{ApplicationConfigs, Environment},
+        mongodb::MongodbConfigs,
+    },
+};
 
 use serde::Deserialize;
-
-use super::configuration::{self, Environment};
 
 use super::token::Token;
 use crate::app::{get_my_graphql_schema, sync_mongo_models, MyGraphQLSchema};
@@ -92,8 +96,8 @@ pub async fn graphql_playground() -> impl IntoResponse {
 }
 
 pub async fn setup_graphql() -> anyhow::Result<MyGraphQLSchema> {
-    let application = configuration::get_app_config();
-    let database = configuration::get_db_config();
+    let application = ApplicationConfigs::get();
+    let database = MongodbConfigs::get();
 
     use Environment::*;
     let (limit_depth, limit_complexity) = match application.environment {

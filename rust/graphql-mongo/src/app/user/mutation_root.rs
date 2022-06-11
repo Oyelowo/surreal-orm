@@ -6,7 +6,7 @@ use common::{
     },
     error_handling::ApiHttpStatus,
 };
-use log::{error, warn};
+use log::error;
 
 use crate::utils::mongodb::get_db_from_ctx;
 

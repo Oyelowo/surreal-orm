@@ -1,4 +1,4 @@
-use super::utils::{get_env_vars_by_prefix, Configurable};
+use super::utils::get_env_vars_by_prefix;
 use anyhow::Context;
 use mongodb::{
     options::{ClientOptions, Credential, ServerAddress},
@@ -22,17 +22,15 @@ pub struct MongodbConfigs {
     pub require_ssl: Option<bool>,
 }
 
-impl Configurable for MongodbConfigs {
-    fn get() -> Self {
-        get_env_vars_by_prefix("MONGODB_")
-    }
-}
-
 fn default_require_ssl() -> Option<bool> {
     Some(false)
 }
 
 impl MongodbConfigs {
+    pub fn get() -> Self {
+        get_env_vars_by_prefix("MONGODB_")
+    }
+
     pub fn get_database(self) -> anyhow::Result<Database> {
         let credential = Credential::builder()
             .username(self.username)

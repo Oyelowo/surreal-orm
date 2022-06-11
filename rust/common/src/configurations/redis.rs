@@ -1,6 +1,6 @@
 use redis::{aio::ConnectionManager, RedisError};
 
-use super::utils::{get_env_vars_by_prefix, Configurable};
+use super::utils::get_env_vars_by_prefix;
 use redis::{ConnectionAddr, ConnectionInfo, RedisConnectionInfo};
 use serde::Deserialize;
 use serde_aux::prelude::deserialize_number_from_string;
@@ -17,13 +17,11 @@ pub struct RedisConfigs {
     pub port: u16,
 }
 
-impl Configurable for RedisConfigs {
-    fn get() -> Self {
+impl RedisConfigs {
+    pub fn get() -> Self {
         get_env_vars_by_prefix("REDIS_")
     }
-}
 
-impl RedisConfigs {
     fn get_redis_connection_info(self) -> RedisConnectionInfo {
         RedisConnectionInfo {
             db: 0,

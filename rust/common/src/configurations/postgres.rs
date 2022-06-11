@@ -1,4 +1,4 @@
-use super::utils::{get_env_vars_by_prefix, Configurable};
+use super::utils::get_env_vars_by_prefix;
 use serde::Deserialize;
 use serde_aux::prelude::deserialize_number_from_string;
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
@@ -18,17 +18,15 @@ pub struct PosgresConfigs {
     pub require_ssl: Option<bool>,
 }
 
-impl Configurable for PosgresConfigs {
-    fn get() -> Self {
-        get_env_vars_by_prefix("POSTGRES_")
-    }
-}
-
 fn default_require_ssl() -> Option<bool> {
     Some(false)
 }
 
 impl PosgresConfigs {
+    pub fn get() -> Self {
+        get_env_vars_by_prefix("POSTGRES_")
+    }
+
     pub fn with_db(&self) -> PgConnectOptions {
         self.without_db().database(&self.name)
     }

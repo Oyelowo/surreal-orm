@@ -13,7 +13,3 @@ pub fn get_env_vars_by_prefix<T: DeserializeOwned>(config_prefix: &str) -> T {
             process::exit(1);
         })
 }
-
-pub trait Configurable {
-    fn get() -> Self;
-}
