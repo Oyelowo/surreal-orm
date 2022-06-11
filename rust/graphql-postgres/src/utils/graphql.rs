@@ -1,11 +1,3 @@
-use poem::{
-    handler,
-    http::HeaderMap,
-    session::Session,
-    web::{websocket::WebSocket, Data, Html},
-    IntoResponse,
-};
-
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig, ALL_WEBSOCKET_PROTOCOLS};
 use async_graphql_poem::{GraphQLProtocol, GraphQLRequest, GraphQLResponse, GraphQLWebSocket};
 use common::{
@@ -14,6 +6,14 @@ use common::{
         application::{ApplicationConfigs, Environment},
         postgres::PostgresConfigs,
     },
+};
+use migration::{Migrator, MigratorTrait};
+use poem::{
+    handler,
+    http::HeaderMap,
+    session::Session,
+    web::{websocket::WebSocket, Data, Html},
+    IntoResponse,
 };
 
 use serde::Deserialize;
@@ -32,6 +32,7 @@ use std::time::Duration;
 
 use sea_orm::{ConnectOptions, Database};
 
+use migration::Migrator;
 use sqlx::postgres::PgPoolOptions;
 
 #[handler]
@@ -126,11 +127,10 @@ pub async fn setup_graphql() -> anyhow::Result<MyGraphQLSchema> {
         .max_lifetime(Duration::from_secs(8))
         .sqlx_logging(true);
 
-    // let k = Database::from(connection_pool);
     let db = Database::connect(opt).await?;
-    // opt.
 
     // sqlx::migrate!("./migrations").run(&connection_pool).await?;
+    Migrator::up(&db, None).await?;
 
     let schema = get_my_graphql_schema()
         .data(connection_pool)

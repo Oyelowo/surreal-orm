@@ -35,6 +35,8 @@ pub struct Model {
     #[serde(skip_deserializing)] // Skip deserializing
     pub id: Uuid,
 
+    pub user_id: Uuid,
+
     #[sea_orm(default)]
     pub created_at: DateTime<Utc>,
 
