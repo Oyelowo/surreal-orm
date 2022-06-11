@@ -1,4 +1,4 @@
-use crate::{error_handling::ApiHttpStatus::*, my_time};
+use crate::{error_handling::ApiHttpStatus::*, middleware::get_session_expiry};
 use async_graphql::{Context, ErrorExtensions, Result};
 use chrono::{DateTime, Utc};
 use log::warn;
@@ -55,6 +55,6 @@ impl TypedSession {
     }
 
     pub fn get_expiry() -> DateTime<Utc> {
-        my_time::get_session_expiry()
+        get_session_expiry()
     }
 }

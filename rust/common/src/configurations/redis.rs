@@ -1,13 +1,10 @@
-use anyhow::Context;
-
-use common::utils::get_config;
-use redis::aio::ConnectionManager;
-
-use redis::{ConnectionAddr, ConnectionInfo, RedisConnectionInfo};
-use serde::{Deserialize, Serialize};
-use serde_aux::prelude::deserialize_number_from_string;
+use redis::{aio::ConnectionManager, RedisError};
 
 use super::utils::{get_config, Configurable};
+use redis::{ConnectionAddr, ConnectionInfo, RedisConnectionInfo};
+use serde::Deserialize;
+use serde_aux::prelude::deserialize_number_from_string;
+use thiserror;
 
 #[derive(Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "lowercase")]
@@ -42,7 +39,7 @@ impl RedisConfigs {
         ConnectionInfo { addr, redis }
     }
 
-    pub fn get_client(self) -> anyhow::Result<redis::Client> {
+    pub fn get_client(self) -> Result<redis::Client, RedisConfigError> {
         let addr = ConnectionAddr::Tcp(self.host, self.port);
 
         let redis = RedisConnectionInfo {
@@ -51,7 +48,7 @@ impl RedisConfigs {
             password: Some(self.password),
         };
         let connection_info = ConnectionInfo { addr, redis };
-        redis::Client::open(connection_info)?
+        redis::Client::open(connection_info).map_err(RedisConfigError::OpenConnectionFailure)
     }
 
     pub fn get_url(&self) -> String {
@@ -69,7 +66,18 @@ impl RedisConfigs {
         format!("redis://{username}:{password}@{host}:{port}/{db}")
     }
 
-    pub async fn get_connection_manager(self) -> anyhow::Result<ConnectionManager> {
-        ConnectionManager::new(self.get_client()).await?
+    pub async fn get_connection_manager(self) -> Result<ConnectionManager, RedisConfigError> {
+        ConnectionManager::new(self.get_client()?)
+            .await
+            .map_err(RedisConfigError::RedisConnectionManagerFailed)
     }
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum RedisConfigError {
+    #[error("Failed to get connection manager")]
+    RedisConnectionManagerFailed(#[source] RedisError),
+
+    #[error("Failed to open connection")]
+    OpenConnectionFailure(#[source] RedisError),
 }

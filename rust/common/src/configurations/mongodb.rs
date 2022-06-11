@@ -4,7 +4,7 @@ use mongodb::{
     options::{ClientOptions, Credential, ServerAddress},
     Client, Database,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_aux::prelude::deserialize_number_from_string;
 
 #[derive(Deserialize, Debug, Default)]

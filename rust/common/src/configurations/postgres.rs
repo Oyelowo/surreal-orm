@@ -1,8 +1,7 @@
-use anyhow::Context;
-use serde::{Deserialize, Serialize};
-use serde_aux::prelude::deserialize_number_from_string;
-
 use super::utils::{get_config, Configurable};
+use serde::Deserialize;
+use serde_aux::prelude::deserialize_number_from_string;
+use sqlx::postgres::{PgConnectOptions, PgSslMode};
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
