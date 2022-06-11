@@ -1,5 +1,4 @@
 pub mod configuration;
-pub mod cors;
 pub mod graphql;
 pub mod mongodb;
 pub mod session;

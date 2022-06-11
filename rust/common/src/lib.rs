@@ -1,8 +1,9 @@
 pub mod authentication;
+pub mod configurations;
 pub mod error_handling;
 mod macros;
+pub mod middleware;
 pub mod my_time;
-mod util_module_alternative;
 pub mod utils;
 
 pub use macros::{calculator, helpers, sync_mongo_models};

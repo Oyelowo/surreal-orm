@@ -1,5 +1,6 @@
 use async_graphql::*;
 
+use bson::Document;
 use common::error_handling::ApiHttpStatus;
 use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};

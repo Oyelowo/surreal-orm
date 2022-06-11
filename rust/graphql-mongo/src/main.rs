@@ -1,23 +1,33 @@
 use std::process;
 
-use actix_web::{middleware::Logger, web, App, HttpServer};
 use anyhow::Context;
-use graphql_mongo::utils::{
-    configuration, cors,
-    graphql::{gql_playground, index, index_ws, setup_graphql},
-    session,
+use async_graphql::extensions::Logger;
+use common::configurations::{application::ApplicationConfigs, redis::RedisConfigs};
+use env_logger::Logger;
+use graphql_mongo::{
+    middleware,
+    utils::{
+        configuration, cors,
+        graphql::{graphql_handler, graphql_handler_ws, graphql_playground, setup_graphql},
+        session,
+    },
 };
 use log::info;
-use tracing_actix_web::TracingLogger;
+use poem::{
+    get,
+    listener::TcpListener,
+    middleware::Tracing,
+    session::{CookieConfig, RedisStorage, ServerSession},
+    EndpointExt, Route, Server,
+};
+use redis::aio::ConnectionManager;
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() {
     env_logger::init();
-    let application = configuration::get_app_config();
-    let redis = configuration::get_redis_config();
+    let application = ApplicationConfigs::get();
+    let redis = RedisConfigs::get();
     let app_url = &application.get_url();
-
-    info!("Playground: {}", app_url);
 
     let schema = setup_graphql()
         .await
@@ -27,20 +37,24 @@ async fn main() -> anyhow::Result<()> {
             process::exit(1)
         });
 
-    HttpServer::new(move || {
-        App::new()
-            .wrap(cors::get_cors())
-            .wrap(TracingLogger::default())
-            .wrap(Logger::default())
-            .wrap(session::get_session_middleware(&redis, &application))
-            .app_data(web::Data::new(schema.clone()))
-            .service(gql_playground)
-            .service(index)
-            .service(web::resource("/graphql/ws").to(index_ws))
-    })
-    .bind(app_url)?
-    .run()
-    .await?;
+    let app = Route::new()
+        .at("/graphql/", get(graphql_playground).post(graphql_handler))
+        .at("/graphql/ws", get(graphql_handler_ws))
+        .with(middleware::get_session(
+            redis_config,
+            application.environment,
+        ))
+        .with(middleware::get_cors())
+        .with(Logger)
+        .with(Tracing);
 
-    Ok(())
+    info!("Playground: {app_url}");
+
+    Server::new(TcpListener::bind(app_url))
+        .run(app)
+        .await
+        .unwrap_or_else(|e| {
+            log::error!("Problem running server. Error: {e}");
+            process::exit(-1)
+        });
 }

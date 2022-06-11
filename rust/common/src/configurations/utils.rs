@@ -13,3 +13,7 @@ pub fn get_config<T: DeserializeOwned>(config_prefix: &str) -> T {
             process::exit(1);
         })
 }
+
+pub trait Configurable {
+    fn get() -> Self;
+}

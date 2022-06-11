@@ -1,7 +1,9 @@
+use anyhow::Context;
 use common::utils::get_config;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
-use sqlx::postgres::{PgConnectOptions, PgSslMode};
+
+use super::utils::{get_config, Configurable};
 
 #[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
@@ -12,9 +14,6 @@ pub enum Environment {
     Production,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AppUrl {}
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub struct ApplicationConfigs {
@@ -24,6 +23,12 @@ pub struct ApplicationConfigs {
     pub environment: Environment,
 }
 
+impl Configurable for ApplicationConfigs {
+    fn get() -> Self {
+        get_config("APP_")
+    }
+}
+
 impl ApplicationConfigs {
     pub fn get_url(&self) -> String {
         let Self { host, port, .. } = self;
@@ -31,16 +36,3 @@ impl ApplicationConfigs {
         format!("{host}:{port}")
     }
 }
-
-
-pub fn get_app_config() -> ApplicationConfigs {
-    get_config("APP_")
-}
-
-pub fn get_postgres_config() -> DatabaseConfigs {
-    get_config("POSTGRES_")
-}
-
-// pub fn get_redis_config() -> RedisConfigs {
-//     get_config("REDIS_")
-// }

@@ -1,8 +1,8 @@
-use actix_web::http::header::HeaderMap;
 use async_graphql::ErrorExtensions;
 use common::error_handling::ApiHttpStatus;
 use derive_more::From;
 use log::warn;
+use poem::http::HeaderMap;
 
 #[derive(From, PartialEq)]
 pub struct Token(pub String);

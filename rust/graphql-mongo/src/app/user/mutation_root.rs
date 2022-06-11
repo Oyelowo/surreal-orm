@@ -118,10 +118,7 @@ impl UserMutationRoot {
                     ApiHttpStatus::InternalServerError("Malformed id".into()).extend()
                 })?;
 
-                session.insert_user_id(&id).map_err(|e| {
-                    warn!("{e:?}");
-                    ApiHttpStatus::InternalServerError("Error handling us".into()).extend()
-                })?;
+                session.insert_user_id(&id);
                 Ok(user)
             }
         };
@@ -187,7 +184,7 @@ impl UserMutationRoot {
                     .await?
                     .ok_or(ApiHttpStatus::Unauthorized("Invalid credentials".into()).extend())?;
 
-                session.insert_user_id(&user_id)?;
+                session.insert_user_id(&user_id);
                 Ok(user)
             }
         };

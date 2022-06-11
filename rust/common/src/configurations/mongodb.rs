@@ -1,0 +1,63 @@
+use super::utils::{get_config, Configurable};
+use anyhow::Context;
+use mongodb::{
+    options::{ClientOptions, Credential, ServerAddress},
+    Client, Database,
+};
+use serde::{Deserialize, Serialize};
+use serde_aux::prelude::deserialize_number_from_string;
+
+#[derive(Deserialize, Debug, Default)]
+#[serde(rename_all = "lowercase")]
+pub struct MongodbConfigs {
+    pub name: String,
+    pub username: String,
+    pub password: String,
+    pub host: String,
+
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub port: u16,
+
+    #[serde(default = "default_require_ssl")]
+    pub require_ssl: Option<bool>,
+}
+
+impl Configurable for MongodbConfigs {
+    fn get() -> Self {
+        get_config("MONGODB_")
+    }
+}
+
+fn default_require_ssl() -> Option<bool> {
+    Some(false)
+}
+
+impl MongodbConfigs {
+    pub fn get_database(self) -> anyhow::Result<Database> {
+        let credential = Credential::builder()
+            .username(self.username)
+            .password(self.password)
+            .source(self.name.clone())
+            .build();
+
+        let hosts = vec![ServerAddress::Tcp {
+            host: self.host,
+            port: Some(self.port),
+        }];
+
+        let options = ClientOptions::builder()
+            .app_name(Some("graphql-mongo".into()))
+            .hosts(hosts)
+            .credential(credential)
+            .build();
+
+        let db = Client::with_options(options)
+            .context("Faulty db option")?
+            .database(&self.name);
+        Ok(db)
+    }
+}
+
+// pub fn get_mongodb_config() -> DatabaseConfigs {
+//     get_config("MONGODB_")
+// }

@@ -1,5 +1,4 @@
-use actix_cors::Cors;
-use actix_web::http;
+use poem::middleware::Cors;
 
 /// https://javascript.info/fetch-crossorigin#cors-for-safe-requests
 /// http://www.ruanyifeng.com/blog/2016/04/cors.html

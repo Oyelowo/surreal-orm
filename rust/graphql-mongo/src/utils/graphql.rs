@@ -1,12 +1,13 @@
-use actix_session::SessionExt;
-
-use actix_web::{get, post, web, HttpRequest, HttpResponse};
-
-use async_graphql::{
-    http::{playground_source, GraphQLPlaygroundConfig},
-    Data, Schema,
+use poem::{
+    handler,
+    http::HeaderMap,
+    session::Session,
+    web::{websocket::WebSocket, Data, Html},
+    IntoResponse,
 };
-use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
+
+use async_graphql::http::{playground_source, GraphQLPlaygroundConfig, ALL_WEBSOCKET_PROTOCOLS};
+use async_graphql_poem::{GraphQLProtocol, GraphQLRequest, GraphQLResponse, GraphQLWebSocket};
 use common::authentication::TypedSession;
 
 use serde::Deserialize;
@@ -20,36 +21,33 @@ extern crate derive_more;
 
 use std::path::Path;
 
-#[post("/graphql")]
-pub async fn index(
-    schema: web::Data<MyGraphQLSchema>,
-    req: HttpRequest,
-    // db: actix_web::web::Data<Database>,
-    gql_request: GraphQLRequest,
-    // _session: Session,
+#[handler]
+pub async fn graphql_handler(
+    session: &Session,
+    schema: Data<&MyGraphQLSchema>,
+    headers: &HeaderMap,
+    req: GraphQLRequest,
 ) -> GraphQLResponse {
-    let mut request = gql_request.into_inner();
-
-    // Get session data and stick it into graphql context
-    let session = TypedSession::new(req.get_session());
+    let session = TypedSession(session.to_owned());
 
     // If, using, jwt, Stick jwt token from headers into graphql context.
     // Presently not using it but cookie session managed with redis
-    let token = Token::get_token_from_headers(req.headers());
+    let token = Token::get_token_from_headers(headers);
 
-    request = request.data(session).data(token);
-
+    let request = req.0.data(session).data(token);
     schema.execute(request).await.into()
 }
 
-async fn on_connection_init(value: serde_json::Value) -> async_graphql::Result<Data> {
+async fn on_connection_init(
+    value: serde_json::Value,
+) -> async_graphql::Result<async_graphql::Data> {
     #[derive(Deserialize)]
     struct Payload {
         token: String,
     }
 
     if let Ok(payload) = serde_json::from_value::<Payload>(value) {
-        let mut data = Data::default();
+        let mut data = async_graphql::Data::default();
         data.insert(Token(payload.token));
         Ok(data)
     } else {
@@ -57,34 +55,40 @@ async fn on_connection_init(value: serde_json::Value) -> async_graphql::Result<D
     }
 }
 
-pub async fn index_ws(
-    schema: web::Data<MyGraphQLSchema>,
-    req: HttpRequest,
-    payload: web::Payload,
-) -> actix_web::Result<HttpResponse> {
-    let mut data = Data::default();
-    let session = TypedSession::new(req.get_session());
-    let token = Token::get_token_from_headers(req.headers());
+#[handler]
+pub async fn graphql_handler_ws(
+    schema: Data<&MyGraphQLSchema>,
+    headers: &HeaderMap,
+    protocol: GraphQLProtocol,
+    websocket: WebSocket,
+    session: &Session,
+) -> impl IntoResponse {
+    let mut data = async_graphql::Data::default();
+    if let Some(token) = Token::get_token_from_headers(headers) {
+        data.insert(token);
+    }
 
-    data.insert(token);
+    let schema = schema.0.clone();
+    let session = TypedSession(session.clone());
+
     data.insert(session);
-
-    GraphQLSubscription::new(Schema::clone(&*schema))
-        .with_data(data)
-        .on_connection_init(on_connection_init)
-        .start(&req, payload)
+    websocket
+        .protocols(ALL_WEBSOCKET_PROTOCOLS)
+        .on_upgrade(move |stream| {
+            GraphQLWebSocket::new(stream, schema, protocol)
+                .with_data(data)
+                .on_connection_init(on_connection_init)
+                .serve()
+        })
 }
 
-#[get("/graphql")]
-pub async fn gql_playground() -> HttpResponse {
-    let source = playground_source(
+#[handler]
+pub async fn graphql_playground() -> impl IntoResponse {
+    Html(playground_source(
         GraphQLPlaygroundConfig::new("/graphql")
-            .subscription_endpoint("/graphql")
+            .subscription_endpoint("/ws")
             .with_setting("credentials", "include"), // e.g allow cookies
-    );
-    HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
-        .body(source)
+    ))
 }
 
 pub async fn setup_graphql() -> anyhow::Result<MyGraphQLSchema> {
