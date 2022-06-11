@@ -1,4 +1,4 @@
-use graphql_mongo::utils::graphql;
+use graphql_postgres::utils::graphql;
 
 fn main() {
     let path = format!("{}/generated/schema.graphql", env!("CARGO_PKG_NAME"));
