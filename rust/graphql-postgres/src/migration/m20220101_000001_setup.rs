@@ -49,7 +49,7 @@ create collation case_insensitive (provider = icu, locale = 'und-u-ks-level2', d
         manager.get_connection().execute(stmt).await.map(|_| ())
     }
 
-    async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+    async fn down(&self, _manager: &SchemaManager) -> Result<(), DbErr> {
         // let sql = "DROP TABLE `cake`";
         // let stmt = Statement::from_string(manager.get_database_backend(), sql.to_owned());
         // manager.get_connection().execute(stmt).await.map(|_| ())

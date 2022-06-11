@@ -4,7 +4,7 @@ use super::{model::PostActiveModel, Post, PostEntity};
 use async_graphql::*;
 use common::error_handling::ApiHttpStatus;
 use log::error;
-use sea_orm::{ActiveModelTrait, EntityTrait, Set};
+use sea_orm::{ActiveModelTrait, Set};
 use sqlx::types::Uuid;
 use validator::Validate;
 

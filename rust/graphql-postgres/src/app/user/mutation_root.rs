@@ -7,7 +7,7 @@ use async_graphql::*;
 use common::error_handling::ApiHttpStatus;
 
 use log::error;
-use sea_orm::{ActiveModelTrait, EntityTrait, Set};
+use sea_orm::{ActiveModelTrait, Set};
 use uuid::Uuid;
 use validator::Validate;
 

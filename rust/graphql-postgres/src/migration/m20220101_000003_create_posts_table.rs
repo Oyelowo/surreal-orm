@@ -44,8 +44,8 @@ impl MigrationTrait for Migration {
                     .foreign_key(
                         ForeignKey::create()
                             .name("FK_posts_users")
-                            .from(Table, Column::UserId)
-                            .to(user::Table, user::Column::Id)
+                            .from(self::Entity, Column::UserId)
+                            .to(user::Entity, user::Column::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::Cascade),
                     )

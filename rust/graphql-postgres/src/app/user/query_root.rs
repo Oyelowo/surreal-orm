@@ -3,7 +3,6 @@ use crate::utils::postgresdb::{get_pg_connection_from_ctx, get_pg_pool_from_ctx}
 use super::user;
 
 use async_graphql::*;
-use sea_orm::EntityTrait;
 use sqlx::query_as;
 use uuid::Uuid;
 
