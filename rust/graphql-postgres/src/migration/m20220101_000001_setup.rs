@@ -1,5 +1,4 @@
-
-use sea_orm::Statement;
+use sea_orm::{ConnectionTrait, Statement};
 use sea_orm_migration::prelude::*;
 
 pub struct Migration;
@@ -55,6 +54,5 @@ create collation case_insensitive (provider = icu, locale = 'und-u-ks-level2', d
         // let stmt = Statement::from_string(manager.get_database_backend(), sql.to_owned());
         // manager.get_connection().execute(stmt).await.map(|_| ())
         unimplemented!()
-
     }
 }

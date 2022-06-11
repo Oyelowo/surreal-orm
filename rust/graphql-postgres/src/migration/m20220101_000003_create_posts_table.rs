@@ -1,7 +1,7 @@
 use crate::app::post::model::*;
 use crate::app::user::model as user;
 use common::utils::get_current_filename;
-use sea_orm::sea_query::{Table, TableBuilder};
+use sea_orm::sea_query::Table;
 use sea_orm_migration::prelude::*;
 
 pub struct Migration;
@@ -41,18 +41,15 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Column::DeletedAt).timestamp_with_time_zone())
                     .col(ColumnDef::new(Column::Title).text())
                     .col(ColumnDef::new(Column::Content).not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("FK_posts_users")
+                            .from(Table, Column::UserId)
+                            .to(user::Table, user::Column::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
                     .to_owned(),
-            )
-            .await;
-
-        manager
-            .create_foreign_key(
-                ForeignKey::create()
-                    .name("FK_posts_users")
-                    .from(Table, Column::UserId)
-                    .to(user::Table, user::Column::Id)
-                    .on_update(ForeignKeyAction::Cascade)
-                    .on_delete(ForeignKeyAction::Cascade),
             )
             .await
     }

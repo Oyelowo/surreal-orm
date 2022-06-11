@@ -1,5 +1,5 @@
 use async_graphql::*;
-use sea_orm::{entity::prelude::*, DeleteMany, QueryOrder};
+use sea_orm::{entity::prelude::*, DeleteMany};
 use serde::{Deserialize, Serialize};
 use sqlx::{
     types::{
@@ -35,17 +35,12 @@ pub struct Model {
     #[serde(skip_deserializing)] // Skip deserializing
     pub id: Uuid,
 
-    pub user_id: Uuid,
-
-    #[sea_orm(default)]
     pub created_at: DateTime<Utc>,
 
     #[graphql(skip_input)]
-    #[sea_orm(default)]
     pub updated_at: Option<DateTime<Utc>>,
 
     #[graphql(skip)]
-    #[sea_orm(default)]
     pub deleted_at: Option<DateTime<Utc>>,
 
     #[validate(length(min = 1), /*custom = "validate_unique_username"*/)]
@@ -92,7 +87,7 @@ impl Entity {
     }
 
     pub fn find_by_username(username: &str) -> Select<Entity> {
-        Self::find().filter(Column::Title.eq(username))
+        Self::find().filter(Column::Username.eq(username))
     }
 
     pub fn delete_by_id(id: Uuid) -> DeleteMany<Entity> {
@@ -104,8 +99,7 @@ impl Entity {
 impl Model {
     async fn posts(&self, ctx: &async_graphql::Context<'_>) -> async_graphql::Result<Vec<Post>> {
         let db = get_pg_connection_from_ctx(ctx)?;
-        let id = format!("{}", self.id);
-        let posts = post::Entity::find_by_user_id(id).all(db).await?;
+        let posts = post::Entity::find_by_user_id(self.id).all(db).await?;
         Ok(posts)
     }
 

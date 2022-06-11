@@ -1,6 +1,6 @@
 use crate::app::user::model::*;
 use common::utils::get_current_filename;
-use sea_orm::sea_query::{Table, TableBuilder};
+use sea_orm::sea_query::Table;
 use sea_orm_migration::prelude::*;
 
 pub struct Migration;

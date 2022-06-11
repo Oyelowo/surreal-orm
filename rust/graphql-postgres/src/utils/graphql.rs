@@ -1,3 +1,4 @@
+use crate::migration::{Migrator, MigratorTrait};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig, ALL_WEBSOCKET_PROTOCOLS};
 use async_graphql_poem::{GraphQLProtocol, GraphQLRequest, GraphQLResponse, GraphQLWebSocket};
 use common::{
@@ -7,7 +8,6 @@ use common::{
         postgres::PostgresConfigs,
     },
 };
-use migration::{Migrator, MigratorTrait};
 use poem::{
     handler,
     http::HeaderMap,
@@ -32,7 +32,6 @@ use std::time::Duration;
 
 use sea_orm::{ConnectOptions, Database};
 
-use migration::Migrator;
 use sqlx::postgres::PgPoolOptions;
 
 #[handler]

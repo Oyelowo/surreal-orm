@@ -1,7 +1,7 @@
 use async_graphql::*;
 
 use common::error_handling::ApiHttpStatus;
-use sea_orm::entity::prelude::*;
+use sea_orm::{entity::prelude::*, DeleteMany, QueryOrder};
 use serde::{Deserialize, Serialize};
 use sqlx::types::{
     chrono::{DateTime, Utc},
@@ -22,26 +22,22 @@ use crate::{app::user::user, utils::postgresdb::get_pg_connection_from_ctx};
     Serialize,
     Deserialize,
 )]
-#[graphql(complex, input_name = "PostInput")]
+#[graphql(complex, input_name = "PostInput", name = "Post")]
 #[sea_orm(table_name = "posts")]
 pub struct Model {
-    #[sea_orm(primary_key)]
     #[graphql(skip_input)]
+    #[sea_orm(primary_key)]
     #[serde(skip_deserializing)] // Skip deserializing
     pub id: Uuid,
 
     // FK -> poster
-    #[sea_orm(get_many)]
     pub user_id: Uuid,
 
-    #[sea_orm(default)]
     pub created_at: DateTime<Utc>,
 
-    #[sea_orm(default)]
     #[graphql(skip)]
     pub updated_at: Option<DateTime<Utc>>,
 
-    #[sea_orm(default, set)]
     #[graphql(skip)]
     pub deleted_at: Option<DateTime<Utc>>,
 
