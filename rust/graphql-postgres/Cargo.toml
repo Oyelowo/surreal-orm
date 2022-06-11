@@ -20,6 +20,7 @@ poem = { version = "1.3.30", features = [
   # "eyre",
   "tokio-metrics",
 ] }
+async-graphql-poem = "4.0.1"
 async-graphql = { version = "4.0.1", features = [
   "apollo_tracing",
   "apollo_persisted_queries",

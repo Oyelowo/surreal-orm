@@ -5,7 +5,7 @@ use sqlx::postgres::{PgConnectOptions, PgSslMode};
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
-pub struct PosgresConfigs {
+pub struct PostgresConfigs {
     pub name: String,
     pub username: String,
     pub password: String,
@@ -22,7 +22,7 @@ fn default_require_ssl() -> Option<bool> {
     Some(false)
 }
 
-impl PosgresConfigs {
+impl PostgresConfigs {
     pub fn get() -> Self {
         get_env_vars_by_prefix("POSTGRES_")
     }
