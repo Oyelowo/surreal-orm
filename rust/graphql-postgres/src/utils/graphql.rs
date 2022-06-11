@@ -32,7 +32,6 @@ use std::time::Duration;
 
 use sea_orm::{ConnectOptions, Database};
 
-use crate::utils::configuration;
 use sqlx::postgres::PgPoolOptions;
 
 #[handler]
@@ -62,7 +61,7 @@ async fn on_connection_init(
 
     if let Ok(payload) = serde_json::from_value::<Payload>(value) {
         let mut data = async_graphql::Data::default();
-        // data.insert(Token(payload.token));
+        data.insert(Token(payload.token));
         Ok(data)
     } else {
         Err("Token is required".into())

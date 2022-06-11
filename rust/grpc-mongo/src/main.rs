@@ -1,14 +1,17 @@
+use std::{net::SocketAddr, process};
+
 use anyhow::Result;
-use grpc_mongo::{
-    app::{app_analytics::AnalyticsApp, greetings::GreeterApp, music::MusicFanApp},
-    utils::configuration,
-};
+use common::configurations::application::ApplicationConfigs;
+use grpc_mongo::app::{app_analytics::AnalyticsApp, greetings::GreeterApp, music::MusicFanApp};
 use tonic::transport::Server;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let application = configuration::get_app_config();
-    let addr = application.get_url();
+    let application = ApplicationConfigs::get();
+    let addr: SocketAddr = application.get_url().parse().unwrap_or_else(|e| {
+        log::error!("Failed to parse application url to socket address. Error: {e}");
+        process::exit(-1)
+    });
 
     Server::builder()
         .accept_http1(true)

@@ -55,7 +55,3 @@ impl MongodbConfigs {
         Ok(db)
     }
 }
-
-// pub fn get_mongodb_config() -> DatabaseConfigs {
-//     get_config("MONGODB_")
-// }

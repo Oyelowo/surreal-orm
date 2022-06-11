@@ -1,12 +1,13 @@
-use mongodb::{Client, Database};
+use std::process;
 
-use super::configuration::get_db_config;
+use common::configurations::mongodb::MongodbConfigs;
+use mongodb::Database;
 
 pub async fn establish_connection() -> Database {
-    let database = get_db_config();
+    let database = MongodbConfigs::get();
 
-    Client::with_uri_str(database.get_url())
-        .await
-        .expect("failed to get database connection")
-        .database(database.name.as_str())
+    database.get_database().unwrap_or_else(|e| {
+        log::error!("failed to get mongo database. Error: {e}");
+        process::exit(-1)
+    })
 }

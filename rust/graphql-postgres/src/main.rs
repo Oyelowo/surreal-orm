@@ -1,5 +1,6 @@
 use std::process;
 
+use anyhow::Context;
 use common::{
     configurations::{application::ApplicationConfigs, redis::RedisConfigs},
     middleware,
@@ -11,11 +12,9 @@ use graphql_postgres::utils::graphql::{
 use log::info;
 use poem::{get, listener::TcpListener, middleware::Tracing, EndpointExt, Route, Server};
 
-use log::info;
-
 #[tokio::main]
 async fn main() {
-    env_logger::init();
+    // env_logger::init();
     let application = ApplicationConfigs::get();
     let redis_config = RedisConfigs::get();
     let app_url = &application.get_url();
