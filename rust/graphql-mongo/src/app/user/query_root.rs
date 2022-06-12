@@ -105,6 +105,6 @@ struct Session {
 #[derive(SimpleObject, InputObject, Serialize, Deserialize)]
 struct SessionUser {
     name: String,
-    email: String,
+    email: Option<String>,
     image: String,
 }

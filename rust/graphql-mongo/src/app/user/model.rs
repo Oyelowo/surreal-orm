@@ -66,25 +66,30 @@ pub struct User {
     pub password: Option<String>,
 
     #[validate(length(min = 1))]
-    pub first_name: String,
+    // #[builder(default, setter(strip_option))]
+    pub first_name: Option<String>,
 
     #[validate(length(min = 1))]
-    pub last_name: String,
+    // #[builder(default, setter(strip_option))]
+    pub last_name: Option<String>,
 
     #[validate(length(min = 1))]
     #[builder(default, setter(strip_option))]
     pub city: Option<String>,
-
+    
     #[validate(email)]
-    pub email: String,
-
+    // #[builder(default, setter(strip_option))]
+    pub email: Option<String>,
+    
     #[graphql(skip_input)]
+    #[builder(default, setter(strip_option))]
     pub email_verified_at: Option<DateTime<Utc>>,
-
+    
     #[validate(range(min = 18, max = 160))]
     pub age: Option<u8>,
 
     #[serde(default)]
+    #[builder(default)]
     pub social_media: Vec<String>,
 
     #[graphql(skip_input)]
@@ -102,30 +107,55 @@ pub struct User {
 pub struct AccountOauth {
     #[graphql(skip_input)]
     pub id: String,
-    #[graphql(skip_input)]
-    pub user_id: String,
+    // pub profile: ProfileOauth,
+    // #[graphql(skip_input)]
+    // pub user_id: String,
+    // Potentially change to enum
     pub account_type: String,
-    pub provider: String,
-    pub provider_account_id: String,
+    pub provider: OauthProvider,
+    pub provider_account_id: OauthProvider,
     pub access_token: String,
     pub refresh_token: Option<String>,
+
+    /// ccess token expiration timestamp, represented as the number of seconds since the epoch (January 1, 1970 00:00:00 UTC).
     pub expires_at: Option<DateTime<Utc>>,
-    pub token_type: Option<String>, // Should probably be changed to an enum. i.e oauth | anything else?
-    pub scope: Option<String>,
+    pub token_type: Option<TokenType>, // Should probably be changed to an enum. i.e oauth | anything else?
+    pub scope: Option<Vec<String>>,
+    #[builder(default, setter(strip_option))]
     pub id_token: Option<String>,
-    pub session_state: Option<String>,
-    pub profile: ProfileOauth,
+    /* NOTE
+    In case of an OAuth 1.0 provider (like Twitter), you will have to look for oauth_token and oauth_token_secret string fields. GitHub also has an extra refresh_token_expires_in integer field. You have to make sure that your database schema includes these fields.
+
+    A single User can have multiple Accounts, but each Account can only have one User.
+                 */
+    #[builder(default, setter(strip_option))]
+    oauth_token: Option<String>,
+    #[builder(default, setter(strip_option))]
+    oauth_token_secret: Option<String>,
 }
 
-#[derive(InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-#[graphql(input_name = "ProfileOauthInput")]
-pub struct ProfileOauth {
-    pub first_name: String,
-    pub last_name: String,
-    pub username: String,
-    pub email: String,
-    pub email_verified: bool,
+// #[derive(InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+// #[serde(rename_all = "camelCase")]
+// #[graphql(input_name = "ProfileOauthInput")]
+// pub struct ProfileOauth {
+//     pub first_name: Option<String>,
+//     pub last_name: Option<String>,
+//     pub username: String,
+//     pub email: Option<String>,
+//     pub email_verified: bool,
+// }
+
+#[derive(Debug, Deserialize, Serialize, Clone, Enum, PartialEq, Eq, Copy)]
+#[serde(rename_all = "lowercase")]
+pub enum OauthProvider {
+    Github,
+    Google,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, Enum, PartialEq, Eq, Copy)]
+#[serde(rename_all = "lowercase")]
+pub enum TokenType {
+    Bearer,
 }
 
 /*
@@ -212,16 +242,16 @@ impl User {
     }
 
     pub async fn get_user(db: &Database, user_by: UserBy) -> Result<Self> {
-        let uk = User::get_fields_serialized();
+        let uf = User::get_fields_serialized();
         let search_doc = match user_by {
-            UserBy::UserId(id) => doc! { uk._id: id },
+            UserBy::UserId(id) => doc! { uf._id: id },
             UserBy::Username(user_name) => {
-                let doc = doc! { uk.username: user_name };
+                let doc = doc! { uf.username: user_name };
                 doc
             }
             // Temporary
-            UserBy::Address(address) => doc! { uk.city: address.city },
-            UserBy::Email(email) => doc! { uk.email: email },
+            UserBy::Address(address) => doc! { uf.city: address.city },
+            UserBy::Email(email) => doc! { uf.email: email },
         };
         // todo!()
         User::find_one(db, search_doc, None)
@@ -261,11 +291,13 @@ impl User {
         mut self,
         db: &Database,
         provider: impl Into<String>,
-        provider_account_id: impl Into<String>,
+        // provider_account_id: impl Into<OauthProvider>,
     ) -> Result<Self, WitherError> {
         let user_keys = User::get_fields_serialized();
         let acc_keys = AccountOauth::get_fields_serialized();
-        let filter = doc! { user_keys.accounts: {"$elemMatch": {acc_keys.provider: provider.into(), acc_keys.providerAccountId: provider_account_id.into()}}};
+        // let filter = doc! { user_keys.accounts: {"$elemMatch": {acc_keys.provider: provider.into(), acc_keys.providerAccountId: provider_account_id.into()}}};
+        let filter =
+            doc! { user_keys.accounts: {"$elemMatch": {acc_keys.provider: provider.into()}}};
         User::save(&mut self, db, Some(filter)).await?;
 
         Ok(self)

@@ -36,7 +36,6 @@ impl UserMutationRoot {
             .first_name(user_input.first_name)
             .last_name(user_input.last_name)
             .email(user_input.email)
-            .email_verified_at(None)
             .age(user_input.age)
             .social_media(user_input.social_media)
             .roles(vec![Role::User])
@@ -70,7 +69,6 @@ impl UserMutationRoot {
             .first_name(user.first_name)
             .last_name(user.last_name)
             .email(user.email)
-            .email_verified_at(None)
             .age(user.age)
             .social_media(user.social_media)
             .roles(vec![Role::User])
@@ -156,24 +154,24 @@ impl UserMutationRoot {
                 // If they already have an id based on the filter, it will update their data, otherwise, it will
                 // create a new record
                 let account_clone = account.clone();
-                let provider = account_clone.provider.as_str();
-                let provider_account_id = account_clone.provider_account_id.as_str();
+                let provider = account_clone.provider;
+                // let provider_account_id = account_clone.provider_account_id.as_str();
                 let user = User::builder()
                     .created_at(Utc::now())
-                    .username(format!("{}-{}", provider, provider_account_id))
-                    .first_name(account_clone.profile.first_name)
-                    .last_name(account_clone.profile.last_name)
-                    .email(account_clone.profile.email)
+                    .username(format!("{}-{:?}", account_clone.id, provider))
+                    .first_name(None)
+                    .last_name(None)
+                    .email(None)
                     .social_media(vec![])
                     .roles(vec![Role::User])
                     .age(None)
                     .accounts(vec![account])
-                    .email_verified_at(None)
                     .password(None)
                     .build();
 
+                let provider = serde_json::to_string(&provider).unwrap_or("".into());
                 let user = user
-                    .find_or_replace_account_oauth(db, provider, provider_account_id)
+                    .find_or_replace_account_oauth(db, provider)
                     .await
                     .map_err(|_| {
                         ApiHttpStatus::Unauthorized("Invalid credentials".into()).extend()
