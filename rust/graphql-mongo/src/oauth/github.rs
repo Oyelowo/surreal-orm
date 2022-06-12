@@ -160,6 +160,7 @@ trait OauthProviderTrait {
 
 const REDIRECT_URL: &str = "http://localhost:8080";
 
+#[derive(Debug, Clone)]
 pub struct TypedAuthUrl(Url);
 
 impl TypedAuthUrl {
@@ -222,7 +223,7 @@ impl GithubConfig {
 
 #[derive(Debug, Clone)]
 struct AuthUrlData {
-    authorize_url: Url,
+    authorize_url: TypedAuthUrl,
     csrf_state: CsrfToken,
 }
 impl OauthProviderTrait for GithubConfig {
@@ -254,7 +255,7 @@ impl OauthProviderTrait for GithubConfig {
             .add_scopes(self.basic_config.scopes)
             .url();
         AuthUrlData {
-            authorize_url,
+            authorize_url: TypedAuthUrl(authorize_url),
             csrf_state,
         }
     }
