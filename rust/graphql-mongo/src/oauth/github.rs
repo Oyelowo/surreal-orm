@@ -5,8 +5,8 @@ use chrono::{Duration, Utc};
 use common::sum;
 use oauth2::{
     basic::{BasicClient, BasicTokenType},
-    AuthUrl, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields, RedirectUrl, Scope,
-    StandardTokenResponse, TokenResponse, TokenUrl,
+    AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
+    RedirectUrl, Scope, StandardTokenResponse, TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -160,6 +160,33 @@ trait OauthProviderTrait {
 
 const REDIRECT_URL: &str = "http://localhost:8080";
 
+pub struct TypedAuthUrl(Url);
+
+impl TypedAuthUrl {
+    pub fn get_authorization_code(&self) -> AuthorizationCode {
+        let value = self.get_query_param_value("code");
+        AuthorizationCode::new(value.into_owned())
+    }
+
+    pub fn get_csrf_state(&self) -> CsrfToken {
+        let value = self.get_query_param_value("state");
+        CsrfToken::new(value.into_owned())
+    }
+
+    fn get_query_param_value(&self, query_param: &str) -> std::borrow::Cow<str> {
+        let state_pair = self
+            .0
+            .query_pairs()
+            .find(|pair| {
+                let &(ref key, _) = pair;
+                key == query_param
+            })
+            .expect("Not found. TODO: Handle error properly later");
+        let (_, value) = state_pair;
+        value
+    }
+}
+
 #[derive(Debug, Clone)]
 struct OauthConfig {
     client_id: ClientId,
@@ -175,7 +202,7 @@ struct GithubConfig {
 }
 
 impl GithubConfig {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let basic_config = OauthConfig {
             // Get first two from environment variable
             client_id: ClientId::new("57d332c258954615aac7".to_string()),
