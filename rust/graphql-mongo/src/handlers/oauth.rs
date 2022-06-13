@@ -1,3 +1,4 @@
+use common::configurations::redis::RedisConfigs;
 use oauth2::basic::BasicClient;
 use poem::middleware::AddData;
 use poem::web::{Data, Redirect};
@@ -11,66 +12,44 @@ use oauth2::{
     TokenResponse, TokenUrl,
 };
 use poem_openapi::payload::PlainText;
+use redis::Connection;
+// use redis::aio::Connection;
 use std::env;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 // use tokio::net::TcpListener;
+use crate::oauth::github::{GithubConfig, OauthProviderTrait, TypedAuthUrl, TypedCsrfState};
 use url::Url;
 
-#[handler]
-pub fn oauth_login(Path(provider): Path<String> ,data: Data<&AuthData>) -> Redirect {
-    let AuthData {
-        authorize_url,
-        csrf_state,
-        client,
-    } = data.0;
-    // let url = authorize_url.to_owned();
-    // let url = url.as_str();
-    Redirect::moved_permanent(authorize_url)
+use crate::app::user::OauthProvider;
 
-    // format!("hello: {}", name)
+#[handler]
+pub async fn oauth_login(Path(provider): Path<OauthProvider>, rc: Data<&RedisConfigs>) -> Redirect {
+    let mut con = rc.clone().get_client().unwrap().get_connection().unwrap();
+
+    let auth_url_data = match provider {
+        OauthProvider::Github => GithubConfig::new().generate_auth_url(),
+        OauthProvider::Google => todo!(),
+    };
+
+    // Send csrf state to redis
+    auth_url_data.csrf_state.cache(&mut con).unwrap();
+
+    Redirect::moved_permanent(auth_url_data.authorize_url)
 }
 
 #[handler]
-async fn oauth_redirect_url(uri: &Uri, data: Data<&AuthData>) -> String {
-    let AuthData {
-        authorize_url,
-        csrf_state,
-        client,
-    } = data.0;
-    let code;
-    let state;
-    let redirect_url = uri.to_string();
-    // let url = Url::parse(&("http://localhost".to_string() + redirect_url)).unwrap();
-    let url = Url::parse(&("http://localhost".to_string() + &redirect_url)).unwrap();
-    // let url = uri;
+async fn oauth_redirect_url(uri: &Uri) -> String {
+    let redirect_url = Url::parse(&("http://localhost".to_string() + &uri.to_string())).unwrap();
+    let redirect_url = TypedAuthUrl(redirect_url);
+    let code = redirect_url.get_authorization_code();
+    // make .verify give me back both the csrf token and the provider
+    let state = redirect_url.get_csrf_state();
 
-    let code_pair = url
-        .query_pairs()
-        .find(|pair| {
-            let &(ref key, _) = pair;
-            key == "code"
-        })
-        .unwrap();
-
-    // format!("hello: {}", name);
-
-    let (_, value) = code_pair;
-    code = AuthorizationCode::new(value.into_owned());
-
-    let state_pair = url
-        .query_pairs()
-        .find(|pair| {
-            let &(ref key, _) = pair;
-            key == "state"
-        })
-        .unwrap();
-
-    let (_, value) = state_pair;
-    state = CsrfToken::new(value.into_owned());
-
+    let github_config = GithubConfig::new();
     println!("my state: {state:?}");
 
-    let token_res = client
+    let token_res = github_config
+        .client()
         .exchange_code(code)
         .request_async(async_http_client)
         .await;

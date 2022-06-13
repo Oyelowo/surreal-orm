@@ -1,4 +1,6 @@
-use anyhow::{Context, Ok};
+use std::fmt;
+
+use anyhow::Context;
 use bson::DateTime;
 use chrono::{Duration, Utc};
 
@@ -8,6 +10,7 @@ use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
     RedirectUrl, Scope, StandardTokenResponse, TokenResponse, TokenUrl,
 };
+use redis::{Commands, FromRedisValue, RedisError};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -149,19 +152,49 @@ impl From<RemoteOauth> for User {
 }
 
 struct Name {}
-trait OauthProviderTrait {
+
+#[async_trait::async_trait]
+pub(crate) trait OauthProviderTrait {
     // type Confr;
 
     fn client(self) -> BasicClient;
 
     /// Generate the authorization URL to which we'll redirect the user.
-    fn generate_auth_url(self) -> AuthUrlData;
+    fn generate_auth_url(&self) -> AuthUrlData;
+
+    // fn exchange_code_for_token(self) {
+    //        let token_res = client
+    //     .exchange_code(code)
+    //     .request_async(async_http_client)
+    //     .await;
+    // }
 }
 
 const REDIRECT_URL: &str = "http://localhost:8080";
+// use derive_more::{Add, Display, From, Into};
 
-#[derive(Debug, Clone)]
-pub struct TypedAuthUrl(Url);
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TypedAuthUrl(pub Url);
+
+// impl IntoInner for TypedAuthUrl {
+
+// }
+
+impl fmt::Display for TypedAuthUrl {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+// impl Into<Url> for TypedAuthUrl {
+//     // fn from(url: Url) -> Self {
+//     //     Self(url)
+//     // }
+
+//     fn into(self) -> Url {
+//         self.0
+//     }
+// }
 
 impl TypedAuthUrl {
     pub fn get_authorization_code(&self) -> AuthorizationCode {
@@ -169,9 +202,9 @@ impl TypedAuthUrl {
         AuthorizationCode::new(value.into_owned())
     }
 
-    pub fn get_csrf_state(&self) -> CsrfToken {
+    pub(crate) fn get_csrf_state(&self) -> TypedCsrfState {
         let value = self.get_query_param_value("state");
-        CsrfToken::new(value.into_owned())
+        TypedCsrfState(CsrfToken::new(value.into_owned()))
     }
 
     fn get_query_param_value(&self, query_param: &str) -> std::borrow::Cow<str> {
@@ -198,7 +231,7 @@ struct OauthConfig {
 }
 
 #[derive(Debug, Clone)]
-struct GithubConfig {
+pub(crate) struct GithubConfig {
     basic_config: OauthConfig,
 }
 
@@ -215,17 +248,79 @@ impl GithubConfig {
             scopes: vec![
                 Scope::new("public_repo".into()),
                 Scope::new("read:user".into()),
+                Scope::new("user:email".into()),
             ],
         };
         Self { basic_config }
     }
 }
 
-#[derive(Debug, Clone)]
-struct AuthUrlData {
-    authorize_url: TypedAuthUrl,
-    csrf_state: CsrfToken,
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum CsrfStateError {
+    #[error("The csrf code provided by the provider is invalid. Does not match the one sent. Potential spoofing")]
+    InvalidCsrfToken,
+
+    #[error(transparent)]
+    RedisError(#[from] RedisError),
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct TypedCsrfState {
+    csrf_token: CsrfToken,
+    provider: OauthProvider,
+}
+
+// impl FromRedisValue for TypedCsrfState {
+//     fn from_redis_value(v: &redis::Value) -> redis::RedisResult<Self> {
+//         v.
+//         todo!()
+//     }
+// }
+// pub(crate) struct TypedCsrfState(CsrfToken);
+
+// #[derive(Debug, Clone, Serialize, Deserialize)]
+// pub(crate) struct VerifiedState{
+
+// };
+
+impl TypedCsrfState {
+    const CSRF_STATE_REDIS_KEY: &'static str = "CSRF_STATE_REDIS_KEY";
+
+    fn redis_key(&self) -> String {
+        format!(
+            "{}{:?}{:?}",
+            Self::CSRF_STATE_REDIS_KEY,
+            self.provider,
+            self.csrf_token.secret().as_str()
+        )
+    }
+
+    pub(crate) fn cache(&self, con: &mut redis::Connection) -> anyhow::Result<(), CsrfStateError> {
+        let _: () = con.set(self.redis_key(), true)?;
+        Ok(())
+    }
+
+    pub(crate) fn verify(
+        &self,
+        con: &mut redis::Connection,
+    ) -> Result<TypedCsrfState, CsrfStateError> {
+        // let m = serde_json::to_string(&p).unwrap();
+        let csrf_token: serde_json::Value = con.get(self.redis_key())?;
+
+        // if csrf_token.csrf_token.secret().as_str() == self.csrf_token.secret().as_str() {
+        if csrf_token.csrf_token == self.csrf_token {
+            return Err(CsrfStateError::InvalidCsrfToken);
+        }
+        Ok(csrf_token)
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct AuthUrlData {
+    pub(crate) authorize_url: TypedAuthUrl,
+    pub(crate) csrf_state: TypedCsrfState,
+}
+
 impl OauthProviderTrait for GithubConfig {
     fn client(self) -> BasicClient {
         BasicClient::new(
@@ -242,7 +337,7 @@ impl OauthProviderTrait for GithubConfig {
     }
 
     /// Generate the authorization URL to which we'll redirect the user.
-    fn generate_auth_url(self) -> AuthUrlData {
+    fn generate_auth_url(&self) -> AuthUrlData {
         // let c = self;
         let (authorize_url, csrf_state) = self
             .clone()
@@ -252,11 +347,17 @@ impl OauthProviderTrait for GithubConfig {
             // .add_scope(Scope::new("public_repo".to_string()))
             // .add_scope(Scope::new("read:user".to_string()))
             // .add_scope(Scope::new("user:email".to_string()))
-            .add_scopes(self.basic_config.scopes)
+            .add_scopes(self.basic_config.clone().scopes)
             .url();
         AuthUrlData {
             authorize_url: TypedAuthUrl(authorize_url),
-            csrf_state,
+            csrf_state: TypedCsrfState(csrf_state),
         }
     }
 }
+
+// fn kkkk() {
+//     let k = GithubConfig::new();
+//     let p = k.generate_auth_url();
+
+// }
