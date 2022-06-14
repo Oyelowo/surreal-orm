@@ -82,6 +82,7 @@ async fn oauth_redirect_url(uri: &Uri, rc: Data<&RedisConfigs>) -> String {
 //         .await
 // }
 
+/* 
 #[derive(Debug, Clone)]
 pub struct AuthData {
     client: BasicClient,
@@ -135,3 +136,4 @@ fn authorize_user() -> AuthData {
         csrf_state,
     }
 }
+ */

@@ -66,11 +66,11 @@ pub struct User {
     pub password: Option<String>,
 
     #[validate(length(min = 1))]
-    // #[builder(default, setter(strip_option))]
+    #[builder(default)]
     pub first_name: Option<String>,
 
     #[validate(length(min = 1))]
-    // #[builder(default, setter(strip_option))]
+    #[builder(default)]
     pub last_name: Option<String>,
 
     #[validate(length(min = 1))]
@@ -105,6 +105,7 @@ pub struct User {
 #[serde(rename_all = "camelCase")]
 #[graphql(input_name = "AccountOauthInput")]
 pub struct AccountOauth {
+    /// unique identifier for the oauth provider. Don't use name of user because that could be changed
     #[graphql(skip_input)]
     pub id: String,
     // pub profile: ProfileOauth,
@@ -120,8 +121,8 @@ pub struct AccountOauth {
     /// ccess token expiration timestamp, represented as the number of seconds since the epoch (January 1, 1970 00:00:00 UTC).
     pub expires_at: Option<DateTime<Utc>>,
     pub token_type: Option<TokenType>, // Should probably be changed to an enum. i.e oauth | anything else?
-    pub scope: Option<Vec<String>>,
-    #[builder(default, setter(strip_option))]
+    pub scopes: Vec<String>,
+    #[builder(default)]
     pub id_token: Option<String>,
     /* NOTE
     In case of an OAuth 1.0 provider (like Twitter), you will have to look for oauth_token and oauth_token_secret string fields. GitHub also has an extra refresh_token_expires_in integer field. You have to make sure that your database schema includes these fields.
