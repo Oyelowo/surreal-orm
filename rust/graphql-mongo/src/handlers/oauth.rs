@@ -40,11 +40,10 @@ pub async fn oauth_login(Path(provider): Path<OauthProvider>, rc: Data<&RedisCon
 
 #[handler]
 async fn oauth_redirect_url(uri: &Uri, rc: Data<&RedisConfigs>) -> String {
+    let mut con = rc.clone().get_client().unwrap().get_connection().unwrap();
     let redirect_url = Url::parse(&("http://localhost".to_string() + &uri.to_string())).unwrap();
     let redirect_url = TypedAuthUrl(redirect_url);
     let code = redirect_url.get_authorization_code();
-
-    let mut con = rc.clone().get_client().unwrap().get_connection().unwrap();
     // make .verify give me back both the csrf token and the provider
     let provider = redirect_url.get_csrf_state().verify(&mut con).expect("er");
 
