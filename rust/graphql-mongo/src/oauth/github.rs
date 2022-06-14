@@ -163,7 +163,10 @@ pub(crate) trait OauthProviderTrait {
     /// Generate the authorization URL to which we'll redirect the user.
     fn generate_auth_url(&self) -> AuthUrlData;
 
-    async fn fetch_oauth_account(&self, code: AuthorizationCode) -> User;
+    async fn fetch_oauth_account(
+        &self,
+        code: AuthorizationCode,
+    ) -> anyhow::Result<User, OauthProviderError>;
 
     // fn exchange_code_for_token(self) {
     //        let token_res = client
@@ -341,6 +344,13 @@ pub(crate) struct AuthUrlData {
     pub(crate) csrf_state: TypedCsrfState,
 }
 
+#[derive(thiserror::Error, Debug)]
+pub(crate) enum OauthProviderError {
+    #[error("Failed to fetch user profile")]
+    FailedToFetchUserProfile,
+    // FailedToFetchUserProfile(#[from] anyhow::Error),
+}
+
 #[async_trait::async_trait]
 impl OauthProviderTrait for GithubConfig {
     fn client(self) -> BasicClient {
@@ -376,7 +386,10 @@ impl OauthProviderTrait for GithubConfig {
         }
     }
 
-    async fn fetch_oauth_account(&self, code: AuthorizationCode) -> User {
+    async fn fetch_oauth_account(
+        &self,
+        code: AuthorizationCode,
+    ) -> anyhow::Result<User, OauthProviderError> {
         let token_res = self
             .clone()
             .client()
@@ -389,14 +402,15 @@ impl OauthProviderTrait for GithubConfig {
             // space-separated scopes. Github-specific clients can parse this scope into
             // multiple scopes by splitting at the commas. Note that it's not safe for the
             // library to do this by default because RFC 6749 allows scopes to contain commas.
-            println!("TOKENNNN{:?}", token);
-            println!("Accesssss{:?}", token.access_token().secret().as_str());
+            // println!("TOKENNNN{:?}", token);
+            // println!("Accesssss{:?}", token.access_token().secret().as_str());
             let url = "https://api.github.com/user";
             let body = reqwest::Client::new()
                     .get(url)
                                 .header("accept", "application/vnd.github.v3+json")
             .header("user-agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36")
-                    .header("Authorization", format!("Bearer {}",token.access_token().secret().as_str()))
+                    // .header("Authorization", format!("Bearer {}",token.access_token().secret().as_str()))
+                    .bearer_auth(token.clone().access_token().secret().as_str())
                     .send()
                     .await
                     .unwrap()
@@ -415,9 +429,17 @@ impl OauthProviderTrait for GithubConfig {
             } else {
                 Vec::new()
             };
+
+            let p = RemoteOauth {
+                token: token.clone(),
+                profile: serde_json::from_str::<RemoteOauthDataGithub>(body.as_str()).unwrap(),
+            };
             println!("Github returned the following scopes:\n{:?}\n", scopes);
+            let k = User::from(p);
+            return Ok(k);
         }
-        todo!()
+
+        return Err(OauthProviderError::FailedToFetchUserProfile);
     }
 }
 
