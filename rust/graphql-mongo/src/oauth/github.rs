@@ -75,8 +75,8 @@ impl GithubConfig {
     pub fn new() -> Self {
         let basic_config = OauthConfig {
             // Get first two from environment variable
-            client_id: ClientId::new("57d332c258954615aac7".to_string()),
-            client_secret: ClientSecret::new("e41a1fb86af01532fe640a2d79ad6608c3774261".into()),
+            client_id: ClientId::new("7b42a802131cb19d2b49".to_string()),
+            client_secret: ClientSecret::new("bd30006cbcdb2a40901c9d4207a4a79d8c4f67c0".into()),
             auth_url: AuthUrl::new("https://github.com/login/oauth/authorize".to_string())
                 .expect("Invalid authorization endpoint URL"),
             token_url: TokenUrl::new("https://github.com/login/oauth/access_token".to_string())

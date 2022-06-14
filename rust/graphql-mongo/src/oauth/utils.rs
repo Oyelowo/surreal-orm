@@ -27,8 +27,8 @@ pub(crate) enum ProviderType {
     Credentials,
 }
 
-pub(crate) const REDIRECT_URL: &str = "http://localhost:8080/api/auth/oauth/callback";
-// pub(crate) const REDIRECT_URL: &str = "http://localhost:8080";
+pub(crate) const REDIRECT_URL: &str = "http://localhost:8000/api/oauth/callback";
+// pub(crate) const REDIRECT_URL: &str = "http://localhost:8000";
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum CsrfStateError {
@@ -109,7 +109,7 @@ impl TypedAuthUrl {
                 let &(ref key, _) = pair;
                 key == query_param
             })
-            .expect("Not found. TODO: Handle error properly later");
+            .expect(format!("Not found. TODO: Handle error properly later, param: {query_param}. url:{}", self.0).as_str());
         let (_, value) = state_pair;
         value
     }

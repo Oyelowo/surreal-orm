@@ -29,7 +29,7 @@ pub async fn oauth_login_initiator(
     rc: Data<&RedisConfigs>,
 ) -> Redirect {
     let mut con = rc.clone().get_client().unwrap().get_connection().unwrap();
-
+println!("XXXXXX : {oauth_provider:?}");
     let auth_url_data = match oauth_provider {
         OauthProvider::Github => GithubConfig::new().generate_auth_url(),
         OauthProvider::Google => todo!(),
@@ -41,6 +41,7 @@ pub async fn oauth_login_initiator(
         .cache(oauth_provider, &mut con)
         .unwrap();
 
+ println!("ewertyrewWRTYREW : {:?}",auth_url_data.authorize_url);
     Redirect::moved_permanent(auth_url_data.authorize_url)
 }
 
