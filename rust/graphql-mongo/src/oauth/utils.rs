@@ -27,7 +27,8 @@ pub(crate) enum ProviderType {
     Credentials,
 }
 
-pub(crate) const REDIRECT_URL: &str = "http://localhost:8080";
+pub(crate) const REDIRECT_URL: &str = "http://localhost:8080/api/auth/oauth/callback";
+// pub(crate) const REDIRECT_URL: &str = "http://localhost:8080";
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum CsrfStateError {

@@ -6,8 +6,9 @@ use common::{
     middleware,
 };
 
-use graphql_mongo::utils::graphql::{
-    graphql_handler, graphql_handler_ws, graphql_playground, setup_graphql,
+use graphql_mongo::{
+    handlers::oauth::{oauth_login_authentication, oauth_login_initiator},
+    utils::graphql::{graphql_handler, graphql_handler_ws, graphql_playground, setup_graphql},
 };
 use log::info;
 use poem::{
@@ -16,7 +17,6 @@ use poem::{
     middleware::{AddData, Tracing},
     EndpointExt, Route, Server,
 };
-use redis::Commands;
 
 #[tokio::main]
 async fn main() {
@@ -40,33 +40,14 @@ async fn main() {
             process::exit(1)
         });
 
-    // let auth_data = AuthData {
-    //     authorize_url,
-    //     csrf_state,
-    //     client,
-    // };
-
-    // let app = Route::new()
-    //     .at("/api/auth/signin", get(oauth))
-    //     // .at("/hello/:name", get(hello))
-    //     .at("/", get(handle_oauth_redirect_url))
-    //     .with(AddData::new(auth_data));
-
-//     let con = redis_config
-//         .get_client()
-//         .expect("dff")
-//         .get_connection()
-//         // .await
-//         .expect("vvv");
-// pp.set("key", "value");
-
-
     let app = Route::new()
-        // .at("/api/auth/signin", get(oauth_login))
-        // // .at("/hello/:name", get(hello))
-        // .at("/", get(oauth_redirec))
-        .at("/graphql/", get(graphql_playground).post(graphql_handler))
-        .at("/graphql/ws", get(graphql_handler_ws))
+        .at("/api/oauth/signin/:oauth_provider", get(oauth_login_initiator))
+        .at("/api/oauth/callback", get(oauth_login_authentication))
+        .at(
+            "/api/graphql",
+            get(graphql_playground).post(graphql_handler),
+        )
+        .at("/api/graphql/ws", get(graphql_handler_ws))
         .data(schema)
         // .with(AddData::new(con))
         .with(AddData::new(redis_config))

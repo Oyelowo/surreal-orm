@@ -18,28 +18,34 @@ use std::env;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 // use tokio::net::TcpListener;
 use crate::oauth::github::GithubConfig;
-use crate::oauth::utils::{OauthProviderTrait, TypedAuthUrl, TypedCsrfState};
+use crate::oauth::utils::{OauthProviderTrait, TypedAuthUrl};
 use url::Url;
 
-use crate::app::user::{OauthProvider, User};
+use crate::app::user::OauthProvider;
 
 #[handler]
-pub async fn oauth_login(Path(provider): Path<OauthProvider>, rc: Data<&RedisConfigs>) -> Redirect {
+pub async fn oauth_login_initiator(
+    Path(oauth_provider): Path<OauthProvider>,
+    rc: Data<&RedisConfigs>,
+) -> Redirect {
     let mut con = rc.clone().get_client().unwrap().get_connection().unwrap();
 
-    let auth_url_data = match provider {
+    let auth_url_data = match oauth_provider {
         OauthProvider::Github => GithubConfig::new().generate_auth_url(),
         OauthProvider::Google => todo!(),
     };
 
     // Send csrf state to redis
-    auth_url_data.csrf_state.cache(provider, &mut con).unwrap();
+    auth_url_data
+        .csrf_state
+        .cache(oauth_provider, &mut con)
+        .unwrap();
 
     Redirect::moved_permanent(auth_url_data.authorize_url)
 }
 
 #[handler]
-async fn oauth_redirect_url(uri: &Uri, rc: Data<&RedisConfigs>) -> String {
+pub async fn oauth_login_authentication(uri: &Uri, rc: Data<&RedisConfigs>) -> String {
     let mut con = rc.clone().get_client().unwrap().get_connection().unwrap();
     let redirect_url = Url::parse(&("http://localhost".to_string() + &uri.to_string())).unwrap();
     let redirect_url = TypedAuthUrl(redirect_url);
