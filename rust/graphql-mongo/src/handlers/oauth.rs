@@ -32,27 +32,36 @@ pub async fn oauth_login(Path(provider): Path<OauthProvider>, rc: Data<&RedisCon
     };
 
     // Send csrf state to redis
-    auth_url_data.csrf_state.cache(&mut con).unwrap();
+    auth_url_data.csrf_state.cache(provider, &mut con).unwrap();
 
     Redirect::moved_permanent(auth_url_data.authorize_url)
 }
 
 #[handler]
-async fn oauth_redirect_url(uri: &Uri) -> String {
+async fn oauth_redirect_url(uri: &Uri, rc: Data<&RedisConfigs>) -> String {
     let redirect_url = Url::parse(&("http://localhost".to_string() + &uri.to_string())).unwrap();
     let redirect_url = TypedAuthUrl(redirect_url);
     let code = redirect_url.get_authorization_code();
+
+    let mut con = rc.clone().get_client().unwrap().get_connection().unwrap();
     // make .verify give me back both the csrf token and the provider
-    let state = redirect_url.get_csrf_state();
+    let provider = redirect_url.get_csrf_state().verify(&mut con).expect("er");
 
-    let github_config = GithubConfig::new();
-    println!("my state: {state:?}");
+    let token_res = match provider {
+        OauthProvider::Github => {
+            let github_config = GithubConfig::new();
+            println!("my state: {provider:?}");
 
-    let token_res = github_config
-        .client()
-        .exchange_code(code)
-        .request_async(async_http_client)
-        .await;
+            // All these are the profile fetch should probably also be part of github config(OauthProvider) trait
+            let token_res = github_config
+                .client()
+                .exchange_code(code)
+                .request_async(async_http_client)
+                .await;
+            token_res
+        }
+        OauthProvider::Google => todo!(),
+    };
 
     if let Ok(token) = token_res {
         // NB: Github returns a single comma-separated "scope" parameter instead of multiple

@@ -7,6 +7,7 @@ use chrono::{Duration, Utc};
 use common::sum;
 use oauth2::{
     basic::{BasicClient, BasicTokenType},
+    reqwest::async_http_client,
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
     RedirectUrl, Scope, StandardTokenResponse, TokenResponse, TokenUrl,
 };
@@ -162,6 +163,8 @@ pub(crate) trait OauthProviderTrait {
     /// Generate the authorization URL to which we'll redirect the user.
     fn generate_auth_url(&self) -> AuthUrlData;
 
+    async fn fetch_oauth_account(&self, code: AuthorizationCode) -> User;
+
     // fn exchange_code_for_token(self) {
     //        let token_res = client
     //     .exchange_code(code)
@@ -262,10 +265,14 @@ pub(crate) enum CsrfStateError {
 
     #[error(transparent)]
     RedisError(#[from] RedisError),
+
+    #[error(transparent)]
+    SerializationError(#[from] serde_json::Error),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct TypedCsrfState {
+pub(crate) struct TypedCsrfState(CsrfToken);
+pub(crate) struct TypedCsrfStateData {
     csrf_token: CsrfToken,
     provider: OauthProvider,
 }
@@ -288,30 +295,43 @@ impl TypedCsrfState {
 
     fn redis_key(&self) -> String {
         format!(
-            "{}{:?}{:?}",
+            "{}{:?}",
             Self::CSRF_STATE_REDIS_KEY,
-            self.provider,
-            self.csrf_token.secret().as_str()
+            self.0.secret().as_str()
         )
+        // format!(
+        //     "{}{:?}{:?}",
+        //     Self::CSRF_STATE_REDIS_KEY,
+        //     self.provider,
+        //     self.csrf_token.secret().as_str()
+        // )
     }
 
-    pub(crate) fn cache(&self, con: &mut redis::Connection) -> anyhow::Result<(), CsrfStateError> {
-        let _: () = con.set(self.redis_key(), true)?;
+    pub(crate) fn cache(
+        &self,
+        provider: OauthProvider,
+        con: &mut redis::Connection,
+    ) -> anyhow::Result<(), CsrfStateError> {
+        let m = serde_json::to_string(&provider)?;
+        // let m = serde_json::to_string(&self.0)?;
+
+        let _: () = con.set(self.redis_key(), m)?;
         Ok(())
     }
 
     pub(crate) fn verify(
         &self,
         con: &mut redis::Connection,
-    ) -> Result<TypedCsrfState, CsrfStateError> {
-        // let m = serde_json::to_string(&p).unwrap();
-        let csrf_token: serde_json::Value = con.get(self.redis_key())?;
+    ) -> Result<OauthProvider, CsrfStateError> {
+        let csrf_state: String = con.get(self.redis_key())?;
+        // let csrf_state: Self = serde_json::from_str(csrf_state.as_str())?;
+        // let csrf_state: OauthProvider = serde_json::from_str(csrf_state.as_str())?;
 
-        // if csrf_token.csrf_token.secret().as_str() == self.csrf_token.secret().as_str() {
-        if csrf_token.csrf_token == self.csrf_token {
+        if let Ok(d) = serde_json::from_str::<OauthProvider>(csrf_state.as_str()) {
+            return Ok(d);
+        } else {
             return Err(CsrfStateError::InvalidCsrfToken);
         }
-        Ok(csrf_token)
     }
 }
 
@@ -321,6 +341,7 @@ pub(crate) struct AuthUrlData {
     pub(crate) csrf_state: TypedCsrfState,
 }
 
+#[async_trait::async_trait]
 impl OauthProviderTrait for GithubConfig {
     fn client(self) -> BasicClient {
         BasicClient::new(
@@ -353,6 +374,50 @@ impl OauthProviderTrait for GithubConfig {
             authorize_url: TypedAuthUrl(authorize_url),
             csrf_state: TypedCsrfState(csrf_state),
         }
+    }
+
+    async fn fetch_oauth_account(&self, code: AuthorizationCode) -> User {
+        let token_res = self
+            .clone()
+            .client()
+            .exchange_code(code)
+            .request_async(async_http_client)
+            .await;
+
+        if let Ok(token) = token_res {
+            // NB: Github returns a single comma-separated "scope" parameter instead of multiple
+            // space-separated scopes. Github-specific clients can parse this scope into
+            // multiple scopes by splitting at the commas. Note that it's not safe for the
+            // library to do this by default because RFC 6749 allows scopes to contain commas.
+            println!("TOKENNNN{:?}", token);
+            println!("Accesssss{:?}", token.access_token().secret().as_str());
+            let url = "https://api.github.com/user";
+            let body = reqwest::Client::new()
+                    .get(url)
+                                .header("accept", "application/vnd.github.v3+json")
+            .header("user-agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36")
+                    .header("Authorization", format!("Bearer {}",token.access_token().secret().as_str()))
+                    .send()
+                    .await
+                    .unwrap()
+                    .text()
+                    .await
+                    .unwrap();
+
+            print!("FGREWRTBODY:{body}");
+
+            let scopes = if let Some(scopes_vec) = token.scopes() {
+                scopes_vec
+                    .iter()
+                    .map(|comma_separated| comma_separated.split(','))
+                    .flatten()
+                    .collect::<Vec<_>>()
+            } else {
+                Vec::new()
+            };
+            println!("Github returned the following scopes:\n{:?}\n", scopes);
+        }
+        todo!()
     }
 }
 
