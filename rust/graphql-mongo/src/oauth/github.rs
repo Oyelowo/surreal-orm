@@ -436,6 +436,7 @@ impl OauthProviderTrait for GithubConfig {
             };
             println!("Github returned the following scopes:\n{:?}\n", scopes);
             let k = User::from(p);
+            // TODO: Search user from db by github id and provider. If present, upsert other attributes, otherwise create
             return Ok(k);
         }
 

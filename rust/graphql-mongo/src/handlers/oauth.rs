@@ -2,8 +2,8 @@ use common::configurations::redis::RedisConfigs;
 use oauth2::basic::BasicClient;
 use poem::middleware::AddData;
 use poem::web::{Data, Redirect};
-use poem::EndpointExt;
 use poem::{get, handler, http::Uri, listener::TcpListener, web::Path, Route, Server};
+use poem::{EndpointExt, IntoResponse};
 
 // Alternatively, this can be `oauth2::curl::http_client` or a custom client.
 use oauth2::reqwest::async_http_client;
@@ -11,7 +11,7 @@ use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, RedirectUrl, Scope,
     TokenResponse, TokenUrl,
 };
-use poem_openapi::payload::PlainText;
+use poem_openapi::payload::{PlainText, Response};
 use redis::Connection;
 // use redis::aio::Connection;
 use std::env;
@@ -20,7 +20,7 @@ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use crate::oauth::github::{GithubConfig, OauthProviderTrait, TypedAuthUrl, TypedCsrfState};
 use url::Url;
 
-use crate::app::user::OauthProvider;
+use crate::app::user::{OauthProvider, User};
 
 #[handler]
 pub async fn oauth_login(Path(provider): Path<OauthProvider>, rc: Data<&RedisConfigs>) -> Redirect {
@@ -47,56 +47,19 @@ async fn oauth_redirect_url(uri: &Uri, rc: Data<&RedisConfigs>) -> String {
     // make .verify give me back both the csrf token and the provider
     let provider = redirect_url.get_csrf_state().verify(&mut con).expect("er");
 
-    let token_res = match provider {
+    let user = match provider {
         OauthProvider::Github => {
             let github_config = GithubConfig::new();
             println!("my state: {provider:?}");
 
             // All these are the profile fetch should probably also be part of github config(OauthProvider) trait
-            let token_res = github_config
-                .client()
-                .exchange_code(code)
-                .request_async(async_http_client)
-                .await;
-            token_res
+            github_config.fetch_oauth_account(code).await.unwrap()
         }
         OauthProvider::Google => todo!(),
     };
-
-    if let Ok(token) = token_res {
-        // NB: Github returns a single comma-separated "scope" parameter instead of multiple
-        // space-separated scopes. Github-specific clients can parse this scope into
-        // multiple scopes by splitting at the commas. Note that it's not safe for the
-        // library to do this by default because RFC 6749 allows scopes to contain commas.
-        println!("TOKENNNN{:?}", token);
-        println!("Accesssss{:?}", token.access_token().secret().as_str());
-        let url = "https://api.github.com/user";
-        let body = reqwest::Client::new()
-                    .get(url)
-                                // .header("accept", "application/vnd.github.v3+json")
-            .header("user-agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36")
-                    .header("Authorization", format!("Bearer {}",token.access_token().secret().as_str()))
-                    .send()
-                    .await
-                    .unwrap()
-                    .text()
-                    .await
-                    .unwrap();
-
-        print!("FGREWRTBODY:{body}");
-
-        let scopes = if let Some(scopes_vec) = token.scopes() {
-            scopes_vec
-                .iter()
-                .map(|comma_separated| comma_separated.split(','))
-                .flatten()
-                .collect::<Vec<_>>()
-        } else {
-            Vec::new()
-        };
-        println!("Github returned the following scopes:\n{:?}\n", scopes);
-    }
-    "erer".into()
+    //  Also, handle storing user session
+    // poem::Response::builder().body(user).finish()
+    "efddfd".into()
 }
 
 // #[tokio::main]
