@@ -17,7 +17,8 @@ use redis::Connection;
 use std::env;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 // use tokio::net::TcpListener;
-use crate::oauth::github::{GithubConfig, OauthProviderTrait, TypedAuthUrl, TypedCsrfState};
+use crate::oauth::github::GithubConfig;
+use crate::oauth::utils::{OauthProviderTrait, TypedAuthUrl, TypedCsrfState};
 use url::Url;
 
 use crate::app::user::{OauthProvider, User};
@@ -57,83 +58,8 @@ async fn oauth_redirect_url(uri: &Uri, rc: Data<&RedisConfigs>) -> String {
         }
         OauthProvider::Google => todo!(),
     };
+
     //  Also, handle storing user session
     // poem::Response::builder().body(user).finish()
     "efddfd".into()
 }
-
-// #[tokio::main]
-// async fn main() -> Result<(), std::io::Error> {
-//     let (client, authorize_url, csrf_state) = fun_name();
-
-//     let auth_data = AuthData {
-//         authorize_url,
-//         csrf_state,
-//         client,
-//     };
-
-//     let app = Route::new()
-//         .at("/api/auth/signin", get(oauth))
-//         // .at("/hello/:name", get(hello))
-//         .at("/", get(handle_oauth_redirect_url))
-//         .with(AddData::new(auth_data));
-//     Server::new(TcpListener::bind("127.0.0.1:8080"))
-//         .run(app)
-//         .await
-// }
-
-/* 
-#[derive(Debug, Clone)]
-pub struct AuthData {
-    client: BasicClient,
-    authorize_url: Url,
-    csrf_state: CsrfToken,
-}
-
-fn authorize_user() -> AuthData {
-    let github_client_id = ClientId::new("57d332c258954615aac7".to_string());
-    let github_client_secret = ClientSecret::new("e41a1fb86af01532fe640a2d79ad6608c3774261".into());
-    // let github_client_id = ClientId::new(
-    //     env::var("GITHUB_CLIENT_ID").expect("Missing the GITHUB_CLIENT_ID environment variable."),
-    // );
-    // let github_client_secret = ClientSecret::new(
-    //     env::var("GITHUB_CLIENT_SECRET")
-    //         .expect("Missing the GITHUB_CLIENT_SECRET environment variable."),
-    // );
-    let auth_url = AuthUrl::new("https://github.com/login/oauth/authorize".to_string())
-        .expect("Invalid authorization endpoint URL");
-    let token_url = TokenUrl::new("https://github.com/login/oauth/access_token".to_string())
-        .expect("Invalid token endpoint URL");
-    // Set up the config for the Github OAuth2 process.
-    let client = BasicClient::new(
-        github_client_id,
-        Some(github_client_secret),
-        auth_url,
-        Some(token_url),
-    )
-    // This example will be running its own server at localhost:8080.
-    // See below for the server implementation.
-    .set_redirect_uri(
-        RedirectUrl::new("http://localhost:8080/api/oauth/redirect_uri".to_string())
-            .expect("Invalid redirect URL"),
-    );
-    // Generate the authorization URL to which we'll redirect the user.
-    let (authorize_url, csrf_state) = client
-        .authorize_url(CsrfToken::new_random)
-        // This example is requesting access to the user's public repos and email.
-        // .add_scope(Scope::new("public_repo".to_string()))
-        .add_scopes(["read:user", "user:email"].map(|s| Scope::new(s.into())))
-        // .add_scope(Scope::new("read:user".to_string()))
-        // .add_scope(Scope::new("user:email".to_string()))
-        .url();
-    println!(
-        "Open this URL in your browser:\n{}\n",
-        authorize_url.to_string()
-    );
-    AuthData {
-        client,
-        authorize_url,
-        csrf_state,
-    }
-}
- */
