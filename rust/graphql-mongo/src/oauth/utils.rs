@@ -1,5 +1,6 @@
 use std::fmt;
 
+use chrono::Duration;
 use derive_more::{From, Into};
 use oauth2::{
     basic::{BasicClient, BasicTokenType},
@@ -66,8 +67,12 @@ impl TypedCsrfState {
         provider: OauthProvider,
         con: &mut redis::Connection,
     ) -> anyhow::Result<(), CsrfStateError> {
-        let m = serde_json::to_string(&provider)?;
-        let _: () = con.set(self.redis_key(), m)?;
+        let provider = serde_json::to_string(&provider)?;
+        println!("RTYUTREWQ: {provider:?}");
+        let _: () = con.set(self.redis_key(), provider)?;
+        // It seems github is storing a session for the auth. So, keep this for much
+        // Longer
+        // con.expire::<_, u16>(self.redis_key(), 600)?;
         Ok(())
     }
 
@@ -76,6 +81,8 @@ impl TypedCsrfState {
         con: &mut redis::Connection,
     ) -> Result<OauthProvider, CsrfStateError> {
         let csrf_state: String = con.get(self.redis_key())?;
+        // Todo: The strategy of delete after use is probably better but leave using TTL at line 72 for now.
+        // con.del::<_, String>(self.redis_key())?;
         serde_json::from_str::<OauthProvider>(csrf_state.as_str())
             .map_err(|_e| CsrfStateError::InvalidCsrfToken)
     }
@@ -109,7 +116,13 @@ impl TypedAuthUrl {
                 let &(ref key, _) = pair;
                 key == query_param
             })
-            .expect(format!("Not found. TODO: Handle error properly later, param: {query_param}. url:{}", self.0).as_str());
+            .expect(
+                format!(
+                    "Not found. TODO: Handle error properly later, param: {query_param}. url:{}",
+                    self.0
+                )
+                .as_str(),
+            );
         let (_, value) = state_pair;
         value
     }
@@ -131,7 +144,6 @@ impl OauthUrl {
         headers: Option<HeaderMap>,
     ) -> T {
         let headers = headers.unwrap_or_default();
-        // TODO: parse to serde as json
         let remote_data = reqwest::Client::new()
                     .get(self.0)
                     .header(ACCEPT, "application/vnd.github.v3+json")
@@ -146,8 +158,8 @@ impl OauthUrl {
                     .text()
                     .await
                     .unwrap();
-        let k = serde_json::from_str::<T>(remote_data.as_str()).unwrap();
-        k
+
+        serde_json::from_str::<T>(remote_data.as_str()).expect("erer")
     }
 }
 

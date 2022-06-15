@@ -29,7 +29,7 @@ pub async fn oauth_login_initiator(
     rc: Data<&RedisConfigs>,
 ) -> Redirect {
     let mut con = rc.clone().get_client().unwrap().get_connection().unwrap();
-println!("XXXXXX : {oauth_provider:?}");
+    println!("XXXXXX : {oauth_provider:?}");
     let auth_url_data = match oauth_provider {
         OauthProvider::Github => GithubConfig::new().generate_auth_url(),
         OauthProvider::Google => todo!(),
@@ -41,7 +41,7 @@ println!("XXXXXX : {oauth_provider:?}");
         .cache(oauth_provider, &mut con)
         .unwrap();
 
- println!("ewertyrewWRTYREW : {:?}",auth_url_data.authorize_url);
+    println!("ewertyrewWRTYREW : {:?}", auth_url_data.authorize_url);
     Redirect::moved_permanent(auth_url_data.authorize_url)
 }
 
@@ -57,14 +57,16 @@ pub async fn oauth_login_authentication(uri: &Uri, rc: Data<&RedisConfigs>) -> S
     let user = match provider {
         OauthProvider::Github => {
             let github_config = GithubConfig::new();
-            println!("my state: {provider:?}");
 
             // All these are the profile fetch should probably also be part of github config(OauthProvider) trait
             github_config.fetch_oauth_account(code).await.unwrap()
+            //  {
+            //                 Ok(u)=>u,
+            //                 Err(e)=>eprintln!("WERYRT: {e:?}");
         }
         OauthProvider::Google => todo!(),
     };
-
+    println!("USERRRR: {user:?}");
     //  Also, handle storing user session
     // poem::Response::builder().body(user).finish()
     "efddfd".into()

@@ -23,7 +23,7 @@ enum GithubScopes {
 #[derive(Debug, Deserialize, Serialize)]
 struct GithubUserData {
     login: String,
-    id: String,
+    id: u32,
     node_id: String,
     #[serde(rename = "type")]
     account_type: String,
@@ -32,29 +32,8 @@ struct GithubUserData {
     avatar_url: Option<String>,
     gravatar_id: Option<String>,
     url: Option<String>,
-    html_url: Option<String>,
-    followers_url: Option<String>,
-    following_url: Option<String>,
-    gists_url: Option<String>,
-    starred_url: Option<String>,
-    subscriptions_url: Option<String>,
-    organizations_url: Option<String>,
-    repos_url: Option<String>,
-    events_url: Option<String>,
-    received_events_url: Option<String>,
-    site_admin: Option<String>,
-    company: Option<String>,
-    blog: Option<String>,
     location: Option<String>,
-    hireable: Option<String>,
-    bio: Option<String>,
-    twitter_username: Option<String>,
-    public_repos: Option<String>,
-    public_gists: Option<String>,
-    followers: Option<String>,
-    following: Option<String>,
-    created_at: Option<String>,
-    updated_at: Option<String>,
+    // Many other irrelevant fields discarded
 }
 
 #[derive(Debug, Deserialize)]
@@ -67,8 +46,6 @@ struct GithubEmail {
 #[derive(Debug, Clone)]
 pub(crate) struct GithubConfig {
     basic_config: OauthConfig,
-    user_data_url: OauthUrl,
-    user_emails_url: OauthUrl,
 }
 
 impl GithubConfig {
@@ -86,16 +63,8 @@ impl GithubConfig {
                 Scope::new("read:user".into()),
                 Scope::new("user:email".into()),
             ],
-            // scopes: vec![GithubScopes::UserEmail, GithubScopes::PublicRepo]
-            //     .iter()
-            //     .map(|s| Scope::new(serde_json::to_string(s).unwrap()))
-            //     .collect::<Vec<Scope>>(),
         };
-        Self {
-            basic_config,
-            user_data_url: OauthUrl("https://api.github.com/user"),
-            user_emails_url: OauthUrl("https://api.github.com/user/emails"),
-        }
+        Self { basic_config }
     }
 }
 
@@ -113,7 +82,6 @@ impl OauthProviderTrait for GithubConfig {
 
     /// Generate the authorization URL to which we'll redirect the user.
     fn generate_auth_url(&self) -> AuthUrlData {
-        // let c = self;
         let (authorize_url, csrf_state) = self
             .clone()
             .client()
@@ -138,17 +106,13 @@ impl OauthProviderTrait for GithubConfig {
             .await
             .context("Failed to Fetch token")?;
 
-        let profile = self
-            .user_data_url
+        let profile = OauthUrl("https://api.github.com/user")
             .get_resource::<GithubUserData>(&token, None)
             .await;
-        print!("FGREWRTBODY:{profile:?}");
 
-        let user_emails = self
-            .user_data_url
+        let user_emails = OauthUrl("https://api.github.com/user/emails")
             .get_resource::<Vec<GithubEmail>>(&token, None)
             .await;
-        print!("FGREWRTBODY:{user_emails:?}");
 
         // Get the primary email or any first
         let primary_email = user_emails
@@ -170,7 +134,7 @@ impl OauthProviderTrait for GithubConfig {
             .collect::<Vec<String>>();
 
         let account = AccountOauth::builder()
-            .id(profile.id.clone())
+            .id(profile.id.to_string())
             .account_type(profile.account_type)
             .provider(OauthProvider::Github)
             .provider_account_id(OauthProvider::Github)
