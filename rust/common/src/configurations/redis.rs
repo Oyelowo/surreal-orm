@@ -49,6 +49,25 @@ impl RedisConfigs {
         redis::Client::open(connection_info).map_err(RedisConfigError::OpenConnectionFailure)
     }
 
+    pub fn get_connection(self) -> Result<redis::Connection, RedisConfigError> {
+        self.get_client()?.get_connection().map_err(|e| {
+            log::error!("Problem getting connection. Error:{e:?}");
+            RedisConfigError::ConnectionFailure(e)
+        })
+    }
+
+    pub async fn get_async_connection(self) -> Result<redis::aio::Connection, RedisConfigError> {
+        let k = self
+            .get_client()?
+            .get_async_connection()
+            .await
+            .map_err(|e| {
+                log::error!("Problem getting connection. Error:{e:?}");
+                RedisConfigError::ConnectionFailure(e)
+            });
+        k
+    }
+
     pub fn get_url(&self) -> String {
         let Self {
             host,
@@ -78,4 +97,7 @@ pub enum RedisConfigError {
 
     #[error("Failed to open connection")]
     OpenConnectionFailure(#[source] RedisError),
+
+    #[error("Problem getting connection")]
+    ConnectionFailure(#[source] RedisError),
 }

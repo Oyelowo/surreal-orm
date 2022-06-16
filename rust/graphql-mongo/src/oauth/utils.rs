@@ -9,7 +9,7 @@ use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields, Scope,
     StandardTokenResponse, TokenResponse, TokenUrl,
 };
-use redis::{Commands, RedisError};
+use redis::{AsyncCommands, Commands, RedisError};
 use reqwest::header::{ACCEPT, USER_AGENT};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use url::Url;
@@ -30,7 +30,8 @@ pub(crate) enum OauthError {
     #[error("Failed to fetch token. Error: {0}")]
     TokenFetchFailed(String),
 
-    #[error(transparent)]
+    // #[error(transparent)]
+    #[error("Failed to fetch data. Please try again")]
     RedisError(#[from] RedisError),
 
     #[error(transparent)]
@@ -60,25 +61,28 @@ impl CsrfStateWrapper {
         )
     }
 
-    pub(crate) fn cache(
+    pub(crate) async fn cache(
         &self,
         provider: OauthProvider,
-        con: &mut redis::Connection,
-    ) -> anyhow::Result<(), OauthError> {
+        con: &mut redis::aio::Connection,
+    ) -> Result<(), OauthError> {
         let provider = serde_json::to_string(&provider)?;
         println!("RTYUTREWQ: {provider:?}");
-        let _: () = con.set(self.redis_key(), provider)?;
+        let _: () = con.set(self.redis_key(), provider).await?;
         // It seems github is storing a session for the auth. So, keep this for much
         // Longer
         // con.expire::<_, u16>(self.redis_key(), 600)?;
         Ok(())
     }
 
-    pub(crate) fn verify(
+    pub(crate) async fn verify(
         &self,
-        con: &mut redis::Connection,
-    ) -> anyhow::Result<OauthProvider, OauthError> {
-        let csrf_state: String = con.get(self.redis_key())?;
+        con: &mut redis::aio::Connection,
+    ) -> Result<OauthProvider, OauthError> {
+        let csrf_state: String = con.get(self.redis_key()).await.map_err(|e| {
+            log::error!("EEEE. Error:{e:?}");
+            e
+        })?;
         // Todo: The strategy of delete after use is probably better but leave using TTL at line 72 for now.
         // con.del::<_, String>(self.redis_key())?;
         Ok(serde_json::from_str::<OauthProvider>(csrf_state.as_str())?)

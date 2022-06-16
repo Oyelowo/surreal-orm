@@ -1,5 +1,8 @@
+use anyhow::Context;
 use common::configurations::redis::{RedisConfigError, RedisConfigs};
+use log::logger;
 use oauth2::basic::BasicClient;
+use poem::error::{BadRequest, InternalServerError};
 use poem::middleware::AddData;
 use poem::web::{Data, Redirect};
 use poem::{get, handler, http::Uri, listener::TcpListener, web::Path, Route, Server};
@@ -14,7 +17,7 @@ use oauth2::{
 use poem_openapi::payload::{PlainText, Response};
 use redis::{Connection, RedisError};
 use reqwest::StatusCode;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 // use redis::aio::Connection;
 use std::env;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
@@ -29,8 +32,15 @@ use crate::app::user::OauthProvider;
 pub async fn oauth_login_initiator(
     Path(oauth_provider): Path<OauthProvider>,
     rc: Data<&RedisConfigs>,
-) -> Redirect {
-    let mut con = rc.clone().get_client().unwrap().get_connection().unwrap();
+) -> poem::Result<Redirect> {
+    let mut con = rc
+        .clone()
+        .get_async_connection()
+        .await
+        // First transform message to client message. So we dont expose server error to client
+        .map_err(OauthHandlerError::RedisConfigError)
+        .map_err(InternalServerError)?;
+
     println!("XXXXXX : {oauth_provider:?}");
     let auth_url_data = match oauth_provider {
         OauthProvider::Github => GithubConfig::new().generate_auth_url(),
@@ -41,10 +51,11 @@ pub async fn oauth_login_initiator(
     auth_url_data
         .csrf_state
         .cache(oauth_provider, &mut con)
+        .await
         .unwrap();
 
     println!("ewertyrewWRTYREW : {:?}", auth_url_data.authorize_url);
-    Redirect::moved_permanent(auth_url_data.authorize_url)
+    Ok(Redirect::moved_permanent(auth_url_data.authorize_url))
 }
 
 pub(crate) const OAUTH_LOGIN_AUTHENTICATION_ENDPOINT: &str = "/api/oauth/callback";
@@ -52,43 +63,18 @@ pub(crate) const OAUTH_LOGIN_AUTHENTICATION_ENDPOINT: &str = "/api/oauth/callbac
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum OauthHandlerError {
     #[error("The csrf code provided by the provider is invalid. Does not match the one sent. Potential spoofing")]
-    OauthError(#[from] OauthError),
+    OauthError(#[source] OauthError),
 
-    #[error(transparent)]
+    #[error("Problem getting data. Try again laater")]
     RedisError(#[from] RedisError),
 
-    #[error(transparent)]
+    // #[error(transparent)]
+    #[error("Problem getting data. Try again laater")]
     RedisConfigError(#[from] RedisConfigError),
 
-    #[error(transparent)]
+    // #[error(transparent)]
+    #[error("Problem transforming data. Try again laater")]
     SerializationError(#[from] serde_json::Error),
-}
-
-impl poem::error::ResponseError for OauthHandlerError {
-    fn status(&self) -> poem::http::StatusCode {
-        match self {
-            Self::OauthError(_) => StatusCode::BAD_REQUEST,
-            Self::RedisError(_) | Self::SerializationError(_) | Self::RedisConfigError(_) => {
-                StatusCode::INTERNAL_SERVER_ERROR
-            }
-        }
-    }
-
-    fn as_response(&self) -> poem::Response
-    where
-        Self: std::error::Error + Send + Sync + 'static,
-    {
-        let error_message = match self {
-            Self::OauthError(_) => "invalid token",
-            _ => "Server error. Please try again",
-        };
-    
-        log::error!("{error_message}");
-        poem::Response::builder().status(self.status())
-        .body(error_message.to_string())
-        // poem::Response::builder().status(self.status())
-        // .body(error_message.to_string())
-    }
 }
 
 #[handler]
@@ -98,10 +84,11 @@ pub async fn oauth_login_authentication(
 ) -> poem::Result<poem::Response> {
     let mut con = rc
         .clone()
-        .get_client()
-        .map_err(OauthHandlerError::RedisConfigError)?
-        .get_connection()
-        .map_err(OauthHandlerError::RedisError)?;
+        .get_async_connection()
+        .await
+        // First transform message to client message. So we dont expose server error to client
+        .map_err(OauthHandlerError::RedisConfigError)
+        .map_err(InternalServerError)?;
 
     let redirect_url = Url::parse(&("http://localhost".to_string() + &uri.to_string())).unwrap();
     let redirect_url = TypedAuthUrl(redirect_url);
@@ -110,7 +97,9 @@ pub async fn oauth_login_authentication(
     let provider = redirect_url
         .get_csrf_state()
         .verify(&mut con)
-        .map_err(OauthHandlerError::OauthError)?;
+        .await
+        .map_err(OauthHandlerError::OauthError)
+        .map_err(BadRequest)?;
 
     let user = match provider {
         OauthProvider::Github => {
@@ -128,7 +117,6 @@ pub async fn oauth_login_authentication(
     //  Also, handle storing user session
     // poem::Response::builder().body(user).finish()
     // let mut r = poem::Response::default();
-    
 
     Ok("efddfd".into())
 }
