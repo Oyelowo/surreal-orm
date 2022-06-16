@@ -1,4 +1,3 @@
-use anyhow::Context;
 use common::configurations::redis::RedisConfigError;
 use derive_more::{From, Into};
 use oauth2::{

@@ -1,7 +1,11 @@
+use std::fmt::Display;
+
 use poem::error::{BadRequest, InternalServerError};
-use poem::web::{Data, Json, Redirect};
+use poem::web::{Data, Json};
 use poem::{error::Result, handler, http::Uri, web::Path};
+use poem::{IntoResponse, Response};
 use redis::RedisError;
+use reqwest::{header, StatusCode};
 use url::Url;
 
 use crate::oauth::github::GithubConfig;
@@ -12,22 +16,28 @@ use crate::app::user::{OauthProvider, User};
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum HandlerError {
-    #[error("The csrf code provided by the provider is invalid. Does not match the one sent. Potential spoofing")]
-    OauthError(#[source] OauthError),
+    #[error("Server error. Please try again")]
+    StorageError(#[source] OauthError),
+
+    #[error("Server error. Unable to retrieve code. Please try again")]
+    MalformedState(#[source] OauthError),
+
+    #[error("The state token provided is invalid.")]
+    InvalidState(#[source] OauthError),
 
     #[error("Problem fetching account")]
     FetchAccountFailed(#[source] OauthError),
 
-    #[error("Problem getting data. Try again laater")]
+    #[error("Server error. Try again laater")]
     RedisError(#[from] RedisError),
 
-    #[error("Problem getting data. Try again laater")]
+    #[error("Server error. Try again laater")]
     RedisConfigError(#[from] RedisConfigError),
 
-    #[error("Problem transforming data. Try again laater")]
+    #[error("Malformed data. Try again laater")]
     SerializationError(#[from] serde_json::Error),
 
-    #[error("Problem transforming data. Try again laater")]
+    #[error("Malformed url. Try again laater")]
     ParseError(#[from] url::ParseError),
 }
 
@@ -43,37 +53,60 @@ async fn get_redis_connection(
         .map_err(InternalServerError)
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Redirect {
+    status: StatusCode,
+    uri: String,
+}
+
+impl Redirect {
+    /// A simple `302` redirect to a different location.
+    pub fn found(uri: impl Display) -> Self {
+        Self {
+            status: StatusCode::FOUND,
+            uri: uri.to_string(),
+        }
+    }
+}
+
+impl IntoResponse for Redirect {
+    fn into_response(self) -> Response {
+        self.status
+            .with_header(header::LOCATION, self.uri)
+            .into_response()
+    }
+}
+
 #[handler]
 pub async fn oauth_login_initiator(
     Path(oauth_provider): Path<OauthProvider>,
     redis: Data<&RedisConfigs>,
 ) -> Result<Redirect> {
-    let mut con = get_redis_connection(redis).await?;
+    let mut connection = get_redis_connection(redis).await?;
 
     let auth_url_data = match oauth_provider {
         OauthProvider::Github => GithubConfig::new().generate_auth_url(),
         OauthProvider::Google => todo!(),
     };
 
-    // Send csrf state to redis
     auth_url_data
         .csrf_state
-        .cache(oauth_provider, &mut con)
+        .cache(oauth_provider, &mut connection)
         .await
-        .map_err(HandlerError::OauthError)
+        .map_err(HandlerError::StorageError)
         .map_err(InternalServerError)?;
 
-    Ok(Redirect::temporary(auth_url_data.authorize_url))
+    Ok(Redirect::found(auth_url_data.authorize_url))
 }
 
-pub(crate) const OAUTH_LOGIN_AUTHENTICATION_ENDPOINT: &str = "/api/oauth/callback";
-
 #[handler]
-pub async fn oauth_login_authentication(uri: &Uri, rc: Data<&RedisConfigs>) -> Result<Json<User>> {
-    let mut con = get_redis_connection(rc).await?;
+pub async fn oauth_login_authentication(
+    uri: &Uri,
+    redis: Data<&RedisConfigs>,
+) -> Result<Json<User>> {
+    let mut connection = get_redis_connection(redis).await?;
 
-    let full_url = "http://localhost".to_string() + &uri.to_string();
-    let redirect_url = Url::parse(&(full_url))
+    let redirect_url = Url::parse(&format!("http://localhost:{uri}"))
         .map_err(HandlerError::ParseError)
         .map_err(InternalServerError)?;
 
@@ -82,11 +115,11 @@ pub async fn oauth_login_authentication(uri: &Uri, rc: Data<&RedisConfigs>) -> R
     // make .verify give me back both the csrf token and the provider
     let provider = redirect_url
         .get_csrf_state()
-        .map_err(HandlerError::OauthError)
+        .map_err(HandlerError::MalformedState)
         .map_err(BadRequest)?
-        .verify(&mut con)
+        .verify(&mut connection)
         .await
-        .map_err(HandlerError::OauthError)
+        .map_err(HandlerError::InvalidState)
         .map_err(BadRequest)?;
 
     let user = match provider {
