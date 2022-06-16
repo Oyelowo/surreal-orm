@@ -14,6 +14,7 @@ use oauth2::{
 use poem_openapi::payload::{PlainText, Response};
 use redis::{Connection, RedisError};
 use reqwest::StatusCode;
+use serde::{Serialize, Deserialize};
 // use redis::aio::Connection;
 use std::env;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
@@ -81,11 +82,12 @@ impl poem::error::ResponseError for OauthHandlerError {
             Self::OauthError(_) => "invalid token",
             _ => "Server error. Please try again",
         };
-
+    
         log::error!("{error_message}");
-        poem::Response::builder()
-            .status(self.status())
-            .body(error_message.to_string())
+        poem::Response::builder().status(self.status())
+        .body(error_message.to_string())
+        // poem::Response::builder().status(self.status())
+        // .body(error_message.to_string())
     }
 }
 
@@ -93,7 +95,7 @@ impl poem::error::ResponseError for OauthHandlerError {
 pub async fn oauth_login_authentication(
     uri: &Uri,
     rc: Data<&RedisConfigs>,
-) -> poem::Result<String> {
+) -> poem::Result<poem::Response> {
     let mut con = rc
         .clone()
         .get_client()
@@ -125,5 +127,8 @@ pub async fn oauth_login_authentication(
     println!("USERRRR: {user:?}");
     //  Also, handle storing user session
     // poem::Response::builder().body(user).finish()
+    // let mut r = poem::Response::default();
+    
+
     Ok("efddfd".into())
 }
