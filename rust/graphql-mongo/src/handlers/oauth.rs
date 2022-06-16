@@ -11,7 +11,7 @@ use common::configurations::redis::{RedisConfigError, RedisConfigs};
 use crate::app::user::{OauthProvider, User};
 
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum OauthHandlerError {
+pub(crate) enum HandlerError {
     #[error("The csrf code provided by the provider is invalid. Does not match the one sent. Potential spoofing")]
     OauthError(#[source] OauthError),
 
@@ -36,7 +36,7 @@ async fn get_redis_connection(
         .get_async_connection()
         .await
         // First transform message to client message. So we dont expose server error to client
-        .map_err(OauthHandlerError::RedisConfigError)
+        .map_err(HandlerError::RedisConfigError)
         .map_err(InternalServerError)
 }
 
@@ -57,10 +57,10 @@ pub async fn oauth_login_initiator(
         .csrf_state
         .cache(oauth_provider, &mut con)
         .await
-        .map_err(OauthHandlerError::OauthError)
+        .map_err(HandlerError::OauthError)
         .map_err(InternalServerError)?;
 
-    Ok(Redirect::moved_permanent(auth_url_data.authorize_url))
+    Ok(Redirect::temporary(auth_url_data.authorize_url))
 }
 
 pub(crate) const OAUTH_LOGIN_AUTHENTICATION_ENDPOINT: &str = "/api/oauth/callback";
@@ -71,17 +71,20 @@ pub async fn oauth_login_authentication(uri: &Uri, rc: Data<&RedisConfigs>) -> R
 
     let full_url = "http://localhost".to_string() + &uri.to_string();
     let redirect_url = Url::parse(&(full_url))
-        .map_err(OauthHandlerError::ParseError)
+        .map_err(HandlerError::ParseError)
         .map_err(InternalServerError)?;
 
     let redirect_url = RedirectUrlReturned(redirect_url);
-    let code = redirect_url.get_authorization_code();
+    let code = redirect_url.get_authorization_code().map_err(BadRequest)?;
+
     // make .verify give me back both the csrf token and the provider
     let provider = redirect_url
         .get_csrf_state()
+        .map_err(HandlerError::OauthError)
+        .map_err(BadRequest)?
         .verify(&mut con)
         .await
-        .map_err(OauthHandlerError::OauthError)
+        .map_err(HandlerError::OauthError)
         .map_err(BadRequest)?;
 
     let user = match provider {
@@ -91,16 +94,13 @@ pub async fn oauth_login_authentication(uri: &Uri, rc: Data<&RedisConfigs>) -> R
             github_config
                 .fetch_oauth_account(code)
                 .await
-                .map_err(OauthHandlerError::OauthError)
+                .map_err(HandlerError::OauthError)
                 .map_err(BadRequest)
         }
         OauthProvider::Google => todo!(),
     };
     println!("USERRRR: {user:?}");
     //  Also, handle storing user session
-    // poem::Response::builder().body(user).finish()
-    // let mut r = poem::Response::default();
 
     Ok(Json(user.unwrap()))
-    // Ok("efddfd".into())
 }

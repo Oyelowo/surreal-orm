@@ -8,7 +8,7 @@ use oauth2::{
     StandardTokenResponse, TokenResponse, TokenUrl, RedirectUrl,
 };
 use redis::{AsyncCommands, RedisError};
-use reqwest::header::ACCEPT;
+use reqwest::header::{ACCEPT, USER_AGENT};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt;
 use url::Url;
@@ -72,11 +72,8 @@ impl CsrfStateWrapper {
         con: &mut redis::aio::Connection,
     ) -> Result<(), OauthError> {
         let provider = serde_json::to_string(&provider)?;
-        println!("RTYUTREWQ: {provider:?}");
         let _: () = con.set(self.redis_key(), provider).await?;
-        // It seems github is storing a session for the auth. So, keep this for much
-        // Longer
-        // con.expire::<_, u16>(self.redis_key(), 600)?;
+        con.expire::<_, u16>(self.redis_key(), 600).await?;
         Ok(())
     }
 
@@ -88,8 +85,7 @@ impl CsrfStateWrapper {
             log::error!("EEEE. Error:{e:?}");
             e
         })?;
-        // Todo: The strategy of delete after use is probably better but leave using TTL at line 72 for now.
-        // con.del::<_, String>(self.redis_key())?;
+        con.del::<_, String>(self.redis_key()).await?;
         Ok(serde_json::from_str::<OauthProvider>(csrf_state.as_str())?)
     }
 }
@@ -106,7 +102,7 @@ impl fmt::Display for RedirectUrlReturned {
 const CODE: &str = "code";
 const STATE: &str = "state";
 
-pub type OauthResult<T> = Result<T, OauthError>;
+pub(crate) type OauthResult<T> = Result<T, OauthError>;
 impl RedirectUrlReturned {
     pub fn get_authorization_code(&self) -> OauthResult<AuthorizationCode> {
         let value = self.get_query_param_value(CODE)?;
