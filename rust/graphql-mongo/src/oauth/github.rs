@@ -105,9 +105,12 @@ impl OauthProviderTrait for GithubConfig {
             .await
             .map_err(|e| OauthError::TokenFetchFailed(e.to_string()))?;
 
+        print!("FFFFFF{:?}", token.access_token().secret().to_string());
         let profile = OauthUrl("https://api.github.com/user")
             .get_resource::<GithubUserData>(&token, None)
             .await?;
+            
+        print!("Profile{:?}", profile);
 
         let user_emails = OauthUrl("https://api.github.com/user/emails")
             .get_resource::<Vec<GithubEmail>>(&token, None)

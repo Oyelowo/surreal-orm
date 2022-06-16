@@ -15,6 +15,9 @@ pub(crate) enum HandlerError {
     #[error("The csrf code provided by the provider is invalid. Does not match the one sent. Potential spoofing")]
     OauthError(#[source] OauthError),
 
+    #[error("Problem fetching account")]
+    FetchAccountFailed(#[source] OauthError),
+
     #[error("Problem getting data. Try again laater")]
     RedisError(#[from] RedisError),
 
@@ -76,7 +79,6 @@ pub async fn oauth_login_authentication(uri: &Uri, rc: Data<&RedisConfigs>) -> R
 
     let redirect_url = RedirectUrlReturned(redirect_url);
     let code = redirect_url.get_authorization_code().map_err(BadRequest)?;
-
     // make .verify give me back both the csrf token and the provider
     let provider = redirect_url
         .get_csrf_state()
@@ -94,13 +96,12 @@ pub async fn oauth_login_authentication(uri: &Uri, rc: Data<&RedisConfigs>) -> R
             github_config
                 .fetch_oauth_account(code)
                 .await
-                .map_err(HandlerError::OauthError)
+                .map_err(HandlerError::FetchAccountFailed)
                 .map_err(BadRequest)
         }
         OauthProvider::Google => todo!(),
     };
-    println!("USERRRR: {user:?}");
-    //  Also, handle storing user session
 
-    Ok(Json(user.unwrap()))
+    //  Also, handle storing user session
+    Ok(Json(user?))
 }

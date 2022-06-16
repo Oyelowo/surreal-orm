@@ -85,7 +85,7 @@ impl CsrfStateWrapper {
             log::error!("EEEE. Error:{e:?}");
             e
         })?;
-        con.del::<_, String>(self.redis_key()).await?;
+        // con.del::<_, String>(self.redis_key()).await?;
         Ok(serde_json::from_str::<OauthProvider>(csrf_state.as_str())?)
     }
 }
@@ -147,7 +147,7 @@ impl OauthUrl {
         let remote_data = reqwest::Client::new()
             .get(self.0)
             .header(ACCEPT, "application/vnd.github.v3+json")
-            // .header(USER_AGENT,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36")
+            .header(USER_AGENT,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36")
             .headers(headers)
             // .header(AUTHORIZATION, format!("Bearer {}",token.access_token().secret().as_str()))
             .bearer_auth(token.access_token().secret().as_str())
