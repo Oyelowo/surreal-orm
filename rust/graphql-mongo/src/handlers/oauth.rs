@@ -48,13 +48,28 @@ pub async fn oauth_login_initiator(
 
 pub(crate) const OAUTH_LOGIN_AUTHENTICATION_ENDPOINT: &str = "/api/oauth/callback";
 
-impl poem::error::ResponseError for OauthError {
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum OauthHandlerError {
+    #[error("The csrf code provided by the provider is invalid. Does not match the one sent. Potential spoofing")]
+    OauthError(#[from] OauthError),
+
+    #[error(transparent)]
+    RedisError(#[from] RedisError),
+
+    #[error(transparent)]
+    RedisConfigError(#[from] RedisConfigError),
+
+    #[error(transparent)]
+    SerializationError(#[from] serde_json::Error),
+}
+
+impl poem::error::ResponseError for OauthHandlerError {
     fn status(&self) -> poem::http::StatusCode {
         match self {
-            Self::InvalidCsrfToken => StatusCode::BAD_REQUEST,
-            Self::RedisError(_)
-            | OauthError::SerializationError(_)
-            | OauthError::RedisConfigError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::OauthError(_) => StatusCode::BAD_REQUEST,
+            Self::RedisError(_) | Self::SerializationError(_) | Self::RedisConfigError(_) => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
         }
     }
 
@@ -63,7 +78,7 @@ impl poem::error::ResponseError for OauthError {
         Self: std::error::Error + Send + Sync + 'static,
     {
         let error_message = match self {
-            OauthError::InvalidCsrfToken => "invalid token",
+            Self::OauthError(_) => "invalid token",
             _ => "Server error. Please try again",
         };
 
@@ -82,15 +97,18 @@ pub async fn oauth_login_authentication(
     let mut con = rc
         .clone()
         .get_client()
-        .map_err(OauthError::RedisConfigError)?
+        .map_err(OauthHandlerError::RedisConfigError)?
         .get_connection()
-        .map_err(OauthError::RedisError)?;
-        
+        .map_err(OauthHandlerError::RedisError)?;
+
     let redirect_url = Url::parse(&("http://localhost".to_string() + &uri.to_string())).unwrap();
     let redirect_url = TypedAuthUrl(redirect_url);
     let code = redirect_url.get_authorization_code();
     // make .verify give me back both the csrf token and the provider
-    let provider = redirect_url.get_csrf_state().verify(&mut con)?;
+    let provider = redirect_url
+        .get_csrf_state()
+        .verify(&mut con)
+        .map_err(OauthHandlerError::OauthError)?;
 
     let user = match provider {
         OauthProvider::Github => {
