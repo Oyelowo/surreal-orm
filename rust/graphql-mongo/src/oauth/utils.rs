@@ -1,6 +1,7 @@
 use std::fmt;
 
-use chrono::Duration;
+use anyhow::Context;
+use common::configurations::redis::RedisConfigError;
 use derive_more::{From, Into};
 use oauth2::{
     basic::{BasicClient, BasicTokenType},
@@ -15,24 +16,14 @@ use url::Url;
 
 use crate::app::user::{OauthProvider, User};
 
-// #[async_trait::async_trait]
-// trait OauthUrlTrait {
-//     async fn get_resource<T: DeserializeOwned>(
-//         &self,
-//         token: &StandardTokenResponse<EmptyExtraTokenFields, BasicTokenType>,
-//         headers: Option<HeaderMap>,
-//     ) -> T;
-// }
-
 pub(crate) enum ProviderType {
     Credentials,
 }
 
 pub(crate) const REDIRECT_URL: &str = "http://localhost:8000/api/oauth/callback";
-// pub(crate) const REDIRECT_URL: &str = "http://localhost:8000";
 
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum CsrfStateError {
+pub(crate) enum OauthError {
     #[error("The csrf code provided by the provider is invalid. Does not match the one sent. Potential spoofing")]
     InvalidCsrfToken,
 
@@ -40,18 +31,22 @@ pub(crate) enum CsrfStateError {
     RedisError(#[from] RedisError),
 
     #[error(transparent)]
+    RedisConfigError(#[from] RedisConfigError),
+
+    #[error(transparent)]
     SerializationError(#[from] serde_json::Error),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct TypedCsrfState(pub(crate) CsrfToken);
+pub(crate) struct CsrfStateWrapper(pub(crate) CsrfToken);
 
 pub(crate) struct TypedCsrfStateData {
     csrf_token: CsrfToken,
     provider: OauthProvider,
+    // pkce_verifier: Option<String>,
 }
 
-impl TypedCsrfState {
+impl CsrfStateWrapper {
     const CSRF_STATE_REDIS_KEY: &'static str = "CSRF_STATE_REDIS_KEY";
 
     fn redis_key(&self) -> String {
@@ -66,7 +61,7 @@ impl TypedCsrfState {
         &self,
         provider: OauthProvider,
         con: &mut redis::Connection,
-    ) -> anyhow::Result<(), CsrfStateError> {
+    ) -> anyhow::Result<(), OauthError> {
         let provider = serde_json::to_string(&provider)?;
         println!("RTYUTREWQ: {provider:?}");
         let _: () = con.set(self.redis_key(), provider)?;
@@ -79,12 +74,11 @@ impl TypedCsrfState {
     pub(crate) fn verify(
         &self,
         con: &mut redis::Connection,
-    ) -> Result<OauthProvider, CsrfStateError> {
+    ) -> anyhow::Result<OauthProvider, OauthError> {
         let csrf_state: String = con.get(self.redis_key())?;
         // Todo: The strategy of delete after use is probably better but leave using TTL at line 72 for now.
         // con.del::<_, String>(self.redis_key())?;
-        serde_json::from_str::<OauthProvider>(csrf_state.as_str())
-            .map_err(|_e| CsrfStateError::InvalidCsrfToken)
+        Ok(serde_json::from_str::<OauthProvider>(csrf_state.as_str())?)
     }
 }
 
@@ -103,9 +97,9 @@ impl TypedAuthUrl {
         AuthorizationCode::new(value.into_owned())
     }
 
-    pub(crate) fn get_csrf_state(&self) -> TypedCsrfState {
+    pub(crate) fn get_csrf_state(&self) -> CsrfStateWrapper {
         let value = self.get_query_param_value("state");
-        TypedCsrfState(CsrfToken::new(value.into_owned()))
+        CsrfStateWrapper(CsrfToken::new(value.into_owned()))
     }
 
     fn get_query_param_value(&self, query_param: &str) -> std::borrow::Cow<str> {
@@ -131,7 +125,7 @@ impl TypedAuthUrl {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct AuthUrlData {
     pub(crate) authorize_url: TypedAuthUrl,
-    pub(crate) csrf_state: TypedCsrfState,
+    pub(crate) csrf_state: CsrfStateWrapper,
 }
 
 #[derive(Debug, From, Into, Clone)]

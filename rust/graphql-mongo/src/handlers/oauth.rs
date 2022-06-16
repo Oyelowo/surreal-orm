@@ -1,4 +1,4 @@
-use common::configurations::redis::RedisConfigs;
+use common::configurations::redis::{RedisConfigError, RedisConfigs};
 use oauth2::basic::BasicClient;
 use poem::middleware::AddData;
 use poem::web::{Data, Redirect};
@@ -12,13 +12,14 @@ use oauth2::{
     TokenResponse, TokenUrl,
 };
 use poem_openapi::payload::{PlainText, Response};
-use redis::Connection;
+use redis::{Connection, RedisError};
+use reqwest::StatusCode;
 // use redis::aio::Connection;
 use std::env;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 // use tokio::net::TcpListener;
 use crate::oauth::github::GithubConfig;
-use crate::oauth::utils::{OauthProviderTrait, TypedAuthUrl};
+use crate::oauth::utils::{OauthError, OauthProviderTrait, TypedAuthUrl};
 use url::Url;
 
 use crate::app::user::OauthProvider;
@@ -45,14 +46,51 @@ pub async fn oauth_login_initiator(
     Redirect::moved_permanent(auth_url_data.authorize_url)
 }
 
+pub(crate) const OAUTH_LOGIN_AUTHENTICATION_ENDPOINT: &str = "/api/oauth/callback";
+
+impl poem::error::ResponseError for OauthError {
+    fn status(&self) -> poem::http::StatusCode {
+        match self {
+            Self::InvalidCsrfToken => StatusCode::BAD_REQUEST,
+            Self::RedisError(_)
+            | OauthError::SerializationError(_)
+            | OauthError::RedisConfigError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+
+    fn as_response(&self) -> poem::Response
+    where
+        Self: std::error::Error + Send + Sync + 'static,
+    {
+        let error_message = match self {
+            OauthError::InvalidCsrfToken => "invalid token",
+            _ => "Server error. Please try again",
+        };
+
+        log::error!("{error_message}");
+        poem::Response::builder()
+            .status(self.status())
+            .body(error_message.to_string())
+    }
+}
+
 #[handler]
-pub async fn oauth_login_authentication(uri: &Uri, rc: Data<&RedisConfigs>) -> String {
-    let mut con = rc.clone().get_client().unwrap().get_connection().unwrap();
+pub async fn oauth_login_authentication(
+    uri: &Uri,
+    rc: Data<&RedisConfigs>,
+) -> poem::Result<String> {
+    let mut con = rc
+        .clone()
+        .get_client()
+        .map_err(OauthError::RedisConfigError)?
+        .get_connection()
+        .map_err(OauthError::RedisError)?;
+        
     let redirect_url = Url::parse(&("http://localhost".to_string() + &uri.to_string())).unwrap();
     let redirect_url = TypedAuthUrl(redirect_url);
     let code = redirect_url.get_authorization_code();
     // make .verify give me back both the csrf token and the provider
-    let provider = redirect_url.get_csrf_state().verify(&mut con).expect("er");
+    let provider = redirect_url.get_csrf_state().verify(&mut con)?;
 
     let user = match provider {
         OauthProvider::Github => {
@@ -69,5 +107,5 @@ pub async fn oauth_login_authentication(uri: &Uri, rc: Data<&RedisConfigs>) -> S
     println!("USERRRR: {user:?}");
     //  Also, handle storing user session
     // poem::Response::builder().body(user).finish()
-    "efddfd".into()
+    Ok("efddfd".into())
 }

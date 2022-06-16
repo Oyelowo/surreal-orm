@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use super::utils::{
     AuthUrlData, OauthConfig, OauthProviderError, OauthProviderTrait, OauthUrl, TypedAuthUrl,
-    TypedCsrfState, REDIRECT_URL,
+    CsrfStateWrapper, REDIRECT_URL,
 };
 use crate::app::user::{AccountOauth, OauthProvider, Role, TokenType, User};
 
@@ -22,9 +22,8 @@ enum GithubScopes {
 
 #[derive(Debug, Deserialize, Serialize)]
 struct GithubUserData {
-    login: String,
     id: u32,
-    node_id: String,
+    login: String,
     #[serde(rename = "type")]
     account_type: String,
     name: String,
@@ -90,7 +89,7 @@ impl OauthProviderTrait for GithubConfig {
             .url();
         AuthUrlData {
             authorize_url: TypedAuthUrl(authorize_url),
-            csrf_state: TypedCsrfState(csrf_state),
+            csrf_state: CsrfStateWrapper(csrf_state),
         }
     }
 
