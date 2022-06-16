@@ -7,8 +7,8 @@ use oauth2::{
 use serde::{Deserialize, Serialize};
 
 use super::utils::{
-    AuthUrlData, OauthConfig, OauthProviderError, OauthProviderTrait, OauthUrl, TypedAuthUrl,
-    CsrfStateWrapper, REDIRECT_URL,
+    AuthUrlData, CsrfStateWrapper, OauthConfig, OauthError, OauthProviderTrait, OauthUrl,
+    TypedAuthUrl, REDIRECT_URL,
 };
 use crate::app::user::{AccountOauth, OauthProvider, Role, TokenType, User};
 
@@ -96,14 +96,14 @@ impl OauthProviderTrait for GithubConfig {
     async fn fetch_oauth_account(
         &self,
         code: AuthorizationCode,
-    ) -> anyhow::Result<User, OauthProviderError> {
+    ) -> anyhow::Result<User, OauthError> {
         let token = self
             .clone()
             .client()
             .exchange_code(code)
             .request_async(async_http_client)
             .await
-            .context("Failed to Fetch token")?;
+            .map_err(|e| OauthError::TokenFetchFailed(e.to_string()))?;
 
         let profile = OauthUrl("https://api.github.com/user")
             .get_resource::<GithubUserData>(&token, None)

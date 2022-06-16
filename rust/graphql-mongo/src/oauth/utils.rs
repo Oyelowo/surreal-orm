@@ -27,6 +27,9 @@ pub(crate) enum OauthError {
     #[error("The csrf code provided by the provider is invalid. Does not match the one sent. Potential spoofing")]
     InvalidCsrfToken,
 
+    #[error("Failed to fetch token. Error: {0}")]
+    TokenFetchFailed(String),
+
     #[error(transparent)]
     RedisError(#[from] RedisError),
 
@@ -181,14 +184,5 @@ pub(crate) trait OauthProviderTrait {
     async fn fetch_oauth_account(
         &self,
         code: AuthorizationCode,
-    ) -> anyhow::Result<User, OauthProviderError>;
-}
-
-#[derive(thiserror::Error, Debug)]
-pub(crate) enum OauthProviderError {
-    #[error("Failed to fetch user profile")]
-    FailedToFetchUserProfile,
-
-    #[error("Whatever happens in Vegas, stays in Vegas")]
-    Unknown(#[from] anyhow::Error),
+    ) -> anyhow::Result<User, OauthError>;
 }
