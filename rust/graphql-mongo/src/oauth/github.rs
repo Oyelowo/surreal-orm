@@ -1,4 +1,3 @@
-use anyhow::Context;
 use chrono::{Duration, Utc};
 use oauth2::{
     basic::BasicClient, reqwest::async_http_client, AuthUrl, AuthorizationCode, ClientId,
@@ -8,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use super::utils::{
     AuthUrlData, CsrfStateWrapper, OauthConfig, OauthError, OauthProviderTrait, OauthUrl,
-    TypedAuthUrl, REDIRECT_URL,
+    RedirectUrlReturned, REDIRECT_URL,
 };
 use crate::app::user::{AccountOauth, OauthProvider, Role, TokenType, User};
 
@@ -57,6 +56,7 @@ impl GithubConfig {
                 .expect("Invalid authorization endpoint URL"),
             token_url: TokenUrl::new("https://github.com/login/oauth/access_token".to_string())
                 .expect("Invalid token endpoint URL"),
+            redirect_url: RedirectUrl::new(REDIRECT_URL.to_string()).expect("Invalid redirect URL"),
             scopes: vec![
                 Scope::new("public_repo".into()),
                 Scope::new("read:user".into()),
@@ -76,7 +76,7 @@ impl OauthProviderTrait for GithubConfig {
             self.basic_config.auth_url,
             Some(self.basic_config.token_url),
         )
-        .set_redirect_uri(RedirectUrl::new(REDIRECT_URL.to_string()).expect("Invalid redirect URL"))
+        .set_redirect_uri(self.basic_config.redirect_url)
     }
 
     /// Generate the authorization URL to which we'll redirect the user.
@@ -88,7 +88,7 @@ impl OauthProviderTrait for GithubConfig {
             .add_scopes(self.basic_config.clone().scopes)
             .url();
         AuthUrlData {
-            authorize_url: TypedAuthUrl(authorize_url),
+            authorize_url: RedirectUrlReturned(authorize_url),
             csrf_state: CsrfStateWrapper(csrf_state),
         }
     }
@@ -107,11 +107,11 @@ impl OauthProviderTrait for GithubConfig {
 
         let profile = OauthUrl("https://api.github.com/user")
             .get_resource::<GithubUserData>(&token, None)
-            .await;
+            .await?;
 
         let user_emails = OauthUrl("https://api.github.com/user/emails")
             .get_resource::<Vec<GithubEmail>>(&token, None)
-            .await;
+            .await?;
 
         // Get the primary email or any first
         let primary_email = user_emails

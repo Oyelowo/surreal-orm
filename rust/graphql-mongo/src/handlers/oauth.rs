@@ -1,11 +1,11 @@
 use poem::error::{BadRequest, InternalServerError};
-use poem::web::{Data, Redirect, Json};
-use poem::{handler, http::Uri, web::Path};
+use poem::web::{Data, Json, Redirect};
+use poem::{error::Result, handler, http::Uri, web::Path};
 use redis::RedisError;
 use url::Url;
 
 use crate::oauth::github::GithubConfig;
-use crate::oauth::utils::{OauthError, OauthProviderTrait, TypedAuthUrl};
+use crate::oauth::utils::{OauthError, OauthProviderTrait, RedirectUrlReturned};
 use common::configurations::redis::{RedisConfigError, RedisConfigs};
 
 use crate::app::user::{OauthProvider, User};
@@ -44,7 +44,7 @@ async fn get_redis_connection(
 pub async fn oauth_login_initiator(
     Path(oauth_provider): Path<OauthProvider>,
     redis: Data<&RedisConfigs>,
-) -> poem::Result<Redirect> {
+) -> Result<Redirect> {
     let mut con = get_redis_connection(redis).await?;
 
     let auth_url_data = match oauth_provider {
@@ -66,10 +66,7 @@ pub async fn oauth_login_initiator(
 pub(crate) const OAUTH_LOGIN_AUTHENTICATION_ENDPOINT: &str = "/api/oauth/callback";
 
 #[handler]
-pub async fn oauth_login_authentication(
-    uri: &Uri,
-    rc: Data<&RedisConfigs>,
-) -> poem::Result<Json<User>> {
+pub async fn oauth_login_authentication(uri: &Uri, rc: Data<&RedisConfigs>) -> Result<Json<User>> {
     let mut con = get_redis_connection(rc).await?;
 
     let full_url = "http://localhost".to_string() + &uri.to_string();
@@ -77,7 +74,7 @@ pub async fn oauth_login_authentication(
         .map_err(OauthHandlerError::ParseError)
         .map_err(InternalServerError)?;
 
-    let redirect_url = TypedAuthUrl(redirect_url);
+    let redirect_url = RedirectUrlReturned(redirect_url);
     let code = redirect_url.get_authorization_code();
     // make .verify give me back both the csrf token and the provider
     let provider = redirect_url

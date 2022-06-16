@@ -1,5 +1,3 @@
-use std::fmt;
-
 use anyhow::Context;
 use common::configurations::redis::RedisConfigError;
 use derive_more::{From, Into};
@@ -7,11 +5,12 @@ use oauth2::{
     basic::{BasicClient, BasicTokenType},
     http::HeaderMap,
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields, Scope,
-    StandardTokenResponse, TokenResponse, TokenUrl,
+    StandardTokenResponse, TokenResponse, TokenUrl, RedirectUrl,
 };
-use redis::{AsyncCommands, Commands, RedisError};
-use reqwest::header::{ACCEPT, USER_AGENT};
+use redis::{AsyncCommands, RedisError};
+use reqwest::header::ACCEPT;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use std::fmt;
 use url::Url;
 
 use crate::app::user::{OauthProvider, User};
@@ -30,8 +29,14 @@ pub(crate) enum OauthError {
     #[error("Failed to fetch token. Error: {0}")]
     TokenFetchFailed(String),
 
-    // #[error(transparent)]
-    #[error("Failed to fetch data. Please try again")]
+    #[error("Failed to fetch resource. Error: {0}")]
+    ResourceFetchFailed(String),
+
+    #[error("Failed to get query param from URL: {0}")]
+    GetUrlQueryParamFailed(String),
+
+    // #[error("Failed to fetch data. Please try again")]
+    #[error(transparent)]
     RedisError(#[from] RedisError),
 
     #[error(transparent)]
@@ -90,26 +95,30 @@ impl CsrfStateWrapper {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct TypedAuthUrl(pub Url);
+pub(crate) struct RedirectUrlReturned(pub Url);
 
-impl fmt::Display for TypedAuthUrl {
+impl fmt::Display for RedirectUrlReturned {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl TypedAuthUrl {
-    pub fn get_authorization_code(&self) -> AuthorizationCode {
-        let value = self.get_query_param_value("code");
-        AuthorizationCode::new(value.into_owned())
+const CODE: &str = "code";
+const STATE: &str = "state";
+
+pub type OauthResult<T> = Result<T, OauthError>;
+impl RedirectUrlReturned {
+    pub fn get_authorization_code(&self) -> OauthResult<AuthorizationCode> {
+        let value = self.get_query_param_value(CODE)?;
+        Ok(AuthorizationCode::new(value.into_owned()))
     }
 
-    pub(crate) fn get_csrf_state(&self) -> CsrfStateWrapper {
-        let value = self.get_query_param_value("state");
-        CsrfStateWrapper(CsrfToken::new(value.into_owned()))
+    pub(crate) fn get_csrf_state(&self) -> OauthResult<CsrfStateWrapper> {
+        let value = self.get_query_param_value(STATE)?;
+        Ok(CsrfStateWrapper(CsrfToken::new(value.into_owned())))
     }
 
-    fn get_query_param_value(&self, query_param: &str) -> std::borrow::Cow<str> {
+    fn get_query_param_value(&self, query_param: &str) -> OauthResult<std::borrow::Cow<str>> {
         let state_pair = self
             .0
             .query_pairs()
@@ -117,21 +126,15 @@ impl TypedAuthUrl {
                 let &(ref key, _) = pair;
                 key == query_param
             })
-            .expect(
-                format!(
-                    "Not found. TODO: Handle error properly later, param: {query_param}. url:{}",
-                    self.0
-                )
-                .as_str(),
-            );
+            .ok_or_else(|| OauthError::GetUrlQueryParamFailed(query_param.into()))?;
         let (_, value) = state_pair;
-        value
+        Ok(value)
     }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct AuthUrlData {
-    pub(crate) authorize_url: TypedAuthUrl,
+    pub(crate) authorize_url: RedirectUrlReturned,
     pub(crate) csrf_state: CsrfStateWrapper,
 }
 
@@ -143,24 +146,23 @@ impl OauthUrl {
         &self,
         token: &StandardTokenResponse<EmptyExtraTokenFields, BasicTokenType>,
         headers: Option<HeaderMap>,
-    ) -> T {
+    ) -> Result<T, OauthError> {
         let headers = headers.unwrap_or_default();
         let remote_data = reqwest::Client::new()
-                    .get(self.0)
-                    .header(ACCEPT, "application/vnd.github.v3+json")
-                    .header(USER_AGENT,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36")
-                    .headers(headers)
-                    // .header(AUTHORIZATION, format!("Bearer {}",token.access_token().secret().as_str()))
-                    .bearer_auth(token.access_token().secret().as_str())
-                    .send()
-                    .await
-                    // TODO: Handler error properly
-                    .unwrap()
-                    .text()
-                    .await
-                    .unwrap();
+            .get(self.0)
+            .header(ACCEPT, "application/vnd.github.v3+json")
+            // .header(USER_AGENT,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36")
+            .headers(headers)
+            // .header(AUTHORIZATION, format!("Bearer {}",token.access_token().secret().as_str()))
+            .bearer_auth(token.access_token().secret().as_str())
+            .send()
+            .await
+            .map_err(|_| OauthError::ResourceFetchFailed(self.0.to_string()))?
+            .text()
+            .await
+            .map_err(|_| OauthError::ResourceFetchFailed(self.0.to_string()))?;
 
-        serde_json::from_str::<T>(remote_data.as_str()).expect("erer")
+        Ok(serde_json::from_str::<T>(remote_data.as_str())?)
     }
 }
 
@@ -170,6 +172,7 @@ pub(crate) struct OauthConfig {
     pub client_secret: ClientSecret,
     pub auth_url: AuthUrl,
     pub token_url: TokenUrl,
+    pub redirect_url: RedirectUrl,
     pub scopes: Vec<Scope>,
 }
 
