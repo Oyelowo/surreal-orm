@@ -70,10 +70,7 @@ impl CsrfState {
     ) -> OauthResult<Self> {
         let ref key = Self::redis_key(csrf_token);
 
-        let csrf_state: String = connection.get(key).await.map_err(|e| {
-            log::error!("Problem getting redis connection. Error:{e:?}");
-            e
-        })?;
+        let csrf_state: String = connection.get(key).await?;
 
         Ok(serde_json::from_str::<Self>(csrf_state.as_str())?)
     }
