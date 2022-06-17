@@ -4,12 +4,13 @@ use oauth2::{
     basic::{BasicClient, BasicTokenType},
     http::HeaderMap,
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
-    RedirectUrl, Scope, StandardTokenResponse, TokenResponse, TokenUrl,
+    PkceCodeVerifier, RedirectUrl, Scope, StandardTokenResponse, TokenResponse, TokenUrl,
 };
 use redis::{AsyncCommands, RedisError};
 use reqwest::header::{ACCEPT, USER_AGENT};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt;
+use typed_builder::TypedBuilder;
 use url::Url;
 
 use crate::app::user::{OauthProvider, User};
@@ -45,13 +46,14 @@ pub(crate) enum OauthError {
     SerializationError(#[from] serde_json::Error),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct CsrfState(pub(crate) CsrfToken);
+// #[derive(Debug, Clone, Serialize, Deserialize)]
+// pub(crate) struct CsrfState(pub(crate) CsrfToken);
 
-pub(crate) struct CsrfStateData {
-    csrf_token: CsrfToken,
-    provider: OauthProvider,
-    // pkce_verifier: Option<String>,
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct CsrfState {
+    pub(crate) csrf_token: CsrfToken,
+    pub(crate) provider: OauthProvider,
+    pub(crate) pkce_code_verifier: Option<PkceCodeVerifier>,
 }
 
 impl CsrfState {
@@ -61,31 +63,60 @@ impl CsrfState {
         format!(
             "{}{:?}",
             Self::CSRF_STATE_REDIS_KEY,
-            self.0.secret().as_str()
+            self.csrf_token.secret().as_str()
+        )
+    }
+    fn redis_key2(csrf_token: CsrfToken) -> String {
+        format!(
+            "{}{:?}",
+            Self::CSRF_STATE_REDIS_KEY,
+            csrf_token.secret().as_str()
         )
     }
 
-    pub(crate) async fn cache(
-        &self,
-        provider: OauthProvider,
+    pub(crate) async fn verify_csrf_token(
+        csrf_token: CsrfToken,
+        // csrf_state_data: Self,
+        // provider: OauthProvider,
+        // pkce_code_verifier: Option<PkceCodeVerifier>,
         connection: &mut redis::aio::Connection,
-    ) -> OauthResult<()> {
-        let provider = serde_json::to_string(&provider)?;
-        connection.set(self.redis_key(), provider).await?;
+    ) -> OauthResult<Self> {
+        let csrf_state: String = connection.get(Self::redis_key2(csrf_token)).await.map_err(|e| {
+            log::error!("Problem getting redis connection. Error:{e:?}");
+            e
+        })?;
+        // connection.del::<_, String>(self.redis_key()).await?;
+        Ok(serde_json::from_str::<Self>(csrf_state.as_str())?)
+    }
+    pub(crate) async fn cache(
+        self,
+        // csrf_state_data: Self,
+        // provider: OauthProvider,
+        // pkce_code_verifier: Option<PkceCodeVerifier>,
+        connection: &mut redis::aio::Connection,
+    ) -> OauthResult<Self> {
+        // let csrf_state_data = CsrfState {
+        //     csrf_token: self.clone(),
+        //     provider,
+        //     pkce_code_verifier,
+        // };
+        let csrf_state_data_string = serde_json::to_string(&self)?;
+
+        connection.set(self.redis_key(), csrf_state_data_string).await?;
         connection.expire::<_, u16>(self.redis_key(), 600).await?;
-        Ok(())
+        Ok(self)
     }
 
     pub(crate) async fn verify(
         &self,
         connection: &mut redis::aio::Connection,
-    ) -> OauthResult<OauthProvider> {
+    ) -> OauthResult<Self> {
         let csrf_state: String = connection.get(self.redis_key()).await.map_err(|e| {
             log::error!("Problem getting redis connection. Error:{e:?}");
             e
         })?;
         connection.del::<_, String>(self.redis_key()).await?;
-        Ok(serde_json::from_str::<OauthProvider>(csrf_state.as_str())?)
+        Ok(serde_json::from_str::<Self>(csrf_state.as_str())?)
     }
 }
 
@@ -109,9 +140,9 @@ impl RedirectUrlReturned {
         Ok(AuthorizationCode::new(value.into_owned()))
     }
 
-    pub(crate) fn get_csrf_state(&self) -> OauthResult<CsrfState> {
+    pub(crate) fn get_csrf_token(&self) -> OauthResult<CsrfToken> {
         let value = self.get_query_param_value(STATE)?;
-        Ok(CsrfState(CsrfToken::new(value.into_owned())))
+        Ok(CsrfToken::new(value.into_owned()))
     }
 
     fn get_query_param_value(&self, query_param: &str) -> OauthResult<std::borrow::Cow<str>> {
@@ -124,10 +155,10 @@ impl RedirectUrlReturned {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct AuthUrlData {
     pub(crate) authorize_url: RedirectUrlReturned,
-    pub(crate) csrf_state: CsrfState,
+    pub(crate) csrf_state_data: CsrfState,
 }
 
 #[derive(Debug, From, Into, Clone)]
@@ -158,7 +189,7 @@ impl OauthUrl {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, TypedBuilder, Clone)]
 pub(crate) struct OauthConfig {
     pub client_id: ClientId,
     pub client_secret: ClientSecret,
@@ -166,6 +197,7 @@ pub(crate) struct OauthConfig {
     pub token_url: TokenUrl,
     pub redirect_url: RedirectUrl,
     pub scopes: Vec<Scope>,
+    pub provider: OauthProvider, // pub csrf_token: CsrfToken,
 }
 
 // TODO: Account linking
@@ -180,8 +212,5 @@ pub(crate) trait OauthProviderTrait {
     /// Generate the authorization URL to which we'll redirect the user.
     fn generate_auth_url(&self) -> AuthUrlData;
 
-    async fn fetch_oauth_account(
-        &self,
-        code: AuthorizationCode,
-    ) -> OauthResult<User>;
+    async fn fetch_oauth_account(&self, code: AuthorizationCode) -> OauthResult<User>;
 }

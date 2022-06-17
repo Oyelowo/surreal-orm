@@ -1,7 +1,8 @@
 use chrono::{Duration, Utc};
 use oauth2::{
     basic::BasicClient, reqwest::async_http_client, AuthUrl, AuthorizationCode, ClientId,
-    ClientSecret, CsrfToken, RedirectUrl, Scope, TokenResponse, TokenUrl,
+    ClientSecret, CsrfToken, PkceCodeChallenge, PkceCodeChallengeMethod, RedirectUrl, Scope,
+    TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
 
@@ -48,6 +49,7 @@ pub(crate) struct GithubConfig {
 
 impl GithubConfig {
     pub fn new() -> Self {
+        let k = CsrfToken::new_random;
         let basic_config = OauthConfig {
             // Get first two from environment variable
             client_id: ClientId::new("7b42a802131cb19d2b49".to_string()),
@@ -62,6 +64,7 @@ impl GithubConfig {
                 Scope::new("read:user".into()),
                 Scope::new("user:email".into()),
             ],
+            provider: OauthProvider::Github,
         };
         Self { basic_config }
     }
@@ -81,15 +84,26 @@ impl OauthProviderTrait for GithubConfig {
 
     /// Generate the authorization URL to which we'll redirect the user.
     fn generate_auth_url(&self) -> AuthUrlData {
-        let (authorize_url, csrf_state) = self
+        // let csrf_token = CsrfToken::new_random();
+        let (pkce_code_challenge, pkce_code_verifier) = PkceCodeChallenge::new_random_sha256();
+
+        let (authorize_url, csrf_token) = self
             .clone()
             .client()
             .authorize_url(CsrfToken::new_random)
             .add_scopes(self.basic_config.clone().scopes)
             .url();
+
+        let p = CsrfState {
+            csrf_token: csrf_token,
+            provider: self.basic_config.provider,
+            pkce_code_verifier: Some(pkce_code_verifier),
+        };
+
         AuthUrlData {
             authorize_url: RedirectUrlReturned(authorize_url),
-            csrf_state: CsrfState(csrf_state),
+            csrf_state_data: p,
+            // csrf_state: CsrfState(csrf_state),
         }
     }
 
@@ -109,7 +123,7 @@ impl OauthProviderTrait for GithubConfig {
         let profile = OauthUrl("https://api.github.com/user")
             .get_resource::<GithubUserData>(&token, None)
             .await?;
-            
+
         print!("Profile{:?}", profile);
 
         let user_emails = OauthUrl("https://api.github.com/user/emails")

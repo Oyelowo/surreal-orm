@@ -13,16 +13,15 @@ use url::Url;
 use wither::Model;
 
 use crate::oauth::github::GithubConfig;
-use crate::oauth::utils::{OauthError, OauthProviderTrait, RedirectUrlReturned};
+use crate::oauth::utils::{CsrfState, OauthError, OauthProviderTrait, RedirectUrlReturned};
 use common::configurations::redis::RedisConfigError;
 
 use crate::app::user::{OauthProvider, User};
 
-
 // These are created to map internral error message that we
 // only want to expose as logs for debugging to messages we
-// would want to show to the client/frontend. 
-// Otherwise, we could have mapped directly. We could also use poem's 
+// would want to show to the client/frontend.
+// Otherwise, we could have mapped directly. We could also use poem's
 // custom error but that feels a little verbose/overkill
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum HandlerError {
@@ -95,7 +94,7 @@ pub async fn oauth_login_initiator(
 ) -> Result<RedirectCustom> {
     let mut connection = get_redis_connection(redis).await?;
     let session = TypedSession(session.to_owned());
-    if let Ok(s) = session.get_user_id::<String>(){
+    if let Ok(s) = session.get_user_id::<String>() {
         session.renew();
         return Ok(RedirectCustom::found("http://localhost:8000"));
     };
@@ -106,8 +105,8 @@ pub async fn oauth_login_initiator(
     };
 
     auth_url_data
-        .csrf_state
-        .cache(oauth_provider, &mut connection)
+        .csrf_state_data
+        .cache(&mut connection)
         .await
         .map_err(HandlerError::StorageError)
         .map_err(InternalServerError)?;
@@ -152,16 +151,17 @@ async fn authenticate_user(uri: &Uri, redis: Data<&redis::Client>) -> Result<Use
     let redirect_url = RedirectUrlReturned(redirect_url);
     let code = redirect_url.get_authorization_code().map_err(BadRequest)?;
     // make .verify give me back both the csrf token and the provider
-    let provider = redirect_url
-        .get_csrf_state()
+    let csrf_token = redirect_url
+        .get_csrf_token()
         .map_err(HandlerError::MalformedState)
-        .map_err(BadRequest)?
-        .verify(&mut connection)
+        .map_err(BadRequest)?;
+
+    let csrf_state = CsrfState::verify_csrf_token(csrf_token, &mut connection)
         .await
         .map_err(HandlerError::InvalidState)
         .map_err(BadRequest)?;
 
-    let user = match provider {
+    let user = match csrf_state.provider {
         OauthProvider::Github => {
             let github_config = GithubConfig::new();
 
