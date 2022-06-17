@@ -7,7 +7,7 @@ use mongodb::{
 use serde::Deserialize;
 use serde_aux::prelude::deserialize_number_from_string;
 
-#[derive(Deserialize, Debug, Default)]
+#[derive(Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "lowercase")]
 pub struct MongodbConfigs {
     pub name: String,

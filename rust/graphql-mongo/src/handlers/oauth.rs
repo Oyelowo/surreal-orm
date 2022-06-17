@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use mongodb::Database;
 use poem::error::{BadRequest, InternalServerError};
 use poem::web::{Data, Json};
 use poem::{error::Result, handler, http::Uri, web::Path};
@@ -7,6 +8,7 @@ use poem::{IntoResponse, Response};
 use redis::RedisError;
 use reqwest::{header, StatusCode};
 use url::Url;
+use wither::Model;
 
 use crate::oauth::github::GithubConfig;
 use crate::oauth::utils::{OauthError, OauthProviderTrait, RedirectUrlReturned};
@@ -101,7 +103,11 @@ pub async fn oauth_login_initiator(
 
 // TODO: Handle failure redirect cases. Pack all the logic into a function and redirect if error returned.
 #[handler]
-pub async fn oauth_login_authentication(uri: &Uri, redis: Data<&RedisConfigs>) -> Result<Redirect> {
+pub async fn oauth_login_authentication(
+    uri: &Uri,
+    db: Data<&Database>,
+    redis: Data<&RedisConfigs>,
+) -> Result<Redirect> {
     let mut connection = get_redis_connection(redis).await?;
 
     let redirect_url = Url::parse(&format!("http://localhost:{uri}"))
@@ -132,6 +138,10 @@ pub async fn oauth_login_authentication(uri: &Uri, redis: Data<&RedisConfigs>) -
         }
         OauthProvider::Google => todo!(),
     };
+    user?
+        .find_or_create_for_oauth(&db)
+        .await
+        .map_err(BadRequest)?;
 
     //  Also, handle storing user session
     // Ok(Json(user?))
