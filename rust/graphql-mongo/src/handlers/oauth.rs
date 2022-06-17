@@ -18,6 +18,12 @@ use common::configurations::redis::RedisConfigError;
 
 use crate::app::user::{OauthProvider, User};
 
+
+// These are created to map internral error message that we
+// only want to expose as logs for debugging to messages we
+// would want to show to the client/frontend. 
+// Otherwise, we could have mapped directly. We could also use poem's 
+// custom error but that feels a little verbose/overkill
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum HandlerError {
     #[error("Server error. Please try again")]

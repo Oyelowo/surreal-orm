@@ -6,7 +6,7 @@ use oauth2::{
 use serde::{Deserialize, Serialize};
 
 use super::utils::{
-    AuthUrlData, CsrfStateWrapper, OauthConfig, OauthError, OauthProviderTrait, OauthUrl,
+    AuthUrlData, CsrfState, OauthConfig, OauthError, OauthProviderTrait, OauthUrl,
     RedirectUrlReturned, REDIRECT_URL,
 };
 use crate::app::user::{AccountOauth, OauthProvider, Role, TokenType, User};
@@ -89,7 +89,7 @@ impl OauthProviderTrait for GithubConfig {
             .url();
         AuthUrlData {
             authorize_url: RedirectUrlReturned(authorize_url),
-            csrf_state: CsrfStateWrapper(csrf_state),
+            csrf_state: CsrfState(csrf_state),
         }
     }
 

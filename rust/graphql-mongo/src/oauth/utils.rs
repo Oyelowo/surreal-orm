@@ -3,8 +3,8 @@ use derive_more::{From, Into};
 use oauth2::{
     basic::{BasicClient, BasicTokenType},
     http::HeaderMap,
-    AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields, Scope,
-    StandardTokenResponse, TokenResponse, TokenUrl, RedirectUrl,
+    AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
+    RedirectUrl, Scope, StandardTokenResponse, TokenResponse, TokenUrl,
 };
 use redis::{AsyncCommands, RedisError};
 use reqwest::header::{ACCEPT, USER_AGENT};
@@ -46,15 +46,15 @@ pub(crate) enum OauthError {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct CsrfStateWrapper(pub(crate) CsrfToken);
+pub(crate) struct CsrfState(pub(crate) CsrfToken);
 
-pub(crate) struct TypedCsrfStateData {
+pub(crate) struct CsrfStateData {
     csrf_token: CsrfToken,
     provider: OauthProvider,
     // pkce_verifier: Option<String>,
 }
 
-impl CsrfStateWrapper {
+impl CsrfState {
     const CSRF_STATE_REDIS_KEY: &'static str = "CSRF_STATE_REDIS_KEY";
 
     fn redis_key(&self) -> String {
@@ -68,27 +68,28 @@ impl CsrfStateWrapper {
     pub(crate) async fn cache(
         &self,
         provider: OauthProvider,
-        con: &mut redis::aio::Connection,
-    ) -> Result<(), OauthError> {
+        connection: &mut redis::aio::Connection,
+    ) -> OauthResult<()> {
         let provider = serde_json::to_string(&provider)?;
-        let _: () = con.set(self.redis_key(), provider).await?;
-        con.expire::<_, u16>(self.redis_key(), 600).await?;
+        connection.set(self.redis_key(), provider).await?;
+        connection.expire::<_, u16>(self.redis_key(), 600).await?;
         Ok(())
     }
 
     pub(crate) async fn verify(
         &self,
-        con: &mut redis::aio::Connection,
-    ) -> Result<OauthProvider, OauthError> {
-        let csrf_state: String = con.get(self.redis_key()).await.map_err(|e| {
-            log::error!("EEEE. Error:{e:?}");
+        connection: &mut redis::aio::Connection,
+    ) -> OauthResult<OauthProvider> {
+        let csrf_state: String = connection.get(self.redis_key()).await.map_err(|e| {
+            log::error!("Problem getting redis connection. Error:{e:?}");
             e
         })?;
-        // con.del::<_, String>(self.redis_key()).await?;
+        connection.del::<_, String>(self.redis_key()).await?;
         Ok(serde_json::from_str::<OauthProvider>(csrf_state.as_str())?)
     }
 }
 
+/// The url returned by the oauth provider with code and state(which should be the one we send)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct RedirectUrlReturned(pub Url);
 
@@ -108,21 +109,17 @@ impl RedirectUrlReturned {
         Ok(AuthorizationCode::new(value.into_owned()))
     }
 
-    pub(crate) fn get_csrf_state(&self) -> OauthResult<CsrfStateWrapper> {
+    pub(crate) fn get_csrf_state(&self) -> OauthResult<CsrfState> {
         let value = self.get_query_param_value(STATE)?;
-        Ok(CsrfStateWrapper(CsrfToken::new(value.into_owned())))
+        Ok(CsrfState(CsrfToken::new(value.into_owned())))
     }
 
     fn get_query_param_value(&self, query_param: &str) -> OauthResult<std::borrow::Cow<str>> {
-        let state_pair = self
+        let (_, value) = self
             .0
             .query_pairs()
-            .find(|pair| {
-                let &(ref key, _) = pair;
-                key == query_param
-            })
+            .find(|&(ref key, _)| key == query_param)
             .ok_or_else(|| OauthError::GetUrlQueryParamFailed(query_param.into()))?;
-        let (_, value) = state_pair;
         Ok(value)
     }
 }
@@ -130,7 +127,7 @@ impl RedirectUrlReturned {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct AuthUrlData {
     pub(crate) authorize_url: RedirectUrlReturned,
-    pub(crate) csrf_state: CsrfStateWrapper,
+    pub(crate) csrf_state: CsrfState,
 }
 
 #[derive(Debug, From, Into, Clone)]
@@ -141,7 +138,7 @@ impl OauthUrl {
         &self,
         token: &StandardTokenResponse<EmptyExtraTokenFields, BasicTokenType>,
         headers: Option<HeaderMap>,
-    ) -> Result<T, OauthError> {
+    ) -> OauthResult<T> {
         let headers = headers.unwrap_or_default();
         let remote_data = reqwest::Client::new()
             .get(self.0)
@@ -186,5 +183,5 @@ pub(crate) trait OauthProviderTrait {
     async fn fetch_oauth_account(
         &self,
         code: AuthorizationCode,
-    ) -> anyhow::Result<User, OauthError>;
+    ) -> OauthResult<User>;
 }
