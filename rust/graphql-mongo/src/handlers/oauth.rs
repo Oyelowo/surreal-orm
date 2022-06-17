@@ -12,7 +12,7 @@ use wither::Model;
 
 use crate::oauth::github::GithubConfig;
 use crate::oauth::utils::{OauthError, OauthProviderTrait, RedirectUrlReturned};
-use common::configurations::redis::{RedisConfigError, RedisConfigs};
+use common::configurations::redis::RedisConfigError;
 
 use crate::app::user::{OauthProvider, User};
 
@@ -30,8 +30,8 @@ pub(crate) enum HandlerError {
     #[error("Problem fetching account")]
     FetchAccountFailed(#[source] OauthError),
 
-    #[error("Server error. Try again laater")]
-    RedisError(#[from] RedisError),
+    #[error("Server error. Failed to retrieve data. Please, try again laater")]
+    RedisError(#[source] RedisError),
 
     #[error("Server error. Try again laater")]
     RedisConfigError(#[from] RedisConfigError),
@@ -44,24 +44,24 @@ pub(crate) enum HandlerError {
 }
 
 async fn get_redis_connection(
-    redis: Data<&RedisConfigs>,
+    // redis: Data<&RedisConfigs>,
+    redis: Data<&redis::Client>,
 ) -> Result<redis::aio::Connection, poem::Error> {
     redis
-        .clone()
         .get_async_connection()
         .await
         // First transform message to client message. So we dont expose server error to client
-        .map_err(HandlerError::RedisConfigError)
+        .map_err(HandlerError::RedisError)
         .map_err(InternalServerError)
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Redirect {
+pub struct RedirectCustom {
     status: StatusCode,
     uri: String,
 }
 
-impl Redirect {
+impl RedirectCustom {
     /// A simple `302` redirect to a different location.
     pub fn found(uri: impl Display) -> Self {
         Self {
@@ -71,7 +71,7 @@ impl Redirect {
     }
 }
 
-impl IntoResponse for Redirect {
+impl IntoResponse for RedirectCustom {
     fn into_response(self) -> Response {
         self.status
             .with_header(header::LOCATION, self.uri)
@@ -82,8 +82,8 @@ impl IntoResponse for Redirect {
 #[handler]
 pub async fn oauth_login_initiator(
     Path(oauth_provider): Path<OauthProvider>,
-    redis: Data<&RedisConfigs>,
-) -> Result<Redirect> {
+    redis: Data<&redis::Client>,
+) -> Result<RedirectCustom> {
     let mut connection = get_redis_connection(redis).await?;
 
     let auth_url_data = match oauth_provider {
@@ -98,16 +98,33 @@ pub async fn oauth_login_initiator(
         .map_err(HandlerError::StorageError)
         .map_err(InternalServerError)?;
 
-    Ok(Redirect::found(auth_url_data.authorize_url))
+    Ok(RedirectCustom::found(auth_url_data.authorize_url))
 }
 
-// TODO: Handle failure redirect cases. Pack all the logic into a function and redirect if error returned.
+
 #[handler]
 pub async fn oauth_login_authentication(
     uri: &Uri,
-    db: Data<&Database>,
-    redis: Data<&RedisConfigs>,
-) -> Result<Redirect> {
+    // db: Data<&Database>,
+    redis: Data<&redis::Client>,
+) -> Result<RedirectCustom> {
+    let user = authenticate_user(uri, redis).await;
+    match user {
+        Ok(user) => Ok(RedirectCustom::found("http://localhost:8000")),
+        Err(e) => Ok(RedirectCustom::found("http://localhost:8000/login")),
+    }
+
+    // user?
+    //     .find_or_create_for_oauth(&db)
+    //     .await
+    //     .map_err(BadRequest)?;
+
+    //  Also, handle storing user session
+    // Ok(Json(user?))
+    // Ok(Redirect::found("http://localhost:8000"))
+}
+
+async fn authenticate_user(uri: &Uri, redis: Data<&redis::Client>) -> Result<User> {
     let mut connection = get_redis_connection(redis).await?;
 
     let redirect_url = Url::parse(&format!("http://localhost:{uri}"))
@@ -138,12 +155,5 @@ pub async fn oauth_login_authentication(
         }
         OauthProvider::Google => todo!(),
     };
-    user?
-        .find_or_create_for_oauth(&db)
-        .await
-        .map_err(BadRequest)?;
-
-    //  Also, handle storing user session
-    // Ok(Json(user?))
-    Ok(Redirect::found("http://localhost:8000"))
+    user
 }
