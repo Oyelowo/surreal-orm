@@ -1,27 +1,18 @@
 use chrono::{Duration, Utc};
 use oauth2::{
-    basic::BasicClient, reqwest::async_http_client, AuthUrl, AuthorizationCode, ClientId,
-    ClientSecret, CsrfToken, PkceCodeChallenge, PkceCodeChallengeMethod, PkceCodeVerifier,
-    RedirectUrl, Scope, TokenResponse, TokenUrl,
+    reqwest::async_http_client, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken,
+    PkceCodeVerifier, RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
 
 use super::utils::{
-    AuthUrlData, CsrfState, OauthConfig, OauthError, OauthProviderTrait, OauthUrl,
-    RedirectUrlReturned, REDIRECT_URL,
+    OauthConfig, OauthError, OauthProviderTrait, OauthResult, OauthUrl, REDIRECT_URL,
 };
 use crate::{
     app::user::{AccountOauth, OauthProvider, Role, TokenType, User},
     oauth::utils::OauthConfigTrait,
 };
 
-#[derive(Debug, Deserialize, Serialize)]
-enum GithubScopes {
-    #[serde(rename = "public_repo")]
-    PublicRepo,
-    #[serde(rename = "user:email")]
-    UserEmail,
-}
 
 #[derive(Debug, Deserialize, Serialize)]
 struct GithubUserData {
@@ -83,26 +74,24 @@ impl OauthProviderTrait for GithubConfig {
     async fn fetch_oauth_account(
         &self,
         code: AuthorizationCode,
-        pkce_verifier: Option<PkceCodeVerifier>,
-    ) -> anyhow::Result<User, OauthError> {
+        pkce_verifier: PkceCodeVerifier,
+    ) -> OauthResult<User> {
         let token = self
             .basic_config()
             .client()
             .exchange_code(code)
-            .set_pkce_verifier(pkce_verifier.expect("has to be"))
+            .set_pkce_verifier(pkce_verifier)
             .request_async(async_http_client)
             .await
             .map_err(|e| OauthError::TokenFetchFailed(e.to_string()))?;
 
         print!("FFFFFF{:?}", token.access_token().secret().to_string());
         let profile = OauthUrl("https://api.github.com/user")
-            .get_resource::<GithubUserData>(&token, None)
+            .fetch_resource::<GithubUserData>(&token, None)
             .await?;
 
-        print!("Profile{:?}", profile);
-
         let user_emails = OauthUrl("https://api.github.com/user/emails")
-            .get_resource::<Vec<GithubEmail>>(&token, None)
+            .fetch_resource::<Vec<GithubEmail>>(&token, None)
             .await?;
 
         // Get the primary email or any first
@@ -147,7 +136,6 @@ impl OauthProviderTrait for GithubConfig {
             .password(None)
             .build();
 
-        // TODO: Search user from db by github id and provider. If present, upsert other attributes, otherwise create
         Ok(user)
     }
 }

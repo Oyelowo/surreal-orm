@@ -4,21 +4,16 @@ use oauth2::{
     basic::{BasicClient, BasicTokenType},
     http::HeaderMap,
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
-    PkceCodeVerifier, RedirectUrl, RevocationUrl, Scope, StandardTokenResponse, TokenResponse,
-    TokenUrl, PkceCodeChallenge,
+    PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, RevocationUrl, Scope, StandardTokenResponse,
+    TokenResponse, TokenUrl,
 };
 use redis::{AsyncCommands, RedisError};
-use reqwest::header::{ACCEPT, USER_AGENT};
+use reqwest::header::ACCEPT;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::{default, fmt};
 use typed_builder::TypedBuilder;
 use url::Url;
 
 use crate::app::user::{OauthProvider, User};
-
-pub(crate) enum ProviderType {
-    Credentials,
-}
 
 pub(crate) const REDIRECT_URL: &str = "http://localhost:8000/api/oauth/callback";
 
@@ -44,14 +39,11 @@ pub(crate) enum OauthError {
     SerializationError(#[from] serde_json::Error),
 }
 
-// #[derive(Debug, Clone, Serialize, Deserialize)]
-// pub(crate) struct CsrfState(pub(crate) CsrfToken);
-
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct CsrfState {
     pub(crate) csrf_token: CsrfToken,
     pub(crate) provider: OauthProvider,
-    pub(crate) pkce_code_verifier: Option<PkceCodeVerifier>,
+    pub(crate) pkce_code_verifier: PkceCodeVerifier,
 }
 
 impl CsrfState {
@@ -97,13 +89,14 @@ impl RedirectUrlReturned {
 }
 
 pub(crate) type OauthResult<T> = Result<T, OauthError>;
+
 impl RedirectUrlReturned {
-    pub fn get_authorization_code(&self) -> OauthResult<AuthorizationCode> {
+    pub fn authorization_code(&self) -> OauthResult<AuthorizationCode> {
         let value = self.get_query_param_value("code")?;
         Ok(AuthorizationCode::new(value.into_owned()))
     }
 
-    pub(crate) fn get_csrf_token(&self) -> OauthResult<CsrfToken> {
+    pub(crate) fn csrf_token(&self) -> OauthResult<CsrfToken> {
         let value = self.get_query_param_value("state")?;
         Ok(CsrfToken::new(value.into_owned()))
     }
@@ -118,17 +111,11 @@ impl RedirectUrlReturned {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct AuthUrlData {
-    pub(crate) authorize_url: RedirectUrlReturned,
-    pub(crate) csrf_state_data: CsrfState,
-}
-
 #[derive(Debug, From, Into, Clone)]
 pub(crate) struct OauthUrl(pub(crate) &'static str);
 
 impl OauthUrl {
-    pub async fn get_resource<T: DeserializeOwned>(
+    pub async fn fetch_resource<T: DeserializeOwned>(
         &self,
         token: &StandardTokenResponse<EmptyExtraTokenFields, BasicTokenType>,
         headers: Option<HeaderMap>,
@@ -137,9 +124,7 @@ impl OauthUrl {
         let remote_data = reqwest::Client::new()
             .get(self.0)
             .header(ACCEPT, "application/vnd.github.v3+json")
-            .header(USER_AGENT,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36")
             .headers(headers)
-            // .header(AUTHORIZATION, format!("Bearer {}",token.access_token().secret().as_str()))
             .bearer_auth(token.access_token().secret().as_str())
             .send()
             .await
@@ -148,8 +133,7 @@ impl OauthUrl {
             .await
             .map_err(|_| OauthError::ResourceFetchFailed(self.0.to_string()))?;
 
-            print!("ERRTEWREWR:::::{remote_data:#}");
-        Ok(serde_json::from_str::<T>(remote_data.as_str()).expect("errr"))
+        Ok(serde_json::from_str::<T>(remote_data.as_str())?)
     }
 }
 
@@ -169,42 +153,30 @@ pub(crate) struct OauthConfig {
 
 // TODO: Account linking
 // Linking Accounts to Users happen automatically, only when they have the same e-mail address, and the user is currently signed in. Check the FAQ for more information why this is a requirement.
-
 #[async_trait::async_trait]
 pub(crate) trait OauthProviderTrait {
-    // type Confr;
-
-    // fn client(self) -> BasicClient;
-
-    // /// Generate the authorization URL to which we'll redirect the user.
-    // fn generate_auth_url(&self) -> AuthUrlData;
-    fn basic_config(&self)-> OauthConfig;
+    fn basic_config(&self) -> OauthConfig;
 
     async fn fetch_oauth_account(
         &self,
         code: AuthorizationCode,
-        pkce_code_verifier: Option<PkceCodeVerifier>,
+        pkce_code_verifier: PkceCodeVerifier,
     ) -> OauthResult<User>;
 }
 
+/// authorization URL to which we'll redirect the user
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct AuthUrlData {
+    pub(crate) authorize_url: RedirectUrlReturned,
+    pub(crate) csrf_state: CsrfState,
+}
 
 #[async_trait::async_trait]
 pub(crate) trait OauthConfigTrait {
-    // type Confr;
-
     fn client(self) -> BasicClient;
 
-    /// Generate the authorization URL to which we'll redirect the user.
     fn generate_auth_url(&self) -> AuthUrlData;
-
-    // async fn fetch_oauth_account(
-    //     &self,
-    //     code: AuthorizationCode,
-    //     pkce_code_verifier: Option<PkceCodeVerifier>,
-    // ) -> OauthResult<User>;
 }
-
-
 
 #[async_trait::async_trait]
 impl OauthConfigTrait for OauthConfig {
@@ -225,7 +197,6 @@ impl OauthConfigTrait for OauthConfig {
 
     /// Generate the authorization URL to which we'll redirect the user.
     fn generate_auth_url(&self) -> AuthUrlData {
-        // let csrf_token = CsrfToken::new_random();
         let (pkce_code_challenge, pkce_code_verifier) = PkceCodeChallenge::new_random_sha256();
 
         let (authorize_url, csrf_token) = self
@@ -237,15 +208,14 @@ impl OauthConfigTrait for OauthConfig {
             .url();
 
         let csrf_state = CsrfState {
-            csrf_token: csrf_token,
+            csrf_token,
+            pkce_code_verifier,
             provider: self.provider,
-            pkce_code_verifier: Some(pkce_code_verifier),
         };
 
         AuthUrlData {
+            csrf_state,
             authorize_url: RedirectUrlReturned(authorize_url),
-            csrf_state_data: csrf_state,
-            // csrf_state: CsrfState(csrf_state),
         }
     }
 }

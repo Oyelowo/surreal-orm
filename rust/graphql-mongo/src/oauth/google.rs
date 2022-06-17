@@ -1,14 +1,13 @@
 use chrono::{Duration, Utc};
 use oauth2::{
-    basic::BasicClient, reqwest::async_http_client, AuthUrl, AuthorizationCode, ClientId,
-    ClientSecret, CsrfToken, PkceCodeChallenge, PkceCodeChallengeMethod, PkceCodeVerifier,
-    RedirectUrl, RevocationUrl, Scope, TokenResponse, TokenUrl,
+    reqwest::async_http_client, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken,
+    PkceCodeVerifier, RedirectUrl, RevocationUrl, Scope, TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
 
 use super::utils::{
-    AuthUrlData, CsrfState, OauthConfig, OauthConfigTrait, OauthError, OauthProviderTrait,
-    OauthUrl, RedirectUrlReturned, REDIRECT_URL,
+    OauthConfig, OauthConfigTrait, OauthError, OauthProviderTrait, OauthResult, OauthUrl,
+    REDIRECT_URL,
 };
 use crate::app::user::{AccountOauth, OauthProvider, Role, TokenType, User};
 
@@ -82,26 +81,21 @@ impl OauthProviderTrait for GoogleConfig {
     async fn fetch_oauth_account(
         &self,
         code: AuthorizationCode,
-        pkce_code_verifier: Option<PkceCodeVerifier>,
-    ) -> anyhow::Result<User, OauthError> {
-        // let p = self.basic_config.client();
+        pkce_code_verifier: PkceCodeVerifier,
+    ) -> OauthResult<User> {
         let token = self
             .basic_config()
             .client()
             .exchange_code(code)
-            .set_pkce_verifier(pkce_code_verifier.expect("Must be provided for google"))
+            .set_pkce_verifier(pkce_code_verifier)
             .request_async(async_http_client)
             .await
             .map_err(|e| OauthError::TokenFetchFailed(e.to_string()))?;
 
-        // let profile = OauthUrl("https://www.googleapis.com/auth/userinfo.profile")
         let profile = OauthUrl("https://www.googleapis.com/oauth2/v3/userinfo")
-            .get_resource::<GoogleUserData>(&token, None)
+            .fetch_resource::<GoogleUserData>(&token, None)
             .await?;
-        print!("Profile{:?}", profile);
 
-        // TODO: First search the database if the user exists, if exists, just update, else create
-        // User::find({profile: profile.id, provider: provider});
         let expiration = token.expires_in().unwrap_or(std::time::Duration::new(0, 0));
         let expiration = Duration::from_std(expiration).unwrap_or(Duration::seconds(0));
         let expires_at = Utc::now() + expiration;
@@ -111,7 +105,6 @@ impl OauthProviderTrait for GoogleConfig {
             .iter()
             .map(|x| x.to_string())
             .collect::<Vec<String>>();
-        print!("scopes{:?}", scopes);
 
         let account = AccountOauth::builder()
             .id(profile.sub.to_string())
@@ -134,7 +127,7 @@ impl OauthProviderTrait for GoogleConfig {
             .age(None)
             .password(None)
             .build();
-        println!("UUUUSER, {user:?}");
+
         Ok(user)
     }
 }

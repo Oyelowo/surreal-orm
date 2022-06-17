@@ -21,11 +21,11 @@ use common::configurations::redis::RedisConfigError;
 
 use crate::app::user::{OauthProvider, User};
 
-// These are created to map internral error message that we
-// only want to expose as logs for debugging to messages we
-// would want to show to the client/frontend.
-// Otherwise, we could have mapped directly. We could also use poem's
-// custom error but that feels a little verbose/overkill
+/// These are created to map internral error message that we
+/// only want to expose as logs for debugging to messages we
+/// would want to show to the client/frontend.
+/// Otherwise, we could have mapped directly. We could also use poem's
+/// custom error but that feels a little verbose/overkill
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum HandlerError {
     #[error("Server error. Please try again")]
@@ -111,7 +111,7 @@ pub async fn oauth_login_initiator(
     };
 
     auth_url_data
-        .csrf_state_data
+        .csrf_state
         .cache(&mut connection)
         .await
         .map_err(HandlerError::StorageError)
@@ -158,13 +158,13 @@ async fn authenticate_user(uri: &Uri, redis: Data<&redis::Client>) -> Result<Use
         .map_err(InternalServerError)?;
 
     let code = redirect_url
-        .get_authorization_code()
+        .authorization_code()
         .map_err(HandlerError::InvalidAuthCode)
         .map_err(BadRequest)?;
 
     // make .verify give me back both the csrf token and the provider
     let csrf_token = redirect_url
-        .get_csrf_token()
+        .csrf_token()
         .map_err(HandlerError::MalformedState)
         .map_err(BadRequest)?;
 
