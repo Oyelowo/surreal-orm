@@ -1,8 +1,8 @@
 use chrono::{Duration, Utc};
 use oauth2::{
     basic::BasicClient, reqwest::async_http_client, AuthUrl, AuthorizationCode, ClientId,
-    ClientSecret, CsrfToken, PkceCodeChallenge, PkceCodeChallengeMethod, RedirectUrl, Scope,
-    TokenResponse, TokenUrl, PkceCodeVerifier,
+    ClientSecret, CsrfToken, PkceCodeChallenge, PkceCodeChallengeMethod, PkceCodeVerifier,
+    RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
 
@@ -10,7 +10,10 @@ use super::utils::{
     AuthUrlData, CsrfState, OauthConfig, OauthError, OauthProviderTrait, OauthUrl,
     RedirectUrlReturned, REDIRECT_URL,
 };
-use crate::app::user::{AccountOauth, OauthProvider, Role, TokenType, User};
+use crate::{
+    app::user::{AccountOauth, OauthProvider, Role, TokenType, User},
+    oauth::utils::OauthConfigTrait,
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 enum GithubScopes {
@@ -44,7 +47,7 @@ struct GithubEmail {
 }
 #[derive(Debug, Clone)]
 pub(crate) struct GithubConfig {
-    basic_config: OauthConfig,
+    pub(crate) basic_config: OauthConfig,
 }
 
 impl GithubConfig {
@@ -73,50 +76,20 @@ impl GithubConfig {
 
 #[async_trait::async_trait]
 impl OauthProviderTrait for GithubConfig {
-    fn client(self) -> BasicClient {
-        BasicClient::new(
-            self.basic_config.client_id,
-            Some(self.basic_config.client_secret),
-            self.basic_config.auth_url,
-            Some(self.basic_config.token_url),
-        )
-        .set_redirect_uri(self.basic_config.redirect_url)
-    }
-
-    /// Generate the authorization URL to which we'll redirect the user.
-    fn generate_auth_url(&self) -> AuthUrlData {
-        // let csrf_token = CsrfToken::new_random();
-        let (pkce_code_challenge, pkce_code_verifier) = PkceCodeChallenge::new_random_sha256();
-
-        let (authorize_url, csrf_token) = self
-            .clone()
-            .client()
-            .authorize_url(CsrfToken::new_random)
-            .add_scopes(self.basic_config.clone().scopes)
-            .url();
-
-        let p = CsrfState {
-            csrf_token: csrf_token,
-            provider: self.basic_config.provider,
-            pkce_code_verifier: Some(pkce_code_verifier),
-        };
-
-        AuthUrlData {
-            authorize_url: RedirectUrlReturned(authorize_url),
-            csrf_state_data: p,
-            // csrf_state: CsrfState(csrf_state),
-        }
+    fn basic_config(self) -> OauthConfig {
+        self.basic_config
     }
 
     async fn fetch_oauth_account(
-        &self,
+        self,
         code: AuthorizationCode,
-        _pkce_code_verifier: Option<PkceCodeVerifier>,
+        pkce_verifier: Option<PkceCodeVerifier>,
     ) -> anyhow::Result<User, OauthError> {
-        let token = self
-            .clone()
+        let token = self.clone()
+            .basic_config()
             .client()
             .exchange_code(code)
+            .set_pkce_verifier(pkce_verifier.expect("has to be"))
             .request_async(async_http_client)
             .await
             .map_err(|e| OauthError::TokenFetchFailed(e.to_string()))?;
@@ -144,8 +117,8 @@ impl OauthProviderTrait for GithubConfig {
         let expiration = token.expires_in().unwrap_or(std::time::Duration::new(0, 0));
         let expiration = Duration::from_std(expiration).unwrap_or(Duration::seconds(0));
         let expires_at = Utc::now() + expiration;
-        let scopes = self
-            .basic_config
+        let scopes = self.clone()
+            .basic_config()
             .scopes
             .iter()
             .map(|x| x.to_string())

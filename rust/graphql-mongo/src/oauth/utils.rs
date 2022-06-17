@@ -5,7 +5,7 @@ use oauth2::{
     http::HeaderMap,
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
     PkceCodeVerifier, RedirectUrl, RevocationUrl, Scope, StandardTokenResponse, TokenResponse,
-    TokenUrl,
+    TokenUrl, PkceCodeChallenge,
 };
 use redis::{AsyncCommands, RedisError};
 use reqwest::header::{ACCEPT, USER_AGENT};
@@ -174,14 +174,78 @@ pub(crate) struct OauthConfig {
 pub(crate) trait OauthProviderTrait {
     // type Confr;
 
+    // fn client(self) -> BasicClient;
+
+    // /// Generate the authorization URL to which we'll redirect the user.
+    // fn generate_auth_url(&self) -> AuthUrlData;
+    fn basic_config(self)-> OauthConfig;
+
+    async fn fetch_oauth_account(
+        self,
+        code: AuthorizationCode,
+        pkce_code_verifier: Option<PkceCodeVerifier>,
+    ) -> OauthResult<User>;
+}
+
+
+#[async_trait::async_trait]
+pub(crate) trait OauthConfigTrait {
+    // type Confr;
+
     fn client(self) -> BasicClient;
 
     /// Generate the authorization URL to which we'll redirect the user.
     fn generate_auth_url(&self) -> AuthUrlData;
 
-    async fn fetch_oauth_account(
-        &self,
-        code: AuthorizationCode,
-        pkce_code_verifier: Option<PkceCodeVerifier>,
-    ) -> OauthResult<User>;
+    // async fn fetch_oauth_account(
+    //     &self,
+    //     code: AuthorizationCode,
+    //     pkce_code_verifier: Option<PkceCodeVerifier>,
+    // ) -> OauthResult<User>;
+}
+
+
+
+#[async_trait::async_trait]
+impl OauthConfigTrait for OauthConfig {
+    fn client(self) -> BasicClient {
+        let client = BasicClient::new(
+            self.client_id,
+            Some(self.client_secret),
+            self.auth_url,
+            Some(self.token_url),
+        )
+        .set_redirect_uri(self.redirect_url);
+
+        if let Some(url) = self.revocation_url {
+            return client.set_revocation_uri(url);
+        }
+        client
+    }
+
+    /// Generate the authorization URL to which we'll redirect the user.
+    fn generate_auth_url(&self) -> AuthUrlData {
+        // let csrf_token = CsrfToken::new_random();
+        let (pkce_code_challenge, pkce_code_verifier) = PkceCodeChallenge::new_random_sha256();
+
+        let (authorize_url, csrf_token) = self
+            .clone()
+            .client()
+            .authorize_url(CsrfToken::new_random)
+            .add_scopes(self.clone().scopes)
+            .set_pkce_challenge(pkce_code_challenge)
+            .url();
+
+        let csrf_state = CsrfState {
+            csrf_token: csrf_token,
+            provider: self.provider,
+            pkce_code_verifier: Some(pkce_code_verifier),
+        };
+
+        AuthUrlData {
+            authorize_url: RedirectUrlReturned(authorize_url),
+            csrf_state_data: csrf_state,
+            // csrf_state: CsrfState(csrf_state),
+        }
+    }
 }

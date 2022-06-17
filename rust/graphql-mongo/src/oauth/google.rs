@@ -7,8 +7,8 @@ use oauth2::{
 use serde::{Deserialize, Serialize};
 
 use super::utils::{
-    AuthUrlData, CsrfState, OauthConfig, OauthError, OauthProviderTrait, OauthUrl,
-    RedirectUrlReturned, REDIRECT_URL,
+    AuthUrlData, CsrfState, OauthConfig, OauthConfigTrait, OauthError, OauthProviderTrait,
+    OauthUrl, RedirectUrlReturned, REDIRECT_URL,
 };
 use crate::app::user::{AccountOauth, OauthProvider, Role, TokenType, User};
 
@@ -29,10 +29,8 @@ struct GoogleUserData {
     picture: String,
     email: String,
     email_verified: bool,
-    locale: String, 
+    locale: String,
 }
-
-
 
 #[derive(Debug, Clone)]
 pub(crate) struct GoogleConfig {
@@ -77,54 +75,18 @@ impl GoogleConfig {
 
 #[async_trait::async_trait]
 impl OauthProviderTrait for GoogleConfig {
-    fn client(self) -> BasicClient {
-        let client = BasicClient::new(
-            self.basic_config.client_id,
-            Some(self.basic_config.client_secret),
-            self.basic_config.auth_url,
-            Some(self.basic_config.token_url),
-        )
-        .set_redirect_uri(self.basic_config.redirect_url);
-
-        if let Some(url) = self.basic_config.revocation_url {
-            return client.set_revocation_uri(url);
-        }
-        client
-    }
-
-    /// Generate the authorization URL to which we'll redirect the user.
-    fn generate_auth_url(&self) -> AuthUrlData {
-        // let csrf_token = CsrfToken::new_random();
-        let (pkce_code_challenge, pkce_code_verifier) = PkceCodeChallenge::new_random_sha256();
-
-        let (authorize_url, csrf_token) = self
-            .clone()
-            .client()
-            .authorize_url(CsrfToken::new_random)
-            .add_scopes(self.basic_config.clone().scopes)
-            .set_pkce_challenge(pkce_code_challenge)
-            .url();
-
-        let csrf_state = CsrfState {
-            csrf_token: csrf_token,
-            provider: self.basic_config.provider,
-            pkce_code_verifier: Some(pkce_code_verifier),
-        };
-
-        AuthUrlData {
-            authorize_url: RedirectUrlReturned(authorize_url),
-            csrf_state_data: csrf_state,
-            // csrf_state: CsrfState(csrf_state),
-        }
+    fn basic_config(self) -> OauthConfig {
+        self.basic_config
     }
 
     async fn fetch_oauth_account(
-        &self,
+        self,
         code: AuthorizationCode,
         pkce_code_verifier: Option<PkceCodeVerifier>,
     ) -> anyhow::Result<User, OauthError> {
-        let token = self
-            .clone()
+        // let p = self.basic_config.client();
+        let token = self.clone()
+            .basic_config()
             .client()
             .exchange_code(code)
             .set_pkce_verifier(pkce_code_verifier.expect("Must be provided for google"))
@@ -137,20 +99,20 @@ impl OauthProviderTrait for GoogleConfig {
             .get_resource::<GoogleUserData>(&token, None)
             .await?;
         print!("Profile{:?}", profile);
-        
+
         // TODO: First search the database if the user exists, if exists, just update, else create
         // User::find({profile: profile.id, provider: provider});
         let expiration = token.expires_in().unwrap_or(std::time::Duration::new(0, 0));
         let expiration = Duration::from_std(expiration).unwrap_or(Duration::seconds(0));
         let expires_at = Utc::now() + expiration;
         let scopes = self
-        .basic_config
-        .scopes
-        .iter()
-        .map(|x| x.to_string())
-        .collect::<Vec<String>>();
+            .basic_config
+            .scopes
+            .iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<String>>();
         print!("scopes{:?}", scopes);
-        
+
         let account = AccountOauth::builder()
             .id(profile.sub.to_string())
             .account_type("oauth".into())
