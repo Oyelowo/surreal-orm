@@ -76,16 +76,16 @@ impl GithubConfig {
 
 #[async_trait::async_trait]
 impl OauthProviderTrait for GithubConfig {
-    fn basic_config(self) -> OauthConfig {
-        self.basic_config
+    fn basic_config(&self) -> OauthConfig {
+        self.basic_config.to_owned()
     }
 
     async fn fetch_oauth_account(
-        self,
+        &self,
         code: AuthorizationCode,
         pkce_verifier: Option<PkceCodeVerifier>,
     ) -> anyhow::Result<User, OauthError> {
-        let token = self.clone()
+        let token = self
             .basic_config()
             .client()
             .exchange_code(code)
@@ -117,7 +117,7 @@ impl OauthProviderTrait for GithubConfig {
         let expiration = token.expires_in().unwrap_or(std::time::Duration::new(0, 0));
         let expiration = Duration::from_std(expiration).unwrap_or(Duration::seconds(0));
         let expires_at = Utc::now() + expiration;
-        let scopes = self.clone()
+        let scopes = self
             .basic_config()
             .scopes
             .iter()

@@ -178,10 +178,10 @@ pub(crate) trait OauthProviderTrait {
 
     // /// Generate the authorization URL to which we'll redirect the user.
     // fn generate_auth_url(&self) -> AuthUrlData;
-    fn basic_config(self)-> OauthConfig;
+    fn basic_config(&self)-> OauthConfig;
 
     async fn fetch_oauth_account(
-        self,
+        &self,
         code: AuthorizationCode,
         pkce_code_verifier: Option<PkceCodeVerifier>,
     ) -> OauthResult<User>;

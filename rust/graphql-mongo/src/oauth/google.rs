@@ -75,17 +75,17 @@ impl GoogleConfig {
 
 #[async_trait::async_trait]
 impl OauthProviderTrait for GoogleConfig {
-    fn basic_config(self) -> OauthConfig {
-        self.basic_config
+    fn basic_config(&self) -> OauthConfig {
+        self.basic_config.to_owned()
     }
 
     async fn fetch_oauth_account(
-        self,
+        &self,
         code: AuthorizationCode,
         pkce_code_verifier: Option<PkceCodeVerifier>,
     ) -> anyhow::Result<User, OauthError> {
         // let p = self.basic_config.client();
-        let token = self.clone()
+        let token = self
             .basic_config()
             .client()
             .exchange_code(code)
@@ -106,7 +106,7 @@ impl OauthProviderTrait for GoogleConfig {
         let expiration = Duration::from_std(expiration).unwrap_or(Duration::seconds(0));
         let expires_at = Utc::now() + expiration;
         let scopes = self
-            .basic_config
+            .basic_config()
             .scopes
             .iter()
             .map(|x| x.to_string())

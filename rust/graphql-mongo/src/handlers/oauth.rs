@@ -14,7 +14,9 @@ use wither::Model;
 
 use crate::oauth::github::GithubConfig;
 use crate::oauth::google::GoogleConfig;
-use crate::oauth::utils::{CsrfState, OauthError, OauthProviderTrait, RedirectUrlReturned};
+use crate::oauth::utils::{
+    CsrfState, OauthConfigTrait, OauthError, OauthProviderTrait, RedirectUrlReturned,
+};
 use common::configurations::redis::RedisConfigError;
 
 use crate::app::user::{OauthProvider, User};
@@ -104,8 +106,8 @@ pub async fn oauth_login_initiator(
     };
 
     let auth_url_data = match oauth_provider {
-        OauthProvider::Github => GithubConfig::new().generate_auth_url(),
-        OauthProvider::Google => GoogleConfig::new().generate_auth_url(),
+        OauthProvider::Github => GithubConfig::new().basic_config().generate_auth_url(),
+        OauthProvider::Google => GoogleConfig::new().basic_config().generate_auth_url(),
     };
 
     auth_url_data
@@ -175,7 +177,9 @@ async fn authenticate_user(uri: &Uri, redis: Data<&redis::Client>) -> Result<Use
         OauthProvider::Github => {
             let github_config = GithubConfig::new();
 
-            github_config.fetch_oauth_account(code, None).await
+            github_config
+                .fetch_oauth_account(code, csrf_state.pkce_code_verifier)
+                .await
         }
         OauthProvider::Google => {
             let google_config = GoogleConfig::new();
