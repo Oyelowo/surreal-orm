@@ -99,11 +99,9 @@ pub async fn oauth_login_initiator(
     Ok(Redirect::found(auth_url_data.authorize_url))
 }
 
+// TODO: Handle failure redirect cases. Pack all the logic into a function and redirect if error returned.
 #[handler]
-pub async fn oauth_login_authentication(
-    uri: &Uri,
-    redis: Data<&RedisConfigs>,
-) -> Result<Json<User>> {
+pub async fn oauth_login_authentication(uri: &Uri, redis: Data<&RedisConfigs>) -> Result<Redirect> {
     let mut connection = get_redis_connection(redis).await?;
 
     let redirect_url = Url::parse(&format!("http://localhost:{uri}"))
@@ -136,5 +134,6 @@ pub async fn oauth_login_authentication(
     };
 
     //  Also, handle storing user session
-    Ok(Json(user?))
+    // Ok(Json(user?))
+    Ok(Redirect::found("http://localhost:8000"))
 }
