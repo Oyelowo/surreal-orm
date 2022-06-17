@@ -29,33 +29,11 @@ struct GoogleUserData {
     picture: String,
     email: String,
     email_verified: bool,
-    locale: String, // ne etv
-                    //    emails {value, type}[]
-                    // photos
-                    // gener
+    locale: String, 
 }
-// #[derive(Debug, Deserialize, Serialize)]
-// struct GoogleUserData {
-//     id: String,
-//     #[serde(rename="displayName")]
-//     display_name: String,
 
-//     #[serde(rename = "givenName")]
-//     given_name: String,
-//     #[serde(rename = "familyName")]
-//     family_name: String,
-// //    emails {value, type}[]
-// // photos
-// // gener
-// }
 
-#[derive(Debug, Deserialize)]
-struct GoogleEmail {
-    email: String,
-    primary: bool,
-    verified: bool,
-    visibility: Option<String>,
-}
+
 #[derive(Debug, Clone)]
 pub(crate) struct GoogleConfig {
     basic_config: OauthConfig,
