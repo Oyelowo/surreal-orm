@@ -2,7 +2,7 @@ use chrono::{Duration, Utc};
 use oauth2::{
     basic::BasicClient, reqwest::async_http_client, AuthUrl, AuthorizationCode, ClientId,
     ClientSecret, CsrfToken, PkceCodeChallenge, PkceCodeChallengeMethod, RedirectUrl, Scope,
-    TokenResponse, TokenUrl,
+    TokenResponse, TokenUrl, PkceCodeVerifier,
 };
 use serde::{Deserialize, Serialize};
 
@@ -65,6 +65,7 @@ impl GithubConfig {
                 Scope::new("user:email".into()),
             ],
             provider: OauthProvider::Github,
+            revocation_url: None,
         };
         Self { basic_config }
     }
@@ -110,6 +111,7 @@ impl OauthProviderTrait for GithubConfig {
     async fn fetch_oauth_account(
         &self,
         code: AuthorizationCode,
+        _pkce_code_verifier: Option<PkceCodeVerifier>,
     ) -> anyhow::Result<User, OauthError> {
         let token = self
             .clone()

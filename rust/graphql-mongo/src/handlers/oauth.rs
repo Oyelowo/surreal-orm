@@ -13,6 +13,7 @@ use url::Url;
 use wither::Model;
 
 use crate::oauth::github::GithubConfig;
+use crate::oauth::google::GoogleConfig;
 use crate::oauth::utils::{CsrfState, OauthError, OauthProviderTrait, RedirectUrlReturned};
 use common::configurations::redis::RedisConfigError;
 
@@ -104,7 +105,7 @@ pub async fn oauth_login_initiator(
 
     let auth_url_data = match oauth_provider {
         OauthProvider::Github => GithubConfig::new().generate_auth_url(),
-        OauthProvider::Google => todo!(),
+        OauthProvider::Google => GoogleConfig::new().generate_auth_url(),
     };
 
     auth_url_data
@@ -114,7 +115,9 @@ pub async fn oauth_login_initiator(
         .map_err(HandlerError::StorageError)
         .map_err(InternalServerError)?;
 
-    Ok(RedirectCustom::found(auth_url_data.authorize_url.into_inner()))
+    Ok(RedirectCustom::found(
+        auth_url_data.authorize_url.into_inner(),
+    ))
 }
 
 #[handler]
@@ -172,13 +175,27 @@ async fn authenticate_user(uri: &Uri, redis: Data<&redis::Client>) -> Result<Use
         OauthProvider::Github => {
             let github_config = GithubConfig::new();
 
-            github_config
-                .fetch_oauth_account(code)
+            github_config.fetch_oauth_account(code, None).await
+        }
+        OauthProvider::Google => {
+            let google_config = GoogleConfig::new();
+
+            google_config
+                .fetch_oauth_account(code, csrf_state.pkce_code_verifier)
                 .await
+        }
+    };
+
+    let user = user
+        .map_err(HandlerError::FetchAccountFailed)
+        .map_err(BadRequest);
+    /*
+           .await
                 .map_err(HandlerError::FetchAccountFailed)
                 .map_err(BadRequest)
-        }
-        OauthProvider::Google => todo!(),
-    };
+       .await
+                .map_err(HandlerError::FetchAccountFailed)
+                .map_err(BadRequest)
+    */
     user
 }

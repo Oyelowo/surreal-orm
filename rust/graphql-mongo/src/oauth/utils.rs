@@ -4,12 +4,13 @@ use oauth2::{
     basic::{BasicClient, BasicTokenType},
     http::HeaderMap,
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
-    PkceCodeVerifier, RedirectUrl, Scope, StandardTokenResponse, TokenResponse, TokenUrl,
+    PkceCodeVerifier, RedirectUrl, RevocationUrl, Scope, StandardTokenResponse, TokenResponse,
+    TokenUrl,
 };
 use redis::{AsyncCommands, RedisError};
 use reqwest::header::{ACCEPT, USER_AGENT};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::fmt;
+use std::{default, fmt};
 use typed_builder::TypedBuilder;
 use url::Url;
 
@@ -147,7 +148,8 @@ impl OauthUrl {
             .await
             .map_err(|_| OauthError::ResourceFetchFailed(self.0.to_string()))?;
 
-        Ok(serde_json::from_str::<T>(remote_data.as_str())?)
+            print!("ERRTEWREWR:::::{remote_data:#}");
+        Ok(serde_json::from_str::<T>(remote_data.as_str()).expect("errr"))
     }
 }
 
@@ -158,6 +160,9 @@ pub(crate) struct OauthConfig {
     pub auth_url: AuthUrl,
     pub token_url: TokenUrl,
     pub redirect_url: RedirectUrl,
+
+    #[builder(default, setter(strip_option))]
+    pub revocation_url: Option<RevocationUrl>,
     pub scopes: Vec<Scope>,
     pub provider: OauthProvider, // pub csrf_token: CsrfToken,
 }
@@ -174,5 +179,9 @@ pub(crate) trait OauthProviderTrait {
     /// Generate the authorization URL to which we'll redirect the user.
     fn generate_auth_url(&self) -> AuthUrlData;
 
-    async fn fetch_oauth_account(&self, code: AuthorizationCode) -> OauthResult<User>;
+    async fn fetch_oauth_account(
+        &self,
+        code: AuthorizationCode,
+        pkce_code_verifier: Option<PkceCodeVerifier>,
+    ) -> OauthResult<User>;
 }
