@@ -1,7 +1,9 @@
 use std::fmt::Display;
 
+use common::authentication::TypedSession;
 use mongodb::Database;
 use poem::error::{BadRequest, InternalServerError};
+use poem::session::Session;
 use poem::web::{Data, Json};
 use poem::{error::Result, handler, http::Uri, web::Path};
 use poem::{IntoResponse, Response};
@@ -82,9 +84,15 @@ impl IntoResponse for RedirectCustom {
 #[handler]
 pub async fn oauth_login_initiator(
     Path(oauth_provider): Path<OauthProvider>,
+    session: &Session,
     redis: Data<&redis::Client>,
 ) -> Result<RedirectCustom> {
     let mut connection = get_redis_connection(redis).await?;
+    let session = TypedSession(session.to_owned());
+    if let Ok(s) = session.get_user_id::<String>(){
+        session.renew();
+        return Ok(RedirectCustom::found("http://localhost:8000"));
+    };
 
     let auth_url_data = match oauth_provider {
         OauthProvider::Github => GithubConfig::new().generate_auth_url(),
@@ -101,16 +109,20 @@ pub async fn oauth_login_initiator(
     Ok(RedirectCustom::found(auth_url_data.authorize_url))
 }
 
-
 #[handler]
 pub async fn oauth_login_authentication(
     uri: &Uri,
+    session: &Session,
     // db: Data<&Database>,
     redis: Data<&redis::Client>,
 ) -> Result<RedirectCustom> {
     let user = authenticate_user(uri, redis).await;
     match user {
-        Ok(user) => Ok(RedirectCustom::found("http://localhost:8000")),
+        Ok(user) => {
+            let session = TypedSession(session.to_owned());
+            session.insert_user_id(&"user_id_oyeoye".to_string());
+            Ok(RedirectCustom::found("http://localhost:8000"))
+        }
         Err(e) => Ok(RedirectCustom::found("http://localhost:8000/login")),
     }
 
