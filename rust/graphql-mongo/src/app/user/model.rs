@@ -76,15 +76,15 @@ pub struct User {
     #[validate(length(min = 1))]
     #[builder(default, setter(strip_option))]
     pub city: Option<String>,
-    
+
     #[validate(email)]
     // #[builder(default, setter(strip_option))]
     pub email: Option<String>,
-    
+
     #[graphql(skip_input)]
-    #[builder(default, setter(strip_option))]
-    pub email_verified_at: Option<DateTime<Utc>>,
-    
+    #[builder(default)]
+    pub email_verified: bool,
+
     #[validate(range(min = 18, max = 160))]
     pub age: Option<u8>,
 
@@ -189,8 +189,8 @@ impl User {
     async fn posts(&self, ctx: &Context<'_>) -> Result<Vec<Post>> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = get_db_from_ctx(ctx)?;
-        let post_keys = Post::get_fields_serialized();
-        Post::find(db, doc! {post_keys.posterId: self.id}, None)
+        let post_fields = Post::get_fields_serialized();
+        Post::find(db, doc! {post_fields.posterId: self.id}, None)
             .await?
             .try_collect()
             .await
@@ -269,23 +269,28 @@ impl User {
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
 
+    pub async fn find_or_create_for_oauth(
+        mut self,
+        db: &Database,
+        // id: String,
+        // provider: impl Into<String>,
+        // provider_account_id: impl Into<OauthProvider>,
+    ) -> Result<Self, WitherError> {
+        let user_fields = User::get_fields_serialized();
+        let acc_fields = AccountOauth::get_fields_serialized();
+        let AccountOauth { id, provider, .. } = self.accounts.first().unwrap();
+        let provider = serde_json::to_string(provider).unwrap();
+        let filter = doc! { user_fields.accounts: {"$elemMatch": {acc_fields.id: id,acc_fields.provider: provider}}};
+        self.save(db, Some(filter)).await?;
+
+        Ok(self)
+    }
+
     pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Result<Self> {
         let uk = User::get_fields_serialized();
         User::find_one(db, doc! { uk.username: username.into() }, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
-    }
-
-    pub async fn _find_by_account_oauth(
-        db: &Database,
-        provider: impl Into<String>,
-        provider_account_id: impl Into<String>,
-    ) -> Result<Self> {
-        let uk = User::get_fields_serialized();
-        let acc_keys = AccountOauth::get_fields_serialized();
-        User::find_one(db, doc! { uk.accounts: {"$elemMatch": {acc_keys.provider: provider.into(), acc_keys.providerAccountId: provider_account_id.into()}} }, None)
-        .await?
-        .ok_or_else(||ApiHttpStatus::NotFound("User not found".into()).extend())
     }
 
     pub async fn find_or_replace_account_oauth(
@@ -294,11 +299,11 @@ impl User {
         provider: impl Into<String>,
         // provider_account_id: impl Into<OauthProvider>,
     ) -> Result<Self, WitherError> {
-        let user_keys = User::get_fields_serialized();
-        let acc_keys = AccountOauth::get_fields_serialized();
-        // let filter = doc! { user_keys.accounts: {"$elemMatch": {acc_keys.provider: provider.into(), acc_keys.providerAccountId: provider_account_id.into()}}};
+        let user_fields = User::get_fields_serialized();
+        let acc_fields = AccountOauth::get_fields_serialized();
+        // let filter = doc! { user_fields.accounts: {"$elemMatch": {acc_fields.provider: provider.into(), acc_fields.providerAccountId: provider_account_id.into()}}};
         let filter =
-            doc! { user_keys.accounts: {"$elemMatch": {acc_keys.provider: provider.into()}}};
+            doc! { user_fields.accounts: {"$elemMatch": {acc_fields.provider: provider.into()}}};
         User::save(&mut self, db, Some(filter)).await?;
 
         Ok(self)

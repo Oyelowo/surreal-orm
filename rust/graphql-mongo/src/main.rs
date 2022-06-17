@@ -2,7 +2,9 @@ use std::process;
 
 use anyhow::Context;
 use common::{
-    configurations::{application::ApplicationConfigs, redis::RedisConfigs},
+    configurations::{
+        application::ApplicationConfigs, mongodb::MongodbConfigs, redis::RedisConfigs,
+    },
     middleware,
 };
 
@@ -23,8 +25,20 @@ async fn main() {
     env_logger::init();
     let application = ApplicationConfigs::get();
     let redis_config = RedisConfigs::get();
+    let redis = redis_config.clone().get_client().unwrap_or_else(|e|{
+        log::error!("Problem getting database. Error: {e:?}");
+        process::exit(-1)
+
+    });
+    let database = MongodbConfigs::get();
+    let database = database.get_database().unwrap_or_else(|e| {
+        log::error!("Problem getting database. Error: {e:?}");
+        process::exit(-1)
+    });
+
     let app_url = &application.get_url();
 
+    let con = redis_config.clone().get_client().unwrap();
     let schema = setup_graphql()
         .await
         .with_context(|| "Problem setting up graphql")
@@ -41,7 +55,10 @@ async fn main() {
         });
 
     let app = Route::new()
-        .at("/api/oauth/signin/:oauth_provider", get(oauth_login_initiator))
+        .at(
+            "/api/oauth/signin/:oauth_provider",
+            get(oauth_login_initiator),
+        )
         .at("/api/oauth/callback", get(oauth_login_authentication))
         .at(
             "/api/graphql",
@@ -49,8 +66,10 @@ async fn main() {
         )
         .at("/api/graphql/ws", get(graphql_handler_ws))
         .data(schema)
-        // .with(AddData::new(con))
-        .with(AddData::new(redis_config))
+        .data(database)
+        .data(redis)
+        .data(redis_config)
+        .with(AddData::new(con))
         .with(session)
         .with(middleware::get_cors())
         // .with(Logger)
