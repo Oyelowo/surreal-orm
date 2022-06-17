@@ -23,9 +23,6 @@ pub(crate) const REDIRECT_URL: &str = "http://localhost:8000/api/oauth/callback"
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum OauthError {
-    #[error("The csrf code provided by the provider is invalid. Does not match the one sent. Potential spoofing")]
-    InvalidCsrfToken,
-
     #[error("Failed to fetch token. Error: {0}")]
     TokenFetchFailed(String),
 
@@ -59,14 +56,7 @@ pub(crate) struct CsrfState {
 impl CsrfState {
     const CSRF_STATE_REDIS_KEY: &'static str = "CSRF_STATE_REDIS_KEY";
 
-    fn redis_key(&self) -> String {
-        format!(
-            "{}{:?}",
-            Self::CSRF_STATE_REDIS_KEY,
-            self.csrf_token.secret().as_str()
-        )
-    }
-    fn redis_key2(csrf_token: CsrfToken) -> String {
+    fn redis_key(csrf_token: CsrfToken) -> String {
         format!(
             "{}{:?}",
             Self::CSRF_STATE_REDIS_KEY,
@@ -76,72 +66,48 @@ impl CsrfState {
 
     pub(crate) async fn verify_csrf_token(
         csrf_token: CsrfToken,
-        // csrf_state_data: Self,
-        // provider: OauthProvider,
-        // pkce_code_verifier: Option<PkceCodeVerifier>,
         connection: &mut redis::aio::Connection,
     ) -> OauthResult<Self> {
-        let csrf_state: String = connection.get(Self::redis_key2(csrf_token)).await.map_err(|e| {
+        let ref key = Self::redis_key(csrf_token);
+
+        let csrf_state: String = connection.get(key).await.map_err(|e| {
             log::error!("Problem getting redis connection. Error:{e:?}");
             e
         })?;
-        // connection.del::<_, String>(self.redis_key()).await?;
+        connection.del::<_, String>(key).await?;
+
         Ok(serde_json::from_str::<Self>(csrf_state.as_str())?)
     }
-    pub(crate) async fn cache(
-        self,
-        // csrf_state_data: Self,
-        // provider: OauthProvider,
-        // pkce_code_verifier: Option<PkceCodeVerifier>,
-        connection: &mut redis::aio::Connection,
-    ) -> OauthResult<Self> {
-        // let csrf_state_data = CsrfState {
-        //     csrf_token: self.clone(),
-        //     provider,
-        //     pkce_code_verifier,
-        // };
+
+    pub(crate) async fn cache(self, connection: &mut redis::aio::Connection) -> OauthResult<Self> {
         let csrf_state_data_string = serde_json::to_string(&self)?;
+        let ref key = Self::redis_key(self.csrf_token.clone());
 
-        connection.set(self.redis_key(), csrf_state_data_string).await?;
-        connection.expire::<_, u16>(self.redis_key(), 600).await?;
+        connection.set(key, csrf_state_data_string).await?;
+        connection.expire::<_, u16>(key, 600).await?;
         Ok(self)
-    }
-
-    pub(crate) async fn verify(
-        &self,
-        connection: &mut redis::aio::Connection,
-    ) -> OauthResult<Self> {
-        let csrf_state: String = connection.get(self.redis_key()).await.map_err(|e| {
-            log::error!("Problem getting redis connection. Error:{e:?}");
-            e
-        })?;
-        connection.del::<_, String>(self.redis_key()).await?;
-        Ok(serde_json::from_str::<Self>(csrf_state.as_str())?)
     }
 }
 
 /// The url returned by the oauth provider with code and state(which should be the one we send)
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct RedirectUrlReturned(pub Url);
+pub(crate) struct RedirectUrlReturned(pub(crate) Url);
 
-impl fmt::Display for RedirectUrlReturned {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
+impl RedirectUrlReturned {
+    pub(crate) fn into_inner(self) -> Url {
+        self.0
     }
 }
-
-const CODE: &str = "code";
-const STATE: &str = "state";
 
 pub(crate) type OauthResult<T> = Result<T, OauthError>;
 impl RedirectUrlReturned {
     pub fn get_authorization_code(&self) -> OauthResult<AuthorizationCode> {
-        let value = self.get_query_param_value(CODE)?;
+        let value = self.get_query_param_value("code")?;
         Ok(AuthorizationCode::new(value.into_owned()))
     }
 
     pub(crate) fn get_csrf_token(&self) -> OauthResult<CsrfToken> {
-        let value = self.get_query_param_value(STATE)?;
+        let value = self.get_query_param_value("state")?;
         Ok(CsrfToken::new(value.into_owned()))
     }
 

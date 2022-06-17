@@ -34,6 +34,9 @@ pub(crate) enum HandlerError {
     #[error("The state token provided is invalid.")]
     InvalidState(#[source] OauthError),
 
+    #[error("The auth code provided is invalid.")]
+    InvalidAuthCode(#[source] OauthError),
+
     #[error("Problem fetching account")]
     FetchAccountFailed(#[source] OauthError),
 
@@ -111,7 +114,7 @@ pub async fn oauth_login_initiator(
         .map_err(HandlerError::StorageError)
         .map_err(InternalServerError)?;
 
-    Ok(RedirectCustom::found(auth_url_data.authorize_url))
+    Ok(RedirectCustom::found(auth_url_data.authorize_url.into_inner()))
 }
 
 #[handler]
@@ -145,11 +148,15 @@ async fn authenticate_user(uri: &Uri, redis: Data<&redis::Client>) -> Result<Use
     let mut connection = get_redis_connection(redis).await?;
 
     let redirect_url = Url::parse(&format!("http://localhost:{uri}"))
+        .map(RedirectUrlReturned)
         .map_err(HandlerError::ParseError)
         .map_err(InternalServerError)?;
 
-    let redirect_url = RedirectUrlReturned(redirect_url);
-    let code = redirect_url.get_authorization_code().map_err(BadRequest)?;
+    let code = redirect_url
+        .get_authorization_code()
+        .map_err(HandlerError::InvalidAuthCode)
+        .map_err(BadRequest)?;
+
     // make .verify give me back both the csrf token and the provider
     let csrf_token = redirect_url
         .get_csrf_token()
