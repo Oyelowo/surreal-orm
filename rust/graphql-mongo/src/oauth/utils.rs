@@ -8,7 +8,7 @@ use oauth2::{
     TokenResponse, TokenUrl,
 };
 use redis::{AsyncCommands, RedisError};
-use reqwest::header::ACCEPT;
+use reqwest::header::{ACCEPT, USER_AGENT};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use url::Url;
@@ -124,6 +124,7 @@ impl OauthUrl {
         let remote_data = reqwest::Client::new()
             .get(self.0)
             .header(ACCEPT, "application/vnd.github.v3+json")
+            .header(USER_AGENT, "oyelowo")
             .headers(headers)
             .bearer_auth(token.access_token().secret().as_str())
             .send()
