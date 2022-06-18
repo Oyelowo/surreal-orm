@@ -13,7 +13,6 @@ use crate::{
     oauth::utils::OauthConfigTrait,
 };
 
-
 #[derive(Debug, Deserialize, Serialize)]
 struct GithubUserData {
     id: u32,
@@ -85,7 +84,6 @@ impl OauthProviderTrait for GithubConfig {
             .await
             .map_err(|e| OauthError::TokenFetchFailed(e.to_string()))?;
 
-        print!("FFFFFF{:?}", token.access_token().secret().to_string());
         let profile = OauthUrl("https://api.github.com/user")
             .fetch_resource::<GithubUserData>(&token, None)
             .await?;
