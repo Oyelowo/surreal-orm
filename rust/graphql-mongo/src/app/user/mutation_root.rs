@@ -130,7 +130,7 @@ impl UserMutationRoot {
         let session = TypedSession::from_ctx(ctx)?;
         let user_id = session.get_user_id()?;
 
-        session.clear();
+        session.purge();
         Ok(SignOutMessage {
             message: "Successfully signed out".into(),
             user_id,
