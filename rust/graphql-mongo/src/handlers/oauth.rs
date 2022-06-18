@@ -139,8 +139,9 @@ pub async fn oauth_login_authentication(
     match user {
         Ok(user) => {
             let session = TypedSession(session.to_owned());
-            let user = user.find_or_create_for_oauth(&db)
-                // User::find_or_create_for_oauth(&db)
+            let user =
+             user.find_or_create_for_oauth(&db)
+                // User::find_or_create_for_oauth(&db, user)
                 .await
                 .map_err(HandlerError::UnknownError).expect("ererre");
                 // ?
