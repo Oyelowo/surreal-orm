@@ -175,16 +175,12 @@ async fn authenticate_user(uri: &Uri, redis: Data<&redis::Client>) -> Result<Use
 
     let user = match csrf_state.provider {
         OauthProvider::Github => {
-            let github_config = GithubConfig::new();
-
-            github_config
+            GithubConfig::new()
                 .fetch_oauth_account(code, csrf_state.pkce_code_verifier)
                 .await
         }
         OauthProvider::Google => {
-            let google_config = GoogleConfig::new();
-
-            google_config
+            GoogleConfig::new()
                 .fetch_oauth_account(code, csrf_state.pkce_code_verifier)
                 .await
         }
@@ -193,13 +189,6 @@ async fn authenticate_user(uri: &Uri, redis: Data<&redis::Client>) -> Result<Use
     let user = user
         .map_err(HandlerError::FetchAccountFailed)
         .map_err(BadRequest);
-    /*
-           .await
-                .map_err(HandlerError::FetchAccountFailed)
-                .map_err(BadRequest)
-       .await
-                .map_err(HandlerError::FetchAccountFailed)
-                .map_err(BadRequest)
-    */
+
     user
 }

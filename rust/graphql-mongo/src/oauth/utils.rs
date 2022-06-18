@@ -39,6 +39,8 @@ pub(crate) enum OauthError {
     SerializationError(#[from] serde_json::Error),
 }
 
+
+/// Tokens stored in redis for returned url oauth verification
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct CsrfState {
     pub(crate) csrf_token: CsrfToken,
