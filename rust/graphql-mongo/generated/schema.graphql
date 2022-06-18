@@ -1,33 +1,24 @@
 directive @oneOf on INPUT_OBJECT
 
 type AccountOauth {
+	"""
+	unique identifier for the oauth provider. Don't use name of user because that could be changed
+	"""
 	id: String!
-	userId: String!
 	accountType: String!
-	provider: String!
-	providerAccountId: String!
+	provider: OauthProvider!
+	providerAccountId: OauthProvider!
 	accessToken: String!
 	refreshToken: String
+	"""
+	ccess token expiration timestamp, represented as the number of seconds since the epoch (January 1, 1970 00:00:00 UTC).
+	"""
 	expiresAt: DateTime
-	tokenType: String
-	scope: String
+	tokenType: TokenType
+	scopes: [String!]!
 	idToken: String
-	sessionState: String
-	profile: ProfileOauth!
-}
-
-input AccountOauthInput {
-	accountType: String!
-	provider: String!
-	providerAccountId: String!
-	accessToken: String!
-	refreshToken: String
-	expiresAt: DateTime
-	tokenType: String
-	scope: String
-	idToken: String
-	sessionState: String
-	profile: ProfileOauthInput!
+	oauthToken: String
+	oauthTokenSecret: String
 }
 
 input Address {
@@ -56,9 +47,13 @@ type Mutation {
 	"""
 	signUp(user: UserInput!): User!
 	signIn(signInCredentials: SignInCredentials!): User!
-	createOrUpdateUserOauth(account: AccountOauthInput!): User!
 	signOut: SignOutMessage!
 	createPost(post: PostInput!): Post!
+}
+
+enum OauthProvider {
+	GITHUB
+	GOOGLE
 }
 
 scalar ObjectId
@@ -76,22 +71,6 @@ input PostInput {
 	content: String!
 }
 
-type ProfileOauth {
-	firstName: String!
-	lastName: String!
-	username: String!
-	email: String!
-	emailVerified: Boolean!
-}
-
-input ProfileOauthInput {
-	firstName: String!
-	lastName: String!
-	username: String!
-	email: String!
-	emailVerified: Boolean!
-}
-
 type Query {
 	user(id: ObjectId!): User!
 	getUser(userBy: UserBy!): User!
@@ -107,14 +86,8 @@ enum Role {
 }
 
 type Session {
-	user: SessionUser!
+	userId: ObjectId!
 	expiresAt: DateTime!
-}
-
-type SessionUser {
-	name: String!
-	email: String!
-	image: String!
 }
 
 input SignInCredentials {
@@ -132,15 +105,19 @@ type Subscription {
 	values: Int!
 }
 
+enum TokenType {
+	BEARER
+}
+
 type User {
 	id: ObjectId
 	createdAt: DateTime
 	username: String!
-	firstName: String!
-	lastName: String!
+	firstName: String
+	lastName: String
 	city: String
-	email: String!
-	emailVerifiedAt: DateTime
+	email: String
+	emailVerified: Boolean!
 	age: Int
 	socialMedia: [String!]!
 	roles: [Role!]!
@@ -159,10 +136,10 @@ input UserBy @oneof {
 input UserInput {
 	username: String!
 	password: String
-	firstName: String!
-	lastName: String!
+	firstName: String
+	lastName: String
 	city: String
-	email: String!
+	email: String
 	age: Int
 	socialMedia: [String!]!
 }
