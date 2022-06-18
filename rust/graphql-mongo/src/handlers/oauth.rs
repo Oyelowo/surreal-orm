@@ -108,7 +108,7 @@ pub async fn oauth_login_initiator(
     let session = TypedSession(session.to_owned());
     if let Ok(s) = session.get_user_id::<ObjectId>() {
         session.renew();
-        return Ok(RedirectCustom::found("http://localhost:8000"));
+        return Ok(RedirectCustom::found("http://localhost:3000"));
     };
 
     let auth_url_data = match oauth_provider {
@@ -152,9 +152,9 @@ pub async fn oauth_login_authentication(
             // Ok(Redirect::found("http://localhost:8000"))
             session.insert_user_id(&user.id);
             // session.renew();
-            Ok(RedirectCustom::found("http://localhost:8000"))
+            Ok(RedirectCustom::found("http://localhost:3000"))
         }
-        Err(e) => Ok(RedirectCustom::found("http://localhost:8000/login")),
+        Err(e) => Ok(RedirectCustom::found(format!("http://localhost:3000/login?error={e}"))),
     }
 
     // user?

@@ -23,9 +23,9 @@ enum GoogleScopes {
 struct GoogleUserData {
     sub: String,
     name: String,
-    given_name: String,
-    family_name: String,
-    picture: String,
+    given_name: Option<String>,
+    family_name: Option<String>,
+    picture: Option<String>,
     email: String,
     email_verified: bool,
     locale: String,
