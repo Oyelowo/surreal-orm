@@ -2,7 +2,10 @@ use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
 use futures_util::TryStreamExt;
-use mongodb::{Database, options::{FindOneOptions, ReadConcern}};
+use mongodb::{
+    options::{FindOneOptions, ReadConcern},
+    Database,
+};
 use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -81,7 +84,7 @@ pub struct User {
     pub city: Option<String>,
 
     #[validate(email)]
-    // #[builder(default, setter(strip_option))]
+    #[builder(default)]
     pub email: Option<String>,
 
     #[graphql(skip_input)]
@@ -103,7 +106,7 @@ pub struct User {
 }
 
 #[derive(
-    InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug, Clone, FieldsGetter,
+    InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug, Clone, FieldsGetter, Validate
 )]
 #[serde(rename_all = "camelCase")]
 #[graphql(input_name = "AccountOauthInput")]
@@ -111,20 +114,23 @@ pub struct AccountOauth {
     /// unique identifier for the oauth provider. Don't use name of user because that could be changed
     #[graphql(skip_input)]
     pub id: String,
-    // pub profile: ProfileOauth,
-    // #[graphql(skip_input)]
-    // pub user_id: String,
-    // Potentially change to enum
-    pub account_type: String,
+
+    pub display_name: Option<String>,
+    
+    #[validate(email)]
+    pub email: Option<String>,
+    pub email_verified: bool,
+
     pub provider: OauthProvider,
     pub provider_account_id: OauthProvider,
     pub access_token: String,
     pub refresh_token: Option<String>,
 
-    /// ccess token expiration timestamp, represented as the number of seconds since the epoch (January 1, 1970 00:00:00 UTC).
+    /// access token expiration timestamp, represented as the number of seconds since the epoch (January 1, 1970 00:00:00 UTC).
     pub expires_at: Option<DateTime<Utc>>,
     pub token_type: Option<TokenType>, // Should probably be changed to an enum. i.e oauth | anything else?
     pub scopes: Vec<String>,
+
     #[builder(default)]
     pub id_token: Option<String>,
     /* NOTE
@@ -137,17 +143,6 @@ pub struct AccountOauth {
     #[builder(default, setter(strip_option))]
     oauth_token_secret: Option<String>,
 }
-
-// #[derive(InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
-// #[serde(rename_all = "camelCase")]
-// #[graphql(input_name = "ProfileOauthInput")]
-// pub struct ProfileOauth {
-//     pub first_name: Option<String>,
-//     pub last_name: Option<String>,
-//     pub username: String,
-//     pub email: Option<String>,
-//     pub email_verified: bool,
-// }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Enum, PartialEq, Eq, Copy, Hash)]
 #[serde(rename_all = "lowercase")]
