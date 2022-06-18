@@ -82,29 +82,17 @@ impl UserQueryRoot {
 
     #[graphql(guard = "AuthGuard")]
     async fn session(&self, ctx: &Context<'_>) -> Result<Session> {
-        let User {
-            username, email, ..
-        } = User::get_current_user(ctx).await?;
+        let user_id = TypedSession::from_ctx(ctx)?.get_user_id::<ObjectId>()?;
 
         Ok(Session {
             expires_at: TypedSession::get_expiry(),
-            user: SessionUser {
-                name: username,
-                email,
-                image: "imageurl.com".into(),
-            },
+            user_id,
         })
     }
 }
 
 #[derive(SimpleObject, InputObject, Serialize, Deserialize)]
 struct Session {
-    user: SessionUser,
+    user_id: ObjectId,
     expires_at: DateTime<Utc>,
-}
-#[derive(SimpleObject, InputObject, Serialize, Deserialize)]
-struct SessionUser {
-    name: String,
-    email: Option<String>,
-    image: String,
 }

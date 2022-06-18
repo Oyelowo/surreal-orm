@@ -58,6 +58,7 @@ impl UserMutationRoot {
         user.validate()?;
 
         let db = get_db_from_ctx(ctx)?;
+        let session = TypedSession::from_ctx(ctx)?;
         let password_hash =
             generate_password_hash(user.password.with_context(|| "Invalid password")?)
                 .await
@@ -80,6 +81,7 @@ impl UserMutationRoot {
             error!("{:?}", e.to_string());
             ApiHttpStatus::BadRequest("Unable to save your data. Try again later".into()).extend()
         })?;
+        session.insert_user_id(&user.id);
         Ok(user)
     }
 

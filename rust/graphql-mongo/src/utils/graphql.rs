@@ -89,8 +89,8 @@ pub async fn graphql_handler_ws(
 #[handler]
 pub async fn graphql_playground() -> impl IntoResponse {
     Html(playground_source(
-        GraphQLPlaygroundConfig::new("/graphql")
-            .subscription_endpoint("/ws")
+        GraphQLPlaygroundConfig::new("graphql")
+            .subscription_endpoint("ws")
             .with_setting("credentials", "include"), // e.g allow cookies
     ))
 }
