@@ -80,7 +80,6 @@ impl UserQueryRoot {
             })
     }
 
-    #[graphql(guard = "AuthGuard")]
     async fn session(&self, ctx: &Context<'_>) -> Result<Session> {
         let user_id = TypedSession::from_ctx(ctx)?.get_user_id::<ObjectId>()?;
 
