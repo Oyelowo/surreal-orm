@@ -72,6 +72,7 @@ input PostInput {
 }
 
 type Query {
+	me: User!
 	user(id: ObjectId!): User!
 	getUser(userBy: UserBy!): User!
 	users: [User!]!

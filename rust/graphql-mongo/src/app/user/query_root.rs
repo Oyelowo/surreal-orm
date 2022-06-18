@@ -21,6 +21,12 @@ pub struct UserQueryRoot;
 
 #[Object]
 impl UserQueryRoot {
+    async fn me(&self, ctx: &Context<'_>) -> Result<User> {
+        User::get_current_user(ctx)
+            .await
+            .map_err(|_e| ApiHttpStatus::NotFound("User not found".into()).extend())
+    }
+
     async fn user(
         &self,
         ctx: &Context<'_>,

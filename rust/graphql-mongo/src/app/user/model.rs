@@ -2,7 +2,7 @@ use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
 use futures_util::TryStreamExt;
-use mongodb::Database;
+use mongodb::{Database, options::{FindOneOptions, ReadConcern}};
 use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -267,7 +267,10 @@ impl User {
     // }
     pub async fn find_by_id(db: &Database, id: &ObjectId) -> Result<Self> {
         let uk = User::get_fields_serialized();
-        User::find_one(db, doc! { uk._id: id }, None)
+        let find_one_options = FindOneOptions::builder()
+            .read_concern(ReadConcern::majority())
+            .build();
+        User::find_one(db, doc! { uk._id: id }, find_one_options)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
