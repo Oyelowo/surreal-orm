@@ -1,4 +1,3 @@
-use anyhow::Context as ContextAnyhow;
 use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
@@ -11,7 +10,6 @@ use validator::Validate;
 use wither::{
     bson::{doc, oid::ObjectId},
     prelude::Model,
-    WitherError,
 };
 
 use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
@@ -38,6 +36,10 @@ pub struct User {
     #[builder(default)]
     #[graphql(skip_input)]
     pub id: Option<ObjectId>,
+
+    // use bson::serde_helpers::uuid_as_binary;
+    // #[serde(with = "uuid_as_binary")]
+    // uuid: Uuid,
 
     // Created_at should only be set once when creating the field, it should be ignored at other times
     // make it possible do just do created_at(value) instead of created_at(Some(value)) at the call site
@@ -270,13 +272,7 @@ impl User {
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
 
-    pub async fn find_or_create_for_oauth(
-        mut self,
-        db: &Database,
-        // id: String,
-        // provider: impl Into<String>,
-        // provider_account_id: impl Into<OauthProvider>,
-    ) -> anyhow::Result<Self> {
+    pub async fn find_or_create_for_oauth(mut self, db: &Database) -> anyhow::Result<Self> {
         let user_fields = User::get_fields_serialized();
         let acc_fields = AccountOauth::get_fields_serialized();
         let AccountOauth { id, provider, .. } = self
@@ -284,10 +280,15 @@ impl User {
             .first()
             .ok_or_else(|| ApiHttpStatus::NotFound("account not found".into()))?;
 
-        let provider = serde_json::to_string(provider)
-            .map_err(|e| ApiHttpStatus::BadRequest("Problem serializing provider".into()))?;
+        // TODO: Can do better🤦🏽‍♂️🤦🏽‍♂️
+        let provider =
+            serde_json::to_value(provider).expect("Unable to comvert provider to serde value");
+        let provider = provider
+            .as_str()
+            .expect("Unable to comvert provider to string");
 
         let filter = doc! { user_fields.accounts: {"$elemMatch": {acc_fields.id: id,acc_fields.provider: provider}}};
+
         self.save(db, Some(filter)).await?;
 
         Ok(self)
@@ -298,22 +299,6 @@ impl User {
         User::find_one(db, doc! { uk.username: username.into() }, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
-    }
-
-    pub async fn find_or_replace_account_oauth(
-        mut self,
-        db: &Database,
-        provider: impl Into<String>,
-        // provider_account_id: impl Into<OauthProvider>,
-    ) -> Result<Self, WitherError> {
-        let user_fields = User::get_fields_serialized();
-        let acc_fields = AccountOauth::get_fields_serialized();
-        // let filter = doc! { user_fields.accounts: {"$elemMatch": {acc_fields.provider: provider.into(), acc_fields.providerAccountId: provider_account_id.into()}}};
-        let filter =
-            doc! { user_fields.accounts: {"$elemMatch": {acc_fields.provider: provider.into()}}};
-        User::save(&mut self, db, Some(filter)).await?;
-
-        Ok(self)
     }
 }
 
