@@ -46,7 +46,7 @@ async fn main() {
             process::exit(1)
         });
 
-    let session = middleware::get_session(redis_config.clone(), application.environment)
+    let session = middleware::get_session(redis_config.clone(), application.environment.clone())
         .await
         .unwrap_or_else(|e| {
             log::error!("{e:?}");
@@ -55,22 +55,22 @@ async fn main() {
 
     let app = Route::new()
         .at(
-            "/api/oauth/signin/:oauth_provider",
+            "/oauth/signin/:oauth_provider",
             get(oauth_login_initiator),
         )
-        .at("/api/oauth/callback", get(oauth_login_authentication))
+        .at("/oauth/callback", get(oauth_login_authentication))
         .at(
-            "/api/graphql",
+            "/graphql",
             get(graphql_playground).post(graphql_handler),
         )
-        .at("/api/graphql/ws", get(graphql_handler_ws))
+        .at("/graphql/ws", get(graphql_handler_ws))
         .data(schema)
         .data(database)
         .data(redis)
         .data(redis_config)
         .with(AddData::new(con))
         .with(session)
-        .with(middleware::get_cors())
+        .with(middleware::get_cors(application.environment))
         // .with(Logger)
         .with(Tracing);
 
