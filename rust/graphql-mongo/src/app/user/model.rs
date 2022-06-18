@@ -1,3 +1,4 @@
+use anyhow::Context as ContextAnyhow;
 use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
@@ -146,7 +147,7 @@ pub struct AccountOauth {
 //     pub email_verified: bool,
 // }
 
-#[derive(Debug, Deserialize, Serialize, Clone, Enum, PartialEq, Eq, Copy)]
+#[derive(Debug, Deserialize, Serialize, Clone, Enum, PartialEq, Eq, Copy, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum OauthProvider {
     Github,
@@ -275,11 +276,17 @@ impl User {
         // id: String,
         // provider: impl Into<String>,
         // provider_account_id: impl Into<OauthProvider>,
-    ) -> Result<Self, WitherError> {
+    ) -> anyhow::Result<Self> {
         let user_fields = User::get_fields_serialized();
         let acc_fields = AccountOauth::get_fields_serialized();
-        let AccountOauth { id, provider, .. } = self.accounts.first().unwrap();
-        let provider = serde_json::to_string(provider).unwrap();
+        let AccountOauth { id, provider, .. } = self
+            .accounts
+            .first()
+            .ok_or_else(|| ApiHttpStatus::NotFound("account not found".into()))?;
+
+        let provider = serde_json::to_string(provider)
+            .map_err(|e| ApiHttpStatus::BadRequest("Problem serializing provider".into()))?;
+
         let filter = doc! { user_fields.accounts: {"$elemMatch": {acc_fields.id: id,acc_fields.provider: provider}}};
         self.save(db, Some(filter)).await?;
 

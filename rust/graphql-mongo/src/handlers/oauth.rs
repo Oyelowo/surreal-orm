@@ -1,6 +1,9 @@
 use std::fmt::Display;
 
+use anyhow::Context;
+use bson::oid::ObjectId;
 use common::authentication::TypedSession;
+use envy::Error;
 use mongodb::Database;
 use poem::error::{BadRequest, InternalServerError};
 use poem::session::Session;
@@ -54,6 +57,9 @@ pub(crate) enum HandlerError {
 
     #[error("Malformed url. Try again laater")]
     ParseError(#[from] url::ParseError),
+
+    #[error("Something went wrong")]
+    UnknownError(#[source] anyhow::Error),
 }
 
 async fn get_redis_connection(
@@ -100,7 +106,7 @@ pub async fn oauth_login_initiator(
 ) -> Result<RedirectCustom> {
     let mut connection = get_redis_connection(redis).await?;
     let session = TypedSession(session.to_owned());
-    if let Ok(s) = session.get_user_id::<String>() {
+    if let Ok(s) = session.get_user_id::<ObjectId>() {
         session.renew();
         return Ok(RedirectCustom::found("http://localhost:8000"));
     };
@@ -126,27 +132,31 @@ pub async fn oauth_login_initiator(
 pub async fn oauth_login_authentication(
     uri: &Uri,
     session: &Session,
-    // db: Data<&Database>,
+    db: Data<&Database>,
     redis: Data<&redis::Client>,
 ) -> Result<RedirectCustom> {
     let user = authenticate_user(uri, redis).await;
     match user {
         Ok(user) => {
             let session = TypedSession(session.to_owned());
-            session.insert_user_id(&"user_id_oyeoye".to_string());
+            let user = user.find_or_create_for_oauth(&db)
+                // User::find_or_create_for_oauth(&db)
+                .await
+                .map_err(HandlerError::UnknownError).expect("ererre");
+                // ?
+                // .map_err(BadRequest)?;
+
+            //  Also, handle storing user session
+            // Ok(Json(user?))
+            // Ok(Redirect::found("http://localhost:8000"))
+            session.insert_user_id(&user.id);
+            // session.renew();
             Ok(RedirectCustom::found("http://localhost:8000"))
         }
         Err(e) => Ok(RedirectCustom::found("http://localhost:8000/login")),
     }
 
     // user?
-    //     .find_or_create_for_oauth(&db)
-    //     .await
-    //     .map_err(BadRequest)?;
-
-    //  Also, handle storing user session
-    // Ok(Json(user?))
-    // Ok(Redirect::found("http://localhost:8000"))
 }
 
 async fn authenticate_user(uri: &Uri, redis: Data<&redis::Client>) -> Result<User> {
