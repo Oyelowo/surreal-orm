@@ -68,7 +68,6 @@ deploy:
             - manifests/generated/local/infrastructure/namespace-names/**/*
             - manifests/generated/local/infrastructure/sealed-secrets/**/*
             - manifests/generated/local/infrastructure/nginx-ingress/**/*
-            - manifests/generated/local/infrastructure/**/**/*
             - manifests/generated/local/services/**/**/*
 # portForward:
 #   - resourceType: service
