@@ -5,13 +5,15 @@ type AccountOauth {
 	unique identifier for the oauth provider. Don't use name of user because that could be changed
 	"""
 	id: String!
-	accountType: String!
+	displayName: String
+	email: String
+	emailVerified: Boolean!
 	provider: OauthProvider!
 	providerAccountId: OauthProvider!
 	accessToken: String!
 	refreshToken: String
 	"""
-	ccess token expiration timestamp, represented as the number of seconds since the epoch (January 1, 1970 00:00:00 UTC).
+	access token expiration timestamp, represented as the number of seconds since the epoch (January 1, 1970 00:00:00 UTC).
 	"""
 	expiresAt: DateTime
 	tokenType: TokenType
