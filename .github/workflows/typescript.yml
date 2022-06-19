@@ -29,20 +29,22 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: 18
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: Build & Unit Test
-        run: npm run test
+        run: make install
 
       - name: Lint
-        run: npm run lint
+        run: make lint
 
-      # - name: E2E Tests
-      #   run: npm run cypress:run
+      - name: Build & Unit Test
+        run: make test
+
+      - name: E2E Tests
+        run: make test:e2e
+
+
 
 
   ############## BUILD AND DEPLOY IMAGES #################
