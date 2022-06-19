@@ -72,16 +72,9 @@ impl OauthProviderTrait for GithubConfig {
     async fn fetch_oauth_account(
         &self,
         code: AuthorizationCode,
-        pkce_verifier: PkceCodeVerifier,
+        pkce_code_verifier: PkceCodeVerifier,
     ) -> OauthResult<User> {
-        let token = self
-            .basic_config()
-            .client()
-            .exchange_code(code)
-            .set_pkce_verifier(pkce_verifier)
-            .request_async(async_http_client)
-            .await
-            .map_err(|e| OauthError::TokenFetchFailed(e.to_string()))?;
+        let token = self.exchange_token(code, pkce_code_verifier).await?;
 
         let profile = OauthUrl("https://api.github.com/user")
             .fetch_resource::<GithubUserData>(&token, None)

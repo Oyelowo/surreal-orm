@@ -5,7 +5,7 @@ use oauth2::{
     http::HeaderMap,
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
     PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, RevocationUrl, Scope, StandardTokenResponse,
-    TokenResponse, TokenUrl,
+    TokenResponse, TokenUrl, reqwest::async_http_client,
 };
 use redis::{AsyncCommands, RedisError};
 use reqwest::header::{ACCEPT, USER_AGENT};
@@ -38,7 +38,6 @@ pub(crate) enum OauthError {
     #[error(transparent)]
     SerializationError(#[from] serde_json::Error),
 }
-
 
 /// Tokens stored in redis for returned url oauth verification
 #[derive(Debug, Serialize, Deserialize)]
@@ -159,6 +158,22 @@ pub(crate) struct OauthConfig {
 #[async_trait::async_trait]
 pub(crate) trait OauthProviderTrait {
     fn basic_config(&self) -> OauthConfig;
+
+    async fn exchange_token(
+        &self,
+        code: AuthorizationCode,
+        pkce_code_verifier: PkceCodeVerifier,
+    ) -> OauthResult<StandardTokenResponse<EmptyExtraTokenFields, BasicTokenType>> {
+        let token = self
+            .basic_config()
+            .client()
+            .exchange_code(code)
+            .set_pkce_verifier(pkce_code_verifier)
+            .request_async(async_http_client)
+            .await
+            .map_err(|e| OauthError::TokenFetchFailed(e.to_string()))?;
+        Ok(token)
+    }
 
     async fn fetch_oauth_account(
         &self,

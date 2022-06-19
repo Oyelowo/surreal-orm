@@ -38,7 +38,6 @@ pub(crate) struct GoogleConfig {
 
 impl GoogleConfig {
     pub fn new() -> Self {
-        let k = CsrfToken::new_random;
         let basic_config = OauthConfig::builder()
             .client_id(ClientId::new(
                 "855174209543-i23grd1ts6qbq568dfl43hla7hv9cn4u.apps.googleusercontent.com"
@@ -83,14 +82,7 @@ impl OauthProviderTrait for GoogleConfig {
         code: AuthorizationCode,
         pkce_code_verifier: PkceCodeVerifier,
     ) -> OauthResult<User> {
-        let token = self
-            .basic_config()
-            .client()
-            .exchange_code(code)
-            .set_pkce_verifier(pkce_code_verifier)
-            .request_async(async_http_client)
-            .await
-            .map_err(|e| OauthError::TokenFetchFailed(e.to_string()))?;
+        let token = self.exchange_token(code, pkce_code_verifier).await?;
 
         let profile = OauthUrl("https://www.googleapis.com/oauth2/v3/userinfo")
             .fetch_resource::<GoogleUserData>(&token, None)
