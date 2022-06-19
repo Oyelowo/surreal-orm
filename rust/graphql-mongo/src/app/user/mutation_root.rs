@@ -10,7 +10,7 @@ use log::error;
 
 use crate::utils::mongodb::get_db_from_ctx;
 
-use super::{AccountOauth, Role, SignInCredentials, SignOutMessage, User};
+use super::{Role, SignInCredentials, SignOutMessage, User};
 use async_graphql::*;
 use chrono::Utc;
 

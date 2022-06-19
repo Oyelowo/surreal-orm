@@ -1,17 +1,12 @@
 use chrono::{Duration, Utc};
 use oauth2::{
-    reqwest::async_http_client, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken,
-    PkceCodeVerifier, RedirectUrl, Scope, TokenResponse, TokenUrl,
+    AuthUrl, AuthorizationCode, ClientId, ClientSecret, PkceCodeVerifier, RedirectUrl, Scope,
+    TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
 
-use super::utils::{
-    OauthConfig, OauthError, OauthProviderTrait, OauthResult, OauthUrl, REDIRECT_URL,
-};
-use crate::{
-    app::user::{AccountOauth, OauthProvider, Role, TokenType, User},
-    oauth::utils::OauthConfigTrait,
-};
+use super::utils::{OauthConfig, OauthProviderTrait, OauthResult, OauthUrl, REDIRECT_URL};
+use crate::app::user::{AccountOauth, OauthProvider, Role, TokenType, User};
 
 #[derive(Debug, Deserialize, Serialize)]
 struct GithubUserData {
@@ -31,7 +26,7 @@ struct GithubEmail {
     email: String,
     primary: bool,
     verified: bool,
-    visibility: Option<String>,
+    // visibility: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -41,7 +36,6 @@ pub(crate) struct GithubConfig {
 
 impl GithubConfig {
     pub fn new() -> Self {
-        let k = CsrfToken::new_random;
         let basic_config = OauthConfig {
             // Get first two from environment variable
             client_id: ClientId::new("7b42a802131cb19d2b49".to_string()),

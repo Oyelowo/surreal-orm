@@ -2,10 +2,7 @@ use std::process;
 
 use anyhow::Context;
 use common::{
-    configurations::{
-        application::{ApplicationConfigs},
-        redis::RedisConfigs,
-    },
+    configurations::{application::ApplicationConfigs, redis::RedisConfigs},
     middleware,
 };
 

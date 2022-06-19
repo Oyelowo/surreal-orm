@@ -1,14 +1,11 @@
 use chrono::{Duration, Utc};
 use oauth2::{
-    reqwest::async_http_client, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken,
-    PkceCodeVerifier, RedirectUrl, RevocationUrl, Scope, TokenResponse, TokenUrl,
+    AuthUrl, AuthorizationCode, ClientId, ClientSecret, PkceCodeVerifier, RedirectUrl,
+    RevocationUrl, Scope, TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
 
-use super::utils::{
-    OauthConfig, OauthConfigTrait, OauthError, OauthProviderTrait, OauthResult, OauthUrl,
-    REDIRECT_URL,
-};
+use super::utils::{OauthConfig, OauthProviderTrait, OauthResult, OauthUrl, REDIRECT_URL};
 use crate::app::user::{AccountOauth, OauthProvider, Role, TokenType, User};
 
 #[derive(Debug, Deserialize, Serialize)]

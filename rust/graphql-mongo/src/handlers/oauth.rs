@@ -1,19 +1,17 @@
 use std::fmt::Display;
 
-use anyhow::Context;
 use bson::oid::ObjectId;
 use common::authentication::TypedSession;
-use envy::Error;
+
 use mongodb::Database;
 use poem::error::{BadRequest, InternalServerError};
 use poem::session::Session;
-use poem::web::{Data, Json};
+use poem::web::Data;
 use poem::{error::Result, handler, http::Uri, web::Path};
 use poem::{IntoResponse, Response};
 use redis::RedisError;
 use reqwest::{header, StatusCode};
 use url::Url;
-use wither::Model;
 
 use crate::oauth::github::GithubConfig;
 use crate::oauth::google::GoogleConfig;
@@ -60,9 +58,6 @@ pub(crate) enum HandlerError {
 
     #[error("Malformed url. Try again laater")]
     ParseError(#[from] url::ParseError),
-
-    #[error("Something went wrong")]
-    UnknownError(#[source] anyhow::Error),
 }
 
 async fn get_redis_connection(
@@ -109,7 +104,7 @@ pub async fn oauth_login_initiator(
 ) -> Result<RedirectCustom> {
     let mut connection = get_redis_connection(redis).await?;
     let session = TypedSession(session.to_owned());
-    if let Ok(s) = session.get_user_id::<ObjectId>() {
+    if let Ok(_s) = session.get_user_id::<ObjectId>() {
         session.renew();
         return Ok(RedirectCustom::found("http://localhost:3000"));
     };
