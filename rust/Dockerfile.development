@@ -5,27 +5,31 @@ WORKDIR /app
 # We only pay the installation cost once,
 # it will be cached from the second build onwards
 RUN cargo install cargo-chef --version 0.1.35
+
 COPY . .
 RUN cargo chef prepare  --recipe-path recipe.json
 
 
 FROM $BASE_IMAGE as  cacher
 WORKDIR /app
+
 RUN cargo install cargo-chef --version 0.1.35
 COPY --from=planner /app/recipe.json recipe.json
+
+# Install cmake which is now necessary for tonic
+RUN apt-get update ; apt-get install -y clang cmake ; rustup component add rustfmt
 # Build dependencies - this is the caching Docker layer! Don't build in release mode for development
 RUN cargo chef cook --recipe-path recipe.json 
 
 
 FROM $BASE_IMAGE as builder-base
 WORKDIR /app
-# Copy over the cached dependencies 
+# Copy over the cached dependencies
 COPY --from=cacher /app/target target
 COPY --from=cacher $CARGO_HOME $CARGO_HOME
 
-#others 
+# others
 COPY . .
-
 
 
 ######### START GRAPHQL-MONGO BACKEND SERVICE  #################
@@ -35,14 +39,10 @@ RUN cargo build --bin graphql-mongo
 # Run as non-privileged user after installations and builds which require privileged access
 RUN useradd --uid 10000 runner
 USER 10000
-# Although, we do not need the Rust toolchain to run the binary!
-# Not using distroless in dev so that we can get extra toolchain for debugging containers in pods
-# To test distroless in dev, uncomment the below and comment out the next baseline, of course!
+
 FROM gcr.io/distroless/cc AS graphql-mongo
-# FROM alpine AS graphql-mongo
 WORKDIR /app
 EXPOSE 8000
-# We are building in debug mode
 COPY --from=builder-graphql-mongo /app/target/debug/graphql-mongo /usr/local/bin/graphql-mongo
 ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
 ######### END GRAPHQL-MONGO BACKEND SERVICE  #################
@@ -65,7 +65,7 @@ USER 10000
 FROM gcr.io/distroless/cc AS graphql-postgres
 WORKDIR /app
 EXPOSE 8000
-# We are building in debug mode
+# We are building in release mode
 COPY --from=builder-graphql-postgres /app/target/debug/graphql-postgres /usr/local/bin/graphql-postgres
 ENTRYPOINT ["/usr/local/bin/graphql-postgres"]
 ######### END GRAPHQL-POSTGRES BACKEND SERVICE  ##############
