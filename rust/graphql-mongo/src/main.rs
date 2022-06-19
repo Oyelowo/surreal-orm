@@ -54,15 +54,9 @@ async fn main() {
         });
 
     let app = Route::new()
-        .at(
-            "/oauth/signin/:oauth_provider",
-            get(oauth_login_initiator),
-        )
+        .at("/oauth/signin/:oauth_provider", get(oauth_login_initiator))
         .at("/oauth/callback", get(oauth_login_authentication))
-        .at(
-            "/graphql",
-            get(graphql_playground).post(graphql_handler),
-        )
+        .at("/graphql", get(graphql_playground).post(graphql_handler))
         .at("/graphql/ws", get(graphql_handler_ws))
         .data(schema)
         .data(database)

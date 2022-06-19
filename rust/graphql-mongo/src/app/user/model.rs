@@ -106,7 +106,15 @@ pub struct User {
 }
 
 #[derive(
-    InputObject, SimpleObject, TypedBuilder, Serialize, Deserialize, Debug, Clone, FieldsGetter, Validate
+    InputObject,
+    SimpleObject,
+    TypedBuilder,
+    Serialize,
+    Deserialize,
+    Debug,
+    Clone,
+    FieldsGetter,
+    Validate,
 )]
 #[serde(rename_all = "camelCase")]
 #[graphql(input_name = "AccountOauthInput")]
@@ -116,7 +124,7 @@ pub struct AccountOauth {
     pub id: String,
 
     pub display_name: Option<String>,
-    
+
     #[validate(email)]
     pub email: Option<String>,
     pub email_verified: bool,

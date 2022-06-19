@@ -3,9 +3,10 @@ use derive_more::{From, Into};
 use oauth2::{
     basic::{BasicClient, BasicTokenType},
     http::HeaderMap,
+    reqwest::async_http_client,
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
     PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, RevocationUrl, Scope, StandardTokenResponse,
-    TokenResponse, TokenUrl, reqwest::async_http_client,
+    TokenResponse, TokenUrl,
 };
 use redis::{AsyncCommands, RedisError};
 use reqwest::header::{ACCEPT, USER_AGENT};

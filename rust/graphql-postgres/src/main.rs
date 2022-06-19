@@ -2,7 +2,10 @@ use std::process;
 
 use anyhow::Context;
 use common::{
-    configurations::{application::ApplicationConfigs, redis::RedisConfigs},
+    configurations::{
+        application::{ApplicationConfigs},
+        redis::RedisConfigs,
+    },
     middleware,
 };
 
@@ -27,7 +30,7 @@ async fn main() {
             process::exit(1)
         });
 
-    let session = middleware::get_session(redis_config, application.environment)
+    let session = middleware::get_session(redis_config, application.environment.clone())
         .await
         .unwrap_or_else(|e| {
             log::error!("{e:?}");
@@ -39,7 +42,7 @@ async fn main() {
         .at("/graphql/ws", get(graphql_handler_ws))
         .data(schema)
         .with(session)
-        .with(middleware::get_cors())
+        .with(middleware::get_cors(application.environment))
         // .with(Logger)
         .with(Tracing);
 

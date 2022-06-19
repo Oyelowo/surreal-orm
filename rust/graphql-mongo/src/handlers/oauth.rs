@@ -46,6 +46,9 @@ pub(crate) enum HandlerError {
     #[error("Problem fetching account")]
     FetchAccountFailed(#[source] OauthError),
 
+    #[error("Problem retrieving account")]
+    GetAccountFailed,
+
     #[error("Server error. Failed to retrieve data. Please, try again laater")]
     RedisError(#[source] RedisError),
 
@@ -135,32 +138,21 @@ pub async fn oauth_login_authentication(
     db: Data<&Database>,
     redis: Data<&redis::Client>,
 ) -> Result<RedirectCustom> {
-    let user = authenticate_user(uri, redis).await;
+    let user = authenticate_user(uri, redis, session, db).await;
     match user {
-        Ok(user) => {
-            let session = TypedSession(session.to_owned());
-            let user =
-             user.find_or_create_for_oauth(&db)
-                // User::find_or_create_for_oauth(&db, user)
-                .await
-                .map_err(HandlerError::UnknownError).expect("ererre");
-                // ?
-                // .map_err(BadRequest)?;
-
-            //  Also, handle storing user session
-            // Ok(Json(user?))
-            // Ok(Redirect::found("http://localhost:8000"))
-            session.insert_user_id(&user.id);
-            // session.renew();
-            Ok(RedirectCustom::found("http://localhost:3000"))
-        }
-        Err(e) => Ok(RedirectCustom::found(format!("http://localhost:3000/login?error={e}"))),
+        Ok(_u) => Ok(RedirectCustom::found("http://localhost:3000")),
+        Err(e) => Ok(RedirectCustom::found(format!(
+            "http://localhost:3000/login?error={e}"
+        ))),
     }
-
-    // user?
 }
 
-async fn authenticate_user(uri: &Uri, redis: Data<&redis::Client>) -> Result<User> {
+async fn authenticate_user(
+    uri: &Uri,
+    redis: Data<&redis::Client>,
+    session: &Session,
+    db: Data<&Database>,
+) -> Result<User> {
     let mut connection = get_redis_connection(redis).await?;
 
     let redirect_url = Url::parse(&format!("http://localhost:{uri}"))
@@ -199,7 +191,14 @@ async fn authenticate_user(uri: &Uri, redis: Data<&redis::Client>) -> Result<Use
 
     let user = user
         .map_err(HandlerError::FetchAccountFailed)
-        .map_err(BadRequest);
+        .map_err(BadRequest)?
+        .find_or_create_for_oauth(&db)
+        .await
+        .map_err(|_e| HandlerError::GetAccountFailed)
+        .map_err(BadRequest)?;
 
-    user
+    let session = TypedSession(session.to_owned());
+    session.insert_user_id(&user.id);
+
+    Ok(user)
 }

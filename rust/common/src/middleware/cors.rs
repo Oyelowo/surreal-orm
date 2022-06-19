@@ -19,6 +19,5 @@ pub fn get_cors(environment: Environment) -> Cors {
             header::CONTENT_TYPE,
         ])
         .allow_credentials(true)
-        // .allow_origin("origin") FIXME: // readd after testing. Default is any
         .max_age(3600)
 }
