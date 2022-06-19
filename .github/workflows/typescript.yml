@@ -42,7 +42,7 @@ jobs:
         run: make test
 
       - name: E2E Tests
-        run: make test:e2e
+        run: make test-e2e
 
 
 

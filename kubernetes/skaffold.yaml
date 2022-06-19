@@ -1,4 +1,4 @@
-apiVersion: skaffold/v2beta27
+apiVersion: skaffold/v2beta28
 kind: Config
 metadata:
     name: kubernetes
@@ -65,7 +65,7 @@ build:
 deploy:
     kubectl:
         manifests:
-            - manifests/generated/local/namespaces/**/*
+            - manifests/generated/local/infrastructure/namespace-names/**/*
             - manifests/generated/local/infrastructure/sealed-secrets/**/*
             - manifests/generated/local/infrastructure/nginx-ingress/**/*
             - manifests/generated/local/infrastructure/**/**/*
