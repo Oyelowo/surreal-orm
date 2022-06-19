@@ -86,7 +86,7 @@ impl OauthProviderTrait for GoogleConfig {
             .await?;
 
         let expiration = token.expires_in().unwrap_or(std::time::Duration::new(0, 0));
-        let expiration = Duration::from_std(expiration).unwrap_or(Duration::seconds(0));
+        let expiration = Duration::from_std(expiration).unwrap_or_else(|_| Duration::seconds(0));
         let expires_at = Utc::now() + expiration;
         let scopes = self
             .basic_config()

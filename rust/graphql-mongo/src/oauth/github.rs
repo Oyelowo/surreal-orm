@@ -79,7 +79,7 @@ impl OauthProviderTrait for GithubConfig {
             .await?;
 
         let expiration = token.expires_in().unwrap_or(std::time::Duration::new(0, 0));
-        let expiration = Duration::from_std(expiration).unwrap_or(Duration::seconds(0));
+        let expiration = Duration::from_std(expiration).unwrap_or_else(|_| Duration::seconds(0));
         let expires_at = Utc::now() + expiration;
         let scopes = self
             .basic_config()
@@ -91,8 +91,7 @@ impl OauthProviderTrait for GithubConfig {
         // Get the primary email or any first
         let primary_email = user_emails
             .iter()
-            .filter(|r| r.primary)
-            .next()
+            .find(|r| r.primary)
             .or_else(|| user_emails.first());
 
         let email = primary_email.map(|p| p.email.to_string());

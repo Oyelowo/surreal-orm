@@ -63,7 +63,7 @@ impl CsrfState {
         csrf_token: CsrfToken,
         connection: &mut redis::aio::Connection,
     ) -> OauthResult<Self> {
-        let ref key = Self::redis_key(csrf_token);
+        let key = &Self::redis_key(csrf_token);
 
         let csrf_state: String = connection.get(key).await?;
 
@@ -71,7 +71,7 @@ impl CsrfState {
     }
 
     pub(crate) async fn cache(self, connection: &mut redis::aio::Connection) -> OauthResult<Self> {
-        let ref key = Self::redis_key(self.csrf_token.clone());
+        let key = &Self::redis_key(self.csrf_token.clone());
         let csrf_state_data_string = serde_json::to_string(&self)?;
 
         connection.set(key, csrf_state_data_string).await?;
