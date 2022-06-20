@@ -117,7 +117,7 @@ export const graphqlPostgresPostgresdbHA = new k8s.helm.v3.Chart(
         fetchOpts: {
             repo: 'https://charts.bitnami.com/bitnami',
         },
-        version: '8.4.0',
+        version: '9.0.4',
         values: postgresValues,
         namespace: namespaceNames.applications,
         // By default Release resource will wait till all created resources
