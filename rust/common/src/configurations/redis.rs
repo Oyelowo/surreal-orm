@@ -9,7 +9,7 @@ use thiserror;
 #[derive(Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "lowercase")]
 pub struct RedisConfigs {
-    pub username: String,
+    // pub username: String,
     pub password: String,
     pub host: String,
 
@@ -57,7 +57,7 @@ impl RedisConfigs {
     }
 
     pub async fn get_async_connection(self) -> Result<redis::aio::Connection, RedisConfigError> {
-        let k = self
+        let con = self
             .get_client()?
             .get_async_connection()
             .await
@@ -65,22 +65,7 @@ impl RedisConfigs {
                 log::error!("Problem getting connection. Error:{e:?}");
                 RedisConfigError::ConnectionFailure(e)
             });
-        k
-    }
-
-    pub fn get_url(&self) -> String {
-        let Self {
-            host,
-            port,
-            username,
-            password,
-            ..
-        } = self;
-        let db = 0;
-
-        // format!("{host}:{port}")
-        // redis://[<username>][:<password>@]<hostname>[:port][/<db>]
-        format!("redis://{username}:{password}@{host}:{port}/{db}")
+        con
     }
 
     pub async fn get_connection_manager(self) -> Result<ConnectionManager, RedisConfigError> {
