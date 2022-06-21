@@ -45,15 +45,15 @@ export interface Settings<TAppName extends ServiceName> {
     replicaCount: number;
     host: string;
     image: `ghcr.io/oyelowo/${TAppName}:${string}`;
-    readinessProbePort?: number
+    readinessProbePort?: number;
 }
 
 export type RecursivePartial<T> = {
     [P in keyof T]?: T[P] extends (infer U)[]
-    ? RecursivePartial<U>[]
-    : T[P] extends object | undefined
-    ? RecursivePartial<T[P]>
-    : T[P];
+        ? RecursivePartial<U>[]
+        : T[P] extends object | undefined
+        ? RecursivePartial<T[P]>
+        : T[P];
 };
 
 // make all properties optional recursively including nested objects.

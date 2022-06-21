@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"batch/v1beta1","kind":"CronJob","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.11.2"},"labels":{"app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"heartbeat","app.kubernetes.io/part-of":"Linkerd","app.kubernetes.io/version":"stable-2.11.2","linkerd.io/control-plane-component":"heartbeat","linkerd.io/control-plane-ns":"linkerd"},"name":"linkerd-heartbeat","namespace":"linkerd"},"spec":{"concurrencyPolicy":"Replace","jobTemplate":{"spec":{"template":{"metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.11.2","sealedsecrets.bitnami.com/managed":"true"},"labels":{"linkerd.io/control-plane-component":"heartbeat","linkerd.io/workload-ns":"linkerd"}},"spec":{"containers":[{"args":["heartbeat","-controller-namespace=linkerd","-log-level=info","-log-format=plain","-prometheus-url=http://prometheus.linkerd-viz.svc.cluster.local:9090"],"env":[{"name":"LINKERD_DISABLED","value":"the heartbeat controller does not use the proxy"}],"image":"cr.l5d.io/linkerd/controller:stable-2.11.2","imagePullPolicy":"IfNotPresent","name":"heartbeat","securityContext":{"runAsUser":2103}}],"nodeSelector":{"kubernetes.io/os":"linux"},"restartPolicy":"Never","serviceAccountName":"linkerd-heartbeat"}}}},"schedule":"13 16 * * *","successfulJobsHistoryLimit":0}}
+      {"apiVersion":"batch/v1beta1","kind":"CronJob","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.11.2"},"labels":{"app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"heartbeat","app.kubernetes.io/part-of":"Linkerd","app.kubernetes.io/version":"stable-2.11.2","linkerd.io/control-plane-component":"heartbeat","linkerd.io/control-plane-ns":"linkerd"},"name":"linkerd-heartbeat","namespace":"linkerd"},"spec":{"concurrencyPolicy":"Replace","jobTemplate":{"spec":{"template":{"metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.11.2","sealedsecrets.bitnami.com/managed":"true"},"labels":{"linkerd.io/control-plane-component":"heartbeat","linkerd.io/workload-ns":"linkerd"}},"spec":{"containers":[{"args":["heartbeat","-controller-namespace=linkerd","-log-level=info","-log-format=plain","-prometheus-url=http://prometheus.linkerd-viz.svc.cluster.local:9090"],"env":[{"name":"LINKERD_DISABLED","value":"the heartbeat controller does not use the proxy"}],"image":"cr.l5d.io/linkerd/controller:stable-2.11.2","imagePullPolicy":"IfNotPresent","name":"heartbeat","securityContext":{"runAsUser":2103}}],"nodeSelector":{"kubernetes.io/os":"linux"},"restartPolicy":"Never","serviceAccountName":"linkerd-heartbeat"}}}},"schedule":"19 23 * * *","successfulJobsHistoryLimit":0}}
     linkerd.io/created-by: linkerd/helm stable-2.11.2
   labels:
     app.kubernetes.io/managed-by: pulumi
@@ -46,5 +46,5 @@ spec:
             kubernetes.io/os: linux
           restartPolicy: Never
           serviceAccountName: linkerd-heartbeat
-  schedule: 13 16 * * *
+  schedule: 19 23 * * *
   successfulJobsHistoryLimit: 0

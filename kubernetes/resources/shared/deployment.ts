@@ -15,7 +15,7 @@ export class ServiceDeployment<
     AN extends ServiceName,
     DBT extends DBType,
     NS extends NamespaceOfApps
-    > extends pulumi.ComponentResource {
+> extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
@@ -105,7 +105,7 @@ export class ServiceDeployment<
                             },
                             initialDelaySeconds: 10,
                             periodSeconds: 10,
-                            failureThreshold: 5
+                            failureThreshold: 5,
                         },
                         livenessProbe: {
                             httpGet: {
@@ -114,10 +114,10 @@ export class ServiceDeployment<
                             },
                             initialDelaySeconds: 10,
                             periodSeconds: 10,
-                            failureThreshold: 5
+                            failureThreshold: 5,
                         },
                         // startupProbe
-                    })
+                    }),
                 },
             ],
             securityContext: {
