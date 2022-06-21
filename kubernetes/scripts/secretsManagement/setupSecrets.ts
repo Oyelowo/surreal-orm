@@ -4,7 +4,7 @@ TODO: ADD INSTRUCTION HERE
 import c from 'chalk';
 import path from 'path';
 import sh from 'shelljs';
-import { Environment } from '../../resources/shared/types/own-types';
+import { Environment } from '../../resources/types/own-types';
 import { getPlainSecretsConfigFilesBaseDir } from './../../resources/shared/manifestsDirectory';
 import { secretsSample } from './secretsSample';
 

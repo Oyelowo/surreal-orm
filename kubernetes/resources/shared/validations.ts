@@ -1,9 +1,8 @@
 import * as z from 'zod';
-import { appEnvironmentsSchema } from './types/own-types';
+import { appEnvironmentsSchema } from '../types/own-types';
 
 // TODO: Move this into helpers
 export const imageTagsObjectValidator = z.object({
-    // TAG_REACT_WEB: z.string().nonempty().or(z.undefined()),
     // This is provided fro, within the CI pipeline where the manifests are generated and pushed to the repo
     IMAGE_TAG_REACT_WEB: z.string().nonempty(),
     IMAGE_TAG_GRAPHQL_MONGO: z.string().nonempty(),

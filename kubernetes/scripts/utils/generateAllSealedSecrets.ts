@@ -1,6 +1,6 @@
 import c from 'chalk';
 import sh from 'shelljs';
-import { Environment } from '../../resources/shared/types/own-types';
+import { Environment } from '../../resources/types/own-types';
 import { getSecretManifestsPaths, getSecretPathsInfo, SEALED_SECRETS_CONTROLLER_NAME } from './sealedSecrets';
 
 /*

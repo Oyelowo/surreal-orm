@@ -5,15 +5,13 @@ import { getSecretsForResource } from '../../scripts/secretsManagement/getSecret
 import { NamespaceName, namespaceNames } from './../namespaces/util';
 import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
 import { getResourceProvider, getResourceRelativePath } from './manifestsDirectory';
-import { ArgocdAppResourceName, ResourceName } from './types/own-types';
+import { ArgocdAppResourceName, ResourceName } from '../types/own-types';
 import { getEnvironmentVariables } from './validations';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 
 type ArgocdApplicationProps = {
     namespace: NamespaceName;
-    // sourceResourceName: ArgocdAppResourceName;
-    // resourceName: ResourceName;
     outputSubDirName: ResourceName;
     sourceApplication: ResourceName;
     parent?: Resource;
@@ -21,7 +19,6 @@ type ArgocdApplicationProps = {
 
 // TODO: Add jsdoc to describe the parameters
 export function createArgocdApplication({
-    // resourceName,
     sourceApplication,
     outputSubDirName,
     namespace,

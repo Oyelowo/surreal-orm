@@ -8,9 +8,7 @@ export const clusterIssuer = new cm.v1.ClusterIssuer(
     'letsencrypt-cluster-issuer',
     {
         metadata: {
-            // name: "letsencrypt-staging",
             name: CLUSTER_ISSUER_NAME,
-            // namespace: "default"
         },
         spec: {
             acme: {
@@ -25,7 +23,6 @@ export const clusterIssuer = new cm.v1.ClusterIssuer(
                 email: 'oyelowooyedayo@gmail.com',
                 // Name of a secret used to store the ACME account private key
                 privateKeySecretRef: {
-                    // name: "letsencrypt-staging",
                     name: `${CLUSTER_ISSUER_NAME}-key`,
                 },
                 // Enable the HTTP-01 challenge provider

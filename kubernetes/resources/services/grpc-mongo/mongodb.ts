@@ -1,11 +1,12 @@
+import { IMongodbbitnami } from './../../types/helm-charts/mongodbBitnami';
 import { grpcMongo } from './index';
-import { MongodbHelmValuesBitnami } from '../../shared/types/helm-charts/MongodbHelmValuesBitnami';
 import { namespaceNames } from '../../namespaces';
 import * as k8s from '@pulumi/kubernetes';
 
 import { grpcMongoSettings } from './settings';
-import { DeepPartial } from '../../shared/types/own-types';
+import { DeepPartial } from '../../types/own-types';
 import { getEnvironmentVariables } from '../../shared/validations';
+import { helmChartsInfo } from '../../shared/helmChartInfo';
 
 const environmentVariables = getEnvironmentVariables();
 
@@ -57,14 +58,12 @@ const mappedCredentials = credentials.reduce<Credentials>(
     }
 );
 
-const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
+const mongoValues: DeepPartial<IMongodbbitnami> = {
     useStatefulSet: true,
     architecture: 'replicaset',
     replicaCount: 3,
-    // nameOverride: "mongodb-graphql",
     fullnameOverride: grpcMongoSettings.envVars.MONGODB_SERVICE_NAME,
     global: {
-        // namespaceOverride: devNamespaceName,
         storageClass:
             environmentVariables.ENVIRONMENT === 'local' ? '' : grpcMongoSettings.envVars.MONGODB_STORAGE_CLASS,
     },
@@ -73,30 +72,29 @@ const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
         rootUser: 'root_user',
         rootPassword: 'root_password',
         replicaSetKey: 'Ld1My4Q1s4',
-        // array of
-        ...mappedCredentials,
-        // usernames: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],
-        // passwords: [graphqlMongoEnvironmentVariables.MONGODB_PASSWORD],
-        // databases: [graphqlMongoEnvironmentVariables.MONGODB_NAME],
-        // users: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],
+        ...mappedCredentials as any,
     },
     service: {
         type: 'ClusterIP',
         port: Number(grpcMongoSettings.envVars.MONGODB_PORT),
-        // portName: "mongo-graphql",
         nameOverride: grpcMongoSettings.envVars.MONGODB_SERVICE_NAME,
     },
 };
 
+const {
+    repo,
+    charts: { mongodb: { chart, version } },
+} = helmChartsInfo.bitnami;
+
 // `http://${name}.${namespace}:${port}`;
 export const grpcMongoMongodb = new k8s.helm.v3.Chart(
-    'grpc-mongodb-helm',
+    chart,
     {
-        chart: 'mongodb',
+        chart,
         fetchOpts: {
-            repo: 'https://charts.bitnami.com/bitnami',
+            repo
         },
-        version: '12.0.0',
+        version,
         values: mongoValues,
         namespace: namespaceNames.applications,
         // By default Release resource will wait till all created resources

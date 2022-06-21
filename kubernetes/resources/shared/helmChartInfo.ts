@@ -1,120 +1,94 @@
-// type Repo = "bitnami" | "jetspack" | "linkerd"
+type Repo = "bitnami" | "jetspack" | "linkerd" | "sealedSecrets" | "argo"
 
-// type BitnamiRepoCharts = {
-//     repo: "https://charts.bitnami.com/bitnami";
-//     certManager: {
-//         chart: "cert-manager";
-//         version: "0.4.17";
-//     };
-// }
+type ChartInfo = {
+    chart: string,
+    version: string,
+}
 
-// type JetspackRepoCharts = {
-//     repo: "https://charts.jetstack.io";
-//     certManager: {
-//         chart: "cert-manager";
-//         version: "1.8.0";
-//     };
-//     certManagerTrust: {
-//         chart: "cert-manager-trust";
-//         version: "0.1.1";
-//     };
-// }
+type ChartsInfo = Record<Repo, {
+    repo: string,
+    charts: Record<string, ChartInfo>
+}>
 
-// type LinkerdRepoCharts = {
-//     repo: "https://helm.linkerd.io/stable",
-//     linkerd2: {
-//         chart: "linkerd2";
-//         version: "2.11.2";
-//     }
-// }
+// This function does nothing. It just helps with typing
+export const checkConstType = <T extends ChartsInfo>(o: T) => o
 
-// type Props = Record<`${Repo}Repo`, BitnamiRepoCharts | JetspackRepoCharts | LinkerdRepoCharts
-export const helmChartsInfo = {
-    bitnamiRepo: {
+export let helmChartsInfo = checkConstType({
+    bitnami: {
         repo: 'https://charts.bitnami.com/bitnami',
-        certManager: {
-            chart: 'cert-manager',
-            version: '0.5.0',
-        },
-        nginxIngress: {
-            chart: 'nginx-ingress-controller',
-            version: '9.1.26',
-        },
-        argocd: {
-            chart: 'argo-cd',
-            version: '3.1.16',
+        charts: {
+            redis: {
+                chart: 'redis',
+                version: '16.8.9',
+            },
+            mongodb: {
+                chart: 'mongodb',
+                version: '11.1.10',
+            },
+            certManager: {
+                chart: 'cert-manager',
+                version: '0.5.0',
+            },
+            nginxIngress: {
+                chart: 'nginx-ingress-controller',
+                version: '9.1.26',
+            },
+            argocd: {
+                chart: 'argo-cd',
+                version: '3.1.16',
+            },
+            postgresql: {
+                chart: 'postgresql',
+                version: '11.6.7',
+            },
+            postgresqlHA: {
+                chart: 'postgresql-ha',
+                version: '9.1.6',
+            }
         },
     },
     sealedSecrets: {
         repo: 'https://bitnami-labs.github.io/sealed-secrets',
-        sealedSecrets: {
-            chart: 'sealed-secrets',
-            version: '2.1.7',
+        charts: {
+            sealedSecrets: {
+                chart: 'sealed-secrets',
+                version: '2.1.7',
+            }
         },
     },
-    jetspackRepo: {
+    jetspack: {
         repo: 'https://charts.jetstack.io',
-        certManager: {
-            chart: 'cert-manager',
-            version: 'v1.8.0',
-        },
-        certManagerTrust: {
-            chart: 'cert-manager-trust',
-            version: 'v0.1.1',
+        charts: {
+            certManager: {
+                chart: 'cert-manager',
+                version: 'v1.8.0',
+            },
+            certManagerTrust: {
+                chart: 'cert-manager-trust',
+                version: 'v0.1.1',
+            }
         },
     },
-    linkerdRepo: {
+    linkerd: {
         repo: 'https://helm.linkerd.io/stable',
-        linkerd2: {
-            chart: 'linkerd2',
-            version: '2.11.2',
-        },
-        linkerdViz: {
-            chart: 'linkerd-viz',
-            version: '2.11.2',
+        charts: {
+            linkerd2: {
+                chart: 'linkerd2',
+                version: '2.11.2',
+            },
+            linkerdViz: {
+                chart: 'linkerd-viz',
+                version: '2.11.2',
+            }
         },
     },
-    argoRepo: {
+    argo: {
         repo: 'https://argoproj.github.io/argo-helm',
-        argoCD: {
-            chart: 'argo-cd',
-            version: '4.5.3',
+        charts: {
+            argoCD: {
+                chart: 'argo-cd',
+                version: '4.5.3',
+            }
         },
     },
-} as const;
-
-// export const helmChartsMetadata = {
-//     certManager: {
-//         bitnami: {
-//             repo: "https://charts.bitnami.com/bitnami",
-//             chart: "cert-manager",
-//             version: "0.4.17",
-//         },
-//         jetspack: {
-//             repo: "https://charts.jetstack.io",
-//             chart: "cert-manager",
-//             version: "1.8.0",
-//         },
-//     },
-//     certManagerTrust: {
-//         bitnami: {
-//             repo: "https://charts.bitnami.com/bitnami",
-//             chart: "cert-manager",
-//             version: "0.4.17",
-//         },
-//         jetspack: {
-//             repo: "https://charts.jetstack.io",
-//             chart: "cert-manager",
-//             version: "1.8.0",
-//         },
-//     },
-//     linked2: {
-//         linkerd: {
-//             repo: "https://helm.linkerd.io/stable",
-//             chart: "linkerd2",
-//             version: "2.11.2",
-//         },
-//     },
-// } as const;
-
-// // repo/chart
+} as const);

@@ -1,123 +1,55 @@
+import { IPostgresqlhabitnami } from './../../types/helm-charts/postgresqlHaBitnami';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaceNames } from '../../namespaces/util';
-import { postgresdbHaHelmValuesBitnami } from '../../shared/types/helm-charts/postgresdbHaHelmValuesBitnami';
-import { DeepPartial } from '../../shared/types/own-types';
+import { helmChartsInfo } from '../../shared/helmChartInfo';
+import { DeepPartial } from '../../types/own-types';
 import { graphqlPostgres } from './index';
 import { graphqlPostgresSettings } from './settings';
 
 const { envVars } = graphqlPostgresSettings;
-// type Credentials = {
-//     usernames: string[]
-//     passwords: string[]
-//     databases: string[]
-// }
-// const credentials = [
-//   {
-//     username: envVars.POSTGRES_USERNAME,
-//     password: envVars.POSTGRES_PASSWORD,
-//     database: envVars.POSTGRES_NAME
-//   },
-//   {
-//     username: 'username1',
-//     password: 'password1',
-//     database: 'database1'
-//   },
-//   {
-//     username: 'username2',
-//     password: 'password2',
-//     database: 'database2'
-//   },
-//   {
-//     username: 'username3',
-//     password: 'password3',
-//     database: 'database1'
-//   },
-//   {
-//     username: 'username4',
-//     password: 'password4',
-//     database: 'database2'
-//   }
-// ]
 
-// const mappedCredentials = credentials.reduce<Credentials>(
-//   (acc, val) => {
-//     acc.usernames.push(val.username)
-//     acc.passwords.push(val.password)
-//     acc.databases.push(val.database)
-//     return acc
-//   },
-//   {
-//     usernames: [],
-//     passwords: [],
-//     databases: []
-//   }
-// )
-
-const postgresValues: DeepPartial<postgresdbHaHelmValuesBitnami> = {
-    // useStatefulSet: true,
-    // architecture: "replicaset",
-    // replicaCount: 3,
-    // nameOverride: "postgres-database",
-    // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
+const postgresValues: DeepPartial<IPostgresqlhabitnami> = {
     fullnameOverride: envVars.POSTGRES_SERVICE_NAME,
     postgresql: {
-        // replicaCount: 3,
-        // containerPort,
         username: envVars.POSTGRES_USERNAME,
-        // pgHbaConfiguration: "",
         postgresPassword: envVars.POSTGRES_PASSWORD,
         database: envVars.POSTGRES_DATABASE_NAME,
-        password: envVars.POSTGRES_PASSWORD,
-        // repmgrPassword: graphqlPostgresEnvironmentVariables.POSTGRES_PASSWORD,
-        // repmgrDatabase: graphqlPostgresEnvironmentVariables.POSTGRES_DATABASE_NAME,
-        // existingSecret: "",
+        password: envVars.POSTGRES_PASSWORD
     },
     pgpool: {
-        // existingSecret: "",
-        // customUsers: "",
-        // usernames: "",
-        // passwords: "",
-        // adminPassword: "",
-        // adminUsername: "",
         replicaCount: 2,
     },
     global: {
-        // namespaceOverride: devNamespaceName,
-        // imagePullSecrets: [],
-        // storageClass: "",
         pgpool: {
-            // adminUsername: "",
-            // adminPassword: "",
-            // existingSecret: "",
         },
         postgresql: {
-            // username: "",
-            // password: "",
-            // database: "",
-            // repmgrUsername: "",
-            // repmgrPassword: "",
-            // repmgrDatabase: "",
-            // existingSecret: "",
+
         },
         ldap: {},
+        storageClass: envVars.POSTGRES_STORAGE_CLASS
     },
     service: {
         type: 'ClusterIP',
-        port: Number(envVars.POSTGRES_PORT),
-        // portName: "mongo-graphql",
-        // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
+        ports: {
+            postgresql: Number(envVars.POSTGRES_PORT),
+        }
     },
 };
 
+const {
+    repo,
+    charts: { postgresqlHA: { chart, version } },
+} = helmChartsInfo.bitnami;
+
 // `http://${name}.${namespace}:${port}`;
 export const graphqlPostgresPostgresdbHA = new k8s.helm.v3.Chart(
-    'postgres-ha',
+    chart,
     {
-        chart: 'postgresql-ha',
+        chart,
         fetchOpts: {
-            repo: 'https://charts.bitnami.com/bitnami',
+            repo
         },
-        version: '9.0.4',
+        version,
         values: postgresValues,
         namespace: namespaceNames.applications,
         // By default Release resource will wait till all created resources

@@ -1,64 +1,15 @@
+import { IPostgresqlbitnami } from './../../types/helm-charts/postgresqlBitnami';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaceNames } from '../../namespaces/util';
-import { postgresdbHelmValuesBitnami } from '../../shared/types/helm-charts/postgresdbHelmValuesBitnami';
-import { DeepPartial } from '../../shared/types/own-types';
+import { helmChartsInfo } from '../../shared/helmChartInfo';
+import { DeepPartial } from '../../types/own-types';
 import { graphqlPostgres } from './index';
 import { graphqlPostgresSettings } from './settings';
 
 const { envVars } = graphqlPostgresSettings;
 
-// type Credentials = {
-//   usernames: string[]
-//   passwords: string[]
-//   databases: string[]
-// }
-// const credentials = [
-//   {
-//     username: envVars.POSTGRES_USERNAME,
-//     password: envVars.POSTGRES_PASSWORD,
-//     database: envVars.POSTGRES_NAME
-//   },
-//   {
-//     username: 'username1',
-//     password: 'password1',
-//     database: 'database1'
-//   },
-//   {
-//     username: 'username2',
-//     password: 'password2',
-//     database: 'database2'
-//   },
-//   {
-//     username: 'username3',
-//     password: 'password3',
-//     database: 'database1'
-//   },
-//   {
-//     username: 'username4',
-//     password: 'password4',
-//     database: 'database2'
-//   }
-// ]
-
-// const mappedCredentials = credentials.reduce<Credentials>(
-//   (acc, val) => {
-//     acc.usernames.push(val.username)
-//     acc.passwords.push(val.password)
-//     acc.databases.push(val.database)
-//     return acc
-//   },
-//   {
-//     usernames: [],
-//     passwords: [],
-//     databases: []
-//   }
-// )
-
-const postgresValues: DeepPartial<postgresdbHelmValuesBitnami> = {
-    // useStatefulSet: true,
+const postgresValues: DeepPartial<IPostgresqlbitnami> = {
     architecture: 'standalone', //  "replication" | "standalone"
-    // replicaCount: 3,
-    // nameOverride: "postgres-database",
     fullnameOverride: envVars.POSTGRES_SERVICE_NAME,
     auth: {
         database: envVars.POSTGRES_DATABASE_NAME,
@@ -67,16 +18,12 @@ const postgresValues: DeepPartial<postgresdbHelmValuesBitnami> = {
         username: envVars.POSTGRES_USERNAME,
     },
     global: {
-        // namespaceOverride: devNamespaceName,
-        // imagePullSecrets: [],
-        // storageClass: "",
         postgresql: {
             auth: {
                 username: envVars.POSTGRES_USERNAME,
                 password: envVars.POSTGRES_PASSWORD,
                 database: envVars.POSTGRES_DATABASE_NAME,
                 postgresPassword: envVars.POSTGRES_PASSWORD,
-                // existingSecret: "",
             },
             service: {
                 ports: {
@@ -84,34 +31,23 @@ const postgresValues: DeepPartial<postgresdbHelmValuesBitnami> = {
                 },
             },
         },
-        storageClass: envVars.APP_ENVIRONMENT === 'local' ? '' : 'linode-', // FIXME TODO: Specify the storage class here
+        storageClass: envVars.APP_ENVIRONMENT === 'local' ? '' : envVars.POSTGRES_STORAGE_CLASS,
     },
-
-    //   primary: {
-    //     service: {
-    //       type: "ClusterIP",
-    //       ports: {
-    //         postgresql: Number(graphqlPostgresEnvironmentVariables.POSTGRES_PORT),
-    //       },
-    //     },
-    //   },
-
-    //   service: {
-    //     type: "ClusterIP",
-    //     port: Number(graphqlPostgresEnvironmentVariables.POSTGRES_PORT),
-    //     // portName: "mongo-graphql",
-    //     // nameOverride: graphqlPostgresEnvironmentVariables.POSTGRES_SERVICE_NAME,
-    //   },
 };
 
+const {
+    repo,
+    charts: { postgresql: { chart, version } },
+} = helmChartsInfo.bitnami;
+
 export const graphqlPostgresPostgresdb = new k8s.helm.v3.Chart(
-    'postgres-helm',
+    'postgresql',
     {
-        chart: 'postgresql',
+        chart,
         fetchOpts: {
-            repo: 'https://charts.bitnami.com/bitnami',
+            repo,
         },
-        version: '11.1.25',
+        version,
         values: postgresValues,
         namespace: namespaceNames.applications,
         // By default Release resource will wait till all created resources
@@ -120,5 +56,4 @@ export const graphqlPostgresPostgresdb = new k8s.helm.v3.Chart(
         skipAwait: false,
     },
     { provider: graphqlPostgres.getProvider() }
-    // { provider }
 );

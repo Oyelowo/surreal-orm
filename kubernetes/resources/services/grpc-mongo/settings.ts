@@ -1,9 +1,10 @@
 import { getEnvironmentVariables } from '../../shared/validations';
-import { AppConfigs } from '../../shared/types/own-types';
+import { AppConfigs } from '../../types/own-types';
 import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp';
 
 const environmentVariables = getEnvironmentVariables();
 const environment = environmentVariables.ENVIRONMENT;
+
 // TODO: Rethink this abstraction for secret
 const secretsFromLocalConfigs = getSecretsForResource('grpc-mongo', environment);
 

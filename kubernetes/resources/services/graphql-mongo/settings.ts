@@ -1,5 +1,5 @@
 import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp';
-import { AppConfigs } from '../../shared/types/own-types';
+import { AppConfigs } from '../../types/own-types';
 import { getEnvironmentVariables } from '../../shared/validations';
 
 const environment = getEnvironmentVariables().ENVIRONMENT;

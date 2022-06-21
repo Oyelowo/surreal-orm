@@ -69,7 +69,13 @@ deploy:
             - manifests/generated/local/infrastructure/sealed-secrets/**/*
             - manifests/generated/local/infrastructure/nginx-ingress/**/*
             - manifests/generated/local/services/**/**/*
-# portForward:
+portForward:
+  - resourceType: service
+    resourceName: graphql-mongo-database
+    namespace: applications
+    port: 27017
+    localPort: 27017
+        
 #   - resourceType: service
 #     resourceName: react-web
 #     port: 3000
@@ -80,6 +86,7 @@ deploy:
 #   namespace: development
 #   port: 8000
 #   localPort: 800
+
 
 # - resourceType: service
 #   resourceName: graphql-postgres

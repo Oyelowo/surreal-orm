@@ -1,4 +1,4 @@
-import { APPLICATION_AUTOMERGE_ANNOTATION } from './../constants';
+import { APPLICATION_AUTOMERGE_ANNOTATION } from '../shared/constants';
 
 // TODO: Use zod to parse this
 export interface SecretTemplate {

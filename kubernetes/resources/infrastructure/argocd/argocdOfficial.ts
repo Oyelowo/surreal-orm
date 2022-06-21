@@ -1,19 +1,19 @@
+import { IArgocdargo } from './../../types/helm-charts/argoCdArgo';
 import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaceNames } from '../../namespaces/util';
-import { ArgocdHelmValuesArgo } from '../../shared/types/helm-charts/argocdHelmValuesArgo';
-import { DeepPartial } from '../../shared/types/own-types';
+
+import { DeepPartial } from '../../types/own-types';
 import bcrypt from 'bcrypt';
 import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant';
 import { argocdProvider } from './settings';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 
-// --insecure
 
 const saltRounds = 10;
 const myPlaintextPassword = 'oyelowo';
 const hash = bcrypt.hashSync(myPlaintextPassword, saltRounds);
-const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
+const argocdValues: DeepPartial<IArgocdargo> = {
     fullnameOverride: 'argocd',
     server: {
         ingress: {
@@ -63,8 +63,9 @@ const argocdValues: DeepPartial<ArgocdHelmValuesArgo> = {
 
 const {
     repo,
-    argoCD: { chart, version },
-} = helmChartsInfo.argoRepo;
+    charts: { argoCD: { chart, version }, }
+} = helmChartsInfo.argo;
+
 export const argocdHelm = new k8s.helm.v3.Chart(
     'argocd',
     {

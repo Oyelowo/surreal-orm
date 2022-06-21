@@ -1,16 +1,16 @@
+import { IArgocdbitnami } from './../../types/helm-charts/argoCdBitnami';
 import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant';
 import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaceNames } from '../../namespaces/util';
-import { ArgocdHelmValuesBitnami } from '../../shared/types/helm-charts/argocdHelmValuesBitnami';
-import { DeepPartial } from '../../shared/types/own-types';
+import { DeepPartial } from '../../types/own-types';
 import { getEnvironmentVariables } from '../../shared/validations';
 import { argocdProvider } from './settings';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 
 // TODO: Use this everywhere
 const STORAGE_CLASS = 'linode-block-storage-retain';
-const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
+const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
     config: {
         secret: {
             create: true,
@@ -43,8 +43,9 @@ const argocdValuesOld: DeepPartial<ArgocdHelmValuesBitnami> = {
 
 const {
     repo,
-    argocd: { chart, version },
-} = helmChartsInfo.bitnamiRepo;
+    charts: { argocd: { chart, version }, }
+} = helmChartsInfo.bitnami;
+
 export const argocdHelm = new k8s.helm.v3.Chart(
     'argocd',
     {

@@ -26,8 +26,18 @@ build-graphql-mongo:
 	docker build . --target graphql-mongo  -t oyelowo/graphql-mongo
 
 deploy-graphql-mongo:
-	docker build -f Dockerfile.development --target graphql-mongo  -t oyelowo/graphql-mongo .
-	docker run -p 8000:8000 oyelowo/graphql-mongo 
+	# docker build -f Dockerfile.development --target graphql-mongo  -t oyelowo/graphql-mongo .
+	docker run -e APP_PORT=8000 -e APP_HOST=0.0.0.0 \
+	 -e APP_ENVIRONMENT=local -e REDIS_USERNAME="" \
+	 -e REDIS_PASSWORD="password" \
+	 -e REDIS_HOST="localhost" \
+	 -e REDIS_PORT=6379 \
+	 -e MONGODB_NAME="mydb" \
+	 -e MONGODB_USERNAME="mydb" \
+	 -e MONGODB_PASSWORD="passoword" \
+	 -e MONGODB_HOST="localhost" \
+	 -e MONGODB_PORT=27017 \
+	 -p 8000:8000 oyelowo/graphql-mongo
 
 deploy-graphql-mongo-slim:
 	docker build -f Dockerfile.development --target graphql-mongo  -t oyelowo/graphql-mongo .

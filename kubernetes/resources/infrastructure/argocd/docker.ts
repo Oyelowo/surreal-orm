@@ -1,14 +1,12 @@
 import c from "chalk";
-// import * as kx from '@pulumi/kubernetesx';
 import path from 'path';
 import sh from 'shelljs';
 import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp';
 import { getResourceAbsolutePath } from '../../shared/manifestsDirectory';
-import { Environment } from '../../shared/types/own-types';
-// import { getEnvironmentVariables } from '../../shared/validations';
+import { Environment } from '../../types/own-types';
 import { namespaceNames } from './../../namespaces/util';
 
-// const { ENVIRONMENT } = getEnvironmentVariables();
+
 const DOCKER_SERVER = 'ghcr.io'
 export const DOCKER_REGISTRY_KEY = 'my-registry-key';
 

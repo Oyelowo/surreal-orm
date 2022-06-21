@@ -191,7 +191,7 @@ SELECT * FROM inventory WHERE status = "A" AND ( qty < 30 OR item LIKE "p%")
 
 #[ComplexObject]
 impl User {
-    #[graphql(guard = "RoleGuard::new(Role::Admin).or(AuthGuard)")]
+    #[graphql(guard = "RoleGuard::new(Role::User).or(AuthGuard)")]
     async fn posts(&self, ctx: &Context<'_>) -> Result<Vec<Post>> {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = get_db_from_ctx(ctx)?;

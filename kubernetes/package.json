@@ -27,6 +27,7 @@
         "eslint-plugin-prettier": "^4.0.0",
         "eslint-plugin-promise": "^6.0.0",
         "js-yaml": "^4.1.0",
+        "json-ts": "^1.6.4",
         "prettier": "2.6.2",
         "typescript": "^4.7.0-beta",
         "uuid": "^8.3.2"
@@ -42,6 +43,9 @@
         "chalk": "^4.1.0",
         "inquirer": "^8.2.2",
         "json-schema-to-ts": "^1.6.5",
+        "json-schema-to-typescript": "^10.1.5",
+        "json-to-ts": "^1.7.0",
+        "lodash": "^4.17.21",
         "patch-package": "^6.4.7",
         "prompt": "^1.2.2",
         "ramda": "^0.28.0",

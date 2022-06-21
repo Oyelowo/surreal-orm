@@ -1,5 +1,5 @@
 import { getResourceProvider } from '../../shared/manifestsDirectory';
-import { ResourceName } from '../../shared/types/own-types';
+import { ResourceName } from '../../types/own-types';
 import { getEnvironmentVariables } from '../../shared/validations';
 
 const { ENVIRONMENT } = getEnvironmentVariables();

@@ -7,7 +7,7 @@ import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker';
 import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
 import { createArgocdApplication } from './createArgoApplication';
 import { getPathToResource } from './manifestsDirectory';
-import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from './types/own-types';
+import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/own-types';
 import { getEnvironmentVariables } from './validations';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
@@ -15,7 +15,7 @@ export class ServiceDeployment<
     AN extends ServiceName,
     DBT extends DBType,
     NS extends NamespaceOfApps
-> extends pulumi.ComponentResource {
+    > extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
@@ -32,12 +32,10 @@ export class ServiceDeployment<
         // opts: pulumi.ComponentResourceOptions
     ) {
         super('k8sjs:service:ServiceDeployment', name, {} /* opts */);
-        // const provider = opts?.provider;
         this.appName = name;
         const { envVars, kubeConfig } = args;
         const metadata = {
             ...args.metadata,
-            // ...getArgoAppSyncWaveAnnotation("service")
         };
         const resourceName = metadata.name;
 
@@ -48,7 +46,6 @@ export class ServiceDeployment<
             },
             { parent: this }
         );
-        // this.provider = this.getProvider();
 
         this.configMaps = new kx.ConfigMap(
             `${resourceName}-configmap`,
@@ -65,7 +62,6 @@ export class ServiceDeployment<
             `${resourceName}-secret`,
             {
                 stringData: {
-                    //  password: "fakepassword",
                     ...secrets,
                 },
                 metadata: {
@@ -76,8 +72,6 @@ export class ServiceDeployment<
                     },
                 },
             },
-            // //TODO: Confirm why secret has a separate provider
-            // { provider: this.secretProvider, parent: this }
             { provider: this.getProvider(), parent: this }
         );
 
@@ -87,8 +81,6 @@ export class ServiceDeployment<
             containers: [
                 {
                     env: {
-                        // CONFIG: this.configMaps.asEnvValue("config"),
-                        // PASSWORD: this.secret.asEnvValue("password"),
                         ...envVars,
                         ...this.#secretsObjectToEnv(this.secret),
                     },

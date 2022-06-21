@@ -1,7 +1,8 @@
+import { IMongodbbitnami } from './../../types/helm-charts/mongodbBitnami';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaceNames } from '../../namespaces/util';
-import { MongodbHelmValuesBitnami } from '../../shared/types/helm-charts/MongodbHelmValuesBitnami';
-import { DeepPartial } from '../../shared/types/own-types';
+import { helmChartsInfo } from '../../shared/helmChartInfo';
+import { DeepPartial } from '../../types/own-types';
 import { getEnvironmentVariables } from '../../shared/validations';
 import { graphqlMongo } from './index';
 import { graphqlMongoSettings } from './settings';
@@ -16,29 +17,14 @@ type Credentials = {
 };
 const credentials = [
     {
-        username: '',
-        password: '',
-        database: '',
+        username: 'username1',
+        password: 'password1',
+        database: 'db1',
     },
     {
-        username: '',
-        password: '',
-        database: '',
-    },
-    {
-        username: '',
-        password: '',
-        database: '',
-    },
-    {
-        username: '',
-        password: '',
-        database: '',
-    },
-    {
-        username: '',
-        password: '',
-        database: '',
+        username: 'username2',
+        password: 'password2',
+        database: 'db2',
     },
 ];
 
@@ -56,16 +42,11 @@ const mappedCredentials = credentials.reduce<Credentials>(
     }
 );
 
-const mongoValues: DeepPartial<MongodbHelmValuesBitnami> = {
+const mongoValues: DeepPartial<IMongodbbitnami> = {
     useStatefulSet: true,
     architecture: 'replicaset',
     replicaCount: 3,
-    // nameOverride: "mongodb-graphql",
     fullnameOverride: envVars.MONGODB_SERVICE_NAME,
-    // global: {
-    //   namespaceOverride: devNamespaceName,
-    // },
-
     persistence: {
         /*
      Linode: This PVC represents a Block Storage Volume. Because Block Storage Volumes have a minimum size of 10 gigabytes, the storage has been set to 10Gi. If you choose a size smaller than 10 gigabytes, the PVC will default to 10 gigabytes.
@@ -86,31 +67,31 @@ In order to retain your Block Storage Volume and its data, even after the associ
         rootPassword: envVars.MONGODB_ROOT_PASSWORD,
         replicaSetKey: 'Ld1My4Q1s4', // TODO
         // array of
-        ...mappedCredentials,
+        ...mappedCredentials as any,
         username: envVars.MONGODB_USERNAME,
         password: envVars.MONGODB_PASSWORD,
-        // usernames: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],
-        // passwords: [graphqlMongoEnvironmentVariables.MONGODB_PASSWORD],
-        // databases: [graphqlMongoEnvironmentVariables.MONGODB_NAME],
-        // users: [graphqlMongoEnvironmentVariables.MONGODB_USERNAME],
+    
     },
     service: {
         type: 'ClusterIP',
         port: Number(envVars.MONGODB_PORT),
-        // portName: "mongo-graphql",
         nameOverride: envVars.MONGODB_SERVICE_NAME,
     },
 };
 
 // `http://${name}.${namespace}:${port}`;
+const {
+    repo,
+    charts: { mongodb: { chart, version } },
+} = helmChartsInfo.bitnami;
 export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
     envVars.MONGODB_SERVICE_NAME,
     {
-        chart: 'mongodb',
+        chart,
         fetchOpts: {
-            repo: 'https://charts.bitnami.com/bitnami',
+            repo,
         },
-        version: '12.0.0',
+        version,
         values: mongoValues,
         namespace: namespaceNames.applications,
         // By default Release resource will wait till all created resources

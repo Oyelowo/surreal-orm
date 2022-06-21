@@ -1,10 +1,8 @@
 import * as k8s from '@pulumi/kubernetes';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
-import { Environment, ResourceName, ResourceType } from './types/own-types';
+import { Environment, ResourceName, ResourceType } from '../types/own-types';
 
-// TODO:  Unify all the resourceType/resourceName path utils into a singular function e.g
-// 12th May, 2022: Get base dir for all kubernetes code: For now from the repo/monorepo root, it is: ./kubernetes
 export const getMainBaseDir = () => {
     const mainBaseDir = path.join(__dirname, '..', '..');
     return mainBaseDir;
@@ -24,13 +22,17 @@ export const getGeneratedEnvManifestsDir = (environment: Environment) => {
     return path.join(MANIFESTS_DIR, 'generated', environment);
 };
 
+export const getHelmChartTypesDir = () => {
+    const BASE_DIR = getMainBaseDir();
+    return path.join(BASE_DIR, 'resources', 'types', 'helm-charts');
+};
+
 export const getPathToResourcesDir = (
     resourceName: ResourceName,
     resourceType: ResourceType,
     environment: Environment
 ) => {
     return path.join(getGeneratedEnvManifestsDir(environment), resourceType, resourceName);
-    // return `kubernetes/manifests/generated/${environment}/services/${appName}`;
 };
 
 /**
@@ -38,7 +40,6 @@ export const getPathToResourcesDir = (
  *                               /infrastructure/1-crd
  *                               /infrastructure/sealed-secrets
  */
-
 export const getRepoPathFromAbsolutePath = (absolutePath: string) => {
     const toolPath = absolutePath.split('/kubernetes/').at(-1);
     if (!toolPath) {
@@ -81,7 +82,6 @@ export function assertUnreachable(_: never): never {
 
 type GetPathToResourceProps = {
     resourceType: ResourceType;
-    // resourceName: Omit<ArgoApplicationName | AppName, "service">
     resourceName: ResourceName;
     environment: Environment;
 };

@@ -2,7 +2,7 @@ import * as k8s from '@pulumi/kubernetes';
 import { namespaceNames } from '../../namespaces/util';
 import { graphqlMongoSettings } from '../../services/graphql-mongo/settings';
 import { reactWebSettings } from '../../services/react-web/settings';
-import { NginxConfiguration } from '../../shared/types/nginxConfigurations';
+import { NginxConfiguration } from '../../types/nginxConfigurations';
 import { getEnvironmentVariables } from '../../shared/validations';
 import { CLUSTER_ISSUER_NAME } from '../cert-manager';
 import { DOMAIN_NAME_BASE } from './constant';

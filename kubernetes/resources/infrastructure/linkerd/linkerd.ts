@@ -1,27 +1,11 @@
+import { ILinkerd2linkerd } from './../../types/helm-charts/linkerd2Linkerd';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaceNames } from '../../namespaces/util';
-import { Linkerd2HelmValues } from '../../shared/types/helm-charts/linkerd2HelmValues';
-import { DeepPartial } from '../../shared/types/own-types';
+import { DeepPartial } from '../../types/own-types';
 import { helmChartsInfo } from './../../shared/helmChartInfo';
 import { linkerdProvider } from './settings';
 
-/*
- --set-file identityTrustAnchorsPEM=ca.crt \
-  --set-file identity.issuer.tls.crtPEM=issuer.crt \
-  --set-file identity.issuer.tls.keyPEM=issuer.key \
-*/
-
-/*
-for automanaged ca
-  --set-file identityTrustAnchorsPEM=ca.crt \
-  --set identity.issuer.scheme=kubernetes.io/tls \
-  --set installNamespace=false \
-  linkerd/linkerd2 \
-*/
-const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
-    // identityTrustAnchorsPEM: "ca.crt",
-    // identityTrustDomain
-    // installNamespace: false,
+const Linkerd2Values: DeepPartial<ILinkerd2linkerd> = {
     podAnnotations: {
         'sealedsecrets.bitnami.com/managed': 'true',
     },
@@ -29,23 +13,15 @@ const Linkerd2Values: DeepPartial<Linkerd2HelmValues> = {
         externalCA: true,
         issuer: {
             scheme: 'kubernetes.io/tls',
-            // tls: {
-            //   crtPEM: "",
-            //   keyPEM: "",
-            // },
         },
     },
-    // proxyInit:{
-    //   runAsRoot: true
-    // }
-    // cniEnabled: true
 };
 
-// const resourceName: ResourceName = "linkerd";
 const {
     repo,
-    linkerd2: { chart, version },
-} = helmChartsInfo.linkerdRepo;
+    charts: { linkerd2: { chart, version }, }
+} = helmChartsInfo.linkerd;
+
 export const linkerd = new k8s.helm.v3.Chart(
     chart,
     {
@@ -56,7 +32,6 @@ export const linkerd = new k8s.helm.v3.Chart(
         version,
         values: Linkerd2Values,
         namespace: namespaceNames.linkerd,
-        // namespace: devNamespaceName,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being
         // available.

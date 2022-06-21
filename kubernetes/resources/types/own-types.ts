@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { NamespaceName } from '../../namespaces/util';
+import { NamespaceName } from '../namespaces/util';
 export const appEnvironmentsSchema = z.union([
     z.literal('local'),
     z.literal('development'),

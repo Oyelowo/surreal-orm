@@ -1,22 +1,22 @@
+import { ILinkerdvizlinkerd } from './../../types/helm-charts/linkerdVizLinkerd';
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as bcrypt from 'bcrypt';
 import { namespaceNames } from '../../namespaces/util';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
-import { LinkerdVizHelmValues } from '../../shared/types/helm-charts/linkerdVizHelmValues';
-import { NginxConfiguration } from '../../shared/types/nginxConfigurations';
-import { DeepPartial, ResourceName } from '../../shared/types/own-types';
+import { NginxConfiguration } from '../../types/nginxConfigurations';
+import { DeepPartial, ResourceName } from '../../types/own-types';
 import { CLUSTER_ISSUER_NAME } from '../cert-manager/clusterIssuer';
 import { DOMAIN_NAME_SUB_LINKERD_VIZ } from '../ingress/constant';
 import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
 import { linkerdVizProvider } from './settings';
 
-const values: DeepPartial<LinkerdVizHelmValues> = {};
+const values: DeepPartial<ILinkerdvizlinkerd> = {};
 const resourceName: ResourceName = 'linkerd-viz';
 const {
     repo,
-    linkerdViz: { chart, version },
-} = helmChartsInfo.linkerdRepo;
+    charts: { linkerdViz: { chart, version }, }
+} = helmChartsInfo.linkerd;
 export const linkerdVizHelmChart = new k8s.helm.v3.Chart(
     resourceName,
     {

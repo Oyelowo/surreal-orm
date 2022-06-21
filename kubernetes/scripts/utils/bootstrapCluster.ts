@@ -5,7 +5,7 @@ import sh from 'shelljs';
 import { namespaceNames } from '../../resources/namespaces/util';
 import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
 import { getResourceAbsolutePath } from '../../resources/shared/manifestsDirectory';
-import { Environment, ResourceName } from '../../resources/shared/types/own-types';
+import { Environment, ResourceName } from '../../resources/types/own-types';
 import { setupPlainSecretTSFiles } from '../secretsManagement/setupSecrets';
 import { generateAllSealedSecrets } from './generateAllSealedSecrets';
 import { generateManifests } from './generateManifests';
