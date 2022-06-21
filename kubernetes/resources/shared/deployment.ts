@@ -100,20 +100,23 @@ export class ServiceDeployment<
                     ...(kubeConfig.readinessProbePort && {
                         readinessProbe: {
                             httpGet: {
-                                path: '/health',
+                                path: '/healthz',
                                 port: kubeConfig.readinessProbePort,
                             },
                             initialDelaySeconds: 10,
                             periodSeconds: 10,
+                            failureThreshold: 5
                         },
                         livenessProbe: {
                             httpGet: {
-                                path: '/health',
+                                path: '/healthz',
                                 port: kubeConfig.readinessProbePort,
                             },
                             initialDelaySeconds: 10,
                             periodSeconds: 10,
+                            failureThreshold: 5
                         },
+                        // startupProbe
                     })
                 },
             ],
