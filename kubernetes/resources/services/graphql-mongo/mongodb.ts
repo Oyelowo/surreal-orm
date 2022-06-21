@@ -17,6 +17,11 @@ type Credentials = {
 };
 const credentials = [
     {
+        username: envVars.MONGODB_USERNAME,
+        password: envVars.MONGODB_PASSWORD,
+        database: envVars.MONGODB_NAME,
+    },
+    {
         username: 'username1',
         password: 'password1',
         database: 'db1',
@@ -63,13 +68,11 @@ In order to retain your Block Storage Volume and its data, even after the associ
 
     auth: {
         enabled: true,
-        rootUser: envVars.MONGODB_ROOT_USERNAME,
-        rootPassword: envVars.MONGODB_ROOT_PASSWORD,
+        rootUser: envVars.MONGODB_USERNAME,
+        rootPassword: envVars.MONGODB_PASSWORD,
         replicaSetKey: 'Ld1My4Q1s4', // TODO
         // array of
         ...(mappedCredentials as any),
-        username: envVars.MONGODB_USERNAME,
-        password: envVars.MONGODB_PASSWORD,
     },
     service: {
         type: 'ClusterIP',
