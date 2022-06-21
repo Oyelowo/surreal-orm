@@ -15,7 +15,7 @@ export class ServiceDeployment<
     AN extends ServiceName,
     DBT extends DBType,
     NS extends NamespaceOfApps
-> extends pulumi.ComponentResource {
+    > extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
@@ -97,6 +97,24 @@ export class ServiceDeployment<
                             cpu: kubeConfig.requestCpu,
                         },
                     },
+                    ...(kubeConfig.readinessProbePort && {
+                        readinessProbe: {
+                            httpGet: {
+                                path: '/health',
+                                port: kubeConfig.readinessProbePort,
+                            },
+                            initialDelaySeconds: 10,
+                            periodSeconds: 10,
+                        },
+                        livenessProbe: {
+                            httpGet: {
+                                path: '/health',
+                                port: kubeConfig.readinessProbePort,
+                            },
+                            initialDelaySeconds: 10,
+                            periodSeconds: 10,
+                        },
+                    })
                 },
             ],
             securityContext: {
@@ -170,7 +188,7 @@ export class ServiceDeployment<
             POSTGRES_PASSWORD: "xxxx",
         };
      }
-
+    
      to
      {
         MONGODB_USERNAME:
@@ -178,8 +196,8 @@ export class ServiceDeployment<
               ...
       ...
      }
-
-   */
+    
+    */
     #secretsObjectToEnv = (secretInstance: kx.Secret) => {
         const secretObject = getSecretsForResource(this.appName, ENVIRONMENT);
         const keyValueEntries = Object.keys(secretObject).map((key) => [key, secretInstance.asEnvValue(key)]);

@@ -15,6 +15,7 @@ export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'mongodb', 'application
         limitMemory: '200Mi',
         limitCpu: '100m',
         replicaCount: 3,
+        readinessProbePort: 5000,
         host: '0.0.0.0',
         image: `ghcr.io/oyelowo/grpc-mongo:${environmentVariables.IMAGE_TAG_GRPC_MONGO}`,
     },

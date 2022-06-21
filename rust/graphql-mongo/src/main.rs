@@ -9,7 +9,10 @@ use common::{
 };
 
 use graphql_mongo::{
-    handlers::oauth::{oauth_login_authentication, oauth_login_initiator},
+    handlers::{
+        healthcheck::healthz,
+        oauth::{oauth_login_authentication, oauth_login_initiator},
+    },
     utils::graphql::{graphql_handler, graphql_handler_ws, graphql_playground, setup_graphql},
 };
 use log::info;
@@ -54,6 +57,7 @@ async fn main() {
         });
 
     let app = Route::new()
+        .at("/healthz", get(healthz))
         .at("/oauth/signin/:oauth_provider", get(oauth_login_initiator))
         .at("/oauth/callback", get(oauth_login_authentication))
         .at("/graphql", get(graphql_playground).post(graphql_handler))

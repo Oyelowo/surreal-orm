@@ -11,6 +11,7 @@ export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'postgresdb
         limitCpu: '100m',
         replicaCount: 3,
         host: '0.0.0.0',
+        readinessProbePort: 8000,
         image: `ghcr.io/oyelowo/graphql-postgres:${getEnvironmentVariables().IMAGE_TAG_GRAPHQL_POSTGRES}`,
     },
 

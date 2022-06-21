@@ -13,6 +13,7 @@ export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'mongodb', 'appli
         limitMemory: '200Mi',
         limitCpu: '100m',
         replicaCount: 2,
+        readinessProbePort: 8000,
         host: '0.0.0.0',
         image: `ghcr.io/oyelowo/graphql-mongo:${getEnvironmentVariables().IMAGE_TAG_GRAPHQL_MONGO}`,
     },

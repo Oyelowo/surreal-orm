@@ -68,8 +68,8 @@ In order to retain your Block Storage Volume and its data, even after the associ
 
     auth: {
         enabled: true,
-        rootUser: envVars.MONGODB_USERNAME,
-        rootPassword: envVars.MONGODB_PASSWORD,
+        rootUser: envVars.MONGODB_ROOT_USERNAME,
+        rootPassword: envVars.MONGODB_ROOT_PASSWORD,
         replicaSetKey: 'Ld1My4Q1s4', // TODO
         // array of
         ...(mappedCredentials as any),

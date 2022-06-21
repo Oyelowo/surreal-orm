@@ -60,7 +60,7 @@ pub(crate) enum HandlerError {
     ParseError(#[from] url::ParseError),
 }
 
-async fn get_redis_connection(
+pub async fn get_redis_connection(
     // redis: Data<&RedisConfigs>,
     redis: Data<&redis::Client>,
 ) -> Result<redis::aio::Connection, poem::Error> {
