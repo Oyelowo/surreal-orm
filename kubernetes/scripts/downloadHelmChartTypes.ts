@@ -2,7 +2,6 @@ import { getHelmChartTypesDir } from './../resources/shared/manifestsDirectory';
 import { helmChartsInfo } from './../resources/shared/helmChartInfo';
 import chalk from 'chalk';
 import sh from 'shelljs';
-import z from "zod";
 import JsonToTS from "json-to-ts";
 import _ from 'lodash';
 
