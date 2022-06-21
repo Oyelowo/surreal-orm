@@ -9,7 +9,9 @@ const values: DeepPartial<ICertmanagertrustjetspack> = {};
 
 const {
     repo,
-    charts: { certManagerTrust: { chart, version } },
+    charts: {
+        certManagerTrust: { chart, version },
+    },
 } = helmChartsInfo.jetspack;
 
 export const certManagerTrustDeploymentName = chart;

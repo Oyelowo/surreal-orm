@@ -9,7 +9,6 @@ import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant';
 import { argocdProvider } from './settings';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 
-
 const saltRounds = 10;
 const myPlaintextPassword = 'oyelowo';
 const hash = bcrypt.hashSync(myPlaintextPassword, saltRounds);
@@ -63,7 +62,9 @@ const argocdValues: DeepPartial<IArgocdargo> = {
 
 const {
     repo,
-    charts: { argoCD: { chart, version }, }
+    charts: {
+        argoCD: { chart, version },
+    },
 } = helmChartsInfo.argo;
 
 export const argocdHelm = new k8s.helm.v3.Chart(

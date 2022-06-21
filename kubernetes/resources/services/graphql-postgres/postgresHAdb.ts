@@ -14,31 +14,30 @@ const postgresValues: DeepPartial<IPostgresqlhabitnami> = {
         username: envVars.POSTGRES_USERNAME,
         postgresPassword: envVars.POSTGRES_PASSWORD,
         database: envVars.POSTGRES_DATABASE_NAME,
-        password: envVars.POSTGRES_PASSWORD
+        password: envVars.POSTGRES_PASSWORD,
     },
     pgpool: {
         replicaCount: 2,
     },
     global: {
-        pgpool: {
-        },
-        postgresql: {
-
-        },
+        pgpool: {},
+        postgresql: {},
         ldap: {},
-        storageClass: envVars.POSTGRES_STORAGE_CLASS
+        storageClass: envVars.POSTGRES_STORAGE_CLASS,
     },
     service: {
         type: 'ClusterIP',
         ports: {
             postgresql: Number(envVars.POSTGRES_PORT),
-        }
+        },
     },
 };
 
 const {
     repo,
-    charts: { postgresqlHA: { chart, version } },
+    charts: {
+        postgresqlHA: { chart, version },
+    },
 } = helmChartsInfo.bitnami;
 
 // `http://${name}.${namespace}:${port}`;
@@ -47,7 +46,7 @@ export const graphqlPostgresPostgresdbHA = new k8s.helm.v3.Chart(
     {
         chart,
         fetchOpts: {
-            repo
+            repo,
         },
         version,
         values: postgresValues,

@@ -15,7 +15,9 @@ const values: DeepPartial<ILinkerdvizlinkerd> = {};
 const resourceName: ResourceName = 'linkerd-viz';
 const {
     repo,
-    charts: { linkerdViz: { chart, version }, }
+    charts: {
+        linkerdViz: { chart, version },
+    },
 } = helmChartsInfo.linkerd;
 export const linkerdVizHelmChart = new k8s.helm.v3.Chart(
     resourceName,

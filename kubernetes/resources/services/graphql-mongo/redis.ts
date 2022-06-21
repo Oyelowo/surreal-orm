@@ -40,7 +40,9 @@ export const redisValues: DeepPartial<IRedisbitnami> = {
 // `http://${name}.${namespace}:${port}`;
 const {
     repo,
-    charts: { redis: { chart, version } },
+    charts: {
+        redis: { chart, version },
+    },
 } = helmChartsInfo.bitnami;
 
 export const graphqlMongoRedis = new k8s.helm.v3.Chart(

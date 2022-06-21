@@ -37,7 +37,9 @@ const postgresValues: DeepPartial<IPostgresqlbitnami> = {
 
 const {
     repo,
-    charts: { postgresql: { chart, version } },
+    charts: {
+        postgresql: { chart, version },
+    },
 } = helmChartsInfo.bitnami;
 
 export const graphqlPostgresPostgresdb = new k8s.helm.v3.Chart(

@@ -17,7 +17,9 @@ Alternatively, you can override fullnameOverride on the helm chart install.
 // `http://${name}.${namespace}:${port}`;
 const {
     repo,
-    charts: { sealedSecrets: { chart, version } },
+    charts: {
+        sealedSecrets: { chart, version },
+    },
 } = helmChartsInfo.sealedSecrets;
 
 export const sealedSecret = new k8s.helm.v3.Chart(

@@ -1,17 +1,20 @@
-type Repo = "bitnami" | "jetspack" | "linkerd" | "sealedSecrets" | "argo"
+type Repo = 'bitnami' | 'jetspack' | 'linkerd' | 'sealedSecrets' | 'argo';
 
 type ChartInfo = {
-    chart: string,
-    version: string,
-}
+    chart: string;
+    version: string;
+};
 
-type ChartsInfo = Record<Repo, {
-    repo: string,
-    charts: Record<string, ChartInfo>
-}>
+type ChartsInfo = Record<
+    Repo,
+    {
+        repo: string;
+        charts: Record<string, ChartInfo>;
+    }
+>;
 
 // This function does nothing. It just helps with typing
-export const checkConstType = <T extends ChartsInfo>(o: T) => o
+export const checkConstType = <T extends ChartsInfo>(o: T) => o;
 
 export let helmChartsInfo = checkConstType({
     bitnami: {
@@ -44,7 +47,7 @@ export let helmChartsInfo = checkConstType({
             postgresqlHA: {
                 chart: 'postgresql-ha',
                 version: '9.1.6',
-            }
+            },
         },
     },
     sealedSecrets: {
@@ -53,7 +56,7 @@ export let helmChartsInfo = checkConstType({
             sealedSecrets: {
                 chart: 'sealed-secrets',
                 version: '2.1.7',
-            }
+            },
         },
     },
     jetspack: {
@@ -66,7 +69,7 @@ export let helmChartsInfo = checkConstType({
             certManagerTrust: {
                 chart: 'cert-manager-trust',
                 version: 'v0.1.1',
-            }
+            },
         },
     },
     linkerd: {
@@ -79,7 +82,7 @@ export let helmChartsInfo = checkConstType({
             linkerdViz: {
                 chart: 'linkerd-viz',
                 version: '2.11.2',
-            }
+            },
         },
     },
     argo: {
@@ -88,7 +91,7 @@ export let helmChartsInfo = checkConstType({
             argoCD: {
                 chart: 'argo-cd',
                 version: '4.5.3',
-            }
+            },
         },
     },
 } as const);

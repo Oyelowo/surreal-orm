@@ -1,4 +1,4 @@
-import c from "chalk";
+import c from 'chalk';
 import path from 'path';
 import sh from 'shelljs';
 import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp';
@@ -6,28 +6,21 @@ import { getResourceAbsolutePath } from '../../shared/manifestsDirectory';
 import { Environment } from '../../types/own-types';
 import { namespaceNames } from './../../namespaces/util';
 
-
-const DOCKER_SERVER = 'ghcr.io'
+const DOCKER_SERVER = 'ghcr.io';
 export const DOCKER_REGISTRY_KEY = 'my-registry-key';
 
 export function createContainerRegistrySecret(environment: Environment): void {
-    const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } =
-        getSecretsForResource("argocd", environment);
+    const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = getSecretsForResource('argocd', environment);
 
-    const dir = path.join(
-        getResourceAbsolutePath("argocd-applications-parents", environment),
-        "1-manifest"
-    );
+    const dir = path.join(getResourceAbsolutePath('argocd-applications-parents', environment), '1-manifest');
     const file = path.join(
         dir,
         // NOTE: has to be prefixed with the name "secret-". This is important for the CLI. I am considering using the file content instead but that might be more expensive operation
-        "secret-docker-registry.yaml"
+        'secret-docker-registry.yaml'
     );
 
     if (!DOCKER_USERNAME || !DOCKER_PASSWORD) {
-        console.warn(
-            c.bgYellowBright("docker username nor password not provideed")
-        );
+        console.warn(c.bgYellowBright('docker username nor password not provideed'));
         return;
     }
 

@@ -6,7 +6,9 @@ import { nginxIngressProvider } from './settings';
 
 const {
     repo,
-    charts: { nginxIngress: { chart, version }, }
+    charts: {
+        nginxIngress: { chart, version },
+    },
 } = helmChartsInfo.bitnami;
 
 const ingressControllerValues: RecursivePartial<INginxingresscontrollerbitnami> = {

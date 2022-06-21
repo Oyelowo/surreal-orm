@@ -43,7 +43,9 @@ const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
 
 const {
     repo,
-    charts: { argocd: { chart, version }, }
+    charts: {
+        argocd: { chart, version },
+    },
 } = helmChartsInfo.bitnami;
 
 export const argocdHelm = new k8s.helm.v3.Chart(

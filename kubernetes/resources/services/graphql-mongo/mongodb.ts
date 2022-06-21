@@ -67,10 +67,9 @@ In order to retain your Block Storage Volume and its data, even after the associ
         rootPassword: envVars.MONGODB_ROOT_PASSWORD,
         replicaSetKey: 'Ld1My4Q1s4', // TODO
         // array of
-        ...mappedCredentials as any,
+        ...(mappedCredentials as any),
         username: envVars.MONGODB_USERNAME,
         password: envVars.MONGODB_PASSWORD,
-    
     },
     service: {
         type: 'ClusterIP',
@@ -82,7 +81,9 @@ In order to retain your Block Storage Volume and its data, even after the associ
 // `http://${name}.${namespace}:${port}`;
 const {
     repo,
-    charts: { mongodb: { chart, version } },
+    charts: {
+        mongodb: { chart, version },
+    },
 } = helmChartsInfo.bitnami;
 export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
     envVars.MONGODB_SERVICE_NAME,

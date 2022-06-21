@@ -72,7 +72,7 @@ const mongoValues: DeepPartial<IMongodbbitnami> = {
         rootUser: 'root_user',
         rootPassword: 'root_password',
         replicaSetKey: 'Ld1My4Q1s4',
-        ...mappedCredentials as any,
+        ...(mappedCredentials as any),
     },
     service: {
         type: 'ClusterIP',
@@ -83,7 +83,9 @@ const mongoValues: DeepPartial<IMongodbbitnami> = {
 
 const {
     repo,
-    charts: { mongodb: { chart, version } },
+    charts: {
+        mongodb: { chart, version },
+    },
 } = helmChartsInfo.bitnami;
 
 // `http://${name}.${namespace}:${port}`;
@@ -92,7 +94,7 @@ export const grpcMongoMongodb = new k8s.helm.v3.Chart(
     {
         chart,
         fetchOpts: {
-            repo
+            repo,
         },
         version,
         values: mongoValues,

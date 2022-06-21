@@ -11,7 +11,9 @@ const certManagerValues: DeepPartial<ICertmanagerjetspack> = {
 
 const {
     repo,
-    charts: { certManager: { chart, version } }
+    charts: {
+        certManager: { chart, version },
+    },
 } = helmChartsInfo.jetspack;
 export const certManagerHelm = new k8s.helm.v3.Chart(
     'cert-manager',

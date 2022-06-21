@@ -19,7 +19,9 @@ const Linkerd2Values: DeepPartial<ILinkerd2linkerd> = {
 
 const {
     repo,
-    charts: { linkerd2: { chart, version }, }
+    charts: {
+        linkerd2: { chart, version },
+    },
 } = helmChartsInfo.linkerd;
 
 export const linkerd = new k8s.helm.v3.Chart(
