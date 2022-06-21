@@ -75,6 +75,11 @@ portForward:
       namespace: applications
       port: 27017
       localPort: 27017
+    - resourceType: service
+      resourceName: graphql-mongo-redis-master
+      namespace: applications
+      port: 6379
+      localPort: 6379
 #   - resourceType: service
 #     resourceName: react-web
 #     port: 3000
