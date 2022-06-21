@@ -24,11 +24,11 @@ kind: ConfigMap
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","data":{"master.conf":"dir /data\n# User-supplied master configuration:\nrename-command FLUSHDB \"\"\nrename-command FLUSHALL \"\"\n# End of master configuration","redis.conf":"# User-supplied common configuration:\n# Enable AOF https://redis.io/topics/persistence#append-only-file\nappendonly yes\n# Disable RDB persistence, AOF persistence already enabled.\nsave \"\"\n# End of common configuration","replica.conf":"dir /data\nslave-read-only yes\n# User-supplied replica configuration:\nrename-command FLUSHDB \"\"\nrename-command FLUSHALL \"\"\n# End of replica configuration"},"kind":"ConfigMap","metadata":{"labels":{"app.kubernetes.io/instance":"redis","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"redis","helm.sh/chart":"redis-16.8.5"},"name":"graphql-mongo-redis-configuration","namespace":"applications"}}
+      {"apiVersion":"v1","data":{"master.conf":"dir /data\n# User-supplied master configuration:\nrename-command FLUSHDB \"\"\nrename-command FLUSHALL \"\"\n# End of master configuration","redis.conf":"# User-supplied common configuration:\n# Enable AOF https://redis.io/topics/persistence#append-only-file\nappendonly yes\n# Disable RDB persistence, AOF persistence already enabled.\nsave \"\"\n# End of common configuration","replica.conf":"dir /data\nslave-read-only yes\n# User-supplied replica configuration:\nrename-command FLUSHDB \"\"\nrename-command FLUSHALL \"\"\n# End of replica configuration"},"kind":"ConfigMap","metadata":{"labels":{"app.kubernetes.io/instance":"redis","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"redis","helm.sh/chart":"redis-16.8.9"},"name":"graphql-mongo-redis-configuration","namespace":"applications"}}
   labels:
     app.kubernetes.io/instance: redis
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/name: redis
-    helm.sh/chart: redis-16.8.5
+    helm.sh/chart: redis-16.8.9
   name: graphql-mongo-redis-configuration
   namespace: applications
