@@ -15,7 +15,7 @@ export class ServiceDeployment<
     AN extends ServiceName,
     DBT extends DBType,
     NS extends NamespaceOfApps
-    > extends pulumi.ComponentResource {
+> extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
@@ -109,7 +109,7 @@ export class ServiceDeployment<
                             failureThreshold: 7,
                         },
                         // TODO: Use a different strategy for this. This endpoint checks our db or redis
-                        // and wont be nice if either is down. We still want to be able to show users that 
+                        // and wont be nice if either is down. We still want to be able to show users that
                         // the application is unavailable
                         livenessProbe: {
                             httpGet: {

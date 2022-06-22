@@ -34,7 +34,7 @@ export let helmChartsInfo = checkConstType({
             },
             nginxIngress: {
                 chart: 'nginx-ingress-controller',
-                version: '9.1.26',
+                version: '9.2.11',
             },
             argocd: {
                 chart: 'argo-cd',

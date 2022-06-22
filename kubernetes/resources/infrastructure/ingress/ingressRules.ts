@@ -1,3 +1,4 @@
+import { Environment } from './../../types/own-types';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaceNames } from '../../namespaces/util';
 import { graphqlMongoSettings } from '../../services/graphql-mongo/settings';
@@ -16,6 +17,26 @@ const SECRET_NAME_NGINX = 'nginx-ingress-tls';
 
 const appBase = 'oyelowo';
 // // Next, expose the app using an Ingress.
+
+type Configs = Record<Environment, { hosts: string[]; host: string }>;
+const configs: Configs = {
+    local: {
+        hosts: ['localhost'],
+        host: 'localhost',
+    },
+    development: {
+        hosts: [DOMAIN_NAME_BASE],
+        host: DOMAIN_NAME_BASE,
+    },
+    staging: {
+        hosts: [DOMAIN_NAME_BASE],
+        host: DOMAIN_NAME_BASE,
+    },
+    production: {
+        hosts: [''],
+        host: DOMAIN_NAME_BASE,
+    },
+};
 
 type CertManagerAnnotations = {
     // NOTE: Make sure you specify the right one, if using cluster-issuer, user cluster-issuer annotations, otherwise, use mere issuer
@@ -42,18 +63,12 @@ export const appIngress = new k8s.networking.v1.Ingress(
             ingressClassName: INGRESS_CLASSNAME_NGINX,
             tls: [
                 {
-                    hosts: [DOMAIN_NAME_BASE],
+                    hosts: configs[ENVIRONMENT].hosts,
                     secretName: SECRET_NAME_NGINX,
                 },
             ],
             rules: [
                 {
-                    // Replace this with your own domain!
-                    // host: "myservicea.foo.org",
-                    // TODO: Change to proper domain name for prod and other environments in case of necessity
-                    host: ENVIRONMENT === 'local' ? 'localhost' : DOMAIN_NAME_BASE,
-                    // host: ENVIRONMENT === "local" ? "localhost" : "172.104.255.25",
-                    // host: ENVIRONMENT === "local" ? "oyelowo.dev" : "oyelowo.dev",
                     http: {
                         paths: [
                             {
