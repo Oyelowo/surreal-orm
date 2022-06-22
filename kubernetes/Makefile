@@ -1,13 +1,13 @@
 setup:
 	make sync
-	npx ts-node scripts/setup.ts
+	# npx ts-node scripts/syncConfigs.ts
 
 install:
 	npm i
 
 sync:
-	npx ts-node scripts/setup.ts
-	npx ts-node scripts/downloadHelmChartTypes.ts
+	npx ts-node scripts/syncConfigs.ts
+	# npx ts-node scripts/downloadHelmChartTypes.ts
 	make format
 
 # EXAMPLE USAGE: make generate_manifests_ci environment=local

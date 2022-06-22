@@ -50,10 +50,10 @@ export interface Settings<TAppName extends ServiceName> {
 
 export type RecursivePartial<T> = {
     [P in keyof T]?: T[P] extends (infer U)[]
-    ? RecursivePartial<U>[]
-    : T[P] extends object | undefined
-    ? RecursivePartial<T[P]>
-    : T[P];
+        ? RecursivePartial<U>[]
+        : T[P] extends object | undefined
+        ? RecursivePartial<T[P]>
+        : T[P];
 };
 
 // make all properties optional recursively including nested objects.
@@ -131,7 +131,7 @@ export type OtherEnvVars = {
     OTHERS_GOOGLE_CLIENT_ID?: string;
     OTHERS_GOOGLE_CLIENT_SECRET?: string;
     OTHERS_REACT_WEB_EXTERNAL_URL?: string; // TODO: This could be make stronger typed
-}
+};
 type EnvironmentVariables<AN extends ServiceName, NS extends NamespaceOfApps, DBT extends DBType> = Extract<
     AppEnvVars<AN, NS>,
     { dbType: DBT }

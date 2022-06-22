@@ -13,7 +13,7 @@ const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 
 type PlainInputSecretsFilePath = `${typeof PLAIN_SECRETS_CONFIGS_DIR}/${Environment}.ts`;
 
-export function setupPlainSecretTSFiles() {
+export function setupOrSyncPlainSecretTSFiles() {
     ENVIRONMENTS.forEach(createSecretsConfigFile);
     sh.exec(`npx prettier --write ${PLAIN_SECRETS_CONFIGS_DIR}`);
 }
@@ -23,7 +23,7 @@ export function clearPlainInputTsSecretFilesContents() {
 
     ENVIRONMENTS.forEach(removeSecret);
 
-    setupPlainSecretTSFiles();
+    setupOrSyncPlainSecretTSFiles();
 }
 
 export function getPlainSecretInputFilePath(environment: Environment): PlainInputSecretsFilePath {

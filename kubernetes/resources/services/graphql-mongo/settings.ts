@@ -22,7 +22,9 @@ export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'mongodb', 'appli
         APP_ENVIRONMENT: getEnvironmentVariables().ENVIRONMENT,
         APP_HOST: '0.0.0.0',
         APP_PORT: '8000',
-        OTHERS_REACT_WEB_EXTERNAL_URL: getEnvironmentVariables().ENVIRONMENT ? "http://localhost:3000" : "TODO: for others. Use a hashmap getter",
+        OTHERS_REACT_WEB_EXTERNAL_URL: getEnvironmentVariables().ENVIRONMENT
+            ? 'http://localhost:3000'
+            : 'TODO: for others. Use a hashmap getter',
         OTHERS_GITHUB_CLIENT_ID: secretsFromLocalConfigs.GITHUB_CLIENT_ID,
         OTHERS_GITHUB_CLIENT_SECRET: secretsFromLocalConfigs.GITHUB_CLIENT_SECRET,
         OTHERS_GOOGLE_CLIENT_ID: secretsFromLocalConfigs.GOOGLE_CLIENT_ID,

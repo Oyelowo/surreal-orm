@@ -16,6 +16,7 @@ use url::Url;
 
 use crate::app::user::{OauthProvider, User};
 
+// TODO: Get the url as an environment variable. Should be EXTERNAL_URL
 pub(crate) const REDIRECT_URL: &str = "http://localhost:8000/api/oauth/callback";
 
 #[derive(Debug, thiserror::Error)]
