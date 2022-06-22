@@ -1,10 +1,13 @@
 export interface INginxingresscontrollerbitnami {
     global: Global;
+    kubeVersion: string;
     nameOverride: string;
     fullnameOverride: string;
+    namespaceOverride: string;
     commonLabels: CommonLabels;
     commonAnnotations: CommonLabels;
     extraDeploy: any[];
+    clusterDomain: string;
     image: Image;
     containerPorts: ContainerPorts;
     hostAliases: any[];
@@ -27,6 +30,7 @@ export interface INginxingresscontrollerbitnami {
     udp: CommonLabels;
     command: any[];
     args: any[];
+    lifecycleHooks: CommonLabels;
     extraArgs: CommonLabels;
     extraEnvVars: any[];
     extraEnvVarsCM: string;
@@ -42,12 +46,15 @@ export interface INginxingresscontrollerbitnami {
     resources: Resources;
     livenessProbe: LivenessProbe;
     readinessProbe: LivenessProbe;
+    startupProbe: LivenessProbe;
     customLivenessProbe: CommonLabels;
     customReadinessProbe: CommonLabels;
+    customStartupProbe: CommonLabels;
     lifecycle: CommonLabels;
     podLabels: CommonLabels;
     podAnnotations: CommonLabels;
     priorityClassName: string;
+    schedulerName: string;
     hostNetwork: boolean;
     dnsPolicy: string;
     terminationGracePeriodSeconds: number;
@@ -63,7 +70,7 @@ export interface INginxingresscontrollerbitnami {
     sidecars: any[];
     customTemplate: CustomTemplate;
     topologySpreadConstraints: any[];
-    podSecurityPolicy: Scope;
+    podSecurityPolicy: PodSecurityPolicy;
     defaultBackend: DefaultBackend;
     service: Service2;
     serviceAccount: ServiceAccount;
@@ -87,18 +94,28 @@ interface PrometheusRule {
 interface ServiceMonitor {
     enabled: boolean;
     namespace: string;
+    jobLabel: string;
     interval: string;
     scrapeTimeout: string;
+    relabelings: any[];
+    metricRelabelings: any[];
     selector: CommonLabels;
+    annotations: CommonLabels;
+    labels: CommonLabels;
+    honorLabels: boolean;
 }
 interface Service3 {
     type: string;
-    port: number;
+    ports: Ports2;
     annotations: Annotations;
+    labels: CommonLabels;
 }
 interface Annotations {
     'prometheus.io/scrape': string;
     'prometheus.io/port': string;
+}
+interface Ports2 {
+    metrics: number;
 }
 interface Autoscaling {
     enabled: boolean;
@@ -109,11 +126,13 @@ interface Autoscaling {
 }
 interface Rbac {
     create: boolean;
+    rules: any[];
 }
 interface ServiceAccount {
     create: boolean;
     name: string;
     annotations: CommonLabels;
+    automountServiceAccountToken: boolean;
 }
 interface Service2 {
     type: string;
@@ -126,8 +145,11 @@ interface Service2 {
     externalIPs: any[];
     loadBalancerIP: string;
     loadBalancerSourceRanges: any[];
+    extraPorts: any[];
     externalTrafficPolicy: string;
     healthCheckNodePort: number;
+    sessionAffinity: string;
+    sessionAffinityConfig: CommonLabels;
 }
 interface NodePorts {
     http: string;
@@ -150,14 +172,31 @@ interface DefaultBackend {
     podSecurityContext: PodSecurityContext;
     containerSecurityContext: ContainerSecurityContext2;
     resources: Resources;
-    livenessProbe: LivenessProbe2;
-    readinessProbe: LivenessProbe2;
+    livenessProbe: LivenessProbe;
+    readinessProbe: LivenessProbe;
+    startupProbe: LivenessProbe;
+    customStartupProbe: CommonLabels;
+    customLivenessProbe: CommonLabels;
+    customReadinessProbe: CommonLabels;
     podLabels: CommonLabels;
     podAnnotations: CommonLabels;
     priorityClassName: string;
+    schedulerName: string;
+    terminationGracePeriodSeconds: number;
+    topologySpreadConstraints: any[];
     podAffinityPreset: string;
     podAntiAffinityPreset: string;
     nodeAffinityPreset: NodeAffinityPreset;
+    command: any[];
+    args: any[];
+    lifecycleHooks: CommonLabels;
+    extraEnvVars: any[];
+    extraEnvVarsCM: string;
+    extraEnvVarsSecret: string;
+    extraVolumes: any[];
+    extraVolumeMounts: any[];
+    sidecars: any[];
+    initContainers: any[];
     affinity: CommonLabels;
     nodeSelector: CommonLabels;
     tolerations: any[];
@@ -171,25 +210,19 @@ interface Pdb {
 }
 interface Service {
     type: string;
-    port: number;
+    ports: Ports;
+    annotations: CommonLabels;
 }
-interface LivenessProbe2 {
-    enabled: boolean;
-    httpGet: HttpGet2;
-    failureThreshold: number;
-    initialDelaySeconds: number;
-    periodSeconds: number;
-    successThreshold: number;
-    timeoutSeconds: number;
-}
-interface HttpGet2 {
-    path: string;
-    port: string;
-    scheme: string;
+interface Ports {
+    http: number;
 }
 interface ContainerSecurityContext2 {
     enabled: boolean;
     runAsUser: number;
+    runAsNonRoot: boolean;
+}
+interface PodSecurityPolicy {
+    enabled: boolean;
 }
 interface CustomTemplate {
     configMapName: string;
@@ -202,17 +235,11 @@ interface NodeAffinityPreset {
 }
 interface LivenessProbe {
     enabled: boolean;
-    httpGet: HttpGet;
     failureThreshold: number;
     initialDelaySeconds: number;
     periodSeconds: number;
     successThreshold: number;
     timeoutSeconds: number;
-}
-interface HttpGet {
-    path: string;
-    port: number;
-    scheme: string;
 }
 interface Resources {
     limits: CommonLabels;
@@ -223,6 +250,7 @@ interface ContainerSecurityContext {
     allowPrivilegeEscalation: boolean;
     runAsUser: number;
     capabilities: Capabilities;
+    runAsNonRoot: boolean;
 }
 interface Capabilities {
     drop: string[];
@@ -242,6 +270,7 @@ interface HostPorts {
 }
 interface Scope {
     enabled: boolean;
+    namespace: string;
 }
 interface PublishService {
     enabled: boolean;

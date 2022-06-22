@@ -15,8 +15,7 @@ type IngressClassName = 'nginx' | 'traefik';
 export const INGRESS_CLASSNAME_NGINX: IngressClassName = 'nginx';
 const SECRET_NAME_NGINX = 'nginx-ingress-tls';
 
-const appBase = 'oyelowo';
-// // Next, expose the app using an Ingress.
+const name = 'oyelowo-ingress';
 
 type Configs = Record<Environment, { hosts: string[]; host: string }>;
 const configs: Configs = {
@@ -33,7 +32,7 @@ const configs: Configs = {
         host: DOMAIN_NAME_BASE,
     },
     production: {
-        hosts: [''],
+        hosts: [DOMAIN_NAME_BASE],
         host: DOMAIN_NAME_BASE,
     },
 };
@@ -52,10 +51,10 @@ export const annotations: Partial<IngressAnnotations> = {
     'cert-manager.io/cluster-issuer': CLUSTER_ISSUER_NAME,
 };
 export const appIngress = new k8s.networking.v1.Ingress(
-    `${appBase}-ingress`,
+    name,
     {
         metadata: {
-            name: `${appBase}-ingress`,
+            name,
             namespace: namespaceNames.applications,
             annotations: annotations as any,
         },
@@ -69,6 +68,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
             ],
             rules: [
                 {
+                    host: configs[ENVIRONMENT].host,
                     http: {
                         paths: [
                             {
