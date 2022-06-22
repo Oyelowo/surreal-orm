@@ -3,7 +3,7 @@
 // running the code
 import R from 'ramda';
 import sh from 'shelljs';
-import { Environment } from '../../resources/shared/types/own-types';
+import { Environment } from '../../resources/types/own-types';
 import { ENVIRONMENTS_ALL } from '../utils/sealedSecrets';
 import { secretRecord } from './getSecretsForApp';
 import { secretsSample } from './secretsSample';

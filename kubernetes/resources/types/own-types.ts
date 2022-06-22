@@ -50,10 +50,10 @@ export interface Settings<TAppName extends ServiceName> {
 
 export type RecursivePartial<T> = {
     [P in keyof T]?: T[P] extends (infer U)[]
-        ? RecursivePartial<U>[]
-        : T[P] extends object | undefined
-        ? RecursivePartial<T[P]>
-        : T[P];
+    ? RecursivePartial<U>[]
+    : T[P] extends object | undefined
+    ? RecursivePartial<T[P]>
+    : T[P];
 };
 
 // make all properties optional recursively including nested objects.
@@ -122,15 +122,16 @@ export type AppEnvVars<AN extends ServiceName, NS extends NamespaceOfApps> = {
     // REDIS_SERVICE_NAME?: `${AN}-redis`; // TODO: Use a derivative approach for getting the host to prevent them from going out of sync
     // REDIS_SERVICE_NAME_WITH_SUFFIX?: `${AN}-redis-master`; // TODO: Use a derivative approach for getting the host to prevent them from going out of sync
     // REDIS_PORT?: "6379";
-    GITHUB_CLIENT_ID?: string;
-    GITHUB_CLIENT_SECRET?: string;
-    GOOGLE_CLIENT_ID?: string;
-    GOOGLE_CLIENT_SECRET?: string;
-    NEXTAUTH_URL?: string;
-    GRAPHQL_MONGO_URL?: string; // TODO: This could be make stronger typed
 } & DatabaseEnvVars<`${AN}-database`, NS> &
     RedisDbEnvVars<AN, NS>;
 
+export type OtherEnvVars = {
+    OTHERS_GITHUB_CLIENT_ID?: string;
+    OTHERS_GITHUB_CLIENT_SECRET?: string;
+    OTHERS_GOOGLE_CLIENT_ID?: string;
+    OTHERS_GOOGLE_CLIENT_SECRET?: string;
+    OTHERS_REACT_WEB_EXTERNAL_URL?: string; // TODO: This could be make stronger typed
+}
 type EnvironmentVariables<AN extends ServiceName, NS extends NamespaceOfApps, DBT extends DBType> = Extract<
     AppEnvVars<AN, NS>,
     { dbType: DBT }
@@ -140,7 +141,7 @@ export type NoUnion<T, U = T> = T extends U ? ([U] extends [T] ? T : never) : ne
 
 export type AppConfigs<AN extends ServiceName, DBT extends DBType, NS extends NamespaceOfApps> = {
     kubeConfig: Settings<NoUnion<AN>>;
-    envVars: Omit<EnvironmentVariables<AN, NS, DBT>, 'dbType'>;
+    envVars: Omit<EnvironmentVariables<AN, NS, DBT>, 'dbType'> & OtherEnvVars;
     metadata: {
         name: AN;
         namespace: NS;

@@ -9,6 +9,10 @@ export const secretsSample = {
         MONGODB_ROOT_PASSWORD: 'example',
         REDIS_USERNAME: 'example',
         REDIS_PASSWORD: 'example',
+        GITHUB_CLIENT_ID: 'example',
+        GITHUB_CLIENT_SECRET: 'example',
+        GOOGLE_CLIENT_ID: 'example',
+        GOOGLE_CLIENT_SECRET: 'example',
     },
     'grpc-mongo': {
         MONGODB_USERNAME: 'example',
@@ -20,12 +24,7 @@ export const secretsSample = {
         POSTGRES_USERNAME: 'example',
         POSTGRES_PASSWORD: 'example',
     },
-    'react-web': {
-        GITHUB_CLIENT_ID: 'example',
-        GITHUB_CLIENT_SECRET: 'example',
-        GOOGLE_CLIENT_ID: 'example',
-        GOOGLE_CLIENT_SECRET: 'example',
-    },
+    'react-web': {},
     argocd: {
         ADMIN_PASSWORD: 'example',
         type: 'git',

@@ -39,7 +39,7 @@ export async function bootstrapCluster(environment: Environment) {
     applyResourceManifests('cert-manager', environment);
 
     // # Wait for cert-manager and cert-manager-trust controllers to be in running phase so that we can use it to encrypt secrets
-    const { certManager, certManagerTrust } = helmChartsInfo.jetspackRepo;
+    const { certManager, certManagerTrust } = helmChartsInfo.jetspack.charts;
     sh.exec(`kubectl rollout status deployment/${certManager.chart} -n=${namespaceNames.certManager}`);
     sh.exec(`kubectl rollout status deployment/${certManagerTrust.chart} -n=${namespaceNames.certManager}`);
 

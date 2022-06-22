@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import sh from 'shelljs';
-import { Environment } from '../../resources/shared/types/own-types';
+import { Environment } from '../../resources/types/own-types';
 // import { ARGV } from "./bootstrap";
 
 /*

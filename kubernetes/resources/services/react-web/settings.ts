@@ -18,8 +18,9 @@ export const reactWebSettings: AppConfigs<'react-web', 'doesNotHaveDb', 'applica
         APP_ENVIRONMENT: getEnvironmentVariables().ENVIRONMENT,
         APP_HOST: '0.0.0.0',
         APP_PORT: '3000',
-        // Not really used as all backend functionality has been moved to rust backend. So, not using typescript for any backend work
-        GRAPHQL_MONGO_URL: getFQDNFromSettings(graphqlMongoSettings), // Get Url mongoFQDN
+        // Not really used as all backend functionality has been moved to rust backend. 
+        // So, not using typescript for any backend work. Keeping for reference purpose
+        // GRAPHQL_MONGO_URL: getFQDNFromSettings(graphqlMongoSettings), // Get Url mongoFQDN
     },
     metadata: {
         name: 'react-web',

@@ -6,6 +6,7 @@ install:
 	npm i
 
 sync:
+	npx ts-node scripts/setup.ts
 	npx ts-node scripts/downloadHelmChartTypes.ts
 	make format
 

@@ -3,9 +3,9 @@ import fs from 'fs';
 import yaml from 'js-yaml';
 import sh from 'shelljs';
 import { APPLICATION_AUTOMERGE_ANNOTATION_KEY } from '../../resources/shared/constants';
-import { Environment } from '../../resources/shared/types/own-types';
-import { SealedSecretTemplate } from '../../resources/shared/types/sealedSecretTemplate';
-import { SecretTemplate } from '../../resources/shared/types/SecretTemplate';
+import { Environment } from '../../resources/types/own-types';
+import { SealedSecretTemplate } from '../../resources/types/sealedSecretTemplate';
+import { SecretTemplate } from '../../resources/types/SecretTemplate';
 import { getSecretManifestsPaths, getSecretPathsInfo, SEALED_SECRETS_CONTROLLER_NAME } from './sealedSecrets';
 
 export function updateAppSealedSecrets(environment: Environment) {

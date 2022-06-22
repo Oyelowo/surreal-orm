@@ -9,12 +9,8 @@ import util from 'util';
 import { getManifestsBaseDir } from '../../resources/shared/manifestsDirectory';
 import { ImageTags, imageTagsObjectValidator } from '../../resources/shared/validations';
 
-// TODO: Use prompt to ask for which cluster this should be used with for the sealed secrets controller
-// npm i inquirer
 const globAsync = util.promisify(glob);
 
-// import z from "zod";
-// const MANIFESTS_DIR = path.join(__dirname, "..", "manifests");
 const MANIFESTS_DIR = getManifestsBaseDir();
 const IMAGE_TAGS_FILES = path.join(MANIFESTS_DIR, 'image-tags', '*');
 
