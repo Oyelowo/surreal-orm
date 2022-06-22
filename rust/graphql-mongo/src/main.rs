@@ -30,12 +30,12 @@ async fn main() {
     let redis_config = RedisConfigs::get();
     let redis = redis_config.clone().get_client().unwrap_or_else(|e| {
         log::error!("Problem getting database. Error: {e:?}");
-        process::exit(-1)
+        process::exit(1)
     });
     let database = MongodbConfigs::get();
     let database = database.get_database().unwrap_or_else(|e| {
         log::error!("Problem getting database. Error: {e:?}");
-        process::exit(-1)
+        process::exit(1)
     });
 
     let app_url = &application.get_url();
@@ -79,6 +79,6 @@ async fn main() {
         .await
         .unwrap_or_else(|e| {
             log::error!("Problem running server. Error: {e}");
-            process::exit(-1)
+            process::exit(1)
         });
 }

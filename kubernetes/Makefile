@@ -23,15 +23,15 @@ generate_sealed_secrets:
 	npx ts-node scripts/generateSealedSecrets.ts
 
 dev:
-	# k3d cluster delete local
-	# k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
-	# kubectx k3d-local
+	k3d cluster delete local
+	k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+	kubectx k3d-local
 		
 	make generate_manifests_ci environment=local
 
 
 	# kubectl apply -R -f  ./manifests/local/secrets-encrypted
-	skaffold run --cleanup=false
+	skaffold dev --cleanup=false
 	# skaffold run --trigger="manual" --no-prune=true --no-prune-children=true
 
 
