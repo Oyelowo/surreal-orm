@@ -1,6 +1,7 @@
+import * as cm from './../../../crds/certmanager';
 import { getEnvironmentVariables } from './../../shared/validations';
 import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
-import * as cm from '../../../crd2pulumi/certManager/certmanager';
+
 import { certManagerProvider } from './settings';
 
 export const CLUSTER_ISSUER_NAME = 'letsencrypt-cluster-issuer';

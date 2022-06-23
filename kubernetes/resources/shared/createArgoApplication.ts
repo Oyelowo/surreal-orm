@@ -1,11 +1,11 @@
 import * as kx from '@pulumi/kubernetesx';
 import { Resource } from '@pulumi/pulumi';
-import * as argocd from '../../crd2pulumi/argocd';
+import * as argocd from '../../crds/argoproj';
 import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp';
 import { NamespaceName, namespaceNames } from './../namespaces/util';
 import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
 import { getResourceProvider, getResourceRelativePath } from './manifestsDirectory';
-import { ArgocdAppResourceName, ResourceName } from '../types/own-types';
+import { ResourceName } from '../types/own-types';
 import { getEnvironmentVariables } from './validations';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
@@ -24,7 +24,7 @@ export function createArgocdApplication({
     namespace,
     parent,
 }: ArgocdApplicationProps) {
-    const argocdApplication = new argocd.argoproj.v1alpha1.Application(
+    const argocdApplication = new argocd.v1alpha1.Application(
         sourceApplication,
         {
             metadata: {

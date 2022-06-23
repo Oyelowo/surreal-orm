@@ -1,4 +1,4 @@
-import * as cm from '../../../crd2pulumi/certManager/certmanager';
+import * as cm from './../../../crds/certmanager';
 import { namespaceNames } from '../../namespaces/util';
 import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer';
 import { linkerdProvider } from './settings';

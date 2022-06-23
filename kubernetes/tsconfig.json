@@ -17,7 +17,7 @@
         "types": ["node"],
         "typeRoots": ["node_modules/@types"]
     },
-    "exclude": ["crd2pulumi", "node_modules"],
+    "exclude": ["crds", "node_modules"],
     "files": [
         "index.ts",
         "scripts/utils/bootstrapCluster.ts",
