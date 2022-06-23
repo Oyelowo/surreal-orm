@@ -6,7 +6,7 @@ import { DeepPartial } from '../../types/own-types';
 import { certManagerProvider } from './settings';
 
 const certManagerValues: DeepPartial<ICertmanagerbitnami> = {
-    installCRDs: true
+    installCRDs: true,
 };
 
 const {

@@ -64,7 +64,7 @@ export let helmChartsInfo = checkConstType({
         charts: {
             certManager: {
                 chart: 'cert-manager',
-                version: 'v1.8.2',
+                version: 'v1.8.0',
             },
             certManagerTrust: {
                 chart: 'cert-manager-trust',

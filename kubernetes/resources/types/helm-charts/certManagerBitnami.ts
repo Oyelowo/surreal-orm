@@ -59,6 +59,7 @@ interface Cainjector {
     command: any[];
     args: any[];
     priorityClassName: string;
+    runtimeClassName: string;
     schedulerName: string;
     topologySpreadConstraints: any[];
     hostAliases: any[];
@@ -97,6 +98,7 @@ interface Webhook {
     customLivenessProbe: CommonLabels;
     customReadinessProbe: CommonLabels;
     priorityClassName: string;
+    runtimeClassName: string;
     schedulerName: string;
     topologySpreadConstraints: any[];
     hostAliases: any[];
@@ -139,6 +141,7 @@ interface Controller {
     command: any[];
     args: any[];
     priorityClassName: string;
+    runtimeClassName: string;
     schedulerName: string;
     topologySpreadConstraints: any[];
     hostAliases: any[];

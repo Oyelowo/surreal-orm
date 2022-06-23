@@ -27,7 +27,8 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
             .exec(`find ${manifestsDirForEnv} -type d -name "${dirName}"`, {
                 silent: true,
             })
-            .stdout.trim().split('\n');
+            .stdout.trim()
+            .split('\n');
 
     const manifestsNonCrds = getManifestsWithinDirName('1-manifest');
     const manifestsCrds = getManifestsWithinDirName('0-crd');
@@ -43,7 +44,7 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     //     const exec = sh.exec(
     //         `
     //     ${getEnvVarsForScript(environment, imageTags)}
-    //     export PULUMI_CONFIG_PASSPHRASE="not-needed" 
+    //     export PULUMI_CONFIG_PASSPHRASE="not-needed"
     //     pulumi up --yes --skip-preview --stack dev
     //    `
     //     );
@@ -53,16 +54,14 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     //     process.exit(-1);
     // }
 
-
-    const manifestsCrdsFilesUpdated = getManifestsWithinDirName('0-crd').flatMap(dir => {
-        const crds = sh.ls(dir).stdout.trim().split("\n")
-        const isNotEmptyFile = (f: string) => Boolean(f.trim())
-        const getFullPathForFile = (f: string) => p.join(dir, f.trim())
+    const manifestsCrdsFilesUpdated = getManifestsWithinDirName('0-crd').flatMap((dir) => {
+        const crds = sh.ls(dir).stdout.trim().split('\n');
+        const isNotEmptyFile = (f: string) => Boolean(f.trim());
+        const getFullPathForFile = (f: string) => p.join(dir, f.trim());
 
         return crds.filter(isNotEmptyFile).map(getFullPathForFile);
     });
 
-
-    sh.exec(` crd2pulumi --nodejsPath ${getMainBaseDir()}/crds ${manifestsCrdsFilesUpdated.join(" ")} --force`);
+    sh.exec(` crd2pulumi --nodejsPath ${getMainBaseDir()}/crds ${manifestsCrdsFilesUpdated.join(' ')} --force`);
     // sh.rm('-rf', './login');
 }
