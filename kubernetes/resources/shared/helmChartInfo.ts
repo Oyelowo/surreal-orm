@@ -30,7 +30,7 @@ export let helmChartsInfo = checkConstType({
             },
             certManager: {
                 chart: 'cert-manager',
-                version: '0.5.0',
+                version: '0.6.1',
             },
             nginxIngress: {
                 chart: 'nginx-ingress-controller',
@@ -64,7 +64,7 @@ export let helmChartsInfo = checkConstType({
         charts: {
             certManager: {
                 chart: 'cert-manager',
-                version: 'v1.8.0',
+                version: 'v1.8.2',
             },
             certManagerTrust: {
                 chart: 'cert-manager-trust',
