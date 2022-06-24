@@ -1,18 +1,18 @@
-import { ICertmanagertrustjetspack } from './../../types/helm-charts/certManagerTrustJetspack';
+import { ICertmanagertrustjetstack } from './../../types/helm-charts/certManagerTrustJetstack';
 import { certManagerProvider } from './settings';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaceNames } from '../../namespaces/util';
 import { DeepPartial } from '../../types/own-types';
 
-const values: DeepPartial<ICertmanagertrustjetspack> = {};
+const values: DeepPartial<ICertmanagertrustjetstack> = {};
 
 const {
     repo,
     charts: {
         certManagerTrust: { chart, version },
     },
-} = helmChartsInfo.jetspack;
+} = helmChartsInfo.jetstack;
 
 export const certManagerTrustDeploymentName = chart;
 export const certManagerTrustHelm = new k8s.helm.v3.Chart(
