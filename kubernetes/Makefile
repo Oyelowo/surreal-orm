@@ -25,7 +25,7 @@ generate_sealed_secrets:
 
 dev:
 	k3d cluster delete local
-	k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+	k3d cluster create local --port 6000:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
 	kubectx k3d-local
 		
 	make generate_manifests_ci environment=local

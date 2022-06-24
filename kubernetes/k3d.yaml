@@ -47,7 +47,7 @@ volumes:
       - server[*]
       - agent[*]
 ports:
-  - port: 8080:80
+  - port: 6000:80
     nodeFilters:
       - loadbalancer
 options:

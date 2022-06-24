@@ -116,4 +116,4 @@ deploy:
 #   # namespace: default
 #   resourceName: nginx-ingress-controller
 #   port: 80
-#   localPort: 8080
+#   localPort: 6000

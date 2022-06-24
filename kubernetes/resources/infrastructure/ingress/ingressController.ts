@@ -14,7 +14,7 @@ const {
 const ingressControllerValues: RecursivePartial<INginxingresscontrollerbitnami> = {
     service: {
         ports: {
-            http: 80, // Maps to 8080 by default locally
+            http: 80, // Maps to 6000 with k3d in the make file
             https: 443,
         },
     },
