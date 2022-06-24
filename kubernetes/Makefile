@@ -7,7 +7,7 @@ install:
 
 sync:
 	npx ts-node scripts/syncConfigs.ts
-	# npx ts-node scripts/syncConfigs.ts
+	make generate_manifests_ci environment=local 
 	make format
 
 # EXAMPLE USAGE: make generate_manifests_ci environment=local

@@ -1,4 +1,4 @@
-import * as cm from './../../../crds/certmanager';
+import * as cm from './../../../crds-generated/certmanager';
 import { namespaceNames } from '../../namespaces/util';
 import { certManagerProvider } from './../cert-manager/settings';
 

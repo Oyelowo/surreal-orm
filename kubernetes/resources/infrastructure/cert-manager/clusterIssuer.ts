@@ -1,4 +1,4 @@
-import * as cm from './../../../crds/certmanager';
+import * as cm from './../../../crds-generated/certmanager';
 import { getEnvironmentVariables } from './../../shared/validations';
 import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
 

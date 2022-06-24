@@ -1,6 +1,6 @@
 import * as kx from '@pulumi/kubernetesx';
 import { Resource } from '@pulumi/pulumi';
-import * as argocd from '../../crds/argoproj';
+import * as argocd from '../../crds-generated/argoproj';
 import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp';
 import { NamespaceName, namespaceNames } from './../namespaces/util';
 import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';

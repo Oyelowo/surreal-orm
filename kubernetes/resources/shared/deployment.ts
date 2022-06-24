@@ -1,7 +1,7 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
-import * as argocd from '../../crds/argoproj';
+import * as argocd from '../../crds-generated/argoproj';
 import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp';
 import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker';
 import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
@@ -15,7 +15,7 @@ export class ServiceDeployment<
     AN extends ServiceName,
     DBT extends DBType,
     NS extends NamespaceOfApps
-> extends pulumi.ComponentResource {
+    > extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
