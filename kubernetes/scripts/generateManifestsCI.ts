@@ -22,4 +22,4 @@ async function main() {
     });
 }
 
-main().catch(e=> console.log("e",e));
+main().catch((e) => console.log('e', e));
