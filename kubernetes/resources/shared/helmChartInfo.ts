@@ -1,4 +1,4 @@
-type Repo = 'bitnami' | 'jetspack' | 'linkerd' | 'sealedSecrets' | 'argo';
+type Repo = 'bitnami' | 'jetstack' | 'linkerd' | 'sealedSecrets' | 'argo';
 
 type ChartInfo = {
     chart: string;
@@ -59,12 +59,12 @@ export let helmChartsInfo = checkConstType({
             },
         },
     },
-    jetspack: {
+    jetstack: {
         repo: 'https://charts.jetstack.io',
         charts: {
             certManager: {
                 chart: 'cert-manager',
-                version: 'v1.8.0',
+                version: 'v1.8.2',
             },
             certManagerTrust: {
                 chart: 'cert-manager-trust',

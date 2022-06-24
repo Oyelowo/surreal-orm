@@ -1,4 +1,4 @@
-export interface ICertmanagertrustjetspack {
+export interface ICertmanagertrustjetstack {
     replicaCount: number;
     image: Image;
     app: App;

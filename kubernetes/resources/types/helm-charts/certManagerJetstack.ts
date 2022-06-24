@@ -1,4 +1,4 @@
-export interface ICertmanagerjetspack {
+export interface ICertmanagerjetstack {
     global: Global;
     installCRDs: boolean;
     replicaCount: number;
