@@ -23,14 +23,16 @@ bootstrap_cluster:
 generate_sealed_secrets:
 	npx ts-node scripts/generateSealedSecrets.ts
 
-dev:
+dev-setup:
 	k3d cluster delete local
-	k3d cluster create local --port 6000:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
+	k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
 	kubectx k3d-local
 		
 	make generate_manifests_ci environment=local
 	make format
 
+dev:
+	# make dev-setup
 
 	# kubectl apply -R -f  ./manifests/local/secrets-encrypted
 	skaffold dev --cleanup=false

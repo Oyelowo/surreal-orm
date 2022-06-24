@@ -135,9 +135,9 @@ pub async fn oauth_login_authentication(
 ) -> Result<RedirectCustom> {
     let user = authenticate_user(uri, redis, session, db).await;
     match user {
-        Ok(_u) => Ok(RedirectCustom::found("http://localhost:6000")),
+        Ok(_u) => Ok(RedirectCustom::found("http://localhost:8080")),
         Err(e) => Ok(RedirectCustom::found(format!(
-            "http://localhost:6000/login?error={e}"
+            "http://localhost:8080/login?error={e}"
         ))),
     }
 }
