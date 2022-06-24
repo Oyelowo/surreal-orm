@@ -17,25 +17,36 @@ const SECRET_NAME_NGINX = 'nginx-ingress-tls';
 
 const name = 'oyelowo-ingress';
 
-type Configs = Record<Environment, { hosts: string[]; host: string }>;
-const configs: Configs = {
+type DomainBase = 'localhost' | typeof DOMAIN_NAME_BASE;
+
+interface Hosts {
+    base: DomainBase;
+    api: `api.${DomainBase}`;
+}
+
+type Configs = Record<Environment, Hosts>;
+const api = (base: DomainBase) => `api.${base}` as const;
+
+const hosts: Configs = {
     local: {
-        hosts: ['localhost'],
-        host: 'localhost',
+        base: 'localhost',
+        api: 'api.localhost',
     },
     development: {
-        hosts: [DOMAIN_NAME_BASE],
-        host: DOMAIN_NAME_BASE,
+        base: DOMAIN_NAME_BASE,
+        api: api(DOMAIN_NAME_BASE),
     },
     staging: {
-        hosts: [DOMAIN_NAME_BASE],
-        host: DOMAIN_NAME_BASE,
+        base: DOMAIN_NAME_BASE,
+        api: api(DOMAIN_NAME_BASE),
     },
     production: {
-        hosts: [DOMAIN_NAME_BASE],
-        host: DOMAIN_NAME_BASE,
+        base: DOMAIN_NAME_BASE,
+        api: api(DOMAIN_NAME_BASE),
     },
 };
+
+const getHosts = (environemnt: Environment) => Object.values(hosts[environemnt]) as string[];
 
 type CertManagerAnnotations = {
     // NOTE: Make sure you specify the right one, if using cluster-issuer, user cluster-issuer annotations, otherwise, use mere issuer
@@ -62,13 +73,13 @@ export const appIngress = new k8s.networking.v1.Ingress(
             ingressClassName: INGRESS_CLASSNAME_NGINX,
             tls: [
                 {
-                    hosts: configs[ENVIRONMENT].hosts,
+                    hosts: getHosts(ENVIRONMENT),
                     secretName: SECRET_NAME_NGINX,
                 },
             ],
             rules: [
                 {
-                    host: configs[ENVIRONMENT].host,
+                    host: hosts[ENVIRONMENT].base,
                     http: {
                         paths: [
                             {
@@ -82,51 +93,26 @@ export const appIngress = new k8s.networking.v1.Ingress(
                                     },
                                 },
                             },
-                            {
-                                pathType: 'Prefix',
-                                path: '/graphql',
-                                backend: {
-                                    service: {
-                                        name: graphqlMongoSettings.metadata.name,
-                                        port: {
-                                            number: Number(graphqlMongoSettings.envVars.APP_PORT),
-                                        },
-                                    },
-                                },
-                            },
-                            // {
-                            //   pathType: "Prefix",
-                            //   path: "/graphql",
-                            //   backend: {
-                            //     service: {
-                            //       name: graphqlPostgresSettings.metadata.name,
-                            //       port: {
-                            //         number: Number(graphqlPostgresSettings.envVars.APP_PORT),
-                            //       },
-                            //     },
-                            //   },
-                            // },
                         ],
                     },
                 },
-                // {
-                //   // Replace this with your own domain!
-                //   host: "myserviceb.foo.org",
-                //   http: {
-                //     paths: [
-                //       {
-                //         pathType: "Prefix",
-                //         path: "/",
-                //         backend: {
-                //           service: {
-                //             name: graphqlPostgresSettings.resourceName,
-                //             port: { number: Number(graphqlPostgresEnvVars.APP_PORT) },
-                //           },
-                //         },
-                //       },
-                //     ],
-                //   },
-                // },
+                {
+                    host: hosts[ENVIRONMENT].api,
+                    http: {
+                        paths: [
+                            {
+                                pathType: 'Prefix',
+                                path: '/',
+                                backend: {
+                                    service: {
+                                        name: graphqlMongoSettings.metadata.name,
+                                        port: { number: Number(graphqlMongoSettings.envVars.APP_PORT) },
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                },
             ],
         },
     },

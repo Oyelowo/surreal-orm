@@ -29,6 +29,7 @@ dev:
 	kubectx k3d-local
 		
 	make generate_manifests_ci environment=local
+	make format
 
 
 	# kubectl apply -R -f  ./manifests/local/secrets-encrypted
