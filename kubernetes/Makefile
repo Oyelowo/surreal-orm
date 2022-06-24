@@ -13,7 +13,7 @@ sync:
 # EXAMPLE USAGE: make generate_manifests_ci environment=local
 # environment options: local, development, staging, production
 generate_manifests_ci:
-	make sync
+	# make sync
 	npx ts-node scripts/generateManifestsCI.ts --environment=$(environment)
 
 
