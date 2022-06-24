@@ -32,27 +32,25 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
 
     const manifestsNonCrds = getManifestsWithinDirName('1-manifest');
     const manifestsCrds = getManifestsWithinDirName('0-crd');
-    //     manifestsNonCrds.concat(manifestsCrds).forEach((f) => sh.rm('-rf', f.trim()));
+    manifestsNonCrds.concat(manifestsCrds).forEach((f) => sh.rm('-rf', f.trim()));
 
-    //     handleShellError(sh.rm('-rf', `${p.join(getMainBaseDir(), 'Pulumi.dev.yaml')}`));
-    //     handleShellError(sh.exec("export PULUMI_CONFIG_PASSPHRASE='not-needed' && pulumi stack init --stack dev"));
+    handleShellError(sh.rm('-rf', `${p.join(getMainBaseDir(), 'Pulumi.dev.yaml')}`));
+    handleShellError(sh.exec("export PULUMI_CONFIG_PASSPHRASE='not-needed' && pulumi stack init --stack dev"));
 
-    //     // Pulumi needs some environment variables set for generating deployments with image tag
-    //     /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
-    //      */
+    // Pulumi needs some environment variables set for generating deployments with image tag
+    /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
+     */
+    const exec = sh.exec(
+        `
+        ${getEnvVarsForScript(environment, imageTags)}
+        export PULUMI_CONFIG_PASSPHRASE="not-needed"
+        pulumi up --yes --skip-preview --stack dev
+       `
+    );
 
-    //     const exec = sh.exec(
-    //         `
-    //     ${getEnvVarsForScript(environment, imageTags)}
-    //     export PULUMI_CONFIG_PASSPHRASE="not-needed"
-    //     pulumi up --yes --skip-preview --stack dev
-    //    `
-    //     );
-
-    // if (exec.stderr) {
-    //     console.warn(c.redBright(exec.stderr));
-    //     process.exit(-1);
-    // }
+    if (exec.stderr) {
+        throw new Error(c.redBright(exec.stderr));
+    }
 
     const manifestsCrdsFilesUpdated = getManifestsWithinDirName('0-crd').flatMap((dir) => {
         const crds = sh.ls(dir).stdout.trim().split('\n');
@@ -62,6 +60,8 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
         return crds.filter(isNotEmptyFile).map(getFullPathForFile);
     });
 
-    sh.exec(` crd2pulumi --nodejsPath ${getMainBaseDir()}/crds ${manifestsCrdsFilesUpdated.join(' ')} --force`);
-    // sh.rm('-rf', './login');
+    sh.exec(
+        ` crd2pulumi --nodejsPath ${getMainBaseDir()}/crds-generated ${manifestsCrdsFilesUpdated.join(' ')} --force`
+    );
+    sh.rm('-rf', './login');
 }
