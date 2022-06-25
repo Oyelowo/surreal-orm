@@ -1,3 +1,4 @@
+import { hosts } from './hosts';
 import { Environment } from './../../types/own-types';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaceNames } from '../../namespaces/util';
@@ -17,34 +18,6 @@ const SECRET_NAME_NGINX = 'nginx-ingress-tls';
 
 const name = 'oyelowo-ingress';
 
-type DomainBase = 'localhost' | typeof DOMAIN_NAME_BASE;
-
-interface Hosts {
-    base: DomainBase;
-    api: `api.${DomainBase}`;
-}
-
-type Configs = Record<Environment, Hosts>;
-const api = (base: DomainBase) => `api.${base}` as const;
-
-const hosts: Configs = {
-    local: {
-        base: 'localhost',
-        api: 'api.localhost',
-    },
-    development: {
-        base: DOMAIN_NAME_BASE,
-        api: api(DOMAIN_NAME_BASE),
-    },
-    staging: {
-        base: DOMAIN_NAME_BASE,
-        api: api(DOMAIN_NAME_BASE),
-    },
-    production: {
-        base: DOMAIN_NAME_BASE,
-        api: api(DOMAIN_NAME_BASE),
-    },
-};
 
 const getHosts = (environemnt: Environment) => Object.values(hosts[environemnt]) as string[];
 
@@ -57,9 +30,13 @@ type CertManagerAnnotations = {
 
 type IngressAnnotations = NginxConfiguration & CertManagerAnnotations;
 export const annotations: Partial<IngressAnnotations> = {
-    'nginx.ingress.kubernetes.io/ssl-redirect': 'false',
-    'nginx.ingress.kubernetes.io/use-regex': 'true',
+    // 'nginx.ingress.kubernetes.io/ssl-redirect': 'false',
+    // 'nginx.ingress.kubernetes.io/use-regex': 'true',
+    // 'nginx.ingress.kubernetes.io/rewrite-target': "/*",
     'cert-manager.io/cluster-issuer': CLUSTER_ISSUER_NAME,
+    // 'nginx.ingress.kubernetes.io/cors-allow-credentials': 'true',
+    // 'nginx.ingress.kubernetes.io/cors-allow-origin': 'http://localhost:8080',
+    // 'nginx.ingress.kubernetes.io/enable-cors': 'false',
 };
 export const appIngress = new k8s.networking.v1.Ingress(
     name,
@@ -93,16 +70,10 @@ export const appIngress = new k8s.networking.v1.Ingress(
                                     },
                                 },
                             },
-                        ],
-                    },
-                },
-                {
-                    host: hosts[ENVIRONMENT].api,
-                    http: {
-                        paths: [
                             {
                                 pathType: 'Prefix',
-                                path: '/',
+                                // path: "/?(.*)",
+                                path: '/graphql ',
                                 backend: {
                                     service: {
                                         name: graphqlMongoSettings.metadata.name,
@@ -113,6 +84,23 @@ export const appIngress = new k8s.networking.v1.Ingress(
                         ],
                     },
                 },
+                // {
+                //     host: hosts[ENVIRONMENT].api,
+                //     http: {
+                //         paths: [
+                //             {
+                //                 pathType: 'Prefix',
+                //                 path: '/',
+                //                 backend: {
+                //                     service: {
+                //                         name: graphqlMongoSettings.metadata.name,
+                //                         port: { number: Number(graphqlMongoSettings.envVars.APP_PORT) },
+                //                     },
+                //                 },
+                //             },
+                //         ],
+                //     },
+                // },
             ],
         },
     },

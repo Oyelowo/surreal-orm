@@ -1,7 +1,7 @@
 import c from 'chalk';
 import p from 'path';
 import sh from 'shelljs';
-import { getGeneratedEnvManifestsDir, getMainBaseDir } from '../../resources/shared/manifestsDirectory';
+import { getGeneratedCrdsCodeDir, getGeneratedEnvManifestsDir, getMainBaseDir } from '../../resources/shared/manifestsDirectory';
 import { ImageTags } from '../../resources/shared/validations';
 import { GenSealedSecretsProps } from './generateAllSealedSecrets';
 import { getEnvVarsForScript, handleShellError } from './shared';
@@ -52,7 +52,15 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
         throw new Error(c.redBright(exec.stderr));
     }
 
-    const manifestsCrdsFilesUpdated = getManifestsWithinDirName('0-crd').flatMap((dir) => {
+    const updatedCrds = getManifestsWithinDirName("0-crd");
+    syncCrdsCode(updatedCrds);
+
+    sh.rm('-rf', './login');
+}
+
+
+function syncCrdsCode(updatedCrds: string[]) {
+    const manifestsCrdsFilesUpdated = updatedCrds.flatMap((dir) => {
         const crds = sh.ls(dir).stdout.trim().split('\n');
         const isNotEmptyFile = (f: string) => Boolean(f.trim());
         const getFullPathForFile = (f: string) => p.join(dir, f.trim());
@@ -63,5 +71,8 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     sh.exec(
         ` crd2pulumi --nodejsPath ${getMainBaseDir()}/crds-generated ${manifestsCrdsFilesUpdated.join(' ')} --force`
     );
-    sh.rm('-rf', './login');
+
+    getGeneratedCrdsCodeDir()
+    sh.exec(`npx prettier --write ${getGeneratedCrdsCodeDir()}`)
 }
+

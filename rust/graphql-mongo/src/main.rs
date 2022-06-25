@@ -15,7 +15,7 @@ use graphql_mongo::{
     },
     utils::graphql::{graphql_handler, graphql_handler_ws, graphql_playground, setup_graphql},
 };
-use log::info;
+
 use poem::{
     get,
     listener::TcpListener,
@@ -56,12 +56,15 @@ async fn main() {
             process::exit(1)
         });
 
-    let app = Route::new()
+    let api_routes = Route::new()
         .at("/healthz", get(healthz))
         .at("/oauth/signin/:oauth_provider", get(oauth_login_initiator))
         .at("/oauth/callback", get(oauth_login_authentication))
         .at("/graphql", get(graphql_playground).post(graphql_handler))
-        .at("/graphql/ws", get(graphql_handler_ws))
+        .at("/graphql/ws", get(graphql_handler_ws));
+
+    let api = Route::new()
+        .nest("/api", api_routes)
         .data(schema)
         .data(database)
         .data(redis)
@@ -72,10 +75,10 @@ async fn main() {
         // .with(Logger)
         .with(Tracing);
 
-    info!("Playground: {app_url}");
+    log::info!("Playground: {app_url}");
 
     Server::new(TcpListener::bind(app_url))
-        .run(app)
+        .run(api)
         .await
         .unwrap_or_else(|e| {
             log::error!("Problem running server. Error: {e}");

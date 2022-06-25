@@ -31,6 +31,7 @@ pub async fn get_session(
     let cookie_config = CookieConfig::private(cookie_key)
         .name("oyelowo-session")
         .secure(matches!(environment, Production | Staging | Development))
+        // Add domain? e.g .domain.com
         .same_site(SameSite::Lax)
         .max_age(Some(get_session_duration_std()));
 

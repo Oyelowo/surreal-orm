@@ -22,6 +22,11 @@ export const getGeneratedEnvManifestsDir = (environment: Environment) => {
     return path.join(MANIFESTS_DIR, 'generated', environment);
 };
 
+export const getGeneratedCrdsCodeDir = () => {
+    const baseDir = getMainBaseDir();
+    return path.join(baseDir, "crds-generated");
+}
+
 export const getHelmChartTypesDir = () => {
     const BASE_DIR = getMainBaseDir();
     return path.join(BASE_DIR, 'resources', 'types', 'helm-charts');
