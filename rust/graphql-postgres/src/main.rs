@@ -15,8 +15,8 @@ use poem::{get, listener::TcpListener, middleware::Tracing, EndpointExt, Route, 
 #[tokio::main]
 async fn main() {
     // env_logger::init();
-    let application = ApplicationConfigs::get();
-    let redis_config = RedisConfigs::get();
+    let application = ApplicationConfigs::default();
+    let redis_config = RedisConfigs::default();
     let app_url = &application.get_url();
 
     let schema = setup_graphql()

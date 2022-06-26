@@ -1,4 +1,5 @@
 use chrono::{Duration, Utc};
+use common::configurations::oauth::OauthGoogleConfigs;
 use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, PkceCodeVerifier, RedirectUrl,
     RevocationUrl, Scope, TokenResponse, TokenUrl,
@@ -35,14 +36,11 @@ pub(crate) struct GoogleConfig {
 
 impl GoogleConfig {
     pub fn new() -> Self {
+        let env = OauthGoogleConfigs::default();
+
         let basic_config = OauthConfig::builder()
-            .client_id(ClientId::new(
-                "855174209543-i23grd1ts6qbq568dfl43hla7hv9cn4u.apps.googleusercontent.com"
-                    .to_string(),
-            ))
-            .client_secret(ClientSecret::new(
-                "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".into(),
-            ))
+            .client_id(ClientId::new(env.google_client_id))
+            .client_secret(ClientSecret::new(env.google_client_secret))
             .auth_url(
                 AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".to_string())
                     .expect("Invalid authorization endpoint URL"),

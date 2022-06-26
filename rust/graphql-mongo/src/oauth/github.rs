@@ -1,4 +1,5 @@
 use chrono::{Duration, Utc};
+use common::configurations::oauth::OauthGithubConfigs;
 use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, PkceCodeVerifier, RedirectUrl, Scope,
     TokenResponse, TokenUrl,
@@ -36,10 +37,10 @@ pub(crate) struct GithubConfig {
 
 impl GithubConfig {
     pub fn new() -> Self {
+        let env = OauthGithubConfigs::default();
         let basic_config = OauthConfig {
-            // Get first two from environment variable
-            client_id: ClientId::new("7b42a802131cb19d2b49".to_string()),
-            client_secret: ClientSecret::new("bd30006cbcdb2a40901c9d4207a4a79d8c4f67c0".into()),
+            client_id: ClientId::new(env.github_client_id),
+            client_secret: ClientSecret::new(env.github_client_secret),
             auth_url: AuthUrl::new("https://github.com/login/oauth/authorize".to_string())
                 .expect("Invalid authorization endpoint URL"),
             token_url: TokenUrl::new("https://github.com/login/oauth/access_token".to_string())

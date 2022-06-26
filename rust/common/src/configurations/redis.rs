@@ -6,7 +6,7 @@ use serde::Deserialize;
 use serde_aux::prelude::deserialize_number_from_string;
 use thiserror;
 
-#[derive(Deserialize, Debug, Default, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub struct RedisConfigs {
     // pub username: String,
@@ -17,11 +17,13 @@ pub struct RedisConfigs {
     pub port: u16,
 }
 
-impl RedisConfigs {
-    pub fn get() -> Self {
+impl Default for RedisConfigs {
+    fn default() -> Self {
         get_env_vars_by_prefix("REDIS_")
     }
+}
 
+impl RedisConfigs {
     fn get_redis_connection_info(self) -> RedisConnectionInfo {
         RedisConnectionInfo {
             db: 0,

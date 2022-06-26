@@ -7,7 +7,7 @@ use mongodb::{
 use serde::Deserialize;
 use serde_aux::prelude::deserialize_number_from_string;
 
-#[derive(Deserialize, Debug, Default, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub struct MongodbConfigs {
     pub name: String,
@@ -26,11 +26,13 @@ fn default_require_ssl() -> Option<bool> {
     Some(false)
 }
 
-impl MongodbConfigs {
-    pub fn get() -> Self {
+impl Default for MongodbConfigs {
+    fn default() -> Self {
         get_env_vars_by_prefix("MONGODB_")
     }
+}
 
+impl MongodbConfigs {
     pub fn get_database(self) -> anyhow::Result<Database> {
         let credential = Credential::builder()
             .username(self.username)

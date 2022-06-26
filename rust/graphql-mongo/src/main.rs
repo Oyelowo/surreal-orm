@@ -31,13 +31,13 @@ async fn main() {
 
     env_logger::init();
 
-    let application = ApplicationConfigs::get();
-    let redis_config = RedisConfigs::get();
+    let application = ApplicationConfigs::default();
+    let redis_config = RedisConfigs::default();
     let redis = redis_config.clone().get_client().unwrap_or_else(|e| {
         log::error!("Problem getting database. Error: {e:?}");
         process::exit(1)
     });
-    let database = MongodbConfigs::get();
+    let database = MongodbConfigs::default();
     let database = database.get_database().unwrap_or_else(|e| {
         log::error!("Problem getting database. Error: {e:?}");
         process::exit(1)

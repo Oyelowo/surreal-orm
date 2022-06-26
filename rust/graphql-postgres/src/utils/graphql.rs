@@ -105,8 +105,8 @@ pub async fn graphql_playground() -> impl IntoResponse {
 }
 
 pub async fn setup_graphql() -> anyhow::Result<MyGraphQLSchema> {
-    let application = ApplicationConfigs::get();
-    let database = PostgresConfigs::get();
+    let application = ApplicationConfigs::default();
+    let database = PostgresConfigs::default();
 
     use Environment::*;
     let (limit_depth, limit_complexity) = match application.environment {

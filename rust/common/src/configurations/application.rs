@@ -21,11 +21,13 @@ pub struct ApplicationConfigs {
     pub environment: Environment,
 }
 
-impl ApplicationConfigs {
-    pub fn get() -> Self {
+impl Default for ApplicationConfigs {
+    fn default() -> Self {
         get_env_vars_by_prefix("APP_")
     }
+}
 
+impl ApplicationConfigs {
     pub fn get_url(&self) -> String {
         let Self { host, port, .. } = self;
         // Url::parse(format!("http://{host}:{port}").as_ref()).expect("Problem parsing application uri")

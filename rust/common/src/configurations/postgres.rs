@@ -18,15 +18,17 @@ pub struct PostgresConfigs {
     pub require_ssl: Option<bool>,
 }
 
+impl Default for PostgresConfigs {
+    fn default() -> Self {
+        get_env_vars_by_prefix("POSTGRES_")
+    }
+}
+
 fn default_require_ssl() -> Option<bool> {
     Some(false)
 }
 
 impl PostgresConfigs {
-    pub fn get() -> Self {
-        get_env_vars_by_prefix("POSTGRES_")
-    }
-
     pub fn with_db(&self) -> PgConnectOptions {
         self.without_db().database(&self.name)
     }

@@ -7,7 +7,7 @@ use tonic::transport::Server;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let application = ApplicationConfigs::get();
+    let application = ApplicationConfigs::default();
     let addr: SocketAddr = application.get_url().parse().unwrap_or_else(|e| {
         log::error!("Failed to parse application url to socket address. Error: {e}");
         process::exit(-1)
