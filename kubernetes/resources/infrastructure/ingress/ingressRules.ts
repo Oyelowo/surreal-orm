@@ -30,10 +30,11 @@ type CertManagerAnnotations = {
 
 type IngressAnnotations = NginxConfiguration & CertManagerAnnotations;
 export const annotations: Partial<IngressAnnotations> = {
-    'nginx.ingress.kubernetes.io/ssl-redirect': isLocal ? 'false' : 'true',
+    // 'nginx.ingress.kubernetes.io/ssl-redirect': isLocal ? 'false' : 'true',
+    'nginx.ingress.kubernetes.io/ssl-redirect': 'false',
     'nginx.ingress.kubernetes.io/use-regex': 'true',
-    'cert-manager.io/cluster-issuer': CLUSTER_ISSUER_NAME,
-    'nginx.ingress.kubernetes.io/enable-cors': isLocal ? 'false' : 'true',
+    // 'cert-manager.io/cluster-issuer': CLUSTER_ISSUER_NAME,
+    // 'nginx.ingress.kubernetes.io/enable-cors': isLocal ? 'false' : 'true',
 };
 
 export const appIngress = new k8s.networking.v1.Ingress(
@@ -47,10 +48,10 @@ export const appIngress = new k8s.networking.v1.Ingress(
         spec: {
             ingressClassName: INGRESS_CLASSNAME_NGINX,
             tls: [
-                {
-                    hosts: getHosts(ENVIRONMENT),
-                    secretName: SECRET_NAME_NGINX,
-                },
+                // {
+                //     hosts: getHosts(ENVIRONMENT),
+                //     secretName: SECRET_NAME_NGINX,
+                // },
             ],
             rules: [
                 {
@@ -66,7 +67,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
                             // Put the specific Path first before the base path below where the frontend is served
                             {
                                 pathType: 'Prefix',
-                                path: '/api ',
+                                path: '/api',
                                 backend: {
                                     service: {
                                         name: graphqlMongoSettings.metadata.name,
