@@ -49,7 +49,7 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     );
 
     if (exec.stderr) {
-        throw new Error(c.redBright(exec.stderr));
+        throw new Error(c.redBright(`Something went wrong with pulumi. Error: ${exec.stderr}`));
     }
 
     const updatedCrds = getManifestsWithinDirName("0-crd");

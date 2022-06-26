@@ -106,7 +106,7 @@ pub async fn oauth_login_initiator(
     let session = TypedSession(session.to_owned());
     if let Ok(_s) = session.get_user_id::<ObjectId>() {
         session.renew();
-        return Ok(RedirectCustom::found("http://localhost:3000"));
+        return Ok(RedirectCustom::found("http://localhost:8080"));
     };
 
     let auth_url_data = match oauth_provider {
