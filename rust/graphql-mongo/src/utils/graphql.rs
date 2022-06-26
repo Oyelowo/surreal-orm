@@ -6,6 +6,7 @@ use poem::{
     IntoResponse,
 };
 
+use async_graphql::extensions::ApolloTracing;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig, ALL_WEBSOCKET_PROTOCOLS};
 use async_graphql_poem::{GraphQLProtocol, GraphQLRequest, GraphQLResponse, GraphQLWebSocket};
 use common::{
@@ -111,6 +112,7 @@ pub async fn setup_graphql() -> anyhow::Result<MyGraphQLSchema> {
 
     let schema = get_my_graphql_schema()
         .data(db)
+        .extension(ApolloTracing)
         .limit_depth(limit_depth) // This and also limit_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
         .limit_complexity(limit_complexity)
         .finish();
