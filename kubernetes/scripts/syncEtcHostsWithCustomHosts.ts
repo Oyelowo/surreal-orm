@@ -9,14 +9,13 @@ export function syncEtcHostsWithCustomHosts() {
     const hostsIngress: string[] = Object.values(hosts.local);
 
     if (hostsFileContent.stderr) {
-        console.error(chalk.blueBright(`Something went wrong. Error: ${hostsFileContent.stderr}`))
+        console.error(chalk.blueBright(`Something went wrong. Error: ${hostsFileContent.stderr}`));
     }
 
     const existingIpHosts = hostsFileContent.stdout
         .split('\n')
         .filter((l) => !(l.startsWith('#') || _.isEmpty(l.trim())))
         .map((l) => l.split(/\s+/).slice(0, 2) as [string, string]);
-
 
     const LOCAL_IP = '127.0.0.1';
     function updateIpHost(customHost: string) {

@@ -1,5 +1,5 @@
-import { Environment } from "../../types/own-types";
-import { DOMAIN_NAME_BASE } from "./constant";
+import { Environment } from '../../types/own-types';
+import { DOMAIN_NAME_BASE } from './constant';
 
 // type DomainBase = 'localhost' | typeof DOMAIN_NAME_BASE;
 type DomainBase = 'oyelowo.local' | typeof DOMAIN_NAME_BASE;

@@ -32,10 +32,10 @@ dev-setup:
 	make format
 
 dev:
-	# make dev-setup
+	make dev-setup
 
 	# kubectl apply -R -f  ./manifests/local/secrets-encrypted
-	skaffold dev --cleanup=false
+	skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true
 	# skaffold run --trigger="manual" --no-prune=true --no-prune-children=true
 
 

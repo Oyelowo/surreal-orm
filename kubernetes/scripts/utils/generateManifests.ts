@@ -1,7 +1,11 @@
 import c from 'chalk';
 import p from 'path';
 import sh from 'shelljs';
-import { getGeneratedCrdsCodeDir, getGeneratedEnvManifestsDir, getMainBaseDir } from '../../resources/shared/manifestsDirectory';
+import {
+    getGeneratedCrdsCodeDir,
+    getGeneratedEnvManifestsDir,
+    getMainBaseDir,
+} from '../../resources/shared/manifestsDirectory';
 import { ImageTags } from '../../resources/shared/validations';
 import { GenSealedSecretsProps } from './generateAllSealedSecrets';
 import { getEnvVarsForScript, handleShellError } from './shared';
@@ -52,12 +56,11 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
         throw new Error(c.redBright(`Something went wrong with pulumi. Error: ${exec.stderr}`));
     }
 
-    const updatedCrds = getManifestsWithinDirName("0-crd");
+    const updatedCrds = getManifestsWithinDirName('0-crd');
     syncCrdsCode(updatedCrds);
 
     sh.rm('-rf', './login');
 }
-
 
 function syncCrdsCode(updatedCrds: string[]) {
     const manifestsCrdsFilesUpdated = updatedCrds.flatMap((dir) => {
@@ -72,7 +75,6 @@ function syncCrdsCode(updatedCrds: string[]) {
         ` crd2pulumi --nodejsPath ${getMainBaseDir()}/crds-generated ${manifestsCrdsFilesUpdated.join(' ')} --force`
     );
 
-    getGeneratedCrdsCodeDir()
-    sh.exec(`npx prettier --write ${getGeneratedCrdsCodeDir()}`)
+    getGeneratedCrdsCodeDir();
+    sh.exec(`npx prettier --write ${getGeneratedCrdsCodeDir()}`);
 }
-
