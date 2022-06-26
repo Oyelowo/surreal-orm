@@ -5,62 +5,55 @@ import sh from 'shelljs';
 import yargs from 'yargs';
 import { INGRESS_EXTERNAL_PORT_LOCAL } from '../resources/infrastructure/ingress/hosts';
 
-export const ARGV = yargs(process.argv.slice(2))
-    .options({
-        environment: {
-            alias: 'n',
-            choices: ["name"],
-            describe: "The environment you're generating the manifests for.",
-            demandOption: true,
-        },
-    })
-    .parseSync();
-
-
-const CLUSTER_NAME = "local-cluster-34i2jn23j"
-
-
 // This autoreloads the app but waits for user inputs
 async function startAppInLocalCluster() {
-    const { deleteExistingCluster, regenerateKubernetesManifests } = await promptQuestions();
+    const { deleteExistingCluster, regenerateKubernetesManifests, clusterName } = await promptQuestions();
     const { http, https } = ingressControllerPorts;
 
     if (deleteExistingCluster) {
-        sh.exec(`k3d cluster delete ${CLUSTER_NAME}`);
+        sh.exec(`k3d cluster delete ${clusterName}`);
     }
 
-    sh.exec(`k3d cluster create ${CLUSTER_NAME} --port ${INGRESS_EXTERNAL_PORT_LOCAL}:${http}@loadbalancer --port 8443:${https}@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"`)
-    sh.exec(`kubectx k3d-${CLUSTER_NAME}`);
+    sh.exec(
+        `k3d cluster create ${clusterName} --port ${INGRESS_EXTERNAL_PORT_LOCAL}:${http}@loadbalancer --port 8443:${https}@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"`
+    );
+    sh.exec(`kubectx k3d-${clusterName}`);
 
     if (regenerateKubernetesManifests) {
         sh.exec(`make generate_manifests_ci environment=local`);
     }
 
-    sh.exec(`make format`);
+    // sh.exec(`make format`);
     // sh.exec(`kubectl apply -R -f  ./manifests/local/secrets-encrypted`);
 
     // Scaffold should wait for user input before reloading (--trigger="manual"). Without this, it hot reloads
-    sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true`);
+    sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune-children=true`);
+    // sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true`);
 
     // This only runs once
     // sh.exec(`skaffold run --trigger="manual" --no-prune=true --no-prune-children=true`);
-
 }
 
-startAppInLocalCluster()
+startAppInLocalCluster();
 
 async function promptQuestions() {
-    const deleteExistingCluster = "deleteExistingCluster";
-    const regenerateKubernetesManifests = "regenerateKubernetesManifests";
-    type Key = typeof deleteExistingCluster | typeof regenerateKubernetesManifests;
+    const DEFAULT_CLUSTER_NAME = 'local-cluster-34i2jn23j';
+    const deleteExistingCluster = 'deleteExistingCluster';
+    const regenerateKubernetesManifests = 'regenerateKubernetesManifests';
+    const clusterName = 'clusterName';
+    type Key = typeof deleteExistingCluster | typeof regenerateKubernetesManifests | typeof clusterName;
 
     const answers = await inquirer.prompt<Record<Key, boolean>>([
         {
+            type: 'input',
+            name: clusterName,
+            message: chalk.blueBright(`What do you want to name your cluster? Press Enter to use default`),
+            default: DEFAULT_CLUSTER_NAME,
+        },
+        {
             type: 'confirm',
             name: deleteExistingCluster,
-            message: chalk.blueBright(
-                '🆘Do you want to keep delete the existing local cluster??? ‼️‼️‼️‼️'
-            ),
+            message: chalk.blueBright('🆘Do you want to delete the existing local cluster??? ‼️‼️‼️‼️'),
             default: false,
         },
         {
@@ -73,6 +66,5 @@ async function promptQuestions() {
         },
     ]);
 
-    return answers
+    return answers;
 }
-
