@@ -13,11 +13,19 @@ interface Hosts {
 type Configs = Record<Environment, Hosts>;
 const api = (base: DomainBase) => `api.${base}` as const;
 
+export const INGRESS_EXTERNAL_PORT_LOCAL = 8080;
+
+
+export const ingressControllerPorts = {
+    http: 80, // Maps to 8080 with k3d in the make file
+    https: 443,
+} as const;
+
 export const hosts: Configs = {
     local: {
         base: 'oyelowo.local',
         api: 'api.oyelowo.local',
-        port: 8080
+        port: INGRESS_EXTERNAL_PORT_LOCAL
     },
     development: {
         base: DOMAIN_NAME_BASE,

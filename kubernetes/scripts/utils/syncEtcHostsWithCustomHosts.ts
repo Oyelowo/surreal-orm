@@ -1,4 +1,4 @@
-import { hosts } from '../resources/infrastructure/ingress/hosts';
+import { hosts } from '../../resources/infrastructure/ingress/hosts';
 import sh from 'shelljs';
 import _ from 'lodash';
 import chalk from 'chalk';
@@ -33,4 +33,4 @@ export function syncEtcHostsWithCustomHosts() {
     hostsIngress.forEach(updateIpHost);
 }
 
-syncEtcHostsWithCustomHosts();
+// syncEtcHostsWithCustomHosts();

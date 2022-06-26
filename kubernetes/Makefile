@@ -16,28 +16,14 @@ generate_manifests_ci:
 	# make sync
 	npx ts-node scripts/generateManifestsCI.ts --environment=$(environment)
 
-
 bootstrap_cluster:
 	npx ts-node scripts/bootstrapCluster.ts
 
 generate_sealed_secrets:
 	npx ts-node scripts/generateSealedSecrets.ts
 
-dev-setup:
-	k3d cluster delete local
-	k3d cluster create local --port 8080:80@loadbalancer --port 8443:443@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"
-	kubectx k3d-local
-		
-	make generate_manifests_ci environment=local
-	make format
-
 dev:
-	make dev-setup
-
-	# kubectl apply -R -f  ./manifests/local/secrets-encrypted
-	skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true
-	# skaffold run --trigger="manual" --no-prune=true --no-prune-children=true
-
+	npx ts-node scripts/startAppInLocalCluster.ts
 
 merge-kube-config:
 # Example Usage:  make merge-kube-config path=config.yaml  

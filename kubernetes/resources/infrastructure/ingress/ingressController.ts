@@ -1,3 +1,4 @@
+import { ingressControllerPorts } from './hosts';
 import { INginxingresscontrollerbitnami } from './../../types/helm-charts/nginxIngressControllerBitnami';
 import * as k8s from '@pulumi/kubernetes';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
@@ -13,10 +14,7 @@ const {
 
 const ingressControllerValues: RecursivePartial<INginxingresscontrollerbitnami> = {
     service: {
-        ports: {
-            http: 80, // Maps to 8080 with k3d in the make file
-            https: 443,
-        },
+        ports: ingressControllerPorts,
     },
     fullnameOverride: chart,
     commonAnnotations: {
