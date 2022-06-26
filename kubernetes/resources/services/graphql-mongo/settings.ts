@@ -1,6 +1,7 @@
 import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp';
 import { AppConfigs } from '../../types/own-types';
 import { getEnvironmentVariables } from '../../shared/validations';
+import { getBaseUrl } from '../../infrastructure/ingress/hosts';
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
 const secretsFromLocalConfigs = getSecretsForResource('graphql-mongo', environment);
@@ -19,16 +20,14 @@ export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'mongodb', 'appli
     },
 
     envVars: {
-        APP_ENVIRONMENT: getEnvironmentVariables().ENVIRONMENT,
+        APP_ENVIRONMENT: environment,
         APP_HOST: '0.0.0.0',
         APP_PORT: '8000',
-        OTHERS_REACT_WEB_EXTERNAL_URL: getEnvironmentVariables().ENVIRONMENT
-            ? 'http://localhost:3000'
-            : 'TODO: for others. Use a hashmap getter',
-        OTHERS_GITHUB_CLIENT_ID: secretsFromLocalConfigs.GITHUB_CLIENT_ID,
-        OTHERS_GITHUB_CLIENT_SECRET: secretsFromLocalConfigs.GITHUB_CLIENT_SECRET,
-        OTHERS_GOOGLE_CLIENT_ID: secretsFromLocalConfigs.GOOGLE_CLIENT_ID,
-        OTHERS_GOOGLE_CLIENT_SECRET: secretsFromLocalConfigs.GOOGLE_CLIENT_SECRET,
+        APP_EXTERNAL_BASE_URL: getBaseUrl(environment),
+        OAUTH_GITHUB_CLIENT_ID: secretsFromLocalConfigs.GITHUB_CLIENT_ID,
+        OAUTH_GITHUB_CLIENT_SECRET: secretsFromLocalConfigs.GITHUB_CLIENT_SECRET,
+        OAUTH_GOOGLE_CLIENT_ID: secretsFromLocalConfigs.GOOGLE_CLIENT_ID,
+        OAUTH_GOOGLE_CLIENT_SECRET: secretsFromLocalConfigs.GOOGLE_CLIENT_SECRET,
 
         MONGODB_NAME: 'graphql-mongo-database',
         // TODO: remove these two. now coming handled in the deployment abstraction and uses referenced secret

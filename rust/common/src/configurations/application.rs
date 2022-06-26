@@ -19,6 +19,7 @@ pub struct ApplicationConfigs {
     pub port: u16,
     pub host: String,
     pub environment: Environment,
+    pub external_base_url: String,
 }
 
 impl Default for ApplicationConfigs {

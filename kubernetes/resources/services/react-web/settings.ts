@@ -1,7 +1,8 @@
-import { getFQDNFromSettings } from '../../shared/helpers';
 import { AppConfigs } from '../../types/own-types';
 import { getEnvironmentVariables } from '../../shared/validations';
-import { graphqlMongoSettings } from '../graphql-mongo/settings';
+import { getBaseUrl } from '../../infrastructure/ingress/hosts';
+
+const environment = getEnvironmentVariables().ENVIRONMENT;
 
 export const reactWebSettings: AppConfigs<'react-web', 'doesNotHaveDb', 'applications'> = {
     kubeConfig: {
@@ -15,9 +16,10 @@ export const reactWebSettings: AppConfigs<'react-web', 'doesNotHaveDb', 'applica
     },
 
     envVars: {
-        APP_ENVIRONMENT: getEnvironmentVariables().ENVIRONMENT,
+        APP_ENVIRONMENT: environment,
         APP_HOST: '0.0.0.0',
         APP_PORT: '3000',
+        APP_EXTERNAL_BASE_URL: getBaseUrl(environment),
         // Not really used as all backend functionality has been moved to rust backend.
         // So, not using typescript for any backend work. Keeping for reference purpose
         // GRAPHQL_MONGO_URL: getFQDNFromSettings(graphqlMongoSettings), // Get Url mongoFQDN

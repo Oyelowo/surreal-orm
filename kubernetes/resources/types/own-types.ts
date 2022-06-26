@@ -115,6 +115,9 @@ export type AppEnvVars<AN extends ServiceName, NS extends NamespaceOfApps> = {
     APP_ENVIRONMENT: Environment;
     APP_HOST: '0.0.0.0';
     APP_PORT: '8000' | '50051' | '3000';
+    // the url of the ingress e.g oyelowo.com // localhost:8080 (for local dev)
+    APP_EXTERNAL_BASE_URL: string;
+
     // REDIS_USERNAME?: string;
     // REDIS_PASSWORD?: string;
     // // REDIS_HOST?: `${AN}-redis.${NS}`;
@@ -126,11 +129,10 @@ export type AppEnvVars<AN extends ServiceName, NS extends NamespaceOfApps> = {
     RedisDbEnvVars<AN, NS>;
 
 export type OtherEnvVars = {
-    OTHERS_GITHUB_CLIENT_ID?: string;
-    OTHERS_GITHUB_CLIENT_SECRET?: string;
-    OTHERS_GOOGLE_CLIENT_ID?: string;
-    OTHERS_GOOGLE_CLIENT_SECRET?: string;
-    OTHERS_REACT_WEB_EXTERNAL_URL?: string; // TODO: This could be make stronger typed
+    OAUTH_GITHUB_CLIENT_ID?: string;
+    OAUTH_GITHUB_CLIENT_SECRET?: string;
+    OAUTH_GOOGLE_CLIENT_ID?: string;
+    OAUTH_GOOGLE_CLIENT_SECRET?: string;
 };
 type EnvironmentVariables<AN extends ServiceName, NS extends NamespaceOfApps, DBT extends DBType> = Extract<
     AppEnvVars<AN, NS>,

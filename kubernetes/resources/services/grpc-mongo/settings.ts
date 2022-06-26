@@ -1,11 +1,12 @@
 import { getEnvironmentVariables } from '../../shared/validations';
 import { AppConfigs } from '../../types/own-types';
 import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp';
+import { getBaseUrl } from '../../infrastructure/ingress/hosts';
 
 const environmentVariables = getEnvironmentVariables();
 const environment = environmentVariables.ENVIRONMENT;
 
-// TODO: Rethink this abstraction for secret
+// TODO: Rethink this abstraction for secret. Maybe can be gotten directly from the typescript secret file which is gitignored locally?
 const secretsFromLocalConfigs = getSecretsForResource('grpc-mongo', environment);
 
 export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'mongodb', 'applications'> = {
@@ -24,6 +25,7 @@ export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'mongodb', 'application
         APP_ENVIRONMENT: environment,
         APP_HOST: '0.0.0.0',
         APP_PORT: '50051',
+        APP_EXTERNAL_BASE_URL: getBaseUrl(environment),
         MONGODB_NAME: 'grpc-mongo-database',
         MONGODB_USERNAME: secretsFromLocalConfigs.MONGODB_USERNAME,
         MONGODB_PASSWORD: secretsFromLocalConfigs.MONGODB_PASSWORD,

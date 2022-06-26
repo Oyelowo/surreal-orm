@@ -3,6 +3,7 @@ use std::fmt::Display;
 use bson::oid::ObjectId;
 use common::authentication::TypedSession;
 
+use common::configurations::application::ApplicationConfigs;
 use mongodb::Database;
 use poem::error::{BadRequest, InternalServerError};
 use poem::session::Session;
@@ -104,9 +105,11 @@ pub async fn oauth_login_initiator(
 ) -> Result<RedirectCustom> {
     let mut connection = get_redis_connection(redis).await?;
     let session = TypedSession(session.to_owned());
+    let env = ApplicationConfigs::default();
+
     if let Ok(_s) = session.get_user_id::<ObjectId>() {
         session.renew();
-        return Ok(RedirectCustom::found("http://localhost:8080"));
+        return Ok(RedirectCustom::found(env.external_base_url));
     };
 
     let auth_url_data = match oauth_provider {
@@ -134,12 +137,11 @@ pub async fn oauth_login_authentication(
     redis: Data<&redis::Client>,
 ) -> Result<RedirectCustom> {
     let user = authenticate_user(uri, redis, session, db).await;
+    let base_url = ApplicationConfigs::default().external_base_url;
     match user {
-        // Redirect to the frontend app
-        Ok(_u) => Ok(RedirectCustom::found("http://localhost:8080")),
-        Err(e) => Ok(RedirectCustom::found(format!(
-            "http://localhost:8080/login?error={e}"
-        ))),
+        // Redirect to the frontend app which is served at base.
+        Ok(_u) => Ok(RedirectCustom::found(base_url)),
+        Err(e) => Ok(RedirectCustom::found(format!("{base_url}/login?error={e}"))),
     }
 }
 
@@ -150,8 +152,9 @@ async fn authenticate_user(
     db: Data<&Database>,
 ) -> Result<User> {
     let mut connection = get_redis_connection(redis).await?;
+    let base_url = ApplicationConfigs::default().external_base_url;
 
-    let redirect_url = Url::parse(&format!("http://localhost:{uri}"))
+    let redirect_url = Url::parse(&format!("{base_url}{uri}"))
         .map(RedirectUrlReturned)
         .map_err(HandlerError::ParseError)
         .map_err(InternalServerError)?;

@@ -6,7 +6,7 @@ use oauth2::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::utils::{OauthConfig, OauthProviderTrait, OauthResult, OauthUrl, REDIRECT_URL};
+use super::utils::{get_redirect_url, OauthConfig, OauthProviderTrait, OauthResult, OauthUrl};
 use crate::app::user::{AccountOauth, OauthProvider, Role, TokenType, User};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -49,7 +49,7 @@ impl GoogleConfig {
                 TokenUrl::new("https://www.googleapis.com/oauth2/v4/token".to_string())
                     .expect("Invalid token endpoint URL"),
             )
-            .redirect_url(RedirectUrl::new(REDIRECT_URL.to_string()).expect("Invalid redirect URL"))
+            .redirect_url(RedirectUrl::new(get_redirect_url()).expect("Invalid redirect URL"))
             .scopes(vec![
                 Scope::new("profile".into()),
                 Scope::new("email".into()),

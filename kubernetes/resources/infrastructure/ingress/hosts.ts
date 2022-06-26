@@ -7,6 +7,7 @@ type DomainBase = 'oyelowo.local' | typeof DOMAIN_NAME_BASE;
 interface Hosts {
     base: DomainBase;
     api: `api.${DomainBase}`;
+    port?: number;
 }
 
 type Configs = Record<Environment, Hosts>;
@@ -16,6 +17,7 @@ export const hosts: Configs = {
     local: {
         base: 'oyelowo.local',
         api: 'api.oyelowo.local',
+        port: 8080
     },
     development: {
         base: DOMAIN_NAME_BASE,
@@ -30,3 +32,10 @@ export const hosts: Configs = {
         api: api(DOMAIN_NAME_BASE),
     },
 };
+
+
+export function getBaseUrl(environment: Environment) {
+    const host = hosts[environment];
+    // For local host, we add a port, otherwise leave out
+    return `${host.base}${host.port ? `:${host.port}` : ''}`
+}

@@ -1,4 +1,4 @@
-use common::configurations::redis::RedisConfigError;
+use common::configurations::{application::ApplicationConfigs, redis::RedisConfigError};
 use derive_more::{From, Into};
 use oauth2::{
     basic::{BasicClient, BasicTokenType},
@@ -16,8 +16,11 @@ use url::Url;
 
 use crate::app::user::{OauthProvider, User};
 
-// TODO: Get the url as an environment variable. Should be EXTERNAL_URL
-pub(crate) const REDIRECT_URL: &str = "http://localhost:8080/api/oauth/callback";
+pub(crate) fn get_redirect_url() -> String {
+    let base_url = ApplicationConfigs::default().external_base_url;
+    // Has to be defined in app router
+    format!("{base_url}/api/oauth/callback")
+}
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum OauthError {
