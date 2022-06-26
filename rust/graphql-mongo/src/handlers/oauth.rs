@@ -135,6 +135,7 @@ pub async fn oauth_login_authentication(
 ) -> Result<RedirectCustom> {
     let user = authenticate_user(uri, redis, session, db).await;
     match user {
+        // Redirect to the frontend app
         Ok(_u) => Ok(RedirectCustom::found("http://localhost:8080")),
         Err(e) => Ok(RedirectCustom::found(format!(
             "http://localhost:8080/login?error={e}"

@@ -25,7 +25,12 @@ use poem::{
 
 #[tokio::main]
 async fn main() {
+    if std::env::var_os("RUST_LOG").is_none() {
+        std::env::set_var("RUST_LOG", "poem=debug");
+    }
+
     env_logger::init();
+
     let application = ApplicationConfigs::get();
     let redis_config = RedisConfigs::get();
     let redis = redis_config.clone().get_client().unwrap_or_else(|e| {
