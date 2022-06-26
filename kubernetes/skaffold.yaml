@@ -14,16 +14,11 @@ build:
         - image: ghcr.io/oyelowo/react-web
           context: ../typescript
           docker:
-              #   dockerfile: Dockerfile.development
-              dockerfile: Dockerfile.local
+              dockerfile: Dockerfile.development
               target: web
               noCache: false
               squash: false
-          sync:
-              infer:
-                  - '**/*.ts'
-                  - '**/*.tsx'
-                  - '**/*.css'
+       \
 
         - image: ghcr.io/oyelowo/graphql-mongo
           context: ../rust
