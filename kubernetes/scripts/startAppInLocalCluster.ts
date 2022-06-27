@@ -27,7 +27,7 @@ async function startAppInLocalCluster() {
     // sh.exec(`kubectl apply -R -f  ./manifests/local/secrets-encrypted`);
 
     // Scaffold should wait for user input before reloading (--trigger="manual"). Without this, it hot reloads
-    sh.exec(`skaffold dev --trigger="manual"  --no-prune-children=true`);
+    sh.exec(`skaffold dev --port-forward --trigger="manual"  --no-prune-children=true`);
     // sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true`);
 
     // This only runs once
