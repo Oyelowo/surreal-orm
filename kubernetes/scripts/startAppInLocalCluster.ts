@@ -15,29 +15,28 @@ async function startAppInLocalCluster() {
     }
 
     sh.exec(
-        `k3d cluster create ${clusterName} --port ${INGRESS_EXTERNAL_PORT_LOCAL}:${http}@loadbalancer --port 8443:${https}@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"`
+        `k3d cluster create ${clusterName} --port ${INGRESS_EXTERNAL_PORT_LOCAL}:${http}@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"`
     );
+    // Uncomment if you also want secure port at 8443
+    // sh.exec(
+    //     `k3d cluster create ${clusterName} --port ${INGRESS_EXTERNAL_PORT_LOCAL}:${http}@loadbalancer --port 8443:${https}@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"`
+    // );
     sh.exec(`kubectx k3d-${clusterName}`);
 
     if (regenerateKubernetesManifests) {
         sh.exec(`make generate_manifests_ci environment=local`);
     }
 
-    // sh.exec(`make format`);
-    // sh.exec(`kubectl apply -R -f  ./manifests/local/secrets-encrypted`);
-
     // Scaffold should wait for user input before reloading (--trigger="manual"). Without this, it hot reloads
-    sh.exec(`skaffold dev --port-forward --trigger="manual" --no-prune=true  --no-prune-children=true`);
+    sh.exec(`skaffold dev --port-forward --cleanup=false --trigger="manual"`);
     // sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true`);
 
-    // This only runs once
-    // sh.exec(`skaffold run --trigger="manual" --no-prune=true --no-prune-children=true`);
 }
 
 startAppInLocalCluster();
 
 async function promptQuestions() {
-    const DEFAULT_CLUSTER_NAME = 'local-cluster-34i2jn23j';
+    const DEFAULT_CLUSTER_NAME = 'local';
     const deleteExistingCluster = 'deleteExistingCluster';
     const regenerateKubernetesManifests = 'regenerateKubernetesManifests';
     const clusterName = 'clusterName';
