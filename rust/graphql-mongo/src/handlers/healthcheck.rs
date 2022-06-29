@@ -31,3 +31,8 @@ pub async fn healthz(
     };
     Ok(auth_url_data)
 }
+
+#[handler]
+pub async fn liveness() -> impl IntoResponse {
+    Response::builder().status(StatusCode::OK).body("Ok")
+}

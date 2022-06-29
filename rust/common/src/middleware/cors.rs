@@ -10,7 +10,13 @@ use crate::configurations::application::Environment;
 pub fn get_cors(environment: Environment) -> Cors {
     Cors::default()
         .allow_origins_fn(move |_origin| matches!(environment, Environment::Local))
-        .allow_methods(vec![Method::GET, Method::POST])
+        .allow_methods(vec![
+            Method::GET,
+            Method::POST,
+            Method::DELETE,
+            Method::PATCH,
+            Method::OPTIONS,
+        ])
         .allow_headers(vec![
             header::AUTHORIZATION,
             header::ACCEPT,
