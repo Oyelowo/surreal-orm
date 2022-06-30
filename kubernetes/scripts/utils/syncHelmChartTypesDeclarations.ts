@@ -18,7 +18,7 @@ export function syncHelmChartTypesDeclarations() {
         sh.exec(`helm repo update ${repoName}`);
 
         Object.values(repoValues.charts).forEach(({ chart, version }) => {
-            let { stdout: valuesJson, stderr } = sh.exec(
+            const { stdout: valuesJson, stderr } = sh.exec(
                 `helm show values ${repoName}/${chart} --version ${version} | yq -o=json`,
                 {
                     silent: true,

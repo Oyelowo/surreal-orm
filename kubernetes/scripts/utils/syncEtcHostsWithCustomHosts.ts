@@ -4,7 +4,7 @@ import _ from 'lodash';
 import chalk from 'chalk';
 
 export function syncEtcHostsWithCustomHosts() {
-    let hostsFileContent = sh.cat('/etc/hosts');
+    const hostsFileContent = sh.cat('/etc/hosts');
 
     const hostsIngress: string[] = Object.values(hosts.local);
 
