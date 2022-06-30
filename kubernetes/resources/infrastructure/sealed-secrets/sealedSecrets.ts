@@ -1,6 +1,6 @@
 import { ISealedsecretssealedsecrets } from './../../types/helm-charts/sealedSecretsSealedsecrets';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaceNames } from '../../namespaces/util';
+import { namespaces } from '../namespaces/util';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 import { DeepPartial } from '../../types/own-types';
 import { sealedSecretsResourceName, sealedSecretsProvider } from './settings';
@@ -31,7 +31,7 @@ export const sealedSecret = new k8s.helm.v3.Chart(
         },
         version,
         values: sealedSecretsValues,
-        namespace: namespaceNames.kubeSystem,
+        namespace: namespaces.kubeSystem,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being
         // available.

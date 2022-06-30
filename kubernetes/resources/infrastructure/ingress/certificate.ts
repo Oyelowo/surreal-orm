@@ -9,7 +9,7 @@
 // export const certificateNginx = new cm.v1.Certificate("certificate-nginx", {
 //     metadata: {
 //         name: "certificate-nginx",
-//         namespace: namespaceNames.default
+//         namespace: namespaces.default
 //     },
 //     spec: {
 //         dnsNames: [DNS_NAME_LINODE_BASE],

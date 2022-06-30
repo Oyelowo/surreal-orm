@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import sh from 'shelljs';
-import { clearPlainInputTsSecretFilesContents, setupOrSyncPlainSecretTSFiles } from './secretsManagement/setupSecrets';
+import { clearPlainInputTsSecretFilesContents, syncSecretsTsFiles } from './secretsManagement/syncSecretsTsFiles';
 import { generateAllSealedSecrets } from './utils/generateAllSealedSecrets';
 import { generateManifests } from './utils/generateManifests';
 import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
@@ -24,7 +24,7 @@ async function main() {
         imageTags,
     });
 
-    setupOrSyncPlainSecretTSFiles();
+    syncSecretsTsFiles();
 
     if (generateSecretsOptions === 'Generate all secrets') {
         generateAllSealedSecrets({ environment });

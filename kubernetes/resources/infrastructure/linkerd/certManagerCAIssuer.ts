@@ -1,5 +1,5 @@
 import * as cm from './../../../crds-generated/certmanager';
-import { namespaceNames } from '../../namespaces/util';
+import { namespaces } from '../namespaces/util';
 import { certManagerProvider } from './../cert-manager/settings';
 
 // ROOT TRUST ANCHOR CERTIFICATES AND CLUSTER ISSUE
@@ -15,7 +15,7 @@ export const clusterIssuerLinkerdSelfSigned = new cm.v1.ClusterIssuer(
             name: CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME,
             // This should be in cert manager namespace because we want the certificate key to stay in
             //  that namespace rather than linkerd namespace
-            namespace: namespaceNames.certManager,
+            namespace: namespaces.certManager,
         },
         spec: {
             selfSigned: {},
@@ -56,7 +56,7 @@ export const certificateLinkerdTrustAnchor = new cm.v1.Certificate(
     {
         metadata: {
             name: LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME,
-            namespace: namespaceNames.certManager,
+            namespace: namespaces.certManager,
         },
         spec: {
             isCA: true,
@@ -86,7 +86,7 @@ export const clusterIssuerLinkerdTrustAnchor = new cm.v1.ClusterIssuer(
     {
         metadata: {
             name: LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME,
-            namespace: namespaceNames.certManager,
+            namespace: namespaces.certManager,
         },
         spec: {
             ca: {

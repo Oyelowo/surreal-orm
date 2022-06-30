@@ -1,5 +1,5 @@
 import * as cm from './../../../crds-generated/certmanager';
-import { namespaceNames } from '../../namespaces/util';
+import { namespaces } from '../namespaces/util';
 import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer';
 import { linkerdProvider } from './settings';
 
@@ -18,7 +18,7 @@ export const certificateLinkerdIdentityIssuer = new cm.v1.Certificate(
     {
         metadata: {
             name: CERTIFICATE_NAME,
-            namespace: namespaceNames.linkerd,
+            namespace: namespaces.linkerd,
         },
         spec: {
             secretName: CERTIFICATE_NAME,

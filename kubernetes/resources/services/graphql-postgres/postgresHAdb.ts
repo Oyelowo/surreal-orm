@@ -1,6 +1,6 @@
 import { IPostgresqlhabitnami } from './../../types/helm-charts/postgresqlHaBitnami';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaceNames } from '../../namespaces/util';
+import { namespaces } from '../../infrastructure/namespaces/util';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 import { DeepPartial } from '../../types/own-types';
 import { graphqlPostgres } from './index';
@@ -50,7 +50,7 @@ export const graphqlPostgresPostgresdbHA = new k8s.helm.v3.Chart(
         },
         version,
         values: postgresValues,
-        namespace: namespaceNames.applications,
+        namespace: namespaces.applications,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being
         // available.

@@ -4,7 +4,7 @@ import sh from 'shelljs';
 import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp';
 import { getResourceAbsolutePath } from '../../shared/manifestsDirectory';
 import { Environment } from '../../types/own-types';
-import { namespaceNames } from './../../namespaces/util';
+import { namespaces } from '../namespaces/util';
 
 const DOCKER_SERVER = 'ghcr.io';
 export const DOCKER_REGISTRY_KEY = 'my-registry-key';
@@ -29,7 +29,7 @@ export function createContainerRegistrySecret(environment: Environment): void {
 
     sh.exec(`
   kubectl create secret docker-registry ${DOCKER_REGISTRY_KEY} --docker-server=${DOCKER_SERVER} \
-     --docker-username=${DOCKER_USERNAME} --docker-password=${DOCKER_PASSWORD} --namespace=${namespaceNames.applications} \
+     --docker-username=${DOCKER_USERNAME} --docker-password=${DOCKER_PASSWORD} --namespace=${namespaces.applications} \
      -o yaml --dry-run=client > ${file}`);
 }
 
@@ -59,7 +59,7 @@ export function createContainerRegistrySecret(environment: Environment): void {
 //         type: 'kubernetes.io/dockerconfigjson',
 //         metadata: {
 //             name: 'docker-registry-applications',
-//             namespace: namespaceNames.applications,
+//             namespace: namespaces.applications,
 //         },
 
 //         data: {

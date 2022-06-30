@@ -1,6 +1,6 @@
 import { ILinkerd2linkerd } from './../../types/helm-charts/linkerd2Linkerd';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaceNames } from '../../namespaces/util';
+import { namespaces } from '../namespaces/util';
 import { DeepPartial } from '../../types/own-types';
 import { helmChartsInfo } from './../../shared/helmChartInfo';
 import { linkerdProvider } from './settings';
@@ -33,7 +33,7 @@ export const linkerd = new k8s.helm.v3.Chart(
         },
         version,
         values: Linkerd2Values,
-        namespace: namespaceNames.linkerd,
+        namespace: namespaces.linkerd,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being
         // available.

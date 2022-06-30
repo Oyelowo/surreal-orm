@@ -1,7 +1,7 @@
 import { IArgocdargo } from './../../types/helm-charts/argoCdArgo';
 import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaceNames } from '../../namespaces/util';
+import { namespaces } from '../namespaces/util';
 
 import { DeepPartial } from '../../types/own-types';
 import bcrypt from 'bcrypt';
@@ -76,7 +76,7 @@ export const argocdHelm = new k8s.helm.v3.Chart(
         },
         version,
         values: argocdValues,
-        namespace: namespaceNames.argocd,
+        namespace: namespaces.argocd,
         // namespace: devNamespaceName,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being

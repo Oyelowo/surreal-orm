@@ -1,7 +1,7 @@
 import { hosts } from './hosts';
 import { Environment } from './../../types/own-types';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaceNames } from '../../namespaces/util';
+import { namespaces } from '../namespaces/util';
 import { graphqlMongoSettings } from '../../services/graphql-mongo/settings';
 import { reactWebSettings } from '../../services/react-web/settings';
 import { NginxConfiguration } from '../../types/nginxConfigurations';
@@ -42,7 +42,7 @@ export const appIngress = new k8s.networking.v1.Ingress(
     {
         metadata: {
             name,
-            namespace: namespaceNames.applications,
+            namespace: namespaces.applications,
             annotations: annotations as Record<string, string>,
         },
         spec: {

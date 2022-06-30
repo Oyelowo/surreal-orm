@@ -2,7 +2,7 @@ import { ILinkerdvizlinkerd } from './../../types/helm-charts/linkerdVizLinkerd'
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as bcrypt from 'bcrypt';
-import { namespaceNames } from '../../namespaces/util';
+import { namespaces } from '../namespaces/util';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 import { NginxConfiguration } from '../../types/nginxConfigurations';
 import { DeepPartial, ResourceName } from '../../types/own-types';
@@ -28,7 +28,7 @@ export const linkerdVizHelmChart = new k8s.helm.v3.Chart(
         },
         version,
         values,
-        namespace: namespaceNames.linkerdViz,
+        namespace: namespaces.linkerdViz,
         // namespace: devNamespaceName,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being
@@ -58,7 +58,7 @@ export const linkerVizIngress = new k8s.networking.v1.Ingress(
     {
         metadata: {
             name: linkerdVizIngressName,
-            namespace: namespaceNames.linkerdViz,
+            namespace: namespaces.linkerdViz,
             annotations: {
                 ...(nginxAnnotions as Record<string, string>),
                 'cert-manager.io/cluster-issuer': CLUSTER_ISSUER_NAME,
@@ -107,7 +107,7 @@ export const linkerdVizSecret = new kx.Secret(
     {
         metadata: {
             name: linkerdVizSecretName,
-            namespace: namespaceNames.linkerdViz,
+            namespace: namespaces.linkerdViz,
         },
         stringData: {
             // format: username:encryptedpassword

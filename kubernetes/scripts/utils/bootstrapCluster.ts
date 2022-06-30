@@ -2,7 +2,7 @@
 
 import path from 'path';
 import sh from 'shelljs';
-import { namespaceNames } from '../../resources/namespaces/util';
+import { namespaces } from '../../resources/infrastructure/namespaces/util';
 import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
 import { getResourceAbsolutePath } from '../../resources/shared/manifestsDirectory';
 import { Environment, ResourceName } from '../../resources/types/own-types';
@@ -33,15 +33,15 @@ export async function bootstrapCluster(environment: Environment) {
 
     const sealedSecretsName: ResourceName = 'sealed-secrets';
     // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
-    sh.exec(`kubectl rollout status deployment/${sealedSecretsName} -n=${namespaceNames.kubeSystem}`);
+    sh.exec(`kubectl rollout status deployment/${sealedSecretsName} -n=${namespaces.kubeSystem}`);
 
     // # Apply setups with cert-manager controller
     applyResourceManifests('cert-manager', environment);
 
     // # Wait for cert-manager and cert-manager-trust controllers to be in running phase so that we can use it to encrypt secrets
     const { certManager, certManagerTrust } = helmChartsInfo.jetstack.charts;
-    sh.exec(`kubectl rollout status deployment/${certManager.chart} -n=${namespaceNames.certManager}`);
-    sh.exec(`kubectl rollout status deployment/${certManagerTrust.chart} -n=${namespaceNames.certManager}`);
+    sh.exec(`kubectl rollout status deployment/${certManager.chart} -n=${namespaces.certManager}`);
+    sh.exec(`kubectl rollout status deployment/${certManagerTrust.chart} -n=${namespaces.certManager}`);
 
     // # Apply setups with linkerd controller
     applyResourceManifests('linkerd', environment);

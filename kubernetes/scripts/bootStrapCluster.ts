@@ -1,5 +1,5 @@
 import sh from 'shelljs';
-import { clearPlainInputTsSecretFilesContents } from './secretsManagement/setupSecrets';
+import { clearPlainInputTsSecretFilesContents } from './secretsManagement/syncSecretsTsFiles';
 import { bootstrapCluster } from './utils/bootstrapCluster';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
 import { promptSecretsKeepingConfirmations } from './utils/promptSecretsKeepingConfirmations';

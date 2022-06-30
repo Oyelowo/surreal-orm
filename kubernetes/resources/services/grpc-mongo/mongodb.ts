@@ -1,6 +1,6 @@
 import { IMongodbbitnami } from './../../types/helm-charts/mongodbBitnami';
 import { grpcMongo } from './index';
-import { namespaceNames } from '../../namespaces';
+import { namespaces } from '../../infrastructure/namespaces/util';
 import * as k8s from '@pulumi/kubernetes';
 
 import { grpcMongoSettings } from './settings';
@@ -98,7 +98,7 @@ export const grpcMongoMongodb = new k8s.helm.v3.Chart(
         },
         version,
         values: mongoValues,
-        namespace: namespaceNames.applications,
+        namespace: namespaces.applications,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being
         // available.
