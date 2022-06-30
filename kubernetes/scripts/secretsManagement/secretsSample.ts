@@ -2,7 +2,7 @@ import { ResourceName } from './../../resources/types/own-types';
 
 // This function does nothing. It just helps with typing
 type AppEnvVars = Record<ResourceName, Record<string, string>>;
-const makeType = <T extends AppEnvVars>(o: T) => o
+const makeType = <T extends AppEnvVars>(o: T) => o;
 
 // NOTE: I initially was encoding the secrets in base64 but it turns out
 // that bitnami sealed secrets not only handles encryption but base64 encoding of the
@@ -44,8 +44,7 @@ export const secretsSample = makeType({
     'cert-manager': {},
     linkerd: {},
     'linkerd-viz': {},
-    'namespaces': {},
+    namespaces: {},
     'nginx-ingress': {},
     'sealed-secrets': {},
 });
-

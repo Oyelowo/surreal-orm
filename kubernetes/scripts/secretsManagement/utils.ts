@@ -1,6 +1,7 @@
 import path from 'path';
-import { getPlainSecretsConfigFilesBaseDir } from '../../resources/shared/manifestsDirectory';import { Environment } from '../../resources/types/own-types';
- import { secretsSample } from './secretsSample';
+import { getPlainSecretsConfigFilesBaseDir } from '../../resources/shared/manifestsDirectory';
+import { Environment } from '../../resources/types/own-types';
+import { secretsSample } from './secretsSample';
 
 // import { SECRET_DEVELOPMENT } from '../../.secrets/development';
 // import { SECRET_LOCAL } from '../../.secrets/local';
@@ -24,15 +25,12 @@ import { getPlainSecretsConfigFilesBaseDir } from '../../resources/shared/manife
 //     return secretRecord[environment][resourceName];
 // }
 
-
-
 export const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 export function getPlainSecretInputFilePath(environment: Environment): string {
     return path.join(PLAIN_SECRETS_CONFIGS_DIR, `${environment}.ts`);
 }
 
 export type Secrets = typeof secretsSample;
-
 
 export function getPlainSecretsContent({ environment, secrets }: { environment: Environment; secrets: Secrets }) {
     const thisFileRelativeDir = __dirname.split('/').slice(-2).join('/');
@@ -45,6 +43,3 @@ export function getPlainSecretsContent({ environment, secrets }: { environment: 
      export const SECRET_${environment.toUpperCase()}: ${SECRETS_TYPE} = ${JSON.stringify(secrets)};
     `);
 }
-
-
-

@@ -23,7 +23,7 @@ const ARGV = yargs(process.argv.slice(2))
     .parseSync();
 
 // Usage ./mergeSecrets --environment=<local>
-function mainn() {
+function main() {
     const { environment } = ARGV;
     const existingSecrets = secretRecord[environment] ?? {};
     const secrets = R.mergeDeepLeft(existingSecrets, secretsSample);
@@ -32,4 +32,4 @@ function mainn() {
     sh.exec(`echo ${content} > ${filePath}`);
 }
 
-mainn();
+main();
