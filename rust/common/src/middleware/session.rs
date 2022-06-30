@@ -13,7 +13,7 @@ use crate::configurations::{
 
 pub async fn get_session(
     redis_config: RedisConfigs,
-    environment: Environment,
+    environment: &Environment,
 ) -> Result<ServerSession<RedisStorage<ConnectionManager>>, SessionError> {
     use Environment::*;
 
@@ -32,6 +32,7 @@ pub async fn get_session(
         .name("oyelowo-session")
         .secure(matches!(environment, Production | Staging | Development))
         // Add domain? e.g .domain.com
+        // .domain("localhost:8080")
         .same_site(SameSite::Lax)
         .max_age(Some(get_session_duration_std()));
 

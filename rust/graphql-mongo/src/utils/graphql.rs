@@ -1,3 +1,4 @@
+use mongodb::Database;
 use poem::{
     handler,
     http::HeaderMap,
@@ -9,18 +10,12 @@ use poem::{
 use async_graphql::extensions::ApolloTracing;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig, ALL_WEBSOCKET_PROTOCOLS};
 use async_graphql_poem::{GraphQLProtocol, GraphQLRequest, GraphQLResponse, GraphQLWebSocket};
-use common::{
-    authentication::TypedSession,
-    configurations::{
-        application::{ApplicationConfigs, Environment},
-        mongodb::MongodbConfigs,
-    },
-};
+use common::{authentication::TypedSession, configurations::application::Environment};
 
 use serde::Deserialize;
 
 use super::token::Token;
-use crate::app::{get_my_graphql_schema, sync_mongo_models, MyGraphQLSchema};
+use crate::app::{get_my_graphql_schema, MyGraphQLSchema};
 use common::utils;
 extern crate derive_more;
 
@@ -96,19 +91,12 @@ pub async fn graphql_playground() -> impl IntoResponse {
     ))
 }
 
-pub async fn setup_graphql() -> anyhow::Result<MyGraphQLSchema> {
-    let application = ApplicationConfigs::default();
-    let database = MongodbConfigs::default();
-
+pub fn setup_graphql(db: Database, environment: &Environment) -> MyGraphQLSchema {
     use Environment::*;
-    let (limit_depth, limit_complexity) = match application.environment {
+    let (limit_depth, limit_complexity) = match environment {
         Local | Development | Staging => (usize::max_value(), usize::max_value()),
         Production => (8, 200),
     };
-
-    let db = database.get_database()?;
-
-    sync_mongo_models(&db).await?;
 
     let schema = get_my_graphql_schema()
         .data(db)
@@ -117,7 +105,7 @@ pub async fn setup_graphql() -> anyhow::Result<MyGraphQLSchema> {
         .limit_complexity(limit_complexity)
         .finish();
 
-    Ok(schema)
+    schema
 }
 
 pub fn generate_schema(path: impl AsRef<Path>) {

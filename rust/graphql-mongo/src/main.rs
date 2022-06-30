@@ -1,6 +1,5 @@
 use std::process;
 
-use anyhow::Context;
 use common::{
     configurations::{
         application::ApplicationConfigs, mongodb::MongodbConfigs, redis::RedisConfigs,
@@ -9,6 +8,7 @@ use common::{
 };
 
 use graphql_mongo::{
+    app::sync_mongo_models,
     handlers::{
         healthcheck::healthz,
         oauth::{oauth_login_authentication, oauth_login_initiator},
@@ -16,12 +16,7 @@ use graphql_mongo::{
     utils::graphql::{graphql_handler, graphql_handler_ws, graphql_playground, setup_graphql},
 };
 
-use poem::{
-    get,
-    listener::TcpListener,
-    middleware::{AddData, Tracing},
-    EndpointExt, Route, Server,
-};
+use poem::{get, listener::TcpListener, middleware::Tracing, EndpointExt, Route, Server};
 
 #[tokio::main]
 async fn main() {
@@ -29,32 +24,30 @@ async fn main() {
         std::env::set_var("RUST_LOG", "poem=debug");
     }
 
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     let application = ApplicationConfigs::default();
+    let environment = application.clone().environment;
     let redis_config = RedisConfigs::default();
+
     let redis = redis_config.clone().get_client().unwrap_or_else(|e| {
         log::error!("Problem getting database. Error: {e:?}");
         process::exit(1)
     });
-    let database = MongodbConfigs::default();
-    let database = database.get_database().unwrap_or_else(|e| {
-        log::error!("Problem getting database. Error: {e:?}");
-        process::exit(1)
-    });
-
-    let app_url = &application.get_url();
-
-    let con = redis_config.clone().get_client().unwrap();
-    let schema = setup_graphql()
-        .await
-        .with_context(|| "Problem setting up graphql")
+    let database = MongodbConfigs::default()
+        .get_database()
         .unwrap_or_else(|e| {
-            log::error!("{e:?}");
+            log::error!("Problem getting database. Error: {e:?}");
             process::exit(1)
         });
 
-    let session = middleware::get_session(redis_config.clone(), application.environment.clone())
+    sync_mongo_models(&database).await.expect("Problem syncing");
+
+    let app_url = &application.get_url();
+
+    let schema = setup_graphql(database.clone(), &environment);
+
+    let session = middleware::get_session(redis_config.clone(), &environment)
         .await
         .unwrap_or_else(|e| {
             log::error!("{e:?}");
@@ -74,9 +67,8 @@ async fn main() {
         .data(database)
         .data(redis)
         .data(redis_config)
-        .with(AddData::new(con))
         .with(session)
-        .with(middleware::get_cors(application.environment))
+        .with(middleware::get_cors(environment))
         // .with(Logger)
         .with(Tracing);
 
