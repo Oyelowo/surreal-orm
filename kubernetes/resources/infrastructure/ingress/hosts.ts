@@ -24,7 +24,7 @@ export const hosts: Configs = {
     local: {
         base: 'localhost',
         // api: 'api.oyelowo.local',
-        apiUrl: 'http://localhost:8080/api',
+        // apiUrl: 'http://localhost:8080/api',
         port: INGRESS_EXTERNAL_PORT_LOCAL,
     },
     development: {
@@ -44,5 +44,5 @@ export const hosts: Configs = {
 export function getBaseUrl(environment: Environment) {
     const host = hosts[environment];
     // For local host, we add a port, otherwise leave out
-    return `${host.base}${host.port ? `:${host.port}` : ''}`;
+    return environment === "local" ? `http://${host.base}:${host.port}` : host.base;
 }
