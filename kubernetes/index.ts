@@ -1,10 +1,10 @@
 // INFRASTRUCTURE
+export * from './resources/infrastructure/namespaces';
 export * from './resources/infrastructure/argocd';
 export * from './resources/infrastructure/cert-manager';
 export * from './resources/infrastructure/ingress';
 export * from './resources/infrastructure/linkerd';
 export * from './resources/infrastructure/sealed-secrets';
-export * from './resources/namespaces';
 // SERVICES
 // Rust server backend with support for graphql, mongodb and postgres
 // RUST WORKSPACE APPS
