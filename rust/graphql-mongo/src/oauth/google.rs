@@ -39,8 +39,8 @@ impl GoogleConfig {
         let env = OauthGoogleConfigs::default();
 
         let basic_config = OauthConfig::builder()
-            .client_id(ClientId::new(env.google_client_id))
-            .client_secret(ClientSecret::new(env.google_client_secret))
+            .client_id(ClientId::new(env.client_id))
+            .client_secret(ClientSecret::new(env.client_secret))
             .auth_url(
                 AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".to_string())
                     .expect("Invalid authorization endpoint URL"),
