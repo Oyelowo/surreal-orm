@@ -2,7 +2,7 @@ import * as kx from '@pulumi/kubernetesx';
 import { Resource } from '@pulumi/pulumi';
 import * as argocd from '../../crds-generated/argoproj';
 import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp';
-import { NamespaceName, namespaceNames } from './../namespaces/util';
+import { Namespace, namespaces } from './../infrastructure/namespaces/util';
 import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
 import { getResourceProvider, getResourceRelativePath } from './manifestsDirectory';
 import { ResourceName } from '../types/own-types';
@@ -11,7 +11,7 @@ import { getEnvironmentVariables } from './validations';
 const { ENVIRONMENT } = getEnvironmentVariables();
 
 type ArgocdApplicationProps = {
-    namespace: NamespaceName;
+    namespace: Namespace;
     outputSubDirName: ResourceName;
     sourceApplication: ResourceName;
     parent?: Resource;
@@ -29,7 +29,7 @@ export function createArgocdApplication({
         {
             metadata: {
                 name: sourceApplication,
-                namespace: namespaceNames.argocd,
+                namespace: namespaces.argocd,
                 annotations: {
                     finalizers: ['resources-finalizer.argocd.argoproj.io'] as any,
                     // Maybe use? argocd.argoproj.io / hook: PreSync
@@ -68,7 +68,7 @@ export function createArgocdApplication({
 
 const metadata = {
     name: 'argocd-applications-secret',
-    namespace: namespaceNames.argocd,
+    namespace: namespaces.argocd,
     labels: {
         'argocd.argoproj.io/secret-type': 'repository',
     },

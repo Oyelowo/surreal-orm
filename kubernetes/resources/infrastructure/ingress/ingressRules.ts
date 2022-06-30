@@ -18,7 +18,7 @@ const SECRET_NAME_NGINX = 'nginx-ingress-tls';
 
 const name = 'oyelowo-ingress';
 
-const getHosts = (environemnt: Environment) => [hosts[environemnt].base, /* hosts[environemnt].api */];
+const getHosts = (environemnt: Environment) => [hosts[environemnt].base /* hosts[environemnt].api */];
 const isLocal = ENVIRONMENT === 'local';
 
 type CertManagerAnnotations = {

@@ -6,7 +6,7 @@ import { namespaceNames } from '../../resources/namespaces/util';
 import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
 import { getResourceAbsolutePath } from '../../resources/shared/manifestsDirectory';
 import { Environment, ResourceName } from '../../resources/types/own-types';
-import { setupOrSyncPlainSecretTSFiles } from '../secretsManagement/setupSecrets';
+import { main } from '../secretsManagement/setupSecrets';
 import { generateAllSealedSecrets } from './generateAllSealedSecrets';
 import { generateManifests } from './generateManifests';
 import { getImageTagsFromDir } from './getImageTagsFromDir';
@@ -19,14 +19,14 @@ export async function bootstrapCluster(environment: Environment) {
         imageTags,
     });
 
-    setupOrSyncPlainSecretTSFiles();
+    main();
 
     /*
        This requires the above step with initial cluster setup making sure that the sealed secret controller is
        running in the cluster */
 
     // # Apply namespace first
-    applyResourceManifests('namespace-names', environment);
+    applyResourceManifests('namespaces', environment);
 
     // # Apply setups with sealed secret controller
     applyResourceManifests('sealed-secrets', environment);

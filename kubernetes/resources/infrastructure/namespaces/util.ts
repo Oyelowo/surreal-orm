@@ -1,4 +1,4 @@
-export type NamespaceName =
+export type Namespace =
     | 'applications'
     | 'argocd'
     | 'cert-manager'
@@ -11,7 +11,7 @@ type CamelCase<S extends string> = S extends `${infer P1}-${infer P2}${infer P3}
     ? `${Lowercase<P1>}${Uppercase<P2>}${CamelCase<P3>}`
     : Lowercase<S>;
 
-export const namespaceNames: Record<CamelCase<NamespaceName>, NamespaceName> = {
+export const namespaces: Record<CamelCase<Namespace>, Namespace> = {
     applications: 'applications',
     argocd: 'argocd',
     certManager: 'cert-manager',

@@ -3,7 +3,7 @@ import { SECRET_LOCAL } from '../../.secrets/local';
 import { SECRET_PRODUCTION } from '../../.secrets/production';
 import { SECRET_STAGING } from '../../.secrets/staging';
 import { Environment, ResourceName } from '../../resources/types/own-types';
-import { Secrets } from './setupSecrets';
+import { Secrets } from './utils';
 
 export const secretRecord: Record<Environment, Secrets> = {
     production: SECRET_PRODUCTION,

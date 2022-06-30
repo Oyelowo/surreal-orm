@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { NamespaceName } from '../namespaces/util';
+import { Namespace } from '../infrastructure/namespaces/util';
 export const appEnvironmentsSchema = z.union([
     z.literal('local'),
     z.literal('development'),
@@ -9,7 +9,7 @@ export const appEnvironmentsSchema = z.union([
 
 export type Environment = z.infer<typeof appEnvironmentsSchema>;
 // This might change but make it the environment for now.
-export type NamespaceOfApps = NamespaceName;
+export type NamespaceOfApps = Namespace;
 
 export type Memory = `${number}${'E' | 'P' | 'T' | 'G' | 'M' | 'k' | 'm' | 'Ei' | 'Pi' | 'Ti' | 'Gi' | 'Mi' | 'Ki'}`;
 
@@ -22,7 +22,7 @@ export type ServiceName = 'graphql-mongo' | 'graphql-postgres' | 'grpc-mongo' | 
 export type ArgocdAppResourceName = `argocd-applications-children-${ResourceType}` | 'argocd-applications-parents';
 
 const InfrastructureNames = [
-    'namespace-names',
+    'namespaces',
     'sealed-secrets',
     'cert-manager',
     'nginx-ingress',
@@ -50,10 +50,10 @@ export interface Settings<TAppName extends ServiceName> {
 
 export type RecursivePartial<T> = {
     [P in keyof T]?: T[P] extends (infer U)[]
-        ? RecursivePartial<U>[]
-        : T[P] extends object | undefined
-        ? RecursivePartial<T[P]>
-        : T[P];
+    ? RecursivePartial<U>[]
+    : T[P] extends object | undefined
+    ? RecursivePartial<T[P]>
+    : T[P];
 };
 
 // make all properties optional recursively including nested objects.

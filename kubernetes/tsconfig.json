@@ -23,6 +23,7 @@
         "scripts/utils/bootstrapCluster.ts",
         "scripts/utils/sealedSecrets.ts",
         "scripts/utils/generateAllSealedSecrets.ts",
-        "scripts/utils/syncHelmChartTypesDeclarations.ts"
+        "scripts/utils/syncHelmChartTypesDeclarations.ts",
+        "./scripts/secretsManagement/getPlainSecretInputFilePath.ts"
     ]
 }

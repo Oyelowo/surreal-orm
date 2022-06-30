@@ -1,7 +1,13 @@
+import { ResourceName } from './../../resources/types/own-types';
+
+// This function does nothing. It just helps with typing
+type AppEnvVars = Record<ResourceName, Record<string, string>>;
+const makeType = <T extends AppEnvVars>(o: T) => o
+
 // NOTE: I initially was encoding the secrets in base64 but it turns out
 // that bitnami sealed secrets not only handles encryption but base64 encoding of the
 // secrets before encrypting them
-export const secretsSample = {
+export const secretsSample = makeType({
     'graphql-mongo': {
         MONGODB_USERNAME: 'example',
         MONGODB_PASSWORD: 'example',
@@ -38,9 +44,8 @@ export const secretsSample = {
     'cert-manager': {},
     linkerd: {},
     'linkerd-viz': {},
-    'namespace-names': {},
+    'namespaces': {},
     'nginx-ingress': {},
     'sealed-secrets': {},
-};
+});
 
-// Record<ResourceName, Record<string, string>>

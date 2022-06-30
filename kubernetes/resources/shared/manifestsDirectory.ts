@@ -70,7 +70,7 @@ function getResourceProperties<T>(
         case 'linkerd':
         case 'sealed-secrets':
         case 'linkerd-viz':
-        case 'namespace-names':
+        case 'namespaces':
         case 'nginx-ingress':
         case 'argocd-applications-children-infrastructure':
         case 'argocd-applications-children-services':
