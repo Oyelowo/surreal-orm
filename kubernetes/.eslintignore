@@ -2,8 +2,7 @@
 build
 coverage
 node_modules
-crd2pulumi
+crds-generated
 manifests
 k3d.yaml
-resources/shared/types
-# resources/shared/types/helm-charts
+resources/types/helm-charts

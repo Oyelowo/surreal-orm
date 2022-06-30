@@ -31,7 +31,7 @@ export function syncHelmChartTypesDeclarations() {
 
             const typeFileName = _.camelCase(`${chart}${_.capitalize(repoName)}`);
 
-            let tsDec = JsonToTS(JSON.parse(valuesJson), {
+            const tsDec = JsonToTS(JSON.parse(valuesJson), {
                 rootName: `I${_.capitalize(typeFileName)}`,
             })
                 .map((typeInterface, i) => {

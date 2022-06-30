@@ -33,3 +33,6 @@ merge-kube-config:
 
 format:
 	npm run prettier
+
+check:
+	npm run lint

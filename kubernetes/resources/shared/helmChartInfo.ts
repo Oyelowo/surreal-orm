@@ -16,7 +16,7 @@ type ChartsInfo = Record<
 // This function does nothing. It just helps with typing
 export const checkConstType = <T extends ChartsInfo>(o: T) => o;
 
-export let helmChartsInfo = checkConstType({
+export const helmChartsInfo = checkConstType({
     bitnami: {
         repo: 'https://charts.bitnami.com/bitnami',
         charts: {
