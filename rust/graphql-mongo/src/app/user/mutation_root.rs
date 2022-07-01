@@ -99,6 +99,7 @@ impl UserMutationRoot {
             Some(ref user_id) => {
                 let user = User::find_by_id(db, user_id).await;
                 session.renew();
+                log::info!("Successfully authenticated and renew session for user: {user_id}");
                 user
             }
             // If not found from session, handle fresh signin flow
@@ -112,13 +113,19 @@ impl UserMutationRoot {
 
                 let plain_password = PasswordPlain::new(sign_in_credentials.password);
                 let hashed_password = PasswordHashPHC::new(password_hash);
-                validate_password(plain_password, hashed_password).await?;
-
-                let id = user.id.ok_or_else(|| {
+                let user_id = user.id.ok_or_else(|| {
+                    error!("Invalid user_id");
                     ApiHttpStatus::InternalServerError("Malformed id".into()).extend()
                 })?;
+                
+                validate_password(plain_password, hashed_password)
+                    .await
+                    .map_err(|e| {
+                        error!("Invalid password by user: {user_id}. Error: {e:?}");
+                        ApiHttpStatus::Unauthorized("Invalid Credentials".into()).extend()
+                    })?;
 
-                session.insert_user_id(&id);
+                session.insert_user_id(&user_id);
                 Ok(user)
             }
         };

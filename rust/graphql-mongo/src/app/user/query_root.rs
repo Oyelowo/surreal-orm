@@ -87,7 +87,8 @@ impl UserQueryRoot {
     }
 
     async fn session(&self, ctx: &Context<'_>) -> Result<Session> {
-        let user_id = TypedSession::from_ctx(ctx)?.get_user_id::<ObjectId>()?;
+        let user_id = TypedSession::from_ctx(ctx)?.get_user_id()?;
+        log::info!("Successfully retrieved session for user: {user_id}");
 
         Ok(Session {
             expires_at: TypedSession::get_expiry(),
