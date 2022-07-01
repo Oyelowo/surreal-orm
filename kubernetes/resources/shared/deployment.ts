@@ -104,7 +104,7 @@ export class ServiceDeployment<
                                 path: '/api/healthz',
                                 port: kubeConfig.readinessProbePort,
                             },
-                            initialDelaySeconds: 20,
+                            initialDelaySeconds: 60,
                             periodSeconds: 10,
                             failureThreshold: 7,
                         },
@@ -113,10 +113,10 @@ export class ServiceDeployment<
                         // the application is unavailable
                         livenessProbe: {
                             httpGet: {
-                                path: '/api/healthz',
+                                path: '/api/liveness',
                                 port: kubeConfig.readinessProbePort,
                             },
-                            initialDelaySeconds: 10,
+                            initialDelaySeconds: 300,
                             periodSeconds: 10,
                             failureThreshold: 7,
                         },

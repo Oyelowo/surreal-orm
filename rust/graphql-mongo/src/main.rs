@@ -2,7 +2,9 @@ use std::process;
 
 use common::{
     configurations::{
-        application::ApplicationConfigs, mongodb::MongodbConfigs, redis::RedisConfigs,
+        application::{ApplicationConfigs, Environment},
+        mongodb::MongodbConfigs,
+        redis::RedisConfigs,
     },
     middleware,
 };
@@ -10,7 +12,7 @@ use common::{
 use graphql_mongo::{
     app::sync_mongo_models,
     handlers::{
-        healthcheck::healthz,
+        healthcheck::{healthz, liveness},
         oauth::{oauth_login_authentication, oauth_login_initiator},
     },
     utils::graphql::{graphql_handler, graphql_handler_ws, graphql_playground, setup_graphql},
@@ -20,15 +22,22 @@ use poem::{get, listener::TcpListener, middleware::Tracing, EndpointExt, Route, 
 
 #[tokio::main]
 async fn main() {
-    if std::env::var_os("RUST_LOG").is_none() {
-        std::env::set_var("RUST_LOG", "poem=debug");
-    }
-
-    tracing_subscriber::fmt::init();
-
     let application = ApplicationConfigs::default();
     let environment = application.clone().environment;
     let redis_config = RedisConfigs::default();
+
+    let log_level = match &environment {
+        Environment::Local => "debug",
+        _ => "info",
+    };
+
+    std::env::set_var("RUST_LOG", log_level);
+    // env_logger::init();
+    // if std::env::var_os("RUST_LOG").is_none() {
+    //     std::env::set_var("RUST_LOG", "poem=debug");
+    // }
+
+    tracing_subscriber::fmt::init();
 
     let redis = redis_config.clone().get_client().unwrap_or_else(|e| {
         log::error!("Problem getting database. Error: {e:?}");
@@ -56,6 +65,7 @@ async fn main() {
 
     let api_routes = Route::new()
         .at("/healthz", get(healthz))
+        .at("/liveness", get(liveness))
         .at("/oauth/signin/:oauth_provider", get(oauth_login_initiator))
         .at("/oauth/callback", get(oauth_login_authentication))
         .at("/graphql", get(graphql_playground).post(graphql_handler))
