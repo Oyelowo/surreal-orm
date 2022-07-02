@@ -1,5 +1,6 @@
 use std::process;
 
+use anyhow::Context;
 use common::{
     configurations::{
         application::{ApplicationConfigs, Environment},
@@ -21,7 +22,7 @@ use graphql_mongo::{
 use poem::{get, listener::TcpListener, middleware::Tracing, EndpointExt, Route, Server};
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     let application = ApplicationConfigs::default();
     let environment = application.clone().environment;
     let redis_config = RedisConfigs::default();
@@ -39,16 +40,14 @@ async fn main() {
 
     tracing_subscriber::fmt::init();
 
-    let redis = redis_config.clone().get_client().unwrap_or_else(|e| {
-        log::error!("Problem getting database. Error: {e:?}");
-        process::exit(1)
-    });
+    let redis = redis_config
+        .clone()
+        .get_client()
+        .context("Problem getting redis")?;
+
     let database = MongodbConfigs::default()
         .get_database()
-        .unwrap_or_else(|e| {
-            log::error!("Problem getting database. Error: {e:?}");
-            process::exit(1)
-        });
+        .context("Problem getting database")?;
 
     sync_mongo_models(&database).await.expect("Problem syncing");
 
@@ -58,10 +57,7 @@ async fn main() {
 
     let session = middleware::get_session(redis_config.clone(), &environment)
         .await
-        .unwrap_or_else(|e| {
-            log::error!("{e:?}");
-            process::exit(1)
-        });
+        .context("Problem getting session")?;
 
     let api_routes = Route::new()
         .at("/healthz", get(healthz))
@@ -91,4 +87,5 @@ async fn main() {
             log::error!("Problem running server. Error: {e}");
             process::exit(1)
         });
+    Ok(())
 }
