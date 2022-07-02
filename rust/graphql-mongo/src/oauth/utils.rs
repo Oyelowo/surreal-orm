@@ -46,13 +46,13 @@ pub(crate) enum OauthError {
 
 /// Tokens stored in redis for returned url oauth verification
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct CsrfState {
+pub(crate) struct Evidence {
     pub(crate) csrf_token: CsrfToken,
     pub(crate) provider: OauthProvider,
     pub(crate) pkce_code_verifier: PkceCodeVerifier,
 }
 
-impl CsrfState {
+impl Evidence {
     const CSRF_STATE_REDIS_KEY: &'static str = "CSRF_STATE_REDIS_KEY";
 
     fn redis_key(csrf_token: CsrfToken) -> String {
@@ -69,9 +69,9 @@ impl CsrfState {
     ) -> OauthResult<Self> {
         let key = &Self::redis_key(csrf_token);
 
-        let csrf_state: String = connection.get(key).await?;
+        let evidence: String = connection.get(key).await?;
 
-        Ok(serde_json::from_str::<Self>(csrf_state.as_str())?)
+        Ok(serde_json::from_str::<Self>(evidence.as_str())?)
     }
 
     pub(crate) async fn cache(self, connection: &mut redis::aio::Connection) -> OauthResult<Self> {
@@ -191,7 +191,7 @@ pub(crate) trait OauthProviderTrait {
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct AuthUrlData {
     pub(crate) authorize_url: RedirectUrlReturned,
-    pub(crate) csrf_state: CsrfState,
+    pub(crate) evidence: Evidence,
 }
 
 #[async_trait::async_trait]
@@ -230,14 +230,14 @@ impl OauthConfigTrait for OauthConfig {
             .set_pkce_challenge(pkce_code_challenge)
             .url();
 
-        let csrf_state = CsrfState {
+        let evidence = Evidence {
             csrf_token,
             pkce_code_verifier,
             provider: self.provider,
         };
 
         AuthUrlData {
-            csrf_state,
+            evidence,
             authorize_url: RedirectUrlReturned(authorize_url),
         }
     }

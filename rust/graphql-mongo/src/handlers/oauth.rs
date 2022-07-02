@@ -17,7 +17,7 @@ use url::Url;
 use crate::oauth::github::GithubConfig;
 use crate::oauth::google::GoogleConfig;
 use crate::oauth::utils::{
-    CsrfState, OauthConfigTrait, OauthError, OauthProviderTrait, RedirectUrlReturned,
+    Evidence, OauthConfigTrait, OauthError, OauthProviderTrait, RedirectUrlReturned,
 };
 use common::configurations::redis::RedisConfigError;
 
@@ -118,7 +118,7 @@ pub async fn oauth_login_initiator(
     };
 
     auth_url_data
-        .csrf_state
+        .evidence
         .cache(&mut connection)
         .await
         .map_err(HandlerError::StorageError)
@@ -170,20 +170,20 @@ async fn authenticate_user(
         .map_err(HandlerError::MalformedState)
         .map_err(BadRequest)?;
 
-    let csrf_state = CsrfState::verify_csrf_token(csrf_token, &mut connection)
+    let evidence = Evidence::verify_csrf_token(csrf_token, &mut connection)
         .await
         .map_err(HandlerError::InvalidState)
         .map_err(BadRequest)?;
 
-    let user = match csrf_state.provider {
+    let user = match evidence.provider {
         OauthProvider::Github => {
             GithubConfig::new()
-                .fetch_oauth_account(code, csrf_state.pkce_code_verifier)
+                .fetch_oauth_account(code, evidence.pkce_code_verifier)
                 .await
         }
         OauthProvider::Google => {
             GoogleConfig::new()
-                .fetch_oauth_account(code, csrf_state.pkce_code_verifier)
+                .fetch_oauth_account(code, evidence.pkce_code_verifier)
                 .await
         }
     };
