@@ -1,6 +1,5 @@
-use std::process;
-
 use anyhow::Context;
+use backoff::ExponentialBackoff;
 use common::{
     configurations::{
         application::{ApplicationConfigs, Environment},
@@ -10,6 +9,7 @@ use common::{
     middleware,
 };
 
+use backoff::future::retry;
 use graphql_mongo::{
     app::sync_mongo_models,
     handlers::{
@@ -18,16 +18,11 @@ use graphql_mongo::{
     },
     utils::graphql::{graphql_handler, graphql_handler_ws, graphql_playground, setup_graphql},
 };
-
 use poem::{get, listener::TcpListener, middleware::Tracing, EndpointExt, Route, Server};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let application = ApplicationConfigs::default();
-    let environment = application.clone().environment;
-    let redis_config = RedisConfigs::default();
-
-    let log_level = match &environment {
+    let log_level = match &ApplicationConfigs::default().environment {
         Environment::Local => "debug",
         _ => "info",
     };
@@ -37,8 +32,18 @@ async fn main() -> anyhow::Result<()> {
     // if std::env::var_os("RUST_LOG").is_none() {
     //     std::env::set_var("RUST_LOG", "poem=debug");
     // }
-
     tracing_subscriber::fmt::init();
+    let backoff = ExponentialBackoff::default();
+
+    let operation = || async { Ok(run_app().await?) };
+
+    retry(backoff, operation).await
+}
+
+async fn run_app() -> anyhow::Result<()> {
+    let application = ApplicationConfigs::default();
+    let environment = application.clone().environment;
+    let redis_config = RedisConfigs::default();
 
     let redis = redis_config
         .clone()
@@ -49,7 +54,7 @@ async fn main() -> anyhow::Result<()> {
         .get_database()
         .context("Problem getting database")?;
 
-    sync_mongo_models(&database).await.expect("Problem syncing");
+    sync_mongo_models(&database).await?;
 
     let app_url = &application.get_url();
 
@@ -83,9 +88,6 @@ async fn main() -> anyhow::Result<()> {
     Server::new(TcpListener::bind(app_url))
         .run(api)
         .await
-        .unwrap_or_else(|e| {
-            log::error!("Problem running server. Error: {e}");
-            process::exit(1)
-        });
+        .context("Problem running server")?;
     Ok(())
 }
