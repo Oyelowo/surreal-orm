@@ -28,7 +28,7 @@ async function startAppInLocalCluster() {
     }
 
     // Scaffold should wait for user input before reloading (--trigger="manual"). Without this, it hot reloads
-    sh.exec(`skaffold dev --port-forward --cleanup=false --trigger="manual"`);
+    sh.exec(`skaffold dev --port-forward --cleanup=false`);
     // sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true`);
 }
 
