@@ -12,22 +12,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/delete-package-versions@v2
+    - uses: actions/delete-package-versions@v3
       with: 
         package-name: 'web'
         min-versions-to-keep: 3
 
-    - uses: actions/delete-package-versions@v2
+    - uses: actions/delete-package-versions@v3
       with: 
         package-name: 'graphql-mongo'
         min-versions-to-keep: 3
 
-    - uses: actions/delete-package-versions@v2
+    - uses: actions/delete-package-versions@v3
       with: 
         package-name: 'graphql-postgres'
         min-versions-to-keep: 3
 
-    - uses: actions/delete-package-versions@v2
+    - uses: actions/delete-package-versions@v3
       with: 
         package-name: 'grpc-mongo'
         min-versions-to-keep: 3
