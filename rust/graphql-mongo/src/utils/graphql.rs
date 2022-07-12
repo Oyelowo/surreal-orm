@@ -98,14 +98,12 @@ pub fn setup_graphql(db: Database, environment: &Environment) -> MyGraphQLSchema
         Production => (8, 200),
     };
 
-    let schema = get_my_graphql_schema()
+    get_my_graphql_schema()
         .data(db)
         .extension(ApolloTracing)
         .limit_depth(limit_depth) // This and also limit_complexity will prevent the graphql playground document from showing because it's unable to do the complete tree parsing. TODO: Add it conditionally. i.e if not in development or test environemnt.
         .limit_complexity(limit_complexity)
-        .finish();
-
-    schema
+        .finish()
 }
 
 pub fn generate_schema(path: impl AsRef<Path>) {

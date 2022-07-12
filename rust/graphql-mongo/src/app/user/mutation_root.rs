@@ -117,7 +117,7 @@ impl UserMutationRoot {
                     error!("Invalid user_id");
                     ApiHttpStatus::InternalServerError("Malformed id".into()).extend()
                 })?;
-                
+
                 validate_password(plain_password, hashed_password)
                     .await
                     .map_err(|e| {
