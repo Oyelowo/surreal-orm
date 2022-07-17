@@ -9,6 +9,7 @@ edition = "2021"
 mongodb = { version = "2.2.1", features = ["bson-chrono-0_4"] }
 serde = { version = "1.0.137", features = ["derive"] }
 anyhow = "1.0.57"
+mongodm = "0.9.0"
 
 # wither = { git = "https://github.com/Oyelowo/wither", branch = "master" }
 # Keep an eye on wither. Only the master branch is stable at the momenet

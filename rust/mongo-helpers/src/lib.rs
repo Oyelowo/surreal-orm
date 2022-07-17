@@ -1,9 +1,7 @@
 pub mod operations;
 mod utils;
 
-// Used by the operators macros
-pub(crate) use mongodb as mongo;
-pub use operations::operators as ops;
+pub use mongodm::operator;
 pub use utils::{bson::as_bson, sync_mongo_models};
 
 #[cfg(test)]
