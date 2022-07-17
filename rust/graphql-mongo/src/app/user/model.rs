@@ -3,7 +3,7 @@ use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
 use futures_util::TryStreamExt;
 use mongo_helpers::{
-    utils::as_bson,
+    as_bson,
     ops::{self, sort::SortOrder},
 };
 use mongodb::{

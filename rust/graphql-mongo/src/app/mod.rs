@@ -7,6 +7,7 @@ use user::{User, UserMutationRoot, UserQueryRoot, UserSubscriptionRoot};
 
 use async_graphql::{MergedObject, MergedSubscription, Schema, SchemaBuilder};
 use mongo_helpers::sync_mongo_models;
+use wither::Model;
 
 // Add new models here
 pub async fn sync_mongo_models(db: &Database) -> anyhow::Result<()> {
