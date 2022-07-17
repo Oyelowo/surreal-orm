@@ -7,7 +7,7 @@ use oauth2::{
 use serde::{Deserialize, Serialize};
 
 use super::utils::{get_redirect_url, OauthConfig, OauthProviderTrait, OauthResult, OauthUrl};
-use crate::app::user::{AccountOauth, OauthProvider, Role, TokenType, User};
+use crate::app::user::{AccountOauth, OauthProvider, TokenType};
 
 #[derive(Debug, Deserialize, Serialize)]
 enum GoogleScopes {

@@ -14,7 +14,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use url::Url;
 
-use crate::app::user::{OauthProvider, User, AccountOauth};
+use crate::app::user::{AccountOauth, OauthProvider};
 
 pub(crate) fn get_redirect_url() -> String {
     let base_url = ApplicationConfigs::default().external_base_url;
