@@ -115,7 +115,7 @@ pub async fn setup_graphql() -> anyhow::Result<MyGraphQLSchema> {
     };
 
     let connection_pool = PgPoolOptions::new()
-        .connect_timeout(Duration::from_secs(15))
+        .idle_timeout(Duration::from_secs(15))
         .connect_lazy_with(database.with_db());
 
     let mut opt = ConnectOptions::new("protocol://username:password@host/database".to_owned());
