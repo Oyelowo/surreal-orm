@@ -2,23 +2,29 @@ use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
 use futures_util::TryStreamExt;
-use mongo_helpers::{converters::as_bson, ops, Model};
+use mongo_helpers::{
+    utils::as_bson,
+    ops::{self, sort::SortOrder},
+};
 use mongodb::{
     bson::{doc, from_bson, oid::ObjectId, to_bson, Bson, Document},
-    options::{FindOneAndUpdateOptions, FindOneOptions, ReadConcern},
+    options::{
+        Acknowledgment, FindOneAndUpdateOptions, FindOneOptions, IndexOptions, ReadConcern,
+        WriteConcern,
+    },
     Database,
 };
 use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
-
-use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
+use wither::{IndexModel, Model};
 
 use super::guards::{AuthGuard, RoleGuard};
+use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
 
 #[derive(
-    // Model,
+    Model,
     SimpleObject,
     InputObject,
     Serialize,
@@ -31,7 +37,7 @@ use super::guards::{AuthGuard, RoleGuard};
 #[serde(rename_all = "camelCase")]
 #[graphql(complex)]
 #[graphql(input_name = "UserInput")]
-// #[model(index(keys = r#"doc!{"username": 1}"#, options = r#"doc!{"unique": true}"#))]
+#[model(index(keys = r#"doc!{"username": 1}"#, options = r#"doc!{"unique": true}"#))]
 pub struct User {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
@@ -101,10 +107,6 @@ pub struct User {
 
     #[graphql(skip_input)]
     pub accounts: Vec<AccountOauth>,
-}
-
-impl Model for User {
-    const COLLECTION_NAME: &'static str = "User";
 }
 
 #[derive(
@@ -199,7 +201,7 @@ impl User {
         let db = get_db_from_ctx(ctx)?;
         let post_fields = Post::get_fields_serialized();
 
-        Post::get_collection(db)
+        Post::collection(db)
             .find(doc! {post_fields.posterId: self.id}, None)
             .await?
             .try_collect()
@@ -268,7 +270,7 @@ impl User {
         // User::find_one(db, search_doc, None)
         //     .await?
         //     .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
-        User::get_collection(db)
+        User::collection(db)
             .find_one(search_doc, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
@@ -282,13 +284,13 @@ impl User {
             .read_concern(ReadConcern::majority())
             .build();
 
-        User::get_collection(db)
+        User::collection(db)
             .find_one(doc! {uk._id: id}, find_one_options)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
 
-    pub async fn find_or_create_for_oauth(self, db: &Database) -> anyhow::Result<Self> {
+    pub async fn find_or_create_for_oauth(mut self, db: &Database) -> anyhow::Result<Self> {
         let user_fields = User::get_fields_serialized();
 
         let acc_fields = AccountOauth::get_fields_serialized();
@@ -307,20 +309,14 @@ impl User {
             }
         };
 
-        let user = User::get_collection(db)
-            .find_one_and_update(
-                filter,
-                self.to_doc()?,
-                FindOneAndUpdateOptions::builder().upsert(true).build(),
-            )
-            .await?;
+        self.save(db, Some(filter)).await?;
 
-        Ok(user.expect("no user"))
+        Ok(self)
     }
 
     pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Result<Self> {
         let uk = User::get_fields_serialized();
-        User::get_collection(db)
+        User::collection(db)
             .find_one(doc! { uk.username: username.into() }, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())

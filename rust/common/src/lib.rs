@@ -5,7 +5,7 @@ mod macros;
 pub mod middleware;
 pub mod utils;
 
-pub use macros::{calculator, helpers, sync_mongo_models};
+pub use macros::{calculator, helpers};
 
 #[macro_use]
 // extern crate ;

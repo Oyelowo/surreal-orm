@@ -7,6 +7,7 @@ use common::{
     error_handling::ApiHttpStatus,
 };
 use log::error;
+use wither::Model;
 
 use crate::utils::mongodb::get_db_from_ctx;
 
@@ -15,7 +16,6 @@ use async_graphql::*;
 use chrono::Utc;
 
 use validator::Validate;
-use wither::Model;
 
 #[derive(Default)]
 pub struct UserMutationRoot;

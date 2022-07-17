@@ -1,22 +1,18 @@
 use async_graphql::*;
 
 use common::error_handling::ApiHttpStatus;
-use mongo_helpers::Model;
 use mongodb::bson::{doc, oid::ObjectId};
 use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
-// use wither::{
-//     bson::{doc, oid::ObjectId},
-//     prelude::Model,
-// };
+use wither::Model;
 
 use crate::{app::user::User, utils::mongodb::get_db_from_ctx};
 
 #[derive(
     FieldsGetter,
-    // Model,
+    Model,
     SimpleObject,
     InputObject,
     Clone,
@@ -46,10 +42,6 @@ pub struct Post {
     pub content: String,
 }
 
-impl Model for Post {
-    const COLLECTION_NAME: &'static str = "Post";
-}
-
 #[ComplexObject]
 impl Post {
     async fn poster(&self, ctx: &Context<'_>) -> Result<User> {
@@ -57,7 +49,7 @@ impl Post {
         let db = get_db_from_ctx(ctx)?;
         let post_keys = Post::get_fields_serialized();
 
-        User::get_collection(db)
+        User::collection(db)
             .find_one(doc! {post_keys._id: self.poster_id}, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("".into()))

@@ -1,18 +1,16 @@
-mod model;
 pub mod operators;
-pub mod converters;
+pub mod utils;
 
-pub use model::Model;
-pub use mongodb as mongo;
+// Used by the operators macros
+pub(crate) use mongodb as mongo;
 pub use operators as ops;
-
+pub use utils::{sync_mongo_models, bson::as_bson};
 #[cfg(test)]
 mod tests {
-    // use crate::operators::*;
 
     #[test]
     fn it_works() {
-        // assert_eq!(result, 4);
         let result = 2 + 2;
+        assert_eq!(result, 4);
     }
 }

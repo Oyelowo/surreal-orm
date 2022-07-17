@@ -6,13 +6,12 @@ use async_graphql::*;
 use common::error_handling::ApiHttpStatus;
 use futures_util::TryStreamExt;
 use log::warn;
-use mongo_helpers::Model;
 use mongodb::{
     bson::{doc, oid::ObjectId},
     options::{FindOneOptions, ReadConcern},
 };
 use my_macros::FieldsGetter;
-// use wither::{bson::doc, prelude::Model};
+use wither::prelude::Model;
 
 #[derive(Default)]
 pub struct PostQueryRoot;
@@ -31,7 +30,7 @@ impl PostQueryRoot {
 
         // TODO: Move to model
         let post_keys = Post::get_fields_serialized();
-        Post::get_collection(db)
+        Post::collection(db)
             .find_one(doc! {post_keys._id: id}, find_one_options)
             .await?
             // Lazily evaluate the error:
@@ -43,7 +42,7 @@ impl PostQueryRoot {
 
     async fn posts(&self, ctx: &Context<'_>) -> Result<Vec<Post>> {
         let db = get_db_from_ctx(ctx)?;
-        Post::get_collection(db)
+        Post::collection(db)
             .find(None, None)
             .await?
             .try_collect()
