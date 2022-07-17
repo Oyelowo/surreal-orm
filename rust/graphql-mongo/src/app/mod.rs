@@ -1,12 +1,12 @@
 pub(crate) mod post;
 pub(crate) mod user;
 
-use common::sync_mongo_models;
 use mongodb::Database;
 use post::{Post, PostMutationRoot, PostQueryRoot, PostSubscriptionRoot};
 use user::{User, UserMutationRoot, UserQueryRoot, UserSubscriptionRoot};
 
 use async_graphql::{MergedObject, MergedSubscription, Schema, SchemaBuilder};
+use mongo_helpers::sync_mongo_models;
 use wither::Model;
 
 // Add new models here

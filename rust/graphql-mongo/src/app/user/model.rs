@@ -2,7 +2,9 @@ use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
 use futures_util::TryStreamExt;
+use mongo_helpers::{as_bson, ops};
 use mongodb::{
+    bson::{doc, oid::ObjectId},
     options::{FindOneOptions, ReadConcern},
     Database,
 };
@@ -10,14 +12,10 @@ use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
-use wither::{
-    bson::{doc, oid::ObjectId},
-    prelude::Model,
-};
-
-use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
+use wither::Model;
 
 use super::guards::{AuthGuard, RoleGuard};
+use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
 
 #[derive(
     Model,
@@ -196,7 +194,9 @@ impl User {
         // let user = User::from_ctx(ctx)?.and_has_role(Role::Admin);
         let db = get_db_from_ctx(ctx)?;
         let post_fields = Post::get_fields_serialized();
-        Post::find(db, doc! {post_fields.posterId: self.id}, None)
+
+        Post::collection(db)
+            .find(doc! {post_fields.posterId: self.id}, None)
             .await?
             .try_collect()
             .await
@@ -261,7 +261,11 @@ impl User {
             UserBy::Email(email) => doc! { uf.email: email },
         };
         // todo!()
-        User::find_one(db, search_doc, None)
+        // User::find_one(db, search_doc, None)
+        //     .await?
+        //     .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
+        User::collection(db)
+            .find_one(search_doc, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
@@ -273,27 +277,31 @@ impl User {
         let find_one_options = FindOneOptions::builder()
             .read_concern(ReadConcern::majority())
             .build();
-        User::find_one(db, doc! { uk._id: id }, find_one_options)
+
+        User::collection(db)
+            .find_one(doc! {uk._id: id}, find_one_options)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
 
     pub async fn find_or_create_for_oauth(mut self, db: &Database) -> anyhow::Result<Self> {
         let user_fields = User::get_fields_serialized();
+
         let acc_fields = AccountOauth::get_fields_serialized();
         let AccountOauth { id, provider, .. } = self
             .accounts
             .first()
             .ok_or_else(|| ApiHttpStatus::NotFound("account not found".into()))?;
 
-        // TODO: Can do better🤦🏽‍♂️🤦🏽‍♂️
-        let provider =
-            serde_json::to_value(provider).expect("Unable to comvert provider to serde value");
-        let provider = provider
-            .as_str()
-            .expect("Unable to comvert provider to string");
-
-        let filter = doc! { user_fields.accounts: {"$elemMatch": {acc_fields.id: id,acc_fields.provider: provider}}};
+        let filter = doc! {
+            user_fields.accounts:
+            {
+                ops::ElemMatch : {
+                    acc_fields.id: id,
+                    acc_fields.provider: as_bson(provider)
+                }
+            }
+        };
 
         self.save(db, Some(filter)).await?;
 
@@ -302,7 +310,8 @@ impl User {
 
     pub async fn find_by_username(db: &Database, username: impl Into<String>) -> Result<Self> {
         let uk = User::get_fields_serialized();
-        User::find_one(db, doc! { uk.username: username.into() }, None)
+        User::collection(db)
+            .find_one(doc! { uk.username: username.into() }, None)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }

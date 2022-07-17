@@ -9,12 +9,12 @@ use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
 use futures_util::TryStreamExt;
 use log::warn;
 use mongodb::{
-    bson::oid::ObjectId,
+    bson::{doc, oid::ObjectId},
     options::{FindOneOptions, FindOptions, ReadConcern},
 };
 use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
-use wither::{bson::doc, prelude::Model};
+use wither::Model;
 
 #[derive(Default)]
 pub struct UserQueryRoot;
@@ -38,7 +38,8 @@ impl UserQueryRoot {
             .build();
         let user_key = User::get_fields_serialized();
 
-        let user = User::find_one(db, doc! {user_key._id: id}, find_one_options)
+        let user = User::collection(db)
+            .find_one(doc! {user_key._id: id}, find_one_options)
             .await?
             .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend());
 
@@ -75,7 +76,8 @@ impl UserQueryRoot {
             .sort(doc! {user_keys.createdAt: -1})
             .build();
 
-        User::find(db, None, find_option)
+        User::collection(db)
+            .find(None, find_option)
             .await?
             .try_collect()
             .await

@@ -62,7 +62,5 @@ redis = { version = "0.21.5", features = [
   "tokio-native-tls-comp",
 ] }
 
-
-wither = { git = "https://github.com/thedodd/wither", branch = "master" }
 bson = "2.2.0"
 mongodb = { version = "2.2.1", features = ["bson-chrono-0_4"] }

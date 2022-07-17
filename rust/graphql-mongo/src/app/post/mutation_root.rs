@@ -24,7 +24,6 @@ impl PostMutationRoot {
         })?;
 
         let db = ctx.data::<Database>()?;
-
         post.save(db, None).await.map_err(|e| {
             warn!("{e:?}");
             ApiHttpStatus::InternalServerError("Server Error. Try again".into()).extend()

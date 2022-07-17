@@ -53,7 +53,9 @@ typed-builder = "0.10.0"
 url = "2.2.2"
 uuid = "1.1.0"
 validator = { version = "0.15.0", features = ["derive"] }
-wither = { git = "https://github.com/thedodd/wither", branch = "master" }
+wither = { git = "https://github.com/Oyelowo/wither", branch = "master" }
+# Keep an eye on wither. Only the master branch is stable at the momenet
+# wither = { git = "https://github.com/thedodd/wither", branch = "master" }
 
 async-trait = "0.1.53"
 config = "0.13.1"
