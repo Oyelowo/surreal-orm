@@ -1,5 +1,5 @@
 pub mod operators;
-pub mod sort;
+pub mod sorting;
 
 pub use operators::*;
-pub use sort::*;
+// pub use sorting::*;

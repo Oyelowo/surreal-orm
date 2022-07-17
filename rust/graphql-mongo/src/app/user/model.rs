@@ -2,23 +2,17 @@ use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
 use futures_util::TryStreamExt;
-use mongo_helpers::{
-    as_bson,
-    ops::{self, sort::SortOrder},
-};
+use mongo_helpers::{as_bson, ops};
 use mongodb::{
-    bson::{doc, from_bson, oid::ObjectId, to_bson, Bson, Document},
-    options::{
-        Acknowledgment, FindOneAndUpdateOptions, FindOneOptions, IndexOptions, ReadConcern,
-        WriteConcern,
-    },
+    bson::{doc, oid::ObjectId},
+    options::{FindOneOptions, ReadConcern},
     Database,
 };
 use my_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
-use wither::{IndexModel, Model};
+use wither::Model;
 
 use super::guards::{AuthGuard, RoleGuard};
 use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
