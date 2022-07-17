@@ -175,7 +175,7 @@ async fn authenticate_user(
         .map_err(HandlerError::InvalidState)
         .map_err(BadRequest)?;
 
-    let user = match evidence.provider {
+    let accountOauth = match evidence.provider {
         OauthProvider::Github => {
             GithubConfig::new()
                 .fetch_oauth_account(code, evidence.pkce_code_verifier)
@@ -186,18 +186,16 @@ async fn authenticate_user(
                 .fetch_oauth_account(code, evidence.pkce_code_verifier)
                 .await
         }
-    };
+    }
+    .map_err(HandlerError::FetchAccountFailed)
+    .map_err(BadRequest)?;
 
-    let user = user
-        .map_err(HandlerError::FetchAccountFailed)
-        .map_err(BadRequest)?
-        .find_or_create_for_oauth(&db)
+    let user = User::find_or_create_for_oauth(&db, accountOauth)
         .await
         .map_err(|_e| HandlerError::GetAccountFailed)
         .map_err(BadRequest)?;
 
     let session = TypedSession(session.to_owned());
     session.insert_user_id(&user.id);
-
     Ok(user)
 }
