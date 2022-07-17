@@ -14,7 +14,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use url::Url;
 
-use crate::app::user::{OauthProvider, User};
+use crate::app::user::{AccountOauth, OauthProvider};
 
 pub(crate) fn get_redirect_url() -> String {
     let base_url = ApplicationConfigs::default().external_base_url;
@@ -184,7 +184,7 @@ pub(crate) trait OauthProviderTrait {
         &self,
         code: AuthorizationCode,
         pkce_code_verifier: PkceCodeVerifier,
-    ) -> OauthResult<User>;
+    ) -> OauthResult<AccountOauth>;
 }
 
 /// authorization URL to which we'll redirect the user
