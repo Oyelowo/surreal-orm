@@ -2,7 +2,7 @@ use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
 use futures_util::TryStreamExt;
-use mongo_helpers::{as_bson, ops};
+use mongo_helpers::{as_bson, operator};
 use mongodb::{
     bson::{doc, oid::ObjectId},
     options::{FindOneOptions, ReadConcern},
@@ -305,7 +305,7 @@ impl User {
         let check_for_existing_account = doc! {
             user_fields.accounts:
             {
-                ops::ElemMatch : {
+                operator::ElemMatch : {
                     acc_fields.id: id,
                     acc_fields.provider: as_bson(&provider)
                 }
