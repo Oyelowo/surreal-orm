@@ -3,7 +3,7 @@ use crate::utils::postgresdb::{get_pg_connection_from_ctx, get_pg_pool_from_ctx}
 use super::model::{Post, PostEntity};
 
 use async_graphql::*;
-use sqlx::types::Uuid;
+use sqlx::{query_as, types::Uuid};
 
 #[derive(Default)]
 pub struct PostQueryRoot;
@@ -25,9 +25,7 @@ impl PostQueryRoot {
 
     async fn posts(&self, ctx: &async_graphql::Context<'_>) -> async_graphql::Result<Vec<Post>> {
         let db = get_pg_pool_from_ctx(ctx)?;
-        let posts = ormx::conditional_query_as!(Post, "SELECT * FROM posts")
-            .fetch_all(db)
-            .await?;
+        let posts = query_as!(Post, "SELECT * FROM posts").fetch_all(db).await?;
         Ok(posts)
     }
 }

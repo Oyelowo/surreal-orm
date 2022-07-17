@@ -26,7 +26,7 @@ poem = { version = "1.3.32", features = [
   "opentelemetry",
   "opentelemetry-http",
 ] }
-poem-openapi = { version = "1.2", features = ["swagger-ui"] }
+poem-openapi = { version = "2.0", features = ["swagger-ui"] }
 
 async-graphql = { version = "4.0.4", features = [
   "apollo_tracing",
@@ -94,7 +94,6 @@ envy = "0.4.2"
 log = "0.4.17"
 rand = "0.8.5"
 secrecy = "0.8.0"
-send_wrapper = { version = "0.5.0", features = ["futures"] }
 thiserror = "1.0.31"
 urlencoding = "2.1.0"
 lazy_static = "1.4.0"
