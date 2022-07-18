@@ -1,5 +1,6 @@
 import c from 'chalk';
 import fs from 'fs';
+import inquirer from 'inquirer';
 import sh, { ShellString } from 'shelljs';
 import { Environment } from '../../resources/types/own-types';
 import { ImageTags } from '../../resources/shared/validations';
@@ -60,4 +61,24 @@ export function handleShellError(shellCommand: ShellString) {
         sh.exit(-1);
     }
     return shellCommand;
+}
+
+
+export const ENVIRONMENTS_ALL: Environment[] = ['local', 'production', 'staging', 'development'];
+export async function promptEnvironmentSelection() {
+    const choices = ENVIRONMENTS_ALL.flatMap((env) => [env, new inquirer.Separator()]);
+
+    const name = 'environment';
+    const answers: Record<typeof name, Environment> = await inquirer.prompt([
+        {
+            type: 'list',
+            name,
+            message: c.greenBright('🆘Select the environment ‼️‼️‼️‼️'),
+            choices,
+            default: ENVIRONMENTS_ALL[0],
+            pageSize: 20,
+        } as const,
+    ]);
+
+    return answers;
 }

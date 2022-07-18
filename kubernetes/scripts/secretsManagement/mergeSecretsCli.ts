@@ -4,8 +4,7 @@
 import R from 'ramda';
 import sh from 'shelljs';
 import yargs from 'yargs';
-import { Environment } from '../../resources/types/own-types';
-import { ENVIRONMENTS_ALL } from '../utils/sealedSecrets';
+import { ENVIRONMENTS_ALL } from '../utils/shared';
 import { secretRecord } from './getSecretsForApp';
 import { secretsSample } from './secretsSample';
 import { getPlainSecretsContent } from './utils';

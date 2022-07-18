@@ -7,7 +7,8 @@ import { generateManifests } from './utils/generateManifests';
 import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
 import { promptSecretsKeepingConfirmations } from './utils/promptSecretsKeepingConfirmations';
-import { getSecretManifestsPaths, promptEnvironmentSelection } from './utils/sealedSecrets';
+import { getSecretManifestsPaths, } from './utils/sealedSecrets';
+import { promptEnvironmentSelection } from './utils/shared';
 import { updateAppSealedSecrets } from './utils/updateApplicationsSecrets';
 
 async function main() {

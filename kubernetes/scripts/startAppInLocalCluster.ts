@@ -2,7 +2,6 @@ import { ingressControllerPorts } from '../resources/infrastructure/ingress/host
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import sh from 'shelljs';
-import yargs from 'yargs';
 import { INGRESS_EXTERNAL_PORT_LOCAL } from '../resources/infrastructure/ingress/hosts';
 
 // This autoreloads the app but waits for user inputs

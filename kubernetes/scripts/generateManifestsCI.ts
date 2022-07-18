@@ -1,7 +1,7 @@
 import yargs from 'yargs';
 import { generateManifests } from './utils/generateManifests';
 import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
-import { ENVIRONMENTS_ALL } from './utils/sealedSecrets';
+import { ENVIRONMENTS_ALL } from './utils/shared';
 
 export const ARGV = yargs(process.argv.slice(2))
     .options({

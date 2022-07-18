@@ -1,5 +1,3 @@
-import c from 'chalk';
-import inquirer from 'inquirer';
 import p from 'path';
 import { getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory';
 import { Environment, ResourceName } from '../../resources/types/own-types';
@@ -35,21 +33,5 @@ export function getSecretManifestsPaths(environment: Environment): string[] {
     return unsealedSecretsFilePathsForEnv;
 }
 
-export const ENVIRONMENTS_ALL: Environment[] = ['local', 'production', 'staging', 'development'];
-export async function promptEnvironmentSelection() {
-    const choices = ENVIRONMENTS_ALL.flatMap((env) => [env, new inquirer.Separator()]);
 
-    const name = 'environment';
-    const answers: Record<typeof name, Environment> = await inquirer.prompt([
-        {
-            type: 'list',
-            name,
-            message: c.greenBright('🆘Select the environment ‼️‼️‼️‼️'),
-            choices,
-            default: ENVIRONMENTS_ALL[0],
-            pageSize: 20,
-        } as const,
-    ]);
 
-    return answers;
-}

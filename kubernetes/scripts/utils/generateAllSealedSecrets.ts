@@ -1,7 +1,9 @@
 import c from 'chalk';
 import sh from 'shelljs';
+import { getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory';
 import { Environment } from '../../resources/types/own-types';
-import { getSecretManifestsPaths, getSecretPathsInfo, SEALED_SECRETS_CONTROLLER_NAME } from './sealedSecrets';
+import { getSecretPathsInfo, SEALED_SECRETS_CONTROLLER_NAME } from './sealedSecrets';
+import { getKubernetesSecretsPaths } from './shared';
 
 /*
 GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PULUMI.
@@ -14,31 +16,35 @@ export interface GenSealedSecretsProps {
 
 // CONSIDER: Prompt user to specify which apps secrets they're looking to update
 export async function generateAllSealedSecrets({ environment }: GenSealedSecretsProps) {
-    getSecretManifestsPaths(environment)?.forEach(generateSealedSecret);
-}
-
-function generateSealedSecret(unsealedSecretFilePath: string) {
-    const { sealedSecretDir, sealedSecretFilePath } = getSecretPathsInfo({
-        unsealedSecretFilePath,
+    const unsealedSecretsFilePathsForEnv = getKubernetesSecretsPaths({
+        environmentManifestsDir: getGeneratedEnvManifestsDir(environment),
     });
 
-    sh.mkdir(sealedSecretDir);
+    const generateSealedSecret = (kubernetesSecretPath: string) => {
+        const { sealedSecretDir, sealedSecretFilePath } = getSecretPathsInfo({
+            unsealedSecretFilePath: kubernetesSecretPath,
+        });
 
-    // CONSIDER?: Check the content of the file to confirm if it is actually a secret object
-    sh.echo(c.blueBright(`Generating sealed secret ${unsealedSecretFilePath} \n to \n ${sealedSecretFilePath}`));
+        sh.mkdir(sealedSecretDir);
 
-    // CONSIDER?: Should I delete old sealed secrets before creating new ones?
-    const kubeSeal = sh.exec(
-        `kubeseal --controller-name ${SEALED_SECRETS_CONTROLLER_NAME} < ${unsealedSecretFilePath} -o yaml >${sealedSecretFilePath}`,
-        { silent: true }
-    );
-    //  CONSIDER?: inject annotations that this is being managed by the sealed secrets controller.
-    sh.echo(c.greenBright(kubeSeal.stdout));
-    if (kubeSeal.stderr) {
-        sh.echo(`Error sealing secrets: ${c.redBright(kubeSeal.stderr)}`);
-        sh.exit(1);
-        return;
+        sh.echo(c.blueBright(`Generating sealed secret ${kubernetesSecretPath} \n to \n ${sealedSecretFilePath}`));
+
+        const kubeSeal = sh.exec(
+            `kubeseal --controller-name ${SEALED_SECRETS_CONTROLLER_NAME} < ${kubernetesSecretPath} -o yaml >${sealedSecretFilePath}`,
+            { silent: true }
+        );
+
+        //  CONSIDER?: inject annotations that this is being managed by the sealed secrets controller.
+        sh.echo(c.greenBright(kubeSeal.stdout));
+        if (kubeSeal.stderr) {
+            sh.echo(`Error sealing secrets: ${c.redBright(kubeSeal.stderr)}`);
+            sh.exit(1);
+            return;
+        }
+
+        sh.echo(c.greenBright('Successfully generated sealed secret at', kubernetesSecretPath));
     }
 
-    sh.echo(c.greenBright('Successfully generated sealed secret at', unsealedSecretFilePath));
+    unsealedSecretsFilePathsForEnv?.forEach(generateSealedSecret);
 }
+

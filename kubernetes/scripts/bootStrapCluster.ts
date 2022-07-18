@@ -3,7 +3,8 @@ import { clearPlainInputTsSecretFilesContents } from './secretsManagement/syncSe
 import { bootstrapCluster } from './utils/bootstrapCluster';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
 import { promptSecretsKeepingConfirmations } from './utils/promptSecretsKeepingConfirmations';
-import { getSecretManifestsPaths, promptEnvironmentSelection } from './utils/sealedSecrets';
+import { promptEnvironmentSelection } from './utils/shared';
+import { getSecretManifestsPaths, } from './utils/sealedSecrets';
 
 async function main() {
     const { environment } = await promptEnvironmentSelection();
