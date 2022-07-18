@@ -26,9 +26,8 @@ export function getSecretPathsInfo({ unsealedSecretFilePath }: { unsealedSecretF
 }
 
 export function getSecretManifestsPaths(environment: Environment): string[] {
-    const contextDir = getGeneratedEnvManifestsDir(environment);
     const unsealedSecretsFilePathsForEnv = getKubernetesSecretsPaths({
-        environmentManifestsDir: contextDir,
+        environment,
     });
     return unsealedSecretsFilePathsForEnv;
 }

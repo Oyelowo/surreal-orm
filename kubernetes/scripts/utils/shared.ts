@@ -4,6 +4,9 @@ import inquirer from 'inquirer';
 import sh, { ShellString } from 'shelljs';
 import { Environment } from '../../resources/types/own-types';
 import { ImageTags } from '../../resources/shared/validations';
+import { namespaceSchema } from './../../resources/infrastructure/namespaces/util';
+import { z } from 'zod';
+import { getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory';
 
 const ENVIRONMENT_KEY = 'ENVIRONMENT';
 export function getEnvVarsForScript(environment: Environment, imageTags: ImageTags) {
@@ -16,7 +19,8 @@ export function getEnvVarsForScript(environment: Environment, imageTags: ImageTa
   `;
 }
 
-export function getKubernetesSecretsPaths({ environmentManifestsDir }: { environmentManifestsDir: string }) {
+export function getKubernetesSecretsPaths({ environment }: { environment: Environment }) {
+    const environmentManifestsDir = getGeneratedEnvManifestsDir(environment);
     const manifestMatcher = "*ml"
     const allManifests = sh.exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
         silent: true,
@@ -81,4 +85,52 @@ export async function promptEnvironmentSelection() {
     ]);
 
     return answers;
+}
+
+
+
+
+
+type ObjectType =
+    'Secret' |
+    'Deployment' |
+    'Service' |
+    'Configmap' |
+    'Pod' |
+    'SealedSecret';
+
+const kubernetesObjectInfo = z.object({
+    // kind: z.union([z.literal("nane"), z.intersection([z.string(), z.object({z})])]),
+    kind: z.string(),
+    name: z.string(),
+    namespace: namespaceSchema,
+    path: z.string()
+
+}).required()
+
+// We override the object kind type since it's a nonexhasutive list
+interface KubeObjectInfo extends Omit<z.infer<typeof kubernetesObjectInfo>, "kind"> { kind: ObjectType | (string & {}) }
+
+export function getKubernetesManifestInfo({ environmentManifestsDir }: { environmentManifestsDir: string }): KubeObjectInfo[] {
+    const manifestMatcher = "*ml"
+    const allManifests = sh.exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
+        silent: true,
+    });
+
+    const allManifestsArray = allManifests.stdout
+        .trim()
+        .split('\n')
+        .map((p) => {
+            const info = JSON.parse(sh.exec(`
+        cat ${p.trim()} | yq '{"kind": .kind, "name": .metadata.name, "namespace": .metadata.namespace}' -o json
+        `).stdout);
+
+            return kubernetesObjectInfo.parse(
+                {
+                    ...info,
+                    path: p
+                })
+        }
+        ) as KubeObjectInfo[];
+    return allManifestsArray
 }
