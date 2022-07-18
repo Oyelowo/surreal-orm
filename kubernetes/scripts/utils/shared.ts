@@ -21,7 +21,7 @@ export function getEnvVarsForScript(environment: Environment, imageTags: ImageTa
 
 export function getKubernetesSecretsPaths({ environment }: { environment: Environment }) {
     const environmentManifestsDir = getGeneratedEnvManifestsDir(environment);
-    const manifestMatcher = "*ml"
+    const manifestMatcher = '*ml';
     const allManifests = sh.exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
         silent: true,
     });
@@ -37,13 +37,12 @@ export function getKubernetesSecretsPaths({ environment }: { environment: Enviro
         let secret = sh.exec(`grep "^kind: *Secret$" ${path}`, { silent: true }).stdout?.trim();
         const isSecret = !!secret;
         // Filter out non-empty secrets. Which means the manifest is secret type
-        isSecret && console.log(`Grabbing secret path: ${path} \n`)
+        isSecret && console.log(`Grabbing secret path: ${path} \n`);
         return isSecret;
     });
 
     return kubernetesSecrets;
 }
-
 
 export function isFileEmpty(fileName: string, ignoreWhitespace = true): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -67,7 +66,6 @@ export function handleShellError(shellCommand: ShellString) {
     return shellCommand;
 }
 
-
 export const ENVIRONMENTS_ALL: Environment[] = ['local', 'production', 'staging', 'development'];
 export async function promptEnvironmentSelection() {
     const choices = ENVIRONMENTS_ALL.flatMap((env) => [env, new inquirer.Separator()]);
@@ -87,50 +85,65 @@ export async function promptEnvironmentSelection() {
     return answers;
 }
 
+type ResourceType = 'Secret' | 'Deployment' | 'Service' | 'Configmap' | 'Pod' | 'SealedSecret' | (string & {});
 
-
-
-
-type ObjectType =
-    'Secret' |
-    'Deployment' |
-    'Service' |
-    'Configmap' |
-    'Pod' |
-    'SealedSecret';
-
-const kubernetesObjectInfo = z.object({
-    // kind: z.union([z.literal("nane"), z.intersection([z.string(), z.object({z})])]),
-    kind: z.string(),
-    name: z.string(),
-    namespace: namespaceSchema,
-    path: z.string()
-
-}).required()
+const kubernetesResourceInfo = z.object({
+    kind: z.string().nullable(),
+    name: z.string().nullable(),
+    namespace: namespaceSchema.nullable(),
+    path: z.string().nullable(),
+});
 
 // We override the object kind type since it's a nonexhasutive list
-interface KubeObjectInfo extends Omit<z.infer<typeof kubernetesObjectInfo>, "kind"> { kind: ObjectType | (string & {}) }
-
-export function getKubernetesManifestInfo({ environmentManifestsDir }: { environmentManifestsDir: string }): KubeObjectInfo[] {
-    const manifestMatcher = "*ml"
-    const allManifests = sh.exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
-        silent: true,
-    });
-
-    const allManifestsArray = allManifests.stdout
-        .trim()
-        .split('\n')
-        .map((p) => {
-            const info = JSON.parse(sh.exec(`
-        cat ${p.trim()} | yq '{"kind": .kind, "name": .metadata.name, "namespace": .metadata.namespace}' -o json
-        `).stdout);
-
-            return kubernetesObjectInfo.parse(
-                {
-                    ...info,
-                    path: p
-                })
-        }
-        ) as KubeObjectInfo[];
-    return allManifestsArray
+interface KubeObjectInfo extends z.infer<typeof kubernetesResourceInfo> {
+    kind: ResourceType;
 }
+import _ from 'lodash';
+
+function getAllManifestsPaths({ environment }: { environment: Environment }) {
+    const environmentManifestsDir = getGeneratedEnvManifestsDir(environment);
+    const manifestMatcher = '*ml';
+    const allManifests = sh
+        .exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
+            silent: true,
+        })
+        .stdout.trim()
+        .split('\n')
+        .map((p) => p.trim());
+    return allManifests;
+}
+
+const exec = (cmd: string) => sh.exec(cmd, { silent: true }).stdout;
+
+const getInfoFromManifests = _.memoize(
+    (manifestsPaths: string[]) => {
+        return manifestsPaths.map((p, i) => {
+            console.log('running', i);
+            const info = JSON.parse(
+                exec(
+                    `cat ${p.trim()} | yq '{"kind": .kind, "name": .metadata.name, "namespace": .metadata.namespace}' -o json`
+                )
+            );
+            // let's mutate to make it a bit faster and should be okay since we only do it here
+            info.path = p;
+            return kubernetesResourceInfo.parse(info);
+        }) as KubeObjectInfo[];
+    },
+    // We are concatenating all the path names to get a stable memoization key
+    // we could also JSON.stringify(paths)
+    (paths) => paths.join('')
+);
+
+export const getAllKubeManifestsInfo = (environment: Environment) => {
+    const m = getAllManifestsPaths({ environment });
+    return getInfoFromManifests(m);
+};
+
+type InfoProps = {
+    resourceType: ResourceType;
+    environment: Environment;
+};
+
+export const getKubeManifestInfo = ({ resourceType, environment }: InfoProps) => {
+    return getAllKubeManifestsInfo(environment).filter(({ kind }) => kind === resourceType);
+};
