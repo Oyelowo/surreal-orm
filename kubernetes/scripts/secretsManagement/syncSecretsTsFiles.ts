@@ -49,9 +49,9 @@ function createSecretsConfigFile(environment: Environment) {
 
         const exec = sh.exec(`npx ts-node ${mergeSecretsPath} --environment=${environment}`, { silent: true });
 
-        if (!exec.stderr.includes('Error: Cannot find module')) {
+        if (!exec.stderr.includes('Error: Cannot find module') && !!exec.stderr) {
             console.warn(
-                c.redBright(
+                c.yellowBright(
                     `
             Make sure the secret file at "${plainSecretsPath}" does not have an invalid key. Remove it if it has a key that does not exist in the secretsSample file. 
             \n
