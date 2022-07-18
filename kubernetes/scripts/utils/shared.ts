@@ -7,6 +7,7 @@ import { ImageTags } from '../../resources/shared/validations';
 import { namespaceSchema } from './../../resources/infrastructure/namespaces/util';
 import { z } from 'zod';
 import { getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory';
+import _ from 'lodash';
 
 const ENVIRONMENT_KEY = 'ENVIRONMENT';
 export function getEnvVarsForScript(environment: Environment, imageTags: ImageTags) {
@@ -98,7 +99,6 @@ const kubernetesResourceInfo = z.object({
 interface KubeObjectInfo extends z.infer<typeof kubernetesResourceInfo> {
     kind: ResourceType;
 }
-import _ from 'lodash';
 
 function getAllManifestsPaths({ environment }: { environment: Environment }) {
     const environmentManifestsDir = getGeneratedEnvManifestsDir(environment);
