@@ -13,7 +13,7 @@ export function getSecretPathsInfo({ unsealedSecretFilePath }: { unsealedSecretF
     // and we want as basedir: kubernetes/manifests/generated/production/applications/graphql-mongo
     const appBaseDir = p.join(appManifestsDir, '..');
     const unsealedSecretFileName = p.basename(unsealedSecretFilePath);
-    // TODO: Get this as an argument to the function whch will be prompted on command start
+    // CONSIDER?: Get this as an argument to the function whch will be prompted on command start
     // if (secretsToUpdate.inclues(unsealedSecretFileName)) {
     // }
 

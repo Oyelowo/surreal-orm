@@ -102,7 +102,6 @@ pub type PostActiveModel = ActiveModel;
 #[ComplexObject]
 impl Post {
     async fn poster(&self, ctx: &Context<'_>) -> Result<user::Model> {
-        // // TODO: Use dataloader to batch user
         let db = get_pg_connection_from_ctx(ctx)?;
         user::Entity::find_by_id(self.user_id)
             .one(db)

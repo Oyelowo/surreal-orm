@@ -3,13 +3,11 @@ import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant';
 import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util';
-import { DeepPartial } from '../../types/own-types';
+import { DeepPartial, STORAGE_CLASS } from '../../types/own-types';
 import { getEnvironmentVariables } from '../../shared/validations';
 import { argocdProvider } from './settings';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 
-// TODO: Use this everywhere
-const STORAGE_CLASS = 'linode-block-storage-retain';
 const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
     config: {
         secret: {

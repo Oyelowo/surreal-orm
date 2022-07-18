@@ -36,7 +36,6 @@ index 4aa2874..7723f64 100644
 -            .apply(([containers, args]) => {
 +            .all([this.spec.template.spec.containers, spec])
 +            .apply(([containers, spec]) => {
-             // TODO: handle merging ports from args
              const ports = {};
              containers.forEach(container => {
 @@ -182,12 +183,17 @@ class Deployment extends k8s.apps.v1.Deployment {
@@ -45,7 +44,6 @@ index 4aa2874..7723f64 100644
              });
 -            return Object.assign(Object.assign({}, args), { ports: args.ports || ports, selector: this.spec.selector.matchLabels, 
 +            return Object.assign(Object.assign({}, spec), { ports: spec.ports || ports, selector: this.spec.selector.matchLabels, 
-                 // TODO: probably need to unwrap args.type in case it's a computed value
 -                type: args && args.type });
 +                type: spec && spec.type });
          });

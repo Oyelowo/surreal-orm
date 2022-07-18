@@ -28,7 +28,6 @@ impl PostQueryRoot {
             .read_concern(ReadConcern::majority())
             .build();
 
-        // TODO: Move to model
         let post_keys = Post::get_fields_serialized();
         Post::collection(db)
             .find_one(doc! {post_keys._id: id}, find_one_options)

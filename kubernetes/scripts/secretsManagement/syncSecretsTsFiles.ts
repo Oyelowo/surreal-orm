@@ -1,7 +1,4 @@
 import { getMainBaseDir } from '../../resources/shared/manifestsDirectory';
-/*
-TODO: ADD INSTRUCTION HERE
-*/
 import c from 'chalk';
 import path from 'path';
 import sh from 'shelljs';
@@ -16,8 +13,6 @@ export function syncSecretsTsFiles() {
     ENVIRONMENTS.forEach(createSecretsConfigFile);
     sh.exec(`npx prettier --write ${PLAIN_SECRETS_CONFIGS_DIR}`);
 }
-
-// main()
 
 export function clearPlainInputTsSecretFilesContents() {
     const removeSecret = (env: Environment) => sh.rm('-rf', getPlainSecretInputFilePath(env));
@@ -35,7 +30,6 @@ function createSecretsConfigFile(environment: Environment) {
         secrets: secretsSample,
     });
 
-    // TODO: This check can be improved to check the serialized content against the sample
     const secretsContent = sh.cat(plainSecretsPath)?.stdout?.trim();
     const secretsExists = !!secretsContent;
 

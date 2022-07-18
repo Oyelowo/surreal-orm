@@ -42,7 +42,7 @@ impl PostMutationRoot {
     ) -> async_graphql::Result<Post> {
         post_input.validate()?;
         let db = get_pg_connection_from_ctx(ctx)?;
-        // // TODO: validate using async-graphql guard that the updater is the authenticated user i.e post.user_id === session/jwt.user_id
+        // // CONSIDER: validate using async-graphql guard that the updater is the authenticated user i.e post.user_id === session/jwt.user_id
         // let mut post = Post::by_id(db, &id).await?;
 
         let updated_post = PostActiveModel::from_json(serde_json::to_value(post_input)?)?;

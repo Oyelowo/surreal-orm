@@ -1,7 +1,7 @@
 import * as z from 'zod';
 import { appEnvironmentsSchema } from '../types/own-types';
 
-// TODO: Move this into helpers
+// CONSIDER: Move this into helpers
 export const imageTagsObjectValidator = z.object({
     // This is provided fro, within the CI pipeline where the manifests are generated and pushed to the repo
     IMAGE_TAG_REACT_WEB: z.string().nonempty(),

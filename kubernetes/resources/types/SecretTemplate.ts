@@ -1,6 +1,6 @@
 import { APPLICATION_AUTOMERGE_ANNOTATION } from '../shared/constants';
 
-// TODO: Use zod to parse this
+// NICE TO HAVE: Use zod to parse this
 export interface SecretTemplate {
     apiVersion: string;
     kind: string;

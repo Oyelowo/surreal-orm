@@ -51,12 +51,10 @@ export async function bootstrapCluster(environment: Environment) {
         environment,
     });
 
-    // TODO: could conditionally check the installation of argocd also cos it may not be necessary for local dev
     applyResourceManifests('argocd', environment);
-    // TODO: Split bootstrap process from restart from update
+
     sh.exec('kubectl -n argocd rollout restart deployment argocd-argo-cd-server');
 
-    // TODO: Only apply this in non prod environment
     applyResourceManifests('argocd-applications-parents', environment);
 }
 

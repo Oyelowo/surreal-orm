@@ -9,7 +9,7 @@ import { DeepPartial, ResourceName } from '../../types/own-types';
 import { CLUSTER_ISSUER_NAME } from '../cert-manager/clusterIssuer';
 import { DOMAIN_NAME_SUB_LINKERD_VIZ } from '../ingress/constant';
 import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
-import { linkerdVizProvider } from './settings';
+import { linkerdVizSecretsFromLocalConfigs, linkerdVizProvider } from './settings';
 
 const values: DeepPartial<ILinkerdvizlinkerd> = {};
 const resourceName: ResourceName = 'linkerd-viz';
@@ -99,9 +99,8 @@ export const linkerVizIngress = new k8s.networking.v1.Ingress(
 );
 
 const saltRounds = 10;
-// TODO: Change alongside argocd
-const myPlaintextPassword = 'oyelowo';
-const hash = bcrypt.hashSync(myPlaintextPassword, saltRounds);
+
+const hash = bcrypt.hashSync(linkerdVizSecretsFromLocalConfigs.PASSWORD, saltRounds);
 export const linkerdVizSecret = new kx.Secret(
     linkerdVizSecretName,
     {

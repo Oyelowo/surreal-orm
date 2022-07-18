@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import glob from 'glob';
-/*
-TODO: ADD INSTRUCTION ON HOW THIS WORKS
-*/
 import path from 'path';
 import util from 'util';
 import { getManifestsBaseDir } from '../../resources/shared/manifestsDirectory';

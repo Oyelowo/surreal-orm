@@ -58,7 +58,7 @@ const mongoValues: DeepPartial<IMongodbbitnami> = {
 
 Currently the only mode supported by the Linode Block Storage CSI driver is ReadWriteOnce, meaning that it can only be connected to one Kubernetes node at a time.
     */
-        size: '0.1Gi', // Default is 8Gi. // TODO: Confirm: This can be increased from initial but not decreased // TODO: Unset this or increase the capacity.
+        size: '10Gi', // Default is 8Gi.
         /*
     Note
 In order to retain your Block Storage Volume and its data, even after the associated PVC is deleted, you must use the linode-block-storage-retain StorageClass. If, instead, you prefer to have your Block Storage Volume and its data deleted along with its PVC, use the linode-block-storage StorageClass. See the Delete a Persistent Volume Claim for steps on deleting a PVC.
@@ -70,7 +70,7 @@ In order to retain your Block Storage Volume and its data, even after the associ
         enabled: true,
         rootUser: envVars.MONGODB_ROOT_USERNAME,
         rootPassword: envVars.MONGODB_ROOT_PASSWORD,
-        replicaSetKey: 'Ld1My4Q1s4', // TODO
+        replicaSetKey: 'Ld1My4Q1s4', // QUESTION: Should this be changed?
         // array of
         ...(mappedCredentials as any),
     },

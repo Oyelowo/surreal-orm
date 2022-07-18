@@ -13,11 +13,12 @@ const { ENVIRONMENT } = getEnvironmentVariables();
 type ArgocdApplicationProps = {
     namespace: Namespace;
     outputSubDirName: ResourceName;
+    // The application we are trying to generate argo app for.
     sourceApplication: ResourceName;
+    // Typically services/infrastructure under which specific app is nested
     parent?: Resource;
 };
 
-// TODO: Add jsdoc to describe the parameters
 export function createArgocdApplication({
     sourceApplication,
     outputSubDirName,

@@ -108,7 +108,7 @@ export class ServiceDeployment<
                             periodSeconds: 10,
                             failureThreshold: 7,
                         },
-                        // TODO: Use a different strategy for this. This endpoint checks our db or redis
+                        // Something to consider: Use a different strategy for this. This endpoint checks our db or redis
                         // and wont be nice if either is down. We still want to be able to show users that
                         // the application is unavailable
                         livenessProbe: {
