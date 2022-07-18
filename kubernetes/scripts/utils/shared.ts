@@ -93,7 +93,7 @@ const exec = (cmd: string) => sh.exec(cmd, { silent: true }).stdout;
 const getInfoFromManifests = _.memoize(
     (manifestsPaths: string[]) => {
         return manifestsPaths.map((p, i) => {
-            console.log('running', i);
+            console.log('Extracting info from manifest', i);
             const info = JSON.parse(
                 exec(
                     `cat ${p.trim()} | yq '{"kind": .kind, "name": .metadata.name, "namespace": .metadata.namespace}' -o json`
@@ -101,6 +101,7 @@ const getInfoFromManifests = _.memoize(
             );
             // let's mutate to make it a bit faster and should be okay since we only do it here
             info.path = p;
+            console.log('Extracted info from', info);
             return kubernetesResourceInfo.parse(info);
         }) as KubeObjectInfo[];
     },
