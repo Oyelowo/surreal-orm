@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import p from 'path';
 import { getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory';
 import { Environment, ResourceName } from '../../resources/types/own-types';
-import { getFilePathsThatMatch } from './shared';
+import { getKubernetesSecretsPaths } from './shared';
 
 export const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets';
 
@@ -13,6 +13,7 @@ export function getSecretPathsInfo({ unsealedSecretFilePath }: { unsealedSecretF
     // and we want as basedir: kubernetes/manifests/generated/production/applications/graphql-mongo
     const appBaseDir = p.join(appManifestsDir, '..');
     const unsealedSecretFileName = p.basename(unsealedSecretFilePath);
+
     // CONSIDER?: Get this as an argument to the function whch will be prompted on command start
     // if (secretsToUpdate.inclues(unsealedSecretFileName)) {
     // }
@@ -28,9 +29,8 @@ export function getSecretPathsInfo({ unsealedSecretFilePath }: { unsealedSecretF
 
 export function getSecretManifestsPaths(environment: Environment): string[] {
     const contextDir = getGeneratedEnvManifestsDir(environment);
-    const unsealedSecretsFilePathsForEnv = getFilePathsThatMatch({
-        contextDir,
-        pattern: 'secret-*ml',
+    const unsealedSecretsFilePathsForEnv = getKubernetesSecretsPaths({
+        environmentManifestsDir: contextDir,
     });
     return unsealedSecretsFilePathsForEnv;
 }

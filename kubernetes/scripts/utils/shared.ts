@@ -15,16 +15,30 @@ export function getEnvVarsForScript(environment: Environment, imageTags: ImageTa
   `;
 }
 
-export function getFilePathsThatMatch({ contextDir, pattern }: { contextDir: string; pattern: string }) {
-    const UNSEALED_SECRETS_MANIFESTS_FOR_ENV = sh.exec(`find ${contextDir} -name "${pattern}"`, {
+export function getKubernetesSecretsPaths({ environmentManifestsDir }: { environmentManifestsDir: string }) {
+    const manifestMatcher = "*ml"
+    const allManifests = sh.exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
         silent: true,
     });
-    const unsealedSecretsFilePathsForEnv = UNSEALED_SECRETS_MANIFESTS_FOR_ENV.stdout
+
+    const allManifestsArray = allManifests.stdout
         .trim()
         .split('\n')
         .map((s) => s.trim());
-    return unsealedSecretsFilePathsForEnv;
+
+    const kubernetesSecrets = allManifestsArray.filter((path) => {
+        // Find Kubernetes Secret Objects i.e with type => Kind: Secret
+        // This matches the space between the ":" and Secret
+        let secret = sh.exec(`grep "^kind: *Secret$" ${path}`, { silent: true }).stdout?.trim();
+        const isSecret = !!secret;
+        // Filter out non-empty secrets. Which means the manifest is secret type
+        isSecret && console.log(`Grabbing secret path: ${path} \n`)
+        return isSecret;
+    });
+
+    return kubernetesSecrets;
 }
+
 
 export function isFileEmpty(fileName: string, ignoreWhitespace = true): Promise<boolean> {
     return new Promise((resolve, reject) => {
