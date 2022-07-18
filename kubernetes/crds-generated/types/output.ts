@@ -7714,10 +7714,6 @@ export namespace argoproj {
     }
 }
 
-export namespace bitnami {
-    export namespace v1alpha1 {}
-}
-
 export namespace certmanager {
     export namespace v1 {
         /**

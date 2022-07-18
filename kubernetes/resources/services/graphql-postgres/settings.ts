@@ -4,7 +4,7 @@ import { getEnvironmentVariables } from '../../shared/validations';
 import { getBaseUrl } from '../../infrastructure/ingress/hosts';
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
-const secretsFromLocalConfigs = getSecretsForResource("graphql-postgres", environment);
+const secretsFromLocalConfigs = getSecretsForResource('graphql-postgres', environment);
 
 export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'postgresdb', 'applications'> = {
     kubeConfig: {

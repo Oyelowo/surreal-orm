@@ -42,10 +42,9 @@ export const secretsSample = makeType({
     'argocd-applications-children-services': {},
     'argocd-applications-parents': {},
     'cert-manager': {},
-    linkerd: {
-    },
+    linkerd: {},
     'linkerd-viz': {
-        PASSWORD: "example",
+        PASSWORD: 'example',
     },
     namespaces: {},
     'nginx-ingress': {},

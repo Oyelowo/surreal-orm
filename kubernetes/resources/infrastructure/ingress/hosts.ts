@@ -44,5 +44,5 @@ export const hosts: Configs = {
 export function getBaseUrl(environment: Environment) {
     const host = hosts[environment];
     // For local host, we add a port, otherwise leave out
-    return environment === "local" ? `http://${host.base}:${host.port}` : host.base;
+    return environment === 'local' ? `http://${host.base}:${host.port}` : host.base;
 }

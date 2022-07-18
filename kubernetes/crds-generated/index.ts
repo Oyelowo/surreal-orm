@@ -10,7 +10,6 @@ export * from './provider';
 // Export sub-modules:
 import * as acme from './acme';
 import * as argoproj from './argoproj';
-import * as bitnami from './bitnami';
 import * as certmanager from './certmanager';
 import * as linkerd from './linkerd';
 import * as policy from './policy';
@@ -18,7 +17,7 @@ import * as split from './split';
 import * as trust from './trust';
 import * as types from './types';
 
-export { acme, argoproj, bitnami, certmanager, linkerd, policy, split, trust, types };
+export { acme, argoproj, certmanager, linkerd, policy, split, trust, types };
 
 import { Provider } from './provider';
 
