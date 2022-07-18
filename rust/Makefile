@@ -1,6 +1,7 @@
 gen:
-	make generate-graphql-mongo-graphql-schema
-	# cargo run -p graphql-mongo --bin graphql_generator_graphql_mongo
+	# make generate-graphql-mongo-graphql-schema
+	cargo run -p graphql-mongo --bin graphql_generator_graphql_mongo
+	# cargo run -p graphql-mongo --bin graphql_generator_graphql_postgres
 
 fmt:
 	SQLX_OFFLINE=true cargo fmt --all -- --check
@@ -16,9 +17,6 @@ test:
 	SQLX_OFFLINE=true cargo test
 
 # 1. graphql-mongo
-generate-graphql-mongo-graphql-schema:
-	cargo run -p graphql-mongo --bin graphql_generator_graphql_postgres
-
 run-graphql-mongo:
 	cargo run -p graphql-mongo --bin graphql-mongo
 
