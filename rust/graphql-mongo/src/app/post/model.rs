@@ -45,7 +45,6 @@ pub struct Post {
 #[ComplexObject]
 impl Post {
     async fn poster(&self, ctx: &Context<'_>) -> Result<User> {
-        // TODO: Use dataloader to batch user
         let db = get_db_from_ctx(ctx)?;
         let post_keys = Post::get_fields_serialized();
 
