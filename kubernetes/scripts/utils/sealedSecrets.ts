@@ -1,7 +1,7 @@
 import p from 'path';
 import { getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory';
 import { Environment, ResourceName } from '../../resources/types/own-types';
-import { getKubernetesSecretsPaths } from './shared';
+import { getKubeResourceTypeInfo } from './shared';
 
 export const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets';
 
@@ -25,11 +25,11 @@ export function getSecretPathsInfo({ unsealedSecretFilePath }: { unsealedSecretF
     } as const;
 }
 
-export function getSecretManifestsPaths(environment: Environment): string[] {
-    const unsealedSecretsFilePathsForEnv = getKubernetesSecretsPaths({
+export function getSecretManifestsPaths(environment: Environment) {
+    return getKubeResourceTypeInfo({
+        resourceType: "Service",
         environment,
-    });
-    return unsealedSecretsFilePathsForEnv;
+    }).map(info => info.path);
 }
 
 

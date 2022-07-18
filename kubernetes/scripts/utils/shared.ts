@@ -20,31 +20,6 @@ export function getEnvVarsForScript(environment: Environment, imageTags: ImageTa
   `;
 }
 
-export function getKubernetesSecretsPaths({ environment }: { environment: Environment }) {
-    const environmentManifestsDir = getGeneratedEnvManifestsDir(environment);
-    const manifestMatcher = '*ml';
-    const allManifests = sh.exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
-        silent: true,
-    });
-
-    const allManifestsArray = allManifests.stdout
-        .trim()
-        .split('\n')
-        .map((s) => s.trim());
-
-    const kubernetesSecrets = allManifestsArray.filter((path) => {
-        // Find Kubernetes Secret Objects i.e with type => Kind: Secret
-        // This matches the space between the ":" and Secret
-        let secret = sh.exec(`grep "^kind: *Secret$" ${path}`, { silent: true }).stdout?.trim();
-        const isSecret = !!secret;
-        // Filter out non-empty secrets. Which means the manifest is secret type
-        isSecret && console.log(`Grabbing secret path: ${path} \n`);
-        return isSecret;
-    });
-
-    return kubernetesSecrets;
-}
-
 export function isFileEmpty(fileName: string, ignoreWhitespace = true): Promise<boolean> {
     return new Promise((resolve, reject) => {
         fs.readFile(fileName, (err, data) => {
@@ -144,6 +119,6 @@ type InfoProps = {
     environment: Environment;
 };
 
-export const getKubeManifestInfo = ({ resourceType, environment }: InfoProps) => {
+export const getKubeResourceTypeInfo = ({ resourceType, environment }: InfoProps) => {
     return getAllKubeManifestsInfo(environment).filter(({ kind }) => kind === resourceType);
 };
