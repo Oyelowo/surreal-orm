@@ -1,3 +1,4 @@
+import { getSecretResourceInfo } from './../shared';
 import c from 'chalk';
 import fs from 'fs';
 import yaml from 'js-yaml';
@@ -7,17 +8,28 @@ import { Environment } from '../../../resources/types/own-types';
 import { SealedSecretTemplate } from '../../../resources/types/sealedSecretTemplate';
 import { SecretTemplate } from '../../../resources/types/SecretTemplate';
 import { getSecretManifestsPaths } from '../shared';
-import { getSealedSecretPathsInfo, SEALED_SECRETS_CONTROLLER_NAME } from './sealedSecrets';
+import { getSealedSecretPathsInfo, SEALED_SECRETS_CONTROLLER_NAME } from './getSealedSecretPathsInfo';
 
+
+// function getFromPrompt() {
+//     const selectedSecretsToUpdate = new Set<string>();
+//     getSecretResourceInfo("local").forEach(e => {
+
+//         if (selectedSecretsToUpdate.has(e.name)) {
+            
+//         }
+//         })
+// }
 export function updateAppSealedSecrets(environment: Environment) {
     try {
+       
         getSecretManifestsPaths(environment).forEach((kubeSecretManifestPath) => {
             const { sealedSecretFilePath } = getSealedSecretPathsInfo({
-                kubeSecretManifestPath: kubeSecretManifestPath,
+                kubeSecretManifestPath,
             });
 
             mergeSecretToSealedSecret({
-                unsealedSecretFilePath: kubeSecretManifestPath,
+                kubeSecretManifestPath,
                 sealedSecretFilePath,
             });
         });
@@ -29,14 +41,14 @@ export function updateAppSealedSecrets(environment: Environment) {
 }
 
 type MergeProps = {
-    unsealedSecretFilePath: string;
+    kubeSecretManifestPath: string;
     sealedSecretFilePath: string;
     // sealedSecretsControllerName: string;
 };
 
-export function mergeSecretToSealedSecret({ unsealedSecretFilePath, sealedSecretFilePath }: MergeProps) {
+export function mergeSecretToSealedSecret({ kubeSecretManifestPath, sealedSecretFilePath }: MergeProps) {
     const unsealedSecretJsonData: SecretTemplate = yaml.load(
-        fs.readFileSync(unsealedSecretFilePath, { encoding: 'utf-8' })
+        fs.readFileSync(kubeSecretManifestPath, { encoding: 'utf-8' })
     ) as SecretTemplate;
     const {
         stringData,

@@ -64,14 +64,22 @@ export async function promptEnvironmentSelection() {
 type ResourceType = 'Secret' | 'Deployment' | 'Service' | 'Configmap' | 'Pod' | 'SealedSecret' | (string & {});
 
 const kubernetesResourceInfo = z.object({
-    kind: z.string().nullable(),
-    name: z.string().nullable(),
-    namespace: namespaceSchema.nullable(),
-    path: z.string().nullable(),
+    kind: z.string(),
+    path: z.string(),
+    metadata: z.object({
+        name: z.string(),
+        // CRDS have namespace as null
+        namespace: namespaceSchema.nullable(),
+    }),
+    data: z.record(z.string().nullable()).nullable(),
+    stringData: z.record(z.string().nullable()).nullable()
 });
-
+/* 
+    data: z.record(z.string().nullable()).default({}).or(z.null()),
+    stringData: z.record(z.string().nullable()).default({}).or(z.null())
+*/
 // We override the object kind type since it's a nonexhasutive list
-interface KubeObjectInfo extends z.infer<typeof kubernetesResourceInfo> {
+export interface KubeObjectInfo extends z.infer<typeof kubernetesResourceInfo> {
     kind: ResourceType;
 }
 
@@ -96,11 +104,15 @@ const getInfoFromManifests = _.memoize(
             console.log('Extracting info from manifest', i);
             const info = JSON.parse(
                 exec(
-                    `cat ${p.trim()} | yq '{"kind": .kind, "name": .metadata.name, "namespace": .metadata.namespace}' -o json`
+                    `cat ${p.trim()} | yq '{"kind": .kind, "metadata" : { "name": .metadata.name, "namespace": .metadata.namespace }, "data": .data, "stringData": .stringData }' -o json`
                 )
             );
             // let's mutate to make it a bit faster and should be okay since we only do it here
             info.path = p;
+            // if (!info.metadata.namespace) {
+            //     // delete info.metadata.namespace
+            //     info.metadata.namespace = "default"
+            // }
             console.log('Extracted info from', info);
             return kubernetesResourceInfo.parse(info);
         }) as KubeObjectInfo[];
@@ -124,13 +136,17 @@ const getKubeResourceTypeInfo = ({ resourceType, environment }: InfoProps) => {
     return getAllKubeManifestsInfo(environment).filter(({ kind }) => kind === resourceType);
 };
 
+export const getSecretResourceInfo = (environment: Environment) =>
+    getKubeResourceTypeInfo({
+        resourceType: 'Secret',
+        environment,
+    });
+
 export function getSecretManifestsPaths(environment: Environment) {
-    const filterTypeSafely = (f: KubeObjectInfo) => f.path ? [f.path] : [];
+    const filterTypeSafely = (f: KubeObjectInfo) => (f.path ? [f.path] : []);
 
     return getKubeResourceTypeInfo({
-        resourceType: "Secret",
+        resourceType: 'Secret',
         environment,
     }).flatMap(filterTypeSafely);
 }
-
-

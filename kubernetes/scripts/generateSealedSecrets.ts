@@ -2,14 +2,16 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import sh from 'shelljs';
 import { clearPlainInputTsSecretFilesContents, syncSecretsTsFiles } from './secretsManagement/syncSecretsTsFiles';
-import { generateAllSealedSecrets } from './utils/generateAllSealedSecrets';
 import { generateManifests } from './utils/generateManifests';
 import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
-import { promptSecretsKeepingConfirmations } from './utils/promptSecretsKeepingConfirmations';
-import { getSecretManifestsPaths, } from './utils/sealedSecrets';
-import { promptEnvironmentSelection } from './utils/shared';
-import { updateAppSealedSecrets } from './utils/updateApplicationsSecrets';
+import { generateAllSealedSecrets } from './utils/sealed-secrets/generateAllSealedSecrets';
+import { promptSecretsKeepingConfirmations } from './utils/sealed-secrets/promptSecretsKeepingConfirmations';
+// import { promptSecretsKeepingConfirmations } from './utils/promptSecretsKeepingConfirmations';
+import { updateAppSealedSecrets } from './utils/sealed-secrets/updateApplicationsSecrets';
+// import { getSecretManifestsPaths, } from './utils/sealedSecrets';
+import { getSecretManifestsPaths, promptEnvironmentSelection } from './utils/shared';
+// import { updateAppSealedSecrets } from './utils/updateApplicationsSecrets';
 
 async function main() {
     const { generateSecretsOptions } = await promptSealedSecretsMergingOptions();
