@@ -7,7 +7,7 @@ import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
 import { getResourceAbsolutePath } from '../../resources/shared/manifestsDirectory';
 import { Environment, ResourceName } from '../../resources/types/own-types';
 import { syncSecretsTsFiles } from '../secretsManagement/syncSecretsTsFiles';
-import { generateAllSealedSecrets } from './generateAllSealedSecrets';
+import { generateAllSealedSecrets } from './sealed-secrets/generateAllSealedSecrets';
 import { generateManifests } from './generateManifests';
 import { getImageTagsFromDir } from './getImageTagsFromDir';
 

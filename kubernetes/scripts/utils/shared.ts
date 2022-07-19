@@ -120,6 +120,17 @@ type InfoProps = {
     environment: Environment;
 };
 
-export const getKubeResourceTypeInfo = ({ resourceType, environment }: InfoProps) => {
+const getKubeResourceTypeInfo = ({ resourceType, environment }: InfoProps) => {
     return getAllKubeManifestsInfo(environment).filter(({ kind }) => kind === resourceType);
 };
+
+export function getSecretManifestsPaths(environment: Environment) {
+    const filterTypeSafely = (f: KubeObjectInfo) => f.path ? [f.path] : [];
+
+    return getKubeResourceTypeInfo({
+        resourceType: "Secret",
+        environment,
+    }).flatMap(filterTypeSafely);
+}
+
+

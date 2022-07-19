@@ -2,21 +2,22 @@ import c from 'chalk';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import sh from 'shelljs';
-import { APPLICATION_AUTOMERGE_ANNOTATION_KEY } from '../../resources/shared/constants';
-import { Environment } from '../../resources/types/own-types';
-import { SealedSecretTemplate } from '../../resources/types/sealedSecretTemplate';
-import { SecretTemplate } from '../../resources/types/SecretTemplate';
-import { getSecretManifestsPaths, getSecretPathsInfo, SEALED_SECRETS_CONTROLLER_NAME } from './sealedSecrets';
+import { APPLICATION_AUTOMERGE_ANNOTATION_KEY } from '../../../resources/shared/constants';
+import { Environment } from '../../../resources/types/own-types';
+import { SealedSecretTemplate } from '../../../resources/types/sealedSecretTemplate';
+import { SecretTemplate } from '../../../resources/types/SecretTemplate';
+import { getSecretManifestsPaths } from '../shared';
+import { getSealedSecretPathsInfo, SEALED_SECRETS_CONTROLLER_NAME } from './sealedSecrets';
 
 export function updateAppSealedSecrets(environment: Environment) {
     try {
-        getSecretManifestsPaths(environment).forEach((unsealedSecretFilePath) => {
-            const { sealedSecretFilePath } = getSecretPathsInfo({
-                unsealedSecretFilePath,
+        getSecretManifestsPaths(environment).forEach((kubeSecretManifestPath) => {
+            const { sealedSecretFilePath } = getSealedSecretPathsInfo({
+                kubeSecretManifestPath: kubeSecretManifestPath,
             });
 
             mergeSecretToSealedSecret({
-                unsealedSecretFilePath,
+                unsealedSecretFilePath: kubeSecretManifestPath,
                 sealedSecretFilePath,
             });
         });

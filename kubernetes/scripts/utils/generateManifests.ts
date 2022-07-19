@@ -7,7 +7,7 @@ import {
     getMainBaseDir,
 } from '../../resources/shared/manifestsDirectory';
 import { ImageTags } from '../../resources/shared/validations';
-import { GenSealedSecretsProps } from './generateAllSealedSecrets';
+import { GenSealedSecretsProps } from './sealed-secrets/generateAllSealedSecrets';
 import { getEnvVarsForScript, handleShellError } from './shared';
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI

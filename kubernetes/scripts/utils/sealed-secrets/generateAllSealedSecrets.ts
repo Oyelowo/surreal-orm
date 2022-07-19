@@ -1,9 +1,8 @@
 import c from 'chalk';
 import sh from 'shelljs';
-import { getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory';
-import { Environment } from '../../resources/types/own-types';
-import { getSecretPathsInfo, SEALED_SECRETS_CONTROLLER_NAME } from './sealedSecrets';
-import { getKubernetesSecretsPaths } from './shared';
+import { Environment } from '../../../resources/types/own-types';
+import { getSealedSecretPathsInfo, SEALED_SECRETS_CONTROLLER_NAME } from './sealedSecrets';
+import { getSecretManifestsPaths } from '../shared';
 
 /*
 GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PULUMI.
@@ -16,21 +15,19 @@ export interface GenSealedSecretsProps {
 
 // CONSIDER: Prompt user to specify which apps secrets they're looking to update
 export async function generateAllSealedSecrets({ environment }: GenSealedSecretsProps) {
-    const unsealedSecretsFilePathsForEnv = getKubernetesSecretsPaths({
-        environmentManifestsDir: getGeneratedEnvManifestsDir(environment),
-    });
+    const unsealedSecretsFilePathsForEnv = getSecretManifestsPaths(environment);
 
-    const generateSealedSecret = (kubernetesSecretPath: string) => {
-        const { sealedSecretDir, sealedSecretFilePath } = getSecretPathsInfo({
-            unsealedSecretFilePath: kubernetesSecretPath,
+    const generateSealedSecret = (kubeSecretManifestPath: string) => {
+        const { sealedSecretDir, sealedSecretFilePath } = getSealedSecretPathsInfo({
+            kubeSecretManifestPath,
         });
 
         sh.mkdir(sealedSecretDir);
 
-        sh.echo(c.blueBright(`Generating sealed secret ${kubernetesSecretPath} \n to \n ${sealedSecretFilePath}`));
+        sh.echo(c.blueBright(`Generating sealed secret ${kubeSecretManifestPath} \n to \n ${sealedSecretFilePath}`));
 
         const kubeSeal = sh.exec(
-            `kubeseal --controller-name ${SEALED_SECRETS_CONTROLLER_NAME} < ${kubernetesSecretPath} -o yaml >${sealedSecretFilePath}`,
+            `kubeseal --controller-name ${SEALED_SECRETS_CONTROLLER_NAME} < ${kubeSecretManifestPath} -o yaml >${sealedSecretFilePath}`,
             { silent: true }
         );
 
@@ -42,7 +39,7 @@ export async function generateAllSealedSecrets({ environment }: GenSealedSecrets
             return;
         }
 
-        sh.echo(c.greenBright('Successfully generated sealed secret at', kubernetesSecretPath));
+        sh.echo(c.greenBright('Successfully generated sealed secret at', kubeSecretManifestPath));
     }
 
     unsealedSecretsFilePathsForEnv?.forEach(generateSealedSecret);
