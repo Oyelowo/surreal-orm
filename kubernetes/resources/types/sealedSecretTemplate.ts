@@ -13,7 +13,7 @@ export type Welcome3Metadata = {
 }
 
 export type Spec = {
-    encryptedData?: Record<string, string>;
+    encryptedData?: Record<string, string | null>;
     template: Template;
 }
 
