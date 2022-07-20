@@ -1,7 +1,7 @@
 import { Namespace } from './../infrastructure/namespaces/util';
 import { v1alpha1 } from "../../crds-generated/bitnami";
 
-type SealedSecretArguments = ConstructorParameters<typeof v1alpha1.SealedSecret>[1]
+type SealedSecretArguments = NonNullable<ConstructorParameters<typeof v1alpha1.SealedSecret>[1]>
 export type SealedSecretTemplate = SealedSecretArguments & {
     metadata: Welcome3Metadata;
     spec: Spec;
@@ -24,7 +24,7 @@ export type Template = {
 }
 
 export interface TemplateMetadata {
-    annotations: Record<'sealedsecrets.bitnami.com/managed' | string, string>
+    annotations: Record<string, string>
     creationTimestamp: null;
     labels: Record<string, string>;
     name: string;

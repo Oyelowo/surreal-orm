@@ -1,11 +1,10 @@
 import { SealedSecretTemplate } from '../../resources/types/sealedSecretTemplate';
 import { getSealedSecretResourceInfo, getSecretResourceInfo, KubeObjectInfo } from './shared';
-import c from 'chalk';
 import p from 'path';
 import yaml from 'js-yaml';
 import sh from 'shelljs';
 import { Environment, ResourceName } from '../../resources/types/own-types';
-import _, { Dictionary } from 'lodash';
+import _ from 'lodash';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { Namespace } from '../../resources/infrastructure/namespaces/util';
@@ -37,7 +36,7 @@ type MergeProps = {
     unsealedSecretInfo: KubeObjectInfo;
     sealedSecretInfo: KubeObjectInfo[];
 };
-// getSelectedSecrets
+
 export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSecretInfo }: MergeProps): void {
     const {
         stringData,
