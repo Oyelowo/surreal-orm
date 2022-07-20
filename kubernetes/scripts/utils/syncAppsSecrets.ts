@@ -1,23 +1,28 @@
-import { SealedSecretTemplate } from './../../../resources/types/sealedSecretTemplate';
-import { getSealedSecretResourceInfo, getSecretResourceInfo, KubeObjectInfo } from './../shared';
+import { SealedSecretTemplate } from '../../resources/types/sealedSecretTemplate';
+import { getSealedSecretResourceInfo, getSecretResourceInfo, KubeObjectInfo } from './shared';
 import c from 'chalk';
 import p from 'path';
 import yaml from 'js-yaml';
 import sh from 'shelljs';
-import { Environment, ResourceName } from '../../../resources/types/own-types';
-import _ from 'lodash';
+import { Environment, ResourceName } from '../../resources/types/own-types';
+import _, { Dictionary } from 'lodash';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import { Namespace } from '../../../resources/infrastructure/namespaces/util';
+import { Namespace } from '../../resources/infrastructure/namespaces/util';
 
 const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets';
 
-export async function updateAppSealedSecretsFromCliPrompt(environment: Environment) {
+/*
+GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PULUMI.
+These secrets are encrypted using the bitnami sealed secret controller running in the cluster
+you are at present context
+*/
+export async function syncAppSealedSecrets(environment: Environment) {
 
-    const selectedUnsealedSecretsInfo = await prompSecretResourcesSelection('local');
+    const selectedUnsealedSecretsInfo = await prompSecretResourcesSelection(environment);
 
     for (let unsealedSecret of selectedUnsealedSecretsInfo) {
-        const sealedSecretInfo = getSealedSecretResourceInfo('local');
+        const sealedSecretInfo = getSealedSecretResourceInfo(environment);
 
         mergeUnsealedSecretToSealedSecret({
             unsealedSecretInfo: unsealedSecret,
@@ -54,10 +59,11 @@ export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSe
             --raw --from-file=/dev/stdin --namespace ${namespace} \
             --name ${name}`
             )
-            .stdout.trim()
+            .stdout.trim();
     };
-    const secretRecord = stringData ?? data ?? {};
-    const filteredSealedSecretsData = _.mapValues(secretRecord, sealSecretValue);
+
+    const dataToSeal = stringData ?? data ?? {};
+    const filteredSealedSecretsData = _.mapValues(dataToSeal, sealSecretValue) as unknown as Record<string, string | null>;
 
     // Update sealed secret object to be converted to yaml
     const updatedSealedSecrets: SealedSecretTemplate = {

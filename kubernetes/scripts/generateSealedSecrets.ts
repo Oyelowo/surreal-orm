@@ -6,9 +6,9 @@ import { generateManifests } from './utils/generateManifests';
 import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
 import { generateAllSealedSecrets } from './utils/sealed-secrets/generateAllSealedSecrets';
-import { promptSecretsKeepingConfirmations } from './utils/sealed-secrets/promptSecretsKeepingConfirmations';
+import { promptSecretsDeletionConfirmations } from './utils/promptSecretsDeletionConfirmations';
 // import { promptSecretsKeepingConfirmations } from './utils/promptSecretsKeepingConfirmations';
-import { updateAppSealedSecrets } from './utils/sealed-secrets/updateApplicationsSecrets';
+import { syncAppSealedSecrets } from './utils/syncAppsSecrets';
 // import { getSecretManifestsPaths, } from './utils/sealedSecrets';
 import { getSecretManifestsPaths, promptEnvironmentSelection } from './utils/shared';
 // import { updateAppSealedSecrets } from './utils/updateApplicationsSecrets';
@@ -18,7 +18,7 @@ async function main() {
 
     const { environment } = await promptEnvironmentSelection();
     await promptKubernetesClusterSwitch(environment);
-    const { keepPlainSecretsInput, keepUnsealedSecretManifestsOutput } = await promptSecretsKeepingConfirmations();
+    const { , } = await promptSecretsDeletionConfirmations();
 
     const imageTags = await getImageTagsFromDir();
 

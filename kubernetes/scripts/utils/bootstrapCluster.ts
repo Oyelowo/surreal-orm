@@ -10,6 +10,7 @@ import { syncSecretsTsFiles } from '../secretsManagement/syncSecretsTsFiles';
 import { generateAllSealedSecrets } from './sealed-secrets/generateAllSealedSecrets';
 import { generateManifests } from './generateManifests';
 import { getImageTagsFromDir } from './getImageTagsFromDir';
+import { syncAppSealedSecrets } from './syncAppsSecrets';
 
 export async function bootstrapCluster(environment: Environment) {
     const imageTags = await getImageTagsFromDir();
@@ -18,6 +19,8 @@ export async function bootstrapCluster(environment: Environment) {
         environment,
         imageTags,
     });
+
+    syncAppSealedSecrets(environment)
 
     syncSecretsTsFiles();
 
