@@ -12,9 +12,9 @@ import { Namespace } from '../../../resources/infrastructure/namespaces/util';
 
 const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets';
 
-export async function updateAppSealedSecrets(environment: Environment) {
+export async function updateAppSealedSecretsFromCliPrompt(environment: Environment) {
 
-    const selectedUnsealedSecretsInfo = await getSelectedSecretKeysFromPrompt('local');
+    const selectedUnsealedSecretsInfo = await prompSecretResourcesSelection('local');
 
     for (let unsealedSecret of selectedUnsealedSecretsInfo) {
         const sealedSecretInfo = getSealedSecretResourceInfo('local');
@@ -32,7 +32,7 @@ type MergeProps = {
     sealedSecretInfo: KubeObjectInfo[];
 };
 // getSelectedSecrets
-export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSecretInfo }: MergeProps) {
+export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSecretInfo }: MergeProps): void {
     const {
         stringData,
         data,
@@ -40,21 +40,21 @@ export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSe
     } = unsealedSecretInfo;
 
     if (!name && namespace) {
-        throw new Error('Name or namespace not provided in the secret');
+        throw new Error('Name and namespace not provided in the secret');
     }
 
     // Get corresponding previously(if it exists) generated sealed secrets info.
-    const matchesUnsealedSecret = ({ metadata: m }: KubeObjectInfo) => m.name === name && m.namespace === namespace;
+    const matchesUnsealedSecret = ({ metadata: m }: KubeObjectInfo): boolean => m.name === name && m.namespace === namespace;
     const existingSealedSecretJsonData = sealedSecretInfo?.find(matchesUnsealedSecret);
 
-    const sealSecretValue = (secretValue: string) => {
+    const sealSecretValue = (secretValue: string): string => {
         return sh
             .exec(
                 `echo -n ${secretValue} | kubeseal --controller-name=${SEALED_SECRETS_CONTROLLER_NAME} \
             --raw --from-file=/dev/stdin --namespace ${namespace} \
             --name ${name}`
             )
-            .stdout.trim();
+            .stdout.trim()
     };
     const secretRecord = stringData ?? data ?? {};
     const filteredSealedSecretsData = _.mapValues(secretRecord, sealSecretValue);
@@ -101,9 +101,12 @@ export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSe
 
 
 /* 
-Gets list of secrets a user wants to update with the CLI
+CLI tool
+Prompts the user to select secret resources in various namespaces to update.
+After, the first prompt, user has to input the exact secret keys of a resource
+they want to update
 */
-async function getSelectedSecretKeysFromPrompt(environment: Environment): Promise<KubeObjectInfo[]> {
+async function prompSecretResourcesSelection(environment: Environment): Promise<KubeObjectInfo[]> {
     // Gets all secrets sorting the secret resources in applications namespace first
     const secretsInfo = _.sortBy(getSecretResourceInfo(environment), [(a) => a.metadata.namespace !== 'applications']);
     const sercretObjectsByNamespace = _.groupBy(secretsInfo, (d) => d.metadata.namespace);
