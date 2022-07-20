@@ -36,7 +36,6 @@ export function isFileEmpty(fileName: string, ignoreWhitespace = true): Promise<
 export function handleShellError(shellCommand: ShellString) {
     if (shellCommand.stderr) {
         console.log(c.bgRedBright(shellCommand.stderr));
-        // process.exit(-1)
         sh.exit(-1);
     }
     return shellCommand;
@@ -81,10 +80,8 @@ const kubernetesResourceInfo = z.object({
     data: z.record(z.string().nullable()).optional(),
     stringData: z.record(z.string().nullable()).optional()
 });
-/* 
-    data: z.record(z.string().nullable()).default({}).or(z.null()),
-    stringData: z.record(z.string().nullable()).default({}).or(z.null())
-*/
+
+
 // We override the object kind type since it's a nonexhasutive list
 export interface KubeObjectInfo extends z.infer<typeof kubernetesResourceInfo> {
     kind: ResourceType;
@@ -103,12 +100,14 @@ function getAllManifestsPaths({ environment }: { environment: Environment }) {
     return allManifests;
 }
 
+
 const exec = (cmd: string) => sh.exec(cmd, { silent: true }).stdout;
 
 const getInfoFromManifests = _.memoize(
-    (manifestsPaths: string[]) => {
+    (manifestsPaths: string[]): KubeObjectInfo[] => {
         return manifestsPaths.map((p, i) => {
             console.log('Extracting info from manifest', i);
+
             const info = JSON.parse(
                 exec(
                     `cat ${p.trim()} | yq '.' -o json`
@@ -116,12 +115,11 @@ const getInfoFromManifests = _.memoize(
             );
             // let's mutate to make it a bit faster and should be okay since we only do it here
             info.path = p;
-            // if (!info.metadata.namespace) {
-            //     // delete info.metadata.namespace
-            //     info.metadata.namespace = "default"
-            // }
-            console.log('Extracted info from', info);
-            return kubernetesResourceInfo.parse(info);
+
+            const updatedPath = kubernetesResourceInfo.parse(info)
+            console.log('Extracted info from', updatedPath.path);
+
+            return updatedPath;
         }) as KubeObjectInfo[];
     },
     // We are concatenating all the path names to get a stable memoization key

@@ -7,7 +7,6 @@ import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
 import { getResourceAbsolutePath } from '../../resources/shared/manifestsDirectory';
 import { Environment, ResourceName } from '../../resources/types/own-types';
 import { syncSecretsTsFiles } from '../secretsManagement/syncSecretsTsFiles';
-import { generateAllSealedSecrets } from './sealed-secrets/generateAllSealedSecrets';
 import { generateManifests } from './generateManifests';
 import { getImageTagsFromDir } from './getImageTagsFromDir';
 import { syncAppSealedSecrets } from './syncAppsSecrets';
@@ -19,8 +18,6 @@ export async function bootstrapCluster(environment: Environment) {
         environment,
         imageTags,
     });
-
-    syncAppSealedSecrets(environment)
 
     syncSecretsTsFiles();
 
@@ -38,6 +35,8 @@ export async function bootstrapCluster(environment: Environment) {
     // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
     sh.exec(`kubectl rollout status deployment/${sealedSecretsName} -n=${namespaces.kubeSystem}`);
 
+    await syncAppSealedSecrets(environment)
+
     // # Apply setups with cert-manager controller
     applyResourceManifests('cert-manager', environment);
 
@@ -50,9 +49,6 @@ export async function bootstrapCluster(environment: Environment) {
     applyResourceManifests('linkerd', environment);
     applyResourceManifests('linkerd-viz', environment);
 
-    await generateAllSealedSecrets({
-        environment,
-    });
 
     applyResourceManifests('argocd', environment);
 

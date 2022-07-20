@@ -32,6 +32,8 @@ export async function syncAppSealedSecrets(environment: Environment) {
 
 }
 
+syncAppSealedSecrets("local")
+
 type MergeProps = {
     unsealedSecretInfo: KubeObjectInfo;
     sealedSecretInfo: KubeObjectInfo[];
@@ -100,6 +102,7 @@ export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSe
     // and we want as basedir: kubernetes/manifests/generated/production/applications/graphql-mongo
     const appBaseDir = p.join(appManifestsDir, '..');
     const sealedSecretDir = p.join(appBaseDir, SEALED_SECRETS_CONTROLLER_NAME);
+    sh.mkdir(sealedSecretDir);
     const sealedSecretFilePath = p.join(sealedSecretDir, `sealed-secret-${name}-${namespace}.yaml`);
 
     sh.exec(`echo '${yaml.dump(updatedSealedSecrets)}' > ${sealedSecretFilePath}`);
@@ -114,8 +117,8 @@ they want to update
 */
 async function prompSecretResourcesSelection(environment: Environment): Promise<KubeObjectInfo[]> {
     // Gets all secrets sorting the secret resources in applications namespace first
-    const secretsInfo = _.sortBy(getSecretResourceInfo(environment), [(a) => a.metadata.namespace !== 'applications']);
-    const sercretObjectsByNamespace = _.groupBy(secretsInfo, (d) => d.metadata.namespace);
+    const originalSecretsInfo = _.sortBy(getSecretResourceInfo(environment), [(a) => a.metadata.namespace !== 'applications']);
+    const sercretObjectsByNamespace = _.groupBy(originalSecretsInfo, (d) => d.metadata.namespace);
 
     // Name and value have to be defined for inquirer if not using basic string
     const mapToPrompterValues = (secret: KubeObjectInfo): { name: string; value: KubeObjectInfo } => ({
@@ -140,8 +143,8 @@ async function prompSecretResourcesSelection(environment: Environment): Promise<
         ...namespaceSecretObjects.map(mapToPrompterValues),
     ]);
 
-    const allResourceAnswerKeyName = 'allSecretResources';
-    const { allSecretResources } = await inquirer.prompt<{ [allResourceAnswerKeyName]: KubeObjectInfo[] }>(
+    const allResourceAnswerKeyName = 'selectedSecretResources';
+    const { selectedSecretResources } = await inquirer.prompt<{ [allResourceAnswerKeyName]: KubeObjectInfo[] }>(
         {
             type: 'checkbox',
             message: 'Select resource secret you want to update',
@@ -158,11 +161,16 @@ async function prompSecretResourcesSelection(environment: Environment): Promise<
         },
     );
 
+    const allSelected = originalSecretsInfo.length === selectedSecretResources.length;
+    if (allSelected) {
+        return originalSecretsInfo
+    }
+
     // List of secrets keys/names in each kube secret resource.
     // e.g for react-app: [secretKey1, secretKey2, ...]
-    const appSecretKeysByNamespace = await promptSecretKeysSelection(allSecretResources);
+    const appSecretKeysByNamespace = await promptSecretKeysSelection(selectedSecretResources);
 
-    return filterSecrets(allSecretResources, appSecretKeysByNamespace);
+    return filterSecrets(selectedSecretResources, appSecretKeysByNamespace);
 }
 
 

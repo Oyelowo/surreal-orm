@@ -1,3 +1,7 @@
+/* 
+Does not handle sealed secret generation/syncing
+*/
+
 import yargs from 'yargs';
 import { generateManifests } from './utils/generateManifests';
 import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
