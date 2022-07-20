@@ -32,7 +32,6 @@ export async function syncAppSealedSecrets(environment: Environment) {
 
 }
 
-syncAppSealedSecrets("local")
 
 type MergeProps = {
     unsealedSecretInfo: KubeObjectInfo;
@@ -70,18 +69,17 @@ export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSe
     // Update sealed secret object to be converted to yaml
     const updatedSealedSecrets: SealedSecretTemplate = {
         // For some reason, typescript is not detecting the correct type here.
-        // @ts-expect-error
         kind: 'SealedSecret',
-        // @ts-expect-error
         apiVersion: 'bitnami.com/v1alpha1',
         metadata: {
             name: unsealedSecretInfo.metadata.name,
             namespace: unsealedSecretInfo.metadata.namespace,
             annotations: {
                 'sealedsecrets.bitnami.com/managed': 'true',
+                ...existingSealedSecretJsonData?.metadata.annotations
             },
+            ...existingSealedSecretJsonData?.metadata,
         },
-        ...existingSealedSecretJsonData,
         spec: {
             encryptedData: {
                 ...existingSealedSecretJsonData?.spec?.encryptedData,

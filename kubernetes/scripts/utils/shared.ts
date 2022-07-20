@@ -71,6 +71,7 @@ const kubernetesResourceInfo = z.object({
         name: z.string(),
         // CRDS have namespace as null
         namespace: namespaceSchema.optional(),
+        annotations: z.record(z.any()).optional(),
     }),
     spec: z.object({
         encryptedData: z.record(z.string().nullable()).optional(), // For sealed secrets
