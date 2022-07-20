@@ -65,14 +65,21 @@ type ResourceType = 'Secret' | 'Deployment' | 'Service' | 'Configmap' | 'Pod' | 
 
 const kubernetesResourceInfo = z.object({
     kind: z.string(),
+    apiVersion: z.string(),
+    type: z.string().optional(),
     path: z.string(),
     metadata: z.object({
         name: z.string(),
         // CRDS have namespace as null
-        namespace: namespaceSchema.nullable(),
+        namespace: namespaceSchema.optional(),
     }),
-    data: z.record(z.string().nullable()).nullable(),
-    stringData: z.record(z.string().nullable()).nullable()
+    spec: z.object({
+        encryptedData: z.record(z.string().nullable()).optional(), // For sealed secrets
+        // CRDS have namespace as null
+        template: z.any().optional(), //Dont care about this yet
+    }).optional(),
+    data: z.record(z.string().nullable()).optional(),
+    stringData: z.record(z.string().nullable()).optional()
 });
 /* 
     data: z.record(z.string().nullable()).default({}).or(z.null()),
@@ -104,7 +111,7 @@ const getInfoFromManifests = _.memoize(
             console.log('Extracting info from manifest', i);
             const info = JSON.parse(
                 exec(
-                    `cat ${p.trim()} | yq '{"kind": .kind, "metadata" : { "name": .metadata.name, "namespace": .metadata.namespace }, "data": .data, "stringData": .stringData }' -o json`
+                    `cat ${p.trim()} | yq '.' -o json`
                 )
             );
             // let's mutate to make it a bit faster and should be okay since we only do it here
@@ -139,6 +146,12 @@ const getKubeResourceTypeInfo = ({ resourceType, environment }: InfoProps) => {
 export const getSecretResourceInfo = (environment: Environment) =>
     getKubeResourceTypeInfo({
         resourceType: 'Secret',
+        environment,
+    });
+
+export const getSealedSecretResourceInfo = (environment: Environment) =>
+    getKubeResourceTypeInfo({
+        resourceType: 'SealedSecret',
         environment,
     });
 

@@ -1,32 +1,34 @@
-export interface SealedSecretTemplate {
-    apiVersion: string;
-    kind: string;
+import { Namespace } from './../infrastructure/namespaces/util';
+import { v1alpha1 } from "../../crds-generated/bitnami";
+
+type SealedSecretArguments = ConstructorParameters<typeof v1alpha1.SealedSecret>[1]
+export type SealedSecretTemplate = SealedSecretArguments & {
     metadata: Welcome3Metadata;
     spec: Spec;
 }
 
-export interface Welcome3Metadata {
-    creationTimestamp: null;
-    name: string;
-    namespace: string;
+export type Welcome3Metadata = {
+    name?: string;
+    namespace?: Namespace;
 }
 
-export interface Spec {
+export type Spec = {
     encryptedData?: Record<string, string>;
     template: Template;
 }
 
-export interface Template {
+export type Template = {
     data: null;
     metadata: TemplateMetadata;
     type: string;
 }
 
 export interface TemplateMetadata {
-    // annotations: Annotations;
-    annotations: Record<string | 'sealedsecrets.bitnami.com/managed', string>;
+    annotations: Record<'sealedsecrets.bitnami.com/managed' | string, string>
     creationTimestamp: null;
     labels: Record<string, string>;
     name: string;
     namespace: string;
 }
+
+

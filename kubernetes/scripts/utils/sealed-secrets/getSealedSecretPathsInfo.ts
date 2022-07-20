@@ -11,10 +11,6 @@ export function getSealedSecretPathsInfo({ kubeSecretManifestPath }: { kubeSecre
     const appBaseDir = p.join(appManifestsDir, '..');
     const unsealedSecretFileName = p.basename(kubeSecretManifestPath);
 
-    // CONSIDER?: Get this as an argument to the function whch will be prompted on command start
-    // if (secretsToUpdate.inclues(unsealedSecretFileName)) {
-    // }
-
     const sealedSecretDir = p.join(appBaseDir, SEALED_SECRETS_CONTROLLER_NAME);
     const sealedSecretFilePath = p.join(sealedSecretDir, `sealed-${unsealedSecretFileName}`);
     return {
