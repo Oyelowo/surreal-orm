@@ -1,3 +1,4 @@
+import { Environment } from './../../resources/types/own-types';
 import c from 'chalk';
 import p from 'path';
 import sh from 'shelljs';
@@ -7,17 +8,30 @@ import {
     getMainBaseDir,
 } from '../../resources/shared/manifestsDirectory';
 import { ImageTags } from '../../resources/shared/validations';
-import { GenSealedSecretsProps } from './sealed-secrets/generateAllSealedSecrets';
 import { getEnvVarsForScript, handleShellError } from './shared';
+import path from 'path';
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 */
-interface GenerateManifestsProps extends Pick<GenSealedSecretsProps, 'environment'> {
+
+type GenerateManifestsProp = {
+    environment: Environment;
     imageTags: ImageTags;
 }
 
-export async function generateManifests({ environment, imageTags }: GenerateManifestsProps) {
+export async function generateManifests({ environment, imageTags }: GenerateManifestsProp) {
     const manifestsDirForEnv = getGeneratedEnvManifestsDir(environment);
+    // Create a cache tracker with a timestamp suffix
+    // This helps the memoized/cached function that get all yaml manifest resources'
+    // info/metatadata. The function uses all the paths of the yamls for
+    // deciding if to cache, we want to create a new "hash" to bust the cache
+    // if we ever generate updated manifefsts in between. This should come first.
+    const cacheTrackerDir = path.join(manifestsDirForEnv, "cache-tracker")
+    sh.rm("-rf", cacheTrackerDir)
+    sh.mkdir(cacheTrackerDir)
+    const yamlManifestsCacheTracker = path.join(cacheTrackerDir, `${Date.now()}.yaml`)
+    sh.touch(yamlManifestsCacheTracker)
+
     sh.exec('npm i');
     sh.rm('-rf', './login');
     sh.mkdir('./login');
@@ -25,7 +39,9 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     sh.exec('pulumi login file://login');
 
     sh.echo(c.blueBright(`First Delete old resources for" ${environment} at ${manifestsDirForEnv}`));
-
+    // TODO: Could use the helper function that gets all manifests and just filter out
+    // SealedSecrets but delete other resource.
+    // getAllManifests().filter(({kind}) => Kind !== "SealedSecret").forEach((f) => sh.rm('-rf', f.trim())) ...
     const getManifestsWithinDirName = (dirName: '1-manifest' | '0-crd') =>
         sh
             .exec(`find ${manifestsDirForEnv} -type d -name "${dirName}"`, {

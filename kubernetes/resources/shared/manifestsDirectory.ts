@@ -41,7 +41,7 @@ export const getPathToResourcesDir = (
 };
 
 /**
- * e.g /manifests/generated/local/infrastructure/1-manifests
+ * e.g /manifests/generated/local/infrastructure/1-manifest
  *                               /infrastructure/1-crd
  *                               /infrastructure/sealed-secrets
  */

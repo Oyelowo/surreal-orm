@@ -1,5 +1,5 @@
 import { SealedSecretTemplate } from '../../resources/types/sealedSecretTemplate';
-import { getSealedSecretResourceInfo, getSecretResourceInfo, KubeObjectInfo } from './shared';
+import { getKubeResourceInfo, KubeObjectInfo } from './shared';
 import p from 'path';
 import yaml from 'js-yaml';
 import sh from 'shelljs';
@@ -17,20 +17,17 @@ These secrets are encrypted using the bitnami sealed secret controller running i
 you are at present context
 */
 export async function syncAppSealedSecrets(environment: Environment) {
-
     const selectedUnsealedSecretsInfo = await prompSecretResourcesSelection(environment);
 
     for (let unsealedSecret of selectedUnsealedSecretsInfo) {
-        const sealedSecretInfo = getSealedSecretResourceInfo(environment);
+        const sealedSecretInfo = getKubeResourceInfo({ kind: "SealedSecret", environment });
 
         mergeUnsealedSecretToSealedSecret({
             unsealedSecretInfo: unsealedSecret,
             sealedSecretInfo: sealedSecretInfo,
         });
     }
-
 }
-
 
 type MergeProps = {
     unsealedSecretInfo: KubeObjectInfo;
@@ -49,7 +46,8 @@ export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSe
     }
 
     // Get corresponding previously(if it exists) generated sealed secrets info.
-    const matchesUnsealedSecret = ({ metadata: m }: KubeObjectInfo): boolean => m.name === name && m.namespace === namespace;
+    const matchesUnsealedSecret = ({ metadata: m }: KubeObjectInfo): boolean =>
+        m.name === name && m.namespace === namespace;
     const existingSealedSecretJsonData = sealedSecretInfo?.find(matchesUnsealedSecret);
 
     const sealSecretValue = (secretValue: string): string => {
@@ -63,7 +61,10 @@ export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSe
     };
 
     const dataToSeal = stringData ?? data ?? {};
-    const filteredSealedSecretsData = _.mapValues(dataToSeal, sealSecretValue) as unknown as Record<string, string | null>;
+    const filteredSealedSecretsData = _.mapValues(dataToSeal, sealSecretValue) as unknown as Record<
+        string,
+        string | null
+    >;
 
     // Update sealed secret object to be converted to yaml
     const updatedSealedSecrets: SealedSecretTemplate = {
@@ -75,7 +76,7 @@ export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSe
             namespace: unsealedSecretInfo.metadata.namespace,
             annotations: {
                 'sealedsecrets.bitnami.com/managed': 'true',
-                ...existingSealedSecretJsonData?.metadata.annotations
+                ...existingSealedSecretJsonData?.metadata.annotations,
             },
             ...existingSealedSecretJsonData?.metadata,
         },
@@ -105,7 +106,6 @@ export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSe
     sh.exec(`echo '${yaml.dump(updatedSealedSecrets)}' > ${sealedSecretFilePath}`);
 }
 
-
 /* 
 CLI tool
 Prompts the user to select secret resources in various namespaces to update.
@@ -114,7 +114,9 @@ they want to update
 */
 async function prompSecretResourcesSelection(environment: Environment): Promise<KubeObjectInfo[]> {
     // Gets all secrets sorting the secret resources in applications namespace first
-    const originalSecretsInfo = _.sortBy(getSecretResourceInfo(environment), [(a) => a.metadata.namespace !== 'applications']);
+    const originalSecretsInfo = _.sortBy(getKubeResourceInfo({ kind: 'Secret', environment }), [
+        (a) => a.metadata.namespace !== 'applications',
+    ]);
     const sercretObjectsByNamespace = _.groupBy(originalSecretsInfo, (d) => d.metadata.namespace);
 
     // Name and value have to be defined for inquirer if not using basic string
@@ -141,26 +143,24 @@ async function prompSecretResourcesSelection(environment: Environment): Promise<
     ]);
 
     const allResourceAnswerKeyName = 'selectedSecretResources';
-    const { selectedSecretResources } = await inquirer.prompt<{ [allResourceAnswerKeyName]: KubeObjectInfo[] }>(
-        {
-            type: 'checkbox',
-            message: 'Select resource secret you want to update',
-            name: allResourceAnswerKeyName,
-            choices: applicationList,
-            validate(answer) {
-                if (answer.length < 1) {
-                    return 'You must choose at least one secret.';
-                }
+    const { selectedSecretResources } = await inquirer.prompt<{ [allResourceAnswerKeyName]: KubeObjectInfo[] }>({
+        type: 'checkbox',
+        message: 'Select resource secret you want to update',
+        name: allResourceAnswerKeyName,
+        choices: applicationList,
+        validate(answer) {
+            if (answer.length < 1) {
+                return 'You must choose at least one secret.';
+            }
 
-                return true;
-            },
-            pageSize: 2000,
+            return true;
         },
-    );
+        pageSize: 2000,
+    });
 
     const allSelected = originalSecretsInfo.length === selectedSecretResources.length;
     if (allSelected) {
-        return originalSecretsInfo
+        return originalSecretsInfo;
     }
 
     // List of secrets keys/names in each kube secret resource.
@@ -169,8 +169,6 @@ async function prompSecretResourcesSelection(environment: Environment): Promise<
 
     return filterSecrets(selectedSecretResources, appSecretKeysByNamespace);
 }
-
-
 
 type AppName = ResourceName | string;
 type SecretKey = string;
