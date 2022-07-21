@@ -1,3 +1,4 @@
+import { getPathToResourceType } from './../../resources/shared/manifestsDirectory';
 import { Environment } from './../../resources/types/own-types';
 import c from 'chalk';
 import p from 'path';
@@ -8,7 +9,13 @@ import {
     getMainBaseDir,
 } from '../../resources/shared/manifestsDirectory';
 import { ImageTags } from '../../resources/shared/validations';
-import { getEnvVarsForScript, handleShellError } from './shared';
+import {
+    getAllKubeManifestsInfo,
+    getEnvVarsForScript,
+    getResourceKindManifestsPaths,
+    handleShellError,
+    KubeObjectInfo,
+} from './shared';
 import path from 'path';
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
@@ -17,7 +24,7 @@ GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 type GenerateManifestsProp = {
     environment: Environment;
     imageTags: ImageTags;
-}
+};
 
 export async function generateManifests({ environment, imageTags }: GenerateManifestsProp) {
     const manifestsDirForEnv = getGeneratedEnvManifestsDir(environment);
@@ -26,11 +33,11 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     // info/metatadata. The function uses all the paths of the yamls for
     // deciding if to cache, we want to create a new "hash" to bust the cache
     // if we ever generate updated manifefsts in between. This should come first.
-    const cacheTrackerDir = path.join(manifestsDirForEnv, "cache-tracker")
-    sh.rm("-rf", cacheTrackerDir)
-    sh.mkdir(cacheTrackerDir)
-    const yamlManifestsCacheTracker = path.join(cacheTrackerDir, `${Date.now()}.yaml`)
-    sh.touch(yamlManifestsCacheTracker)
+    const cacheTrackerDir = path.join(manifestsDirForEnv, 'cache-tracker');
+    sh.rm('-rf', cacheTrackerDir);
+    sh.mkdir(cacheTrackerDir);
+    const yamlManifestsCacheTracker = path.join(cacheTrackerDir, `${Date.now()}.yaml`);
+    sh.touch(yamlManifestsCacheTracker);
 
     sh.exec('npm i');
     sh.rm('-rf', './login');
@@ -38,21 +45,16 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
 
     sh.exec('pulumi login file://login');
 
-    sh.echo(c.blueBright(`First Delete old resources for" ${environment} at ${manifestsDirForEnv}`));
-    // TODO: Could use the helper function that gets all manifests and just filter out
-    // SealedSecrets but delete other resource.
-    // getAllManifests().filter(({kind}) => Kind !== "SealedSecret").forEach((f) => sh.rm('-rf', f.trim())) ...
-    const getManifestsWithinDirName = (dirName: '1-manifest' | '0-crd') =>
-        sh
-            .exec(`find ${manifestsDirForEnv} -type d -name "${dirName}"`, {
-                silent: true,
-            })
-            .stdout.trim()
-            .split('\n');
+    sh.echo(
+        c.blueBright(`First Delete old resources(except sealed secrets) for" ${environment} at ${manifestsDirForEnv}`)
+    );
 
-    const manifestsNonCrds = getManifestsWithinDirName('1-manifest');
-    const manifestsCrds = getManifestsWithinDirName('0-crd');
-    manifestsNonCrds.concat(manifestsCrds).forEach((f) => sh.rm('-rf', f.trim()));
+    const removeNonSealedSecrets = (info: KubeObjectInfo) => {
+        if (info.kind !== 'SealedSecret') {
+            sh.rm('-rf', info.path);
+        }
+    };
+    getAllKubeManifestsInfo(environment).forEach(removeNonSealedSecrets);
 
     handleShellError(sh.rm('-rf', `${p.join(getMainBaseDir(), 'Pulumi.dev.yaml')}`));
     handleShellError(sh.exec("export PULUMI_CONFIG_PASSPHRASE='not-needed' && pulumi stack init --stack dev"));
@@ -71,26 +73,16 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     if (exec.stderr) {
         throw new Error(c.redBright(`Something went wrong with pulumi. Error: ${exec.stderr}`));
     }
-
-    const updatedCrds = getManifestsWithinDirName('0-crd');
-    syncCrdsCode(updatedCrds);
+    
+    syncCrdsCode(environment);
 
     sh.rm('-rf', './login');
 }
 
-function syncCrdsCode(updatedCrds: string[]) {
-    const manifestsCrdsFilesUpdated = updatedCrds.flatMap((dir) => {
-        const crds = sh.ls(dir).stdout.trim().split('\n');
-        const isNotEmptyFile = (f: string) => Boolean(f.trim());
-        const getFullPathForFile = (f: string) => p.join(dir, f.trim());
+function syncCrdsCode(environment: Environment) {
+    const manifestsCrdsFiles = getResourceKindManifestsPaths({ kind: 'CustomResourceDefinition', environment });
+    const outDir = path.join(getMainBaseDir(), 'crds-generated');
 
-        return crds.filter(isNotEmptyFile).map(getFullPathForFile);
-    });
-
-    sh.exec(
-        ` crd2pulumi --nodejsPath ${getMainBaseDir()}/crds-generated ${manifestsCrdsFilesUpdated.join(' ')} --force`
-    );
-
-    getGeneratedCrdsCodeDir();
+    sh.exec(` crd2pulumi --nodejsPath ${outDir} ${manifestsCrdsFiles.join(' ')} --force`);
     sh.exec(`npx prettier --write ${getGeneratedCrdsCodeDir()}`);
 }

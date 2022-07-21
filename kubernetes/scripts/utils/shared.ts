@@ -60,7 +60,7 @@ export async function promptEnvironmentSelection() {
     return answers;
 }
 
-type ResourceKind = 'Secret' | 'Deployment' | 'Service' | 'Configmap' | 'Pod' | 'SealedSecret';
+type ResourceKind = 'Secret' | 'Deployment' | 'Service' | 'Configmap' | 'Pod' | 'SealedSecret' | 'CustomResourceDefinition';
 
 const kubernetesResourceInfo = z.object({
     kind: z.string(),
@@ -143,11 +143,11 @@ export const getKubeResourceInfo = ({ kind, environment }: InfoProps): KubeObjec
     return getAllKubeManifestsInfo(environment).filter((info) => info.kind === kind);
 };
 
-export function getSecretManifestsPaths(environment: Environment): string[] {
+export function getResourceKindManifestsPaths({ kind, environment }: InfoProps): string[] {
     const filterTypeSafely = (f: KubeObjectInfo) => (f.path ? [f.path] : []);
 
     return getKubeResourceInfo({
-        kind: 'Secret',
+        kind,
         environment,
     }).flatMap(filterTypeSafely);
 }

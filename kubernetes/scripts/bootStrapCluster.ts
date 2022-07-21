@@ -4,7 +4,7 @@ import { bootstrapCluster } from './utils/bootstrapCluster';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
 import { promptSecretsDeletionConfirmations } from './utils/promptSecretsDeletionConfirmations';
 import { promptEnvironmentSelection } from './utils/shared';
-import { getSecretManifestsPaths, } from './utils/shared';
+import { getResourceKindManifestsPaths, } from './utils/shared';
 
 async function main() {
     const { environment } = await promptEnvironmentSelection();
@@ -20,7 +20,7 @@ async function main() {
 
     if (deleteUnsealedSecretManifestsOutput) {
         const removeSecret = (path: string) => sh.rm('-rf', path);
-        getSecretManifestsPaths(environment).forEach(removeSecret);
+        getResourceKindManifestsPaths({ kind: "Secret", environment }).forEach(removeSecret);
     }
 }
 
