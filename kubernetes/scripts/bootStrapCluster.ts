@@ -3,8 +3,7 @@ import { clearPlainInputTsSecretFilesContents } from './secretsManagement/syncSe
 import { bootstrapCluster } from './utils/bootstrapCluster';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
 import { promptSecretsDeletionConfirmations } from './utils/promptSecretsDeletionConfirmations';
-import { promptEnvironmentSelection } from './utils/shared';
-import { getResourceManifestsPaths, } from './utils/shared';
+import { promptEnvironmentSelection, getKubeManifestsPaths } from './utils/shared';
 
 async function main() {
     const { environment } = await promptEnvironmentSelection();
@@ -20,7 +19,7 @@ async function main() {
 
     if (deleteUnsealedSecretManifestsOutput) {
         const removeSecret = (path: string) => sh.rm('-rf', path);
-        getResourceManifestsPaths({ kind: "Secret", environment }).forEach(removeSecret);
+        getKubeManifestsPaths({ kind: "Secret", environment }).forEach(removeSecret);
     }
 }
 
