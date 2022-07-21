@@ -1,4 +1,3 @@
-import { getPathToResourceType } from './../../resources/shared/manifestsDirectory';
 import { Environment } from './../../resources/types/own-types';
 import c from 'chalk';
 import p from 'path';
@@ -28,6 +27,8 @@ type GenerateManifestsProp = {
 
 export async function generateManifests({ environment, imageTags }: GenerateManifestsProp) {
     const manifestsDirForEnv = getGeneratedEnvManifestsDir(environment);
+
+    sh.echo(c.blueBright(`UPDATE CACHE TRACKER FILE`));
     // Create a cache tracker with a timestamp suffix
     // This helps the memoized/cached function that get all yaml manifest resources'
     // info/metatadata. The function uses all the paths of the yamls for
@@ -45,14 +46,10 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
 
     sh.exec('pulumi login file://login');
 
-    sh.echo(
-        c.blueBright(`First Delete old resources(except sealed secrets) for" ${environment} at ${manifestsDirForEnv}`)
-    );
-
+    sh.echo(c.blueBright(`DELETE EXISTING RESOURCES(except sealed secrets) at ${manifestsDirForEnv}`));
     const removeNonSealedSecrets = (info: KubeObjectInfo) => {
-        if (info.kind !== 'SealedSecret') {
-            sh.rm('-rf', info.path);
-        }
+        const isSealedSecret = info.kind === 'SealedSecret';
+        !isSealedSecret && sh.rm('-rf', info.path);
     };
     getAllKubeManifestsInfo(environment).forEach(removeNonSealedSecrets);
 
@@ -62,18 +59,15 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     // Pulumi needs some environment variables set for generating deployments with image tag
     /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
      */
-    const exec = sh.exec(
+    handleShellError(sh.exec(
         `
         ${getEnvVarsForScript(environment, imageTags)}
         export PULUMI_CONFIG_PASSPHRASE="not-needed"
         pulumi up --yes --skip-preview --stack dev
        `
-    );
+    ));
 
-    if (exec.stderr) {
-        throw new Error(c.redBright(`Something went wrong with pulumi. Error: ${exec.stderr}`));
-    }
-
+    sh.echo(c.blueBright(`SYNC CRDS CODE`));
     syncCrdsCode(environment);
 
     sh.rm('-rf', './login');
