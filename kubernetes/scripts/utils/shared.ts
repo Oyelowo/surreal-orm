@@ -1,3 +1,4 @@
+import { ResourceName } from './../../resources/types/own-types';
 import c from 'chalk';
 import fs from 'fs';
 import inquirer from 'inquirer';
@@ -6,7 +7,7 @@ import { Environment } from '../../resources/types/own-types';
 import { ImageTags } from '../../resources/shared/validations';
 import { namespaceSchema } from './../../resources/infrastructure/namespaces/util';
 import { z } from 'zod';
-import { getGeneratedEnvManifestsDir } from '../../resources/shared/manifestsDirectory';
+import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../resources/shared/manifestsDirectory';
 import _ from 'lodash';
 
 const ENVIRONMENT_KEY = 'ENVIRONMENT';
@@ -60,7 +61,14 @@ export async function promptEnvironmentSelection() {
     return answers;
 }
 
-type ResourceKind = 'Secret' | 'Deployment' | 'Service' | 'Configmap' | 'Pod' | 'SealedSecret' | 'CustomResourceDefinition';
+type ResourceKind =
+    | 'Secret'
+    | 'Deployment'
+    | 'Service'
+    | 'Configmap'
+    | 'Pod'
+    | 'SealedSecret'
+    | 'CustomResourceDefinition';
 
 const kubernetesResourceInfo = z.object({
     kind: z.string(),
@@ -73,24 +81,26 @@ const kubernetesResourceInfo = z.object({
         namespace: namespaceSchema.optional(),
         annotations: z.record(z.string()),
     }),
-    spec: z.object({
-        encryptedData: z.record(z.string().nullable()).optional(), // For sealed secrets
-        // CRDS have namespace as null
-        template: z.any().optional(), //Dont care about this yet
-    }).optional(),
+    spec: z
+        .object({
+            encryptedData: z.record(z.string().nullable()).optional(), // For sealed secrets
+            // CRDS have namespace as null
+            template: z.any().optional(), //Dont care about this yet
+        })
+        .optional(),
     data: z.record(z.string().nullable()).optional(),
-    stringData: z.record(z.string().nullable()).optional()
+    stringData: z.record(z.string().nullable()).optional(),
 });
 
-
-export interface KubeObjectInfo extends z.infer<typeof kubernetesResourceInfo> {
+type kubernetesResourceInfoZod = z.infer<typeof kubernetesResourceInfo>;
+export interface KubeObjectInfo extends kubernetesResourceInfoZod {
     // We override the object kind type since it's a nonexhasutive list
     // We also want to allow allow other string types here
-    kind: ResourceKind | (string & {});
+    kind: ResourceKind;
+    // kind: ResourceKind | (string & {});
 }
 
-function getAllManifestsPaths({ environment }: { environment: Environment }) {
-    const environmentManifestsDir = getGeneratedEnvManifestsDir(environment);
+function getManifestsWithinDir(environmentManifestsDir: string): string[] {
     const manifestMatcher = '*ml';
     const allManifests = sh
         .exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
@@ -102,7 +112,6 @@ function getAllManifestsPaths({ environment }: { environment: Environment }) {
     return allManifests;
 }
 
-
 const exec = (cmd: string) => sh.exec(cmd, { silent: true }).stdout;
 
 const getInfoFromManifests = _.memoize(
@@ -110,15 +119,11 @@ const getInfoFromManifests = _.memoize(
         return manifestsPaths.map((p, i) => {
             console.log('Extracting info from manifest', i);
 
-            const info = JSON.parse(
-                exec(
-                    `cat ${p.trim()} | yq '.' -o json`
-                )
-            );
+            const info = JSON.parse(exec(`cat ${p.trim()} | yq '.' -o json`));
             // let's mutate to make it a bit faster and should be okay since we only do it here
             info.path = p;
 
-            const updatedPath = kubernetesResourceInfo.parse(info)
+            const updatedPath = kubernetesResourceInfo.parse(info);
             console.log('Extracted info from', updatedPath.path);
 
             return updatedPath;
@@ -130,8 +135,19 @@ const getInfoFromManifests = _.memoize(
 );
 
 export const getAllKubeManifestsInfo = (environment: Environment): KubeObjectInfo[] => {
-    const m = getAllManifestsPaths({ environment });
-    return getInfoFromManifests(m);
+    const envDir = getGeneratedEnvManifestsDir(environment);
+    const manifests = getManifestsWithinDir(envDir);
+    return getInfoFromManifests(manifests);
+};
+
+// An app resource can comprise of multiple kubernetes manifests
+export const getAppResourceManifestsInfo = (
+    resourceName: ResourceName,
+    environment: Environment
+): KubeObjectInfo[] => {
+    const envDir = getResourceAbsolutePath(resourceName, environment);
+    const manifests = getManifestsWithinDir(envDir);
+    return getInfoFromManifests(manifests);
 };
 
 type InfoProps = {
@@ -139,14 +155,14 @@ type InfoProps = {
     environment: Environment;
 };
 
-export const getKubeResourceInfo = ({ kind, environment }: InfoProps): KubeObjectInfo[] => {
+export const getKubeManifestsInfo = ({ kind, environment }: InfoProps): KubeObjectInfo[] => {
     return getAllKubeManifestsInfo(environment).filter((info) => info.kind === kind);
 };
 
-export function getResourceManifestsPaths({ kind, environment }: InfoProps): string[] {
+export function getKubeManifestsPaths({ kind, environment }: InfoProps): string[] {
     const filterTypeSafely = (f: KubeObjectInfo) => (f.path ? [f.path] : []);
 
-    return getKubeResourceInfo({
+    return getKubeManifestsInfo({
         kind,
         environment,
     }).flatMap(filterTypeSafely);

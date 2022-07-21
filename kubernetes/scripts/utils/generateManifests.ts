@@ -11,7 +11,7 @@ import { ImageTags } from '../../resources/shared/validations';
 import {
     getAllKubeManifestsInfo,
     getEnvVarsForScript,
-    getResourceManifestsPaths,
+    getKubeManifestsPaths,
     handleShellError,
     KubeObjectInfo,
 } from './shared';
@@ -74,7 +74,7 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
 }
 
 function syncCrdsCode(environment: Environment) {
-    const manifestsCrdsFiles = getResourceManifestsPaths({ kind: 'CustomResourceDefinition', environment });
+    const manifestsCrdsFiles = getKubeManifestsPaths({ kind: 'CustomResourceDefinition', environment });
     const outDir = path.join(getMainBaseDir(), 'crds-generated');
 
     sh.exec(` crd2pulumi --nodejsPath ${outDir} ${manifestsCrdsFiles.join(' ')} --force`);

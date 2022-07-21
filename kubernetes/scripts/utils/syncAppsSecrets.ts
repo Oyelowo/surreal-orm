@@ -1,5 +1,5 @@
 import { SealedSecretTemplate } from '../../resources/types/sealedSecretTemplate';
-import { getKubeResourceInfo, KubeObjectInfo } from './shared';
+import { getKubeManifestsInfo, KubeObjectInfo } from './shared';
 import p from 'path';
 import yaml from 'js-yaml';
 import sh from 'shelljs';
@@ -20,7 +20,7 @@ export async function syncAppSealedSecrets(environment: Environment) {
     const selectedUnsealedSecretsInfo = await prompSecretResourcesSelection(environment);
 
     for (let unsealedSecret of selectedUnsealedSecretsInfo) {
-        const sealedSecretInfo = getKubeResourceInfo({ kind: "SealedSecret", environment });
+        const sealedSecretInfo = getKubeManifestsInfo({ kind: "SealedSecret", environment });
 
         mergeUnsealedSecretToSealedSecret({
             unsealedSecretInfo: unsealedSecret,
@@ -114,7 +114,7 @@ they want to update
 */
 async function prompSecretResourcesSelection(environment: Environment): Promise<KubeObjectInfo[]> {
     // Gets all secrets sorting the secret resources in applications namespace first
-    const originalSecretsInfo = _.sortBy(getKubeResourceInfo({ kind: 'Secret', environment }), [
+    const originalSecretsInfo = _.sortBy(getKubeManifestsInfo({ kind: 'Secret', environment }), [
         (a) => a.metadata.namespace !== 'applications',
     ]);
     const sercretObjectsByNamespace = _.groupBy(originalSecretsInfo, (d) => d.metadata.namespace);

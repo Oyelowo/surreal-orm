@@ -14,8 +14,7 @@ export function createContainerRegistrySecret(environment: Environment): void {
 
     const dir = path.join(getResourceAbsolutePath('argocd-applications-parents', environment), '1-manifest');
     const file = path.join(
-        dir,
-        // NOTE: has to be prefixed with the name "secret-". This is important for the CLI. I am considering using the file content instead but that might be more expensive operation
+        dir, 
         'secret-docker-registry.yaml'
     );
 

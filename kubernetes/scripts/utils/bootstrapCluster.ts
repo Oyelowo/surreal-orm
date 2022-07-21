@@ -1,5 +1,7 @@
 #!/usr/bin/env ts-node
 
+import { getAppResourceManifestsInfo } from './shared';
+
 import path from 'path';
 import sh from 'shelljs';
 import { namespaces } from '../../resources/infrastructure/namespaces/util';
@@ -10,6 +12,7 @@ import { syncSecretsTsFiles } from '../secretsManagement/syncSecretsTsFiles';
 import { generateManifests } from './generateManifests';
 import { getImageTagsFromDir } from './getImageTagsFromDir';
 import { syncAppSealedSecrets } from './syncAppsSecrets';
+import _ from 'lodash';
 
 export async function bootstrapCluster(environment: Environment) {
     const imageTags = await getImageTagsFromDir();
@@ -34,7 +37,6 @@ export async function bootstrapCluster(environment: Environment) {
     const sealedSecretsName: ResourceName = 'sealed-secrets';
     // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
     sh.exec(`kubectl rollout status deployment/${sealedSecretsName} -n=${namespaces.kubeSystem}`);
-
     await syncAppSealedSecrets(environment)
 
     // # Apply setups with cert-manager controller
@@ -58,17 +60,12 @@ export async function bootstrapCluster(environment: Environment) {
 }
 
 function applyResourceManifests(resourceName: ResourceName, environment: Environment) {
-    const resourceDir = getResourceAbsolutePath(resourceName, environment);
+    const manifestsInfo = getAppResourceManifestsInfo(resourceName, environment)
 
-    const applyManifests = (subDir: string) => {
-        const subDirPath = path.join(resourceDir, subDir);
-        const manifestsCount = Number(sh.exec(`ls ${subDirPath} | wc -l`).stdout.trim());
-        const isEmptyDir = manifestsCount === 0;
-        if (isEmptyDir) return;
+    // put crds and sealed secret resources first
+    _.sortBy(manifestsInfo, [
+        m => m.kind !== "CustomResourceDefinition",
+        m => m.kind !== "SealedSecret",
+    ]).forEach(o => sh.exec(`kubectl apply -f  ${o.path}`))
 
-        sh.exec(`kubectl apply -R -f  ${subDirPath}`);
-    };
-
-    const sealedSecrets: ResourceName = 'sealed-secrets';
-    [sealedSecrets, '0-crd', '1-manifest'].forEach(applyManifests);
 }
