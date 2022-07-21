@@ -143,7 +143,7 @@ export const getKubeResourceInfo = ({ kind, environment }: InfoProps): KubeObjec
     return getAllKubeManifestsInfo(environment).filter((info) => info.kind === kind);
 };
 
-export function getResourceKindManifestsPaths({ kind, environment }: InfoProps): string[] {
+export function getResourceManifestsPaths({ kind, environment }: InfoProps): string[] {
     const filterTypeSafely = (f: KubeObjectInfo) => (f.path ? [f.path] : []);
 
     return getKubeResourceInfo({

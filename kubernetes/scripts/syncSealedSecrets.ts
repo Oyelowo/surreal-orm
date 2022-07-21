@@ -6,7 +6,7 @@ import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
 import { promptSecretsDeletionConfirmations } from './utils/promptSecretsDeletionConfirmations';
 import { syncAppSealedSecrets } from './utils/syncAppsSecrets';
-import { getResourceKindManifestsPaths, promptEnvironmentSelection } from './utils/shared';
+import { getResourceManifestsPaths, promptEnvironmentSelection } from './utils/shared';
 
 async function main() {
     const { environment } = await promptEnvironmentSelection();
@@ -30,7 +30,7 @@ async function main() {
 
     if (deleteUnsealedSecretManifestsOutput) {
         const removeSecret = (path: string) => sh.rm('-rf', path);
-        getResourceKindManifestsPaths({ kind: "Secret", environment }).forEach(removeSecret);
+        getResourceManifestsPaths({ kind: "Secret", environment }).forEach(removeSecret);
     }
 }
 

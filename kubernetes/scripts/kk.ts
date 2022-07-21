@@ -1,20 +1,20 @@
 import { Namespace } from './../resources/infrastructure/namespaces/util';
 import inquirer from 'inquirer';
 import _ from 'lodash';
-import { getSecretResourceInfo, KubeObjectInfo } from './utils/shared';
+import { getKubeResourceInfo, KubeObjectInfo } from './utils/shared';
 // import { getKubeResourceTypeInfo } from "./shared"
 // getKubernetesManifestInfo
 import chalk from 'chalk';
 import sh from 'shelljs';
 import { Environment, ResourceName } from '../resources/types/own-types';
 
-
-
-getSelectedSecretKeysFromPrompt("local").then(c=> console.log("xxx", c))
+getSelectedSecretKeysFromPrompt('local').then((c) => console.log('xxx', c));
 
 async function getSelectedSecretKeysFromPrompt(environment: Environment): Promise<KubeObjectInfo[]> {
     // Gets all secrets sorting the secret resources in applications namespace first
-    const secretsInfo = _.sortBy(getSecretResourceInfo(environment), [(a) => a.metadata.namespace !== 'applications']);
+    const secretsInfo = _.sortBy(getKubeResourceInfo({ kind: 'Secret', environment }), [
+        ({ metadata }) => metadata.namespace !== 'applications',
+    ]);
     const sercretObjectsByNamespace = _.groupBy(secretsInfo, (d) => d.metadata.namespace);
 
     // Name and value have to be defined for inquirer if not using basic string
@@ -41,22 +41,20 @@ async function getSelectedSecretKeysFromPrompt(environment: Environment): Promis
     ]);
 
     const allResourceAnswerKeyName = 'allSecretResources';
-    const { allSecretResources } = await inquirer.prompt<{ [allResourceAnswerKeyName]:KubeObjectInfo[]}>(
-        {
-            type: 'checkbox',
-            message: 'Select resource secret you want to update',
-            name: allResourceAnswerKeyName,
-            choices: applicationList,
-            validate(answer) {
-                if (answer.length < 1) {
-                    return 'You must choose at least one secret.';
-                }
+    const { allSecretResources } = await inquirer.prompt<{ [allResourceAnswerKeyName]: KubeObjectInfo[] }>({
+        type: 'checkbox',
+        message: 'Select resource secret you want to update',
+        name: allResourceAnswerKeyName,
+        choices: applicationList,
+        validate(answer) {
+            if (answer.length < 1) {
+                return 'You must choose at least one secret.';
+            }
 
-                return true;
-            },
-            pageSize: 2000,
+            return true;
         },
-    );
+        pageSize: 2000,
+    });
 
     // List of secrets keys/names in each kube secret resource.
     // e.g for react-app: [secretKey1, secretKey2, ...]
@@ -64,8 +62,6 @@ async function getSelectedSecretKeysFromPrompt(environment: Environment): Promis
 
     return filterSecrets(allSecretResources, appSecretKeysByNamespace);
 }
-
-
 
 type AppName = ResourceName | string;
 type SecretKey = string;
@@ -96,7 +92,6 @@ function filterSecrets(
     return allSecretResources?.map((info) => {
         const { name, namespace } = info.metadata;
         const { stringData, data } = info;
-
 
         if (!namespace) {
             throw new Error(`namespace missing for ${name}`);
