@@ -69,15 +69,18 @@ async function applySetupManifests(environment: Environment, initialAllManifests
     const updatedeAllManifestsInfo = getAllKubeManifestsInfo(environment);
     // # Apply setups with cert-manager controller
     applyResourceManifests('cert-manager', environment, updatedeAllManifestsInfo);
-
+    
     // # Wait for cert-manager and cert-manager-trust controllers to be in running phase so that we can use it to encrypt secrets
     const { certManager, certManagerTrust } = helmChartsInfo.jetstack.charts;
     sh.exec(`kubectl rollout status deployment/${certManager.chart} -n=${namespaces.certManager}`);
     sh.exec(`kubectl rollout status deployment/${certManagerTrust.chart} -n=${namespaces.certManager}`);
+    // Reapply cert-manager in case something did not apply the first time e.g the cert-managerr-trust
+    // needs to be ready for Bundle to be applied
+    applyResourceManifests('cert-manager', environment, updatedeAllManifestsInfo);
 
     // # Apply setups with linkerd controller
     applyResourceManifests('linkerd', environment, updatedeAllManifestsInfo);
-    // applyResourceManifests('linkerd-viz', environment, upDatedeAllManifestsInfo);
+    applyResourceManifests('linkerd-viz', environment, updatedeAllManifestsInfo);
 
     // applyResourceManifests('argocd', environment, upDatedeAllManifestsInfo);
 
@@ -100,6 +103,6 @@ function applyResourceManifests(
         (m) => m.kind !== 'SealedSecret',
     ]);
 
-    console.log('manifestsToApply', manifestsToApply);
+    // console.log('manifestsToApply', manifestsToApply);
     manifestsToApply.forEach((o) => sh.exec(`kubectl apply -f  ${o.path}`));
 }
