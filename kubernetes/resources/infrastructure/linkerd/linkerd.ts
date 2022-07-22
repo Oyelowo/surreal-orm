@@ -7,7 +7,7 @@ import { linkerdProvider } from './settings';
 
 const Linkerd2Values: DeepPartial<ILinkerd2linkerd> = {
     podAnnotations: {
-        'sealedsecrets.bitnami.com/managed': 'true',
+        // 'sealedsecrets.bitnami.com/managed': 'true',
     },
     identity: {
         externalCA: true,

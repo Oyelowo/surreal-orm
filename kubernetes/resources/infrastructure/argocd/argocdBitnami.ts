@@ -14,7 +14,7 @@ const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
             create: true,
             argocdServerAdminPassword: 'oyelowo',
             annotations: {
-                'sealedsecrets.bitnami.com/managed': 'true',
+                // 'sealedsecrets.bitnami.com/managed': 'true',
             },
         },
     },

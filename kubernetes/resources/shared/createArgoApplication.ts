@@ -3,7 +3,6 @@ import { Resource } from '@pulumi/pulumi';
 import * as argocd from '../../crds-generated/argoproj';
 import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp';
 import { Namespace, namespaces } from './../infrastructure/namespaces/util';
-import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
 import { getResourceProvider, getResourceRelativePath } from './manifestsDirectory';
 import { ResourceName } from '../types/own-types';
 import { getEnvironmentVariables } from './validations';
@@ -85,7 +84,6 @@ export const argoCDApplicationsSecret = new kx.Secret(
         metadata: {
             ...metadata,
             annotations: {
-                ...APPLICATION_AUTOMERGE_ANNOTATION,
             },
         },
     },

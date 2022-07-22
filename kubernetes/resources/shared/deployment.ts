@@ -4,7 +4,6 @@ import * as pulumi from '@pulumi/pulumi';
 import * as argocd from '../../crds-generated/argoproj';
 import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp';
 import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker';
-import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
 import { createArgocdApplication } from './createArgoApplication';
 import { getPathToResource } from './manifestsDirectory';
 import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/own-types';
@@ -68,8 +67,7 @@ export class ServiceDeployment<
                 metadata: {
                     ...metadata,
                     annotations: {
-                        'sealedsecrets.bitnami.com/managed': 'true',
-                        ...APPLICATION_AUTOMERGE_ANNOTATION,
+                        // 'sealedsecrets.bitnami.com/managed': 'true',
                     },
                 },
             },

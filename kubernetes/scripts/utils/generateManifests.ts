@@ -35,8 +35,8 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     // deciding if to cache, we want to create a new "hash" to bust the cache
     // if we ever generate updated manifefsts in between. This should come first.
     const cacheTrackerDir = path.join(manifestsDirForEnv, 'cache-tracker');
-    sh.rm('-rf', cacheTrackerDir);
-    sh.mkdir(cacheTrackerDir);
+    sh.mkdir("-p", cacheTrackerDir);
+    sh.rm('-rf', `${cacheTrackerDir}/*`);
     const yamlManifestsCacheTracker = path.join(cacheTrackerDir, `${Date.now()}.yaml`);
     sh.touch(yamlManifestsCacheTracker);
 
@@ -51,6 +51,7 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
         const isSealedSecret = info.kind === 'SealedSecret';
         !isSealedSecret && sh.rm('-rf', info.path);
     };
+
     getAllKubeManifestsInfo(environment).forEach(removeNonSealedSecrets);
 
     handleShellError(sh.rm('-rf', `${p.join(getMainBaseDir(), 'Pulumi.dev.yaml')}`));
@@ -68,7 +69,7 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     ));
 
     sh.echo(c.blueBright(`SYNC CRDS CODE`));
-    syncCrdsCode(environment);
+    // syncCrdsCode(environment);
 
     sh.rm('-rf', './login');
 }

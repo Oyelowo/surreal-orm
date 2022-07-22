@@ -103,7 +103,8 @@ export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSe
     sh.mkdir(sealedSecretDir);
     const sealedSecretFilePath = p.join(sealedSecretDir, `sealed-secret-${name}-${namespace}.yaml`);
 
-    sh.exec(`echo '${yaml.dump(updatedSealedSecrets)}' > ${sealedSecretFilePath}`);
+    // sh.exec(`echo '${yaml.dump(updatedSealedSecrets)}' > ${sealedSecretFilePath}`);
+    sh.exec(`echo '${JSON.stringify(updatedSealedSecrets)}' | yq -P '.' -o yaml > ${sealedSecretFilePath}`);
 }
 
 /* 

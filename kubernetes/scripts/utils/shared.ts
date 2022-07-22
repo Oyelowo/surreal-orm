@@ -79,7 +79,7 @@ const kubernetesResourceInfo = z.object({
         name: z.string(),
         // CRDS have namespace as null
         namespace: namespaceSchema.optional(),
-        annotations: z.record(z.string()),
+        annotations: z.record(z.string()).transform(p => p),
     }),
     spec: z
         .object({
@@ -116,18 +116,21 @@ const exec = (cmd: string) => sh.exec(cmd, { silent: true }).stdout;
 
 const getInfoFromManifests = _.memoize(
     (manifestsPaths: string[]): KubeObjectInfo[] => {
-        return manifestsPaths.map((p, i) => {
+        return manifestsPaths.reduce<KubeObjectInfo[]>((acc, path, i) => {
             console.log('Extracting info from manifest', i);
 
-            const info = JSON.parse(exec(`cat ${p.trim()} | yq '.' -o json`));
-            // let's mutate to make it a bit faster and should be okay since we only do it here
-            info.path = p;
+            const info = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`));
+            if (!info) return acc;
 
-            const updatedPath = kubernetesResourceInfo.parse(info);
+            // let's mutate to make it a bit faster and should be okay since we only do it here
+            info.path = path;
+
+            const updatedPath = kubernetesResourceInfo.parse(info) as KubeObjectInfo;
             console.log('Extracted info from', updatedPath.path);
 
-            return updatedPath;
-        }) as KubeObjectInfo[];
+            acc.push(updatedPath)
+            return acc;
+        }, []);
     },
     // We are concatenating all the path names to get a stable memoization key
     // we could also JSON.stringify(paths)
@@ -146,8 +149,9 @@ export const getAppResourceManifestsInfo = (
     environment: Environment
 ): KubeObjectInfo[] => {
     const envDir = getResourceAbsolutePath(resourceName, environment);
-    const manifests = getManifestsWithinDir(envDir);
-    return getInfoFromManifests(manifests);
+    // const manifests = getManifestsWithinDir(envDir);
+    // return getInfoFromManifests(manifests);
+    return getAllKubeManifestsInfo(environment).filter(m => m.path.startsWith(envDir))
 };
 
 type InfoProps = {

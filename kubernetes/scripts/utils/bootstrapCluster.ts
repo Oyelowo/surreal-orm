@@ -6,7 +6,6 @@ import path from 'path';
 import sh from 'shelljs';
 import { namespaces } from '../../resources/infrastructure/namespaces/util';
 import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
-import { getResourceAbsolutePath } from '../../resources/shared/manifestsDirectory';
 import { Environment, ResourceName } from '../../resources/types/own-types';
 import { syncSecretsTsFiles } from '../secretsManagement/syncSecretsTsFiles';
 import { generateManifests } from './generateManifests';
@@ -64,8 +63,8 @@ function applyResourceManifests(resourceName: ResourceName, environment: Environ
 
     // put crds and sealed secret resources first
     _.sortBy(manifestsInfo, [
-        m => m.kind !== "CustomResourceDefinition",
         m => m.kind !== "SealedSecret",
+        m => m.kind !== "CustomResourceDefinition",
     ]).forEach(o => sh.exec(`kubectl apply -f  ${o.path}`))
 
 }

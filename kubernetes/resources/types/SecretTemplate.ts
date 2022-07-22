@@ -1,6 +1,3 @@
-import { APPLICATION_AUTOMERGE_ANNOTATION } from '../shared/constants';
-
-// TODO: Use zod to parse this
 export interface SecretTemplate {
     apiVersion: string;
     kind: string;
@@ -11,7 +8,7 @@ export interface SecretTemplate {
 }
 
 export interface Metadata {
-    annotations: Record<'sealedsecrets.bitnami.com/managed', string> & typeof APPLICATION_AUTOMERGE_ANNOTATION;
+    annotations: Record<'sealedsecrets.bitnami.com/managed', string>;
     // annotations: Annotations;
     labels: Record<string, string>;
     // labels: Labels;
