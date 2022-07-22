@@ -23,22 +23,11 @@ GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 type GenerateManifestsProp = {
     environment: Environment;
     imageTags: ImageTags;
+    allManifestsInfo: KubeObjectInfo[]
 };
 
-export async function generateManifests({ environment, imageTags }: GenerateManifestsProp) {
+export async function generateManifests({ environment, imageTags, allManifestsInfo }: GenerateManifestsProp) {
     const manifestsDirForEnv = getGeneratedEnvManifestsDir(environment);
-
-    sh.echo(c.blueBright(`UPDATE CACHE TRACKER FILE`));
-    // Create a cache tracker with a timestamp suffix
-    // This helps the memoized/cached function that get all yaml manifest resources'
-    // info/metatadata. The function uses all the paths of the yamls for
-    // deciding if to cache, we want to create a new "hash" to bust the cache
-    // if we ever generate updated manifefsts in between. This should come first.
-    const cacheTrackerDir = path.join(manifestsDirForEnv, 'cache-tracker');
-    sh.mkdir("-p", cacheTrackerDir);
-    sh.rm('-rf', `${cacheTrackerDir}/*`);
-    const yamlManifestsCacheTracker = path.join(cacheTrackerDir, `${Date.now()}.yaml`);
-    sh.touch(yamlManifestsCacheTracker);
 
     sh.exec('npm i');
     sh.rm('-rf', './login');
@@ -52,7 +41,7 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
         !isSealedSecret && sh.rm('-rf', info.path);
     };
 
-    getAllKubeManifestsInfo(environment).forEach(removeNonSealedSecrets);
+    allManifestsInfo.forEach(removeNonSealedSecrets);
 
     handleShellError(sh.rm('-rf', `${p.join(getMainBaseDir(), 'Pulumi.dev.yaml')}`));
     handleShellError(sh.exec("export PULUMI_CONFIG_PASSPHRASE='not-needed' && pulumi stack init --stack dev"));
@@ -74,8 +63,8 @@ export async function generateManifests({ environment, imageTags }: GenerateMani
     sh.rm('-rf', './login');
 }
 
-function syncCrdsCode(environment: Environment) {
-    const manifestsCrdsFiles = getKubeManifestsPaths({ kind: 'CustomResourceDefinition', environment });
+function syncCrdsCode(environment: Environment, allManifestsInfo: KubeObjectInfo[]) {
+    const manifestsCrdsFiles = getKubeManifestsPaths({ kind: 'CustomResourceDefinition', environment, allManifestsInfo });
     const outDir = path.join(getMainBaseDir(), 'crds-generated');
 
     sh.exec(` crd2pulumi --nodejsPath ${outDir} ${manifestsCrdsFiles.join(' ')} --force`);

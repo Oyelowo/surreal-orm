@@ -101,7 +101,7 @@ export interface KubeObjectInfo extends kubernetesResourceInfoZod {
     // kind: ResourceKind | (string & {});
 }
 
-function getManifestsWithinDir(environmentManifestsDir: string): string[] {
+function getManifestsPathWithinDir(environmentManifestsDir: string): string[] {
     const manifestMatcher = '*ml';
     const allManifests = sh
         .exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
@@ -115,41 +115,46 @@ function getManifestsWithinDir(environmentManifestsDir: string): string[] {
 
 const exec = (cmd: string) => sh.exec(cmd, { silent: true }).stdout;
 
-const getInfoFromManifests = _.memoize(
-    (manifestsPaths: string[]): KubeObjectInfo[] => {
-        return manifestsPaths.reduce<KubeObjectInfo[]>((acc, path, i) => {
-            console.log('Extracting info from manifest', i);
+const getInfoFromManifests = (manifestsPaths: string[]): KubeObjectInfo[] => {
+    return manifestsPaths.reduce<KubeObjectInfo[]>((acc, path, i) => {
+        if (!path) return acc;
+        console.log('Extracting info from manifest', i);
 
-            const info = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`));
-            if (!info) return acc;
+        const info = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`));
+        if (_.isEmpty(info)) return acc;
 
-            // let's mutate to make it a bit faster and should be okay since we only do it here
-            info.path = path;
+        // let's mutate to make it a bit faster and should be okay since we only do it here
+        info.path = path;
 
-            const updatedPath = kubernetesResourceInfo.parse(info) as KubeObjectInfo;
-            console.log('Extracted info from', updatedPath.path);
+        const updatedPath = kubernetesResourceInfo.parse(info) as KubeObjectInfo;
+        console.log('Extracted info from', updatedPath.path);
 
-            acc.push(updatedPath);
-            return acc;
-        }, []);
-    },
-    // We are concatenating all the path names to get a stable memoization key
-    // we could also JSON.stringify(paths)
-    (paths) => paths.join('')
-);
+        acc.push(updatedPath);
+        return acc;
+    }, []);
+};
 
 export const getAllKubeManifestsInfo = (environment: Environment): KubeObjectInfo[] => {
     const envDir = getGeneratedEnvManifestsDir(environment);
-    const manifests = getManifestsWithinDir(envDir);
-    return getInfoFromManifests(manifests);
+    const paths = getManifestsPathWithinDir(envDir);
+    return getInfoFromManifests(paths);
 };
 
 // An app resource can comprise of multiple kubernetes manifests
-export const getAppResourceManifestsInfo = (resourceName: ResourceName, environment: Environment): KubeObjectInfo[] => {
+type Props = {
+    resourceName: ResourceName;
+    environment: Environment;
+    allManifestsInfo: KubeObjectInfo[];
+}
+export const getAppResourceManifestsInfo = ({
+    resourceName,
+    environment,
+    allManifestsInfo,
+}: Props): KubeObjectInfo[] => {
     const envDir = getResourceAbsolutePath(resourceName, environment);
     // const manifests = getManifestsWithinDir(envDir);
     // return getInfoFromManifests(manifests);
-    return getAllKubeManifestsInfo(environment).filter((m) => {
+    return allManifestsInfo.filter((m) => {
         const manifestIsWithinDir = (demarcator: '/' | '\\') => m.path.startsWith(`${envDir}${demarcator}`);
         return manifestIsWithinDir('/') || manifestIsWithinDir('\\');
     });
@@ -158,17 +163,19 @@ export const getAppResourceManifestsInfo = (resourceName: ResourceName, environm
 type InfoProps = {
     kind: ResourceKind;
     environment: Environment;
+    allManifestsInfo: KubeObjectInfo[];
 };
 
-export const getKubeManifestsInfo = ({ kind, environment }: InfoProps): KubeObjectInfo[] => {
-    return getAllKubeManifestsInfo(environment).filter((info) => info.kind === kind);
+export const getKubeManifestsInfo = ({ kind, environment, allManifestsInfo }: InfoProps): KubeObjectInfo[] => {
+    return allManifestsInfo.filter((info) => info.kind === kind);
 };
 
-export function getKubeManifestsPaths({ kind, environment }: InfoProps): string[] {
+export function getKubeManifestsPaths({ kind, environment, allManifestsInfo }: InfoProps): string[] {
     const filterTypeSafely = (f: KubeObjectInfo) => (f.path ? [f.path] : []);
 
     return getKubeManifestsInfo({
         kind,
         environment,
+        allManifestsInfo
     }).flatMap(filterTypeSafely);
 }

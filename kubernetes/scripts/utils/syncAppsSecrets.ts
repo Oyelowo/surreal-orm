@@ -16,9 +16,9 @@ GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PU
 These secrets are encrypted using the bitnami sealed secret controller running in the cluster
 you are at present context
 */
-export async function syncAppSealedSecrets(environment: Environment) {
-    const selectedUnsealedSecretsInfo = await prompSecretResourcesSelection(environment);
-    const allSealedSecretsInfo = getKubeManifestsInfo({ kind: "SealedSecret", environment });
+export async function syncAppSealedSecrets(environment: Environment, allManifestsInfo: KubeObjectInfo[]) {
+    const selectedUnsealedSecretsInfo = await prompSecretResourcesSelection(environment, allManifestsInfo);
+    const allSealedSecretsInfo = getKubeManifestsInfo({ kind: "SealedSecret", environment, allManifestsInfo });
 
     for (let unsealedSecret of selectedUnsealedSecretsInfo) {
         mergeUnsealedSecretToSealedSecret({
@@ -109,9 +109,9 @@ Prompts the user to select secret resources in various namespaces to update.
 After, the first prompt, user has to input the exact secret keys of a resource
 they want to update
 */
-async function prompSecretResourcesSelection(environment: Environment): Promise<KubeObjectInfo[]> {
+async function prompSecretResourcesSelection(environment: Environment, allManifestsInfo: KubeObjectInfo[]): Promise<KubeObjectInfo[]> {
     // Gets all secrets sorting the secret resources in applications namespace first
-    const originalSecretsInfo = _.sortBy(getKubeManifestsInfo({ kind: 'Secret', environment }), [
+    const originalSecretsInfo = _.sortBy(getKubeManifestsInfo({ kind: 'Secret', environment, allManifestsInfo }), [
         (a) => a.metadata.namespace !== 'applications',
     ]);
     const sercretObjectsByNamespace = _.groupBy(originalSecretsInfo, (d) => d.metadata.namespace);
