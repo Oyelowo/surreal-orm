@@ -18,13 +18,12 @@ you are at present context
 */
 export async function syncAppSealedSecrets(environment: Environment) {
     const selectedUnsealedSecretsInfo = await prompSecretResourcesSelection(environment);
+    const allSealedSecretsInfo = getKubeManifestsInfo({ kind: "SealedSecret", environment });
 
     for (let unsealedSecret of selectedUnsealedSecretsInfo) {
-        const sealedSecretInfo = getKubeManifestsInfo({ kind: "SealedSecret", environment });
-
         mergeUnsealedSecretToSealedSecret({
             unsealedSecretInfo: unsealedSecret,
-            sealedSecretInfo: sealedSecretInfo,
+            sealedSecretInfo: allSealedSecretsInfo,
         });
     }
 }
@@ -35,11 +34,8 @@ type MergeProps = {
 };
 
 export function mergeUnsealedSecretToSealedSecret({ sealedSecretInfo, unsealedSecretInfo }: MergeProps): void {
-    const {
-        stringData,
-        data,
-        metadata: { name, namespace /* annotations */ },
-    } = unsealedSecretInfo;
+    const { data, stringData } = unsealedSecretInfo;
+    const { name, namespace, /* annotations */ } = unsealedSecretInfo.metadata;
 
     if (!name && namespace) {
         throw new Error('Name and namespace not provided in the secret');
