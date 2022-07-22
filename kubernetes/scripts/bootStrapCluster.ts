@@ -21,7 +21,6 @@ async function main() {
 
     const { deletePlainSecretsInput, deleteUnsealedSecretManifestsOutput } = await promptSecretsDeletionConfirmations();
 
-    // await bootstrapCluster(environment);
     const imageTags = await getImageTagsFromDir();
 
     await generateManifests({
@@ -49,24 +48,27 @@ async function main() {
 main();
 
 
-async function applySetupManifests(environment: Environment, allManifestsInfo: KubeObjectInfo[]) {
+async function applySetupManifests(environment: Environment, initialAllManifestsInfo: KubeObjectInfo[]) {
     /*
        This requires the above step with initial cluster setup making sure that the sealed secret controller is
        running in the cluster */
 
     // # Apply namespace first
-    applyResourceManifests('namespaces', environment, allManifestsInfo);
+    applyResourceManifests('namespaces', environment, initialAllManifestsInfo);
 
     // # Apply setups with sealed secret controller
-    applyResourceManifests('sealed-secrets', environment, allManifestsInfo);
+    applyResourceManifests('sealed-secrets', environment, initialAllManifestsInfo);
 
     const sealedSecretsName: ResourceName = 'sealed-secrets';
     // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
     sh.exec(`kubectl rollout status deployment/${sealedSecretsName} -n=${namespaces.kubeSystem}`);
-    await syncAppSealedSecrets(environment, allManifestsInfo);
 
+    // This generates sealed secrets, so, we would want updated version of all manifests
+    await syncAppSealedSecrets(environment, initialAllManifestsInfo);
+
+    const updatedeAllManifestsInfo = getAllKubeManifestsInfo(environment);
     // # Apply setups with cert-manager controller
-    applyResourceManifests('cert-manager', environment, allManifestsInfo);
+    applyResourceManifests('cert-manager', environment, updatedeAllManifestsInfo);
 
     // # Wait for cert-manager and cert-manager-trust controllers to be in running phase so that we can use it to encrypt secrets
     const { certManager, certManagerTrust } = helmChartsInfo.jetstack.charts;
@@ -74,14 +76,14 @@ async function applySetupManifests(environment: Environment, allManifestsInfo: K
     sh.exec(`kubectl rollout status deployment/${certManagerTrust.chart} -n=${namespaces.certManager}`);
 
     // # Apply setups with linkerd controller
-    applyResourceManifests('linkerd', environment, allManifestsInfo);
-    applyResourceManifests('linkerd-viz', environment, allManifestsInfo);
+    applyResourceManifests('linkerd', environment, updatedeAllManifestsInfo);
+    // applyResourceManifests('linkerd-viz', environment, upDatedeAllManifestsInfo);
 
-    applyResourceManifests('argocd', environment, allManifestsInfo);
+    // applyResourceManifests('argocd', environment, upDatedeAllManifestsInfo);
 
-    sh.exec('kubectl -n argocd rollout restart deployment argocd-argo-cd-server');
+    // sh.exec('kubectl -n argocd rollout restart deployment argocd-argo-cd-server');
 
-    applyResourceManifests('argocd-applications-parents', environment, allManifestsInfo);
+    // applyResourceManifests('argocd-applications-parents', environment, upDatedeAllManifestsInfo);
 }
 
 
