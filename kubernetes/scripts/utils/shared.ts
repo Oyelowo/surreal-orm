@@ -162,20 +162,18 @@ export const getAppResourceManifestsInfo = ({
 
 type InfoProps = {
     kind: ResourceKind;
-    environment: Environment;
     allManifestsInfo: KubeObjectInfo[];
 };
 
-export const getKubeManifestsInfo = ({ kind, environment, allManifestsInfo }: InfoProps): KubeObjectInfo[] => {
+export const getKubeManifestsInfo = ({ kind, allManifestsInfo }: InfoProps): KubeObjectInfo[] => {
     return allManifestsInfo.filter((info) => info.kind === kind);
 };
 
-export function getKubeManifestsPaths({ kind, environment, allManifestsInfo }: InfoProps): string[] {
+export function getKubeManifestsPaths({ kind, allManifestsInfo }: InfoProps): string[] {
     const filterTypeSafely = (f: KubeObjectInfo) => (f.path ? [f.path] : []);
 
     return getKubeManifestsInfo({
         kind,
-        environment,
         allManifestsInfo
     }).flatMap(filterTypeSafely);
 }

@@ -1,3 +1,4 @@
+import { getAllKubeManifestsInfo } from './utils/shared';
 /* 
 Does not handle sealed secret generation/syncing
 */
@@ -23,6 +24,7 @@ async function main() {
     await generateManifests({
         environment: ARGV.environment,
         imageTags,
+        allManifestsInfo: getAllKubeManifestsInfo(ARGV.environment)
     });
 }
 

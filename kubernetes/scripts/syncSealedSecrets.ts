@@ -6,7 +6,7 @@ import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
 import { promptSecretsDeletionConfirmations } from './utils/promptSecretsDeletionConfirmations';
 import { syncAppSealedSecrets } from './utils/syncAppsSecrets';
-import { getKubeManifestsPaths, promptEnvironmentSelection } from './utils/shared';
+import { getAllKubeManifestsInfo, getKubeManifestsPaths, promptEnvironmentSelection } from './utils/shared';
 
 async function main() {
     const { environment } = await promptEnvironmentSelection();
@@ -18,11 +18,13 @@ async function main() {
     await generateManifests({
         environment,
         imageTags,
+        allManifestsInfo: getAllKubeManifestsInfo(environment),
     });
 
     syncSecretsTsFiles();
 
-    syncAppSealedSecrets(environment);
+    const allManifestsInfo = getAllKubeManifestsInfo(environment);
+    syncAppSealedSecrets(environment, allManifestsInfo);
 
     if (deletePlainSecretsInput) {
         clearPlainInputTsSecretFilesContents();
@@ -30,7 +32,7 @@ async function main() {
 
     if (deleteUnsealedSecretManifestsOutput) {
         const removeSecret = (path: string) => sh.rm('-rf', path);
-        getKubeManifestsPaths({ kind: "Secret", environment }).forEach(removeSecret);
+        getKubeManifestsPaths({ kind: "Secret", allManifestsInfo }).forEach(removeSecret);
     }
 }
 

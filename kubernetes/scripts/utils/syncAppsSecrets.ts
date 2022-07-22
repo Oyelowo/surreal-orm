@@ -18,7 +18,7 @@ you are at present context
 */
 export async function syncAppSealedSecrets(environment: Environment, allManifestsInfo: KubeObjectInfo[]) {
     const selectedUnsealedSecretsInfo = await prompSecretResourcesSelection(environment, allManifestsInfo);
-    const allSealedSecretsInfo = getKubeManifestsInfo({ kind: "SealedSecret", environment, allManifestsInfo });
+    const allSealedSecretsInfo = getKubeManifestsInfo({ kind: "SealedSecret", allManifestsInfo });
 
     for (let unsealedSecret of selectedUnsealedSecretsInfo) {
         mergeUnsealedSecretToSealedSecret({
@@ -111,7 +111,7 @@ they want to update
 */
 async function prompSecretResourcesSelection(environment: Environment, allManifestsInfo: KubeObjectInfo[]): Promise<KubeObjectInfo[]> {
     // Gets all secrets sorting the secret resources in applications namespace first
-    const originalSecretsInfo = _.sortBy(getKubeManifestsInfo({ kind: 'Secret', environment, allManifestsInfo }), [
+    const originalSecretsInfo = _.sortBy(getKubeManifestsInfo({ kind: 'Secret', allManifestsInfo }), [
         (a) => a.metadata.namespace !== 'applications',
     ]);
     const sercretObjectsByNamespace = _.groupBy(originalSecretsInfo, (d) => d.metadata.namespace);
