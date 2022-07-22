@@ -1,3 +1,4 @@
+import path from 'path';
 import { ResourceName } from './../../resources/types/own-types';
 import c from 'chalk';
 import fs from 'fs';
@@ -79,7 +80,7 @@ const kubernetesResourceInfo = z.object({
         name: z.string(),
         // CRDS have namespace as null
         namespace: namespaceSchema.optional(),
-        annotations: z.record(z.string()).transform(p => p),
+        annotations: z.record(z.string()).transform((p) => p),
     }),
     spec: z
         .object({
@@ -128,7 +129,7 @@ const getInfoFromManifests = _.memoize(
             const updatedPath = kubernetesResourceInfo.parse(info) as KubeObjectInfo;
             console.log('Extracted info from', updatedPath.path);
 
-            acc.push(updatedPath)
+            acc.push(updatedPath);
             return acc;
         }, []);
     },
@@ -144,14 +145,14 @@ export const getAllKubeManifestsInfo = (environment: Environment): KubeObjectInf
 };
 
 // An app resource can comprise of multiple kubernetes manifests
-export const getAppResourceManifestsInfo = (
-    resourceName: ResourceName,
-    environment: Environment
-): KubeObjectInfo[] => {
+export const getAppResourceManifestsInfo = (resourceName: ResourceName, environment: Environment): KubeObjectInfo[] => {
     const envDir = getResourceAbsolutePath(resourceName, environment);
     // const manifests = getManifestsWithinDir(envDir);
     // return getInfoFromManifests(manifests);
-    return getAllKubeManifestsInfo(environment).filter(m => m.path.startsWith(envDir))
+    return getAllKubeManifestsInfo(environment).filter((m) => {
+        const manifestIsWithinDir = (demarcator: '/' | '\\') => m.path.startsWith(`${envDir}${demarcator}`);
+        return manifestIsWithinDir('/') || manifestIsWithinDir('\\');
+    });
 };
 
 type InfoProps = {
