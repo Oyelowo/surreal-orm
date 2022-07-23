@@ -57,7 +57,7 @@ export async function generateManifests({ environment, imageTags, allManifestsIn
     ));
 
     sh.echo(c.blueBright(`SYNC CRDS CODE`));
-    // syncCrdsCode(environment);
+    syncCrdsCode(allManifestsInfo);
 
     sh.rm('-rf', './login');
 }

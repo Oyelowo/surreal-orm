@@ -65,10 +65,14 @@ build:
 deploy:
     kubectl:
         manifests:
-            - manifests/generated/local/infrastructure/namespaces/**/*
-            - manifests/generated/local/infrastructure/sealed-secrets/**/*
+            # - manifests/generated/local/infrastructure/namespaces/**/*
+            # - manifests/generated/local/infrastructure/sealed-secrets/**/*
+            # - manifests/generated/local/infrastructure/cert-manager/**/*
+            # - manifests/generated/local/infrastructure/linkerd/**/*
+            # - manifests/generated/local/infrastructure/linkerd-viz/**/*
             - manifests/generated/local/infrastructure/nginx-ingress/**/*
             - manifests/generated/local/services/**/**/*
+
 portForward:
     - resourceType: service
       resourceName: graphql-mongo

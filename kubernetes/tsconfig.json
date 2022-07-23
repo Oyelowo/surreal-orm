@@ -18,5 +18,5 @@
         "typeRoots": ["node_modules/@types"]
     },
     "exclude": ["crds", "node_modules"],
-    "files": ["index.ts", "scripts/utils/bootstrapCluster.ts", "scripts/utils/syncHelmChartTypesDeclarations.ts"]
+    "files": ["index.ts", "scripts/utils/syncHelmChartTypesDeclarations.ts"]
 }

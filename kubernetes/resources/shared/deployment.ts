@@ -155,7 +155,7 @@ export class ServiceDeployment<
 
         this.service = generateService({
             deployment: this.deployment,
-            serviceName: `${resourceName}-service`,
+            serviceFileName: `${resourceName}-service`,
             args: {
                 type: kx.types.ServiceType.ClusterIP,
                 ports: [
