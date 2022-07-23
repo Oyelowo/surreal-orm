@@ -1,15 +1,16 @@
-import { SealedSecretsMerger } from './SealedSecretsManager';
-import p from "path"
+import { mergeUnsealedSecretToSealedSecret } from './SealedSecretsManager';
+import p from 'path';
 import sh from 'shelljs';
-import _ from "lodash";
-import { z } from "zod";
-import { namespaceSchema } from "../../../resources/infrastructure/namespaces/util";
-import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from "../../../resources/shared/manifestsDirectory";
-import { ResourceName, Environment } from "../../../resources/types/own-types";
+import _ from 'lodash';
+import { z } from 'zod';
+import { namespaceSchema } from '../../../resources/infrastructure/namespaces/util';
+import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../resources/shared/manifestsDirectory';
+import { ResourceName, Environment } from '../../../resources/types/own-types';
 import { handleShellError } from '../shared';
 import { SealedSecretTemplate } from '../../../resources/types/sealedSecretTemplate';
-import { SecretKubeObjectPrompter } from "./SecretsSelectorPrompter";
-
+import { selectSecretKubeObjectsFromPrompt } from './SecretsSelectorPrompter';
+import { generateManifests } from './generateManifests';
+import { getImageTagsFromDir } from '../getImageTagsFromDir';
 
 type ResourceKind =
     | 'Secret'
@@ -19,7 +20,6 @@ type ResourceKind =
     | 'Pod'
     | 'SealedSecret'
     | 'CustomResourceDefinition';
-
 
 const kubernetesResourceInfo = z.object({
     kind: z.string(),
@@ -53,19 +53,20 @@ type kubernetesResourceInfoZod = z.infer<typeof kubernetesResourceInfo>;
 // }
 type CreateKubeObject<K extends ResourceKind> = kubernetesResourceInfoZod & {
     kind: Extract<ResourceKind, K>;
-}
-export type TSecretKubeObject = CreateKubeObject<"Secret">
-export type TSealedSecretKubeObject = CreateKubeObject<"SealedSecret">
-export type TCustomResourceDefinitionObject = CreateKubeObject<"CustomResourceDefinition">
-export type TKubeObject = TSecretKubeObject | TSealedSecretKubeObject | TCustomResourceDefinitionObject
+};
+export type TSecretKubeObject = CreateKubeObject<'Secret'>;
+export type TSealedSecretKubeObject = CreateKubeObject<'SealedSecret'>;
+export type TCustomResourceDefinitionObject = CreateKubeObject<'CustomResourceDefinition'>;
+export type TKubeObject = TSecretKubeObject | TSealedSecretKubeObject | TCustomResourceDefinitionObject;
 
 export class KubeObject {
     #kubeObjectsAll: TKubeObject[];
 
     constructor(private environment: Environment) {
-        this.#kubeObjectsAll = this.sync().getAll()
+        this.#kubeObjectsAll = this.sync().getAll();
     }
 
+    getEnvironment = () => this.environment;
 
     getForApp = (resourceName: ResourceName): TKubeObject[] => {
         const envDir = getResourceAbsolutePath(resourceName, this.environment);
@@ -77,7 +78,12 @@ export class KubeObject {
 
     getAll = (): TKubeObject[] => {
         return this.#kubeObjectsAll;
-    }
+    };
+
+    generateManifests = async () => {
+        generateManifests(this);
+        this.sync();
+    };
 
     /** Extract information from all the manifests for an environment(local, staging etc)  */
     sync = () => {
@@ -98,8 +104,8 @@ export class KubeObject {
             acc.push(updatedPath);
             return acc;
         }, []);
-        return this
-    }
+        return this;
+    };
 
     /** Gets all the yaml manifests for an environment(local, staging etc)  */
     #getManifestsPathWithinDir = (environmentManifestsDir: string): string[] => {
@@ -112,13 +118,11 @@ export class KubeObject {
             .split('\n')
             .map((p) => p.trim());
         return allManifests;
-    }
-
-
-    getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
-        return (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter(o => o.kind === kind);
     };
 
+    getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
+        return (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
+    };
 
     /**
 GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PULUMI.
@@ -126,14 +130,14 @@ These secrets are encrypted using the bitnami sealed secret controller running i
 you are at present context
 */
     syncSealedSecretsWithPrompt = async () => {
-        const selectedSecretObjects = await SecretKubeObjectPrompter.selectFromPrompt(this.getOfAKind('Secret'));
+        const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(this.getOfAKind('Secret'));
 
-        SealedSecretsMerger.mergeUnsealedSecretToSealedSecret({
-            sealedSecretKubeObjects: this.getOfAKind("SealedSecret"),
-            secretKubeObjects: selectedSecretObjects
-        })
+        mergeUnsealedSecretToSealedSecret({
+            sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
+            secretKubeObjects: selectedSecretObjects,
+        });
 
         // Sync kube object info after sealed secrets manifests have been updated
-        this.sync()
-    }
+        this.sync();
+    };
 }

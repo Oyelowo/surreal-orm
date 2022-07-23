@@ -8,14 +8,14 @@ import { createArgocdApplication } from './createArgoApplication';
 import { getPathToResource } from './manifestsDirectory';
 import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/own-types';
 import { getEnvironmentVariables } from './validations';
-import { generateService } from "./helpers"
+import { generateService } from './helpers';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 export class ServiceDeployment<
     AN extends ServiceName,
     DBT extends DBType,
     NS extends NamespaceOfApps
-    > extends pulumi.ComponentResource {
+> extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
@@ -164,9 +164,9 @@ export class ServiceDeployment<
                         protocol: 'TCP',
                         name: `${resourceName}-http`,
                         targetPort: Number(envVars.APP_PORT),
-                    }
-                ]
-            }
+                    },
+                ],
+            },
         });
         // this.service = this.deployment.createService({
         //     type: kx.types.ServiceType.ClusterIP,

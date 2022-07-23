@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import sh from 'shelljs';
 import { clearPlainInputTsSecretFilesContents, syncSecretsTsFiles } from './secretsManagement/syncSecretsTsFiles';
-import { generateManifests } from './utils/generateManifests';
+import { generateManifests } from './utils/kubeObject/generateManifests';
 import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
 import { promptSecretsDeletionConfirmations } from './utils/promptSecretsDeletionConfirmations';
@@ -17,24 +17,20 @@ async function main() {
 
     const kubeObject = new KubeObject(environment);
 
-    await generateManifests({
-        environment,
-        imageTags,
-        allManifestsInfo: kubeObject.getAll(),
-    });
+    await kubeObject.generateManifests();
 
     syncSecretsTsFiles();
 
     // This requires the cluster to be on
-    kubeObject.syncSealedSecretsWithPrompt()
+    kubeObject.syncSealedSecretsWithPrompt();
 
     if (deletePlainSecretsInput) {
         clearPlainInputTsSecretFilesContents();
     }
 
     if (deleteUnsealedSecretManifestsOutput) {
-        kubeObject.getOfAKind("Secret").forEach(({ path }) => {
-            sh.rm('-rf', path)
+        kubeObject.getOfAKind('Secret').forEach(({ path }) => {
+            sh.rm('-rf', path);
         });
     }
 }

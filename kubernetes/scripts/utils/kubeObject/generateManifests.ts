@@ -1,0 +1,65 @@
+import { Environment } from '../../../resources/types/own-types';
+import c from 'chalk';
+import p from 'path';
+import sh from 'shelljs';
+import {
+    getGeneratedCrdsCodeDir,
+    getGeneratedEnvManifestsDir,
+    getMainBaseDir,
+} from '../../../resources/shared/manifestsDirectory';
+import { ImageTags } from '../../../resources/shared/validations';
+import { getEnvVarsForScript, handleShellError } from '../shared';
+import path from 'path';
+import { TKubeObject, TCustomResourceDefinitionObject, KubeObject } from './kubeObject';
+import { getImageTagsFromDir } from '../getImageTagsFromDir';
+/*
+GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
+*/
+
+export async function generateManifests(kubeObject: KubeObject) {
+    sh.exec('npm i');
+    sh.rm('-rf', './login');
+    sh.mkdir('./login');
+
+    sh.exec('pulumi login file://login');
+
+    sh.echo(c.blueBright(`DELETE EXISTING RESOURCES(except sealed secrets)`));
+
+    const removeNonSealedSecrets = (obj: TKubeObject) => {
+        const isSealedSecret = obj.kind === 'SealedSecret';
+        !isSealedSecret && sh.rm('-rf', obj.path);
+    };
+
+    kubeObject.getAll().forEach(removeNonSealedSecrets);
+
+    handleShellError(sh.rm('-rf', `${p.join(getMainBaseDir(), 'Pulumi.dev.yaml')}`));
+    handleShellError(sh.exec("export PULUMI_CONFIG_PASSPHRASE='not-needed' && pulumi stack init --stack dev"));
+
+    const imageTags = await getImageTagsFromDir();
+    // Pulumi needs some environment variables set for generating deployments with image tag
+    /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
+     */
+    handleShellError(
+        sh.exec(
+            `
+        ${getEnvVarsForScript(kubeObject.getEnvironment(), imageTags)}
+        export PULUMI_CONFIG_PASSPHRASE="not-needed"
+        pulumi up --yes --skip-preview --stack dev
+       `
+        )
+    );
+
+    sh.echo(c.blueBright(`SYNC CRDS CODE`));
+
+    syncCrdsCode(kubeObject.getOfAKind('CustomResourceDefinition'));
+
+    sh.rm('-rf', './login');
+}
+
+function syncCrdsCode(crdKubeObjects: TCustomResourceDefinitionObject[]) {
+    const manifestsCrdsFiles = crdKubeObjects.map(({ path }) => path);
+    const outDir = path.join(getMainBaseDir(), 'crds-generated');
+
+    sh.exec(` crd2pulumi --nodejsPath ${outDir} ${manifestsCrdsFiles.join(' ')} --force`);
+    sh.exec(`npx prettier --write ${getGeneratedCrdsCodeDir()}`);
+}

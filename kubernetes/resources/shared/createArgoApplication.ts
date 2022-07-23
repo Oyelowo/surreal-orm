@@ -83,8 +83,7 @@ export const argoCDApplicationsSecret = new kx.Secret(
         },
         metadata: {
             ...metadata,
-            annotations: {
-            },
+            annotations: {},
         },
     },
     { provider: getResourceProvider('argocd-applications-parents', ENVIRONMENT) }
