@@ -5,8 +5,8 @@ import { generateManifests } from './utils/generateManifests';
 import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
 import { promptSecretsDeletionConfirmations } from './utils/promptSecretsDeletionConfirmations';
-import { syncAppSealedSecrets } from './utils/syncAppsSecrets';
-import { getAllKubeManifestsInfo, getKubeManifestsPaths, promptEnvironmentSelection } from './utils/shared';
+import { KubeObject } from './utils/kubeObject/kubeObject';
+import { promptEnvironmentSelection } from './utils/shared';
 
 async function main() {
     const { environment } = await promptEnvironmentSelection();
@@ -15,24 +15,27 @@ async function main() {
 
     const imageTags = await getImageTagsFromDir();
 
+    const kubeObject = new KubeObject(environment);
+
     await generateManifests({
         environment,
         imageTags,
-        allManifestsInfo: getAllKubeManifestsInfo(environment),
+        allManifestsInfo: kubeObject.getAll(),
     });
 
     syncSecretsTsFiles();
 
-    const allManifestsInfo = getAllKubeManifestsInfo(environment);
-    syncAppSealedSecrets(environment, allManifestsInfo);
+    // This requires the cluster to be on
+    kubeObject.syncSealedSecretsWithPrompt()
 
     if (deletePlainSecretsInput) {
         clearPlainInputTsSecretFilesContents();
     }
 
     if (deleteUnsealedSecretManifestsOutput) {
-        const removeSecret = (path: string) => sh.rm('-rf', path);
-        getKubeManifestsPaths({ kind: "Secret", allManifestsInfo }).forEach(removeSecret);
+        kubeObject.getOfAKind("Secret").forEach(({ path }) => {
+            sh.rm('-rf', path)
+        });
     }
 }
 

@@ -26,20 +26,19 @@ type GenerateManifestsProp = {
 };
 
 export async function generateManifests({ environment, imageTags, allManifestsInfo }: GenerateManifestsProp) {
-    const manifestsDirForEnv = getGeneratedEnvManifestsDir(environment);
-
     sh.exec('npm i');
     sh.rm('-rf', './login');
     sh.mkdir('./login');
 
     sh.exec('pulumi login file://login');
 
+    const manifestsDirForEnv = getGeneratedEnvManifestsDir(environment);
     sh.echo(c.blueBright(`DELETE EXISTING RESOURCES(except sealed secrets) at ${manifestsDirForEnv}`));
+    
     const removeNonSealedSecrets = (info: KubeObjectInfo) => {
         const isSealedSecret = info.kind === 'SealedSecret';
         !isSealedSecret && sh.rm('-rf', info.path);
     };
-
     allManifestsInfo.forEach(removeNonSealedSecrets);
 
     handleShellError(sh.rm('-rf', `${p.join(getMainBaseDir(), 'Pulumi.dev.yaml')}`));

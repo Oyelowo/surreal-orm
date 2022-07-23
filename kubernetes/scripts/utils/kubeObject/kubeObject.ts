@@ -1,10 +1,14 @@
+import { SealedSecretsMerger } from './SealedSecretsManager';
+import p from "path"
 import sh from 'shelljs';
 import _ from "lodash";
 import { z } from "zod";
-import { namespaceSchema } from "../../resources/infrastructure/namespaces/util";
-import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from "../../resources/shared/manifestsDirectory";
-import { ResourceName, Environment } from "../../resources/types/own-types";
-import { handleShellError } from './shared';
+import { namespaceSchema } from "../../../resources/infrastructure/namespaces/util";
+import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from "../../../resources/shared/manifestsDirectory";
+import { ResourceName, Environment } from "../../../resources/types/own-types";
+import { handleShellError } from '../shared';
+import { SealedSecretTemplate } from '../../../resources/types/sealedSecretTemplate';
+import { SecretKubeObjectPrompter } from "./SecretsSelectorPrompter";
 
 
 type ResourceKind =
@@ -16,12 +20,6 @@ type ResourceKind =
     | 'SealedSecret'
     | 'CustomResourceDefinition';
 
-// An app resource can comprise of multiple kubernetes manifests
-type Props = {
-    resourceName: ResourceName;
-    // environment: Environment;
-    allManifestsInfo: KubeObjectInfo[];
-}
 
 const kubernetesResourceInfo = z.object({
     kind: z.string(),
@@ -46,51 +44,48 @@ const kubernetesResourceInfo = z.object({
 });
 
 type kubernetesResourceInfoZod = z.infer<typeof kubernetesResourceInfo>;
-export interface KubeObjectInfo extends kubernetesResourceInfoZod {
-    // We override the object kind type since it's a nonexhasutive list
-    // We also want to allow allow other string types here
-    kind: ResourceKind;
-    // kind: ResourceKind | (string & {});
+
+// export interface KubeObjectInfo extends kubernetesResourceInfoZod {
+//     // We override the object kind type since it's a nonexhasutive list
+//     // We also want to allow allow other string types here
+//     kind: ResourceKind;
+//     // kind: ResourceKind | (string & {});
+// }
+type CreateKubeObject<K extends ResourceKind> = kubernetesResourceInfoZod & {
+    kind: Extract<ResourceKind, K>;
 }
+export type TSecretKubeObject = CreateKubeObject<"Secret">
+export type TSealedSecretKubeObject = CreateKubeObject<"SealedSecret">
+export type TCustomResourceDefinitionObject = CreateKubeObject<"CustomResourceDefinition">
+export type TKubeObject = TSecretKubeObject | TSealedSecretKubeObject | TCustomResourceDefinitionObject
 
-type InfoProps = {
-    kind: ResourceKind;
-    allManifestsInfo: KubeObjectInfo[];
-};
-
-
-export class ManifestsManager {
-    #allManifestsInfo: KubeObjectInfo[];
+export class KubeObject {
+    #kubeObjectsAll: TKubeObject[];
 
     constructor(private environment: Environment) {
-        this.#allManifestsInfo = this.syncManifestsInfo().getAllKubeManifestsInfo()
+        this.#kubeObjectsAll = this.sync().getAll()
     }
 
 
-    getAppResourceManifestsInfo = ({
-        resourceName,
-        allManifestsInfo,
-    }: Props): KubeObjectInfo[] => {
+    getForApp = (resourceName: ResourceName): TKubeObject[] => {
         const envDir = getResourceAbsolutePath(resourceName, this.environment);
-        // const manifests = getManifestsWithinDir(envDir);
-        // return getInfoFromManifests(manifests);
-        return allManifestsInfo.filter((m) => {
+        return this.#kubeObjectsAll.filter((m) => {
             const manifestIsWithinDir = (demarcator: '/' | '\\') => m.path.startsWith(`${envDir}${demarcator}`);
             return manifestIsWithinDir('/') || manifestIsWithinDir('\\');
         });
     };
 
-    getAllKubeManifestsInfo = () => {
-        return this.#allManifestsInfo;
+    getAll = (): TKubeObject[] => {
+        return this.#kubeObjectsAll;
     }
 
     /** Extract information from all the manifests for an environment(local, staging etc)  */
-    syncManifestsInfo = () => {
+    sync = () => {
         const envDir = getGeneratedEnvManifestsDir(this.environment);
         const manifestsPaths = this.#getManifestsPathWithinDir(envDir);
         const exec = (cmd: string) => handleShellError(sh.exec(cmd, { silent: true })).stdout;
 
-        this.#allManifestsInfo = manifestsPaths.reduce<KubeObjectInfo[]>((acc, path, i) => {
+        this.#kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
             if (!path) return acc;
             console.log('Extracting info from manifest', i);
             const info = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`));
@@ -98,7 +93,7 @@ export class ManifestsManager {
             if (_.isEmpty(info)) return acc;
             // let's mutate to make it a bit faster and should be okay since we only do it here
             info.path = path;
-            const updatedPath = kubernetesResourceInfo.parse(info) as KubeObjectInfo;
+            const updatedPath = kubernetesResourceInfo.parse(info) as TKubeObject;
 
             acc.push(updatedPath);
             return acc;
@@ -119,19 +114,26 @@ export class ManifestsManager {
         return allManifests;
     }
 
-    /** Get information for all specific kind of kubernetes object (e.g Deployment, Secrets)  */
-    getKubeObjectManifestsInfo = ({ kind, allManifestsInfo }: InfoProps): KubeObjectInfo[] => {
-        return allManifestsInfo.filter((info) => info.kind === kind);
+
+    getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
+        return (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter(o => o.kind === kind);
     };
 
-    // getKubeManifestsPaths = ({ kind, allManifestsInfo }: InfoProps): string[] => {
 
-    //     return this.getKubeObjectManifestsInfo({
-    //         kind,
-    //         allManifestsInfo
-    //     }).map(({ path }) => path);
-    // }
+    /**
+GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PULUMI.
+These secrets are encrypted using the bitnami sealed secret controller running in the cluster
+you are at present context
+*/
+    syncSealedSecretsWithPrompt = async () => {
+        const selectedSecretObjects = await SecretKubeObjectPrompter.selectFromPrompt(this.getOfAKind('Secret'));
 
+        SealedSecretsMerger.mergeUnsealedSecretToSealedSecret({
+            sealedSecretKubeObjects: this.getOfAKind("SealedSecret"),
+            secretKubeObjects: selectedSecretObjects
+        })
 
-
+        // Sync kube object info after sealed secrets manifests have been updated
+        this.sync()
+    }
 }
