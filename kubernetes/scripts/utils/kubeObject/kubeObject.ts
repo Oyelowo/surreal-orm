@@ -58,39 +58,39 @@ export type TCustomResourceDefinitionObject = CreateKubeObject<'CustomResourceDe
 export type TKubeObject = TSecretKubeObject | TSealedSecretKubeObject | TCustomResourceDefinitionObject;
 
 export class KubeObject {
-    static #kubeObjectsAll: TKubeObject[];
+    #kubeObjectsAll: TKubeObject[];
 
     constructor(private environment: Environment) {
-        KubeObject.#kubeObjectsAll = this.sync().getAll();
+        this.#kubeObjectsAll = this.syncAll().getAll();
     }
 
     getEnvironment = () => this.environment;
 
     getForApp = (resourceName: ResourceName): TKubeObject[] => {
         const envDir = getResourceAbsolutePath(resourceName, this.environment);
-        return KubeObject.#kubeObjectsAll.filter((m) => {
+        return this.#kubeObjectsAll.filter((m) => {
             const manifestIsWithinDir = (demarcator: '/' | '\\') => m.path.startsWith(`${envDir}${demarcator}`);
             return manifestIsWithinDir('/') || manifestIsWithinDir('\\');
         });
     };
 
     getAll = (): TKubeObject[] => {
-        return KubeObject.#kubeObjectsAll;
+        return this.#kubeObjectsAll;
     };
 
     generateManifests = async () => {
         await generateManifests(this);
-        syncCrdsCode(KubeObject.getOfAKind('CustomResourceDefinition'));
-        this.sync();
+        syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
+        this.syncAll();
     };
 
     /** Extract information from all the manifests for an environment(local, staging etc)  */
-    sync = () => {
+    syncAll = () => {
         const envDir = getGeneratedEnvManifestsDir(this.environment);
         const manifestsPaths = this.#getManifestsPathWithinDir(envDir);
         const exec = (cmd: string) => handleShellError(sh.exec(cmd, { silent: true })).stdout;
 
-        KubeObject.#kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
+        this.#kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
             if (!path) return acc;
             console.log('Extracting info from manifest', i);
             const info = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`));
@@ -119,8 +119,8 @@ export class KubeObject {
         return allManifests;
     };
 
-    static getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
-        return (KubeObject.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
+    getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
+        return (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
     };
 
     /**
@@ -133,13 +133,13 @@ which is cached locally but that would be more involved.
 */
     syncSealedSecrets = async () => {
         mergeUnsealedSecretToSealedSecret({
-            sealedSecretKubeObjects: KubeObject.getOfAKind('SealedSecret'),
+            sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
             // Syncs all secrets
-            secretKubeObjects: KubeObject.getOfAKind('Secret'),
+            secretKubeObjects: this.getOfAKind('Secret'),
         });
 
         // Sync kube object info after sealed secrets manifests have been updated
-        this.sync();
+        this.syncAll();
     };
 
     /**
@@ -148,15 +148,15 @@ when you want to update Secrets in an existing cluster. Plain kubernetes
 secrets should never be pushed to git but they help to generate sealed secrets.
 */
     syncSealedSecretsWithPrompt = async () => {
-        const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(KubeObject.getOfAKind('Secret'));
+        const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(this.getOfAKind('Secret'));
 
         mergeUnsealedSecretToSealedSecret({
-            sealedSecretKubeObjects: KubeObject.getOfAKind('SealedSecret'),
+            sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
             // Syncs only selected secrets from the CLI prompt
             secretKubeObjects: selectedSecretObjects,
         });
 
         // Sync kube object info after sealed secrets manifests have been updated
-        this.sync();
+        this.syncAll();
     };
 }

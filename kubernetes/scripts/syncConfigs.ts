@@ -8,4 +8,7 @@ syncEtcHostsWithCustomHosts();
 syncHelmChartTypesDeclarations();
 PlainSecretJsonConfig.syncAll();
 
-syncCrdsCode(KubeObject.getOfAKind('CustomResourceDefinition'));
+
+// Use local manifests to syn/generate new CRD codes
+const crds = new KubeObject("local").getOfAKind('CustomResourceDefinition');
+syncCrdsCode(crds);

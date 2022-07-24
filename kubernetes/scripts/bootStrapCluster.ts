@@ -43,7 +43,7 @@ async function main() {
     }
 
     if (secretDeleter?.deleteUnsealedSecretManifestsOutput) {
-        KubeObject.getOfAKind('Secret').forEach((o) => {
+        kubeObject.getOfAKind('Secret').forEach((o) => {
             sh.rm('-rf', o.path);
         });
     }
