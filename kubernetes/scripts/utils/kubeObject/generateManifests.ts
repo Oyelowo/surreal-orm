@@ -1,16 +1,11 @@
-import { Environment } from '../../../resources/types/own-types';
 import c from 'chalk';
 import p from 'path';
 import sh from 'shelljs';
-import {
-    getGeneratedEnvManifestsDir,
-    getMainBaseDir,
-} from '../../../resources/shared/manifestsDirectory';
-import { ImageTags } from '../../../resources/shared/validations';
+import { getMainBaseDir } from '../../../resources/shared/manifestsDirectory';
 import { getEnvVarsForScript, handleShellError } from '../shared';
 import { TKubeObject, KubeObject } from './kubeObject';
 import { getImageTagsFromDir } from '../getImageTagsFromDir';
-import { syncCrdsCode } from './syncCrdsCode';
+
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 */
@@ -48,10 +43,5 @@ export async function generateManifests(kubeObject: KubeObject) {
         )
     );
 
-    sh.echo(c.blueBright(`SYNC CRDS CODE`));
-
-
     sh.rm('-rf', './login');
 }
-
-

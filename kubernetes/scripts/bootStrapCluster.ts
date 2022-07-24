@@ -8,17 +8,34 @@ import { namespaces } from '../resources/infrastructure/namespaces/util';
 import { helmChartsInfo } from '../resources/shared/helmChartInfo';
 import { Environment, ResourceName } from '../resources/types/own-types';
 import { syncSecretsTsFiles } from './secretsManagement/syncSecretsTsFiles';
-import { generateManifests } from './utils/kubeObject/generateManifests';
 import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
 import _ from 'lodash';
 import { KubeObject, TKubeObject } from './utils/kubeObject/kubeObject';
+import { createLocalCluster } from './utils/createLocalCluster';
 
 async function main() {
     const { environment } = await promptEnvironmentSelection();
-    const kubeObject = new KubeObject(environment);
-    await promptKubernetesClusterSwitch(environment);
-    const { deletePlainSecretsInput, deleteUnsealedSecretManifestsOutput } = await promptSecretsDeletionConfirmations();
+    const isLocal = environment === "local";
+    if (isLocal) {
+        const localCluster = await createLocalCluster()
+        // await promptKubernetesClusterSwitch(environment);
 
+        if (!localCluster.regenerateKubernetesManifests) {
+            sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true`);
+            // return;
+        }
+    }
+
+    await promptKubernetesClusterSwitch(environment);
+
+    let secretDeleter: Awaited<ReturnType<typeof promptSecretsDeletionConfirmations>> | null = null;
+    if (isLocal) {
+        // const { deletePlainSecretsInput, deleteUnsealedSecretManifestsOutput } = await promptSecretsDeletionConfirmations();
+        secretDeleter = await promptSecretsDeletionConfirmations();
+    }
+
+
+    const kubeObject = new KubeObject(environment);
     await kubeObject.generateManifests();
 
     // Sync the TS config files where our gitignored secrets are stored locally
@@ -26,11 +43,11 @@ async function main() {
 
     await applySetupManifests(kubeObject);
 
-    if (deletePlainSecretsInput) {
+    if (secretDeleter?.deletePlainSecretsInput) {
         clearPlainInputTsSecretFilesContents();
     }
 
-    if (deleteUnsealedSecretManifestsOutput) {
+    if (secretDeleter?.deleteUnsealedSecretManifestsOutput) {
         kubeObject.getOfAKind('Secret').forEach((o) => {
             sh.rm('-rf', o.path);
         });
@@ -40,8 +57,6 @@ async function main() {
 main();
 
 async function applySetupManifests(kubeObject: KubeObject) {
-    // const { getAllKubeManifestsInfo, syncManifestsInfo } = manifestsManager
-
     // # Apply namespace first
     applyResourceManifests('namespaces', kubeObject);
 
@@ -52,7 +67,7 @@ async function applySetupManifests(kubeObject: KubeObject) {
     // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
     sh.exec(`kubectl rollout status deployment/${sealedSecretsName} -n=${namespaces.kubeSystem}`);
 
-    kubeObject.syncSealedSecretsWithPrompt();
+    kubeObject.syncSealedSecrets();
 
     // # Apply setups with cert-manager controller
     applyResourceManifests('cert-manager', kubeObject);
@@ -70,12 +85,17 @@ async function applySetupManifests(kubeObject: KubeObject) {
     applyResourceManifests('linkerd', kubeObject);
     applyResourceManifests('linkerd-viz', kubeObject);
 
-    // applyResourceManifests('argocd', environment, allManifestsInfo);
 
-    // sh.exec('kubectl -n argocd rollout restart deployment argocd-argo-cd-server');
+    if (kubeObject.getEnvironment() === "local") {
+        sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true`);
+    } else {
+        applyResourceManifests('argocd', kubeObject);
 
-    // applyResourceManifests('argocd-applications-parents', environment, allManifestsInfo);
-    sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true`);
+        sh.exec('kubectl -n argocd rollout restart deployment argocd-argo-cd-server');
+
+        applyResourceManifests('argocd-applications-parents', kubeObject);
+
+    }
 }
 
 function applyResourceManifests(resourceName: ResourceName, kubeObject: KubeObject) {
@@ -87,6 +107,5 @@ function applyResourceManifests(resourceName: ResourceName, kubeObject: KubeObje
         (m) => m.kind !== 'SealedSecret',
     ]);
 
-    // console.log('manifestsToApply', manifestsToApply);
     manifestsToApply.forEach((o) => sh.exec(`kubectl apply -f  ${o.path}`));
 }

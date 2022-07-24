@@ -127,15 +127,35 @@ export class KubeObject {
     };
 
     /**
-GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PULUMI.
-These secrets are encrypted using the bitnami sealed secret controller running in the cluster
-you are at present context
+Sync all Sealed secrets. This is usually useful when you're bootstrapping
+a cluster and you typically want to sync/build all sealed secrets from kubernetes
+secret objects. @see NOTE: This shoould only be done after sealed secrets controller 
+is running because that is required to seal the plain secrets. You can see where this is used.
+Side note: In the future, we can also allow this to use public key of the sealed secret controller
+which is cached locally but that would be more involved.
+*/
+    syncSealedSecrets = async () => {
+        mergeUnsealedSecretToSealedSecret({
+            sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
+            // Syncs all secrets
+            secretKubeObjects: this.getOfAKind("Secret"),
+        });
+
+        // Sync kube object info after sealed secrets manifests have been updated
+        this.sync();
+    };
+
+    /**
+Sync only Sealed secrets that are selected from user in  the CLI terminal prompt. This is usually useful 
+when you want to update Secrets in an existing cluster. Plain kubernetes
+secrets should never be pushed to git but they help to generate sealed secrets.
 */
     syncSealedSecretsWithPrompt = async () => {
         const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(this.getOfAKind('Secret'));
 
         mergeUnsealedSecretToSealedSecret({
             sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
+            // Syncs only selected secrets from the CLI prompt
             secretKubeObjects: selectedSecretObjects,
         });
 
