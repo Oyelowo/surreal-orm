@@ -58,7 +58,7 @@ export class ServiceDeployment<
             { provider: this.getProvider(), parent: this }
         );
 
-        const secrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT);
+        const secrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
         // Create a Kubernetes Secret.
         this.secret = new kx.Secret(
             `${resourceName}-secret`,
