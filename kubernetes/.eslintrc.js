@@ -18,6 +18,13 @@ module.exports = {
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-unused-vars': 'off',
+        'no-restricted-syntax': [
+            'error',
+            {
+                selector: 'ClassDeclaration[superClass]',
+                message: "Extending other classes via inheritance isn't allowed. Use composition instead.",
+            },
+        ],
     },
     plugins: ['prettier', '@typescript-eslint'],
 };
