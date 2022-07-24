@@ -1,5 +1,4 @@
 import { mergeUnsealedSecretToSealedSecret } from './SealedSecretsManager';
-import p from 'path';
 import sh from 'shelljs';
 import _ from 'lodash';
 import { z } from 'zod';
@@ -7,10 +6,8 @@ import { namespaceSchema } from '../../../resources/infrastructure/namespaces/ut
 import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../resources/shared/manifestsDirectory';
 import { ResourceName, Environment } from '../../../resources/types/own-types';
 import { handleShellError } from '../shared';
-import { SealedSecretTemplate } from '../../../resources/types/sealedSecretTemplate';
 import { selectSecretKubeObjectsFromPrompt } from './SecretsSelectorPrompter';
 import { generateManifests } from './generateManifests';
-import { getImageTagsFromDir } from '../getImageTagsFromDir';
 import { syncCrdsCode } from './syncCrdsCode';
 
 type ResourceKind =
@@ -61,29 +58,29 @@ export type TCustomResourceDefinitionObject = CreateKubeObject<'CustomResourceDe
 export type TKubeObject = TSecretKubeObject | TSealedSecretKubeObject | TCustomResourceDefinitionObject;
 
 export class KubeObject {
-    #kubeObjectsAll: TKubeObject[];
+    static #kubeObjectsAll: TKubeObject[];
 
     constructor(private environment: Environment) {
-        this.#kubeObjectsAll = this.sync().getAll();
+        KubeObject.#kubeObjectsAll = this.sync().getAll();
     }
 
     getEnvironment = () => this.environment;
 
     getForApp = (resourceName: ResourceName): TKubeObject[] => {
         const envDir = getResourceAbsolutePath(resourceName, this.environment);
-        return this.#kubeObjectsAll.filter((m) => {
+        return KubeObject.#kubeObjectsAll.filter((m) => {
             const manifestIsWithinDir = (demarcator: '/' | '\\') => m.path.startsWith(`${envDir}${demarcator}`);
             return manifestIsWithinDir('/') || manifestIsWithinDir('\\');
         });
     };
 
     getAll = (): TKubeObject[] => {
-        return this.#kubeObjectsAll;
+        return KubeObject.#kubeObjectsAll;
     };
 
     generateManifests = async () => {
         await generateManifests(this);
-        syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
+        syncCrdsCode(KubeObject.getOfAKind('CustomResourceDefinition'));
         this.sync();
     };
 
@@ -93,7 +90,7 @@ export class KubeObject {
         const manifestsPaths = this.#getManifestsPathWithinDir(envDir);
         const exec = (cmd: string) => handleShellError(sh.exec(cmd, { silent: true })).stdout;
 
-        this.#kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
+        KubeObject.#kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
             if (!path) return acc;
             console.log('Extracting info from manifest', i);
             const info = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`));
@@ -122,8 +119,8 @@ export class KubeObject {
         return allManifests;
     };
 
-    getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
-        return (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
+    static getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
+        return (KubeObject.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
     };
 
     /**
@@ -136,9 +133,9 @@ which is cached locally but that would be more involved.
 */
     syncSealedSecrets = async () => {
         mergeUnsealedSecretToSealedSecret({
-            sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
+            sealedSecretKubeObjects: KubeObject.getOfAKind('SealedSecret'),
             // Syncs all secrets
-            secretKubeObjects: this.getOfAKind('Secret'),
+            secretKubeObjects: KubeObject.getOfAKind('Secret'),
         });
 
         // Sync kube object info after sealed secrets manifests have been updated
@@ -151,10 +148,10 @@ when you want to update Secrets in an existing cluster. Plain kubernetes
 secrets should never be pushed to git but they help to generate sealed secrets.
 */
     syncSealedSecretsWithPrompt = async () => {
-        const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(this.getOfAKind('Secret'));
+        const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(KubeObject.getOfAKind('Secret'));
 
         mergeUnsealedSecretToSealedSecret({
-            sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
+            sealedSecretKubeObjects: KubeObject.getOfAKind('SealedSecret'),
             // Syncs only selected secrets from the CLI prompt
             secretKubeObjects: selectedSecretObjects,
         });

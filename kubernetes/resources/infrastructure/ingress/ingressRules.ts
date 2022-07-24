@@ -7,7 +7,6 @@ import { reactWebSettings } from '../../services/react-web/settings';
 import { NginxConfiguration } from '../../types/nginxConfigurations';
 import { getEnvironmentVariables } from '../../shared/validations';
 import { CLUSTER_ISSUER_NAME } from '../cert-manager';
-import { DOMAIN_NAME_BASE } from './constant';
 import { nginxIngressProvider } from './settings';
 
 const { ENVIRONMENT } = getEnvironmentVariables();

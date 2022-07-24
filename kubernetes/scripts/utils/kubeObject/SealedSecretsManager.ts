@@ -3,9 +3,8 @@ import { TSecretKubeObject } from './kubeObject';
 import { SealedSecretTemplate } from '../../../resources/types/sealedSecretTemplate';
 import { TKubeObject, TSealedSecretKubeObject } from './kubeObject';
 import p from 'path';
-import yaml from 'js-yaml';
 import sh from 'shelljs';
-import { Environment, ResourceName } from '../../../resources/types/own-types';
+import { ResourceName } from '../../../resources/types/own-types';
 import _ from 'lodash';
 
 const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets';

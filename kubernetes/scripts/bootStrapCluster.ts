@@ -1,16 +1,13 @@
+import { PlainSecretJsonConfig } from './utils/plainSecretJsonConfig';
 import sh from 'shelljs';
-import { clearPlainInputTsSecretFilesContents } from './secretsManagement/syncSecretsTsFiles';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
 import { promptSecretsDeletionConfirmations } from './utils/promptSecretsDeletionConfirmations';
 import { promptEnvironmentSelection } from './utils/shared';
-import path from 'path';
 import { namespaces } from '../resources/infrastructure/namespaces/util';
 import { helmChartsInfo } from '../resources/shared/helmChartInfo';
-import { Environment, ResourceName } from '../resources/types/own-types';
-import { syncSecretsTsFiles } from './secretsManagement/syncSecretsTsFiles';
-import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
+import { ResourceName } from '../resources/types/own-types';
 import _ from 'lodash';
-import { KubeObject, TKubeObject } from './utils/kubeObject/kubeObject';
+import { KubeObject } from './utils/kubeObject/kubeObject';
 import { createLocalCluster } from './utils/createLocalCluster';
 
 async function main() {
@@ -37,17 +34,16 @@ async function main() {
     const kubeObject = new KubeObject(environment);
     await kubeObject.generateManifests();
 
-    // Sync the TS config files where our gitignored secrets are stored locally
-    syncSecretsTsFiles();
+    PlainSecretJsonConfig.syncAll()
 
     await applySetupManifests(kubeObject);
 
     if (secretDeleter?.deletePlainSecretsInput) {
-        clearPlainInputTsSecretFilesContents();
+        PlainSecretJsonConfig.emptyAll();
     }
 
     if (secretDeleter?.deleteUnsealedSecretManifestsOutput) {
-        kubeObject.getOfAKind('Secret').forEach((o) => {
+        KubeObject.getOfAKind('Secret').forEach((o) => {
             sh.rm('-rf', o.path);
         });
     }

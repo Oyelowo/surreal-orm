@@ -8,6 +8,4 @@ syncEtcHostsWithCustomHosts();
 syncHelmChartTypesDeclarations();
 PlainSecretJsonConfig.syncAll()
 
-// The enviroment does not matter here
-const kubeObject = new KubeObject('local');
-syncCrdsCode(kubeObject.getOfAKind('CustomResourceDefinition'));
+syncCrdsCode(KubeObject.getOfAKind('CustomResourceDefinition'));

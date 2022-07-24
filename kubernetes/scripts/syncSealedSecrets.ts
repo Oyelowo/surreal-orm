@@ -1,7 +1,4 @@
-import chalk from 'chalk';
 import sh from 'shelljs';
-import { generateManifests } from './utils/kubeObject/generateManifests';
-import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
 import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
 import { promptSecretsDeletionConfirmations } from './utils/promptSecretsDeletionConfirmations';
 import { KubeObject } from './utils/kubeObject/kubeObject';
@@ -26,7 +23,7 @@ async function main() {
     }
 
     if (deleteUnsealedSecretManifestsOutput) {
-        kubeObject.getOfAKind('Secret').forEach(({ path }) => {
+        KubeObject.getOfAKind('Secret').forEach(({ path }) => {
             sh.rm('-rf', path);
         });
     }
