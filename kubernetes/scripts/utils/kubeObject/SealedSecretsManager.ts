@@ -20,32 +20,32 @@ These secrets are encrypted using the bitnami sealed secret controller running i
 you are at present context
 */
 export async function mergeUnsealedSecretToSealedSecret(props: Props) {
-    for (const unsealedSecret of props.secretKubeObjects) {
+    for (const secret of props.secretKubeObjects) {
         mergeUnsealedSecretToSealedSecretHelper({
-            unsealedSecretOne: unsealedSecret,
-            sealedSecretAll: props.sealedSecretKubeObjects,
+            secretKubeObject: secret,
+            sealedSecretKubeObjects: props.sealedSecretKubeObjects,
         });
     }
 }
 
 function mergeUnsealedSecretToSealedSecretHelper({
-    sealedSecretAll,
-    unsealedSecretOne,
+    sealedSecretKubeObjects,
+    secretKubeObject,
 }: {
-    unsealedSecretOne: TKubeObject;
-    sealedSecretAll: TSealedSecretKubeObject[];
+    secretKubeObject: TSecretKubeObject;
+    sealedSecretKubeObjects: TSealedSecretKubeObject[];
 }): void {
-    const { data, stringData } = unsealedSecretOne;
-    const { name, namespace /* annotations */ } = unsealedSecretOne.metadata;
+    const { data, stringData } = secretKubeObject;
+    const { name, namespace /* annotations */ } = secretKubeObject.metadata;
 
     if (!name && namespace) {
         throw new Error('Name and namespace not provided in the secret');
     }
 
-    // Get corresponding previously(if it exists) generated sealed secrets info.
+    // Get corresponding previously generated sealed secrets info(if it exists).
     const matchesUnsealedSecret = ({ metadata: m }: TKubeObject): boolean =>
         m.name === name && m.namespace === namespace;
-    const existingSealedSecretJsonData = sealedSecretAll?.find(matchesUnsealedSecret);
+    const existingSealedSecretJsonData = sealedSecretKubeObjects?.find(matchesUnsealedSecret);
 
     const sealSecretValue = (secretValue: string): string => {
         return sh
@@ -58,19 +58,20 @@ function mergeUnsealedSecretToSealedSecretHelper({
     };
 
     const dataToSeal = stringData ?? data ?? {};
-    const filteredSealedSecretsData = _.mapValues(dataToSeal, sealSecretValue) as unknown as Record<
-        string,
-        string | null
-    >;
+    const updatedSealedSecretsData = _.mapValues(dataToSeal, sealSecretValue);
+
+    const encryptedData = {
+        ...existingSealedSecretJsonData?.spec?.encryptedData,
+        ...updatedSealedSecretsData,
+    }
 
     // Update sealed secret object to be converted to yaml
     const updatedSealedSecrets: SealedSecretTemplate = {
-        // For some reason, typescript is not detecting the correct type here.
         kind: 'SealedSecret',
         apiVersion: 'bitnami.com/v1alpha1',
         metadata: {
-            name: unsealedSecretOne.metadata.name,
-            namespace: unsealedSecretOne.metadata.namespace,
+            name: secretKubeObject.metadata.name,
+            namespace: secretKubeObject.metadata.namespace,
             annotations: {
                 'sealedsecrets.bitnami.com/managed': 'true',
                 ...existingSealedSecretJsonData?.metadata.annotations,
@@ -78,21 +79,18 @@ function mergeUnsealedSecretToSealedSecretHelper({
             ...existingSealedSecretJsonData?.metadata,
         },
         spec: {
-            encryptedData: {
-                ...existingSealedSecretJsonData?.spec?.encryptedData,
-                ...filteredSealedSecretsData,
-            },
+            encryptedData,
             template: {
                 ...existingSealedSecretJsonData?.spec?.template,
                 data: null,
-                metadata: unsealedSecretOne.metadata,
-                type: unsealedSecretOne.type,
+                metadata: secretKubeObject.metadata,
+                type: secretKubeObject.type,
             },
         },
     };
 
     // GET SEALED SECRET PATH USING UNSEALED SECRET PATH
-    const appManifestsDir = p.dirname(unsealedSecretOne.path);
+    const appManifestsDir = p.dirname(secretKubeObject.path);
     // The path format is: kubernetes/manifests/generated/production/applications/graphql-mongo/1-manifest
     // and we want as basedir: kubernetes/manifests/generated/production/applications/graphql-mongo
     const appBaseDir = p.join(appManifestsDir, '..');
