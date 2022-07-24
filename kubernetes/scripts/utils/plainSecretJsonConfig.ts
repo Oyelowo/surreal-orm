@@ -21,7 +21,7 @@ const getSecretsSample = ({
     const string = z
         .string()
         .min(allowEmptyValues ? 0 : 1)
-        .transform(() => isLocal ? 'example' : "");
+        .transform(() => (isLocal ? 'example' : ''));
     const secretsSample = z.object({
         'graphql-mongo': z.object({
             MONGODB_USERNAME: string,
@@ -82,7 +82,7 @@ function emptyObjectValues(object: any) {
 
 const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 export class PlainSecretJsonConfig<App extends ResourceName> {
-    constructor(private resourceName: App, private environment: Environment) { }
+    constructor(private resourceName: App, private environment: Environment) {}
 
     getSecrets(): TSecretJson[App] {
         PlainSecretJsonConfig.syncAll();
