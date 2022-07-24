@@ -34,12 +34,12 @@ async function main() {
     const kubeObject = new KubeObject(environment);
     await kubeObject.generateManifests();
 
-    PlainSecretJsonConfig.syncAll()
+    PlainSecretJsonConfig.syncAll();
 
     await applySetupManifests(kubeObject);
 
     if (secretDeleter?.deletePlainSecretsInput) {
-        PlainSecretJsonConfig.emptyAll();
+        PlainSecretJsonConfig.emptyValues(environment);
     }
 
     if (secretDeleter?.deleteUnsealedSecretManifestsOutput) {

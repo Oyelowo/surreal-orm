@@ -6,6 +6,6 @@ import { syncHelmChartTypesDeclarations } from './utils/syncHelmChartTypesDeclar
 
 syncEtcHostsWithCustomHosts();
 syncHelmChartTypesDeclarations();
-PlainSecretJsonConfig.syncAll()
+PlainSecretJsonConfig.syncAll();
 
 syncCrdsCode(KubeObject.getOfAKind('CustomResourceDefinition'));

@@ -18,7 +18,7 @@ module.exports = {
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-unused-vars': 'off',
-        // 'unused-imports/no-unused-imports': 'error',
+        'unused-imports/no-unused-imports': 'error',
         'no-restricted-syntax': [
             'error',
             {
@@ -27,5 +27,5 @@ module.exports = {
             },
         ],
     },
-    plugins: ['prettier', '@typescript-eslint', /* 'eslint-plugin-unused-imports' */],
+    plugins: ['prettier', '@typescript-eslint', 'eslint-plugin-unused-imports'],
 };
