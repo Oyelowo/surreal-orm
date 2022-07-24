@@ -1,7 +1,7 @@
+import { PlainSecretJsonConfig } from './../../../scripts/utils/plainSecretJsonConfig';
 import c from 'chalk';
 import path from 'path';
 import sh from 'shelljs';
-import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp';
 import { getResourceAbsolutePath } from '../../shared/manifestsDirectory';
 import { Environment } from '../../types/own-types';
 import { namespaces } from '../namespaces/util';
@@ -10,7 +10,10 @@ const DOCKER_SERVER = 'ghcr.io';
 export const DOCKER_REGISTRY_KEY = 'my-registry-key';
 
 export function createContainerRegistrySecret(environment: Environment): void {
-    const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = getSecretsForResource('argocd', environment);
+    const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = new PlainSecretJsonConfig(
+        'argocd',
+        environment
+    ).getSecrets();
 
     const dir = path.join(getResourceAbsolutePath('argocd-applications-parents', environment), '1-manifest');
     const file = path.join(dir, 'secret-docker-registry.yaml');
@@ -35,7 +38,10 @@ export function createContainerRegistrySecret(environment: Environment): void {
 //     };
 // }
 
-// const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = getSecretsForResource('argocd', ENVIRONMENT);
+// const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = new PlainSecretJsonConfig(
+// 'argocd',
+//     environment
+//     ).getSecretsForResource();
 // const dataRaw: DockerRawData = {
 //     auths: {
 //         'ghrc.io': {

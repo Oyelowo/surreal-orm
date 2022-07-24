@@ -1,13 +1,13 @@
 import { getEnvironmentVariables } from '../../shared/validations';
 import { AppConfigs } from '../../types/own-types';
-import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp';
 import { getBaseUrl } from '../../infrastructure/ingress/hosts';
+import { PlainSecretJsonConfig } from '../../../scripts/utils/plainSecretJsonConfig';
 
 const environmentVariables = getEnvironmentVariables();
 const environment = environmentVariables.ENVIRONMENT;
 
 // Maybe?: Rethink this abstraction for secret. Maybe can be gotten directly from the typescript secret file which is gitignored locally?
-const secretsFromLocalConfigs = getSecretsForResource('grpc-mongo', environment);
+const secretsFromLocalConfigs = new PlainSecretJsonConfig('grpc-mongo', environment).getSecrets();
 
 export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'mongodb', 'applications'> = {
     kubeConfig: {

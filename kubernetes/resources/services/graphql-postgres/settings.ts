@@ -1,10 +1,10 @@
-import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp';
+import { PlainSecretJsonConfig } from './../../../scripts/utils/plainSecretJsonConfig';
 import { AppConfigs } from '../../types/own-types';
 import { getEnvironmentVariables } from '../../shared/validations';
 import { getBaseUrl } from '../../infrastructure/ingress/hosts';
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
-const secretsFromLocalConfigs = getSecretsForResource('graphql-postgres', environment);
+const secretsFromLocalConfigs = new PlainSecretJsonConfig('graphql-postgres', environment).getSecrets();
 
 export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'postgresdb', 'applications'> = {
     kubeConfig: {

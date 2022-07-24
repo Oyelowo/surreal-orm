@@ -1,20 +1,14 @@
 import { ENVIRONMENTS_ALL } from '../utils/shared';
 import path from 'path';
 import sh from 'shelljs';
-import { getPlainSecretsConfigFilesBaseDir } from '../../resources/shared/manifestsDirectory';
 import { Environment, ResourceName } from '../../resources/types/own-types';
-
-export const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
-export function getPlainSecretInputFilePath(environment: Environment): string {
-    return path.join(PLAIN_SECRETS_CONFIGS_DIR, `${environment}.ts`);
-}
-
 import { generateMock } from '@anatine/zod-mock';
 import { z } from 'zod';
 import R from 'ramda';
 import _ from 'lodash';
+import { getPlainSecretsConfigFilesBaseDir } from '../../resources/shared/manifestsDirectory';
 
-const secretsSample = z.object({
+const secretsSchema = z.object({
     'graphql-mongo': z.object({
         MONGODB_USERNAME: z.string().min(1),
         MONGODB_PASSWORD: z.string().min(1),
@@ -67,9 +61,9 @@ const secretsSample = z.object({
     'sealed-secrets': z.object({}),
 });
 
-type TSecretJson = z.infer<typeof secretsSample>;
+type TSecretJson = z.infer<typeof secretsSchema>;
 
-const mockData = generateMock(secretsSample);
+const mockData = generateMock(secretsSchema);
 
 function empty(object: any) {
     Object.keys(object).forEach((k) => {
@@ -80,31 +74,41 @@ function empty(object: any) {
     });
 }
 
-class PlainSecretJsonConfig {
-    constructor(private resourceName: ResourceName, private environment: Environment) { }
+const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
+export class PlainSecretJsonConfig<App extends ResourceName> {
+    constructor(private resourceName: App, private environment: Environment) {}
 
-    getSecretsForResource<App extends ResourceName>(): TSecretJson[App] {
-        PlainSecretJsonConfig.sync();
+    getSecrets(): TSecretJson[App] {
+        PlainSecretJsonConfig.syncAll();
 
-        return secretsSample.parse(PlainSecretJsonConfig.#getSecretJsonObject(this.environment))[
-            this.resourceName
-        ];
+        return secretsSchema.parse(PlainSecretJsonConfig.#getSecretJsonObject(this.environment))[this.resourceName];
     }
 
-    static sync = () => {
+    static emptyAll(): void {
         ENVIRONMENTS_ALL.forEach((env) => {
-            sh.exec(`Syncing Secret JSON config for ${env}`)
+            sh.exec(`Empting secret JSON config for ${env}`);
+            sh.mkdir(PLAIN_SECRETS_CONFIGS_DIR);
+            const envPath = this.#getSecretPath(env);
+
+            sh.exec(`echo '${JSON.stringify(mockData)}' > ${envPath}`);
+            sh.exec(`npx prettier --write ${envPath}`);
+        });
+    }
+
+    static syncAll = (): void => {
+        ENVIRONMENTS_ALL.forEach((env) => {
+            sh.exec(`Syncing Secret JSON config for ${env}`);
             sh.mkdir(PLAIN_SECRETS_CONFIGS_DIR);
 
             const envPath = this.#getSecretPath(env);
-            const existingEnvSecret = this.#getSecretJsonObject(env)
+            const existingEnvSecret = this.#getSecretJsonObject(env) ?? {};
 
             if (_.isEmpty(existingEnvSecret)) sh.touch(envPath);
             // if (env !== 'local') empty(mockData);
 
             // Parse the object to filter out stale keys in existing local secret configs
             // This also persists the values of existing secrets
-            const mergedObject = secretsSample.parse(R.mergeDeepLeft(existingEnvSecret, mockData));
+            const mergedObject = secretsSchema.parse(R.mergeDeepLeft(existingEnvSecret, mockData));
 
             sh.exec(`echo '${JSON.stringify(mergedObject)}' > ${envPath}`);
             sh.exec(`npx prettier --write ${envPath}`);
