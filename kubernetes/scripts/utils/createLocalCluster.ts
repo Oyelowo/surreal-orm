@@ -1,11 +1,13 @@
-import { ingressControllerPorts } from '../resources/infrastructure/ingress/hosts';
+import { ingressControllerPorts } from '../../resources/infrastructure/ingress/hosts';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import sh from 'shelljs';
-import { INGRESS_EXTERNAL_PORT_LOCAL } from '../resources/infrastructure/ingress/hosts';
+import { INGRESS_EXTERNAL_PORT_LOCAL } from '../../resources/infrastructure/ingress/hosts';
 
 // This autoreloads the app but waits for user inputs
-async function startAppInLocalCluster() {
+export async function createLocalCluster() {
+    // TODO: might be able to eliminate the first two questions by having `create new cluster` as part of list
+    // of clusters in the command prompt
     const { deleteExistingCluster, regenerateKubernetesManifests, clusterName } = await promptQuestions();
     const { http, https } = ingressControllerPorts;
 
@@ -22,16 +24,10 @@ async function startAppInLocalCluster() {
     // );
     sh.exec(`kubectx k3d-${clusterName}`);
 
-    if (regenerateKubernetesManifests) {
-        sh.exec(`make generate_manifests_ci environment=local`);
-    }
-
-    // Scaffold should wait for user input before reloading (--trigger="manual"). Without this, it hot reloads
-    sh.exec(`skaffold dev --port-forward --cleanup=false`);
-    // sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true`);
+    return {
+        regenerateKubernetesManifests,
+    };
 }
-
-startAppInLocalCluster();
 
 async function promptQuestions() {
     const DEFAULT_CLUSTER_NAME = 'local';
@@ -56,9 +52,7 @@ async function promptQuestions() {
         {
             type: 'confirm',
             name: regenerateKubernetesManifests,
-            message: chalk.blueBright(
-                `🆘Would you like to regenerate/update Kubernetes manifests from code?? ‼️‼️‼️‼️`
-            ),
+            message: chalk.blueBright(`🆘Would you like to sync the local Kubernetes manifests?? ‼️‼️‼️‼️`),
             default: false,
         },
     ]);

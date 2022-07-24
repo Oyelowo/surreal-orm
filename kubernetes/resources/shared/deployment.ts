@@ -4,11 +4,11 @@ import * as pulumi from '@pulumi/pulumi';
 import * as argocd from '../../crds-generated/argoproj';
 import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp';
 import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker';
-import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
 import { createArgocdApplication } from './createArgoApplication';
 import { getPathToResource } from './manifestsDirectory';
 import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/own-types';
 import { getEnvironmentVariables } from './validations';
+import { generateService } from './helpers';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 export class ServiceDeployment<
@@ -67,8 +67,7 @@ export class ServiceDeployment<
                 metadata: {
                     ...metadata,
                     annotations: {
-                        'sealedsecrets.bitnami.com/managed': 'true',
-                        ...APPLICATION_AUTOMERGE_ANNOTATION,
+                        // 'sealedsecrets.bitnami.com/managed': 'true',
                     },
                 },
             },
@@ -108,7 +107,7 @@ export class ServiceDeployment<
                             periodSeconds: 10,
                             failureThreshold: 7,
                         },
-                        // TODO: Use a different strategy for this. This endpoint checks our db or redis
+                        // Something to consider: Use a different strategy for this. This endpoint checks our db or redis
                         // and wont be nice if either is down. We still want to be able to show users that
                         // the application is unavailable
                         livenessProbe: {
@@ -154,17 +153,32 @@ export class ServiceDeployment<
             { provider: this.getProvider(), parent: this }
         );
 
-        this.service = this.deployment.createService({
-            type: kx.types.ServiceType.ClusterIP,
-            ports: [
-                {
-                    port: Number(envVars.APP_PORT),
-                    protocol: 'TCP',
-                    name: `${resourceName}-http`,
-                    targetPort: Number(envVars.APP_PORT),
-                },
-            ],
+        this.service = generateService({
+            deployment: this.deployment,
+            serviceFileName: `${resourceName}-service`,
+            args: {
+                type: kx.types.ServiceType.ClusterIP,
+                ports: [
+                    {
+                        port: Number(envVars.APP_PORT),
+                        protocol: 'TCP',
+                        name: `${resourceName}-http`,
+                        targetPort: Number(envVars.APP_PORT),
+                    },
+                ],
+            },
         });
+        // this.service = this.deployment.createService({
+        //     type: kx.types.ServiceType.ClusterIP,
+        //     ports: [
+        //         {
+        //             port: Number(envVars.APP_PORT),
+        //             protocol: 'TCP',
+        //             name: `${resourceName}-http`,
+        //             targetPort: Number(envVars.APP_PORT),
+        //         },
+        //     ],
+        // });
 
         this.argocdApplication = createArgocdApplication({
             sourceApplication: this.appName,

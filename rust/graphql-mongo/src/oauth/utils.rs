@@ -158,7 +158,7 @@ pub(crate) struct OauthConfig {
     pub provider: OauthProvider, // pub csrf_token: CsrfToken,
 }
 
-// TODO: Account linking
+// Nice to have: Account linking. User has to be logged in to link another account.
 // Linking Accounts to Users happen automatically, only when they have the same e-mail address, and the user is currently signed in. Check the FAQ for more information why this is a requirement.
 #[async_trait::async_trait]
 pub(crate) trait OauthProviderTrait {

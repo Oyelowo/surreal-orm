@@ -6,7 +6,7 @@ import { getBaseUrl } from '../../infrastructure/ingress/hosts';
 const environmentVariables = getEnvironmentVariables();
 const environment = environmentVariables.ENVIRONMENT;
 
-// TODO: Rethink this abstraction for secret. Maybe can be gotten directly from the typescript secret file which is gitignored locally?
+// Maybe?: Rethink this abstraction for secret. Maybe can be gotten directly from the typescript secret file which is gitignored locally?
 const secretsFromLocalConfigs = getSecretsForResource('grpc-mongo', environment);
 
 export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'mongodb', 'applications'> = {
@@ -34,10 +34,6 @@ export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'mongodb', 'application
         MONGODB_HOST: 'grpc-mongo-database.applications',
         MONGODB_SERVICE_NAME: 'grpc-mongo-database',
         MONGODB_STORAGE_CLASS: 'linode-block-storage-retain',
-        // hostAndPort":"grpc-mongo-0.mongo-graphql.development.svc.cluster.local:27017
-        // MONGODB_HOST: "grpc-mongod-0.grpc-mongod-headless.development.svc.cluster.local",
-        // const url = 'mongodb://username1:$[password]@mongo-grpc.development:27017/db1?authSource=$[authSource]';
-
         MONGODB_PORT: '27017',
     },
     metadata: {

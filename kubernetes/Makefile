@@ -19,8 +19,8 @@ generate_manifests_ci:
 bootstrap_cluster:
 	npx ts-node scripts/bootstrapCluster.ts
 
-generate_sealed_secrets:
-	npx ts-node scripts/generateSealedSecrets.ts
+sync_sealed_secrets:
+	npx ts-node scripts/syncSealedSecrets.ts
 
 dev:
 	npx ts-node scripts/startAppInLocalCluster.ts

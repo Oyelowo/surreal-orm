@@ -69,6 +69,7 @@ type DoesNotHaveDb = 'doesNotHaveDb';
 
 export type DBType = MongoDb | PostgresDb | DoesNotHaveDb;
 
+export const STORAGE_CLASS = 'linode-block-storage-retain';
 export type MongoDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
     dbType: MongoDb;
     MONGODB_NAME: DBN;
@@ -77,7 +78,7 @@ export type MongoDbEnvVars<DBN extends `${ServiceName}-database`, NS extends Nam
     MONGODB_HOST: `${DBN}.${NS}`;
     MONGODB_PORT: '27017';
     MONGODB_SERVICE_NAME: DBN;
-    MONGODB_STORAGE_CLASS: 'linode-block-storage-retain'; // TODO: Do this properly
+    MONGODB_STORAGE_CLASS: typeof STORAGE_CLASS;
     MONGODB_ROOT_USERNAME: string;
     MONGODB_ROOT_PASSWORD: string;
 };
@@ -117,14 +118,6 @@ export type AppEnvVars<AN extends ServiceName, NS extends NamespaceOfApps> = {
     APP_PORT: '8000' | '50051' | '3000';
     // the url of the ingress e.g oyelowo.com // localhost:8080 (for local dev)
     APP_EXTERNAL_BASE_URL: string;
-
-    // REDIS_USERNAME?: string;
-    // REDIS_PASSWORD?: string;
-    // // REDIS_HOST?: `${AN}-redis.${NS}`;
-    // REDIS_HOST?: `${AN}-redis-master.${NS}`;
-    // REDIS_SERVICE_NAME?: `${AN}-redis`; // TODO: Use a derivative approach for getting the host to prevent them from going out of sync
-    // REDIS_SERVICE_NAME_WITH_SUFFIX?: `${AN}-redis-master`; // TODO: Use a derivative approach for getting the host to prevent them from going out of sync
-    // REDIS_PORT?: "6379";
 } & DatabaseEnvVars<`${AN}-database`, NS> &
     RedisDbEnvVars<AN, NS>;
 

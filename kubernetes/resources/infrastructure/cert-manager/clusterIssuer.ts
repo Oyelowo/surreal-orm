@@ -14,7 +14,7 @@ export const clusterIssuer = new cm.v1.ClusterIssuer(
         spec: {
             acme: {
                 // The ACME server URL
-                // TODO: use self signed cert for local development
+                // Comment: Could also use self signed cert for local development
                 server:
                     getEnvironmentVariables().ENVIRONMENT === 'production'
                         ? 'https://acme-v02.api.letsencrypt.org/directory'

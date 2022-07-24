@@ -6,7 +6,6 @@ import { getBaseUrl } from '../../infrastructure/ingress/hosts';
 const environment = getEnvironmentVariables().ENVIRONMENT;
 const secretsFromLocalConfigs = getSecretsForResource('graphql-mongo', environment);
 
-// TODO: ADD A NEW KEY - SECRETS TO THE config which would accept secrets from the global secrets config used to generate manifests
 export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'mongodb', 'applications'> = {
     kubeConfig: {
         requestMemory: '70Mi',
@@ -30,7 +29,6 @@ export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'mongodb', 'appli
         OAUTH_GOOGLE_CLIENT_SECRET: secretsFromLocalConfigs.GOOGLE_CLIENT_SECRET,
 
         MONGODB_NAME: 'graphql-mongo-database',
-        // TODO: remove these two. now coming handled in the deployment abstraction and uses referenced secret
         MONGODB_USERNAME: secretsFromLocalConfigs.MONGODB_USERNAME,
         MONGODB_PASSWORD: secretsFromLocalConfigs.MONGODB_PASSWORD,
         MONGODB_ROOT_USERNAME: secretsFromLocalConfigs.MONGODB_ROOT_USERNAME,
@@ -38,10 +36,6 @@ export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'mongodb', 'appli
         MONGODB_HOST: 'graphql-mongo-database.applications',
         MONGODB_SERVICE_NAME: 'graphql-mongo-database',
         MONGODB_STORAGE_CLASS: 'linode-block-storage-retain',
-        // TODO: ADD REDIS
-        // hostAndPort":"graphql-mongo-0.mongo-graphql.development.svc.cluster.local:27017
-        // MONGODB_HOST: "graphql-mongod-0.graphql-mongod-headless.development.svc.cluster.local",
-        // const url = 'mongodb://username1:$[password]@mongo-graphql.development:27017/db1?authSource=$[authSource]';
         MONGODB_PORT: '27017',
 
         REDIS_USERNAME: secretsFromLocalConfigs.REDIS_USERNAME,

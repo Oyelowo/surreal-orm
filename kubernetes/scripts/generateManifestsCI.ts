@@ -1,7 +1,11 @@
+import { KubeObject } from './utils/kubeObject/kubeObject';
+
+/* 
+Does not handle sealed secret generation/syncing
+*/
+
 import yargs from 'yargs';
-import { generateManifests } from './utils/generateManifests';
-import { getImageTagsFromDir } from './utils/getImageTagsFromDir';
-import { ENVIRONMENTS_ALL } from './utils/sealedSecrets';
+import { ENVIRONMENTS_ALL } from './utils/shared';
 
 export const ARGV = yargs(process.argv.slice(2))
     .options({
@@ -15,11 +19,8 @@ export const ARGV = yargs(process.argv.slice(2))
     .parseSync();
 
 async function main() {
-    const imageTags = await getImageTagsFromDir();
-    await generateManifests({
-        environment: ARGV.environment,
-        imageTags,
-    });
+    const kubeObject = new KubeObject(ARGV.environment);
+    await kubeObject.generateManifests();
 }
 
 main().catch((e) => console.log('e', e));

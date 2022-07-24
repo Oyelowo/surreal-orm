@@ -13,11 +13,7 @@ export function createContainerRegistrySecret(environment: Environment): void {
     const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = getSecretsForResource('argocd', environment);
 
     const dir = path.join(getResourceAbsolutePath('argocd-applications-parents', environment), '1-manifest');
-    const file = path.join(
-        dir,
-        // NOTE: has to be prefixed with the name "secret-". This is important for the CLI. I am considering using the file content instead but that might be more expensive operation
-        'secret-docker-registry.yaml'
-    );
+    const file = path.join(dir, 'secret-docker-registry.yaml');
 
     if (!DOCKER_USERNAME || !DOCKER_PASSWORD) {
         console.warn(c.bgYellowBright('docker username nor password not provideed'));

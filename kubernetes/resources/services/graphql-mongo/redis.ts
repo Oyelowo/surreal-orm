@@ -24,7 +24,7 @@ export const redisValues: DeepPartial<IRedisbitnami> = {
     },
 
     auth: {
-        enabled: true, // TODO:: auth. Figure out how to connect with the FQDNurl with password in rust app ; graphql-mongo
+        enabled: true,
         password: envVars.REDIS_PASSWORD,
     },
     master: {

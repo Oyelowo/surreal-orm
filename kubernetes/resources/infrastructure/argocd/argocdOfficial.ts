@@ -39,7 +39,7 @@ const argocdValues: DeepPartial<IArgocdargo> = {
             // createSecret: false,
             argocdServerAdminPassword: hash,
             annotations: {
-                'sealedsecrets.bitnami.com/managed': 'true',
+                // 'sealedsecrets.bitnami.com/managed': 'true',
             },
         },
     },

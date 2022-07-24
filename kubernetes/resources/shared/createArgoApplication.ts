@@ -3,7 +3,6 @@ import { Resource } from '@pulumi/pulumi';
 import * as argocd from '../../crds-generated/argoproj';
 import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp';
 import { Namespace, namespaces } from './../infrastructure/namespaces/util';
-import { APPLICATION_AUTOMERGE_ANNOTATION } from './constants';
 import { getResourceProvider, getResourceRelativePath } from './manifestsDirectory';
 import { ResourceName } from '../types/own-types';
 import { getEnvironmentVariables } from './validations';
@@ -13,11 +12,12 @@ const { ENVIRONMENT } = getEnvironmentVariables();
 type ArgocdApplicationProps = {
     namespace: Namespace;
     outputSubDirName: ResourceName;
+    // The application we are trying to generate argo app for.
     sourceApplication: ResourceName;
+    // Typically services/infrastructure under which specific app is nested
     parent?: Resource;
 };
 
-// TODO: Add jsdoc to describe the parameters
 export function createArgocdApplication({
     sourceApplication,
     outputSubDirName,
@@ -83,9 +83,7 @@ export const argoCDApplicationsSecret = new kx.Secret(
         },
         metadata: {
             ...metadata,
-            annotations: {
-                ...APPLICATION_AUTOMERGE_ANNOTATION,
-            },
+            annotations: {},
         },
     },
     { provider: getResourceProvider('argocd-applications-parents', ENVIRONMENT) }

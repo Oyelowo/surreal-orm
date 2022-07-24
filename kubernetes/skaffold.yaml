@@ -65,10 +65,14 @@ build:
 deploy:
     kubectl:
         manifests:
-            - manifests/generated/local/infrastructure/namespaces/**/*
-            - manifests/generated/local/infrastructure/sealed-secrets/**/*
+            # - manifests/generated/local/infrastructure/namespaces/**/*
+            # - manifests/generated/local/infrastructure/sealed-secrets/**/*
+            # - manifests/generated/local/infrastructure/cert-manager/**/*
+            # - manifests/generated/local/infrastructure/linkerd/**/*
+            # - manifests/generated/local/infrastructure/linkerd-viz/**/*
             - manifests/generated/local/infrastructure/nginx-ingress/**/*
             - manifests/generated/local/services/**/**/*
+
 portForward:
     - resourceType: service
       resourceName: graphql-mongo
@@ -94,18 +98,18 @@ portForward:
       port: 6379
       localPort: 6379 # *Optional*
 
-# - resourceType: service
-#   resourceName: graphql-postgres
-#   port: 8000
-#   localPort: 8000
+    # - resourceType: service
+    #   resourceName: graphql-postgres
+    #   port: 8000
+    #   localPort: 8000
 
-# - resourceType: service
-#   resourceName: grpc-mongo
-#   port: 50051
-#   localPort: 50051
+    # - resourceType: service
+    #   resourceName: grpc-mongo
+    #   port: 50051
+    #   localPort: 50051
 
-# - resourceType: service
-#   # namespace: default
-#   resourceName: nginx-ingress-controller
-#   port: 80
-#   localPort: 8080
+    - resourceType: service
+      # namespace: default
+      resourceName: nginx-ingress-controller
+      port: 80
+      localPort: 8080

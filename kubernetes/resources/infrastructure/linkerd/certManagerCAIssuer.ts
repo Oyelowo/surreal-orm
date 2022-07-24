@@ -7,7 +7,7 @@ import { certManagerProvider } from './../cert-manager/settings';
 export const CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME = 'linkerd-self-signed-issuer';
 export const LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME = 'linkerd-trust-anchor';
 export const LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME = 'linkerd-identity-trust-roots';
-// First, create  a clusterIssuer for our linkerd CA. This resource will issue our roots
+// First, create  a clusterIssuer for our linkerd Cert Authority. This resource will issue our root certificate
 export const clusterIssuerLinkerdSelfSigned = new cm.v1.ClusterIssuer(
     CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME,
     {
@@ -49,7 +49,7 @@ export const clusterIssuerLinkerdSelfSigned = new cm.v1.ClusterIssuer(
     { provider: certManagerProvider }
 );
 
-// Then, creat the actual CA certificate to be used for validation paths.This
+// Then, create the actual CA certificate to be used for validation paths.This
 //  will be signed(issued) by our issuer created above,
 export const certificateLinkerdTrustAnchor = new cm.v1.Certificate(
     LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME,
@@ -90,6 +90,8 @@ export const clusterIssuerLinkerdTrustAnchor = new cm.v1.ClusterIssuer(
         },
         spec: {
             ca: {
+                // This uses the certicate stored in the secret generated
+                // by the certificate above, to sign other certificates
                 secretName: LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME,
             },
         },

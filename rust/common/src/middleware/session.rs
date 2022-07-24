@@ -17,22 +17,20 @@ pub async fn get_session(
 ) -> Result<ServerSession<RedisStorage<ConnectionManager>>, SessionError> {
     use Environment::*;
 
-    // let cookie_key = CookieKey::generate();
-    // TODO: Change
+    let cookie_key = CookieKey::generate();
+    // Alternative, if you want stable key to regenerate all cookies
     // Generate a random 32 byte key. Note that it is important to use a unique
     // private key for every project. Anyone with access to the key can generate
     // authentication cookies for any user!
     // Generate key with the command `openssl rand -base64 32`
-    let cookie_key = CookieKey::from(
-        "YN7sLNF+vsvAX+bYe5qNUtmCUOJSYuZFF9PasqO+b8w="
-            .repeat(256)
-            .as_bytes(),
-    );
+    // let cookie_key = CookieKey::from(
+    //     "YN7sLNF+vsvAX+bYe5qNUtmCUOJSYuZFF9PasqO+b8w="
+    //         .repeat(256)
+    //         .as_bytes(),
+    // );
     let cookie_config = CookieConfig::private(cookie_key)
         .name("oyelowo-session")
         .secure(matches!(environment, Production | Staging | Development))
-        // Add domain? e.g .domain.com
-        // .domain("localhost:8080")
         .same_site(SameSite::Lax)
         .max_age(Some(get_session_duration_std()));
 

@@ -9,15 +9,15 @@ export function getFQDNFromSettings(config: AppConfigs<any, any, any>) {
 }
 
 interface ServiceProps {
-    serviceName: string;
+    serviceFileName: string;
     deployment: kx.Deployment;
     args: kx.types.ServiceSpec;
 }
 
 // NOT USED FOR NOW. I went with directly patching the kx package instead. Keep for future purpose/reference
-export function generateService({ serviceName, deployment, args = {} }: ServiceProps): kx.Service {
+export function generateService({ serviceFileName, deployment, args = {} }: ServiceProps): kx.Service {
     const serviceSpec = pulumi.all([deployment.spec.template.spec.containers, args]).apply(([containers, args]) => {
-        // TODO: handle merging ports from args
+        // CONSIDER: handle merging ports from args
         const ports: Record<string, number> = {};
         containers.forEach((container) => {
             if (container.ports) {
@@ -30,15 +30,15 @@ export function generateService({ serviceName, deployment, args = {} }: ServiceP
             ...args,
             ports: args.ports || ports,
             selector: deployment.spec.selector.matchLabels,
-            // TODO: probably need to unwrap args.type in case it's a computed value
+            // CONSIDER: probably need to unwrap args.type in case it's a computed value
             type: args && (args.type as string),
         };
     });
 
     return new kx.Service(
-        serviceName,
+        serviceFileName,
         {
-            metadata: { namespace: deployment.metadata.namespace, name: serviceName },
+            metadata: deployment.metadata,
             spec: serviceSpec,
         },
         { parent: deployment }
