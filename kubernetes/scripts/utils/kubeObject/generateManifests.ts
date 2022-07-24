@@ -3,15 +3,14 @@ import c from 'chalk';
 import p from 'path';
 import sh from 'shelljs';
 import {
-    getGeneratedCrdsCodeDir,
     getGeneratedEnvManifestsDir,
     getMainBaseDir,
 } from '../../../resources/shared/manifestsDirectory';
 import { ImageTags } from '../../../resources/shared/validations';
 import { getEnvVarsForScript, handleShellError } from '../shared';
-import path from 'path';
-import { TKubeObject, TCustomResourceDefinitionObject, KubeObject } from './kubeObject';
+import { TKubeObject, KubeObject } from './kubeObject';
 import { getImageTagsFromDir } from '../getImageTagsFromDir';
+import { syncCrdsCode } from './syncCrdsCode';
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 */
@@ -51,15 +50,8 @@ export async function generateManifests(kubeObject: KubeObject) {
 
     sh.echo(c.blueBright(`SYNC CRDS CODE`));
 
-    syncCrdsCode(kubeObject.getOfAKind('CustomResourceDefinition'));
 
     sh.rm('-rf', './login');
 }
 
-function syncCrdsCode(crdKubeObjects: TCustomResourceDefinitionObject[]) {
-    const manifestsCrdsFiles = crdKubeObjects.map(({ path }) => path);
-    const outDir = path.join(getMainBaseDir(), 'crds-generated');
 
-    sh.exec(` crd2pulumi --nodejsPath ${outDir} ${manifestsCrdsFiles.join(' ')} --force`);
-    sh.exec(`npx prettier --write ${getGeneratedCrdsCodeDir()}`);
-}

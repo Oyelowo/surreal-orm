@@ -11,6 +11,7 @@ import { SealedSecretTemplate } from '../../../resources/types/sealedSecretTempl
 import { selectSecretKubeObjectsFromPrompt } from './SecretsSelectorPrompter';
 import { generateManifests } from './generateManifests';
 import { getImageTagsFromDir } from '../getImageTagsFromDir';
+import { syncCrdsCode } from './syncCrdsCode';
 
 type ResourceKind =
     | 'Secret'
@@ -81,7 +82,8 @@ export class KubeObject {
     };
 
     generateManifests = async () => {
-        generateManifests(this);
+        await generateManifests(this);
+        syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
         this.sync();
     };
 
