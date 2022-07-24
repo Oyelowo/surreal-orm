@@ -98,15 +98,15 @@ portForward:
       port: 6379
       localPort: 6379 # *Optional*
 
-# - resourceType: service
-#   resourceName: graphql-postgres
-#   port: 8000
-#   localPort: 8000
+    # - resourceType: service
+    #   resourceName: graphql-postgres
+    #   port: 8000
+    #   localPort: 8000
 
-# - resourceType: service
-#   resourceName: grpc-mongo
-#   port: 50051
-#   localPort: 50051
+    # - resourceType: service
+    #   resourceName: grpc-mongo
+    #   port: 50051
+    #   localPort: 50051
 
     - resourceType: service
       # namespace: default

@@ -15,9 +15,9 @@ import { createLocalCluster } from './utils/createLocalCluster';
 
 async function main() {
     const { environment } = await promptEnvironmentSelection();
-    const isLocal = environment === "local";
+    const isLocal = environment === 'local';
     if (isLocal) {
-        const localCluster = await createLocalCluster()
+        const localCluster = await createLocalCluster();
         // await promptKubernetesClusterSwitch(environment);
 
         if (!localCluster.regenerateKubernetesManifests) {
@@ -33,7 +33,6 @@ async function main() {
         // const { deletePlainSecretsInput, deleteUnsealedSecretManifestsOutput } = await promptSecretsDeletionConfirmations();
         secretDeleter = await promptSecretsDeletionConfirmations();
     }
-
 
     const kubeObject = new KubeObject(environment);
     await kubeObject.generateManifests();
@@ -85,8 +84,7 @@ async function applySetupManifests(kubeObject: KubeObject) {
     applyResourceManifests('linkerd', kubeObject);
     applyResourceManifests('linkerd-viz', kubeObject);
 
-
-    if (kubeObject.getEnvironment() === "local") {
+    if (kubeObject.getEnvironment() === 'local') {
         sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true`);
     } else {
         applyResourceManifests('argocd', kubeObject);
@@ -94,7 +92,6 @@ async function applySetupManifests(kubeObject: KubeObject) {
         sh.exec('kubectl -n argocd rollout restart deployment argocd-argo-cd-server');
 
         applyResourceManifests('argocd-applications-parents', kubeObject);
-
     }
 }
 

@@ -15,7 +15,6 @@ type Props = {
     sealedSecretKubeObjects: TSealedSecretKubeObject[];
 };
 
-
 /*
 GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PULUMI.
 These secrets are encrypted using the bitnami sealed secret controller running in the cluster
@@ -28,7 +27,7 @@ export async function mergeUnsealedSecretToSealedSecret(props: Props) {
             sealedSecretAll: props.sealedSecretKubeObjects,
         });
     }
-};
+}
 
 function mergeUnsealedSecretToSealedSecretHelper({
     sealedSecretAll,
@@ -104,5 +103,4 @@ function mergeUnsealedSecretToSealedSecretHelper({
 
     // sh.exec(`echo '${yaml.dump(updatedSealedSecrets)}' > ${sealedSecretFilePath}`);
     sh.exec(`echo '${JSON.stringify(updatedSealedSecrets)}' | yq -P '.' -o yaml > ${sealedSecretFilePath}`);
-};
-
+}

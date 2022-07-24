@@ -138,7 +138,7 @@ which is cached locally but that would be more involved.
         mergeUnsealedSecretToSealedSecret({
             sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
             // Syncs all secrets
-            secretKubeObjects: this.getOfAKind("Secret"),
+            secretKubeObjects: this.getOfAKind('Secret'),
         });
 
         // Sync kube object info after sealed secrets manifests have been updated

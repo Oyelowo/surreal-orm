@@ -21,7 +21,9 @@ type AppSecretKeysWithinNamespaces = Record<Namespace, Record<AppName, SecretKey
          - infra 1
          - infra 2
  **/
-export async function selectSecretKubeObjectsFromPrompt(secretKubeObjects: TSecretKubeObject[]): Promise<TSecretKubeObject[]> {
+export async function selectSecretKubeObjectsFromPrompt(
+    secretKubeObjects: TSecretKubeObject[]
+): Promise<TSecretKubeObject[]> {
     // We want applications secrets first
     const secretKubeObjectsSorted = _.sortBy(secretKubeObjects, [(a) => a.metadata.namespace !== 'applications']);
     const sercretObjectsByNamespace = _.groupBy(secretKubeObjects, (d) => d.metadata.namespace);

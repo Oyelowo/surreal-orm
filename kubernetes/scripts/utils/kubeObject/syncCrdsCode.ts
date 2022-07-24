@@ -3,7 +3,6 @@ import { getGeneratedCrdsCodeDir, getMainBaseDir } from '../../../resources/shar
 import path from 'path';
 import { TCustomResourceDefinitionObject } from './kubeObject';
 
-
 export function syncCrdsCode(crdKubeObjects: TCustomResourceDefinitionObject[]) {
     const manifestsCrdsFiles = crdKubeObjects.map(({ path }) => path);
     const outDir = path.join(getMainBaseDir(), 'crds-generated');

@@ -8,5 +8,5 @@ syncEtcHostsWithCustomHosts();
 syncHelmChartTypesDeclarations();
 syncSecretsTsFiles();
 
-const kubeObject = new KubeObject("local")
+const kubeObject = new KubeObject('local');
 syncCrdsCode(kubeObject.getOfAKind('CustomResourceDefinition'));

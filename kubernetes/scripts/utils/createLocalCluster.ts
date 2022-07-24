@@ -25,11 +25,9 @@ export async function createLocalCluster() {
     sh.exec(`kubectx k3d-${clusterName}`);
 
     return {
-        regenerateKubernetesManifests
-    }
-
+        regenerateKubernetesManifests,
+    };
 }
-
 
 async function promptQuestions() {
     const DEFAULT_CLUSTER_NAME = 'local';
@@ -54,9 +52,7 @@ async function promptQuestions() {
         {
             type: 'confirm',
             name: regenerateKubernetesManifests,
-            message: chalk.blueBright(
-                `🆘Would you like to sync the local Kubernetes manifests?? ‼️‼️‼️‼️`
-            ),
+            message: chalk.blueBright(`🆘Would you like to sync the local Kubernetes manifests?? ‼️‼️‼️‼️`),
             default: false,
         },
     ]);
