@@ -72,9 +72,9 @@ export async function selectSecretKubeObjectsFromPrompt(
     return secretKubeObjects.map((s) => {
         const { name, namespace } = s?.metadata ?? {};
         if (!namespace) {
-            throw new Error("erer");
-            
+            throw new Error("Namespace not found in secret");
         }
+        
         return {
             ...s,
             selectedSecretsForUpdate: secretkeysData[namespace][name]
