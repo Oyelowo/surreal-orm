@@ -1,10 +1,13 @@
+import { ResourceName } from './../../../resources/types/own-types';
+import { NamespaceList } from '@pulumi/kubernetes/core/v1';
+import { Namespace } from './../../../resources/infrastructure/namespaces/util';
 import { mergeUnsealedSecretToSealedSecret } from './SealedSecretsManager';
 import sh from 'shelljs';
 import _ from 'lodash';
-import { z } from 'zod';
+import z from 'zod';
 import { namespaceSchema } from '../../../resources/infrastructure/namespaces/util';
 import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../resources/shared/manifestsDirectory';
-import { ResourceName, Environment } from '../../../resources/types/own-types';
+import type { Environment } from '../../../resources/types/own-types';
 import { handleShellError } from '../shared';
 import { selectSecretKubeObjectsFromPrompt } from './SecretsSelectorPrompter';
 import { generateManifests } from './generateManifests';
@@ -19,7 +22,10 @@ type ResourceKind =
     | 'SealedSecret'
     | 'CustomResourceDefinition';
 
-const kubernetesResourceInfo = z.object({
+
+
+
+const kubeObjectSchema = z.object({
     kind: z.string(),
     apiVersion: z.string(),
     type: z.string().optional(),
@@ -28,7 +34,7 @@ const kubernetesResourceInfo = z.object({
         name: z.string(),
         // CRDS have namespace as null
         namespace: namespaceSchema.optional(),
-        annotations: z.record(z.string()).transform((p) => p),
+        annotations: z.record(z.string()),
     }),
     spec: z
         .object({
@@ -41,13 +47,18 @@ const kubernetesResourceInfo = z.object({
     stringData: z.record(z.string().nullable()).optional(),
 });
 
-type kubernetesResourceInfoZod = z.infer<typeof kubernetesResourceInfo>;
 
-type CreateKubeObject<K extends ResourceKind> = kubernetesResourceInfoZod & {
+
+
+type KubeObjectSchema = Required<z.infer<typeof kubeObjectSchema>>;
+
+type CreateKubeObject<K extends ResourceKind> = KubeObjectSchema & {
     kind: Extract<ResourceKind, K>;
 };
+
+
 export type TSecretKubeObject = CreateKubeObject<'Secret'> & {
-    selectedSecretsForUpdate: string[]
+    selectedSecretsForUpdate?: string[] | null;
 };
 export type TSealedSecretKubeObject = CreateKubeObject<'SealedSecret'>;
 export type TCustomResourceDefinitionObject = CreateKubeObject<'CustomResourceDefinition'>;
@@ -89,12 +100,14 @@ export class KubeObject {
         this.#kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
             if (!path) return acc;
             console.log('Extracting info from manifest', i);
+
             const info = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`));
 
             if (_.isEmpty(info)) return acc;
             // let's mutate to make it a bit faster and should be okay since we only do it here
             info.path = path;
-            const updatedPath = kubernetesResourceInfo.parse(info) as TKubeObject;
+
+            const updatedPath = kubeObjectSchema.parse(info) as TKubeObject;
 
             acc.push(updatedPath);
             return acc;
@@ -116,12 +129,11 @@ export class KubeObject {
     };
 
     getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
-        return (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind).map(p => ({ ...p, metadata: { ...p.metadata, allSecretKeys: Object.keys(p?.stringData ?? p.data) } }));
+        return (this.#kubeObjectsAll as CreateKubeObject<K>[])
+            .filter((o) => o.kind === kind)
     };
 
-    #getSecretsWithExtraMetadata = () => {
-        return this.getOfAKind('Secret').map(p => ({ ...p, selectedSecretsForUpdate: [] }))
-    }
+
 
     /**
 Sync all Sealed secrets. This is usually useful when you're bootstrapping
@@ -132,11 +144,14 @@ Side note: In the future, we can also allow this to use public key of the sealed
 which is cached locally but that would be more involved.
 */
     syncSealedSecrets = async () => {
-        // const k = this.getOfAKind('Secret').map(p => ({ ...p, metadata: { ...p.metadata, allSecretKeys: Object.keys(p?.stringData ?? p.data) } }))
+        const secrets: TSecretKubeObject[] = this.getOfAKind('Secret').map((p) => ({
+            ...p,
+            // Syncs all secrets
+            selectedSecretsForUpdate: Object.keys(p.data ?? p.stringData ?? {}),
+        }));
         mergeUnsealedSecretToSealedSecret({
             sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
-            // Syncs all secrets
-            secretKubeObjects: this.#getSecretsWithExtraMetadata(),
+            secretKubeObjects: secrets,
         });
 
         // Sync kube object info after sealed secrets manifests have been updated
@@ -149,7 +164,7 @@ when you want to update Secrets in an existing cluster. Plain kubernetes
 secrets should never be pushed to git but they help to generate sealed secrets.
 */
     syncSealedSecretsWithPrompt = async () => {
-        const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(this.#getSecretsWithExtraMetadata());
+        const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(this.getOfAKind("Secret"));
 
         mergeUnsealedSecretToSealedSecret({
             sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),

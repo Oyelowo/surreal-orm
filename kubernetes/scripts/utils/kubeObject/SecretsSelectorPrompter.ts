@@ -5,8 +5,8 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { Namespace } from '../../../resources/infrastructure/namespaces/util';
 
-type AppName = ResourceName | string;
 type SecretKey = string;
+type AppSecretKeysWithinNamespaces = Record<Namespace, Record<ResourceName | string, SecretKey[]>>;
 
 /**  Cli command that prompts user to select from a list of applications separated/grouped by their namespaces
  * After, the first prompt, user has to input the exact secret keys of a resource they want to update
@@ -23,9 +23,9 @@ type SecretKey = string;
 export async function selectSecretKubeObjectsFromPrompt(
     secretKubeObjects: TSecretKubeObject[]
 ): Promise<TSecretKubeObject[]> {
-    // We want applications secrets first
-    const secretKubeObjectsSorted = _.sortBy(secretKubeObjects, [(a) => a.metadata.namespace !== 'applications']);
-    const sercretObjectsByNamespace = _.groupBy(secretKubeObjectsSorted, (d) => d.metadata.namespace);
+    // We want secrets in applications namesapce first
+    const secretKubeObjectsSorted = _.sortBy(secretKubeObjects, [(s) => s.metadata.namespace !== 'applications']);
+    const sercretObjectsByNamespace = _.groupBy(secretKubeObjectsSorted, (s) => s.metadata.namespace);
 
     // Name and value have to be defined for inquirer if not using basic string
     const mapToPrompterValues = (secret: TKubeObject): { name: string; value: TKubeObject } => ({
@@ -50,13 +50,12 @@ export async function selectSecretKubeObjectsFromPrompt(
         ...namespaceSecretObjects.map(mapToPrompterValues),
     ]);
 
-    const selectedSecretObjectsKeyName = 'selectedSecretObjects';
     const promptResponse = await inquirer.prompt<{
-        [selectedSecretObjectsKeyName]: TSecretKubeObject[];
+        selectedSecretObjects: TSecretKubeObject[];
     }>({
         type: 'checkbox',
         message: 'Which of the secrets do you want to update?',
-        name: selectedSecretObjectsKeyName,
+        name: "selectedSecretObjects",
         choices: applicationList,
         validate(answer) {
             if (answer.length < 1) {
@@ -68,27 +67,18 @@ export async function selectSecretKubeObjectsFromPrompt(
         pageSize: 2000,
     });
 
-    const allSelected = secretKubeObjects.length === promptResponse.selectedSecretObjects.length;
-    if (allSelected) {
-        return secretKubeObjects;
-    }
+    const secretkeysData = await promptSecretObjectDataSelection(promptResponse.selectedSecretObjects)
 
-    return await promptSecretDataSelection(promptResponse.selectedSecretObjects);
+    return secretKubeObjects.map((s) => {
+        const { name, namespace } = s?.metadata ?? {};
+  
+        return {
+            ...s,
+            selectedSecretsForUpdate: secretkeysData[namespace][name]
+        }
+    })
 }
 
-
-/** @example
- * {
- *    namespace1 : {
- *          app1 : [secretKey1, secretKey2]
- *      },
- *    namespace2 : {
- *          appx : [secretKeyx, secretKeyx]
- *      }
- *  }
- * 
-*/
-type AppSecretKeysWithinNamespaces = Record<Namespace, Record<AppName, SecretKey[]>>;
 
 
 /** Creates a list of Command line prompts that appear one after the other for
@@ -103,9 +93,9 @@ type AppSecretKeysWithinNamespaces = Record<Namespace, Record<AppName, SecretKey
  * PASSWORD
  * ...
  */
-async function promptSecretDataSelection(
+async function promptSecretObjectDataSelection(
     secretKubeObjects: TSecretKubeObject[]
-): Promise<TSecretKubeObject[]> {
+): Promise<AppSecretKeysWithinNamespaces> {
 
     const createAppSecretDataSelectionPrompt = (resource: TSecretKubeObject) => {
         const { name, namespace } = resource.metadata;
@@ -121,69 +111,8 @@ async function promptSecretDataSelection(
     };
 
     // We many prompts which for all secrets in various namepsaces appear one after the other
-    const selectedSecretsDataKeys = await inquirer.prompt<AppSecretKeysWithinNamespaces>(
+    return await inquirer.prompt<AppSecretKeysWithinNamespaces>(
         secretKubeObjects.map(createAppSecretDataSelectionPrompt)
     );
-
-    return pickBySelectedSecretDataKeys(secretKubeObjects, selectedSecretsDataKeys);
 }
 
-type Po = {
-    key: `${Namespace}.${ResourceName}`,
-    secretsToBeSealed: string[]
-}
-
-
-/**
- * Picks out the selected Secret data key from within
- * all Secret kubeObjectInfo
- * @example
- * # For each of the Secret kubeObjectInfos(like below), you can pick out "USERNAME" & "PASSWORD"
- * # Before ....
- * Kind: Secret,
- * metadata: { name: "oyelowo-app", namespace: "application"},
- * data: {
- *    USERNAME: "oyelowo"
- *    PASSWORD: "123"
- *    CLIENT_ID: "itrirt"
- *    CLIENT_SECRET: "mmomonienre",
- * }
- *
- * # After ....
- * Kind: Secret,
- * metadata: { name: "oyelowo-app", namespace: "application"},
- * data: {
- *    USERNAME: "oyelowo"
- *    PASSWORD: "123"
- * }
- * ...
- * */
-function pickBySelectedSecretDataKeys(
-    secretObjects: TSecretKubeObject[],
-    secretDataKeys: AppSecretKeysWithinNamespaces
-): TSecretKubeObject[] {
-    return secretObjects?.map((secretObj) => {
-        const { name, namespace } = secretObj.metadata;
-        const { stringData, data } = secretObj;
-
-        if (!namespace) {
-            throw new Error(`namespace missing for ${name}`);
-        }
-
-        if (!stringData && !data) {
-            throw new Error('data or stringData field missing in secret Resource');
-        }
-
-        const secretDataKeyName = stringData ? 'stringData' : 'data';
-        const secretData = secretObj[secretDataKeyName] ?? {};
-        const selectedSecretDataKeys = secretDataKeys[namespace][name];
-
-        const filteredSecretRecords = _.pickBy(secretData, (_v, k) => selectedSecretDataKeys.includes(k));
-
-        return {
-            ...secretObj,
-            selectedSecretsForUpdate: Object.keys(filteredSecretRecords),
-            // [secretDataKeyName]: filteredSecretRecords,
-        };
-    });
-}

@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@anatine/zod-mock@^3.3.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@anatine/zod-mock/-/zod-mock-3.3.0.tgz#71d612b821b596235476039ebbc548a857d6d9f3"
-  integrity sha512-0VxF/TlHCOXeYeBeLEzsss89bSVxxBupBEH9Ki0KkysFOVwV/sV82yPdjNIRzF4ZJ+MhH6zvZCSd69MAnkoE3w==
+"@anatine/zod-mock@^3.5.2":
+  version "3.5.2"
+  resolved "https://registry.yarnpkg.com/@anatine/zod-mock/-/zod-mock-3.5.2.tgz#e44fdc4261bb7c39a0c934117f41c02e4772fa23"
+  integrity sha512-CKc4ffdT4j3LqsAtwLS+GFI1NJ+FKfmu4VjSHMTWFxyF1vYc6BJna3RibT5yzSTvTGtk5ACiYZXyPIr3NGAugg==
   dependencies:
     randexp "^0.5.3"
 

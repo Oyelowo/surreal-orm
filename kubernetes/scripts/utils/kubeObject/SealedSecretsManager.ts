@@ -20,6 +20,7 @@ These secrets are encrypted using the bitnami sealed secret controller running i
 you are at present context
 */
 export async function mergeUnsealedSecretToSealedSecret(props: Props) {
+    console.log("props", props);
     for (const secret of props.secretKubeObjects) {
         mergeUnsealedSecretToSealedSecretHelper({
             secretKubeObject: secret,
@@ -35,7 +36,7 @@ function mergeUnsealedSecretToSealedSecretHelper({
     secretKubeObject: TSecretKubeObject;
     sealedSecretKubeObjects: TSealedSecretKubeObject[];
 }): void {
-    const { data, stringData } = secretKubeObject;
+    const { data, stringData, selectedSecretsForUpdate } = secretKubeObject;
     const { name, namespace /* annotations */ } = secretKubeObject.metadata;
 
     if (!name && namespace) {
@@ -57,13 +58,21 @@ function mergeUnsealedSecretToSealedSecretHelper({
             .stdout.trim();
     };
 
-    const dataToSeal = stringData ?? data ?? {};
-    const updatedSealedSecretsData = _.mapValues(dataToSeal, sealSecretValue);
+    const secretData = stringData ?? data ?? {}
 
-    const encryptedData = {
-        ...existingSealedSecretJsonData?.spec?.encryptedData,
-        ...updatedSealedSecretsData,
+    // Pick only selected secrets for encytption
+    const filteredSecretData = _.pickBy(secretData, (_v, k) => selectedSecretsForUpdate?.includes(k));
+    const updatedSealedSecretsData = _.mapValues(filteredSecretData, sealSecretValue);
+
+    // Merge new secrets with old
+    const encryptedData: Record<string, string> = {
+        // ...existingSealedSecretJsonData?.spec?.encryptedData,
+        // ...updatedSealedSecretsData,
     }
+
+    // Remove stale/unsed encrypted secret
+    const unfilteredSecretKeys = Object.keys(secretData) ?? [];
+    const mergedEncryptedData = _.pickBy(encryptedData, (_v, k) => unfilteredSecretKeys.includes(k))
 
     // Update sealed secret object to be converted to yaml
     const updatedSealedSecrets: SealedSecretTemplate = {
@@ -79,7 +88,7 @@ function mergeUnsealedSecretToSealedSecretHelper({
             ...existingSealedSecretJsonData?.metadata,
         },
         spec: {
-            encryptedData,
+            encryptedData: mergedEncryptedData,
             template: {
                 ...existingSealedSecretJsonData?.spec?.template,
                 data: null,
