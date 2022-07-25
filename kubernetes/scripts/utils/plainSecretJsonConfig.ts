@@ -83,9 +83,9 @@ function emptyObjectValues(object: any) {
 const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 
 export class PlainSecretJsonConfig<App extends ResourceName> {
-    constructor(private resourceName: App, private environment: Environment) {}
+    constructor(private resourceName: App, private environment: Environment) { }
 
-    getSecrets=(): TSecretJson[App]=> {
+    getSecrets = (): TSecretJson[App] => {
         PlainSecretJsonConfig.syncAll();
 
         const secretsSchema = PlainSecretJsonConfig.getSecretsSchema({
@@ -98,7 +98,7 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
         ];
     }
 
-    static emptyValue=(environment: Environment): void =>{
+    static emptyValues = (environment: Environment): void => {
         sh.exec(`Empting secret JSON config for ${environment}`);
         sh.mkdir(PLAIN_SECRETS_CONFIGS_DIR);
         const envPath = this.#getSecretPath(environment);
