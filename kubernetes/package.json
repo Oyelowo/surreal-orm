@@ -1,7 +1,6 @@
 {
     "name": "oye",
     "scripts": {
-        "postinstall": "patch-package",
         "lint": "npx eslint . --ext .js,.ts",
         "lint-fix": "npx eslint . --ext .js,.ts",
         "prettier": "npx prettier --write .",
@@ -33,6 +32,8 @@
         "uuid": "^8.3.2"
     },
     "dependencies": {
+        "@anatine/zod-mock": "^3.5.2",
+        "@faker-js/faker": "^7.3.0",
         "@pulumi/docker": "^3.1.0",
         "@pulumi/kubernetes": "^3.15.1",
         "@pulumi/kubernetes-ingress-nginx": "^0.0.1",
@@ -41,6 +42,7 @@
         "@pulumi/random": "^4.3.1",
         "bcrypt": "^5.0.1",
         "chalk": "^4.1.0",
+        "eslint-plugin-unused-imports": "^2.0.0",
         "inquirer": "^8.2.2",
         "json-schema-to-ts": "^1.6.5",
         "json-schema-to-typescript": "^10.1.5",
@@ -51,6 +53,6 @@
         "ramda": "^0.28.0",
         "shelljs": "^0.8.5",
         "yargs": "^17.4.0",
-        "zod": "^3.14.3"
+        "zod": "^3.17.10"
     }
 }

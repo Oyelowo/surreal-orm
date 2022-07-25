@@ -1,10 +1,10 @@
-import { getSecretsForResource } from '../../../scripts/secretsManagement/getSecretsForApp';
 import { AppConfigs } from '../../types/own-types';
 import { getEnvironmentVariables } from '../../shared/validations';
 import { getBaseUrl } from '../../infrastructure/ingress/hosts';
+import { PlainSecretJsonConfig } from '../../../scripts/utils/plainSecretJsonConfig';
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
-const secretsFromLocalConfigs = getSecretsForResource('graphql-mongo', environment);
+const secretsFromLocalConfigs = new PlainSecretJsonConfig('graphql-mongo', environment).getSecrets();
 
 export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'mongodb', 'applications'> = {
     kubeConfig: {

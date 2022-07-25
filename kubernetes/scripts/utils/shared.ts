@@ -1,15 +1,9 @@
-import path from 'path';
-import { ResourceName } from './../../resources/types/own-types';
 import c from 'chalk';
 import fs from 'fs';
 import inquirer from 'inquirer';
 import sh, { ShellString } from 'shelljs';
 import { Environment } from '../../resources/types/own-types';
 import { ImageTags } from '../../resources/shared/validations';
-import { namespaceSchema } from './../../resources/infrastructure/namespaces/util';
-import { z } from 'zod';
-import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../resources/shared/manifestsDirectory';
-import _ from 'lodash';
 
 const ENVIRONMENT_KEY = 'ENVIRONMENT';
 export function getEnvVarsForScript(environment: Environment, imageTags: ImageTags) {

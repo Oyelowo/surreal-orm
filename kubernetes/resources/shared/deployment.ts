@@ -2,15 +2,17 @@ import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
 import * as argocd from '../../crds-generated/argoproj';
-import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp';
 import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker';
 import { createArgocdApplication } from './createArgoApplication';
 import { getPathToResource } from './manifestsDirectory';
 import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/own-types';
 import { getEnvironmentVariables } from './validations';
 import { generateService } from './helpers';
+import { PlainSecretJsonConfig } from '../../scripts/utils/plainSecretJsonConfig';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
+
+// eslint-disable-next-line no-restricted-syntax
 export class ServiceDeployment<
     AN extends ServiceName,
     DBT extends DBType,
@@ -56,7 +58,7 @@ export class ServiceDeployment<
             { provider: this.getProvider(), parent: this }
         );
 
-        const secrets = getSecretsForResource(this.appName, ENVIRONMENT);
+        const secrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
         // Create a Kubernetes Secret.
         this.secret = new kx.Secret(
             `${resourceName}-secret`,
@@ -220,7 +222,7 @@ export class ServiceDeployment<
     
     */
     #secretsObjectToEnv = (secretInstance: kx.Secret) => {
-        const secretObject = getSecretsForResource(this.appName, ENVIRONMENT);
+        const secretObject = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
         const keyValueEntries = Object.keys(secretObject).map((key) => [key, secretInstance.asEnvValue(key)]);
         return Object.fromEntries(keyValueEntries);
     };

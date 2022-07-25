@@ -1,11 +1,11 @@
 import * as kx from '@pulumi/kubernetesx';
 import { Resource } from '@pulumi/pulumi';
 import * as argocd from '../../crds-generated/argoproj';
-import { getSecretsForResource } from '../../scripts/secretsManagement/getSecretsForApp';
 import { Namespace, namespaces } from './../infrastructure/namespaces/util';
 import { getResourceProvider, getResourceRelativePath } from './manifestsDirectory';
 import { ResourceName } from '../types/own-types';
 import { getEnvironmentVariables } from './validations';
+import { PlainSecretJsonConfig } from '../../scripts/utils/plainSecretJsonConfig';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 
@@ -74,7 +74,7 @@ const metadata = {
     },
 };
 
-const secrets = getSecretsForResource('argocd', ENVIRONMENT);
+const secrets = new PlainSecretJsonConfig('argocd', ENVIRONMENT).getSecrets();
 export const argoCDApplicationsSecret = new kx.Secret(
     'argocd-secret',
     {
