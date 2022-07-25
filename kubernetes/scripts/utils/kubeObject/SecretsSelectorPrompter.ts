@@ -71,7 +71,10 @@ export async function selectSecretKubeObjectsFromPrompt(
 
     return secretKubeObjects.map((s) => {
         const { name, namespace } = s?.metadata ?? {};
-  
+        if (!namespace) {
+            throw new Error("erer");
+            
+        }
         return {
             ...s,
             selectedSecretsForUpdate: secretkeysData[namespace][name]
