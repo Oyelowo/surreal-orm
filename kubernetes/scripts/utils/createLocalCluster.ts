@@ -52,7 +52,7 @@ async function promptQuestions() {
         {
             type: 'confirm',
             name: regenerateKubernetesManifests,
-            message: chalk.blueBright(`🆘Would you like to sync the local Kubernetes manifests?? ‼️‼️‼️‼️`),
+            message: chalk.blueBright(`🆘Would you like to REBUILD the local Kubernetes manifests?? ‼️‼️‼️‼️`),
             default: false,
         },
     ]);
