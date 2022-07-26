@@ -20,7 +20,6 @@ These secrets are encrypted using the bitnami sealed secret controller running i
 you are at present context
 */
 export async function mergeUnsealedSecretToSealedSecret(props: Props) {
-    console.log("props", props);
     for (const secret of props.secretKubeObjects) {
         mergeUnsealedSecretToSealedSecretHelper({
             secretKubeObject: secret,
@@ -58,7 +57,7 @@ function mergeUnsealedSecretToSealedSecretHelper({
             .stdout.trim();
     };
 
-    const secretData = stringData ?? data ?? {}
+    const secretData = stringData ?? data ?? {};
 
     // Pick only selected secrets for encytption
     const filteredSecretData = _.pickBy(secretData, (_v, k) => selectedSecretsForUpdate?.includes(k));
@@ -68,11 +67,11 @@ function mergeUnsealedSecretToSealedSecretHelper({
     const encryptedData: Record<string, string> = {
         // ...existingSealedSecretJsonData?.spec?.encryptedData,
         // ...updatedSealedSecretsData,
-    }
+    };
 
     // Remove stale/unsed encrypted secret
     const unfilteredSecretKeys = Object.keys(secretData) ?? [];
-    const mergedEncryptedData = _.pickBy(encryptedData, (_v, k) => unfilteredSecretKeys.includes(k))
+    const mergedEncryptedData = _.pickBy(encryptedData, (_v, k) => unfilteredSecretKeys.includes(k));
 
     // Update sealed secret object to be converted to yaml
     const updatedSealedSecrets: SealedSecretTemplate = {
