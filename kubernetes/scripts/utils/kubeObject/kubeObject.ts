@@ -1,6 +1,4 @@
 import { ResourceName } from './../../../resources/types/own-types';
-import { NamespaceList } from '@pulumi/kubernetes/core/v1';
-import { Namespace } from './../../../resources/infrastructure/namespaces/util';
 import { mergeUnsealedSecretToSealedSecret } from './SealedSecretsManager';
 import sh from 'shelljs';
 import _ from 'lodash';
@@ -21,9 +19,6 @@ type ResourceKind =
     | 'Pod'
     | 'SealedSecret'
     | 'CustomResourceDefinition';
-
-
-
 
 const kubeObjectSchema = z.object({
     kind: z.string(),
@@ -47,15 +42,11 @@ const kubeObjectSchema = z.object({
     stringData: z.record(z.string().nullable()).optional(),
 });
 
-
-
-
 type KubeObjectSchema = Required<z.infer<typeof kubeObjectSchema>>;
 
 type CreateKubeObject<K extends ResourceKind> = KubeObjectSchema & {
     kind: Extract<ResourceKind, K>;
 };
-
 
 export type TSecretKubeObject = CreateKubeObject<'Secret'> & {
     selectedSecretsForUpdate?: string[] | null;
@@ -129,11 +120,8 @@ export class KubeObject {
     };
 
     getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
-        return (this.#kubeObjectsAll as CreateKubeObject<K>[])
-            .filter((o) => o.kind === kind)
+        return (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
     };
-
-
 
     /**
 Sync all Sealed secrets. This is usually useful when you're bootstrapping
@@ -164,7 +152,7 @@ when you want to update Secrets in an existing cluster. Plain kubernetes
 secrets should never be pushed to git but they help to generate sealed secrets.
 */
     syncSealedSecretsWithPrompt = async () => {
-        const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(this.getOfAKind("Secret"));
+        const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(this.getOfAKind('Secret'));
 
         mergeUnsealedSecretToSealedSecret({
             sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),

@@ -55,7 +55,7 @@ export async function selectSecretKubeObjectsFromPrompt(
     }>({
         type: 'checkbox',
         message: 'Which of the secrets do you want to update?',
-        name: "selectedSecretObjects",
+        name: 'selectedSecretObjects',
         choices: applicationList,
         validate(answer) {
             if (answer.length < 1) {
@@ -67,22 +67,20 @@ export async function selectSecretKubeObjectsFromPrompt(
         pageSize: 2000,
     });
 
-    const secretkeysData = await promptSecretObjectDataSelection(promptResponse.selectedSecretObjects)
+    const secretkeysData = await promptSecretObjectDataSelection(promptResponse.selectedSecretObjects);
 
     return secretKubeObjects.map((s) => {
         const { name, namespace } = s?.metadata ?? {};
         if (!namespace) {
-            throw new Error("Namespace not found in secret");
+            throw new Error('Namespace not found in secret');
         }
-        
+
         return {
             ...s,
-            selectedSecretsForUpdate: secretkeysData[namespace][name]
-        }
-    })
+            selectedSecretsForUpdate: secretkeysData[namespace][name],
+        };
+    });
 }
-
-
 
 /** Creates a list of Command line prompts that appear one after the other for
  *  selecting from data/StringData field of each Secret object.
@@ -99,11 +97,10 @@ export async function selectSecretKubeObjectsFromPrompt(
 async function promptSecretObjectDataSelection(
     secretKubeObjects: TSecretKubeObject[]
 ): Promise<AppSecretKeysWithinNamespaces> {
-
     const createAppSecretDataSelectionPrompt = (resource: TSecretKubeObject) => {
         const { name, namespace } = resource.metadata;
         const secretKeys = Object.keys(resource.stringData ?? resource.data ?? {});
-        const promptKey = `${namespace}.${name}`
+        const promptKey = `${namespace}.${name}`;
         return {
             type: 'checkbox',
             name: promptKey,
@@ -118,4 +115,3 @@ async function promptSecretObjectDataSelection(
         secretKubeObjects.map(createAppSecretDataSelectionPrompt)
     );
 }
-

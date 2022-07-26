@@ -21,7 +21,12 @@ const getSecretsSample = ({
     const string = z
         .string()
         .min(allowEmptyValues ? 0 : 1)
-        .transform(() => (isLocal ? 'example' : ''));
+        // We want to populate the values for local environment
+        // for the first time but not for other environments
+        // So that the dev can properly see which secrets have not been added
+        // it's okay to make mistake in local
+        .default(() => (isLocal ? 'example' : ''));
+
     const secretsSample = z.object({
         'graphql-mongo': z.object({
             MONGODB_USERNAME: string,
@@ -83,7 +88,7 @@ function emptyObjectValues(object: any) {
 const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 
 export class PlainSecretJsonConfig<App extends ResourceName> {
-    constructor(private resourceName: App, private environment: Environment) { }
+    constructor(private resourceName: App, private environment: Environment) {}
 
     getSecrets = (): TSecretJson[App] => {
         PlainSecretJsonConfig.syncAll();
@@ -96,7 +101,7 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
         return secretsSchema.strict().parse(PlainSecretJsonConfig.#getSecretJsonObject(this.environment))[
             this.resourceName
         ];
-    }
+    };
 
     static emptyValues = (environment: Environment): void => {
         sh.exec(`Empting secret JSON config for ${environment}`);
@@ -108,7 +113,7 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
 
         sh.exec(`echo '${JSON.stringify(isLocal ? mockData : emptyObjectValues(mockData))}' > ${envPath}`);
         sh.exec(`npx prettier --write ${envPath}`);
-    }
+    };
 
     static syncAll = (): void => {
         ENVIRONMENTS_ALL.forEach((environment) => {
