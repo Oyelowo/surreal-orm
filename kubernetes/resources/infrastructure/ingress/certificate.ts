@@ -1,4 +1,4 @@
-// import * as cm from './../../../crds-generated/certmanager';
+// import * as cm from './../../../generated-crds-ts/certmanager';
 // import { namespaceNames } from "../../shared"
 // import { CLUSTER_ISSUER_NAME } from "../cert-manager/clusterIssuer";
 // import { DNS_NAME_LINODE_BASE } from "./constant"

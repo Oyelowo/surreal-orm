@@ -1,4 +1,4 @@
-import * as cm from './../../../crds-generated/certmanager';
+import * as cm from './../../../generated-crds-ts/certmanager';
 import { namespaces } from '../namespaces/util';
 import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer';
 import { linkerdProvider } from './settings';

@@ -1,6 +1,6 @@
 import * as kx from '@pulumi/kubernetesx';
 import { Resource } from '@pulumi/pulumi';
-import * as argocd from '../../crds-generated/argoproj';
+import * as argocd from '../../generated-crds-ts/argoproj';
 import { Namespace, namespaces } from './../infrastructure/namespaces/util';
 import { getResourceProvider, getResourceRelativePath } from './manifestsDirectory';
 import { ResourceName } from '../types/own-types';
