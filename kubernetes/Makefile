@@ -18,7 +18,9 @@ format:
 	
 check:
 	yarn lint
-	yarn prettier-ci
+
+test:
+	# yarn test
 
 
 #############
