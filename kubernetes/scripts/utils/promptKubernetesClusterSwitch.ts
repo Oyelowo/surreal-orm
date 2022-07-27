@@ -8,7 +8,7 @@ import { Environment } from '../../resources/types/own-types';
 const switchToCluster = (name: string) => {
     const selectContext = sh.exec(`kubectl config use-context ${name}`, { silent: true });
     sh.echo(chalk.greenBright(`${selectContext.stdout} 🎉`));
-}
+};
 
 async function createCluster(clusterChoices: string[], likelyLocalCluster: (s: string) => boolean) {
     const newClusterDefaultNumberSuffix = _.chain(clusterChoices)
@@ -21,7 +21,6 @@ async function createCluster(clusterChoices: string[], likelyLocalCluster: (s: s
         .value();
 
     const DEFAULT_CLUSTER_NAME = `local-${newClusterDefaultNumberSuffix}`;
-
 
     const newClusterNameKey = 'newClusterName';
     const answerNewCluster = await inquirer.prompt<Record<typeof newClusterNameKey, boolean>>([
@@ -44,21 +43,15 @@ async function createCluster(clusterChoices: string[], likelyLocalCluster: (s: s
     switchToCluster(`k3d-${answerNewCluster.newClusterName}`);
 }
 
-
-
 const LOCAL_CLUSTER_REGEX = /local|k3d|k3d-local|minikube/g;
 const likelyLocalCluster = (s: string) => !!s.match(LOCAL_CLUSTER_REGEX);
 
 export function getClustersList() {
     const kubernetesContexts = sh.exec('kubectl config get-contexts --output=name', { silent: true });
-    const clusters = kubernetesContexts.stdout
-        .trim()
-        .split('\n');
+    const clusters = kubernetesContexts.stdout.trim().split('\n');
     const clusterChoices = _.sortBy(clusters, [likelyLocalCluster]);
     return clusterChoices;
 }
-
-
 
 /*
 Prompt cluster selection
@@ -66,13 +59,9 @@ Prompt cluster selection
 export async function promptKubernetesClusterSwitch(environment: Environment) {
     const clusterChoices = getClustersList();
 
-    const clusterChoicesWithSeparators = clusterChoices
-        .flatMap((ctx) => [ctx, new inquirer.Separator()]);
+    const clusterChoicesWithSeparators = clusterChoices.flatMap((ctx) => [ctx, new inquirer.Separator()]);
 
     const createNewLocalClusterOption = 'Create a new local cluster instead?';
-    console.log(clusterChoices);
-
-
 
     const name = 'cluster';
     const answers: Record<typeof name, string> = await inquirer.prompt([
@@ -92,11 +81,10 @@ export async function promptKubernetesClusterSwitch(environment: Environment) {
     ]);
 
     if (answers.cluster !== createNewLocalClusterOption) {
-        switchToCluster(answers.cluster)
+        switchToCluster(answers.cluster);
         return;
     }
 
-    // Create cluster 
+    // Create cluster
     await createCluster(clusterChoices, likelyLocalCluster);
-
 }

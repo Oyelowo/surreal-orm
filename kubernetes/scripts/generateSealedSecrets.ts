@@ -8,7 +8,8 @@ import { PlainSecretJsonConfig } from './utils/plainSecretJsonConfig';
 async function main() {
     const { environment } = await promptEnvironmentSelection();
     await promptKubernetesClusterSwitch(environment);
-    const { deletPlainJsonSecretsInput, deleteUnsealedSecretManifestsOutput } = await promptSecretsDeletionConfirmations();
+    const { deletPlainJsonSecretsInput, deleteUnsealedSecretManifestsOutput } =
+        await promptSecretsDeletionConfirmations();
 
     const kubeObject = new KubeObject(environment);
 

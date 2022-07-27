@@ -12,7 +12,6 @@ Expects that the cluster is already running and in user's local
 machine context
 */
 
-
 async function main() {
     const { environment } = await promptEnvironmentSelection();
 

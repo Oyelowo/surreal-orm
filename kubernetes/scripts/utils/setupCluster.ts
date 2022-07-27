@@ -9,8 +9,8 @@ import _ from 'lodash';
 import { KubeObject } from '../utils/kubeObject/kubeObject';
 
 export async function setupCluster(environment: Environment) {
-    const { deletPlainJsonSecretsInput, deleteUnsealedSecretManifestsOutput } = await promptSecretsDeletionConfirmations();
-
+    const { deletPlainJsonSecretsInput, deleteUnsealedSecretManifestsOutput } =
+        await promptSecretsDeletionConfirmations();
 
     const kubeObject = new KubeObject(environment);
     await kubeObject.generateManifests();
@@ -29,7 +29,6 @@ export async function setupCluster(environment: Environment) {
         });
     }
 }
-
 
 async function applySetupManifests(kubeObject: KubeObject) {
     // # Apply namespace first

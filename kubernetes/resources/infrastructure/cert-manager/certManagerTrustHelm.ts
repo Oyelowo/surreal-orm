@@ -1,4 +1,4 @@
-import { ICertmanagertrustjetstack } from './../../types/helm-charts/certManagerTrustJetstack';
+import { ICertmanagertrustjetstack } from '../../../generatedHelmCharts/certManagerTrustJetstack';
 import { certManagerProvider } from './settings';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 import * as k8s from '@pulumi/kubernetes';

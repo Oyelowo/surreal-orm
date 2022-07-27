@@ -4,7 +4,6 @@ import { PlainSecretJsonConfig } from './utils/plainSecretJsonConfig';
 import { syncEtcHostsWithCustomHosts } from './utils/syncEtcHostsWithCustomHosts';
 import { syncHelmChartTypesDeclarations } from './utils/syncHelmChartTypesDeclarations';
 
-
 syncEtcHostsWithCustomHosts();
 syncHelmChartTypesDeclarations();
 

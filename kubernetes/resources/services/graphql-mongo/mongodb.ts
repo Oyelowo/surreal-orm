@@ -1,4 +1,4 @@
-import { IMongodbbitnami } from './../../types/helm-charts/mongodbBitnami';
+import { IMongodbbitnami } from '../../../generatedHelmCharts/mongodbBitnami';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../../infrastructure/namespaces/util';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
