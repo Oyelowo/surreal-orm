@@ -5,7 +5,7 @@ import { TCustomResourceDefinitionObject } from './kubeObject';
 
 export function syncCrdsCode(crdKubeObjects: TCustomResourceDefinitionObject[]) {
     const manifestsCrdsFiles = crdKubeObjects.map(({ path }) => path);
-    const outDir = path.join(getMainBaseDir(), 'generated-crds-ts');
+    const outDir = path.join(getMainBaseDir(), 'generatedCrdsTs');
 
     sh.exec(` crd2pulumi --nodejsPath ${outDir} ${manifestsCrdsFiles.join(' ')} --force`);
     sh.exec(`npx prettier --write ${getGeneratedCrdsCodeDir()}`);

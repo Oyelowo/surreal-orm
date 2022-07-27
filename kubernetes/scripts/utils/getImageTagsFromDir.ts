@@ -3,12 +3,12 @@ import fs from 'fs';
 import glob from 'glob';
 import path from 'path';
 import util from 'util';
-import { getManifestsBaseDir } from '../../resources/shared/manifestsDirectory';
+import { getMainBaseDir } from '../../resources/shared/manifestsDirectory';
 import { ImageTags, imageTagsObjectValidator } from '../../resources/shared/validations';
 
 const globAsync = util.promisify(glob);
 
-const MANIFESTS_DIR = getManifestsBaseDir();
+const MANIFESTS_DIR = getMainBaseDir();
 const IMAGE_TAGS_FILES = path.join(MANIFESTS_DIR, 'image-tags', '*');
 
 export async function getImageTagsFromDir(): Promise<ImageTags> {
