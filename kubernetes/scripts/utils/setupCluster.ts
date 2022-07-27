@@ -1,25 +1,35 @@
+import { Environment } from './../../resources/types/own-types';
+import { PlainSecretJsonConfig } from '../utils/plainSecretJsonConfig';
 import sh from 'shelljs';
-import { promptEnvironmentSelection } from './utils/shared';
-import { namespaces } from '../resources/infrastructure/namespaces/util';
-import { helmChartsInfo } from '../resources/shared/helmChartInfo';
-import { ResourceName } from '../resources/types/own-types';
+import { promptSecretsDeletionConfirmations } from '../utils/promptSecretsDeletionConfirmations';
+import { namespaces } from '../../resources/infrastructure/namespaces/util';
+import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
+import { ResourceName } from '../../resources/types/own-types';
 import _ from 'lodash';
-import { KubeObject } from './utils/kubeObject/kubeObject';
-import { setupCluster } from './utils/setupCluster';
+import { KubeObject } from '../utils/kubeObject/kubeObject';
 
-/* 
-Expects that the cluster is already running and in user's local
-machine context
-*/
+export async function setupCluster(environment: Environment) {
+    const { deletPlainJsonSecretsInput, deleteUnsealedSecretManifestsOutput } = await promptSecretsDeletionConfirmations();
 
 
-async function main() {
-    const { environment } = await promptEnvironmentSelection();
+    const kubeObject = new KubeObject(environment);
+    await kubeObject.generateManifests();
 
-    setupCluster(environment);
+    PlainSecretJsonConfig.syncAll();
+
+    await applySetupManifests(kubeObject);
+
+    if (deletPlainJsonSecretsInput) {
+        PlainSecretJsonConfig.emptyValues(environment);
+    }
+
+    if (deleteUnsealedSecretManifestsOutput) {
+        kubeObject.getOfAKind('Secret').forEach((o) => {
+            sh.rm('-rf', o.path);
+        });
+    }
 }
 
-main();
 
 async function applySetupManifests(kubeObject: KubeObject) {
     // # Apply namespace first

@@ -1,38 +1,41 @@
-setup:
-	make sync
-	# npx ts-node scripts/syncConfigs.ts
-
+#############
+## STANDARD
+#############
 install:
-	npm i
+	yarn install
+	make sync
 
 sync:
 	npx ts-node scripts/syncConfigs.ts
-	make generate_manifests_ci environment=local 
 	make format
+
+dev:
+	npx ts-node scripts/bootstrapLocalCluster.ts
+
+format:
+	yarn prettier
+	yarn lint --fix
+	
+check:
+	yarn lint
+	yarn prettier-ci
+
+
+#############
+## INFRA SPECIFIC
+#############
+bootsrap_cluster:
+	npx ts-node scripts/bootstrapCluster.ts
 
 # EXAMPLE USAGE: make generate_manifests_ci environment=local
 # environment options: local, development, staging, production
 generate_manifests_ci:
-	# make sync
 	npx ts-node scripts/generateManifestsCI.ts --environment=$(environment)
 
-bootstrap_cluster:
-	npx ts-node scripts/bootstrapCluster.ts
-
-sync_sealed_secrets:
-	npx ts-node scripts/syncSealedSecrets.ts
-
-dev:
-	npx ts-node scripts/startAppInLocalCluster.ts
+generatae_sealed_secrets:
+	npx ts-node scripts/generateSealedSecrets.ts
 
 merge-kube-config:
 # Example Usage:  make merge-kube-config path=config.yaml  
 	cp ~/.kube/config ~/.kube/config.bak && KUBECONFIG=~/.kube/config:$(path) kubectl config view --flatten > /tmp/config && mv /tmp/config ~/.kube/config
 # cp ~/.kube/config ~/.kube/config.bak && KUBECONFIG=~/.kube/config:/path/to/new/config kubectl config view --flatten > /tmp/config && mv /tmp/config ~/.kube/config
-
-
-format:
-	npm run prettier
-
-check:
-	npm run lint

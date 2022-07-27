@@ -4,8 +4,10 @@ import { PlainSecretJsonConfig } from './utils/plainSecretJsonConfig';
 import { syncEtcHostsWithCustomHosts } from './utils/syncEtcHostsWithCustomHosts';
 import { syncHelmChartTypesDeclarations } from './utils/syncHelmChartTypesDeclarations';
 
+
 syncEtcHostsWithCustomHosts();
 syncHelmChartTypesDeclarations();
+
 PlainSecretJsonConfig.syncAll();
 
 // Use local manifests to syn/generate new CRD codes

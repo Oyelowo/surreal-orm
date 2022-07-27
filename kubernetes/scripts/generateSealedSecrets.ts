@@ -8,7 +8,7 @@ import { PlainSecretJsonConfig } from './utils/plainSecretJsonConfig';
 async function main() {
     const { environment } = await promptEnvironmentSelection();
     await promptKubernetesClusterSwitch(environment);
-    const { deletePlainSecretsInput, deleteUnsealedSecretManifestsOutput } = await promptSecretsDeletionConfirmations();
+    const { deletPlainJsonSecretsInput, deleteUnsealedSecretManifestsOutput } = await promptSecretsDeletionConfirmations();
 
     const kubeObject = new KubeObject(environment);
 
@@ -18,7 +18,7 @@ async function main() {
     // This requires the cluster to be on and switch to its context
     kubeObject.syncSealedSecretsWithPrompt();
 
-    if (deletePlainSecretsInput) {
+    if (deletPlainJsonSecretsInput) {
         PlainSecretJsonConfig.emptyValues(environment);
     }
 
