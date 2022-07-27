@@ -14,9 +14,9 @@ e.g to start local kubernetes cluster with all apps running with live reloading
 ```
 
 
-| Commands   |      Are      
+| Commands   |      Purpose      
 |----------|:-------------:
-|  setup    |  when fresh clone | 
+|  setup    |  To setup the codebase for development| 
 |  install  |    install packages   |   
 |  upgrade  | upgrade packages |    
 |  sync     | synchronize/generate local code e.g graphql queries, kubernetes configs etc |    
