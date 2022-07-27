@@ -1,4 +1,4 @@
-import { ILinkerdvizlinkerd } from '../../../generatedHelmCharts/linkerdVizLinkerd';
+import { ILinkerdvizlinkerd } from '../../../generatedHelmChartsTsTypes/linkerdVizLinkerd';
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as bcrypt from 'bcrypt';

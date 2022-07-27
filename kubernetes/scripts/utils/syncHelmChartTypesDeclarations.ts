@@ -1,9 +1,16 @@
-import { getHelmChartTypesDir } from '../../resources/shared/manifestsDirectory';
+
 import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
 import chalk from 'chalk';
 import sh from 'shelljs';
 import JsonToTS from 'json-to-ts';
 import _ from 'lodash';
+import { getMainBaseDir } from '../../resources/shared/manifestsDirectory';
+import path from 'path';
+
+export const getHelmChartTypesDir = () => {
+    const BASE_DIR = getMainBaseDir();
+    return path.join(BASE_DIR, 'generatedHelmChartsTsTypes');
+};
 
 export function syncHelmChartTypesDeclarations() {
     const helmChartsDir = getHelmChartTypesDir();

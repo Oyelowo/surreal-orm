@@ -1,4 +1,4 @@
-import { IPostgresqlbitnami } from '../../../generatedHelmCharts/postgresqlBitnami';
+import { IPostgresqlbitnami } from '../../../generatedHelmChartsTsTypes/postgresqlBitnami';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../../infrastructure/namespaces/util';
 import { helmChartsInfo } from '../../shared/helmChartInfo';

@@ -1,4 +1,4 @@
-import { ILinkerd2linkerd } from '../../../generatedHelmCharts/linkerd2Linkerd';
+import { ILinkerd2linkerd } from '../../../generatedHelmChartsTsTypes/linkerd2Linkerd';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util';
 import { DeepPartial } from '../../types/own-types';

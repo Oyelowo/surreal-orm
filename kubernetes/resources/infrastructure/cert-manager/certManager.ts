@@ -1,4 +1,4 @@
-import { ICertmanagerbitnami } from '../../../generatedHelmCharts/certManagerBitnami';
+import { ICertmanagerbitnami } from '../../../generatedHelmChartsTsTypes/certManagerBitnami';
 import { helmChartsInfo } from './../../shared/helmChartInfo';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util';
