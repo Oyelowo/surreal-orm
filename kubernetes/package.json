@@ -4,7 +4,8 @@
         "lint-check": "npx eslint . --ext .js,.ts",
         "lint-fix": "npx eslint . --ext .js,.ts",
         "prettier": "npx prettier --write .",
-        "prettier-check": "npx prettier --check ."
+        "prettier-check": "npx prettier --check .",
+        "upgrade-interactive": "yarn upgrade-interactive --latest"
     },
     "devDependencies": {
         "@types/bcrypt": "^5.0.0",

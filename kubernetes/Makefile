@@ -5,6 +5,10 @@ install:
 	yarn install
 	make sync
 
+upgrade:
+	yarn install
+	make sync
+
 sync:
 	npx ts-node scripts/syncConfigs.ts
 	make format
