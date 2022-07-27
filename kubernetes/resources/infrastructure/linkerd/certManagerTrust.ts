@@ -1,4 +1,4 @@
-import * as cmt from './../../../generated-crds-ts/trust';
+import * as cmt from './../../../generatedCrdsTs/trust';
 
 import { certManagerProvider } from './../cert-manager/settings';
 import { LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME } from './certManagerCAIssuer';
