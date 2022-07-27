@@ -2,13 +2,13 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 
 export async function promptSecretsDeletionConfirmations() {
-    const deletePlainSecretsInput = 'deletePlainSecretsInput';
+    const deletPlainJsonSecretsInput = 'deletPlainJsonSecretsInput';
     const deleteUnsealedSecretManifestsOutput = 'deleteUnsealedSecretManifestsOutput';
-    type Key = typeof deletePlainSecretsInput | typeof deleteUnsealedSecretManifestsOutput;
+    type Key = typeof deletPlainJsonSecretsInput | typeof deleteUnsealedSecretManifestsOutput;
     const answers = await inquirer.prompt<Record<Key, boolean>>([
         {
             type: 'confirm',
-            name: deletePlainSecretsInput,
+            name: deletPlainJsonSecretsInput,
             message: chalk.greenBright(
                 '🆘Do you want to delete the plain secrets used for generating the sealed secrets? ‼️‼️‼️‼️'
             ),

@@ -1,21 +1,41 @@
-gen:
-	# make generate-graphql-mongo-graphql-schema
-	cargo run -p graphql-mongo --bin graphql_generator_graphql_mongo
-	# cargo run -p graphql-mongo --bin graphql_generator_graphql_postgres
+#############
+## STANDARD
+#############
+install:
+	cargo install cargo-edit  
 
-fmt:
+upgrade:
+	cargo update
+
+sync:
+# Update graphql schemas which is then consumed by the frontend graphql build script
+	cargo run -p graphql-mongo --bin graphql_generator_graphql_mongo
+	# cargo run -p graphql-postgres --bin graphql_generator_graphql_postgres
+
+dev:
+	cargo run -p graphql-mongo --bin graphql-mongo
+
+format:
 	SQLX_OFFLINE=true cargo fmt --all -- --check
 	SQLX_OFFLINE=true cargo clippy --fix
-
-clippy:
+	
+check:
 	SQLX_OFFLINE=true cargo clippy -- -D  warnings
-
-clippy-fix:
-	SQLX_OFFLINE=true cargo clippy --fix
 
 test:
 	SQLX_OFFLINE=true cargo test
 
+build:
+	cargo build
+
+run:
+	cargo run -p graphql-mongo --bin graphql-mongo
+
+
+
+##############
+## Others
+##############
 # 1. graphql-mongo
 run-graphql-mongo:
 	cargo run -p graphql-mongo --bin graphql-mongo

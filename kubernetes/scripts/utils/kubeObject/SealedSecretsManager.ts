@@ -99,8 +99,8 @@ function mergeUnsealedSecretToSealedSecretHelper({
 
     // GET SEALED SECRET PATH USING UNSEALED SECRET PATH
     const appManifestsDir = p.dirname(secretKubeObject.path);
-    // The path format is: kubernetes/manifests/generated/production/applications/graphql-mongo/1-manifest
-    // and we want as basedir: kubernetes/manifests/generated/production/applications/graphql-mongo
+    // The path format is: kubernetesgeneratedManifestsgenerated/production/applications/graphql-mongo/1-manifest
+    // and we want as basedir: kubernetesgeneratedManifestsgenerated/production/applications/graphql-mongo
     const appBaseDir = p.join(appManifestsDir, '..');
     const sealedSecretDir = p.join(appBaseDir, SEALED_SECRETS_CONTROLLER_NAME);
     sh.mkdir(sealedSecretDir);

@@ -2,7 +2,7 @@
 build
 coverage
 node_modules
-crds-generated
-manifests
+generatedCrdsTs
+generatedManifests
 k3d.yaml
 resources/types/helm-charts

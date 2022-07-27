@@ -9,7 +9,7 @@ export const getMainBaseDir = () => {
 };
 
 export const getManifestsBaseDir = () => {
-    const MANIFESTS_DIR = path.join(getMainBaseDir(), 'manifests');
+    const MANIFESTS_DIR = path.join(getMainBaseDir(), 'generatedManifests');
     return MANIFESTS_DIR;
 };
 
@@ -25,13 +25,8 @@ export const getGeneratedEnvManifestsDir = (environment: Environment) => {
 
 export const getGeneratedCrdsCodeDir = () => {
     const baseDir = getMainBaseDir();
-    return path.join(baseDir, 'crds-generated');
-};
-
-export const getHelmChartTypesDir = () => {
-    const BASE_DIR = getMainBaseDir();
-    return path.join(BASE_DIR, 'resources', 'types', 'helm-charts');
-};
+    return path.join(baseDir, 'generatedCrdsTs');
+}
 
 export const getPathToResourcesDir = (
     resourceName: ResourceName,
@@ -42,7 +37,7 @@ export const getPathToResourcesDir = (
 };
 
 /**
- * e.g /manifests/generated/local/infrastructure/1-manifest
+ * e.g generatedManifestsgenerated/local/infrastructure/1-manifest
  *                               /infrastructure/1-crd
  *                               /infrastructure/sealed-secrets
  */

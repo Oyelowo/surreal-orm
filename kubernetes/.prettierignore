@@ -3,5 +3,6 @@ build
 coverage
 node_modules
 crd2pulumi
-manifests
+generatedCrdsTs
+generatedManifests
 k3d.yaml

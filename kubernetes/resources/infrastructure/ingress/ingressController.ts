@@ -1,5 +1,5 @@
 import { ingressControllerPorts } from './hosts';
-import { INginxingresscontrollerbitnami } from './../../types/helm-charts/nginxIngressControllerBitnami';
+import { INginxingresscontrollerbitnami } from '../../../generatedHelmChartsTsTypes/nginxIngressControllerBitnami';
 import * as k8s from '@pulumi/kubernetes';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
 import { RecursivePartial } from '../../types/own-types';

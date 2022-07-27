@@ -1,52 +1,21 @@
-import { PlainSecretJsonConfig } from './utils/plainSecretJsonConfig';
 import sh from 'shelljs';
-import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
-import { promptSecretsDeletionConfirmations } from './utils/promptSecretsDeletionConfirmations';
 import { promptEnvironmentSelection } from './utils/shared';
 import { namespaces } from '../resources/infrastructure/namespaces/util';
 import { helmChartsInfo } from '../resources/shared/helmChartInfo';
 import { ResourceName } from '../resources/types/own-types';
 import _ from 'lodash';
 import { KubeObject } from './utils/kubeObject/kubeObject';
-import { createLocalCluster } from './utils/createLocalCluster';
+import { setupCluster } from './utils/setupCluster';
+
+/* 
+Expects that the cluster is already running and in user's local
+machine context
+*/
 
 async function main() {
     const { environment } = await promptEnvironmentSelection();
-    const isLocal = environment === 'local';
-    if (isLocal) {
-        const localCluster = await createLocalCluster();
-        // await promptKubernetesClusterSwitch(environment);
 
-        if (!localCluster.regenerateKubernetesManifests) {
-            sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true`);
-            // return;
-        }
-    }
-
-    await promptKubernetesClusterSwitch(environment);
-
-    let secretDeleter: Awaited<ReturnType<typeof promptSecretsDeletionConfirmations>> | null = null;
-    if (isLocal) {
-        // const { deletePlainSecretsInput, deleteUnsealedSecretManifestsOutput } = await promptSecretsDeletionConfirmations();
-        secretDeleter = await promptSecretsDeletionConfirmations();
-    }
-
-    const kubeObject = new KubeObject(environment);
-    await kubeObject.generateManifests();
-
-    PlainSecretJsonConfig.syncAll();
-
-    await applySetupManifests(kubeObject);
-
-    if (secretDeleter?.deletePlainSecretsInput) {
-        PlainSecretJsonConfig.emptyValues(environment);
-    }
-
-    if (secretDeleter?.deleteUnsealedSecretManifestsOutput) {
-        kubeObject.getOfAKind('Secret').forEach((o) => {
-            sh.rm('-rf', o.path);
-        });
-    }
+    setupCluster(environment);
 }
 
 main();
@@ -80,9 +49,8 @@ async function applySetupManifests(kubeObject: KubeObject) {
     applyResourceManifests('linkerd', kubeObject);
     applyResourceManifests('linkerd-viz', kubeObject);
 
-    if (kubeObject.getEnvironment() === 'local') {
-        sh.exec(`skaffold dev --cleanup=false  --trigger="manual"  --no-prune=true --no-prune-children=true`);
-    } else {
+    // For automated deployment, Use skaffold locally and argocd in other environments
+    if (kubeObject.getEnvironment() !== 'local') {
         applyResourceManifests('argocd', kubeObject);
 
         sh.exec('kubectl -n argocd rollout restart deployment argocd-argo-cd-server');

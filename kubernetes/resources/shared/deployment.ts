@@ -1,7 +1,7 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
-import * as argocd from '../../crds-generated/argoproj';
+import * as argocd from '../../generatedCrdsTs/argoproj';
 import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker';
 import { createArgocdApplication } from './createArgoApplication';
 import { getPathToResource } from './manifestsDirectory';

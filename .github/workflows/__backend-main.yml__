@@ -20,7 +20,7 @@ jobs:
         ports:
           - 5433:5432
     env:
-      SQLX_VERSION: 0.5.7
+      SQLX_VERSION: 0.6.0
       SQLX_FEATURES: postgres
     steps:
       - name: Checkout repository
@@ -108,7 +108,7 @@ jobs:
         ports:
           - 5433:5432
     env:
-      SQLX_VERSION: 0.5.7
+      SQLX_VERSION: 0.6.0
       SQLX_FEATURES: postgres
     steps:
       - name: Checkout repository

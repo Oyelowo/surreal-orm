@@ -1,4 +1,4 @@
-import { ISealedsecretssealedsecrets } from './../../types/helm-charts/sealedSecretsSealedsecrets';
+import { ISealedsecretssealedsecrets } from '../../../generatedHelmChartsTsTypes/sealedSecretsSealedsecrets';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util';
 import { helmChartsInfo } from '../../shared/helmChartInfo';

@@ -1,4 +1,4 @@
-import { IRedisbitnami } from './../../types/helm-charts/redisBitnami';
+import { IRedisbitnami } from '../../../generatedHelmChartsTsTypes/redisBitnami';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../../infrastructure/namespaces/util';
 import { helmChartsInfo } from '../../shared/helmChartInfo';

@@ -1,5 +1,5 @@
 import { Namespace } from './../infrastructure/namespaces/util';
-import { v1alpha1 } from '../../crds-generated/bitnami';
+import { v1alpha1 } from '../../generatedCrdsTs/bitnami';
 
 type SealedSecretArguments = NonNullable<ConstructorParameters<typeof v1alpha1.SealedSecret>[1]>;
 export type SealedSecretTemplate = SealedSecretArguments & {

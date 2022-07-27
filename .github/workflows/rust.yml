@@ -49,7 +49,7 @@ jobs:
           profile: minimal
           toolchain: stable
       - run: rustup component add rustfmt
-      - run: make fmt
+      - run: make format
         
         
   clippy:
@@ -68,7 +68,7 @@ jobs:
       - uses: Swatinem/rust-cache@v1
       
       - run: rustup component add clippy
-      - run: make clippy
+      - run: make check
 
 
   ############## BUILD AND DEPLOY IMAGES #################
