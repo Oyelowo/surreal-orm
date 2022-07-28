@@ -48,20 +48,10 @@ export interface Settings<TAppName extends ServiceName> {
     readinessProbePort?: number;
 }
 
-export type RecursivePartial<T> = {
-    [P in keyof T]?: T[P] extends (infer U)[]
-        ? RecursivePartial<U>[]
-        : T[P] extends object | undefined
-        ? RecursivePartial<T[P]>
-        : T[P];
-};
-
 // make all properties optional recursively including nested objects.
 // keep in mind that this should be used on json / plain objects only.
 // otherwise, it will make class methods optional as well.
-export type DeepPartial<T> = {
-    [P in keyof T]?: T[P] extends Array<infer I> ? Array<DeepPartial<I>> : DeepPartial<T[P]>;
-};
+export type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
 
 type MongoDb = 'mongodb';
 type PostgresDb = 'postgresdb';
