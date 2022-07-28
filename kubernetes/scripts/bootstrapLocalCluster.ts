@@ -24,7 +24,7 @@ async function main() {
 
 }
 
-main();
+main().catch(e => `Falied to bootstrap. Error: ${e}`);
 
 async function promptQuestions() {
     const clusterRefreshMode = 'clusterRefreshMode';

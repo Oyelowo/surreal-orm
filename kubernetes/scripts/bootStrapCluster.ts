@@ -18,7 +18,7 @@ async function main() {
     await setupCluster(environment);
 }
 
-main();
+main().catch(e => `Failed to bootstrap. Error: ${e}`);
 
 async function applySetupManifests(kubeObject: KubeObject) {
     // # Apply namespace first
