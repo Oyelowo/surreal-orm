@@ -15,7 +15,7 @@ machine context
 async function main() {
     const { environment } = await promptEnvironmentSelection();
 
-    setupCluster(environment);
+    await setupCluster(environment);
 }
 
 main();

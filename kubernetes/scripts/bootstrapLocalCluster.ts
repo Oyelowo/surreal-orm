@@ -13,13 +13,15 @@ async function main() {
     const { shouldRebuild, clusterRefreshMode } = await promptQuestions();
 
     const trigger = clusterRefreshMode === 'live' ? '' : '--trigger="manual"';
-    sh.exec(`skaffold dev --port-forward --cleanup=false  ${trigger}  --no-prune=true --no-prune-children=true`);
 
     if (!shouldRebuild) {
         return;
     }
 
-    setupCluster('local');
+    await setupCluster('local');
+
+    sh.exec(`skaffold dev --port-forward --cleanup=false  ${trigger}  --no-prune=true --no-prune-children=true`);
+
 }
 
 main();
