@@ -41,6 +41,9 @@ generate_manifests_ci:
 generatae_sealed_secrets:
 	npx ts-node scripts/generateSealedSecrets.ts
 
+delete_local_clusters:
+	npx ts-node scripts/deleteLocalClusters.ts
+
 merge-kube-config:
 # Example Usage:  make merge-kube-config path=config.yaml  
 	cp ~/.kube/config ~/.kube/config.bak && KUBECONFIG=~/.kube/config:$(path) kubectl config view --flatten > /tmp/config && mv /tmp/config ~/.kube/config

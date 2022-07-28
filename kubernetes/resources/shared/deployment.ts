@@ -17,7 +17,7 @@ export class ServiceDeployment<
     AN extends ServiceName,
     DBT extends DBType,
     NS extends NamespaceOfApps
-> extends pulumi.ComponentResource {
+    > extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
@@ -125,12 +125,14 @@ export class ServiceDeployment<
                     }),
                 },
             ],
-            securityContext: {
-                runAsNonRoot: true,
-                runAsUser: 10000,
-                runAsGroup: 10000,
-                // fsGroup:
-            },
+            ...(ENVIRONMENT !== "local" && {
+                securityContext: {
+                    runAsNonRoot: true,
+                    runAsUser: 10000,
+                    runAsGroup: 10000,
+                    // fsGroup:
+                }
+            }),
             imagePullSecrets: [
                 {
                     name: DOCKER_REGISTRY_KEY,
@@ -211,7 +213,7 @@ export class ServiceDeployment<
             POSTGRES_PASSWORD: "xxxx",
         };
      }
-    
+     
      to
      {
         MONGODB_USERNAME:
@@ -219,7 +221,7 @@ export class ServiceDeployment<
               ...
       ...
      }
-    
+     
     */
     #secretsObjectToEnv = (secretInstance: kx.Secret) => {
         const secretObject = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
