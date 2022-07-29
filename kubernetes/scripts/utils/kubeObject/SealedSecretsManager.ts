@@ -51,7 +51,7 @@ function mergeUnsealedSecretToSealedSecretHelper({
     const sealSecretValue = (secretValue: string): string => {
         return sh
             .exec(
-                `echo -n ${secretValue} | kubeseal --controller-name=${SEALED_SECRETS_CONTROLLER_NAME} \
+                `echo ${secretValue} | kubeseal --controller-name=${SEALED_SECRETS_CONTROLLER_NAME} \
             --raw --from-file=/dev/stdin --namespace ${namespace} \
             --name ${name}`
             )
