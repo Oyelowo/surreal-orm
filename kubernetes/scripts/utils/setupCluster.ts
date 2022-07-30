@@ -17,7 +17,7 @@ export async function setupCluster(environment: Environment) {
 
     PlainSecretJsonConfig.syncAll();
 
-    await applySetupManifests(kubeObject);
+    applySetupManifests(kubeObject);
 
     if (deletPlainJsonSecretsInput) {
         PlainSecretJsonConfig.emptyValues(environment);
@@ -30,7 +30,7 @@ export async function setupCluster(environment: Environment) {
     }
 }
 
-async function applySetupManifests(kubeObject: KubeObject) {
+function applySetupManifests(kubeObject: KubeObject) {
     // # Apply namespace first
     applyResourceManifests('namespaces', kubeObject);
 

@@ -20,7 +20,7 @@ GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PU
 These secrets are encrypted using the bitnami sealed secret controller running in the cluster
 you are at present context
 */
-export async function mergeUnsealedSecretToSealedSecret(props: Props) {
+export function mergeUnsealedSecretToSealedSecret(props: Props): void {
     for (const secret of props.secretKubeObjects) {
         mergeUnsealedSecretToSealedSecretHelper({
             secretKubeObject: secret,
@@ -36,7 +36,7 @@ function mergeUnsealedSecretToSealedSecretHelper({
     secretKubeObject: TSecretKubeObject;
     sealedSecretKubeObjects: TSealedSecretKubeObject[];
 }): void {
-    const { data, stringData, selectedSecretsForUpdate } = secretKubeObject;
+    const { data, selectedSecretsForUpdate } = secretKubeObject;
     const { name, namespace /* annotations */ } = secretKubeObject.metadata;
 
     if (!name && namespace) {
@@ -51,14 +51,14 @@ function mergeUnsealedSecretToSealedSecretHelper({
     const sealSecretValue = (secretValue: string): string => {
         return sh
             .exec(
-                `echo ${secretValue} | kubeseal --controller-name=${SEALED_SECRETS_CONTROLLER_NAME} \
+                `echo ${secretValue} | base64 -d | kubeseal --controller-name=${SEALED_SECRETS_CONTROLLER_NAME} \
             --raw --from-file=/dev/stdin --namespace ${namespace} \
             --name ${name}`
             )
             .stdout.trim();
     };
 
-    const secretData = stringData ?? data ?? {};
+    const secretData = data ?? {};
 
     // Pick only selected secrets for encytption
     const filteredSecretData = _.pickBy(secretData, (_v, k) => selectedSecretsForUpdate?.includes(k));

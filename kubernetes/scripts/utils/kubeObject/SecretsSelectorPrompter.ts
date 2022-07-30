@@ -83,7 +83,7 @@ export async function selectSecretKubeObjectsFromPrompt(
 }
 
 /** Creates a list of Command line prompts that appear one after the other for
- *  selecting from data/StringData field of each Secret object.
+ *  selecting from data field of each Secret object.
  *
  * e.g if a kubernetes Secret object(oyelowo-app) in `application` namespace has secret data: { USERNAME: "xxx", PASSWORD: "123" },
  * it will list them as below and do that for other app Secrets as well:
@@ -99,7 +99,7 @@ async function promptSecretObjectDataSelection(
 ): Promise<AppSecretKeysWithinNamespaces> {
     const createAppSecretDataSelectionPrompt = (resource: TSecretKubeObject) => {
         const { name, namespace } = resource.metadata;
-        const secretKeys = Object.keys(resource.stringData ?? resource.data ?? {});
+        const secretKeys = Object.keys(resource.data);
         const promptKey = `${namespace}.${name}`;
         return {
             type: 'checkbox',

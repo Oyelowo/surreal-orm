@@ -3,6 +3,7 @@ import { mergeUnsealedSecretToSealedSecret } from './SealedSecretsManager';
 import sh from 'shelljs';
 import _ from 'lodash';
 import z from 'zod';
+import ramda from "ramda";
 import { namespaceSchema } from '../../../resources/infrastructure/namespaces/util';
 import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../resources/shared/manifestsDirectory';
 import type { Environment } from '../../../resources/types/own-types';
@@ -83,7 +84,7 @@ export class KubeObject {
     };
 
     /** Extract information from all the manifests for an environment(local, staging etc)  */
-    syncAll = () => {
+    syncAll = (): this => {
         const envDir = getGeneratedEnvManifestsDir(this.environment);
         const manifestsPaths = this.#getManifestsPathWithinDir(envDir);
         const exec = (cmd: string) => handleShellError(sh.exec(cmd, { silent: true })).stdout;
@@ -92,13 +93,22 @@ export class KubeObject {
             if (!path) return acc;
             console.log('Extracting info from manifest', i);
 
-            const info = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`));
+            const kubeObject = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`));
 
-            if (_.isEmpty(info)) return acc;
+            if (_.isEmpty(kubeObject)) return acc;
             // let's mutate to make it a bit faster and should be okay since we only do it here
-            info.path = path;
+            kubeObject.path = path;
 
-            const updatedPath = kubeObjectSchema.parse(info) as TKubeObject;
+            // Encode stringData into Data field for Secret Objects. This is to
+            // ensure consistency and a single source of truth in handling the data.
+            if (kubeObject.kind === "Secret") {
+                const encodedStringData = _.mapValues(kubeObject.stringData, v => {
+                    return Buffer.from(String(v)).toString("base64");
+                });
+                kubeObject.data = ramda.mergeDeepRight(kubeObject.data ?? {}, encodedStringData);
+            }
+
+            const updatedPath = kubeObjectSchema.parse(kubeObject) as TKubeObject;
 
             acc.push(updatedPath);
             return acc;
@@ -120,6 +130,8 @@ export class KubeObject {
     };
 
     getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
+        // console.log(`this.#kubeObjectsAll`, this.#kubeObjectsAll[0])
+        // console.log(`(this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind)`, (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind))
         return (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
     };
 
@@ -131,12 +143,17 @@ is running because that is required to seal the plain secrets. You can see where
 Side note: In the future, we can also allow this to use public key of the sealed secret controller
 which is cached locally but that would be more involved.
 */
-    syncSealedSecrets = async () => {
-        const secrets: TSecretKubeObject[] = this.getOfAKind('Secret').map((p) => ({
-            ...p,
-            // Syncs all secrets
-            selectedSecretsForUpdate: Object.keys(p.data ?? p.stringData ?? {}),
-        }));
+    syncSealedSecrets = (): void => {
+        const secrets: TSecretKubeObject[] = this.getOfAKind('Secret').map((s) => {
+            return {
+                ...s,
+                // Syncs all secrets
+                selectedSecretsForUpdate: Object.keys(s?.data ?? {}),
+            }
+        }) as TSecretKubeObject[];
+        // console.log(chalk.cyanBright(`XXXXXXX...Secretssss`, JSON.stringify(secrets, null, 4)))
+        // return
+        // console.log(chalk.cyanBright(`this.getOfAKind('SealedSecret'). ${this.getOfAKind('SealedSecret')}`))
         mergeUnsealedSecretToSealedSecret({
             sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
             secretKubeObjects: secrets,
