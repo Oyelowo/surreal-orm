@@ -4,7 +4,7 @@ import { getBaseUrl } from '../../infrastructure/ingress/hosts';
 import { PlainSecretJsonConfig } from '../../../scripts/utils/plainSecretJsonConfig';
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
-const secretsFromLocalConfigs = new PlainSecretJsonConfig('graphql-mongo', environment).getSecrets();
+const secretsFromLocalConfigs = new PlainSecretJsonConfig('graphql-mongo', environment).getSecretsBase64();
 
 export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'mongodb', 'applications'> = {
     kubeConfig: {

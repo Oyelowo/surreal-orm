@@ -91,9 +91,9 @@ export class KubeObject {
 
         this.#kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
             if (!path) return acc;
-            console.log('Extracting info from manifest', i);
+            console.log('Extracting kubeobject from manifest', i);
 
-            const kubeObject = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`));
+            const kubeObject = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`)) as TKubeObject;
 
             if (_.isEmpty(kubeObject)) return acc;
             // let's mutate to make it a bit faster and should be okay since we only do it here
@@ -105,6 +105,7 @@ export class KubeObject {
                 const encodedStringData = _.mapValues(kubeObject.stringData, v => {
                     return Buffer.from(String(v)).toString("base64");
                 });
+
                 kubeObject.data = ramda.mergeDeepRight(kubeObject.data ?? {}, encodedStringData);
             }
 
@@ -113,6 +114,7 @@ export class KubeObject {
             acc.push(updatedPath);
             return acc;
         }, []);
+
         return this;
     };
 

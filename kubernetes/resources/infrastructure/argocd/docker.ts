@@ -1,3 +1,4 @@
+import { getEnvironmentVariables } from './../../shared/validations';
 import { PlainSecretJsonConfig } from './../../../scripts/utils/plainSecretJsonConfig';
 import c from 'chalk';
 import path from 'path';
@@ -13,7 +14,7 @@ export function createContainerRegistrySecret(environment: Environment): void {
     const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = new PlainSecretJsonConfig(
         'argocd',
         environment
-    ).getSecrets();
+    ).getSecretsPlain();
 
     const dir = path.join(getResourceAbsolutePath('argocd-applications-parents', environment), '1-manifest');
     const file = path.join(dir, 'secret-docker-registry.yaml');
@@ -31,6 +32,8 @@ export function createContainerRegistrySecret(environment: Environment): void {
      --docker-username=${DOCKER_USERNAME} --docker-password=${DOCKER_PASSWORD} --namespace=${namespaces.applications} \
      -o yaml --dry-run=client > ${file}`);
 }
+
+createContainerRegistrySecret(getEnvironmentVariables().ENVIRONMENT)
 
 // interface DockerRawData {
 //     auths: {

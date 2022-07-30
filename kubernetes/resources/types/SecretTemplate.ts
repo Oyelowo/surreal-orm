@@ -3,8 +3,8 @@ export interface SecretTemplate {
     kind: string;
     metadata: Metadata;
     type: string;
-    // stringData?: Record<string, string>;
-    data?: Record<string, string>;
+    data: Record<string, string>;
+    stringData?: Record<string, string>;
 }
 
 export interface Metadata {

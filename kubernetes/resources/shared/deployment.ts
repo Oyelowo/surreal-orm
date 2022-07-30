@@ -58,14 +58,14 @@ export class ServiceDeployment<
             { provider: this.getProvider(), parent: this }
         );
 
-        const secrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
+
+        const encodedSecrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecretsBase64();
+
         // Create a Kubernetes Secret.
         this.secret = new kx.Secret(
             `${resourceName}-secret`,
             {
-                stringData: {
-                    ...secrets,
-                },
+                data: encodedSecrets,
                 metadata: {
                     ...metadata,
                     annotations: {
@@ -224,7 +224,7 @@ export class ServiceDeployment<
      
     */
     #secretsObjectToEnv = (secretInstance: kx.Secret) => {
-        const secretObject = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
+        const secretObject = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecretsBase64();
         const keyValueEntries = Object.keys(secretObject).map((key) => [key, secretInstance.asEnvValue(key)]);
         return Object.fromEntries(keyValueEntries);
     };

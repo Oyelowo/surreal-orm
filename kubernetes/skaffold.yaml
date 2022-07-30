@@ -18,11 +18,11 @@ build:
               target: web
               noCache: false
               squash: false
-          sync:
-            infer:
-            - '../typescript/**/*.ts'
-            - '../typescript/**/*.tsx'
-            - '../typescript/**/*.css'
+          # sync:
+          #   infer:
+          #   - '**/*.ts'
+          #   - '**/*.tsx'
+          #   - '**/*.css'
 
         - image: ghcr.io/oyelowo/graphql-mongo
           context: ../rust
@@ -76,7 +76,7 @@ deploy:
             # - generatedManifests/local/infrastructure/cert-manager/**/*
             # - generatedManifests/local/infrastructure/linkerd/**/*
             # - generatedManifests/local/infrastructure/linkerd-viz/**/*
-            # - generatedManifests/local/infrastructure/nginx-ingress/**/*
+            - generatedManifests/local/infrastructure/nginx-ingress/**/*
             - generatedManifests/local/services/**/**/*
 
 portForward:

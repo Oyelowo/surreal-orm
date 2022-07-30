@@ -7,6 +7,7 @@ import { z } from 'zod';
 import R from 'ramda';
 import _ from 'lodash';
 import { getPlainSecretsConfigFilesBaseDir } from '../../resources/shared/manifestsDirectory';
+import { toBase64 } from '../../resources/shared/converters';
 
 // Note: If these starts growing too much, we can separate
 // each apps schema and merge them all
@@ -88,9 +89,14 @@ function emptyObjectValues(object: any) {
 const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 
 export class PlainSecretJsonConfig<App extends ResourceName> {
-    constructor(private resourceName: App, private environment: Environment) {}
+    constructor(private resourceName: App, private environment: Environment) { }
 
-    getSecrets = (): TSecretJson[App] => {
+    getSecretsBase64 = (): TSecretJson[App] => {
+        const encodedSecrets = _.mapValues(this.getSecretsPlain(), v=> toBase64(String(v)));
+        return encodedSecrets as TSecretJson[App];
+    };
+
+    getSecretsPlain = (): TSecretJson[App] => {
         PlainSecretJsonConfig.syncAll();
 
         const secretsSchema = PlainSecretJsonConfig.getSecretsSchema({
@@ -98,7 +104,8 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
             environment: this.environment,
         });
 
-        return secretsSchema.strict().parse(PlainSecretJsonConfig.#getSecretJsonObject(this.environment))[
+        const secrets = PlainSecretJsonConfig.#getSecretJsonObject(this.environment);
+        return secretsSchema.strict().parse(secrets)[
             this.resourceName
         ];
     };

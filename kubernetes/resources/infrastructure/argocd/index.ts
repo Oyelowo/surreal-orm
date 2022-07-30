@@ -4,6 +4,8 @@ import { createArgocdApplication } from '../../shared/createArgoApplication';
 export * from './argocdBitnami';
 // export * from "./argocdOfficial";
 
+export * from './docker';
+
 export const argoInfrastructureParentApplications = createArgocdApplication({
     sourceApplication: 'argocd-applications-children-infrastructure',
     outputSubDirName: 'argocd-applications-parents',
