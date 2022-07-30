@@ -70,13 +70,13 @@ build:
 deploy:
     kubectl:
         manifests:
+            # - generatedManifests/local/infrastructure/**/*
             # - generatedManifests/local/infrastructure/namespaces/**/*
             # - generatedManifests/local/infrastructure/sealed-secrets/**/*
             # - generatedManifests/local/infrastructure/cert-manager/**/*
             # - generatedManifests/local/infrastructure/linkerd/**/*
             # - generatedManifests/local/infrastructure/linkerd-viz/**/*
             # - generatedManifests/local/infrastructure/nginx-ingress/**/*
-            # - generatedManifests/local/infrastructure/**/*
             - generatedManifests/local/services/**/**/*
 
 portForward:
