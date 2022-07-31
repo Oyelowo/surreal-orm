@@ -20,7 +20,7 @@ export const getPlainSecretsConfigFilesBaseDir = () => {
 /** Directory of a generated manifests for an environment(local/production etc)  */
 export const getGeneratedEnvManifestsDir = (environment: Environment) => {
     const MANIFESTS_DIR = getManifestsBaseDir();
-    return path.join(MANIFESTS_DIR, 'generated', environment);
+    return path.join(MANIFESTS_DIR, environment);
 };
 
 export const getGeneratedCrdsCodeDir = () => {
@@ -37,7 +37,7 @@ export const getPathToResourcesDir = (
 };
 
 /**
- * e.g generatedManifestsgenerated/local/infrastructure/1-manifest
+ * e.g generatedManifests/local/infrastructure/1-manifest
  *                               /infrastructure/1-crd
  *                               /infrastructure/sealed-secrets
  */

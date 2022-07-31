@@ -35,10 +35,10 @@ const getSecretsSample = ({
             MONGODB_ROOT_PASSWORD: string,
             REDIS_USERNAME: string,
             REDIS_PASSWORD: string,
-            GITHUB_CLIENT_ID: string,
-            GITHUB_CLIENT_SECRET: string,
-            GOOGLE_CLIENT_ID: string,
-            GOOGLE_CLIENT_SECRET: string,
+            OAUTH_GITHUB_CLIENT_ID: string,
+            OAUTH_GITHUB_CLIENT_SECRET: string,
+            OAUTH_GOOGLE_CLIENT_ID: string,
+            OAUTH_GOOGLE_CLIENT_SECRET: string,
         }),
         'grpc-mongo': z.object({
             MONGODB_USERNAME: string,
@@ -74,7 +74,7 @@ const getSecretsSample = ({
     return secretsSample;
 };
 
-type TSecretJson = z.infer<ReturnType<typeof getSecretsSample>>;
+export type TSecretJson = z.infer<ReturnType<typeof getSecretsSample>>;
 
 function emptyObjectValues(object: any) {
     Object.keys(object).forEach((k) => {
@@ -88,7 +88,7 @@ function emptyObjectValues(object: any) {
 const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 
 export class PlainSecretJsonConfig<App extends ResourceName> {
-    constructor(private resourceName: App, private environment: Environment) {}
+    constructor(private resourceName: App, private environment: Environment) { }
 
     getSecrets = (): TSecretJson[App] => {
         PlainSecretJsonConfig.syncAll();
@@ -98,7 +98,8 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
             environment: this.environment,
         });
 
-        return secretsSchema.strict().parse(PlainSecretJsonConfig.#getSecretJsonObject(this.environment))[
+        const allSecretsJson = PlainSecretJsonConfig.#getSecretJsonObject(this.environment);
+        return secretsSchema.strict().parse(allSecretsJson)[
             this.resourceName
         ];
     };

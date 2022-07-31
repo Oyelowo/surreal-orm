@@ -14,7 +14,8 @@ async function main() {
         choices: clusters,
     });
 
-    const deleteLocalCluster = (name: string) => sh.exec(`k3d cluster delete ${name}`);
+    // starts with k3d-<clustername>
+    const deleteLocalCluster = (name: string) => sh.exec(`k3d cluster delete ${name.slice(4)}`);
 
     answer.clusterNames.forEach(deleteLocalCluster);
 }

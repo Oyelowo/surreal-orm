@@ -8,7 +8,8 @@ import { getPathToResource } from './manifestsDirectory';
 import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/own-types';
 import { getEnvironmentVariables } from './validations';
 import { generateService } from './helpers';
-import { PlainSecretJsonConfig } from '../../scripts/utils/plainSecretJsonConfig';
+import { toBase64 } from './converters';
+import _ from 'lodash';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 
@@ -17,7 +18,7 @@ export class ServiceDeployment<
     AN extends ServiceName,
     DBT extends DBType,
     NS extends NamespaceOfApps
-> extends pulumi.ComponentResource {
+    > extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
@@ -29,8 +30,8 @@ export class ServiceDeployment<
     public readonly appName: AN;
 
     constructor(
-        name: NoUnion<AN>,
-        args: AppConfigs<AN, DBT, NS>
+        private name: NoUnion<AN>,
+        private args: AppConfigs<AN, DBT, NS>
         // opts: pulumi.ComponentResourceOptions
     ) {
         super('k8sjs:service:ServiceDeployment', name, {} /* opts */);
@@ -58,18 +59,18 @@ export class ServiceDeployment<
             { provider: this.getProvider(), parent: this }
         );
 
-        const secrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
+        // const plainSecrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
+        const encodedSecrets = _.mapValues(envVars, toBase64) as typeof envVars;
+
         // Create a Kubernetes Secret.
         this.secret = new kx.Secret(
             `${resourceName}-secret`,
             {
-                stringData: {
-                    ...secrets,
-                },
+                data: encodedSecrets,
                 metadata: {
                     ...metadata,
                     annotations: {
-                        // 'sealedsecrets.bitnami.com/managed': 'true',
+                        'sealedsecrets.bitnami.com/managed': 'true',
                     },
                 },
             },
@@ -82,8 +83,7 @@ export class ServiceDeployment<
             containers: [
                 {
                     env: {
-                        ...envVars,
-                        ...this.#secretsObjectToEnv(this.secret),
+                        ...this.#secretsObjectToEnv({ secretInstance: this.secret, secretObject: envVars }),
                     },
                     image: kubeConfig.image,
                     ports: { http: Number(envVars.APP_PORT) },
@@ -125,12 +125,14 @@ export class ServiceDeployment<
                     }),
                 },
             ],
-            securityContext: {
-                runAsNonRoot: true,
-                runAsUser: 10000,
-                runAsGroup: 10000,
-                // fsGroup:
-            },
+            ...(ENVIRONMENT !== 'local' && {
+                securityContext: {
+                    runAsNonRoot: true,
+                    runAsUser: 10000,
+                    runAsGroup: 10000,
+                    // fsGroup:
+                },
+            }),
             imagePullSecrets: [
                 {
                     name: DOCKER_REGISTRY_KEY,
@@ -148,7 +150,7 @@ export class ServiceDeployment<
                 metadata: {
                     ...metadata,
                     annotations: {
-                        'linkerd.io/inject': 'enabled',
+                        "linkerd.io/inject": "enabled",
                     },
                 },
             },
@@ -199,6 +201,7 @@ export class ServiceDeployment<
 
     /**
      Maps custom secret object to what kx can understand to produce secretRef automagically
+     * @example
      {
         "graphql-mongo": {
             MONGODB_USERNAME: "xxxx",
@@ -211,7 +214,7 @@ export class ServiceDeployment<
             POSTGRES_PASSWORD: "xxxx",
         };
      }
-    
+     
      to
      {
         MONGODB_USERNAME:
@@ -219,10 +222,14 @@ export class ServiceDeployment<
               ...
       ...
      }
-    
     */
-    #secretsObjectToEnv = (secretInstance: kx.Secret) => {
-        const secretObject = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
+    #secretsObjectToEnv = ({
+        secretInstance,
+        secretObject,
+    }: {
+        secretInstance: kx.Secret;
+        secretObject: AppConfigs<AN, DBT, NS>["envVars"];
+    }) => {
         const keyValueEntries = Object.keys(secretObject).map((key) => [key, secretInstance.asEnvValue(key)]);
         return Object.fromEntries(keyValueEntries);
     };

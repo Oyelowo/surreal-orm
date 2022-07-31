@@ -6,6 +6,7 @@ import p from 'path';
 import sh from 'shelljs';
 import { ResourceName } from '../../../resources/types/own-types';
 import _ from 'lodash';
+import z from "zod";
 
 const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets';
 
@@ -19,7 +20,7 @@ GENERATE BITNAMI'S SEALED SECRET FROM PLAIN SECRETS MANIFESTS GENERATED USING PU
 These secrets are encrypted using the bitnami sealed secret controller running in the cluster
 you are at present context
 */
-export async function mergeUnsealedSecretToSealedSecret(props: Props) {
+export function mergeUnsealedSecretToSealedSecret(props: Props): void {
     for (const secret of props.secretKubeObjects) {
         mergeUnsealedSecretToSealedSecretHelper({
             secretKubeObject: secret,
@@ -35,7 +36,7 @@ function mergeUnsealedSecretToSealedSecretHelper({
     secretKubeObject: TSecretKubeObject;
     sealedSecretKubeObjects: TSealedSecretKubeObject[];
 }): void {
-    const { data, stringData, selectedSecretsForUpdate } = secretKubeObject;
+    const { data, selectedSecretsForUpdate } = secretKubeObject;
     const { name, namespace /* annotations */ } = secretKubeObject.metadata;
 
     if (!name && namespace) {
@@ -50,24 +51,27 @@ function mergeUnsealedSecretToSealedSecretHelper({
     const sealSecretValue = (secretValue: string): string => {
         return sh
             .exec(
-                `echo -n ${secretValue} | kubeseal --controller-name=${SEALED_SECRETS_CONTROLLER_NAME} \
+                `echo ${secretValue} | base64 -d | kubeseal --controller-name=${SEALED_SECRETS_CONTROLLER_NAME} \
             --raw --from-file=/dev/stdin --namespace ${namespace} \
             --name ${name}`
             )
             .stdout.trim();
     };
 
-    const secretData = stringData ?? data ?? {};
+    const secretData = data ?? {};
 
     // Pick only selected secrets for encytption
     const filteredSecretData = _.pickBy(secretData, (_v, k) => selectedSecretsForUpdate?.includes(k));
     const updatedSealedSecretsData = _.mapValues(filteredSecretData, sealSecretValue);
 
     // Merge new secrets with old
-    const encryptedData: Record<string, string> = {
-        // ...existingSealedSecretJsonData?.spec?.encryptedData,
-        // ...updatedSealedSecretsData,
+    const encryptedDataa: Record<string, unknown> = {
+        ...existingSealedSecretJsonData?.spec?.encryptedData,
+        ...updatedSealedSecretsData,
     };
+
+    const recordSchema = z.record(z.string());
+    const encryptedData = recordSchema.parse(encryptedDataa);
 
     // Remove stale/unsed encrypted secret
     const unfilteredSecretKeys = Object.keys(secretData) ?? [];
@@ -99,8 +103,8 @@ function mergeUnsealedSecretToSealedSecretHelper({
 
     // GET SEALED SECRET PATH USING UNSEALED SECRET PATH
     const appManifestsDir = p.dirname(secretKubeObject.path);
-    // The path format is: kubernetesgeneratedManifestsgenerated/production/applications/graphql-mongo/1-manifest
-    // and we want as basedir: kubernetesgeneratedManifestsgenerated/production/applications/graphql-mongo
+    // The path format is: kubernetes/generatedManifests/production/applications/graphql-mongo/1-manifest
+    // and we want as basedir: kubernetes/generatedManifests/production/applications/graphql-mongo
     const appBaseDir = p.join(appManifestsDir, '..');
     const sealedSecretDir = p.join(appBaseDir, SEALED_SECRETS_CONTROLLER_NAME);
     sh.mkdir(sealedSecretDir);

@@ -4,7 +4,7 @@
         "outDir": "bin",
         "target": "ES2022",
         "lib": ["ESNext"],
-        "module": "commonjs",
+        "module": "es2022",
         "moduleResolution": "node",
         "sourceMap": true,
         "experimentalDecorators": true,
@@ -14,9 +14,13 @@
         "forceConsistentCasingInFileNames": true,
         "resolveJsonModule": true,
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "types": ["node"],
-        "typeRoots": ["node_modules/@types"]
+        "typeRoots": ["node_modules/@types"],
     },
-    "exclude": ["crds", "node_modules"],
+    "ts-node":{
+        "esm": true
+    },
+    "exclude": ["generatedCrdsTs", "node_modules"],
     "files": ["index.ts", "scripts/utils/syncHelmChartTypesDeclarations.ts"]
 }

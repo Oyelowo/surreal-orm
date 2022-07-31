@@ -71,8 +71,8 @@ const mongoValues: DeepPartial<IMongodbbitnami> = {
         enabled: true,
         rootUser: 'root_user',
         rootPassword: 'root_password',
-        replicaSetKey: 'Ld1My4Q1s4',
-        ...(mappedCredentials as any),
+        // replicaSetKey: 'Ld1My4Q1s4',
+        ...mappedCredentials,
     },
     service: {
         type: 'ClusterIP',

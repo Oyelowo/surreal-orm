@@ -78,7 +78,7 @@ const secrets = new PlainSecretJsonConfig('argocd', ENVIRONMENT).getSecrets();
 export const argoCDApplicationsSecret = new kx.Secret(
     'argocd-secret',
     {
-        stringData: {
+        data: {
             ...secrets,
         },
         metadata: {

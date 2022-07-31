@@ -70,9 +70,9 @@ In order to retain your Block Storage Volume and its data, even after the associ
         enabled: true,
         rootUser: envVars.MONGODB_ROOT_USERNAME,
         rootPassword: envVars.MONGODB_ROOT_PASSWORD,
-        replicaSetKey: 'Ld1My4Q1s4', // QUESTION: Should this be changed?
-        // array of
-        ...(mappedCredentials as any),
+        // replicaSetKey: 'Ld1My4Q1s4', // QUESTION: Should this be changed?
+        // array of,
+        ...mappedCredentials,
     },
     service: {
         type: 'ClusterIP',

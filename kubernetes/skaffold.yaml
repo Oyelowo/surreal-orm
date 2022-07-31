@@ -18,6 +18,11 @@ build:
               target: web
               noCache: false
               squash: false
+          # sync:
+          #   infer:
+          #   - '**/*.ts'
+          #   - '**/*.tsx'
+          #   - '**/*.css'
 
         - image: ghcr.io/oyelowo/graphql-mongo
           context: ../rust
@@ -64,14 +69,15 @@ build:
 
 deploy:
     kubectl:
-        generatedManifests:
-            # - generatedManifests/generated/local/infrastructure/namespaces/**/*
-            # - generatedManifests/generated/local/infrastructure/sealed-secrets/**/*
-            # - generatedManifests/generated/local/infrastructure/cert-manager/**/*
-            # - generatedManifests/generated/local/infrastructure/linkerd/**/*
-            # - generatedManifests/generated/local/infrastructure/linkerd-viz/**/*
-            - generatedManifests/generated/local/infrastructure/nginx-ingress/**/*
-            - generatedManifests/generated/local/services/**/**/*
+        manifests:
+            # - generatedManifests/local/infrastructure/**/*
+            # - generatedManifests/local/infrastructure/namespaces/**/*
+            # - generatedManifests/local/infrastructure/sealed-secrets/**/*
+            # - generatedManifests/local/infrastructure/cert-manager/**/*
+            # - generatedManifests/local/infrastructure/linkerd/**/*
+            # - generatedManifests/local/infrastructure/linkerd-viz/**/*
+            - generatedManifests/local/infrastructure/nginx-ingress/**/*
+            - generatedManifests/local/services/**/**/*
 
 portForward:
     - resourceType: service

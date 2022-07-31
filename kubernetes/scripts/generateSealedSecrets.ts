@@ -17,7 +17,7 @@ async function main() {
     PlainSecretJsonConfig.syncAll();
 
     // This requires the cluster to be on and switch to its context
-    kubeObject.syncSealedSecretsWithPrompt();
+    await kubeObject.syncSealedSecretsWithPrompt();
 
     if (deletPlainJsonSecretsInput) {
         PlainSecretJsonConfig.emptyValues(environment);

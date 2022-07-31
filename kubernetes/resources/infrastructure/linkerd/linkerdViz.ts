@@ -4,6 +4,7 @@ import * as kx from '@pulumi/kubernetesx';
 import * as bcrypt from 'bcrypt';
 import { namespaces } from '../namespaces/util';
 import { helmChartsInfo } from '../../shared/helmChartInfo';
+import { toBase64 } from '../../shared/converters';
 import { NginxConfiguration } from '../../types/nginxConfigurations';
 import { DeepPartial, ResourceName } from '../../types/own-types';
 import { CLUSTER_ISSUER_NAME } from '../cert-manager/clusterIssuer';
@@ -108,10 +109,10 @@ export const linkerdVizSecret = new kx.Secret(
             name: linkerdVizSecretName,
             namespace: namespaces.linkerdViz,
         },
-        stringData: {
+        data: {
             // format: username:encryptedpassword
             // format: admin:$apr1$n7Cu6gHl$E47ogf7CO8NRYjEjBOkWM.
-            auth: `admin:${hash}`,
+            auth: toBase64(`admin:${hash}`),
         },
     },
     { provider: linkerdVizProvider }

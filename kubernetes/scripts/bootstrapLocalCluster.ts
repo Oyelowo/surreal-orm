@@ -9,20 +9,22 @@ Creates and bootstraps cluster
 */
 
 async function main() {
-    await promptKubernetesClusterSwitch('local');
     const { shouldRebuild, clusterRefreshMode } = await promptQuestions();
+    await promptKubernetesClusterSwitch('local');
 
     const trigger = clusterRefreshMode === 'live' ? '' : '--trigger="manual"';
-    sh.exec(`skaffold dev --port-forward --cleanup=false  ${trigger}  --no-prune=true --no-prune-children=true`);
 
     if (!shouldRebuild) {
         return;
     }
 
-    setupCluster('local');
+    await setupCluster('local');
+
+    sh.exec(`skaffold dev --port-forward --cleanup=false  ${trigger}  --no-prune=true --no-prune-children=true`);
+
 }
 
-main();
+main().catch(e => `Falied to bootstrap. Error: ${e}`);
 
 async function promptQuestions() {
     const clusterRefreshMode = 'clusterRefreshMode';

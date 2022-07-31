@@ -1,5 +1,6 @@
 {
     "name": "oye",
+    "type": "module",
     "scripts": {
         "lint-check": "npx eslint . --ext .js,.ts",
         "lint-fix": "npx eslint . --ext .js,.ts",
@@ -11,6 +12,7 @@
         "@types/bcrypt": "^5.0.0",
         "@types/inquirer": "^8.2.1",
         "@types/js-yaml": "^4.0.5",
+        "@types/lodash-es": "^4.17.6",
         "@types/node": "^14.18.12",
         "@types/prompt": "^1.1.2",
         "@types/ramda": "^0.28.12",
@@ -29,7 +31,8 @@
         "js-yaml": "^4.1.0",
         "json-ts": "^1.6.4",
         "prettier": "2.6.2",
-        "typescript": "^4.7.0-beta",
+        "ts-node": "^10.9.1",
+        "typescript": "^4.7.4",
         "uuid": "^8.3.2"
     },
     "dependencies": {
@@ -44,11 +47,14 @@
         "bcrypt": "^5.0.1",
         "chalk": "^4.1.0",
         "eslint-plugin-unused-imports": "^2.0.0",
+        "find-free-port": "^2.0.0",
+        "get-port": "^6.1.2",
         "inquirer": "^8.2.2",
         "json-schema-to-ts": "^1.6.5",
         "json-schema-to-typescript": "^10.1.5",
         "json-to-ts": "^1.7.0",
         "lodash": "^4.17.21",
+        "lodash-es": "^4.17.21",
         "patch-package": "^6.4.7",
         "prompt": "^1.2.2",
         "ramda": "^0.28.0",
