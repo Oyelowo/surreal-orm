@@ -5,4 +5,4 @@ import { getEnvironmentVariables } from '../../shared/validations';
 const { ENVIRONMENT } = getEnvironmentVariables();
 export const linkerdProvider = getResourceProvider('linkerd', ENVIRONMENT);
 export const linkerdVizProvider = getResourceProvider('linkerd-viz', ENVIRONMENT);
-export const linkerdVizSecretsFromLocalConfigs = new PlainSecretJsonConfig('linkerd-viz', ENVIRONMENT).getSecretsBase64();
+export const linkerdVizSecretsFromLocalConfigs = new PlainSecretJsonConfig('linkerd-viz', ENVIRONMENT).getSecrets();

@@ -30,7 +30,7 @@ const kubeObjectSchema = z.object({
         name: z.string(),
         // CRDS have namespace as null
         namespace: namespaceSchema.optional(),
-        annotations: z.record(z.string()),
+        annotations: z.record(z.string()).optional(),
     }),
     spec: z
         .object({

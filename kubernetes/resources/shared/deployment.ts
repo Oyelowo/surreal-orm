@@ -9,6 +9,8 @@ import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../ty
 import { getEnvironmentVariables } from './validations';
 import { generateService } from './helpers';
 import { PlainSecretJsonConfig } from '../../scripts/utils/plainSecretJsonConfig';
+import { toBase64 } from './converters';
+import _ from 'lodash';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 
@@ -59,7 +61,8 @@ export class ServiceDeployment<
         );
 
 
-        const encodedSecrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecretsBase64();
+        const plainSecrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
+        const encodedSecrets = _.mapValues(plainSecrets, v => toBase64(String(v)));
 
         // Create a Kubernetes Secret.
         this.secret = new kx.Secret(
@@ -224,7 +227,9 @@ export class ServiceDeployment<
      
     */
     #secretsObjectToEnv = (secretInstance: kx.Secret) => {
-        const secretObject = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecretsBase64();
+        // These need to be in base64. 
+        // Note: for the helm charts(especially bitnami charts), base64 is usually handled
+        const secretObject = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
         const keyValueEntries = Object.keys(secretObject).map((key) => [key, secretInstance.asEnvValue(key)]);
         return Object.fromEntries(keyValueEntries);
     };
