@@ -8,7 +8,6 @@ import { getPathToResource } from './manifestsDirectory';
 import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/own-types';
 import { getEnvironmentVariables } from './validations';
 import { generateService } from './helpers';
-import { PlainSecretJsonConfig } from '../../scripts/utils/plainSecretJsonConfig';
 import { toBase64 } from './converters';
 import _ from 'lodash';
 
@@ -31,8 +30,8 @@ export class ServiceDeployment<
     public readonly appName: AN;
 
     constructor(
-        name: NoUnion<AN>,
-        args: AppConfigs<AN, DBT, NS>
+        private name: NoUnion<AN>,
+        private args: AppConfigs<AN, DBT, NS>
         // opts: pulumi.ComponentResourceOptions
     ) {
         super('k8sjs:service:ServiceDeployment', name, {} /* opts */);
@@ -60,7 +59,6 @@ export class ServiceDeployment<
             { provider: this.getProvider(), parent: this }
         );
 
-
         // const plainSecrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
         const encodedSecrets = _.mapValues(envVars, toBase64) as typeof envVars;
 
@@ -72,7 +70,7 @@ export class ServiceDeployment<
                 metadata: {
                     ...metadata,
                     annotations: {
-                        // 'sealedsecrets.bitnami.com/managed': 'true',
+                        'sealedsecrets.bitnami.com/managed': 'true',
                     },
                 },
             },
@@ -85,8 +83,7 @@ export class ServiceDeployment<
             containers: [
                 {
                     env: {
-                        ...envVars,
-                        ...this.#secretsObjectToEnv(this.secret),
+                        ...this.#secretsObjectToEnv({ secretInstance: this.secret, secretObject: envVars }),
                     },
                     image: kubeConfig.image,
                     ports: { http: Number(envVars.APP_PORT) },
@@ -128,13 +125,13 @@ export class ServiceDeployment<
                     }),
                 },
             ],
-            ...(ENVIRONMENT !== "local" && {
+            ...(ENVIRONMENT !== 'local' && {
                 securityContext: {
                     runAsNonRoot: true,
                     runAsUser: 10000,
                     runAsGroup: 10000,
                     // fsGroup:
-                }
+                },
             }),
             imagePullSecrets: [
                 {
@@ -153,7 +150,7 @@ export class ServiceDeployment<
                 metadata: {
                     ...metadata,
                     annotations: {
-                        'linkerd.io/inject': 'enabled',
+                        "linkerd.io/inject": "enabled",
                     },
                 },
             },
@@ -226,10 +223,13 @@ export class ServiceDeployment<
       ...
      }
     */
-    #secretsObjectToEnv = (secretInstance: kx.Secret) => {
-        // These need to be in base64. 
-        // Note: for the helm charts(especially bitnami charts), base64 is usually handled
-        const secretObject = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
+    #secretsObjectToEnv = ({
+        secretInstance,
+        secretObject,
+    }: {
+        secretInstance: kx.Secret;
+        secretObject: AppConfigs<AN, DBT, NS>["envVars"];
+    }) => {
         const keyValueEntries = Object.keys(secretObject).map((key) => [key, secretInstance.asEnvValue(key)]);
         return Object.fromEntries(keyValueEntries);
     };
