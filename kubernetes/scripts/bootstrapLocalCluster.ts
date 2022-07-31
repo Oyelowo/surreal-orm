@@ -9,8 +9,8 @@ Creates and bootstraps cluster
 */
 
 async function main() {
-    await promptKubernetesClusterSwitch('local');
     const { shouldRebuild, clusterRefreshMode } = await promptQuestions();
+    await promptKubernetesClusterSwitch('local');
 
     const trigger = clusterRefreshMode === 'live' ? '' : '--trigger="manual"';
 
