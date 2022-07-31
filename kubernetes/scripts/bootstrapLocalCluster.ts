@@ -21,10 +21,9 @@ async function main() {
     await setupCluster('local');
 
     sh.exec(`skaffold dev --port-forward --cleanup=false  ${trigger}  --no-prune=true --no-prune-children=true`);
-
 }
 
-main().catch(e => `Falied to bootstrap. Error: ${e}`);
+main().catch((e) => `Falied to bootstrap. Error: ${e}`);
 
 async function promptQuestions() {
     const clusterRefreshMode = 'clusterRefreshMode';

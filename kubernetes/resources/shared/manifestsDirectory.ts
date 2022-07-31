@@ -7,7 +7,6 @@ import { Environment, ResourceName, ResourceType } from '../types/own-types';
 // const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
-
 export const getMainBaseDir = () => {
     const mainBaseDir = path.join(__dirname, '..', '..');
     return mainBaseDir;
@@ -31,7 +30,7 @@ export const getGeneratedEnvManifestsDir = (environment: Environment) => {
 export const getGeneratedCrdsCodeDir = () => {
     const baseDir = getMainBaseDir();
     return path.join(baseDir, 'generatedCrdsTs');
-}
+};
 
 export const getPathToResourcesDir = (
     resourceName: ResourceName,

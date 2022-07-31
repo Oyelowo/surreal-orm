@@ -1,6 +1,5 @@
 `kubectl delete all --all -n {namespace}`
 
-
 ```sh
 (
 NAMESPACE=your-rogue-namespace

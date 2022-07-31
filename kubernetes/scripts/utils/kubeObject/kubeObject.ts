@@ -3,7 +3,7 @@ import { mergeUnsealedSecretToSealedSecret } from './SealedSecretsManager';
 import sh from 'shelljs';
 import _ from 'lodash';
 import z from 'zod';
-import ramda from "ramda";
+import ramda from 'ramda';
 import { namespaceSchema } from '../../../resources/infrastructure/namespaces/util';
 import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../resources/shared/manifestsDirectory';
 import type { Environment } from '../../../resources/types/own-types';
@@ -101,9 +101,9 @@ export class KubeObject {
 
             // Encode stringData into Data field for Secret Objects. This is to
             // ensure consistency and a single source of truth in handling the data.
-            if (kubeObject.kind === "Secret") {
-                const encodedStringData = _.mapValues(kubeObject.stringData, v => {
-                    return Buffer.from(String(v)).toString("base64");
+            if (kubeObject.kind === 'Secret') {
+                const encodedStringData = _.mapValues(kubeObject.stringData, (v) => {
+                    return Buffer.from(String(v)).toString('base64');
                 });
 
                 kubeObject.data = ramda.mergeDeepRight(kubeObject.data ?? {}, encodedStringData);
@@ -151,7 +151,7 @@ which is cached locally but that would be more involved.
                 ...s,
                 // Syncs all secrets
                 selectedSecretsForUpdate: Object.keys(s?.data ?? {}),
-            }
+            };
         }) as TSecretKubeObject[];
         // console.log(chalk.cyanBright(`XXXXXXX...Secretssss`, JSON.stringify(secrets, null, 4)))
         // return

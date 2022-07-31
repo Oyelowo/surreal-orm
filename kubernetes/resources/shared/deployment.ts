@@ -18,7 +18,7 @@ export class ServiceDeployment<
     AN extends ServiceName,
     DBT extends DBType,
     NS extends NamespaceOfApps
-    > extends pulumi.ComponentResource {
+> extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
@@ -32,8 +32,8 @@ export class ServiceDeployment<
     constructor(
         private name: NoUnion<AN>,
         private args: AppConfigs<AN, DBT, NS>
-        // opts: pulumi.ComponentResourceOptions
-    ) {
+    ) // opts: pulumi.ComponentResourceOptions
+    {
         super('k8sjs:service:ServiceDeployment', name, {} /* opts */);
         this.appName = name;
         const { envVars, kubeConfig } = args;
@@ -150,7 +150,7 @@ export class ServiceDeployment<
                 metadata: {
                     ...metadata,
                     annotations: {
-                        "linkerd.io/inject": "enabled",
+                        'linkerd.io/inject': 'enabled',
                     },
                 },
             },
@@ -228,7 +228,7 @@ export class ServiceDeployment<
         secretObject,
     }: {
         secretInstance: kx.Secret;
-        secretObject: AppConfigs<AN, DBT, NS>["envVars"];
+        secretObject: AppConfigs<AN, DBT, NS>['envVars'];
     }) => {
         const keyValueEntries = Object.keys(secretObject).map((key) => [key, secretInstance.asEnvValue(key)]);
         return Object.fromEntries(keyValueEntries);

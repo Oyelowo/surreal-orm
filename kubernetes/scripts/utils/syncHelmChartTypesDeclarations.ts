@@ -1,4 +1,3 @@
-
 import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
 import chalk from 'chalk';
 import sh from 'shelljs';

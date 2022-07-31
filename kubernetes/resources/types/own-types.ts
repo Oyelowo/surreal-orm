@@ -123,7 +123,6 @@ type EnvironmentVariables<AN extends ServiceName, NS extends NamespaceOfApps, DB
     { dbType: DBT }
 >;
 
-
 export type NoUnion<T, U = T> = T extends U ? ([U] extends [T] ? T : never) : never;
 
 export type AppConfigs<AN extends ServiceName, DBT extends DBType, NS extends NamespaceOfApps> = {
