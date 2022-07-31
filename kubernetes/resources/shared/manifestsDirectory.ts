@@ -1,7 +1,12 @@
 import * as k8s from '@pulumi/kubernetes';
+import * as url from 'url';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
 import { Environment, ResourceName, ResourceType } from '../types/own-types';
+
+// const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+
 
 export const getMainBaseDir = () => {
     const mainBaseDir = path.join(__dirname, '..', '..');
