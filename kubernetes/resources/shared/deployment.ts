@@ -31,9 +31,8 @@ export class ServiceDeployment<
 
     constructor(
         private name: NoUnion<AN>,
-        private args: AppConfigs<AN, DBT, NS>
-    ) // opts: pulumi.ComponentResourceOptions
-    {
+        private args: AppConfigs<AN, DBT, NS> // opts: pulumi.ComponentResourceOptions
+    ) {
         super('k8sjs:service:ServiceDeployment', name, {} /* opts */);
         this.appName = name;
         const { envVars, kubeConfig } = args;
