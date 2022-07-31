@@ -61,8 +61,8 @@ export class ServiceDeployment<
         );
 
 
-        const plainSecrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
-        const encodedSecrets = _.mapValues(plainSecrets, v => toBase64(String(v)));
+        // const plainSecrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
+        const encodedSecrets = _.mapValues(envVars, toBase64) as typeof envVars;
 
         // Create a Kubernetes Secret.
         this.secret = new kx.Secret(
@@ -204,6 +204,7 @@ export class ServiceDeployment<
 
     /**
      Maps custom secret object to what kx can understand to produce secretRef automagically
+     * @example
      {
         "graphql-mongo": {
             MONGODB_USERNAME: "xxxx",
@@ -224,7 +225,6 @@ export class ServiceDeployment<
               ...
       ...
      }
-     
     */
     #secretsObjectToEnv = (secretInstance: kx.Secret) => {
         // These need to be in base64. 

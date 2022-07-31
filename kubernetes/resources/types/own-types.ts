@@ -1,3 +1,4 @@
+import { TSecretJson } from './../../scripts/utils/plainSecretJsonConfig';
 import * as z from 'zod';
 import { Namespace } from '../infrastructure/namespaces/util';
 export const appEnvironmentsSchema = z.union([
@@ -122,11 +123,12 @@ type EnvironmentVariables<AN extends ServiceName, NS extends NamespaceOfApps, DB
     { dbType: DBT }
 >;
 
+
 export type NoUnion<T, U = T> = T extends U ? ([U] extends [T] ? T : never) : never;
 
 export type AppConfigs<AN extends ServiceName, DBT extends DBType, NS extends NamespaceOfApps> = {
     kubeConfig: Settings<NoUnion<AN>>;
-    envVars: Omit<EnvironmentVariables<AN, NS, DBT>, 'dbType'> & OtherEnvVars;
+    envVars: Omit<EnvironmentVariables<AN, NS, DBT>, 'dbType'> & OtherEnvVars & TSecretJson[AN];
     metadata: {
         name: AN;
         namespace: NS;
