@@ -5,7 +5,7 @@ Does not handle sealed secret generation/syncing
 */
 
 import yargs from 'yargs';
-import { ENVIRONMENTS_ALL } from './utils/shared';
+import { ENVIRONMENTS_ALL } from './utils/shared.js';
 
 export const ARGV = yargs(process.argv.slice(2))
     .options({

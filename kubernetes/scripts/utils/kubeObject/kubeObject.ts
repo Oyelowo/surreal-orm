@@ -3,7 +3,7 @@ import { mergeUnsealedSecretToSealedSecret } from './SealedSecretsManager.js';
 import sh from 'shelljs';
 import _ from 'lodash';
 import z from 'zod';
-import ramda from 'ramda';
+import * as ramda from 'ramda';
 import { namespaceSchema } from '../../../resources/infrastructure/namespaces/util.js';
 import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../resources/shared/manifestsDirectory.js';
 import type { Environment } from '../../../resources/types/own-types.js';
