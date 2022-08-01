@@ -4,7 +4,7 @@
     "scripts": {
         "lint-check": "eslint . --ext .js,.ts",
         "lint-fix": "eslint . --ext .js,.ts",
-        "prettier": "prettier --write .",
+        "prettier-fix": "prettier --write .",
         "prettier-check": "prettier --check .",
         "upgrade-interactive": "yarn upgrade-interactive --latest"
     },

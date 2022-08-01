@@ -19,9 +19,9 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "types": ["node"],
-        "typeRoots": ["node_modules/@types"],
+        "typeRoots": ["node_modules/@types"]
     },
-    "ts-node":{
+    "ts-node": {
         "esm": true
     },
     "exclude": ["generatedCrdsTs", "node_modules"],

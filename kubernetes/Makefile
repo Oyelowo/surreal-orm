@@ -17,11 +17,12 @@ dev:
 	yarn ts-node scripts/bootstrapLocalCluster.ts
 
 format:
-	yarn prettier
-	yarn lint --fix
+	yarn prettier-fix
+	yarn lint-fix
 	
 check:
-	yarn lint
+	yarn prettier-check
+	yarn lint-check
 
 test:
 	# yarn test
