@@ -10,11 +10,11 @@ upgrade:
 	make sync
 
 sync:
-	npx ts-node scripts/syncConfigs.ts
+	yarn ts-node scripts/syncConfigs.ts
 	make format
 
 dev:
-	npx ts-node scripts/bootstrapLocalCluster.ts
+	yarn ts-node scripts/bootstrapLocalCluster.ts
 
 format:
 	yarn prettier
@@ -31,18 +31,18 @@ test:
 ## INFRA SPECIFIC
 #############
 bootsrap_cluster:
-	npx ts-node scripts/bootstrapCluster.ts
+	yarn ts-node scripts/bootstrapCluster.ts
 
 # EXAMPLE USAGE: make generate_manifests_ci environment=local
 # environment options: local, development, staging, production
 generate_manifests_ci:
-	npx ts-node scripts/generateManifestsCI.ts --environment=$(environment)
+	yarn ts-node scripts/generateManifestsCI.ts --environment=$(environment)
 
 generatae_sealed_secrets:
-	npx ts-node scripts/generateSealedSecrets.ts
+	yarn ts-node scripts/generateSealedSecrets.ts
 
 delete_local_clusters:
-	npx ts-node scripts/deleteLocalClusters.ts
+	yarn ts-node scripts/deleteLocalClusters.ts
 
 merge-kube-config:
 # Example Usage:  make merge-kube-config path=config.yaml  

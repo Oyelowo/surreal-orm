@@ -6,7 +6,7 @@ import p from 'path';
 import sh from 'shelljs';
 import { ResourceName } from '../../../resources/types/own-types';
 import _ from 'lodash';
-import z from "zod";
+import z from 'zod';
 
 const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets';
 

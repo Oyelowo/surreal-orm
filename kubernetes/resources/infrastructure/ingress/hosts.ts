@@ -1,10 +1,14 @@
 import { Environment } from '../../types/own-types';
 import { DOMAIN_NAME_BASE } from './constant';
+import getPort, { portNumbers } from 'get-port';
 
 // type DomainBase = 'oyelowo.local' | typeof DOMAIN_NAME_BASE;
 type DomainBase = 'localhost' | typeof DOMAIN_NAME_BASE;
 
-export const INGRESS_EXTERNAL_PORT_LOCAL = 8080;
+// Incrementally find next available port from 8080 for exposing ingress,
+// otherwise fall back to a random port
+export const INGRESS_EXTERNAL_PORT_LOCAL = await getPort({ port: portNumbers(8080, 8200) });
+
 interface Hosts {
     base: DomainBase;
     // api: `api.${DomainBase}`;
@@ -16,7 +20,7 @@ type Configs = Record<Environment, Hosts>;
 const api = (base: DomainBase) => `${base}/api` as const;
 
 export const ingressControllerPorts = {
-    http: 80, // Maps to 8080 with k3d in the make file
+    http: 80, // Maps to INGRESS_EXTERNAL_PORT_LOCAL with k3d in the make file
     https: 443,
 } as const;
 

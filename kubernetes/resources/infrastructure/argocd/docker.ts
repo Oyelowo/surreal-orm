@@ -32,7 +32,6 @@ export function createContainerRegistrySecret(environment: Environment): void {
      -o yaml --dry-run=client > ${file}`);
 }
 
-
 // interface DockerRawData {
 //     auths: {
 //         'ghrc.io': { username: string; password: string; auth: string };

@@ -10,12 +10,11 @@ async function main() {
 
     PlainSecretJsonConfig.syncAll();
 
-    
     // Use local manifests to syn/generate new CRD codes
-    const kubeObjectInstance = new KubeObject('local')
-    await kubeObjectInstance.generateManifests()
+    const kubeObjectInstance = new KubeObject('local');
+    await kubeObjectInstance.generateManifests();
     const crds = kubeObjectInstance.getOfAKind('CustomResourceDefinition');
     syncCrdsCode(crds);
 }
 
-main().catch(e=> `problem syncing configs. Error: ${e}`)
+main().catch((e) => `problem syncing configs. Error: ${e}`);

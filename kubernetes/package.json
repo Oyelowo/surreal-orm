@@ -2,10 +2,10 @@
     "name": "oye",
     "type": "module",
     "scripts": {
-        "lint-check": "npx eslint . --ext .js,.ts",
-        "lint-fix": "npx eslint . --ext .js,.ts",
-        "prettier": "npx prettier --write .",
-        "prettier-check": "npx prettier --check .",
+        "lint-check": "eslint . --ext .js,.ts",
+        "lint-fix": "eslint . --ext .js,.ts",
+        "prettier": "prettier --write .",
+        "prettier-check": "prettier --check .",
         "upgrade-interactive": "yarn upgrade-interactive --latest"
     },
     "devDependencies": {
