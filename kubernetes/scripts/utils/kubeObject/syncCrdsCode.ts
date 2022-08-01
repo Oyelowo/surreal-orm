@@ -1,7 +1,7 @@
 import sh from 'shelljs';
-import { getGeneratedCrdsCodeDir, getMainBaseDir } from '../../../resources/shared/manifestsDirectory';
+import { getGeneratedCrdsCodeDir, getMainBaseDir } from '../../../resources/shared/manifestsDirectory.js';
 import path from 'path';
-import { TCustomResourceDefinitionObject } from './kubeObject';
+import { TCustomResourceDefinitionObject } from './kubeObject.js';
 
 export function syncCrdsCode(crdKubeObjects: TCustomResourceDefinitionObject[]) {
     const manifestsCrdsFiles = crdKubeObjects.map(({ path }) => path);

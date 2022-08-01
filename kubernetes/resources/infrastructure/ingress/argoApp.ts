@@ -1,4 +1,4 @@
-import { createArgocdApplication } from '../../shared/createArgoApplication';
+import { createArgocdApplication } from '../../shared/createArgoApplication.js';
 
 export const ingressControllerApplication = createArgocdApplication({
     sourceApplication: 'nginx-ingress',

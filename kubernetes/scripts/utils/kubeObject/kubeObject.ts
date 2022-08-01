@@ -1,16 +1,16 @@
-import { ResourceName } from './../../../resources/types/own-types';
-import { mergeUnsealedSecretToSealedSecret } from './SealedSecretsManager';
+import { ResourceName } from './../../../resources/types/own-types.js';
+import { mergeUnsealedSecretToSealedSecret } from './SealedSecretsManager.js';
 import sh from 'shelljs';
 import _ from 'lodash';
 import z from 'zod';
 import ramda from 'ramda';
-import { namespaceSchema } from '../../../resources/infrastructure/namespaces/util';
-import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../resources/shared/manifestsDirectory';
-import type { Environment } from '../../../resources/types/own-types';
-import { handleShellError } from '../shared';
-import { selectSecretKubeObjectsFromPrompt } from './SecretsSelectorPrompter';
-import { generateManifests } from './generateManifests';
-import { syncCrdsCode } from './syncCrdsCode';
+import { namespaceSchema } from '../../../resources/infrastructure/namespaces/util.js';
+import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../resources/shared/manifestsDirectory.js';
+import type { Environment } from '../../../resources/types/own-types.js';
+import { handleShellError } from '../shared.js';
+import { selectSecretKubeObjectsFromPrompt } from './SecretsSelectorPrompter.js';
+import { generateManifests } from './generateManifests.js';
+import { syncCrdsCode } from './syncCrdsCode.js';
 
 type ResourceKind =
     | 'Secret'

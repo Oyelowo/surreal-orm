@@ -1,9 +1,9 @@
-import { helmChartsInfo } from '../../resources/shared/helmChartInfo';
+import { helmChartsInfo } from '../../resources/shared/helmChartInfo.js';
 import chalk from 'chalk';
 import sh from 'shelljs';
 import JsonToTS from 'json-to-ts';
 import _ from 'lodash';
-import { getMainBaseDir } from '../../resources/shared/manifestsDirectory';
+import { getMainBaseDir } from '../../resources/shared/manifestsDirectory.js';
 import path from 'path';
 
 export const getHelmChartTypesDir = () => {
@@ -37,7 +37,7 @@ export function syncHelmChartTypesDeclarations() {
 
             const typeFileName = _.camelCase(`${chart}${_.capitalize(repoName)}`);
 
-            const tsDec = JsonToTS(JSON.parse(valuesJson), {
+            const tsDec = JsonToTS.default(JSON.parse(valuesJson), {
                 rootName: `I${_.capitalize(typeFileName)}`,
             })
                 .map((typeInterface, i) => {

@@ -1,4 +1,4 @@
-import { KubeObject } from './utils/kubeObject/kubeObject';
+import { KubeObject } from './utils/kubeObject/kubeObject.js';
 
 /* 
 Does not handle sealed secret generation/syncing

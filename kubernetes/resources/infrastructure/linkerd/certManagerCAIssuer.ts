@@ -1,6 +1,6 @@
-import * as cm from './../../../generatedCrdsTs/certmanager';
-import { namespaces } from '../namespaces/util';
-import { certManagerProvider } from './../cert-manager/settings';
+import * as cm from './../../../generatedCrdsTs/certmanager/index.js';
+import { namespaces } from '../namespaces/util.js';
+import { certManagerProvider } from './../cert-manager/settings.js';
 
 // ROOT TRUST ANCHOR CERTIFICATES AND CLUSTER ISSUE
 

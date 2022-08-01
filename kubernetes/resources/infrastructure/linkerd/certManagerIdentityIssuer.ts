@@ -1,7 +1,7 @@
-import * as cm from './../../../generatedCrdsTs/certmanager';
-import { namespaces } from '../namespaces/util';
-import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer';
-import { linkerdProvider } from './settings';
+import * as cm from './../../../generatedCrdsTs/certmanager/index.js';
+import { namespaces } from '../namespaces/util.js';
+import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer.js';
+import { linkerdProvider } from './settings.js';
 
 // IDENTITY CERTIFICATE WHICH ISSUES THE SECRETS FOR GENERATING CERTIFICATE FOR PODS PROXIES
 // NOTE: this should be in linkerd namespace where the identity service

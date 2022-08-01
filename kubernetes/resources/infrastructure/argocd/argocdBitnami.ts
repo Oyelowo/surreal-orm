@@ -1,12 +1,12 @@
-import { IArgocdbitnami } from '../../../generatedHelmChartsTsTypes/argoCdBitnami';
-import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant';
-import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
+import { IArgocdbitnami } from '../../../generatedHelmChartsTsTypes/argoCdBitnami.js';
+import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant.js';
+import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util';
-import { DeepPartial, STORAGE_CLASS } from '../../types/own-types';
-import { getEnvironmentVariables } from '../../shared/validations';
-import { argocdProvider } from './settings';
-import { helmChartsInfo } from '../../shared/helmChartInfo';
+import { namespaces } from '../namespaces/util.js';
+import { DeepPartial, STORAGE_CLASS } from '../../types/own-types.js';
+import { getEnvironmentVariables } from '../../shared/validations.js';
+import { argocdProvider } from './settings.js';
+import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 
 const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
     config: {

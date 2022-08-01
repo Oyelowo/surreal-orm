@@ -1,8 +1,8 @@
-import * as cm from './../../../generatedCrdsTs/certmanager';
-import { getEnvironmentVariables } from './../../shared/validations';
-import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
+import * as cm from './../../../generatedCrdsTs/certmanager/index.js';
+import { getEnvironmentVariables } from './../../shared/validations.js';
+import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
 
-import { certManagerProvider } from './settings';
+import { certManagerProvider } from './settings.js';
 
 export const CLUSTER_ISSUER_NAME = 'letsencrypt-cluster-issuer';
 export const clusterIssuer = new cm.v1.ClusterIssuer(

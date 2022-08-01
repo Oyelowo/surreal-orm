@@ -1,9 +1,9 @@
-import { ICertmanagertrustjetstack } from '../../../generatedHelmChartsTsTypes/certManagerTrustJetstack';
-import { certManagerProvider } from './settings';
-import { helmChartsInfo } from '../../shared/helmChartInfo';
+import { ICertmanagertrustjetstack } from '../../../generatedHelmChartsTsTypes/certManagerTrustJetstack.js';
+import { certManagerProvider } from './settings.js';
+import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util';
-import { DeepPartial } from '../../types/own-types';
+import { namespaces } from '../namespaces/util.js';
+import { DeepPartial } from '../../types/own-types.js';
 
 const values: DeepPartial<ICertmanagertrustjetstack> = {};
 

@@ -1,9 +1,9 @@
-import { ISealedsecretssealedsecrets } from '../../../generatedHelmChartsTsTypes/sealedSecretsSealedsecrets';
+import { ISealedsecretssealedsecrets } from '../../../generatedHelmChartsTsTypes/sealedSecretsSealedsecrets.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util';
-import { helmChartsInfo } from '../../shared/helmChartInfo';
-import { DeepPartial } from '../../types/own-types';
-import { sealedSecretsResourceName, sealedSecretsProvider } from './settings';
+import { namespaces } from '../namespaces/util.js';
+import { helmChartsInfo } from '../../shared/helmChartInfo.js';
+import { DeepPartial } from '../../types/own-types.js';
+import { sealedSecretsResourceName, sealedSecretsProvider } from './settings.js';
 
 const sealedSecretsValues: DeepPartial<ISealedsecretssealedsecrets> = {
     /*

@@ -1,12 +1,15 @@
 {
     "compilerOptions": {
         "strict": true,
+        "rootDir": ".",
         "outDir": "bin",
         "target": "ES2022",
         "lib": ["ESNext"],
-        "module": "es2022",
-        "moduleResolution": "node",
+        "module": "NodeNext",
+        "declaration": true,
+        "moduleResolution": "NodeNext",
         "sourceMap": true,
+        "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "pretty": true,
         "noFallthroughCasesInSwitch": true,
@@ -16,9 +19,9 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "types": ["node"],
-        "typeRoots": ["node_modules/@types"]
+        "typeRoots": ["node_modules/@types"],
     },
-    "ts-node": {
+    "ts-node":{
         "esm": true
     },
     "exclude": ["generatedCrdsTs", "node_modules"],

@@ -1,4 +1,4 @@
-import { createArgocdApplication } from '../../shared/createArgoApplication';
+import { createArgocdApplication } from '../../shared/createArgoApplication.js';
 
 export const certManagerApplication = createArgocdApplication({
     sourceApplication: 'cert-manager',

@@ -1,5 +1,5 @@
-import { Environment } from '../../types/own-types';
-import { DOMAIN_NAME_BASE } from './constant';
+import { Environment } from '../../types/own-types.js';
+import { DOMAIN_NAME_BASE } from './constant.js';
 import getPort, { portNumbers } from 'get-port';
 
 // type DomainBase = 'oyelowo.local' | typeof DOMAIN_NAME_BASE;

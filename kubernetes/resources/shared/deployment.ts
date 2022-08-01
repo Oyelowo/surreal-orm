@@ -1,14 +1,14 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
-import * as argocd from '../../generatedCrdsTs/argoproj';
-import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker';
-import { createArgocdApplication } from './createArgoApplication';
-import { getPathToResource } from './manifestsDirectory';
-import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/own-types';
-import { getEnvironmentVariables } from './validations';
-import { generateService } from './helpers';
-import { toBase64 } from './converters';
+import * as argocd from '../../generatedCrdsTs/argoproj/index.js';
+import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker.js';
+import { createArgocdApplication } from './createArgoApplication.js';
+import { getPathToResource } from './manifestsDirectory.js';
+import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/own-types.js';
+import { getEnvironmentVariables } from './validations.js';
+import { generateService } from './helpers.js';
+import { toBase64 } from './converters.js';
 import _ from 'lodash';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
@@ -18,7 +18,7 @@ export class ServiceDeployment<
     AN extends ServiceName,
     DBT extends DBType,
     NS extends NamespaceOfApps
-> extends pulumi.ComponentResource {
+    > extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
@@ -82,7 +82,7 @@ export class ServiceDeployment<
             containers: [
                 {
                     env: {
-                        ...this.#secretsObjectToEnv({ secretInstance: this.secret, secretObject: envVars }),
+                        ...this.secretsObjectToEnv({ secretInstance: this.secret, secretObject: envVars }),
                     },
                     image: kubeConfig.image,
                     ports: { http: Number(envVars.APP_PORT) },
@@ -222,7 +222,7 @@ export class ServiceDeployment<
       ...
      }
     */
-    #secretsObjectToEnv = ({
+    private secretsObjectToEnv = ({
         secretInstance,
         secretObject,
     }: {

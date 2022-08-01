@@ -1,11 +1,11 @@
-import { IMongodbbitnami } from '../../../generatedHelmChartsTsTypes/mongodbBitnami';
+import { IMongodbbitnami } from '../../../generatedHelmChartsTsTypes/mongodbBitnami.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../../infrastructure/namespaces/util';
-import { helmChartsInfo } from '../../shared/helmChartInfo';
-import { DeepPartial } from '../../types/own-types';
-import { getEnvironmentVariables } from '../../shared/validations';
-import { graphqlMongo } from './index';
-import { graphqlMongoSettings } from './settings';
+import { namespaces } from '../../infrastructure/namespaces/util.js';
+import { helmChartsInfo } from '../../shared/helmChartInfo.js';
+import { DeepPartial } from '../../types/own-types.js';
+import { getEnvironmentVariables } from '../../shared/validations.js';
+import { graphqlMongo } from './index.js';
+import { graphqlMongoSettings } from './settings.js';
 
 const { envVars } = graphqlMongoSettings;
 

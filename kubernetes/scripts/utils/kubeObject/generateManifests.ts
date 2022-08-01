@@ -1,10 +1,10 @@
 import c from 'chalk';
 import p from 'path';
 import sh from 'shelljs';
-import { getMainBaseDir } from '../../../resources/shared/manifestsDirectory';
-import { getEnvVarsForScript, handleShellError } from '../shared';
-import { TKubeObject, KubeObject } from './kubeObject';
-import { getImageTagsFromDir } from '../getImageTagsFromDir';
+import { getMainBaseDir } from '../../../resources/shared/manifestsDirectory.js';
+import { getEnvVarsForScript, handleShellError } from '../shared.js';
+import { TKubeObject, KubeObject } from './kubeObject.js';
+import { getImageTagsFromDir } from '../getImageTagsFromDir.js';
 
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI

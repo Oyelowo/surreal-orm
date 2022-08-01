@@ -1,13 +1,13 @@
-import { IArgocdargo } from './../../types/helm-charts/argoCdArgo';
-import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
+import { IArgocdargo } from './../../types/helm-charts/argoCdArgo.js';
+import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util';
+import { namespaces } from '../namespaces/util.js';
 
-import { DeepPartial } from '../../types/own-types';
+import { DeepPartial } from '../../types/own-types.js';
 import bcrypt from 'bcrypt';
-import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant';
-import { argocdProvider } from './settings';
-import { helmChartsInfo } from '../../shared/helmChartInfo';
+import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant.js';
+import { argocdProvider } from './settings.js';
+import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 
 const saltRounds = 10;
 const myPlaintextPassword = 'oyelowo';

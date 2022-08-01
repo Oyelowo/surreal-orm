@@ -1,6 +1,6 @@
-import { getResourceProvider } from '../../shared/manifestsDirectory';
-import { ResourceName } from '../../types/own-types';
-import { getEnvironmentVariables } from '../../shared/validations';
+import { getResourceProvider } from '../../shared/manifestsDirectory.js';
+import { ResourceName } from '../../types/own-types.js';
+import { getEnvironmentVariables } from '../../shared/validations.js';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 export const sealedSecretsResourceName: ResourceName = 'sealed-secrets';

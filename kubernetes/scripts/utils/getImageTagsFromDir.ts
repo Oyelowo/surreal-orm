@@ -3,8 +3,8 @@ import fs from 'fs';
 import glob from 'glob';
 import path from 'path';
 import util from 'util';
-import { getMainBaseDir } from '../../resources/shared/manifestsDirectory';
-import { ImageTags, imageTagsObjectValidator } from '../../resources/shared/validations';
+import { getMainBaseDir } from '../../resources/shared/manifestsDirectory.js';
+import { ImageTags, imageTagsObjectValidator } from '../../resources/shared/validations.js';
 
 const globAsync = util.promisify(glob);
 

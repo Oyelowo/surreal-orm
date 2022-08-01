@@ -1,16 +1,16 @@
-import { ILinkerdvizlinkerd } from '../../../generatedHelmChartsTsTypes/linkerdVizLinkerd';
+import { ILinkerdvizlinkerd } from '../../../generatedHelmChartsTsTypes/linkerdVizLinkerd.js';
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as bcrypt from 'bcrypt';
-import { namespaces } from '../namespaces/util';
-import { helmChartsInfo } from '../../shared/helmChartInfo';
-import { toBase64 } from '../../shared/converters';
-import { NginxConfiguration } from '../../types/nginxConfigurations';
-import { DeepPartial, ResourceName } from '../../types/own-types';
-import { CLUSTER_ISSUER_NAME } from '../cert-manager/clusterIssuer';
-import { DOMAIN_NAME_SUB_LINKERD_VIZ } from '../ingress/constant';
-import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules';
-import { linkerdVizSecretsFromLocalConfigs, linkerdVizProvider } from './settings';
+import { namespaces } from '../namespaces/util.js';
+import { helmChartsInfo } from '../../shared/helmChartInfo.js';
+import { toBase64 } from '../../shared/converters.js';
+import { NginxConfiguration } from '../../types/nginxConfigurations.js';
+import { DeepPartial, ResourceName } from '../../types/own-types.js';
+import { CLUSTER_ISSUER_NAME } from '../cert-manager/clusterIssuer.js';
+import { DOMAIN_NAME_SUB_LINKERD_VIZ } from '../ingress/constant.js';
+import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
+import { linkerdVizSecretsFromLocalConfigs, linkerdVizProvider } from './settings.js';
 
 const values: DeepPartial<ILinkerdvizlinkerd> = {};
 const resourceName: ResourceName = 'linkerd-viz';

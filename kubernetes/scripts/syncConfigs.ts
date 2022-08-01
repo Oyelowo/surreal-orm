@@ -1,8 +1,8 @@
-import { KubeObject } from './utils/kubeObject/kubeObject';
-import { syncCrdsCode } from './utils/kubeObject/syncCrdsCode';
-import { PlainSecretJsonConfig } from './utils/plainSecretJsonConfig';
-import { syncEtcHostsWithCustomHosts } from './utils/syncEtcHostsWithCustomHosts';
-import { syncHelmChartTypesDeclarations } from './utils/syncHelmChartTypesDeclarations';
+import { KubeObject } from './utils/kubeObject/kubeObject.js';
+import { syncCrdsCode } from './utils/kubeObject/syncCrdsCode.js';
+import { PlainSecretJsonConfig } from './utils/plainSecretJsonConfig.js';
+import { syncEtcHostsWithCustomHosts } from './utils/syncEtcHostsWithCustomHosts.js';
+import { syncHelmChartTypesDeclarations } from './utils/syncHelmChartTypesDeclarations.js';
 
 async function main() {
     syncEtcHostsWithCustomHosts();
