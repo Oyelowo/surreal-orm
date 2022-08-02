@@ -6,7 +6,7 @@ import { graphqlMongoSettings } from '../../services/graphql-mongo/settings.js';
 import { reactWebSettings } from '../../services/react-web/settings.js';
 import { NginxConfiguration } from '../../types/nginxConfigurations.js';
 import { getEnvironmentVariables } from '../../shared/validations.js';
-import { CLUSTER_ISSUER_NAME } from '../cert-manager';
+import { CLUSTER_ISSUER_NAME } from '../cert-manager/index.js';
 import { nginxIngressProvider } from './settings.js';
 
 const { ENVIRONMENT } = getEnvironmentVariables();

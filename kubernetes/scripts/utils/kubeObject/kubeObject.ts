@@ -57,24 +57,24 @@ export type TCustomResourceDefinitionObject = CreateKubeObject<'CustomResourceDe
 export type TKubeObject = TSecretKubeObject | TSealedSecretKubeObject | TCustomResourceDefinitionObject;
 
 export class KubeObject {
-    #kubeObjectsAll: TKubeObject[];
+    private kubeObjectsAll: TKubeObject[];
 
     constructor(private environment: Environment) {
-        this.#kubeObjectsAll = this.syncAll().getAll();
+        this.kubeObjectsAll = this.syncAll().getAll();
     }
 
     getEnvironment = () => this.environment;
 
     getForApp = (resourceName: ResourceName): TKubeObject[] => {
         const envDir = getResourceAbsolutePath(resourceName, this.environment);
-        return this.#kubeObjectsAll.filter((m) => {
+        return this.kubeObjectsAll.filter((m) => {
             const manifestIsWithinDir = (demarcator: '/' | '\\') => m.path.startsWith(`${envDir}${demarcator}`);
             return manifestIsWithinDir('/') || manifestIsWithinDir('\\');
         });
     };
 
     getAll = (): TKubeObject[] => {
-        return this.#kubeObjectsAll;
+        return this.kubeObjectsAll;
     };
 
     generateManifests = async () => {
@@ -86,10 +86,10 @@ export class KubeObject {
     /** Extract information from all the manifests for an environment(local, staging etc)  */
     syncAll = (): this => {
         const envDir = getGeneratedEnvManifestsDir(this.environment);
-        const manifestsPaths = this.#getManifestsPathWithinDir(envDir);
+        const manifestsPaths = this.getManifestsPathWithinDir(envDir);
         const exec = (cmd: string) => handleShellError(sh.exec(cmd, { silent: true })).stdout;
 
-        this.#kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
+        this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
             if (!path) return acc;
             console.log('Extracting kubeobject from manifest', i);
 
@@ -119,7 +119,7 @@ export class KubeObject {
     };
 
     /** Gets all the yaml manifests for an environment(local, staging etc)  */
-    #getManifestsPathWithinDir = (environmentManifestsDir: string): string[] => {
+    getManifestsPathWithinDir = (environmentManifestsDir: string): string[] => {
         const manifestMatcher = '*ml';
         const allManifests = sh
             .exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
@@ -132,9 +132,9 @@ export class KubeObject {
     };
 
     getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
-        // console.log(`this.#kubeObjectsAll`, this.#kubeObjectsAll[0])
-        // console.log(`(this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind)`, (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind))
-        return (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
+        // console.log(`this.kubeObjectsAll`, this.kubeObjectsAll[0])
+        // console.log(`(this.kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind)`, (this.kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind))
+        return (this.kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
     };
 
     /**
