@@ -1,5 +1,5 @@
 import c from 'chalk';
-import fs from 'fs';
+import fs from 'node:fs';
 import inquirer from 'inquirer';
 import sh, { ShellString } from 'shelljs';
 import { Environment } from '../../resources/types/ownTypes.js';
@@ -24,7 +24,7 @@ export function isFileEmpty(fileName: string, ignoreWhitespace = true): Promise<
                 return;
             }
 
-            resolve((!ignoreWhitespace && data.length === 0) || (ignoreWhitespace && !!String(data).match(/^\s*$/)));
+            resolve((!ignoreWhitespace && data.length === 0) || (ignoreWhitespace && /^\s*$/.test(String(data))));
         });
     });
 }

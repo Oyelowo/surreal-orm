@@ -19,6 +19,7 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': 'off',
         '@typescript-eslint/no-empty-interface': 'off',
         'unicorn/prefer-module': 'error',
+        'unicorn/consistent-function-scoping': 'off',
         'unicorn/filename-case': [
             'error',
             {

@@ -1,14 +1,14 @@
 import { ResourceName } from '../../../resources/types/ownTypes.js';
 import { mergeUnsealedSecretToSealedSecret } from './sealedSecretsManager.js';
+import { selectSecretKubeObjectsFromPrompt } from './secretsSelectorPrompter.js';
 import sh from 'shelljs';
+import * as ramda from 'ramda';
 import _ from 'lodash';
 import z from 'zod';
-import * as ramda from 'ramda';
 import { namespaceSchema } from '../../../resources/infrastructure/namespaces/util.js';
 import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../resources/shared/manifestsDirectory.js';
 import type { Environment } from '../../../resources/types/ownTypes.js';
 import { handleShellError } from '../shared.js';
-import { selectSecretKubeObjectsFromPrompt } from './SecretsSelectorPrompter.js';
 import { generateManifests } from './generateManifests.js';
 import { syncCrdsCode } from './syncCrdsCode.js';
 
@@ -89,6 +89,7 @@ export class KubeObject {
         const manifestsPaths = this.getManifestsPathWithinDir(envDir);
         const exec = (cmd: string) => handleShellError(sh.exec(cmd, { silent: true })).stdout;
 
+        // eslint-disable-next-line unicorn/no-array-reduce
         this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
             if (!path) return acc;
             console.log('Extracting kubeobject from manifest', i);

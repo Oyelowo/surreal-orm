@@ -141,7 +141,7 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
         });
     };
 
-    static #getSecretJsonObject = (environment: Environment): object | null => {
+    static #getSecretJsonObject = (environment: Environment): object | undefined => {
         const envPath = PlainSecretJsonConfig.#getSecretPath(environment);
 
         const existingEnvSecret = this.#parseJson<object>(sh.exec(`cat ${envPath}`, { silent: true }).stdout.trim());
@@ -152,11 +152,11 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
         return path.join(PLAIN_SECRETS_CONFIGS_DIR, `${environment}.json`);
     };
 
-    static #parseJson = <T>(json: string): T | null => {
+    static #parseJson = <T>(json: string): T | undefined => {
         try {
             return JSON.parse(json) as T;
-        } catch (error) {
-            return null;
+        } catch {
+            return undefined;
         }
     };
 

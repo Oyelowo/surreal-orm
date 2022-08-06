@@ -12,4 +12,4 @@ async function main() {
     await setupCluster(environment);
 }
 
-main().catch((e) => `Failed to bootstrap. Error: ${e}`);
+await main();
