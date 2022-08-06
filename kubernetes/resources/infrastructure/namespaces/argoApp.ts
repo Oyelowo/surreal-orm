@@ -1,5 +1,5 @@
-import { createArgocdApplication } from '../../shared/createArgoApplication';
-import { namespaces } from './util';
+import { createArgocdApplication } from '../../shared/createArgoApplication.js';
+import { namespaces } from './util.js';
 
 export const namespacesArgoApps = createArgocdApplication({
     sourceApplication: 'namespaces',

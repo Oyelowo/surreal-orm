@@ -1,10 +1,10 @@
-import { IPostgresqlbitnami } from '../../../generatedHelmChartsTsTypes/postgresqlBitnami';
+import { IPostgresqlbitnami } from '../../../generatedHelmChartsTsTypes/postgresqlBitnami.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../../infrastructure/namespaces/util';
-import { helmChartsInfo } from '../../shared/helmChartInfo';
-import { DeepPartial } from '../../types/own-types';
-import { graphqlPostgres } from './index';
-import { graphqlPostgresSettings } from './settings';
+import { namespaces } from '../../infrastructure/namespaces/util.js';
+import { helmChartsInfo } from '../../shared/helmChartInfo.js';
+import { DeepPartial } from '../../types/own-types.js';
+import { graphqlPostgres } from './app.js';
+import { graphqlPostgresSettings } from './settings.js';
 
 const { envVars } = graphqlPostgresSettings;
 

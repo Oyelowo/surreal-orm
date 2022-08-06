@@ -1,3 +1,3 @@
-export * from './argoApp';
-export * from './sealedSecrets';
-export * from './settings';
+export * from './argoApp.js';
+export * from './sealedSecrets.js';
+export * from './settings.js';

@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { appEnvironmentsSchema } from '../types/own-types';
+import { appEnvironmentsSchema } from '../types/own-types.js';
 
 // CONSIDER: Move this into helpers
 export const imageTagsObjectValidator = z.object({

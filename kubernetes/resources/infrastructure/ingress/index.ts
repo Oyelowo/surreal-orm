@@ -1,3 +1,3 @@
-export * from './ingressController';
-export * from './argoApp';
-// export * from "./certificate";
+export * from './ingressController.js';
+export * from './argoApp.js';
+// export * from "./certificate.js";

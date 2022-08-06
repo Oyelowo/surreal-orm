@@ -1,6 +1,6 @@
-import * as cm from './../../../generatedCrdsTs/certmanager';
-import { namespaces } from '../namespaces/util';
-import { certManagerProvider } from './../cert-manager/settings';
+import crds from './../../../generatedCrdsTs/index.js';
+import { namespaces } from '../namespaces/util.js';
+import { certManagerProvider } from './../cert-manager/settings.js';
 
 // ROOT TRUST ANCHOR CERTIFICATES AND CLUSTER ISSUE
 
@@ -8,7 +8,7 @@ export const CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME = 'linkerd-self-signed-issu
 export const LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME = 'linkerd-trust-anchor';
 export const LINKERD_IDENTITY_TRUST_ROOTS_SECRET_NAME = 'linkerd-identity-trust-roots';
 // First, create  a clusterIssuer for our linkerd Cert Authority. This resource will issue our root certificate
-export const clusterIssuerLinkerdSelfSigned = new cm.v1.ClusterIssuer(
+export const clusterIssuerLinkerdSelfSigned = new crds.certmanager.v1.ClusterIssuer(
     CLUSTER_ISSUER_LINKERD_SELF_SIGNED_NAME,
     {
         metadata: {
@@ -51,7 +51,7 @@ export const clusterIssuerLinkerdSelfSigned = new cm.v1.ClusterIssuer(
 
 // Then, create the actual CA certificate to be used for validation paths.This
 //  will be signed(issued) by our issuer created above,
-export const certificateLinkerdTrustAnchor = new cm.v1.Certificate(
+export const certificateLinkerdTrustAnchor = new crds.certmanager.v1.Certificate(
     LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME,
     {
         metadata: {
@@ -81,7 +81,7 @@ export const certificateLinkerdTrustAnchor = new cm.v1.Certificate(
 Finally, create another ClusterIssuer to sign intermediate issuers. This
 will use the root cert we just created, our issuer will be "signed" by the root CA.
 */
-export const clusterIssuerLinkerdTrustAnchor = new cm.v1.ClusterIssuer(
+export const clusterIssuerLinkerdTrustAnchor = new crds.certmanager.v1.ClusterIssuer(
     LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME,
     {
         metadata: {

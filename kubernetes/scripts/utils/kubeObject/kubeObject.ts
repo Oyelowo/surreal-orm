@@ -1,16 +1,16 @@
-import { ResourceName } from './../../../resources/types/own-types';
-import { mergeUnsealedSecretToSealedSecret } from './SealedSecretsManager';
+import { ResourceName } from './../../../resources/types/own-types.js';
+import { mergeUnsealedSecretToSealedSecret } from './SealedSecretsManager.js';
 import sh from 'shelljs';
 import _ from 'lodash';
 import z from 'zod';
-import ramda from 'ramda';
-import { namespaceSchema } from '../../../resources/infrastructure/namespaces/util';
-import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../resources/shared/manifestsDirectory';
-import type { Environment } from '../../../resources/types/own-types';
-import { handleShellError } from '../shared';
-import { selectSecretKubeObjectsFromPrompt } from './SecretsSelectorPrompter';
-import { generateManifests } from './generateManifests';
-import { syncCrdsCode } from './syncCrdsCode';
+import * as ramda from 'ramda';
+import { namespaceSchema } from '../../../resources/infrastructure/namespaces/util.js';
+import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../resources/shared/manifestsDirectory.js';
+import type { Environment } from '../../../resources/types/own-types.js';
+import { handleShellError } from '../shared.js';
+import { selectSecretKubeObjectsFromPrompt } from './SecretsSelectorPrompter.js';
+import { generateManifests } from './generateManifests.js';
+import { syncCrdsCode } from './syncCrdsCode.js';
 
 type ResourceKind =
     | 'Secret'
@@ -57,39 +57,39 @@ export type TCustomResourceDefinitionObject = CreateKubeObject<'CustomResourceDe
 export type TKubeObject = TSecretKubeObject | TSealedSecretKubeObject | TCustomResourceDefinitionObject;
 
 export class KubeObject {
-    #kubeObjectsAll: TKubeObject[];
+    private kubeObjectsAll: TKubeObject[];
 
     constructor(private environment: Environment) {
-        this.#kubeObjectsAll = this.syncAll().getAll();
+        this.kubeObjectsAll = this.syncAll().getAll();
     }
 
     getEnvironment = () => this.environment;
 
     getForApp = (resourceName: ResourceName): TKubeObject[] => {
         const envDir = getResourceAbsolutePath(resourceName, this.environment);
-        return this.#kubeObjectsAll.filter((m) => {
+        return this.kubeObjectsAll.filter((m) => {
             const manifestIsWithinDir = (demarcator: '/' | '\\') => m.path.startsWith(`${envDir}${demarcator}`);
             return manifestIsWithinDir('/') || manifestIsWithinDir('\\');
         });
     };
 
     getAll = (): TKubeObject[] => {
-        return this.#kubeObjectsAll;
+        return this.kubeObjectsAll;
     };
 
     generateManifests = async () => {
         await generateManifests(this);
-        syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
         this.syncAll();
+        syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
     };
 
     /** Extract information from all the manifests for an environment(local, staging etc)  */
     syncAll = (): this => {
         const envDir = getGeneratedEnvManifestsDir(this.environment);
-        const manifestsPaths = this.#getManifestsPathWithinDir(envDir);
+        const manifestsPaths = this.getManifestsPathWithinDir(envDir);
         const exec = (cmd: string) => handleShellError(sh.exec(cmd, { silent: true })).stdout;
 
-        this.#kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
+        this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
             if (!path) return acc;
             console.log('Extracting kubeobject from manifest', i);
 
@@ -119,7 +119,7 @@ export class KubeObject {
     };
 
     /** Gets all the yaml manifests for an environment(local, staging etc)  */
-    #getManifestsPathWithinDir = (environmentManifestsDir: string): string[] => {
+    getManifestsPathWithinDir = (environmentManifestsDir: string): string[] => {
         const manifestMatcher = '*ml';
         const allManifests = sh
             .exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
@@ -132,9 +132,9 @@ export class KubeObject {
     };
 
     getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
-        // console.log(`this.#kubeObjectsAll`, this.#kubeObjectsAll[0])
-        // console.log(`(this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind)`, (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind))
-        return (this.#kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
+        // console.log(`this.kubeObjectsAll`, this.kubeObjectsAll[0])
+        // console.log(`(this.kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind)`, (this.kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind))
+        return (this.kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
     };
 
     /**

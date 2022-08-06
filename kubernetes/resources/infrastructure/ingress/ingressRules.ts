@@ -1,13 +1,13 @@
-import { hosts } from './hosts';
-import { Environment } from './../../types/own-types';
+import { hosts } from './hosts.js';
+import { Environment } from './../../types/own-types.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util';
-import { graphqlMongoSettings } from '../../services/graphql-mongo/settings';
-import { reactWebSettings } from '../../services/react-web/settings';
-import { NginxConfiguration } from '../../types/nginxConfigurations';
-import { getEnvironmentVariables } from '../../shared/validations';
-import { CLUSTER_ISSUER_NAME } from '../cert-manager';
-import { nginxIngressProvider } from './settings';
+import { namespaces } from '../namespaces/util.js';
+import { graphqlMongoSettings } from '../../services/graphql-mongo/settings.js';
+import { reactWebSettings } from '../../services/react-web/settings.js';
+import { NginxConfiguration } from '../../types/nginxConfigurations.js';
+import { getEnvironmentVariables } from '../../shared/validations.js';
+import { CLUSTER_ISSUER_NAME } from '../cert-manager/index.js';
+import { nginxIngressProvider } from './settings.js';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 

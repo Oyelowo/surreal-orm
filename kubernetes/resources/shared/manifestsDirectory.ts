@@ -1,8 +1,8 @@
 import * as k8s from '@pulumi/kubernetes';
-import * as url from 'url';
-import path from 'path';
+import url from 'node:url';
+import path from 'node:path';
 import { v4 as uuid } from 'uuid';
-import { Environment, ResourceName, ResourceType } from '../types/own-types';
+import { Environment, ResourceName, ResourceType } from '../types/own-types.js';
 
 // const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));

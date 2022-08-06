@@ -1,6 +1,6 @@
 import sh from 'shelljs';
-import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch';
-import { setupCluster } from './utils/setupCluster';
+import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch.js';
+import { setupCluster } from './utils/setupCluster.js';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 

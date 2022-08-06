@@ -1,3 +1,3 @@
-export * from './argoApp';
-export * from './namespaces';
-export * from './util';
+export * from './argoApp.js';
+export * from './namespaces.js';
+export * from './util.js';

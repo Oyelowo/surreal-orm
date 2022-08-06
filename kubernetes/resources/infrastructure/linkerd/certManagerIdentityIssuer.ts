@@ -1,7 +1,7 @@
-import * as cm from './../../../generatedCrdsTs/certmanager';
-import { namespaces } from '../namespaces/util';
-import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer';
-import { linkerdProvider } from './settings';
+import crds from '../../../generatedCrdsTs/index.js';
+import { namespaces } from '../namespaces/util.js';
+import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer.js';
+import { linkerdProvider } from './settings.js';
 
 // IDENTITY CERTIFICATE WHICH ISSUES THE SECRETS FOR GENERATING CERTIFICATE FOR PODS PROXIES
 // NOTE: this should be in linkerd namespace where the identity service
@@ -13,7 +13,7 @@ import { linkerdProvider } from './settings';
 
 const CERTIFICATE_NAME = 'linkerd-identity-issuer';
 const DNS_NAME_IDENTITY_LINKERD = 'identity.linkerd.cluster.local';
-export const certificateLinkerdIdentityIssuer = new cm.v1.Certificate(
+export const certificateLinkerdIdentityIssuer = new crds.certmanager.v1.Certificate(
     CERTIFICATE_NAME,
     {
         metadata: {

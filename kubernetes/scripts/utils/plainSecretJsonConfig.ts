@@ -1,12 +1,12 @@
-import { ENVIRONMENTS_ALL } from '../utils/shared';
-import path from 'path';
+import { ENVIRONMENTS_ALL } from '../utils/shared.js';
+import path from 'node:path';
 import sh from 'shelljs';
-import { Environment, ResourceName } from '../../resources/types/own-types';
+import { Environment, ResourceName } from '../../resources/types/own-types.js';
 import { generateMock } from '@anatine/zod-mock';
 import { z } from 'zod';
-import R from 'ramda';
+import * as R from 'ramda';
 import _ from 'lodash';
-import { getPlainSecretsConfigFilesBaseDir } from '../../resources/shared/manifestsDirectory';
+import { getPlainSecretsConfigFilesBaseDir } from '../../resources/shared/manifestsDirectory.js';
 
 // Note: If these starts growing too much, we can separate
 // each apps schema and merge them all

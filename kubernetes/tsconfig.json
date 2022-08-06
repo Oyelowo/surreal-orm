@@ -2,11 +2,13 @@
     "compilerOptions": {
         "strict": true,
         "outDir": "bin",
-        "target": "ES2022",
+        "target": "ESNext",
         "lib": ["ESNext"],
-        "module": "es2022",
-        "moduleResolution": "node",
+        "module": "NodeNext",
+        "declaration": true,
+        "moduleResolution": "NodeNext",
         "sourceMap": true,
+        "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "pretty": true,
         "noFallthroughCasesInSwitch": true,
@@ -21,6 +23,7 @@
     "ts-node": {
         "esm": true
     },
+    "include": ["**/*.ts", "**/*.mts", "**/*.cts"],
     "exclude": ["generatedCrdsTs", "node_modules"],
     "files": ["index.ts", "scripts/utils/syncHelmChartTypesDeclarations.ts"]
 }

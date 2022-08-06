@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import sh from 'shelljs';
-import { getClustersList } from './utils/promptKubernetesClusterSwitch';
+import { getClustersList } from './utils/promptKubernetesClusterSwitch.js';
 
 async function main() {
     const clusterNames = 'clusterNames';

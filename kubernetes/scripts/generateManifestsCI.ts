@@ -1,11 +1,11 @@
-import { KubeObject } from './utils/kubeObject/kubeObject';
+import { KubeObject } from './utils/kubeObject/kubeObject.js';
 
 /* 
 Does not handle sealed secret generation/syncing
 */
 
 import yargs from 'yargs';
-import { ENVIRONMENTS_ALL } from './utils/shared';
+import { ENVIRONMENTS_ALL } from './utils/shared.js';
 
 export const ARGV = yargs(process.argv.slice(2))
     .options({
@@ -23,4 +23,4 @@ async function main() {
     await kubeObject.generateManifests();
 }
 
-main().catch((e) => console.log('e', e));
+main().catch((e) => console.log('Problem generating manifests. Error:', e));

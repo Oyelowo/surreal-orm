@@ -1,6 +1,6 @@
-import { AppConfigs } from '../../types/own-types';
-import { getEnvironmentVariables } from '../../shared/validations';
-import { getBaseUrl } from '../../infrastructure/ingress/hosts';
+import { AppConfigs } from '../../types/own-types.js';
+import { getEnvironmentVariables } from '../../shared/validations.js';
+import { getBaseUrl } from '../../infrastructure/ingress/hosts.js';
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
 

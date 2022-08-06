@@ -1,6 +1,6 @@
-import { PlainSecretJsonConfig } from '../../../scripts/utils/plainSecretJsonConfig';
-import { getResourceProvider } from '../../shared/manifestsDirectory';
-import { getEnvironmentVariables } from '../../shared/validations';
+import { PlainSecretJsonConfig } from '../../../scripts/utils/plainSecretJsonConfig.js';
+import { getResourceProvider } from '../../shared/manifestsDirectory.js';
+import { getEnvironmentVariables } from '../../shared/validations.js';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 export const linkerdProvider = getResourceProvider('linkerd', ENVIRONMENT);

@@ -1,12 +1,12 @@
-import { IMongodbbitnami } from './../../types/helm-charts/mongodbBitnami';
-import { grpcMongo } from './index';
-import { namespaces } from '../../infrastructure/namespaces/util';
+import { IMongodbbitnami } from './../../types/helm-charts/mongodbBitnami.js';
+import { grpcMongo } from './app.js';
+import { namespaces } from '../../infrastructure/namespaces/util.js';
 import * as k8s from '@pulumi/kubernetes';
 
-import { grpcMongoSettings } from './settings';
-import { DeepPartial } from '../../types/own-types';
-import { getEnvironmentVariables } from '../../shared/validations';
-import { helmChartsInfo } from '../../shared/helmChartInfo';
+import { grpcMongoSettings } from './settings.js';
+import { DeepPartial } from '../../types/own-types.js';
+import { getEnvironmentVariables } from '../../shared/validations.js';
+import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 
 const environmentVariables = getEnvironmentVariables();
 

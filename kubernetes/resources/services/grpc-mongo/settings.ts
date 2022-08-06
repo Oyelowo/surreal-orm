@@ -1,7 +1,7 @@
-import { getEnvironmentVariables } from '../../shared/validations';
-import { AppConfigs } from '../../types/own-types';
-import { getBaseUrl } from '../../infrastructure/ingress/hosts';
-import { PlainSecretJsonConfig } from '../../../scripts/utils/plainSecretJsonConfig';
+import { getEnvironmentVariables } from '../../shared/validations.js';
+import { AppConfigs } from '../../types/own-types.js';
+import { getBaseUrl } from '../../infrastructure/ingress/hosts.js';
+import { PlainSecretJsonConfig } from '../../../scripts/utils/plainSecretJsonConfig.js';
 
 const environmentVariables = getEnvironmentVariables();
 const environment = environmentVariables.ENVIRONMENT;

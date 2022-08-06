@@ -1,9 +1,9 @@
-import { Namespace } from '@pulumi/kubernetes/core/v1';
-import { namespacesNamesProvider } from './settings';
-import { namespaces } from './util';
+import * as pulumi from '@pulumi/kubernetes';
+import { namespacesNamesProvider } from './settings.js';
+import { namespaces } from './util.js';
 
 export const resourceNamespaces = Object.values(namespaces).map((namespace) => {
-    const resourceNamespace = new Namespace(
+    const resourceNamespace = new pulumi.core.v1.Namespace(
         namespace,
         {
             metadata: {

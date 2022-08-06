@@ -1,11 +1,11 @@
 import * as kx from '@pulumi/kubernetesx';
 import { Resource } from '@pulumi/pulumi';
-import * as argocd from '../../generatedCrdsTs/argoproj';
-import { Namespace, namespaces } from './../infrastructure/namespaces/util';
-import { getResourceProvider, getResourceRelativePath } from './manifestsDirectory';
-import { ResourceName } from '../types/own-types';
-import { getEnvironmentVariables } from './validations';
-import { PlainSecretJsonConfig } from '../../scripts/utils/plainSecretJsonConfig';
+import crds from '../../generatedCrdsTs/index.js';
+import { Namespace, namespaces } from './../infrastructure/namespaces/util.js';
+import { getResourceProvider, getResourceRelativePath } from './manifestsDirectory.js';
+import { ResourceName } from '../types/own-types.js';
+import { getEnvironmentVariables } from './validations.js';
+import { PlainSecretJsonConfig } from '../../scripts/utils/plainSecretJsonConfig.js';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 
@@ -24,7 +24,7 @@ export function createArgocdApplication({
     namespace,
     parent,
 }: ArgocdApplicationProps) {
-    const argocdApplication = new argocd.v1alpha1.Application(
+    const argocdApplication = new crds.argoproj.v1alpha1.Application(
         sourceApplication,
         {
             metadata: {

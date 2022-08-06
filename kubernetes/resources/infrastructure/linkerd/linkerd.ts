@@ -1,9 +1,9 @@
-import { ILinkerd2linkerd } from '../../../generatedHelmChartsTsTypes/linkerd2Linkerd';
+import { ILinkerd2linkerd } from '../../../generatedHelmChartsTsTypes/linkerd2Linkerd.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util';
-import { DeepPartial } from '../../types/own-types';
-import { helmChartsInfo } from './../../shared/helmChartInfo';
-import { linkerdProvider } from './settings';
+import { namespaces } from '../namespaces/util.js';
+import { DeepPartial } from '../../types/own-types.js';
+import { helmChartsInfo } from './../../shared/helmChartInfo.js';
+import { linkerdProvider } from './settings.js';
 
 const Linkerd2Values: DeepPartial<ILinkerd2linkerd> = {
     podAnnotations: {

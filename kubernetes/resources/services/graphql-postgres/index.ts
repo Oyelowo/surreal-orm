@@ -1,7 +1,3 @@
-import { ServiceDeployment } from '../../shared/deployment';
-import { graphqlPostgresSettings } from './settings';
-
-export const graphqlPostgres = new ServiceDeployment('graphql-postgres', graphqlPostgresSettings);
-
-// export * from "./postgresHAdb";
-export * from './postgres';
+export * from './app.js';
+// export * from "./postgresHAdb.js";
+export * from './postgres.js';
