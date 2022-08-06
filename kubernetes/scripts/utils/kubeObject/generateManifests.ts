@@ -1,5 +1,5 @@
 import c from 'chalk';
-import p from 'path';
+import p from 'node:path';
 import sh from 'shelljs';
 import { getMainBaseDir } from '../../../resources/shared/manifestsDirectory.js';
 import { getEnvVarsForScript, handleShellError } from '../shared.js';
@@ -41,6 +41,7 @@ export async function generateManifests(kubeObject: KubeObject) {
         export PULUMI_NODEJS_TRANSPILE_ONLY=true
         export PULUMI_PREFER_YARN=true
         export PULUMI_SKIP_CONFIRMATIONS=true
+        export PULUMI_NODEJS_TSCONFIG_PATH=/Users/oyelowo/Desktop/dev/modern-distributed-app-template/kubernetes/pulumi.tsconfig.json
         pulumi up --yes --skip-preview --stack dev
        `
         )

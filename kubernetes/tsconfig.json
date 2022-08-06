@@ -1,9 +1,8 @@
 {
     "compilerOptions": {
         "strict": true,
-        "rootDir": ".",
         "outDir": "bin",
-        "target": "ES2022",
+        "target": "ESNext",
         "lib": ["ESNext"],
         "module": "NodeNext",
         "declaration": true,
@@ -24,6 +23,7 @@
     "ts-node": {
         "esm": true
     },
+    "include": ["**/*.ts", "**/*.mts", "**/*.cts"],
     "exclude": ["generatedCrdsTs", "node_modules"],
     "files": ["index.ts", "scripts/utils/syncHelmChartTypesDeclarations.ts"]
 }

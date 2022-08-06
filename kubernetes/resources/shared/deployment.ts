@@ -1,7 +1,7 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
-import * as argocd from '../../generatedCrdsTs/argoproj/index.js';
+import crds from '../../generatedCrdsTs/index.js';
 import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker.js';
 import { createArgocdApplication } from './createArgoApplication.js';
 import { getPathToResource } from './manifestsDirectory.js';
@@ -23,7 +23,7 @@ export class ServiceDeployment<
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
     public readonly service: kx.Service;
-    public readonly argocdApplication: argocd.v1alpha1.Application;
+    public readonly argocdApplication: crds.argoproj.v1alpha1.Application;
     public readonly ipAddress?: pulumi.Output<string>;
     public readonly provider?: pulumi.ProviderResource;
     public readonly secretProvider?: pulumi.ProviderResource;

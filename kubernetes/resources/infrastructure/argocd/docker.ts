@@ -1,6 +1,6 @@
 import { PlainSecretJsonConfig } from './../../../scripts/utils/plainSecretJsonConfig.js';
 import c from 'chalk';
-import path from 'path';
+import path from 'node:path';
 import sh from 'shelljs';
 import { getResourceAbsolutePath } from '../../shared/manifestsDirectory.js';
 import { Environment } from '../../types/own-types.js';

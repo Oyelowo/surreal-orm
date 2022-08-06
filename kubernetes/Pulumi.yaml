@@ -1,3 +1,18 @@
 name: oye
-runtime: nodejs
-description: A minimal Kubernetes TypeScript Pulumi program
+runtime:
+    name: nodejs
+    options:
+        # See https://github.com/TypeStrong/ts-node/issues/1007
+        nodeargs: '--loader ts-node/esm --no-warnings'
+description: Use ECMAScript modules for a TS program.
+
+# name: oye
+# runtime:
+#     name: nodejs
+#     options:
+#         # See https://github.com/TypeStrong/ts-node/issues/1007
+#         nodeargs: '--loader ts-node/esm --no-warnings'
+# description: Use ECMAScript modules for a TS program.
+
+# # runtime: nodejs
+# # description: A minimal Kubernetes TypeScript Pulumi program

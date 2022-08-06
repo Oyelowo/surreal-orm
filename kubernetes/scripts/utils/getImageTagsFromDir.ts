@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import glob from 'glob';
-import path from 'path';
+import path from 'node:path';
 import util from 'util';
 import { getMainBaseDir } from '../../resources/shared/manifestsDirectory.js';
 import { ImageTags, imageTagsObjectValidator } from '../../resources/shared/validations.js';

@@ -1,10 +1,10 @@
 import { ENVIRONMENTS_ALL } from '../utils/shared.js';
-import path from 'path';
+import path from 'node:path';
 import sh from 'shelljs';
 import { Environment, ResourceName } from '../../resources/types/own-types.js';
 import { generateMock } from '@anatine/zod-mock';
 import { z } from 'zod';
-import R from 'ramda';
+import * as R from 'ramda';
 import _ from 'lodash';
 import { getPlainSecretsConfigFilesBaseDir } from '../../resources/shared/manifestsDirectory.js';
 
@@ -88,7 +88,7 @@ function emptyObjectValues(object: any) {
 const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 
 export class PlainSecretJsonConfig<App extends ResourceName> {
-    constructor(private resourceName: App, private environment: Environment) {}
+    constructor(private resourceName: App, private environment: Environment) { }
 
     getSecrets = (): TSecretJson[App] => {
         PlainSecretJsonConfig.syncAll();

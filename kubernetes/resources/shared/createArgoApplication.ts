@@ -1,6 +1,6 @@
 import * as kx from '@pulumi/kubernetesx';
 import { Resource } from '@pulumi/pulumi';
-import * as argocd from '../../generatedCrdsTs/argoproj/index.js';
+import crds from '../../generatedCrdsTs/index.js';
 import { Namespace, namespaces } from './../infrastructure/namespaces/util.js';
 import { getResourceProvider, getResourceRelativePath } from './manifestsDirectory.js';
 import { ResourceName } from '../types/own-types.js';
@@ -24,7 +24,7 @@ export function createArgocdApplication({
     namespace,
     parent,
 }: ArgocdApplicationProps) {
-    const argocdApplication = new argocd.v1alpha1.Application(
+    const argocdApplication = new crds.argoproj.v1alpha1.Application(
         sourceApplication,
         {
             metadata: {

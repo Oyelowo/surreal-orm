@@ -4,7 +4,7 @@ import sh from 'shelljs';
 import JsonToTS from 'json-to-ts';
 import _ from 'lodash';
 import { getMainBaseDir } from '../../resources/shared/manifestsDirectory.js';
-import path from 'path';
+import path from 'node:path';
 
 export const getHelmChartTypesDir = () => {
     const BASE_DIR = getMainBaseDir();

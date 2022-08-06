@@ -1,4 +1,4 @@
-import * as cm from './../../../generatedCrdsTs/certmanager/index.js';
+import crds from '../../../generatedCrdsTs/index.js';
 import { namespaces } from '../namespaces/util.js';
 import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer.js';
 import { linkerdProvider } from './settings.js';
@@ -13,7 +13,7 @@ import { linkerdProvider } from './settings.js';
 
 const CERTIFICATE_NAME = 'linkerd-identity-issuer';
 const DNS_NAME_IDENTITY_LINKERD = 'identity.linkerd.cluster.local';
-export const certificateLinkerdIdentityIssuer = new cm.v1.Certificate(
+export const certificateLinkerdIdentityIssuer = new crds.certmanager.v1.Certificate(
     CERTIFICATE_NAME,
     {
         metadata: {
