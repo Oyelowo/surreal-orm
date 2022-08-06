@@ -95,6 +95,7 @@ jobs:
           file: typescript/Dockerfile.production
           target: web
           tags: ${{env.IMAGE_WITH_TAG_REACT_WEB}}
+          build-args: NEXT_PUBLIC_API_URL=oyelowo.dev
           push: true
           cache-from: |
             type=gha,scope=react-web
