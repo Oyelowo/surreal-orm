@@ -42,7 +42,6 @@ export async function generateManifests(kubeObject: KubeObject) {
         ${getEnvVarsForScript(kubeObject.getEnvironment(), imageTags)}
         export PULUMI_CONFIG_PASSPHRASE="not-needed"
         export PULUMI_NODEJS_TRANSPILE_ONLY=true
-        export PULUMI_PREFER_YARN=true
         export PULUMI_SKIP_CONFIRMATIONS=true
         export PULUMI_NODEJS_TSCONFIG_PATH=${tsConfigPath}
         pulumi up --yes --skip-preview --stack dev
