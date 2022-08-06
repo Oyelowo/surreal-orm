@@ -3,7 +3,7 @@ import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 
-import { DeepPartial } from '../../types/own-types.js';
+import { DeepPartial } from '../../types/ownTypes.js';
 import bcrypt from 'bcrypt';
 import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant.js';
 import { argocdProvider } from './settings.js';

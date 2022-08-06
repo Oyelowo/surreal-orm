@@ -1,10 +1,10 @@
-import { Environment } from './../../resources/types/own-types.js';
+import { Environment } from '../../resources/types/ownTypes.js';
 import { PlainSecretJsonConfig } from '../utils/plainSecretJsonConfig.js';
 import sh from 'shelljs';
 import { promptSecretsDeletionConfirmations } from '../utils/promptSecretsDeletionConfirmations.js';
 import { namespaces } from '../../resources/infrastructure/namespaces/util.js';
 import { helmChartsInfo } from '../../resources/shared/helmChartInfo.js';
-import { ResourceName } from '../../resources/types/own-types.js';
+import { ResourceName } from '../../resources/types/ownTypes.js';
 import _ from 'lodash';
 import { KubeObject } from '../utils/kubeObject/kubeObject.js';
 

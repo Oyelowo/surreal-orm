@@ -1,4 +1,4 @@
-import { TSecretJson } from './../../scripts/utils/plainSecretJsonConfig.js';
+import { TSecretJson } from '../../scripts/utils/plainSecretJsonConfig.js';
 import * as z from 'zod';
 import { Namespace } from '../infrastructure/namespaces/util.js';
 export const appEnvironmentsSchema = z.union([

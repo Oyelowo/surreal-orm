@@ -1,7 +1,7 @@
 import { ILinkerd2linkerd } from '../../../generatedHelmChartsTsTypes/linkerd2Linkerd.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
-import { DeepPartial } from '../../types/own-types.js';
+import { DeepPartial } from '../../types/ownTypes.js';
 import { helmChartsInfo } from './../../shared/helmChartInfo.js';
 import { linkerdProvider } from './settings.js';
 

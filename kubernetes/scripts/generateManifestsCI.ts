@@ -23,4 +23,4 @@ async function main() {
     await kubeObject.generateManifests();
 }
 
-main().catch((e) => console.log('Problem generating manifests. Error:', e));
+await main();

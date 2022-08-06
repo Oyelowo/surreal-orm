@@ -16,14 +16,14 @@ export function syncHelmChartTypesDeclarations() {
     sh.exec(`rm -rf ${helmChartsDir}`);
     sh.exec(`mkdir -p ${helmChartsDir}`);
 
-    Object.entries(helmChartsInfo).map(([repoName, repoValues]) => {
-        const { repo: repoUrl } = repoValues;
+    Object.entries(helmChartsInfo).forEach(([repoName, repoValues]) => {
+        const { repo: repoUrl, charts } = repoValues;
         sh.echo(chalk.blueBright(`Syncing helm chart - ${repoName} from ${repoUrl}`));
 
         sh.exec(`helm repo add ${repoName} ${repoUrl}`);
         sh.exec(`helm repo update ${repoName}`);
 
-        Object.values(repoValues.charts).forEach(({ chart, version }) => {
+        Object.values(charts).forEach(({ chart, version }) => {
             const { stdout: valuesJson, stderr } = sh.exec(
                 `helm show values ${repoName}/${chart} --version ${version} | yq -o=json`,
                 {

@@ -4,7 +4,7 @@ import { SealedSecretTemplate } from '../../../resources/types/sealedSecretTempl
 import { TKubeObject, TSealedSecretKubeObject } from './kubeObject.js';
 import p from 'node:path';
 import sh from 'shelljs';
-import { ResourceName } from '../../../resources/types/own-types.js';
+import { ResourceName } from '../../../resources/types/ownTypes.js';
 import _ from 'lodash';
 import z from 'zod';
 
@@ -36,8 +36,8 @@ function mergeUnsealedSecretToSealedSecretHelper({
     secretKubeObject: TSecretKubeObject;
     sealedSecretKubeObjects: TSealedSecretKubeObject[];
 }): void {
-    const { data, selectedSecretsForUpdate } = secretKubeObject;
-    const { name, namespace /* annotations */ } = secretKubeObject.metadata;
+    const { data, selectedSecretsForUpdate, metadata, path } = secretKubeObject;
+    const { name, namespace /* annotations */ } = metadata;
 
     if (!name && namespace) {
         throw new Error('Name and namespace not provided in the secret');
@@ -82,8 +82,8 @@ function mergeUnsealedSecretToSealedSecretHelper({
         kind: 'SealedSecret',
         apiVersion: 'bitnami.com/v1alpha1',
         metadata: {
-            name: secretKubeObject.metadata.name,
-            namespace: secretKubeObject.metadata.namespace,
+            name,
+            namespace,
             annotations: {
                 'sealedsecrets.bitnami.com/managed': 'true',
                 ...existingSealedSecretJsonData?.metadata.annotations,
@@ -94,15 +94,14 @@ function mergeUnsealedSecretToSealedSecretHelper({
             encryptedData: mergedEncryptedData,
             template: {
                 ...existingSealedSecretJsonData?.spec?.template,
-                data: null,
-                metadata: secretKubeObject.metadata,
+                metadata,
                 type: secretKubeObject.type,
             },
         },
     };
 
     // GET SEALED SECRET PATH USING UNSEALED SECRET PATH
-    const appManifestsDir = p.dirname(secretKubeObject.path);
+    const appManifestsDir = p.dirname(path);
     // The path format is: kubernetes/generatedManifests/production/applications/graphql-mongo/1-manifest
     // and we want as basedir: kubernetes/generatedManifests/production/applications/graphql-mongo
     const appBaseDir = p.join(appManifestsDir, '..');

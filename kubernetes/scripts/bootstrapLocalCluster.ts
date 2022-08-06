@@ -23,7 +23,7 @@ async function main() {
     sh.exec(`skaffold dev --port-forward --cleanup=false  ${trigger}  --no-prune=true --no-prune-children=true`);
 }
 
-main().catch((e) => `Falied to bootstrap. Error: ${e}`);
+await main();
 
 async function promptQuestions() {
     const clusterRefreshMode = 'clusterRefreshMode';

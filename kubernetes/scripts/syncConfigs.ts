@@ -17,4 +17,4 @@ async function main() {
     syncCrdsCode(crds);
 }
 
-main().catch((e) => `problem syncing configs. Error: ${e}`);
+await main();

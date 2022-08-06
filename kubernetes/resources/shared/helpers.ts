@@ -1,6 +1,6 @@
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
-import { AppConfigs } from '../types/own-types.js';
+import { AppConfigs } from '../types/ownTypes.js';
 
 export function getFQDNFromSettings(config: AppConfigs<any, any, any>) {
     const { namespace, name } = config.metadata;

@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-empty-file */
 // import crds from './../../../generatedCrdsTs/index.js';
 // import { namespaceNames } from "../../shared.js"
 // import { CLUSTER_ISSUER_NAME } from "../cert-manager/clusterIssuer.js";
