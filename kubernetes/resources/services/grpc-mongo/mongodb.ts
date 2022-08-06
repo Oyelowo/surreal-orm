@@ -1,5 +1,5 @@
 import { IMongodbbitnami } from './../../types/helm-charts/mongodbBitnami.js';
-import { grpcMongo } from './index.js';
+import { grpcMongo } from './app.js';
 import { namespaces } from '../../infrastructure/namespaces/util.js';
 import * as k8s from '@pulumi/kubernetes';
 

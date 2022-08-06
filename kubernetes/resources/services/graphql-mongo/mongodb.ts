@@ -4,7 +4,7 @@ import { namespaces } from '../../infrastructure/namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/own-types.js';
 import { getEnvironmentVariables } from '../../shared/validations.js';
-import { graphqlMongo } from './index.js';
+import { graphqlMongo } from './app.js';
 import { graphqlMongoSettings } from './settings.js';
 
 const { envVars } = graphqlMongoSettings;
