@@ -2,48 +2,48 @@
 ## STANDARD
 #############
 install:
-	yarn install
+	npm run install
 	make sync
 
 upgrade:
-	yarn install
+	npm run install
 	make sync
 
 sync:
-	yarn ts-node scripts/syncConfigs.ts
+	npx ts-node scripts/syncConfigs.ts
 	make format
 
 dev:
-	yarn ts-node scripts/bootstrapLocalCluster.ts
+	npx ts-node scripts/bootstrapLocalCluster.ts
 
 format:
-	yarn prettier-fix
-	yarn lint-fix
+	npm run prettier-fix
+	npm run lint-fix
 	
 check:
-	yarn prettier-check
-	yarn lint-check
+	npm run prettier-check
+	npm run lint-check
 
 test:
-	# yarn test
+	# npm test
 
 
 #############
 ## INFRA SPECIFIC
 #############
 bootsrap_cluster:
-	yarn ts-node scripts/bootstrapCluster.ts
+	npx ts-node scripts/bootstrapCluster.ts
 
 # EXAMPLE USAGE: make generate_manifests_ci environment=local
 # environment options: local, development, staging, production
 generate_manifests_ci:
-	yarn ts-node scripts/generateManifestsCI.ts --environment=$(environment)
+	npx ts-node scripts/generateManifestsCI.ts --environment=$(environment)
 
 generatae_sealed_secrets:
-	yarn ts-node scripts/generateSealedSecrets.ts
+	npx ts-node scripts/generateSealedSecrets.ts
 
 delete_local_clusters:
-	yarn ts-node scripts/deleteLocalClusters.ts
+	npx ts-node scripts/deleteLocalClusters.ts
 
 merge-kube-config:
 # Example Usage:  make merge-kube-config path=config.yaml  
