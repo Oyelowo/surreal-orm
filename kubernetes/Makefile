@@ -2,11 +2,11 @@
 ## STANDARD
 #############
 install:
-	npm run install
+	npm install
 	make sync
 
 upgrade:
-	npm run install
+	npm install
 	make sync
 
 sync:
