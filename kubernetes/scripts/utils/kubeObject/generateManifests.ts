@@ -1,10 +1,11 @@
+import { getMainBaseDir } from './../../../resources/shared/manifestsDirectory.js';
 import c from 'chalk';
 import p from 'node:path';
 import sh from 'shelljs';
-import { getMainBaseDir } from '../../../resources/shared/manifestsDirectory.js';
 import { getEnvVarsForScript, handleShellError } from '../shared.js';
 import { TKubeObject, KubeObject } from './kubeObject.js';
 import { getImageTagsFromDir } from '../getImageTagsFromDir.js';
+import path from 'node:path';
 
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
@@ -30,6 +31,8 @@ export async function generateManifests(kubeObject: KubeObject) {
     handleShellError(sh.exec("export PULUMI_CONFIG_PASSPHRASE='not-needed' && pulumi stack init --stack dev"));
 
     const imageTags = await getImageTagsFromDir();
+    const mainDir = getMainBaseDir();
+    const tsConfigPath = path.join(mainDir, 'tsconfig.pulumi.json');
     // Pulumi needs some environment variables set for generating deployments with image tag
     /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
      */
@@ -41,7 +44,7 @@ export async function generateManifests(kubeObject: KubeObject) {
         export PULUMI_NODEJS_TRANSPILE_ONLY=true
         export PULUMI_PREFER_YARN=true
         export PULUMI_SKIP_CONFIRMATIONS=true
-        export PULUMI_NODEJS_TSCONFIG_PATH=/Users/oyelowo/Desktop/dev/modern-distributed-app-template/kubernetes/pulumi.tsconfig.json
+        export PULUMI_NODEJS_TSCONFIG_PATH=${tsConfigPath}
         pulumi up --yes --skip-preview --stack dev
        `
         )
