@@ -7,7 +7,6 @@
     },
     "scripts": {
         "build": "tsc",
-        "ts-node": "ts-node",
         "lint-check": "eslint . --ext .js,.ts",
         "lint-fix": "eslint . --ext .js,.ts",
         "prettier-fix": "prettier --write .",
