@@ -1,9 +1,8 @@
 module.exports = {
     env: {
-        es6: true,
-        browser: false,
-        node: true,
         es2021: true,
+        node: true,
+        browser: false,
     },
     extends: ['plugin:unicorn/recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
     parserOptions: {
@@ -19,8 +18,17 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-unused-vars': 'off',
         '@typescript-eslint/no-empty-interface': 'off',
-        'unicorn/prfer-module': 'error',
+        'unicorn/prefer-module': 'error',
+        'unicorn/filename-case': [
+            'error',
+            {
+                case: 'camelCase',
+            },
+        ],
         'unused-imports/no-unused-imports': 'error',
+        'unicorn/no-array-callback-reference': 'off',
+        'unicorn/no-array-for-each': 'off',
+        'unicorn/prevent-abbreviations': 'off',
         'no-restricted-syntax': [
             'error',
             {

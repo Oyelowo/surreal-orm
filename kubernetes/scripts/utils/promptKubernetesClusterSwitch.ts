@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import _ from 'lodash';
 import sh from 'shelljs';
 import { ingressControllerPorts, INGRESS_EXTERNAL_PORT_LOCAL } from '../../resources/infrastructure/ingress/hosts.js';
-import { Environment } from '../../resources/types/own-types.js';
+import { Environment } from '../../resources/types/ownTypes.js';
 
 const switchToCluster = (name: string) => {
     const selectContext = sh.exec(`kubectl config use-context ${name}`, { silent: true });
@@ -12,10 +12,10 @@ const switchToCluster = (name: string) => {
 
 async function createCluster(clusterChoices: string[], likelyLocalCluster: (s: string) => boolean) {
     const newClusterDefaultNumberSuffix = _.chain(clusterChoices)
-        .filter(likelyLocalCluster)
-        .map(_.toString)
+        .filter((element) => likelyLocalCluster(element))
+        .map((element) => _.toString(element))
         .map((name) => name.match(/\d+$/))
-        .map(_.toNumber)
+        .map((element) => _.toNumber(element))
         .max()
         .add(1)
         .value();
@@ -44,7 +44,7 @@ async function createCluster(clusterChoices: string[], likelyLocalCluster: (s: s
 }
 
 const LOCAL_CLUSTER_REGEX = /local|k3d|k3d-local|minikube/g;
-const likelyLocalCluster = (s: string) => !!s.match(LOCAL_CLUSTER_REGEX);
+const likelyLocalCluster = (s: string) => LOCAL_CLUSTER_REGEX.test(s);
 
 export function getClustersList() {
     const kubernetesContexts = sh.exec('kubectl config get-contexts --output=name', { silent: true });
@@ -59,7 +59,7 @@ Prompt cluster selection
 export async function promptKubernetesClusterSwitch(environment: Environment) {
     const clusterChoices = getClustersList();
 
-    const clusterChoicesWithSeparators = clusterChoices.flatMap((ctx) => [ctx, new inquirer.Separator()]);
+    const clusterChoicesWithSeparators = clusterChoices.flatMap((context) => [context, new inquirer.Separator()]);
 
     const createNewLocalClusterOption = 'Create a new local cluster instead?';
 
@@ -75,7 +75,7 @@ export async function promptKubernetesClusterSwitch(environment: Environment) {
                 new inquirer.Separator(),
                 ...clusterChoicesWithSeparators,
             ],
-            default: clusterChoices.find(likelyLocalCluster),
+            default: clusterChoices.find((element) => likelyLocalCluster(element)),
             pageSize: 20,
         },
     ]);

@@ -3,6 +3,9 @@ import inquirer from 'inquirer';
 import sh from 'shelljs';
 import { getClustersList } from './utils/promptKubernetesClusterSwitch.js';
 
+// starts with k3d-<clustername>
+const deleteLocalCluster = (name: string) => sh.exec(`k3d cluster delete ${name.slice(4)}`);
+
 async function main() {
     const clusterNames = 'clusterNames';
     const clusters = getClustersList();
@@ -14,10 +17,7 @@ async function main() {
         choices: clusters,
     });
 
-    // starts with k3d-<clustername>
-    const deleteLocalCluster = (name: string) => sh.exec(`k3d cluster delete ${name.slice(4)}`);
-
     answer.clusterNames.forEach(deleteLocalCluster);
 }
 
-main();
+await main();

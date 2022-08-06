@@ -1,5 +1,5 @@
 import { hosts } from './hosts.js';
-import { Environment } from './../../types/own-types.js';
+import { Environment } from '../../types/ownTypes.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { graphqlMongoSettings } from '../../services/graphql-mongo/settings.js';

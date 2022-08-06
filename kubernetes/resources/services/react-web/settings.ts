@@ -1,4 +1,4 @@
-import { AppConfigs } from '../../types/own-types.js';
+import { AppConfigs } from '../../types/ownTypes.js';
 import { getEnvironmentVariables } from '../../shared/validations.js';
 import { getBaseUrl } from '../../infrastructure/ingress/hosts.js';
 

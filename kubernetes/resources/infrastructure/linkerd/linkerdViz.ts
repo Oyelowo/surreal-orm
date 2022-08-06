@@ -6,7 +6,7 @@ import { namespaces } from '../namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { toBase64 } from '../../shared/converters.js';
 import { NginxConfiguration } from '../../types/nginxConfigurations.js';
-import { DeepPartial, ResourceName } from '../../types/own-types.js';
+import { DeepPartial, ResourceName } from '../../types/ownTypes.js';
 import { CLUSTER_ISSUER_NAME } from '../cert-manager/clusterIssuer.js';
 import { DOMAIN_NAME_SUB_LINKERD_VIZ } from '../ingress/constant.js';
 import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';

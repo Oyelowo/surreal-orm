@@ -1,4 +1,4 @@
-import { DeepPartial } from './../../types/own-types.js';
+import { DeepPartial } from '../../types/ownTypes.js';
 import { ingressControllerPorts } from './hosts.js';
 import { INginxingresscontrollerbitnami } from '../../../generatedHelmChartsTsTypes/nginxIngressControllerBitnami.js';
 import * as k8s from '@pulumi/kubernetes';

@@ -1,7 +1,7 @@
 import { ENVIRONMENTS_ALL } from '../utils/shared.js';
 import path from 'node:path';
 import sh from 'shelljs';
-import { Environment, ResourceName } from '../../resources/types/own-types.js';
+import { Environment, ResourceName } from '../../resources/types/ownTypes.js';
 import { generateMock } from '@anatine/zod-mock';
 import { z } from 'zod';
 import * as R from 'ramda';

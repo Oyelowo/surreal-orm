@@ -2,7 +2,7 @@ import c from 'chalk';
 import fs from 'fs';
 import inquirer from 'inquirer';
 import sh, { ShellString } from 'shelljs';
-import { Environment } from '../../resources/types/own-types.js';
+import { Environment } from '../../resources/types/ownTypes.js';
 import { ImageTags } from '../../resources/shared/validations.js';
 
 const ENVIRONMENT_KEY = 'ENVIRONMENT';

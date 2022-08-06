@@ -4,7 +4,7 @@ import { namespaces } from '../../infrastructure/namespaces/util.js';
 import * as k8s from '@pulumi/kubernetes';
 
 import { grpcMongoSettings } from './settings.js';
-import { DeepPartial } from '../../types/own-types.js';
+import { DeepPartial } from '../../types/ownTypes.js';
 import { getEnvironmentVariables } from '../../shared/validations.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 
@@ -44,19 +44,17 @@ const credentials = [
     },
 ];
 
-const mappedCredentials = credentials.reduce<Credentials>(
-    (acc, val) => {
-        acc.usernames.push(val.username);
-        acc.passwords.push(val.password);
-        acc.databases.push(val.database);
-        return acc;
-    },
-    {
-        usernames: [],
-        passwords: [],
-        databases: [],
-    }
-);
+const mappedCredentials: Credentials = {
+    usernames: [],
+    passwords: [],
+    databases: [],
+};
+
+for (const val of credentials) {
+    mappedCredentials.usernames.push(val.username);
+    mappedCredentials.passwords.push(val.password);
+    mappedCredentials.databases.push(val.database);
+}
 
 const mongoValues: DeepPartial<IMongodbbitnami> = {
     useStatefulSet: true,

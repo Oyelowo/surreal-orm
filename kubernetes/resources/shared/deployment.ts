@@ -5,7 +5,7 @@ import crds from '../../generatedCrdsTs/index.js';
 import { DOCKER_REGISTRY_KEY } from './../infrastructure/argocd/docker.js';
 import { createArgocdApplication } from './createArgoApplication.js';
 import { getPathToResource } from './manifestsDirectory.js';
-import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/own-types.js';
+import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/ownTypes.js';
 import { getEnvironmentVariables } from './validations.js';
 import { generateService } from './helpers.js';
 import { toBase64 } from './converters.js';
@@ -127,8 +127,8 @@ export class ServiceDeployment<
             ...(ENVIRONMENT !== 'local' && {
                 securityContext: {
                     runAsNonRoot: true,
-                    runAsUser: 10000,
-                    runAsGroup: 10000,
+                    runAsUser: 10_000,
+                    runAsGroup: 10_000,
                     // fsGroup:
                 },
             }),
@@ -191,11 +191,7 @@ export class ServiceDeployment<
         });
 
         const useLoadBalancer = new pulumi.Config('useLoadBalancer') ?? false;
-        if (useLoadBalancer) {
-            this.ipAddress = this.service.status.loadBalancer.ingress[0].ip;
-        } else {
-            this.ipAddress = this.service.spec.clusterIP;
-        }
+        this.ipAddress = useLoadBalancer ? this.service.status.loadBalancer.ingress[0].ip : this.service.spec.clusterIP;
     }
 
     /**

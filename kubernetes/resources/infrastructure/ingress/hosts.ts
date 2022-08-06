@@ -1,4 +1,4 @@
-import { Environment } from '../../types/own-types.js';
+import { Environment } from '../../types/ownTypes.js';
 import { DOMAIN_NAME_BASE } from './constant.js';
 import getPort, { portNumbers } from 'get-port';
 

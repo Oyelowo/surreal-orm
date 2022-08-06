@@ -2,7 +2,7 @@ import { IPostgresqlhabitnami } from './../../types/helm-charts/postgresqlHaBitn
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../../infrastructure/namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
-import { DeepPartial } from '../../types/own-types.js';
+import { DeepPartial } from '../../types/ownTypes.js';
 import { graphqlPostgres } from './app.js';
 import { graphqlPostgresSettings } from './settings.js';
 

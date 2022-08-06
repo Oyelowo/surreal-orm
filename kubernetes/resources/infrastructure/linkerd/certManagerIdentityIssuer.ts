@@ -1,6 +1,6 @@
 import crds from '../../../generatedCrdsTs/index.js';
 import { namespaces } from '../namespaces/util.js';
-import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCAIssuer.js';
+import { LINKERD_TRUST_ANCHOR_CERTIFICATE_NAME } from './certManagerCaIssuer.js';
 import { linkerdProvider } from './settings.js';
 
 // IDENTITY CERTIFICATE WHICH ISSUES THE SECRETS FOR GENERATING CERTIFICATE FOR PODS PROXIES

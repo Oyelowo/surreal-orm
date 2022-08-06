@@ -3,7 +3,7 @@ import c from 'chalk';
 import path from 'node:path';
 import sh from 'shelljs';
 import { getResourceAbsolutePath } from '../../shared/manifestsDirectory.js';
-import { Environment } from '../../types/own-types.js';
+import { Environment } from '../../types/ownTypes.js';
 import { namespaces } from '../namespaces/util.js';
 
 const DOCKER_SERVER = 'ghcr.io';

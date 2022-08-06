@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import fs from 'fs';
+import fs from 'node:fs';
 import glob from 'glob';
 import path from 'node:path';
-import util from 'util';
+import util from 'node:util';
 import { getMainBaseDir } from '../../resources/shared/manifestsDirectory.js';
 import { ImageTags, imageTagsObjectValidator } from '../../resources/shared/validations.js';
 
@@ -18,7 +18,7 @@ export async function getImageTagsFromDir(): Promise<ImageTags> {
 
     const imageTagsList = imageTagsPaths.map((x) => {
         const imageTagKey = path.basename(x);
-        const imageTagValue = fs.readFileSync(x, { encoding: 'utf-8' });
+        const imageTagValue = fs.readFileSync(x, { encoding: 'utf8' });
         return [imageTagKey, imageTagValue];
     });
 

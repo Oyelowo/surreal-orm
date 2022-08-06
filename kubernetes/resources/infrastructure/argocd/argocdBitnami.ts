@@ -3,7 +3,7 @@ import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant.js';
 import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
-import { DeepPartial, STORAGE_CLASS } from '../../types/own-types.js';
+import { DeepPartial, STORAGE_CLASS } from '../../types/ownTypes.js';
 import { getEnvironmentVariables } from '../../shared/validations.js';
 import { argocdProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';

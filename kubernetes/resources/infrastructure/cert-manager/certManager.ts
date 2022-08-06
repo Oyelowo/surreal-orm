@@ -2,7 +2,7 @@ import { ICertmanagerbitnami } from '../../../generatedHelmChartsTsTypes/certMan
 import { helmChartsInfo } from './../../shared/helmChartInfo.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
-import { DeepPartial } from '../../types/own-types.js';
+import { DeepPartial } from '../../types/ownTypes.js';
 import { certManagerProvider } from './settings.js';
 
 const certManagerValues: DeepPartial<ICertmanagerbitnami> = {
