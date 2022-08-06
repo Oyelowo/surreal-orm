@@ -5,7 +5,7 @@ module.exports = {
         node: true,
         es2021: true,
     },
-    extends: ['plugin:@typescript-eslint/recommended', 'prettier'],
+    extends: ['plugin:unicorn/recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
     parserOptions: {
         ecmaVersion: 12,
         sourceType: 'module',
@@ -19,6 +19,7 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-unused-vars': 'off',
         '@typescript-eslint/no-empty-interface': 'off',
+        'unicorn/prfer-module': 'error',
         'unused-imports/no-unused-imports': 'error',
         'no-restricted-syntax': [
             'error',
@@ -28,5 +29,5 @@ module.exports = {
             },
         ],
     },
-    plugins: ['prettier', '@typescript-eslint', 'eslint-plugin-unused-imports'],
+    plugins: ['prettier', '@typescript-eslint', 'eslint-plugin-unused-imports', 'unicorn'],
 };
