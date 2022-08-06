@@ -79,8 +79,8 @@ export class KubeObject {
 
     generateManifests = async () => {
         await generateManifests(this);
-        syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
         this.syncAll();
+        syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
     };
 
     /** Extract information from all the manifests for an environment(local, staging etc)  */

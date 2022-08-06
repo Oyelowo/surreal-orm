@@ -7,6 +7,6 @@ export function syncCrdsCode(crdKubeObjects: TCustomResourceDefinitionObject[]) 
     const outDir = getGeneratedCrdsCodeDir();
     sh.mkdir(outDir);
 
-    sh.exec(` crd2pulumi --nodejsPath ${outDir} ${manifestsCrdsFiles.join(' ')} --force`);
+    sh.exec(`crd2pulumi --nodejsPath ${outDir} ${manifestsCrdsFiles.join(' ')} --force`);
     sh.exec(`npx prettier --write ${getGeneratedCrdsCodeDir()}`);
 }
