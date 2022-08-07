@@ -3,46 +3,51 @@ kind: Config
 metadata:
     name: kubernetes
 build:
-    local:
-        concurrency: 0
-        tryImportMissing: false
-        useDockerCLI: false
-        useBuildkit: true
+    # local:
+      # push: false
+        # concurrency: 0
+        # tryImportMissing: false
+        # useDockerCLI: false
+        # useBuildkit: true
     # platforms: ["linux/amd64"]
     # platforms: ["linux/amd64", "linux/arm64"]
     artifacts:
-        - image: ghcr.io/oyelowo/react-web
+        - image: react-web
+          sync:
+            manual:
+            - src: '**/*.ts'
+              dest: .
+            - src: '**/*.tsx'
+              dest: .
+            - src: '**/*.css'
+              dest: .
           context: ../typescript
-          buildArgs: NEXT_PUBLIC_API_URL=localhost:8080
           docker:
               dockerfile: Dockerfile.development
+              buildArgs: 
+                NEXT_PUBLIC_API_URL: localhost:8080
               target: web
-              noCache: false
-              squash: false
-          # sync:
-          #   infer:
-          #   - '**/*.ts'
-          #   - '**/*.tsx'
-          #   - '**/*.css'
+              # noCache: false
+              # squash: false
 
-        - image: ghcr.io/oyelowo/graphql-mongo
-          context: ../rust
-          docker:
-              dockerfile: Dockerfile.development
-              target: graphql-mongo
-              noCache: false
-              squash: false
+        # - image: ghcr.io/oyelowo/graphql-mongo
+        #   context: ../rust
+        #   docker:
+        #       dockerfile: Dockerfile.development
+        #       target: graphql-mongo
+        #       noCache: false
+        #       squash: false
         #   requires:
         #     - image: builder-base
         #       alias: BASE
 
-        - image: ghcr.io/oyelowo/graphql-postgres
-          context: ../rust
-          docker:
-              dockerfile: Dockerfile.development
-              target: graphql-postgres
-              noCache: false
-              squash: false
+        # - image: ghcr.io/oyelowo/graphql-postgres
+        #   context: ../rust
+        #   docker:
+        #       dockerfile: Dockerfile.development
+        #       target: graphql-postgres
+        #       noCache: false
+        #       squash: false
     #   requires:
     #     - image: builder-base
     #       alias: BASE
@@ -72,51 +77,52 @@ deploy:
     kubectl:
         manifests:
             # - generatedManifests/local/infrastructure/**/*
-            # - generatedManifests/local/infrastructure/namespaces/**/*
+            - generatedManifests/local/infrastructure/namespaces/**/*
             # - generatedManifests/local/infrastructure/sealed-secrets/**/*
             # - generatedManifests/local/infrastructure/cert-manager/**/*
             # - generatedManifests/local/infrastructure/linkerd/**/*
             # - generatedManifests/local/infrastructure/linkerd-viz/**/*
-            - generatedManifests/local/infrastructure/nginx-ingress/**/*
-            - generatedManifests/local/services/**/**/*
+            # - generatedManifests/local/infrastructure/nginx-ingress/**/*
+            - generatedManifests/local/services/react-web/**/*
+            # - generatedManifests/local/services/**/**/*
 
 portForward:
-    - resourceType: service
-      resourceName: graphql-mongo
-      namespace: applications
-      port: 8000
-      localPort: 8000 # *Optional*
+    # - resourceType: service
+    #   resourceName: graphql-mongo
+    #   namespace: applications
+    #   port: 8000
+      # localPort: 8000 # *Optional*
 
     - resourceType: service
       resourceName: react-web
       namespace: applications
       port: 3000
-      localPort: 3000 # *Optional*
-
-    - resourceType: service
-      resourceName: graphql-mongo-database
-      namespace: applications
-      port: 27017
-      localPort: 27017 # *Optional*
-
-    - resourceType: service
-      resourceName: graphql-mongo-redis-master
-      namespace: applications
-      port: 6379
-      localPort: 6379 # *Optional*
+      # localPort: 3000 # *Optional*
 
     # - resourceType: service
-    #   resourceName: graphql-postgres
-    #   port: 8000
-    #   localPort: 8000
+    #   resourceName: graphql-mongo-database
+    #   namespace: applications
+    #   port: 27017
+    #   # localPort: 27017 # *Optional*
 
     # - resourceType: service
-    #   resourceName: grpc-mongo
-    #   port: 50051
-    #   localPort: 50051
+    #   resourceName: graphql-mongo-redis-master
+    #   namespace: applications
+    #   port: 6379
+    #   # localPort: 6379 # *Optional*
 
-    - resourceType: service
-      # namespace: default
-      resourceName: nginx-ingress-controller
-      port: 80
-      localPort: 8080
+    # # - resourceType: service
+    # #   resourceName: graphql-postgres
+    # #   port: 8000
+    # #   localPort: 8000
+
+    # # - resourceType: service
+    # #   resourceName: grpc-mongo
+    # #   port: 50051
+    # #   localPort: 50051
+
+    # - resourceType: service
+    #   # namespace: default
+    #   resourceName: nginx-ingress-controller
+    #   port: 80
+      # localPort: 8080
