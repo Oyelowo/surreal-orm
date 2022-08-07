@@ -98,19 +98,19 @@ portForward:
       resourceName: react-web
       namespace: applications
       port: 3000
-      # localPort: 3000 # *Optional*
+      localPort: 3000 # *Optional*
 
     - resourceType: service
       resourceName: graphql-mongo-database
       namespace: applications
       port: 27017
-      # localPort: 27017 # *Optional*
+      localPort: 27017 # *Optional*
 
     - resourceType: service
       resourceName: graphql-mongo-redis-master
       namespace: applications
       port: 6379
-      # localPort: 6379 # *Optional*
+      localPort: 6379 # *Optional*
 
     # - resourceType: service
     #   resourceName: graphql-postgres
