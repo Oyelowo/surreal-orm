@@ -4,45 +4,52 @@ metadata:
     name: kubernetes
 build:
     local:
+        push: false
         concurrency: 0
-        tryImportMissing: false
-        useDockerCLI: false
-        useBuildkit: true
+        # tryImportMissing: false
+        # useDockerCLI: false
+        # useBuildkit: true
     # platforms: ["linux/amd64"]
     # platforms: ["linux/amd64", "linux/arm64"]
     artifacts:
         - image: ghcr.io/oyelowo/react-web
+          sync:
+              manual:
+                  - src: '**/*.ts'
+                    dest: .
+                  - src: '**/*.tsx'
+                    dest: .
+                  - src: '**/*.css'
+                    dest: .
+                  - src: '**/*.png'
+                    dest: .
+                  - src: '**/*.svg'
+                    dest: .
+                  - src: '**/*.jpeg'
+                    dest: .
           context: ../typescript
-          buildArgs: NEXT_PUBLIC_API_URL=localhost:8080
           docker:
               dockerfile: Dockerfile.development
+              buildArgs:
+                  NEXT_PUBLIC_API_URL: localhost:8080
               target: web
-              noCache: false
-              squash: false
-          # sync:
-          #   infer:
-          #   - '**/*.ts'
-          #   - '**/*.tsx'
-          #   - '**/*.css'
 
         - image: ghcr.io/oyelowo/graphql-mongo
           context: ../rust
           docker:
               dockerfile: Dockerfile.development
               target: graphql-mongo
-              noCache: false
-              squash: false
-        #   requires:
-        #     - image: builder-base
-        #       alias: BASE
+
+          # requires:
+          #   - image: builder-base
+          #     alias: BASE
 
         - image: ghcr.io/oyelowo/graphql-postgres
           context: ../rust
           docker:
               dockerfile: Dockerfile.development
               target: graphql-postgres
-              noCache: false
-              squash: false
+
     #   requires:
     #     - image: builder-base
     #       alias: BASE
@@ -72,7 +79,7 @@ deploy:
     kubectl:
         manifests:
             # - generatedManifests/local/infrastructure/**/*
-            # - generatedManifests/local/infrastructure/namespaces/**/*
+            - generatedManifests/local/infrastructure/namespaces/**/*
             # - generatedManifests/local/infrastructure/sealed-secrets/**/*
             # - generatedManifests/local/infrastructure/cert-manager/**/*
             # - generatedManifests/local/infrastructure/linkerd/**/*
@@ -91,19 +98,19 @@ portForward:
       resourceName: react-web
       namespace: applications
       port: 3000
-      localPort: 3000 # *Optional*
+      # localPort: 3000 # *Optional*
 
     - resourceType: service
       resourceName: graphql-mongo-database
       namespace: applications
       port: 27017
-      localPort: 27017 # *Optional*
+      # localPort: 27017 # *Optional*
 
     - resourceType: service
       resourceName: graphql-mongo-redis-master
       namespace: applications
       port: 6379
-      localPort: 6379 # *Optional*
+      # localPort: 6379 # *Optional*
 
     # - resourceType: service
     #   resourceName: graphql-postgres

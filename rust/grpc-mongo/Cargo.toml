@@ -18,7 +18,7 @@ log = "0.4.17"
 tonic-web = "0.4"
 prost = "0.11.0"
 base64 = "0.13"
-bytes = "1.0"
+bytes = "1.2"
 futures-core = "0.3"
 http = "0.2"
 http-body = "0.4"
@@ -28,43 +28,38 @@ tower-service = "0.3"
 tracing = "0.1"
 
 
-# tokio = { version = "1.18.2", features = ["macros", "rt"] }
-tokio = { version = "1.18.2", features = ["macros", "rt-multi-thread"] }
-anyhow = "1.0.57"
-thiserror = "1.0.31"
-# sqlx = "0.5.11"
-sqlx-cli = "0.6.0"
-sqlx = { version = "0.6.0", features = [
+tokio = { version = "1.20.1", features = ["macros", "rt-multi-thread"] }
+anyhow = "1.0.60"
+thiserror = "1.0.32"
+sqlx-cli = "0.6.1"
+sqlx = { version = "0.6.1", features = [
     "runtime-tokio-native-tls",
     "postgres",
 ] }
-# tokio = { version = "1.18.2", features = ["full"] }
 
-mongodb = { version = "2.2.1", features = ["bson-chrono-0_4"] }
-bson = "2.2.0"
-# chrono = "0.4.19"
-chrono = { version = "0.4.19", features = ["serde"] }
-chrono-tz = "0.6.1"
-# mongodb = "2.1.0"
-serde = { version = "1.0.137", features = ["derive"] }
-serde_json = "1.0.81"
-slab = "0.4.6"
+mongodb = { version = "2.3.0", features = ["bson-chrono-0_4"] }
+bson = "2.4.0"
+chrono = { version = "0.4.20", features = ["serde"] }
+chrono-tz = "0.6.3"
+serde = { version = "1.0.142", features = ["derive"] }
+serde_json = "1.0.83"
+slab = "0.4.7"
 typed-builder = "0.10.0"
 url = "2.2.2"
-uuid = "1.1.0"
+uuid = "1.1.2"
 validator = { version = "0.16.0", features = ["derive"] }
 wither = { git = "https://github.com/Oyelowo/wither", branch = "master" }
-# Keep an eye on wither. Only the master branch is stable at the momenet
+# Keep an eye on wither. Only the master branch is stable at the moment
 # wither = { git = "https://github.com/thedodd/wither", branch = "master" }
 
-async-trait = "0.1.53"
-config = "0.13.1"
-crossbeam = "0.8.1"
+async-trait = "0.1.57"
+config = "0.13.2"
+crossbeam = "0.8.2"
 derive_more = "0.99.17"
-parking_lot = "0.12.0"
+parking_lot = "0.12.1"
 rayon = "1.5.3"
-ron = "0.7.0"
-serde-aux = "3.0.1"
+ron = "0.7.1"
+serde-aux = "3.1.0"
 urlencoding = "2.1.0"
 envy = "0.4.2"
 secrecy = "0.8.0"
@@ -104,5 +99,5 @@ futures = "0.3.21"
 
 [build-dependencies]
 tonic-build = "0.8.0"
-anyhow = "1.0.57"
-thiserror = "1.0.31"
+anyhow = "1.0.60"
+thiserror = "1.0.32"
