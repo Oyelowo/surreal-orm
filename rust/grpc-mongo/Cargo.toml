@@ -28,24 +28,19 @@ tower-service = "0.3"
 tracing = "0.1"
 
 
-# tokio = { version = "1.18.2", features = ["macros", "rt"] }
 tokio = { version = "1.18.2", features = ["macros", "rt-multi-thread"] }
 anyhow = "1.0.57"
 thiserror = "1.0.31"
-# sqlx = "0.5.11"
 sqlx-cli = "0.6.0"
 sqlx = { version = "0.6.0", features = [
     "runtime-tokio-native-tls",
     "postgres",
 ] }
-# tokio = { version = "1.18.2", features = ["full"] }
 
 mongodb = { version = "2.2.1", features = ["bson-chrono-0_4"] }
 bson = "2.2.0"
-# chrono = "0.4.19"
 chrono = { version = "0.4.19", features = ["serde"] }
 chrono-tz = "0.6.1"
-# mongodb = "2.1.0"
 serde = { version = "1.0.137", features = ["derive"] }
 serde_json = "1.0.81"
 slab = "0.4.6"
@@ -54,7 +49,7 @@ url = "2.2.2"
 uuid = "1.1.0"
 validator = { version = "0.16.0", features = ["derive"] }
 wither = { git = "https://github.com/Oyelowo/wither", branch = "master" }
-# Keep an eye on wither. Only the master branch is stable at the momenet
+# Keep an eye on wither. Only the master branch is stable at the moment
 # wither = { git = "https://github.com/thedodd/wither", branch = "master" }
 
 async-trait = "0.1.53"

@@ -3,16 +3,16 @@ kind: Config
 metadata:
     name: kubernetes
 build:
-    # local:
-      # push: false
-        # concurrency: 0
-        # tryImportMissing: false
-        # useDockerCLI: false
-        # useBuildkit: true
+    local:
+      push: false
+      concurrency: 0
+      # tryImportMissing: false
+      # useDockerCLI: false
+      # useBuildkit: true
     # platforms: ["linux/amd64"]
     # platforms: ["linux/amd64", "linux/arm64"]
     artifacts:
-        - image: react-web
+        - image: ghcr.io/oyelowo/react-web
           sync:
             manual:
             - src: '**/*.ts'
@@ -20,6 +20,12 @@ build:
             - src: '**/*.tsx'
               dest: .
             - src: '**/*.css'
+              dest: .
+            - src: '**/*.png'
+              dest: .
+            - src: '**/*.svg'
+              dest: .
+            - src: '**/*.jpeg'
               dest: .
           context: ../typescript
           docker:
@@ -82,7 +88,7 @@ deploy:
             # - generatedManifests/local/infrastructure/cert-manager/**/*
             # - generatedManifests/local/infrastructure/linkerd/**/*
             # - generatedManifests/local/infrastructure/linkerd-viz/**/*
-            # - generatedManifests/local/infrastructure/nginx-ingress/**/*
+            - generatedManifests/local/infrastructure/nginx-ingress/**/*
             - generatedManifests/local/services/react-web/**/*
             # - generatedManifests/local/services/**/**/*
 
@@ -121,8 +127,8 @@ portForward:
     # #   port: 50051
     # #   localPort: 50051
 
-    # - resourceType: service
-    #   # namespace: default
-    #   resourceName: nginx-ingress-controller
-    #   port: 80
-      # localPort: 8080
+    - resourceType: service
+      # namespace: default
+      resourceName: nginx-ingress-controller
+      port: 80
+      localPort: 8080
