@@ -11,10 +11,6 @@ fn main() -> Result<()> {
         .compile(files, dirs)
         .unwrap_or_else(|e| panic!("protobuf compilation failed: {}", e));
 
-    // recompile protobufs only if any of the proto files changes.
-    for file in files {
-        println!("cargo:rerun-if-changed={}", file);
-    }
     Ok(())
 }
 
