@@ -9,7 +9,7 @@ version = "0.1.0"
 [dependencies]
 # migration = { path = "./migration" }
 common = { path = "../common" }
-poem = { version = "1.3.32", features = [
+poem = { version = "1.3.37", features = [
   "redis-session",
   "session",
   "websocket",
@@ -26,8 +26,8 @@ poem = { version = "1.3.32", features = [
   "opentelemetry",
   "opentelemetry-http",
 ] }
-async-graphql-poem = "4.0.4"
-async-graphql = { version = "4.0.4", features = [
+async-graphql-poem = "4.0.6"
+async-graphql = { version = "4.0.6", features = [
   "apollo_tracing",
   "apollo_persisted_queries",
   "bson",
@@ -47,19 +47,19 @@ async-graphql = { version = "4.0.4", features = [
   "decimal",
   "smol_str",
 ] }
-tokio = { version = "1.18.2", features = ["full"] }
+tokio = { version = "1.20.1", features = ["full"] }
 
-bson = "2.2.0"
-chrono = { version = "0.4.19", features = ["serde"] }
-chrono-tz = "0.6.1"
+bson = "2.4.0"
+chrono = { version = "0.4.20", features = ["serde"] }
+chrono-tz = "0.6.3"
 rand = "0.8.5"
-sea-orm = { version = "0.9.0", features = [
+sea-orm = { version = "0.9.1", features = [
   "sqlx-postgres",
   "runtime-tokio-native-tls",
   "macros",
 ] }
-sea-orm-migration = "0.9.0"
-sqlx = { version = "0.6.0", features = [
+sea-orm-migration = "0.9.1"
+sqlx = { version = "0.6.1", features = [
   "runtime-tokio-native-tls",
   "postgres",
   "chrono",
@@ -77,21 +77,21 @@ envy = "0.4.2"
 futures = "0.3.21"
 log = "0.4.17"
 secrecy = "0.8.0"
-serde = { version = "1.0.137", features = ["derive"] }
-serde_json = "1.0.81"
-simple_logger = "2.1.0"
-slab = "0.4.6"
-thiserror = "1.0.31"
+serde = { version = "1.0.142", features = ["derive"] }
+serde_json = "1.0.83"
+simple_logger = "2.2.0"
+slab = "0.4.7"
+thiserror = "1.0.32"
 typed-builder = "0.10.0"
 url = "2.2.2"
 urlencoding = "2.1.0"
 validator = { version = "0.16.0", features = ["derive"] }
 
-async-trait = "0.1.53"
-config = "0.13.1"
-crossbeam = "0.8.1"
+async-trait = "0.1.57"
+config = "0.13.2"
+crossbeam = "0.8.2"
 derive_more = "0.99.17"
-parking_lot = "0.12.0"
+parking_lot = "0.12.1"
 rayon = "1.5.3"
-ron = "0.7.0"
-serde-aux = "3.0.1"
+ron = "0.7.1"
+serde-aux = "3.1.0"
