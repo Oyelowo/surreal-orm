@@ -4,34 +4,34 @@ metadata:
     name: kubernetes
 build:
     local:
-      push: false
-      concurrency: 0
-      # tryImportMissing: false
-      # useDockerCLI: false
-      # useBuildkit: true
+        push: false
+        concurrency: 0
+        # tryImportMissing: false
+        # useDockerCLI: false
+        # useBuildkit: true
     # platforms: ["linux/amd64"]
     # platforms: ["linux/amd64", "linux/arm64"]
     artifacts:
         - image: ghcr.io/oyelowo/react-web
           sync:
-            manual:
-            - src: '**/*.ts'
-              dest: .
-            - src: '**/*.tsx'
-              dest: .
-            - src: '**/*.css'
-              dest: .
-            - src: '**/*.png'
-              dest: .
-            - src: '**/*.svg'
-              dest: .
-            - src: '**/*.jpeg'
-              dest: .
+              manual:
+                  - src: '**/*.ts'
+                    dest: .
+                  - src: '**/*.tsx'
+                    dest: .
+                  - src: '**/*.css'
+                    dest: .
+                  - src: '**/*.png'
+                    dest: .
+                  - src: '**/*.svg'
+                    dest: .
+                  - src: '**/*.jpeg'
+                    dest: .
           context: ../typescript
           docker:
               dockerfile: Dockerfile.development
-              buildArgs: 
-                NEXT_PUBLIC_API_URL: localhost:8080
+              buildArgs:
+                  NEXT_PUBLIC_API_URL: localhost:8080
               target: web
 
         - image: ghcr.io/oyelowo/graphql-mongo
