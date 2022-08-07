@@ -161,11 +161,11 @@ jobs:
           cache-to: |
             type=gha,scope=grpc-mongo,mode=max
 
-      - name: Update repo with image tags to /kubernetes/manifests/image-tags/*
+      - name: Update repo with image tags to /kubernetes/image-tags/*
         run: |
-          echo ${{env.IMAGE_TAG_GRAPHQL_MONGO}} > ../kubernetes/manifests/image-tags/IMAGE_TAG_GRAPHQL_MONGO
-          echo ${{env.IMAGE_TAG_GRAPHQL_POSTGRES}} > ../kubernetes/manifests/image-tags/IMAGE_TAG_GRAPHQL_POSTGRES
-          echo ${{env.IMAGE_TAG_GRPC_MONGO}} > ../kubernetes/manifests/image-tags/IMAGE_TAG_GRPC_MONGO
+          echo ${{env.IMAGE_TAG_GRAPHQL_MONGO}} > ../kubernetes/image-tags/IMAGE_TAG_GRAPHQL_MONGO
+          echo ${{env.IMAGE_TAG_GRAPHQL_POSTGRES}} > ../kubernetes/image-tags/IMAGE_TAG_GRAPHQL_POSTGRES
+          echo ${{env.IMAGE_TAG_GRPC_MONGO}} > ../kubernetes/image-tags/IMAGE_TAG_GRPC_MONGO
 
       - name: Commit files
         run: |
