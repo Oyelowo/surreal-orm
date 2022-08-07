@@ -15,6 +15,7 @@ async function main() {
     const trigger = clusterRefreshMode === 'live' ? '' : '--trigger="manual"';
 
     if (!shouldRebuild) {
+        sh.exec(`skaffold dev --port-forward --cleanup=false  ${trigger}  --no-prune=true --no-prune-children=true`);
         return;
     }
 

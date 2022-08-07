@@ -4,12 +4,13 @@ import { getBaseUrl } from '../../infrastructure/ingress/hosts.js';
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
 
+const isLocal = environment === 'local';
 export const reactWebSettings: AppConfigs<'react-web', 'doesNotHaveDb', 'applications'> = {
     kubeConfig: {
-        requestMemory: '70Mi',
-        requestCpu: '100m',
-        limitMemory: '200Mi',
-        limitCpu: '100m',
+        requestMemory: isLocal ? '1.3Gi' : '300Mi',
+        requestCpu: isLocal ? '500m' : '200m',
+        limitMemory: isLocal ? '2Gi' : '300Mi',
+        limitCpu: isLocal ? '700m' : '300m',
         replicaCount: 2,
         host: '0.0.0.0',
         image: `ghcr.io/oyelowo/react-web:${getEnvironmentVariables().IMAGE_TAG_REACT_WEB}`,
