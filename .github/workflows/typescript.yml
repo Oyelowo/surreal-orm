@@ -102,8 +102,8 @@ jobs:
           cache-to: |
             type=gha,scope=react-web,mode=max
 
-      - name: Update repo with IMAGE_TAG_REACT_WEB to /kubernetes/manifests/image-tags/IMAGE_TAG_REACT_WEB
-        run: echo ${{env.IMAGE_TAG_REACT_WEB}} > ../kubernetes/manifests/image-tags/IMAGE_TAG_REACT_WEB
+      - name: Update repo with IMAGE_TAG_REACT_WEB to /kubernetes/image-tags/IMAGE_TAG_REACT_WEB
+        run: echo ${{env.IMAGE_TAG_REACT_WEB}} > ../kubernetes/image-tags/IMAGE_TAG_REACT_WEB
 
       - name: Commit files
         run: |
