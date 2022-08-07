@@ -13,8 +13,7 @@ build:
     artifacts:
         - image: ghcr.io/oyelowo/react-web
           context: ../typescript
-          buildArgs:
-              NEXT_PUBLIC_API_URL=localhost:8080
+          buildArgs: NEXT_PUBLIC_API_URL=localhost:8080
           docker:
               dockerfile: Dockerfile.development
               target: web
