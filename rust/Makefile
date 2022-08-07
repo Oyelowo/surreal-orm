@@ -5,7 +5,7 @@ install:
 	cargo install cargo-edit  
 
 upgrade:
-	cargo update
+	cargo upgrade
 
 sync:
 # Update graphql schemas which is then consumed by the frontend graphql build script

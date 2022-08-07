@@ -73,7 +73,7 @@ slab = "0.4.6"
 typed-builder = "0.10.0"
 url = "2.2.2"
 uuid = "1.1.0"
-validator = { version = "0.15.0", features = ["derive"] }
+validator = { version = "0.16.0", features = ["derive"] }
 wither = { git = "https://github.com/Oyelowo/wither", branch = "master" }
 # Keep an eye on wither official repo
 # wither = { git = "https://github.com/thedodd/wither", branch = "master" }

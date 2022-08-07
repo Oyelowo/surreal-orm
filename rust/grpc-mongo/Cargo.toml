@@ -9,14 +9,14 @@ edition = "2021"
 [dependencies]
 common = { path = "../common" }
 my-macros = { path = "../my-macros" }
-tonic = "0.7.2"
-# tonic = { version = "0.7", default-features = false, features = [
+tonic = "0.8.0"
+# tonic = { version = "0.8.0", default-features = false, features = [
 #     "transport",
 #     "tls",
 # ] }
 log = "0.4.17"
-tonic-web = "0.3"
-prost = "0.10.4"
+tonic-web = "0.4"
+prost = "0.11.0"
 base64 = "0.13"
 bytes = "1.0"
 futures-core = "0.3"
@@ -52,7 +52,7 @@ slab = "0.4.6"
 typed-builder = "0.10.0"
 url = "2.2.2"
 uuid = "1.1.0"
-validator = { version = "0.15.0", features = ["derive"] }
+validator = { version = "0.16.0", features = ["derive"] }
 wither = { git = "https://github.com/Oyelowo/wither", branch = "master" }
 # Keep an eye on wither. Only the master branch is stable at the momenet
 # wither = { git = "https://github.com/thedodd/wither", branch = "master" }
@@ -103,6 +103,6 @@ futures = "0.3.21"
 
 
 [build-dependencies]
-tonic-build = "0.7.2"
+tonic-build = "0.8.0"
 anyhow = "1.0.57"
 thiserror = "1.0.31"
