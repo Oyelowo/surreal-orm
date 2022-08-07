@@ -71,7 +71,7 @@ sqlx = { version = "0.6.0", features = [
 ] }
 uuid = { version = "1.1.2", features = ["v4", "serde"] }
 
-anyhow = "1.0.57"
+anyhow = "1.0.60"
 dotenv = "0.15.0"
 envy = "0.4.2"
 futures = "0.3.21"
