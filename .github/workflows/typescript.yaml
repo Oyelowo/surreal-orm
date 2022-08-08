@@ -1,6 +1,9 @@
-name: typescript
+name: Build typescript images
 
 on:
+  workflow_dispatch:
+    paths: 
+      - 'typescript/**'
   push:
     branches: [master]
     paths: 

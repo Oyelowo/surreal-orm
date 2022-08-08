@@ -2,6 +2,9 @@ name: Generate Kubernetes manifests
 
 # Only trigger, when the rust and typescript workflow succeeded
 on:
+  workflow_dispatch:
+    paths: 
+      - 'kubernetes/**'
   workflow_run:
     # This  must match with the other two workflows
     workflows: ["rust", "typescript"]
