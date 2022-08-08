@@ -1,4 +1,4 @@
-import { hosts } from '../../resources/infrastructure/ingress/hosts.js';
+import { hosts } from '../../src/resources/infrastructure/ingress/hosts.js';
 import sh from 'shelljs';
 import _ from 'lodash';
 import chalk from 'chalk';
