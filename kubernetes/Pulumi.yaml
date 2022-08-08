@@ -1,4 +1,5 @@
 name: oye
+main: src
 runtime:
     name: nodejs
     options:
