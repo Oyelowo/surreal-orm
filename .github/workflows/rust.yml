@@ -32,6 +32,10 @@ jobs:
           profile: minimal
           toolchain: stable
       - uses: Swatinem/rust-cache@v1
+
+    # If you need to pin your workflow to specific CMake version you can use the 'tag' to select the version.
+    - name: Get specific version CMake, v3.23.2
+      uses: lukka/get-cmake@v3.23.2   ⟸ THIS IS THE ONE LINER YOU NEED. It can also be `@latest`
       
       - name: Run cargo test
         run: make test
