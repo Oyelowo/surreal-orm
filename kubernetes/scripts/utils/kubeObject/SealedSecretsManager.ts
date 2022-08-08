@@ -1,10 +1,10 @@
 import { TSecretKubeObject } from './kubeObject.js';
 // import { ManifestsManager, SealedSecretKubeObject } from './kubeObject.js';
-import { SealedSecretTemplate } from '../../../resources/types/sealedSecretTemplate.js';
+import { SealedSecretTemplate } from '../../../src/resources/types/sealedSecretTemplate.js';
 import { TKubeObject, TSealedSecretKubeObject } from './kubeObject.js';
 import p from 'node:path';
 import sh from 'shelljs';
-import { ResourceName } from '../../../resources/types/ownTypes.js';
+import { ResourceName } from '../../../src/resources/types/ownTypes.js';
 import _ from 'lodash';
 import z from 'zod';
 

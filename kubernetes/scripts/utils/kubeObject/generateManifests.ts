@@ -1,4 +1,4 @@
-import { getMainBaseDir } from './../../../resources/shared/manifestsDirectory.js';
+import { getMainBaseDir } from '../../../src/resources/shared/manifestsDirectory.js';
 import c from 'chalk';
 import p from 'node:path';
 import sh from 'shelljs';

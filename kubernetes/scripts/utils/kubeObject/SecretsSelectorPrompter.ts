@@ -1,9 +1,9 @@
 import { TKubeObject, TSecretKubeObject } from './kubeObject.js';
-import { ResourceName } from '../../../resources/types/ownTypes.js';
+import { ResourceName } from '../../../src/resources/types/ownTypes.js';
 import _ from 'lodash';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import { Namespace } from '../../../resources/infrastructure/namespaces/util.js';
+import { Namespace } from '../../../src/resources/infrastructure/namespaces/util.js';
 
 type SecretKey = string;
 type AppSecretKeysWithinNamespaces = Record<Namespace, Record<ResourceName | string, SecretKey[]>>;

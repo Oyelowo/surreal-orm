@@ -2,8 +2,8 @@ import c from 'chalk';
 import fs from 'node:fs';
 import inquirer from 'inquirer';
 import sh, { ShellString } from 'shelljs';
-import { Environment } from '../../resources/types/ownTypes.js';
-import { ImageTags } from '../../resources/shared/validations.js';
+import { Environment } from '../../src/resources/types/ownTypes.js';
+import { ImageTags } from '../../src/resources/shared/validations.js';
 
 const ENVIRONMENT_KEY = 'ENVIRONMENT';
 export function getEnvVarsForScript(environment: Environment, imageTags: ImageTags) {

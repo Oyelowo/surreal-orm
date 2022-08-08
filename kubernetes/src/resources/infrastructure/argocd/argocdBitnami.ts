@@ -1,0 +1,65 @@
+import { IArgocdbitnami } from '../../../../generatedHelmChartsTsTypes/argoCdBitnami.js';
+import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant.js';
+import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
+import * as k8s from '@pulumi/kubernetes';
+import { namespaces } from '../namespaces/util.js';
+import { DeepPartial, STORAGE_CLASS } from '../../types/ownTypes.js';
+import { getEnvironmentVariables } from '../../shared/validations.js';
+import { argocdProvider } from './settings.js';
+import { helmChartsInfo } from '../../shared/helmChartInfo.js';
+
+const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
+    config: {
+        secret: {
+            create: true,
+            argocdServerAdminPassword: 'oyelowo',
+            annotations: {
+                // 'sealedsecrets.bitnami.com/managed': 'true',
+            },
+        },
+    },
+    global: {
+        storageClass: getEnvironmentVariables().ENVIRONMENT === 'local' ? '' : STORAGE_CLASS,
+    },
+    server: {
+        ingress: {
+            enabled: true,
+            hostname: DOMAIN_NAME_SUB_ARGOCD,
+            annotations,
+            pathType: 'Prefix' as 'Exact' | 'ImplementationSpecific' | 'Prefix',
+            ingressClassName: INGRESS_CLASSNAME_NGINX,
+            tls: true,
+        },
+        // Ingress-controller already handles TLS. Argocd does too which causes collision. Disable argo from doing that
+        // https://stackoverflow.com/questions/49856754/nginx-ingress-too-many-redirects-when-force-ssl-is-enabled
+        extraArgs: ['--insecure'] as any[],
+    },
+    dex: {
+        enabled: false,
+    },
+};
+
+const {
+    repo,
+    charts: {
+        argocd: { chart, version },
+    },
+} = helmChartsInfo.bitnami;
+
+export const argocdHelm = new k8s.helm.v3.Chart(
+    'argocd',
+    {
+        chart,
+        fetchOpts: {
+            repo,
+        },
+        version,
+        values: argocdValuesOld,
+        namespace: namespaces.argocd,
+        // By default Release resource will wait till all created resources
+        // are available. Set this to true to skip waiting on resources being
+        // available.
+        skipAwait: false,
+    },
+    { provider: argocdProvider }
+);

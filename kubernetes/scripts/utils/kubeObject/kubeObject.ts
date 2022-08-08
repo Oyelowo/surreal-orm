@@ -1,13 +1,13 @@
-import { ResourceName } from '../../../resources/types/ownTypes.js';
+import { ResourceName } from '../../../src/resources/types/ownTypes.js';
 import { mergeUnsealedSecretToSealedSecret } from './sealedSecretsManager.js';
 import { selectSecretKubeObjectsFromPrompt } from './secretsSelectorPrompter.js';
 import sh from 'shelljs';
 import * as ramda from 'ramda';
 import _ from 'lodash';
 import z from 'zod';
-import { namespaceSchema } from '../../../resources/infrastructure/namespaces/util.js';
-import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../resources/shared/manifestsDirectory.js';
-import type { Environment } from '../../../resources/types/ownTypes.js';
+import { namespaceSchema } from '../../../src/resources/infrastructure/namespaces/util.js';
+import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../src/resources/shared/manifestsDirectory.js';
+import type { Environment } from '../../../src/resources/types/ownTypes.js';
 import { handleShellError } from '../shared.js';
 import { generateManifests } from './generateManifests.js';
 import { syncCrdsCode } from './syncCrdsCode.js';
