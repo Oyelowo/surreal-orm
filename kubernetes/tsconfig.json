@@ -25,5 +25,5 @@
     },
     "include": ["**/*.ts", "**/*.mts", "**/*.cts"],
     "exclude": ["generatedCrdsTs", "node_modules"],
-    "files": ["src/index.ts", "scripts/utils/syncHelmChartTypesDeclarations.ts"]
+    "files": ["index.ts", "scripts/utils/syncHelmChartTypesDeclarations.ts"]
 }

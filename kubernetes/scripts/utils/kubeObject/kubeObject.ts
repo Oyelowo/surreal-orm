@@ -6,7 +6,10 @@ import * as ramda from 'ramda';
 import _ from 'lodash';
 import z from 'zod';
 import { namespaceSchema } from '../../../src/resources/infrastructure/namespaces/util.js';
-import { getGeneratedEnvManifestsDir, getResourceAbsolutePath } from '../../../src/resources/shared/directoriesManager.js';
+import {
+    getGeneratedEnvManifestsDir,
+    getResourceAbsolutePath,
+} from '../../../src/resources/shared/directoriesManager.js';
 import type { Environment } from '../../../src/resources/types/ownTypes.js';
 import { handleShellError } from '../shared.js';
 import { generateManifests } from './generateManifests.js';
