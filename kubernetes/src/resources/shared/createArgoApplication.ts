@@ -2,7 +2,7 @@ import * as kx from '@pulumi/kubernetesx';
 import { Resource } from '@pulumi/pulumi';
 import crds from '../../../generatedCrdsTs/index.js';
 import { Namespace, namespaces } from '../infrastructure/namespaces/util.js';
-import { getResourceProvider, getResourceRelativePath } from './manifestsDirectory.js';
+import { getResourceProvider, getResourceRelativePath } from './directoriesManager.js';
 import { ResourceName } from '../types/ownTypes.js';
 import { getEnvironmentVariables } from './validations.js';
 import { PlainSecretJsonConfig } from '../../../scripts/utils/plainSecretJsonConfig.js';

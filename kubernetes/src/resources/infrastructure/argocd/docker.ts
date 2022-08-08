@@ -2,7 +2,7 @@ import { PlainSecretJsonConfig } from '../../../../scripts/utils/plainSecretJson
 import c from 'chalk';
 import path from 'node:path';
 import sh from 'shelljs';
-import { getResourceAbsolutePath } from '../../shared/manifestsDirectory.js';
+import { getResourceAbsolutePath } from '../../shared/directoriesManager.js';
 import { Environment } from '../../types/ownTypes.js';
 import { namespaces } from '../namespaces/util.js';
 

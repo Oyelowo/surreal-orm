@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import sh from 'shelljs';
 import JsonToTS from 'json-to-ts';
 import _ from 'lodash';
-import { getMainBaseDir } from '../../src/resources/shared/manifestsDirectory.js';
+import { getMainBaseDir } from '../../src/resources/shared/directoriesManager.js';
 import path from 'node:path';
 
 export const getHelmChartTypesDir = () => {

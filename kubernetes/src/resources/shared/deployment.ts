@@ -4,7 +4,7 @@ import * as pulumi from '@pulumi/pulumi';
 import crds from '../../../generatedCrdsTs/index.js';
 import { DOCKER_REGISTRY_KEY } from '../infrastructure/argocd/docker.js';
 import { createArgocdApplication } from './createArgoApplication.js';
-import { getPathToResource } from './manifestsDirectory.js';
+import { getPathToResource } from './directoriesManager.js';
 import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/ownTypes.js';
 import { getEnvironmentVariables } from './validations.js';
 import { generateService } from './helpers.js';

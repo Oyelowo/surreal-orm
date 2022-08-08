@@ -6,7 +6,7 @@ import { generateMock } from '@anatine/zod-mock';
 import { z } from 'zod';
 import * as R from 'ramda';
 import _ from 'lodash';
-import { getPlainSecretsConfigFilesBaseDir } from '../../src/resources/shared/manifestsDirectory.js';
+import { getPlainSecretsConfigFilesBaseDir } from '../../src/resources/shared/directoriesManager.js';
 
 // Note: If these starts growing too much, we can separate
 // each apps schema and merge them all

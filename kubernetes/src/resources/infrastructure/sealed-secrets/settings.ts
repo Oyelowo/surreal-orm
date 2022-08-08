@@ -1,4 +1,4 @@
-import { getResourceProvider } from '../../shared/manifestsDirectory.js';
+import { getResourceProvider } from '../../shared/directoriesManager.js';
 import { ResourceName } from '../../types/ownTypes.js';
 import { getEnvironmentVariables } from '../../shared/validations.js';
 

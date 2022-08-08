@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import glob from 'glob';
 import path from 'node:path';
 import util from 'node:util';
-import { getMainBaseDir } from '../../src/resources/shared/manifestsDirectory.js';
+import { getMainBaseDir } from '../../src/resources/shared/directoriesManager.js';
 import { ImageTags, imageTagsObjectValidator } from '../../src/resources/shared/validations.js';
 
 const globAsync = util.promisify(glob);

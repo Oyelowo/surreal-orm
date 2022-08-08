@@ -1,5 +1,5 @@
 import { PlainSecretJsonConfig } from '../../../../scripts/utils/plainSecretJsonConfig.js';
-import { getResourceProvider } from '../../shared/manifestsDirectory.js';
+import { getResourceProvider } from '../../shared/directoriesManager.js';
 import { getEnvironmentVariables } from '../../shared/validations.js';
 
 const { ENVIRONMENT } = getEnvironmentVariables();

@@ -1,5 +1,5 @@
 import sh from 'shelljs';
-import { getGeneratedCrdsCodeDir } from '../../../src/resources/shared/manifestsDirectory.js';
+import { getGeneratedCrdsCodeDir } from '../../../src/resources/shared/directoriesManager.js';
 import { TCustomResourceDefinitionObject } from './kubeObject.js';
 
 export function syncCrdsCode(crdKubeObjects: TCustomResourceDefinitionObject[]) {
