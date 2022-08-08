@@ -29,7 +29,7 @@ export const hosts: Configs = {
     local: {
         base: 'localhost',
         // api: 'api.oyelowo.local',
-        // apiUrl: 'http://localhost:8080/api',
+        apiUrl: `http://localhost:${INGRESS_EXTERNAL_PORT_LOCAL}/api`,
         port: INGRESS_EXTERNAL_PORT_LOCAL,
     },
     development: {
