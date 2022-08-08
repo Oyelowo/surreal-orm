@@ -27,14 +27,14 @@ jobs:
         working-directory: kubernetes
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
           fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
       - name: Setup Node
         uses: actions/setup-node@v1
         with:
-          node-version: 18.4.0
+          node-version: 18.7.0
       - run: npm install
       - name: Set environment variables
         run: |
@@ -44,7 +44,7 @@ jobs:
       - name: Install pulumi
         uses: pulumi/setup-pulumi@v2
         with:
-          pulumi-version: 3.37.0
+          pulumi-version: 3.37.2
       - run: |
           # make generate_manifests_ci environment=development
           # make generate_manifests_ci environment=staging

@@ -29,7 +29,7 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 18.7.0
           cache: npm
           cache-dependency-path: './typescript/package-lock.json'
 
@@ -60,7 +60,7 @@ jobs:
         working-directory: typescript
         
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       # Using other environment variables as input into another 
       # does not work for normal "env: <value>" setup as the input environment
       # variable to another would be treated literally by github parser rather than evaluating it.

@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
@@ -43,7 +43,7 @@ jobs:
       run:
         working-directory: rust
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -59,7 +59,7 @@ jobs:
       run:
         working-directory: rust
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal 
@@ -82,7 +82,7 @@ jobs:
         working-directory: rust
         
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       # Using other environment variables as input into another 
       # does not work for normal "env: <value>" setup as the input environment
       # variable to another would be treated literally by github parser rather than evaluating it.
@@ -192,7 +192,7 @@ jobs:
   #       # working-directory: kubernetes
         
     # steps:
-      # - uses: actions/checkout@v2
+      # - uses: actions/checkout@v3
       #   with:
       #     persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
       #     fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
@@ -239,7 +239,7 @@ jobs:
       #     PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
       # - name: Check out code
-      #   uses: actions/checkout@v2
+      #   uses: actions/checkout@v3
 
       # # 1. APPLICATION 1: Build and push image for graphql-mongo
       # - name: build graphql-mongo docker image
