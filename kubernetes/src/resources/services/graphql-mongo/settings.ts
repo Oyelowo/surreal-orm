@@ -1,6 +1,6 @@
 import { AppConfigs } from '../../types/ownTypes.js';
 import { getEnvironmentVariables } from '../../shared/validations.js';
-import { getBaseUrl } from '../../infrastructure/ingress/hosts.js';
+import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { PlainSecretJsonConfig } from '../../../../scripts/utils/plainSecretJsonConfig.js';
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
@@ -22,7 +22,7 @@ export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'mongodb', 'appli
         APP_ENVIRONMENT: environment,
         APP_HOST: '0.0.0.0',
         APP_PORT: '8000',
-        APP_EXTERNAL_BASE_URL: getBaseUrl(environment),
+        APP_EXTERNAL_BASE_URL: getIngressUrl({ environment }),
         OAUTH_GITHUB_CLIENT_ID: secretsFromLocalConfigs.OAUTH_GITHUB_CLIENT_ID,
         OAUTH_GITHUB_CLIENT_SECRET: secretsFromLocalConfigs.OAUTH_GITHUB_CLIENT_SECRET,
         OAUTH_GOOGLE_CLIENT_ID: secretsFromLocalConfigs.OAUTH_GOOGLE_CLIENT_ID,

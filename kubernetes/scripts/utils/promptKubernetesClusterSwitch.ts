@@ -14,11 +14,12 @@ const switchToCluster = (name: string) => {
 };
 
 async function createCluster(clusterChoices: string[], likelyLocalCluster: (s: string) => boolean) {
+    const getSufficedNumber = (str: string) => str.match(/\d+$/);
     const newClusterDefaultNumberSuffix = _.chain(clusterChoices)
-        .filter((element) => likelyLocalCluster(element))
-        .map((element) => _.toString(element))
-        .map((name) => name.match(/\d+$/))
-        .map((element) => _.toNumber(element))
+        .filter(likelyLocalCluster)
+        .map(String)
+        .map(getSufficedNumber)
+        .map(Number)
         .max()
         .add(1)
         .value();

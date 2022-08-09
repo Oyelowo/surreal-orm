@@ -1,5 +1,4 @@
-import { hosts } from './hosts.js';
-import { Environment } from '../../types/ownTypes.js';
+import { getIngressUrlHost } from './hosts.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { graphqlMongoSettings } from '../../services/graphql-mongo/settings.js';
@@ -16,9 +15,6 @@ export const INGRESS_CLASSNAME_NGINX: IngressClassName = 'nginx';
 const SECRET_NAME_NGINX = 'nginx-ingress-tls';
 
 const name = 'oyelowo-ingress';
-
-const getHosts = (environemnt: Environment) => [hosts[environemnt].base /* hosts[environemnt].api */];
-const isLocal = ENVIRONMENT === 'local';
 
 type CertManagerAnnotations = {
     // NOTE: Make sure you specify the right one, if using cluster-issuer, user cluster-issuer annotations, otherwise, use mere issuer
@@ -58,9 +54,9 @@ export const appIngress = new k8s.networking.v1.Ingress(
                     // 1:1 mapping i.e 1 domain/subdomain =>  Unit(i.e Frontend and backend)
                     // Frontent served at base route and come last, while backend served at /api and come first to match specifically.
                     // e.g if you have two services:
-                    // For service a... servicea.mydomain.com   => Frontend(serivea.mydomain.com), Backend(servicea.mydomain.com)
-                    // For service b... servicea.mydomain.com   => Frontend(seriveb.mydomain.com), Backend(serviceb.mydomain.com)
-                    host: hosts[ENVIRONMENT].base,
+                    // For service a... servicea.mydomain.com   => Frontend(serivea.mydomain.com), Backend(servicea.mydomain.com/api)
+                    // For service b... servicea.mydomain.com   => Frontend(seriveb.mydomain.com), Backend(serviceb.mydomain.com/api)
+                    host: getIngressUrlHost({ environment: ENVIRONMENT }),
                     http: {
                         paths: [
                             // Put the specific Path first before the base path below where the frontend is served
