@@ -29,13 +29,15 @@ build:
                     dest: .
           context: ../typescript
           custom:
+          #  We use $IMAGE to inject the tag from skaffold
+          # I need to go back into kubernetes dir because we have changed context to typescript dir up here
             buildCommand: |
-              npx ts-node /Users/oyelowo/Desktop/dev/modern-distributed-app-template/kubernetes/scripts/buildImage.ts
-              # dockerfile:
-              #   path: ../typescript
-              #   buildArgs:
-              #     # key2: { { .ENV_VAR } }
-              #     NEXT_PUBLIC_API_URL: {{ .NEXT_PUBLIC_API_URL }}
+              INGRESS_DOMAIN_LOCAL=$(npx ts-node ../kubernetes/scripts/logIngressDomain.ts -e=local)
+
+              docker build -f Dockerfile.development  \
+              --target web -t $IMAGE \
+              --build-arg NEXT_PUBLIC_API_URL=$INGRESS_DOMAIN_LOCAL .
+
           # docker:
           #     dockerfile: Dockerfile.development
           #     buildArgs:

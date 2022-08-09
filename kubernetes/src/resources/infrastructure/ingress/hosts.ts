@@ -3,17 +3,18 @@ import { DOMAIN_NAME_BASE } from './constant.js';
 import getPort, { portNumbers } from 'get-port';
 
 // type DomainBase = 'oyelowo.local' | typeof DOMAIN_NAME_BASE;
-type DomainBase = 'localhost' | typeof DOMAIN_NAME_BASE;
+type DomainBase = `localhost` | typeof DOMAIN_NAME_BASE;
 
 // Incrementally find next available port from 8080 for exposing ingress,
 // otherwise fall back to a random port
-// export const INGRESS_EXTERNAL_PORT_LOCAL = 8080;
 export const INGRESS_EXTERNAL_PORT_LOCAL = await getPort({ port: portNumbers(8080, 8200) });
 
+type Domain = `http://${DomainBase}:${typeof INGRESS_EXTERNAL_PORT_LOCAL}` | `https://${DomainBase}`;
 interface Hosts {
     base: DomainBase;
     // api: `api.${DomainBase}`;
-    apiUrl?: `http://${DomainBase}:${typeof INGRESS_EXTERNAL_PORT_LOCAL}/api`;
+    domain: Domain;
+    apiUrl?: `${Domain}/api`;
     port?: typeof INGRESS_EXTERNAL_PORT_LOCAL;
 }
 
@@ -27,21 +28,26 @@ export const ingressControllerPorts = {
 
 export const hosts: Configs = {
     local: {
-        base: 'localhost',
+        // base: `localhost:${INGRESS_EXTERNAL_PORT_LOCAL}`,
+        base: `localhost`,
+        domain: `http://localhost:${INGRESS_EXTERNAL_PORT_LOCAL}`,
         // api: 'api.oyelowo.local',
-        apiUrl: `http://localhost:${INGRESS_EXTERNAL_PORT_LOCAL}/api`,
+        // apiUrl: `http://localhost:${INGRESS_EXTERNAL_PORT_LOCAL}/api`,
         port: INGRESS_EXTERNAL_PORT_LOCAL,
     },
     development: {
         base: DOMAIN_NAME_BASE,
+        domain: `https://${DOMAIN_NAME_BASE}`,
         // api: api(DOMAIN_NAME_BASE),
     },
     staging: {
         base: DOMAIN_NAME_BASE,
+        domain: `https://${DOMAIN_NAME_BASE}`,
         // api: api(DOMAIN_NAME_BASE),
     },
     production: {
         base: DOMAIN_NAME_BASE,
+        domain: `https://${DOMAIN_NAME_BASE}`,
         // api: api(DOMAIN_NAME_BASE),
     },
 };
