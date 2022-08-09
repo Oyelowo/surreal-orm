@@ -1,3 +1,3 @@
-function placeHolder(){
-    console.log("It works");
+function placeHolderInfra() {
+    console.log('It works');
 }
