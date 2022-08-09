@@ -1,7 +1,7 @@
 import { PlainSecretJsonConfig } from '../../../../scripts/utils/plainSecretJsonConfig.js';
 import { AppConfigs } from '../../types/ownTypes.js';
 import { getEnvironmentVariables } from '../../shared/validations.js';
-import { getBaseUrl } from '../../infrastructure/ingress/hosts.js';
+import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
 const secretsFromLocalConfigs = new PlainSecretJsonConfig('graphql-postgres', environment).getSecrets();
@@ -22,7 +22,7 @@ export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'postgresdb
         APP_ENVIRONMENT: environment,
         APP_HOST: '0.0.0.0',
         APP_PORT: '8000',
-        APP_EXTERNAL_BASE_URL: getBaseUrl(environment),
+        APP_EXTERNAL_BASE_URL: getIngressUrl({ environment }),
         POSTGRES_DATABASE_NAME: 'graphql-postgres-database',
         POSTGRES_NAME: 'graphql-postgres-database',
         POSTGRES_USERNAME: secretsFromLocalConfigs.POSTGRES_USERNAME,

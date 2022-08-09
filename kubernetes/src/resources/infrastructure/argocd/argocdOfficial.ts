@@ -1,3 +1,4 @@
+import { getEnvironmentVariables } from './../../../resources/shared/validations';
 import { IArgocdargo } from '../../types/helm-charts/argoCdArgo.js';
 import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
 import * as k8s from '@pulumi/kubernetes';
@@ -5,10 +6,12 @@ import { namespaces } from '../namespaces/util.js';
 
 import { DeepPartial } from '../../types/ownTypes.js';
 import bcrypt from 'bcrypt';
-import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant.js';
 import { argocdProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
+import { getIngressUrlHost } from '../ingress/hosts.js';
 
+const { ENVIRONMENT } = getEnvironmentVariables();
+const argocdHost = getIngressUrlHost({ environment: ENVIRONMENT, subDomain: 'argocd' });
 const saltRounds = 10;
 const myPlaintextPassword = 'oyelowo';
 const hash = bcrypt.hashSync(myPlaintextPassword, saltRounds);
@@ -24,15 +27,15 @@ const argocdValues: DeepPartial<IArgocdargo> = {
             https: true,
             tls: [
                 {
-                    hosts: [DOMAIN_NAME_SUB_ARGOCD],
-                    secretName: `${DOMAIN_NAME_SUB_ARGOCD}-tls` as any,
+                    hosts: [argocdHost],
+                    secretName: `${argocdHost}-tls`,
                 },
             ],
-            hosts: [DOMAIN_NAME_SUB_ARGOCD] as any[],
+            hosts: [argocdHost],
         },
         // Ingress-controller already handles TLS. Argocd does too which causes collision. Disable argo from doing that
         // https://stackoverflow.com/questions/49856754/nginx-ingress-too-many-redirects-when-force-ssl-is-enabled
-        extraArgs: ['--insecure'] as any[],
+        extraArgs: ['--insecure'],
     },
     configs: {
         secret: {

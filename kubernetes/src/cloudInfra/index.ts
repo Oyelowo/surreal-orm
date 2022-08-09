@@ -1,3 +1,3 @@
-function placeHolder(){
-    console.log("It works");
+function placeHolder() {
+    console.log('It works');
 }

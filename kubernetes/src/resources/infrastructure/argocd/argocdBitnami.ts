@@ -1,5 +1,4 @@
 import { IArgocdbitnami } from '../../../../generatedHelmChartsTsTypes/argoCdBitnami.js';
-import { DOMAIN_NAME_SUB_ARGOCD } from '../ingress/constant.js';
 import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
@@ -7,7 +6,9 @@ import { DeepPartial, STORAGE_CLASS } from '../../types/ownTypes.js';
 import { getEnvironmentVariables } from '../../shared/validations.js';
 import { argocdProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
+import { getIngressUrlHost } from '../ingress/hosts.js';
 
+const { ENVIRONMENT } = getEnvironmentVariables();
 const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
     config: {
         secret: {
@@ -24,7 +25,7 @@ const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
     server: {
         ingress: {
             enabled: true,
-            hostname: DOMAIN_NAME_SUB_ARGOCD,
+            hostname: getIngressUrlHost({ environment: ENVIRONMENT, subDomain: 'argocd' }),
             annotations,
             pathType: 'Prefix' as 'Exact' | 'ImplementationSpecific' | 'Prefix',
             ingressClassName: INGRESS_CLASSNAME_NGINX,
@@ -32,7 +33,7 @@ const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
         },
         // Ingress-controller already handles TLS. Argocd does too which causes collision. Disable argo from doing that
         // https://stackoverflow.com/questions/49856754/nginx-ingress-too-many-redirects-when-force-ssl-is-enabled
-        extraArgs: ['--insecure'] as any[],
+        extraArgs: ['--insecure'],
     },
     dex: {
         enabled: false,
