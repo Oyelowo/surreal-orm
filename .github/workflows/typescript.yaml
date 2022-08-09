@@ -76,8 +76,12 @@ jobs:
 
           echo "IMAGE_TAG_REACT_WEB=$IMAGE_TAG" >> $GITHUB_ENV
           IMAGE_NAME_REACT_WEB=$CONTAINER_REGISTRY/react-web
+
           echo "IMAGE_WITH_TAG_REACT_WEB=$IMAGE_NAME_REACT_WEB:$IMAGE_TAG, $IMAGE_NAME_REACT_WEB:latest" >> $GITHUB_ENV
           # echo "IMAGE_WITH_TAG_REACT_WEB=ghcr.io/${{ github.repository_owner }}/react-web:$GITHUB_REF_NAME-$GITHUB_SHA" >> $GITHUB_ENV
+
+          # Go outside of typescript working directory into kubernetes dir, where the script lies
+          echo "INGRESS_DOMAIN_PRODUCTION=$(npx ts-node ../kubernetes/scripts/logIngressDomain.ts -e=production)" >> $GITHUB_ENV
       
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
@@ -92,14 +96,14 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Build and cache web image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: typescript
           file: typescript/Dockerfile.production
           target: web
           tags: ${{env.IMAGE_WITH_TAG_REACT_WEB}}
           build-args: |
-            NEXT_PUBLIC_API_URL=https://oyelowo.dev
+            NEXT_PUBLIC_API_URL=$INGRESS_DOMAIN_PRODUCTION
           push: true
           cache-from: |
             type=gha,scope=react-web

@@ -8,7 +8,7 @@ build:
         concurrency: 0
         # tryImportMissing: false
         # useDockerCLI: false
-        # useBuildkit: true
+        useBuildkit: true
     # platforms: ["linux/amd64"]
     # platforms: ["linux/amd64", "linux/arm64"]
     artifacts:
@@ -28,11 +28,23 @@ build:
                   - src: '**/*.jpeg'
                     dest: .
           context: ../typescript
-          docker:
-              dockerfile: Dockerfile.development
-              buildArgs:
-                  NEXT_PUBLIC_API_URL: localhost:8080
-              target: web
+          custom:
+              #  We use $IMAGE to inject the tag from skaffold
+              # I need to go back into kubernetes dir because we have changed context to typescript dir up here
+              buildCommand: |
+                  INGRESS_DOMAIN_LOCAL=$(npx ts-node ../kubernetes/scripts/logIngressDomain.ts -e=local)
+
+                  docker build -f Dockerfile.development  \
+                  --target web -t $IMAGE \
+                  --build-arg NEXT_PUBLIC_API_URL=$INGRESS_DOMAIN_LOCAL .
+
+          # docker:
+          #     dockerfile: Dockerfile.development
+          #     buildArgs:
+          #       # key2: { { .ENV_VAR } }
+          #       NEXT_PUBLIC_API_URL: {{ .NEXT_PUBLIC_API_URL }}
+          #       # NEXT_PUBLIC_API_URL: localhost:8080
+          #     target: web
 
         - image: ghcr.io/oyelowo/graphql-mongo
           context: ../rust
@@ -44,11 +56,11 @@ build:
           #   - image: builder-base
           #     alias: BASE
 
-        - image: ghcr.io/oyelowo/graphql-postgres
-          context: ../rust
-          docker:
-              dockerfile: Dockerfile.development
-              target: graphql-postgres
+        # - image: ghcr.io/oyelowo/graphql-postgres
+        #   context: ../rust
+        #   docker:
+        #       dockerfile: Dockerfile.development
+        #       target: graphql-postgres
 
     #   requires:
     #     - image: builder-base
@@ -88,11 +100,11 @@ deploy:
             - generatedManifests/local/services/**/**/*
 
 portForward:
-    - resourceType: service
-      resourceName: graphql-mongo
-      namespace: applications
-      port: 8000
-      localPort: 8000 # *Optional*
+    # - resourceType: service
+    #   resourceName: graphql-mongo
+    #   namespace: applications
+    #   port: 8000
+    #   localPort: 8000 # *Optional*
 
     - resourceType: service
       resourceName: react-web
@@ -112,6 +124,7 @@ portForward:
       port: 6379
       localPort: 6379 # *Optional*
 
+
     # - resourceType: service
     #   resourceName: graphql-postgres
     #   port: 8000
@@ -122,8 +135,9 @@ portForward:
     #   port: 50051
     #   localPort: 50051
 
-    - resourceType: service
-      # namespace: default
-      resourceName: nginx-ingress-controller
-      port: 80
-      localPort: 8080
+    # Handled by the build script so that we can dynamically get a next free available port for the ingress
+    # - resourceType: service
+    #   # namespace: default
+    #   resourceName: nginx-ingress-controller
+    #   port: 80
+    #   localPort: 8080

@@ -1,6 +1,6 @@
 import { getEnvironmentVariables } from '../../shared/validations.js';
 import { AppConfigs } from '../../types/ownTypes.js';
-import { getBaseUrl } from '../../infrastructure/ingress/hosts.js';
+import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { PlainSecretJsonConfig } from '../../../../scripts/utils/plainSecretJsonConfig.js';
 
 const environmentVariables = getEnvironmentVariables();
@@ -25,7 +25,7 @@ export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'mongodb', 'application
         APP_ENVIRONMENT: environment,
         APP_HOST: '0.0.0.0',
         APP_PORT: '50051',
-        APP_EXTERNAL_BASE_URL: getBaseUrl(environment),
+        APP_EXTERNAL_BASE_URL: getIngressUrl({ environment }),
         MONGODB_NAME: 'grpc-mongo-database',
         MONGODB_USERNAME: secretsFromLocalConfigs.MONGODB_USERNAME,
         MONGODB_PASSWORD: secretsFromLocalConfigs.MONGODB_PASSWORD,

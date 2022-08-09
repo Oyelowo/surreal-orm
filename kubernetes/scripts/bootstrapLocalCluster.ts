@@ -28,9 +28,7 @@ await main();
 
 async function promptQuestions() {
     const clusterRefreshMode = 'clusterRefreshMode';
-    const regenerateKubernetesManifests = 'regenerateKubernetesManifests';
     const shouldRebuild = 'shouldRebuild';
-    type Key = typeof clusterRefreshMode | typeof regenerateKubernetesManifests | typeof shouldRebuild;
 
     const manualTrigger = 'Manual Trigger (Requires keyboard input from the termial)';
     const clusterRefreshModesChoices = ['live', manualTrigger] as const;

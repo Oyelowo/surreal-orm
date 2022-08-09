@@ -1,6 +1,6 @@
 import { AppConfigs } from '../../types/ownTypes.js';
 import { getEnvironmentVariables } from '../../shared/validations.js';
-import { getBaseUrl } from '../../infrastructure/ingress/hosts.js';
+import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 
 const environment = getEnvironmentVariables().ENVIRONMENT;
 
@@ -20,7 +20,7 @@ export const reactWebSettings: AppConfigs<'react-web', 'doesNotHaveDb', 'applica
         APP_ENVIRONMENT: environment,
         APP_HOST: '0.0.0.0',
         APP_PORT: '3000',
-        APP_EXTERNAL_BASE_URL: getBaseUrl(environment),
+        APP_EXTERNAL_BASE_URL: getIngressUrl({ environment }),
         // Not really used as all backend functionality has been moved to rust backend.
         // So, not using typescript for any backend work. Keeping for reference purpose
         // GRAPHQL_MONGO_URL: getFQDNFromSettings(graphqlMongoSettings), // Get Url mongoFQDN
