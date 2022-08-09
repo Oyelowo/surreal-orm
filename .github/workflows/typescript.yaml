@@ -1,4 +1,4 @@
-name: Build typescript images
+name: typescript
 
 on:
   workflow_dispatch:

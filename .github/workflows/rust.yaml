@@ -1,4 +1,4 @@
-name: Build rust images
+name: rust
 
 on:
   workflow_dispatch:
