@@ -20,7 +20,7 @@ export async function setupCluster(environment: Environment) {
     applySetupManifests(kubeObject);
 
     if (deletPlainJsonSecretsInput) {
-        PlainSecretJsonConfig.emptyValues(environment);
+        PlainSecretJsonConfig.resetValues(environment);
     }
 
     if (deleteUnsealedSecretManifestsOutput) {

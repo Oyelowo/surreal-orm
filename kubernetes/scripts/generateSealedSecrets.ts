@@ -20,7 +20,7 @@ async function main() {
     await kubeObject.syncSealedSecretsWithPrompt();
 
     if (deletPlainJsonSecretsInput) {
-        PlainSecretJsonConfig.emptyValues(environment);
+        PlainSecretJsonConfig.resetValues(environment);
     }
 
     if (deleteUnsealedSecretManifestsOutput) {
