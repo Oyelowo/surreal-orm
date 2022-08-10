@@ -17,14 +17,17 @@ export const getSecretsSchema = ({
     environment: Environment;
 }) => {
     const isLocal = environment === 'local';
-    const string = z
-        .string()
-        .min(allowEmptyValues ? 0 : 1)
+    const getDefault =
+        (defaultValue: string) =>
+        (v: string): string =>
+            isLocal && _.isEmpty(v) ? defaultValue : v;
+    const stringNoDefault = z.string().min(allowEmptyValues ? 0 : 1);
+    const string = stringNoDefault
         // We want to populate the values for local environment
         // for the first time but not for other environments
         // So that the dev can properly see which secrets have not been added
         // it's okay to make mistake in local
-        .default(() => (isLocal ? 'example' : ''));
+        .transform(getDefault('example'));
 
     const secretsSample = z.object({
         'graphql-mongo': z.object({
@@ -52,9 +55,9 @@ export const getSecretsSchema = ({
         'react-web': z.object({}),
         argocd: z.object({
             ADMIN_PASSWORD: string,
-            type: string.transform(() => 'git'),
-            url: string.transform((_item) => 'https://github.com/Oyelowo/modern-distributed-app-template'),
-            username: string.transform(() => 'Oyelowo'),
+            type: stringNoDefault.transform(getDefault('git')),
+            url: stringNoDefault.transform(getDefault('https://github.com/Oyelowo/modern-distributed-app-template')),
+            username: stringNoDefault.transform(getDefault('Oyelowo')),
             password: string,
         }),
         'argocd-applications-children-infrastructure': z.object({}),
@@ -88,13 +91,13 @@ const secretsSample: TSecretJson = checkType({
         OAUTH_GITHUB_CLIENT_ID: '',
         OAUTH_GITHUB_CLIENT_SECRET: '',
         OAUTH_GOOGLE_CLIENT_ID: '',
-        OAUTH_GOOGLE_CLIENT_SECRET: ''
+        OAUTH_GOOGLE_CLIENT_SECRET: '',
     },
     'grpc-mongo': {
         MONGODB_USERNAME: '',
         MONGODB_PASSWORD: '',
         MONGODB_ROOT_USERNAME: '',
-        MONGODB_ROOT_PASSWORD: ''
+        MONGODB_ROOT_PASSWORD: '',
     },
     'graphql-postgres': { POSTGRES_USERNAME: '', POSTGRES_PASSWORD: '' },
     'react-web': {},
@@ -103,7 +106,7 @@ const secretsSample: TSecretJson = checkType({
         type: '',
         url: '',
         username: '',
-        password: ''
+        password: '',
     },
     'argocd-applications-children-infrastructure': {},
     'argocd-applications-children-services': {},
@@ -113,18 +116,16 @@ const secretsSample: TSecretJson = checkType({
     'linkerd-viz': { PASSWORD: '' },
     namespaces: {},
     'nginx-ingress': {},
-    'sealed-secrets': {}
+    'sealed-secrets': {},
 } as const);
-
-
 
 const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 
 export class PlainSecretJsonConfig<App extends ResourceName> {
-    constructor(private resourceName: App, private environment: Environment) { }
+    constructor(private resourceName: App, private environment: Environment) {}
 
     getSecrets = (): TSecretJson[App] => {
-        PlainSecretJsonConfig.syncAll();
+        // PlainSecretJsonConfig.syncAll();
 
         const secretsSchema = getSecretsSchema({
             allowEmptyValues: false,
@@ -152,10 +153,9 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
             const envPath = this.#getSecretPath(environment);
             const existingEnvSecret = this.#getSecretJsonObject(environment) ?? {};
 
-            
             if (_.isEmpty(existingEnvSecret)) sh.touch(envPath);
-            
-            // Allows us to only get valid keys out, so we can parse the merged secrets out. 
+
+            // Allows us to only get valid keys out, so we can parse the merged secrets out.
             const secretsSchema = getSecretsSchema({ allowEmptyValues: true, environment });
             // Parse the object to filter out stale keys in existing local secret configs
             // This also persists the values of existing secrets
@@ -183,5 +183,5 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
         } catch {
             return undefined;
         }
-    }
+    };
 }
