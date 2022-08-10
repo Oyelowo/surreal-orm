@@ -2,7 +2,6 @@ import { ENVIRONMENTS_ALL } from '../utils/shared.js';
 import path from 'node:path';
 import sh from 'shelljs';
 import { Environment, ResourceName } from '../../src/resources/types/ownTypes.js';
-import { generateMock } from '@anatine/zod-mock';
 import { z } from 'zod';
 import * as R from 'ramda';
 import _ from 'lodash';
@@ -10,7 +9,7 @@ import { getPlainSecretsConfigFilesBaseDir } from '../../src/resources/shared/di
 
 // Note: If these starts growing too much, we can separate
 // each apps schema and merge them all
-const getSecretsSample = ({
+export const getSecretsSchema = ({
     allowEmptyValues,
     environment,
 }: {
@@ -74,16 +73,50 @@ const getSecretsSample = ({
     return secretsSample;
 };
 
-export type TSecretJson = z.infer<ReturnType<typeof getSecretsSample>>;
+export type TSecretJson = z.infer<ReturnType<typeof getSecretsSchema>>;
 
-function emptyObjectValues(object: any) {
-    Object.keys(object).forEach((k) => {
-        if (object[k] && typeof object[k] === 'object') {
-            return emptyObjectValues(object[k]);
-        }
-        object[k] = '';
-    });
-}
+const checkType = <T extends Record<ResourceName, unknown>>(obj: T): T => obj;
+
+const secretsSample: TSecretJson = checkType({
+    'graphql-mongo': {
+        MONGODB_USERNAME: '',
+        MONGODB_PASSWORD: '',
+        MONGODB_ROOT_USERNAME: '',
+        MONGODB_ROOT_PASSWORD: '',
+        REDIS_USERNAME: '',
+        REDIS_PASSWORD: '',
+        OAUTH_GITHUB_CLIENT_ID: '',
+        OAUTH_GITHUB_CLIENT_SECRET: '',
+        OAUTH_GOOGLE_CLIENT_ID: '',
+        OAUTH_GOOGLE_CLIENT_SECRET: ''
+    },
+    'grpc-mongo': {
+        MONGODB_USERNAME: '',
+        MONGODB_PASSWORD: '',
+        MONGODB_ROOT_USERNAME: '',
+        MONGODB_ROOT_PASSWORD: ''
+    },
+    'graphql-postgres': { POSTGRES_USERNAME: '', POSTGRES_PASSWORD: '' },
+    'react-web': {},
+    argocd: {
+        ADMIN_PASSWORD: '',
+        type: '',
+        url: '',
+        username: '',
+        password: ''
+    },
+    'argocd-applications-children-infrastructure': {},
+    'argocd-applications-children-services': {},
+    'argocd-applications-parents': {},
+    'cert-manager': {},
+    linkerd: {},
+    'linkerd-viz': { PASSWORD: '' },
+    namespaces: {},
+    'nginx-ingress': {},
+    'sealed-secrets': {}
+} as const);
+
+
 
 const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 
@@ -93,7 +126,7 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
     getSecrets = (): TSecretJson[App] => {
         PlainSecretJsonConfig.syncAll();
 
-        const secretsSchema = PlainSecretJsonConfig.getSecretsSchema({
+        const secretsSchema = getSecretsSchema({
             allowEmptyValues: false,
             environment: this.environment,
         });
@@ -102,15 +135,12 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
         return secretsSchema.strict().parse(allSecretsJson)[this.resourceName];
     };
 
-    static emptyValues = (environment: Environment): void => {
+    static resetValues = (environment: Environment): void => {
         sh.echo(`Empting secret JSON config for ${environment}`);
-        sh.mkdir(PLAIN_SECRETS_CONFIGS_DIR);
+        sh.mkdir('-p', PLAIN_SECRETS_CONFIGS_DIR);
         const envPath = this.#getSecretPath(environment);
-        const isLocal = environment === 'local';
-        const secretsSchema = this.getSecretsSchema({ allowEmptyValues: !isLocal, environment });
-        const mockData = generateMock(secretsSchema);
 
-        sh.exec(`echo '${JSON.stringify(isLocal ? mockData : emptyObjectValues(mockData))}' > ${envPath}`);
+        sh.exec(`echo '${JSON.stringify(secretsSample)}' > ${envPath}`);
         sh.exec(`npx prettier --write ${envPath}`);
     };
 
@@ -122,19 +152,14 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
             const envPath = this.#getSecretPath(environment);
             const existingEnvSecret = this.#getSecretJsonObject(environment) ?? {};
 
-            // We want to allow setting default empty values for non local environment
-            // to allow users thoroughly check the secrets that have not been properly set.
-            // NOTE: We can probably consider just using examples everywhere also just like prod.
-            // but will keep an eye on which feels better
-            const secretsSchema = this.getSecretsSchema({ allowEmptyValues: true, environment });
-            const mockData = generateMock(secretsSchema);
-
+            
             if (_.isEmpty(existingEnvSecret)) sh.touch(envPath);
-            if (environment !== 'local') emptyObjectValues(mockData);
-
+            
+            // Allows us to only get valid keys out, so we can parse the merged secrets out. 
+            const secretsSchema = getSecretsSchema({ allowEmptyValues: true, environment });
             // Parse the object to filter out stale keys in existing local secret configs
             // This also persists the values of existing secrets
-            const mergedObject = secretsSchema.parse(R.mergeDeepLeft(existingEnvSecret, mockData));
+            const mergedObject = secretsSchema.parse(R.mergeDeepLeft(existingEnvSecret, secretsSample));
 
             sh.exec(`echo '${JSON.stringify(mergedObject)}' > ${envPath}`);
             sh.exec(`npx prettier --write ${envPath}`);
@@ -158,15 +183,5 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
         } catch {
             return undefined;
         }
-    };
-
-    static getSecretsSchema = ({
-        allowEmptyValues,
-        environment,
-    }: {
-        allowEmptyValues: boolean;
-        environment: Environment;
-    }) => {
-        return getSecretsSample({ allowEmptyValues, environment });
-    };
+    }
 }
