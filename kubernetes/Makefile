@@ -42,9 +42,6 @@ generate_manifests_ci:
 generatae_sealed_secrets:
 	npx ts-node scripts/generateSealedSecrets.ts
 
-log_ingress_domain:
-	npx ts-node scripts/logIngressDomain.ts --environment=$(environment)
-
 delete_local_clusters:
 	npx ts-node scripts/deleteLocalClusters.ts
 
