@@ -60,7 +60,7 @@ export type TCustomResourceDefinitionObject = CreateKubeObject<'CustomResourceDe
 export type TKubeObject = TSecretKubeObject | TSealedSecretKubeObject | TCustomResourceDefinitionObject;
 
 export class KubeObject {
-    private kubeObjectsAll: TKubeObject[];
+    private kubeObjectsAll: TKubeObject[] = [];
 
     constructor(private environment: Environment) {
         this.kubeObjectsAll = this.syncAll().getAll();
@@ -86,15 +86,19 @@ export class KubeObject {
         syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
     };
 
+    getManifestsDir() { return getGeneratedEnvManifestsDir(this.environment) };
+    // #getManifestsDir = () => getGeneratedEnvManifestsDir(this.environment);
+
     /** Extract information from all the manifests for an environment(local, staging etc)  */
-    syncAll = (): this => {
-        const envDir = getGeneratedEnvManifestsDir(this.environment);
-        const manifestsPaths = this.getManifestsPathWithinDir(envDir);
+    private syncAll = (): this => {
+        const envDir = this.getManifestsDir();
+        const manifestsPaths = z.array(z.string()).min(5).parse(this.getManifestsPathWithinDir(envDir));
         const exec = (cmd: string) => handleShellError(sh.exec(cmd, { silent: true })).stdout;
 
         // eslint-disable-next-line unicorn/no-array-reduce
         this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
             if (!path) return acc;
+
             console.log('Extracting kubeobject from manifest', i);
 
             const kubeObject = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`)) as TKubeObject;
@@ -123,7 +127,7 @@ export class KubeObject {
     };
 
     /** Gets all the yaml manifests for an environment(local, staging etc)  */
-    getManifestsPathWithinDir = (environmentManifestsDir: string): string[] => {
+    private getManifestsPathWithinDir = (environmentManifestsDir: string): string[] => {
         const manifestMatcher = '*ml';
         const allManifests = sh
             .exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
@@ -187,3 +191,5 @@ secrets should never be pushed to git but they help to generate sealed secrets.
         this.syncAll();
     };
 }
+
+// const createKubeClass = () =>

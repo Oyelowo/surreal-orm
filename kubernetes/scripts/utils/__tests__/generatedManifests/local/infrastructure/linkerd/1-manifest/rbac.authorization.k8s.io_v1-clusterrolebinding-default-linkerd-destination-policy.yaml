@@ -1,0 +1,20 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRoleBinding","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/part-of":"Linkerd","linkerd.io/control-plane-component":"destination","linkerd.io/control-plane-ns":"linkerd"},"name":"linkerd-destination-policy"},"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"ClusterRole","name":"linkerd-policy"},"subjects":[{"kind":"ServiceAccount","name":"linkerd-destination","namespace":"linkerd"}]}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/part-of: Linkerd
+    linkerd.io/control-plane-component: destination
+    linkerd.io/control-plane-ns: linkerd
+  name: linkerd-destination-policy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: linkerd-policy
+subjects:
+- kind: ServiceAccount
+  name: linkerd-destination
+  namespace: linkerd

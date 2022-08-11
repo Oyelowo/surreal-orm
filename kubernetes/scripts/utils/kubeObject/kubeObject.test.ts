@@ -1,16 +1,32 @@
-import {jest} from '@jest/globals';
+import { getMainBaseDir } from './../../../src/resources/shared/directoriesManager';
+import path from 'node:path';
+// jest.useFakeTimers()
+import { KubeObject, TKubeObject } from './kubeObject.js';
+import { expect, jest, test } from '@jest/globals';
 
-jest.useFakeTimers()
-import { KubeObject } from './kubeObject.js';
+const mockManifestsPath = path.join('scripts', 'utils', '__tests__', 'generatedManifests', 'local');
+const rootDir = getMainBaseDir();
+const manifestDir = path.join(rootDir, mockManifestsPath);
+const privateFunc = jest.spyOn(KubeObject.prototype, 'getManifestsDir').mockImplementation(() => manifestDir);
 
-import { sum } from "./sum.js";
-// function sum(a: number, b: number) {
-//     return a + b;
-// }
+const diff = (diffMe: string, diffBy: string): string => diffMe.split(diffBy).join('');
 
+test('Test of life', () => {
+    const kubeInstance = new KubeObject('local');
+    expect(kubeInstance.getManifestsDir()).toContain(mockManifestsPath);
+    expect(privateFunc).toHaveBeenCalled();
 
-test('adds 1 + 2 to equal 3', () => {
-    const kubeInstance = new KubeObject("local");
-    expect(kubeInstance).toBe(3);
-    expect(sum(1,2)).toBe(3);
+    // kubeInstance.syncSealedSecrets()
+    const removeNonDeterministicRootDir = (p: TKubeObject) => ({ ...p, path: diff(p.path, rootDir) });
+    const inst = kubeInstance.getAll().map(removeNonDeterministicRootDir)
+    expect(inst).toMatchSnapshot();
+    expect(inst).toHaveLength(267);
+
+    // expect(kubeInstance.getAll()).toStrictEqual([]);
+    // expect(kubeInstance).toMatchSnapshot();
+
+    // Nas correct enviroment
+    // expect(kubeInstance.getEnvironment()).toBe('local');
+    // expect(kubeInstance.generateManifests()).toBe('local');
+    // expect(kubeInstance.getAll()).toBe('local');
 });
