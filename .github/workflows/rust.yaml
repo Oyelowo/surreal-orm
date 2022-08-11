@@ -96,7 +96,7 @@ jobs:
 
   ############## BUILD AND DEPLOY IMAGES #################
   build_and_push_rust_applications:
-    if: github.event.pull_request.merged ||  ${{ github.ref == 'refs/heads/master' }}
+    if: github.event.pull_request.merged == true
     needs: [check_and_test_rust_monorepo, format, clippy]
     runs-on: ubuntu-latest
 
