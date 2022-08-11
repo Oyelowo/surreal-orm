@@ -59,7 +59,15 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
+
       - run: rustup component add rustfmt
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }} 
+      - uses: Swatinem/rust-cache@v1
+
       - run: make format
         
         
@@ -76,6 +84,10 @@ jobs:
           profile: minimal 
           toolchain: stable
       
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }} 
       - uses: Swatinem/rust-cache@v1
       
       - run: rustup component add clippy

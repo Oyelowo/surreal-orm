@@ -50,7 +50,7 @@ ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
 
 
 
-##############################################################
+###############################################################
 ######### START GRAPHQL-POSTGRES BACKEND SERVICE  #############
 ################################################################
 FROM builder-base as builder-graphql-postgres
