@@ -8,7 +8,7 @@
     },
     "scripts": {
         "build": "tsc",
-        "test": "jest",
+        "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
         "lint-check": "eslint . --ext .js,.ts",
         "lint-fix": "eslint . --ext .js,.ts",
         "prettier-fix": "prettier --write .",
@@ -43,6 +43,7 @@
         "js-yaml": "^4.1.0",
         "json-ts": "^1.6.4",
         "prettier": "^2.7.1",
+        "ts-jest": "^28.0.7",
         "uuid": "^8.3.2"
     },
     "dependencies": {
@@ -54,6 +55,7 @@
         "@pulumi/random": "^4.8.1",
         "bcrypt": "^5.0.1",
         "chalk": "^5.0.1",
+        "cross-env": "^7.0.3",
         "eslint-plugin-unused-imports": "^2.0.0",
         "find-free-port": "^2.0.0",
         "get-port": "^6.1.2",
