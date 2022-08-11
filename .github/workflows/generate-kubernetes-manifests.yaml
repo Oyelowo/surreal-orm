@@ -25,6 +25,8 @@ jobs:
     name: Run code checks for rust workspace
     timeout-minutes: 10
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    needs: [check_and_test_rust_monorepo, format, clippy]
     defaults:
       run:
         working-directory: kubernetes
