@@ -1,4 +1,4 @@
-import type { TKubeObject, TKubeObjectAll } from './kubeObject.js';
+import type { TKubeObject } from './kubeObject.js';
 import type { ResourceName } from '../../../src/resources/types/ownTypes.js';
 import _ from 'lodash';
 import chalk from 'chalk';
@@ -28,7 +28,7 @@ export async function selectSecretKubeObjectsFromPrompt(
     const sercretObjectsByNamespace = _.groupBy(secretKubeObjectsSorted, (s) => s.metadata.namespace);
 
     // Name and value have to be defined for inquirer if not using basic string
-    const mapToPrompterValues = (secret: TKubeObjectAll): { name: string; value: TKubeObjectAll } => ({
+    const mapToPrompterValues = (secret: TKubeObject): { name: string; value: TKubeObject } => ({
         name: secret?.metadata?.name,
         value: secret,
     });

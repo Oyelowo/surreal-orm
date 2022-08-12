@@ -70,17 +70,14 @@ type KubeObjectCustom =
 
 // This helps to narrow the kubernetes object type in case
 // it has extra specifc properties
-export type TKubeObject<K extends ResourceKind=ResourceKind> = Extract<KubeObjectCustom, { kind: K }>;
+export type TKubeObject<K extends ResourceKind = ResourceKind> = Extract<KubeObjectCustom, { kind: K }>;
 
 export type TSecretKubeObject = TKubeObjectBaseCommonProps<'Secret'> & {
     selectedSecretsForUpdate?: string[] | null;
 };
-// Add new resource type here like the above if you need more/new specific/narrow type as aboeve.
-// The below is the combination of all
-export type TKubeObjectAll = TKubeObjectBaseCommonProps<ResourceKind>;
 
 export class KubeObject {
-    private kubeObjectsAll: TKubeObjectAll[] = [];
+    private kubeObjectsAll: TKubeObject[] = [];
 
     constructor(private environment: Environment) {
         this.kubeObjectsAll = this.syncAll().getAll();
@@ -88,7 +85,7 @@ export class KubeObject {
 
     getEnvironment = () => this.environment;
 
-    getForApp = (resourceName: ResourceName): TKubeObjectAll[] => {
+    getForApp = (resourceName: ResourceName): TKubeObject[] => {
         const envDir = getResourceAbsolutePath(resourceName, this.environment);
         return this.kubeObjectsAll.filter((m) => {
             const manifestIsWithinDir = (demarcator: '/' | '\\') => m.path.startsWith(`${envDir}${demarcator}`);
@@ -96,7 +93,7 @@ export class KubeObject {
         });
     };
 
-    getAll = (): TKubeObjectAll[] => {
+    getAll = (): TKubeObject[] => {
         return this.kubeObjectsAll;
     };
 
@@ -118,12 +115,12 @@ export class KubeObject {
         const exec = (cmd: string) => handleShellError(sh.exec(cmd, { silent: true })).stdout;
 
         // eslint-disable-next-line unicorn/no-array-reduce
-        this.kubeObjectsAll = manifestsPaths.reduce<TKubeObjectAll[]>((acc, path, i) => {
+        this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
             if (!path) return acc;
 
             console.log('Extracting kubeobject from manifest', i);
 
-            const kubeObject = JSON.parse(exec(`cat ${path} | yq '.' -o json`)) as TKubeObjectAll;
+            const kubeObject = JSON.parse(exec(`cat ${path} | yq '.' -o json`)) as TKubeObject;
 
             if (_.isEmpty(kubeObject)) return acc;
             // let's mutate to make it a bit faster and should be okay since we only do it here
@@ -139,7 +136,7 @@ export class KubeObject {
                 kubeObject.data = ramda.mergeDeepRight(kubeObject.data ?? {}, encodedStringData);
             }
 
-            const updatedPath = kubeObjectSchema.parse(kubeObject) as TKubeObjectAll;
+            const updatedPath = kubeObjectSchema.parse(kubeObject) as TKubeObject;
 
             acc.push(updatedPath);
             return acc;

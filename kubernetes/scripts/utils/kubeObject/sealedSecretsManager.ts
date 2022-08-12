@@ -1,5 +1,5 @@
 import { SealedSecretTemplate } from '../../../src/resources/types/sealedSecretTemplate.js';
-import { TKubeObjectAll, TKubeObject } from './kubeObject.js';
+import type { TKubeObject } from './kubeObject.js';
 import p from 'node:path';
 import sh from 'shelljs';
 import { ResourceName } from '../../../src/resources/types/ownTypes.js';
@@ -31,7 +31,7 @@ function mergeUnsealedSecretToSealedSecretHelper({
     sealedSecretKubeObjects,
     secretKubeObject,
 }: {
-    secretKubeObject: TKubeObject<'Secret'>;
+    secretKubeObject: TKubeObject<'Secreet'>;
     sealedSecretKubeObjects: TKubeObject<'SealedSecret'>[];
 }): void {
     const { data, selectedSecretsForUpdate, metadata, path } = secretKubeObject;
@@ -42,7 +42,7 @@ function mergeUnsealedSecretToSealedSecretHelper({
     }
 
     // Get corresponding previously generated sealed secrets info(if it exists).
-    const matchesUnsealedSecret = ({ metadata: m }: TKubeObjectAll): boolean =>
+    const matchesUnsealedSecret = ({ metadata: m }: TKubeObject): boolean =>
         m.name === name && m.namespace === namespace;
     const existingSealedSecretJsonData = sealedSecretKubeObjects?.find(matchesUnsealedSecret);
 
