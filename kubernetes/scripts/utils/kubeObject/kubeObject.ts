@@ -57,7 +57,10 @@ export type TSecretKubeObject = CreateKubeObject<'Secret'> & {
 };
 export type TSealedSecretKubeObject = CreateKubeObject<'SealedSecret'>;
 export type TCustomResourceDefinitionObject = CreateKubeObject<'CustomResourceDefinition'>;
-export type TKubeObject = TSecretKubeObject | TSealedSecretKubeObject | TCustomResourceDefinitionObject;
+export type TCustomDeploymentObject = CreateKubeObject<'Deployment'>;
+// Add new resource type here like the above if you need more/new specific/narrow type as aboeve.
+// The below is the combination of all
+export type TKubeObject = TSecretKubeObject | TSealedSecretKubeObject | TCustomResourceDefinitionObject | CreateKubeObject<ResourceKind>;
 
 export class KubeObject {
     private kubeObjectsAll: TKubeObject[] = [];
@@ -98,7 +101,7 @@ export class KubeObject {
         // eslint-disable-next-line unicorn/no-array-reduce
         this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
             if (!path) return acc;
-            
+
             console.log('Extracting kubeobject from manifest', i);
 
             const kubeObject = JSON.parse(exec(`cat ${path} | yq '.' -o json`)) as TKubeObject;
@@ -138,8 +141,6 @@ export class KubeObject {
     };
 
     getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
-        // console.log(`this.kubeObjectsAll`, this.kubeObjectsAll[0])
-        // console.log(`(this.kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind)`, (this.kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind))
         return (this.kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
     };
 

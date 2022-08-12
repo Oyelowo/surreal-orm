@@ -22,6 +22,14 @@ test('Test of life', () => {
     expect(inst).toMatchSnapshot();
     expect(inst).toHaveLength(267);
 
+    const inst2 = kubeInstance.getOfAKind("Deployment").map(removeNonDeterministicRootDir)
+    expect(inst2).toMatchSnapshot();
+    expect(inst2).toHaveLength(21);
+
+    expect(kubeInstance.getOfAKind("Secret").map(removeNonDeterministicRootDir)).toMatchSnapshot()
+    expect(kubeInstance.getOfAKind("SealedSecret").map(removeNonDeterministicRootDir)).toMatchSnapshot()
+    expect(kubeInstance.getOfAKind("CustomResourceDefinition").map(removeNonDeterministicRootDir)).toMatchSnapshot()
+
     // expect(kubeInstance.getAll()).toStrictEqual([]);
     // expect(kubeInstance).toMatchSnapshot();
 
