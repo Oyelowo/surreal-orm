@@ -1,5 +1,5 @@
-import { TKubeObject, TSecretKubeObject } from './kubeObject.js';
-import { ResourceName } from '../../../src/resources/types/ownTypes.js';
+import type { TKubeObject, TKubeObjectAll } from './kubeObject.js';
+import type { ResourceName } from '../../../src/resources/types/ownTypes.js';
 import _ from 'lodash';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
@@ -21,14 +21,14 @@ type AppSecretKeysWithinNamespaces = Record<Namespace, Record<ResourceName | str
          - infra 2
  **/
 export async function selectSecretKubeObjectsFromPrompt(
-    secretKubeObjects: TSecretKubeObject[]
-): Promise<TSecretKubeObject[]> {
+    secretKubeObjects: TKubeObject<'Secret'>[]
+): Promise<TKubeObject<'Secret'>[]> {
     // We want secrets in applications namesapce first
     const secretKubeObjectsSorted = _.sortBy(secretKubeObjects, [(s) => s.metadata.namespace !== 'applications']);
     const sercretObjectsByNamespace = _.groupBy(secretKubeObjectsSorted, (s) => s.metadata.namespace);
 
     // Name and value have to be defined for inquirer if not using basic string
-    const mapToPrompterValues = (secret: TKubeObject): { name: string; value: TKubeObject } => ({
+    const mapToPrompterValues = (secret: TKubeObjectAll): { name: string; value: TKubeObjectAll } => ({
         name: secret?.metadata?.name,
         value: secret,
     });
@@ -51,7 +51,7 @@ export async function selectSecretKubeObjectsFromPrompt(
     ]);
 
     const promptResponse = await inquirer.prompt<{
-        selectedSecretObjects: TSecretKubeObject[];
+        selectedSecretObjects: TKubeObject<'Secret'>[];
     }>({
         type: 'checkbox',
         message: 'Which of the secrets do you want to update?',
@@ -95,9 +95,9 @@ export async function selectSecretKubeObjectsFromPrompt(
  * ...
  */
 async function promptSecretObjectDataSelection(
-    secretKubeObjects: TSecretKubeObject[]
+    secretKubeObjects: TKubeObject<'Secret'>[]
 ): Promise<AppSecretKeysWithinNamespaces> {
-    const createAppSecretDataSelectionPrompt = (resource: TSecretKubeObject) => {
+    const createAppSecretDataSelectionPrompt = (resource: TKubeObject<'Secret'>) => {
         const { name, namespace } = resource.metadata;
         const secretKeys = Object.keys(resource.data);
         const promptKey = `${namespace}.${name}`;

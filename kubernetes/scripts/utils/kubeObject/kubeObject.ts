@@ -48,22 +48,39 @@ const kubeObjectSchema = z.object({
 
 type KubeObjectSchema = Required<z.infer<typeof kubeObjectSchema>>;
 
-type CreateKubeObject<K extends ResourceKind> = KubeObjectSchema & {
+export type TKubeObjectBaseCommonProps<K extends ResourceKind> = KubeObjectSchema & {
     kind: Extract<ResourceKind, K>;
 };
 
-export type TSecretKubeObject = CreateKubeObject<'Secret'> & {
+// The following is done to narrow down the type for specific object
+// in case it has extra properties and the expose a single `TKubeObject` with
+// Resource Kind parameter
+// If you want more resources with specific properties, then you
+// have to add as above
+type KubeObjectCustom =
+    | (TKubeObjectBaseCommonProps<'Secret'> & {
+          selectedSecretsForUpdate?: string[] | null;
+      })
+    | TKubeObjectBaseCommonProps<'SealedSecret'>
+    | TKubeObjectBaseCommonProps<'CustomResourceDefinition'>
+    | TKubeObjectBaseCommonProps<'Deployment'>
+    | TKubeObjectBaseCommonProps<'Configmap'>
+    | TKubeObjectBaseCommonProps<'Service'>
+    | TKubeObjectBaseCommonProps<'Pod'>;
+
+// This helps to narrow the kubernetes object type in case
+// it has extra specifc properties
+export type TKubeObject<K extends ResourceKind=ResourceKind> = Extract<KubeObjectCustom, { kind: K }>;
+
+export type TSecretKubeObject = TKubeObjectBaseCommonProps<'Secret'> & {
     selectedSecretsForUpdate?: string[] | null;
 };
-export type TSealedSecretKubeObject = CreateKubeObject<'SealedSecret'>;
-export type TCustomResourceDefinitionObject = CreateKubeObject<'CustomResourceDefinition'>;
-export type TCustomDeploymentObject = CreateKubeObject<'Deployment'>;
 // Add new resource type here like the above if you need more/new specific/narrow type as aboeve.
 // The below is the combination of all
-export type TKubeObject = TSecretKubeObject | TSealedSecretKubeObject | TCustomResourceDefinitionObject | CreateKubeObject<ResourceKind>;
+export type TKubeObjectAll = TKubeObjectBaseCommonProps<ResourceKind>;
 
 export class KubeObject {
-    private kubeObjectsAll: TKubeObject[] = [];
+    private kubeObjectsAll: TKubeObjectAll[] = [];
 
     constructor(private environment: Environment) {
         this.kubeObjectsAll = this.syncAll().getAll();
@@ -71,7 +88,7 @@ export class KubeObject {
 
     getEnvironment = () => this.environment;
 
-    getForApp = (resourceName: ResourceName): TKubeObject[] => {
+    getForApp = (resourceName: ResourceName): TKubeObjectAll[] => {
         const envDir = getResourceAbsolutePath(resourceName, this.environment);
         return this.kubeObjectsAll.filter((m) => {
             const manifestIsWithinDir = (demarcator: '/' | '\\') => m.path.startsWith(`${envDir}${demarcator}`);
@@ -79,7 +96,7 @@ export class KubeObject {
         });
     };
 
-    getAll = (): TKubeObject[] => {
+    getAll = (): TKubeObjectAll[] => {
         return this.kubeObjectsAll;
     };
 
@@ -89,7 +106,9 @@ export class KubeObject {
         syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
     };
 
-    getManifestsDir() { return getGeneratedEnvManifestsDir(this.environment) };
+    getManifestsDir() {
+        return getGeneratedEnvManifestsDir(this.environment);
+    }
     // #getManifestsDir = () => getGeneratedEnvManifestsDir(this.environment);
 
     /** Extract information from all the manifests for an environment(local, staging etc)  */
@@ -99,12 +118,12 @@ export class KubeObject {
         const exec = (cmd: string) => handleShellError(sh.exec(cmd, { silent: true })).stdout;
 
         // eslint-disable-next-line unicorn/no-array-reduce
-        this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
+        this.kubeObjectsAll = manifestsPaths.reduce<TKubeObjectAll[]>((acc, path, i) => {
             if (!path) return acc;
 
             console.log('Extracting kubeobject from manifest', i);
 
-            const kubeObject = JSON.parse(exec(`cat ${path} | yq '.' -o json`)) as TKubeObject;
+            const kubeObject = JSON.parse(exec(`cat ${path} | yq '.' -o json`)) as TKubeObjectAll;
 
             if (_.isEmpty(kubeObject)) return acc;
             // let's mutate to make it a bit faster and should be okay since we only do it here
@@ -120,7 +139,7 @@ export class KubeObject {
                 kubeObject.data = ramda.mergeDeepRight(kubeObject.data ?? {}, encodedStringData);
             }
 
-            const updatedPath = kubeObjectSchema.parse(kubeObject) as TKubeObject;
+            const updatedPath = kubeObjectSchema.parse(kubeObject) as TKubeObjectAll;
 
             acc.push(updatedPath);
             return acc;
@@ -140,8 +159,8 @@ export class KubeObject {
         return allManifests;
     };
 
-    getOfAKind = <K extends ResourceKind>(kind: K): CreateKubeObject<K>[] => {
-        return (this.kubeObjectsAll as CreateKubeObject<K>[]).filter((o) => o.kind === kind);
+    getOfAKind = <K extends ResourceKind>(kind: K): TKubeObject<K>[] => {
+        return (this.kubeObjectsAll as TKubeObject<K>[]).filter((o) => o.kind === kind);
     };
 
     /**
@@ -153,13 +172,13 @@ Side note: In the future, we can also allow this to use public key of the sealed
 which is cached locally but that would be more involved.
 */
     syncSealedSecrets = (): void => {
-        const secrets: TSecretKubeObject[] = this.getOfAKind('Secret').map((s) => {
+        const secrets: TKubeObject<'Secret'>[] = this.getOfAKind('Secret').map((s) => {
             return {
                 ...s,
                 // Syncs all secrets
                 selectedSecretsForUpdate: Object.keys(s?.data ?? {}),
             };
-        }) as TSecretKubeObject[];
+        }) as TKubeObject<'Secret'>[];
         // console.log(chalk.cyanBright(`XXXXXXX...Secretssss`, JSON.stringify(secrets, null, 4)))
         // return
         // console.log(chalk.cyanBright(`this.getOfAKind('SealedSecret'). ${this.getOfAKind('SealedSecret')}`))

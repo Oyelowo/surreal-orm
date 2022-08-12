@@ -1,7 +1,7 @@
 import { getMainBaseDir } from './../../../src/resources/shared/directoriesManager';
 import path from 'node:path';
 // jest.useFakeTimers()
-import { KubeObject, TKubeObject } from './kubeObject.js';
+import { KubeObject, TKubeObjectAll } from './kubeObject.js';
 import { expect, jest, test } from '@jest/globals';
 
 const mockManifestsPath = path.join('scripts', 'utils', '__tests__', 'generatedManifests', 'local');
@@ -17,7 +17,7 @@ test('Test of life', () => {
     expect(privateFunc).toHaveBeenCalled();
 
     // kubeInstance.syncSealedSecrets()
-    const removeNonDeterministicRootDir = (p: TKubeObject) => ({ ...p, path: diff(p.path, rootDir) });
+    const removeNonDeterministicRootDir = (p: TKubeObjectAll) => ({ ...p, path: diff(p.path, rootDir) });
     const inst = kubeInstance.getAll().map(removeNonDeterministicRootDir)
     expect(inst).toMatchSnapshot();
     expect(inst).toHaveLength(267);

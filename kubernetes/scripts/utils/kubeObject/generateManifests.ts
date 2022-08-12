@@ -3,7 +3,7 @@ import c from 'chalk';
 import p from 'node:path';
 import sh from 'shelljs';
 import { getEnvVarsForScript, handleShellError } from '../shared.js';
-import { TKubeObject, KubeObject } from './kubeObject.js';
+import { TKubeObjectAll, KubeObject } from './kubeObject.js';
 import { getImageTagsFromDir } from '../getImageTagsFromDir.js';
 import path from 'node:path';
 
@@ -20,7 +20,7 @@ export async function generateManifests(kubeObject: KubeObject) {
 
     sh.echo(c.blueBright(`DELETE EXISTING RESOURCES(except sealed secrets)`));
 
-    const removeNonSealedSecrets = (obj: TKubeObject) => {
+    const removeNonSealedSecrets = (obj: TKubeObjectAll) => {
         const isSealedSecret = obj.kind === 'SealedSecret';
         !isSealedSecret && sh.rm('-rf', obj.path);
     };

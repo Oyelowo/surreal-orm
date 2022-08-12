@@ -1,8 +1,8 @@
 import sh from 'shelljs';
 import { getGeneratedCrdsCodeDir } from '../../../src/resources/shared/directoriesManager.js';
-import { TCustomResourceDefinitionObject } from './kubeObject.js';
+import { TKubeObject } from './kubeObject.js';
 
-export function syncCrdsCode(crdKubeObjects: TCustomResourceDefinitionObject[]) {
+export function syncCrdsCode(crdKubeObjects: TKubeObject<"CustomResourceDefinition">[]) {
     const manifestsCrdsFiles = crdKubeObjects.map(({ path }) => path);
     const outDir = getGeneratedCrdsCodeDir();
     sh.mkdir(outDir);
