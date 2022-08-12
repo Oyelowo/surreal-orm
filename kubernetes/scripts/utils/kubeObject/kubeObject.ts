@@ -98,10 +98,10 @@ export class KubeObject {
         // eslint-disable-next-line unicorn/no-array-reduce
         this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
             if (!path) return acc;
-
+            
             console.log('Extracting kubeobject from manifest', i);
 
-            const kubeObject = JSON.parse(exec(`cat ${path.trim()} | yq '.' -o json`)) as TKubeObject;
+            const kubeObject = JSON.parse(exec(`cat ${path} | yq '.' -o json`)) as TKubeObject;
 
             if (_.isEmpty(kubeObject)) return acc;
             // let's mutate to make it a bit faster and should be okay since we only do it here
@@ -133,9 +133,7 @@ export class KubeObject {
             .exec(`find ${environmentManifestsDir} -name "${manifestMatcher}"`, {
                 silent: true,
             })
-            .stdout.trim()
-            .split('\n')
-            .map((p) => p.trim());
+            .split('\n');
         return allManifests;
     };
 
