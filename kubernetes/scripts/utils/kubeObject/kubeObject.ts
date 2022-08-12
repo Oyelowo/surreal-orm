@@ -83,7 +83,7 @@ export class KubeObject {
         this.kubeObjectsAll = this.syncAll().getAll();
     }
 
-    getEnvironment = () => this.environment;
+    getEnvironment = (): Environment => this.environment;
 
     getForApp = (resourceName: ResourceName): TKubeObject[] => {
         const envDir = getResourceAbsolutePath(resourceName, this.environment);
@@ -97,16 +97,15 @@ export class KubeObject {
         return this.kubeObjectsAll;
     };
 
-    generateManifests = async () => {
+    generateManifests = async (): Promise<void> => {
         await generateManifests(this);
         this.syncAll();
         syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
     };
 
-    getManifestsDir() {
+    getManifestsDir():string {
         return getGeneratedEnvManifestsDir(this.environment);
     }
-    // #getManifestsDir = () => getGeneratedEnvManifestsDir(this.environment);
 
     /** Extract information from all the manifests for an environment(local, staging etc)  */
     private syncAll = (): this => {
@@ -193,7 +192,7 @@ Sync only Sealed secrets that are selected from user in  the CLI terminal prompt
 when you want to update Secrets in an existing cluster. Plain kubernetes
 secrets should never be pushed to git but they help to generate sealed secrets.
 */
-    syncSealedSecretsWithPrompt = async () => {
+    syncSealedSecretsWithPrompt = async (): Promise<void> => {
         const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(this.getOfAKind('Secret'));
 
         mergeUnsealedSecretToSealedSecret({
@@ -206,5 +205,3 @@ secrets should never be pushed to git but they help to generate sealed secrets.
         this.syncAll();
     };
 }
-
-// const createKubeClass = () =>
