@@ -19068,7 +19068,7 @@ Array [
 ]
 `;
 
-exports[`KubeObject Can sync resources 13`] = `
+exports[`KubeObject Can update sealed secrets 1`] = `
 Array [
   Object {
     "apiVersion": "bitnami.com/v1alpha1",

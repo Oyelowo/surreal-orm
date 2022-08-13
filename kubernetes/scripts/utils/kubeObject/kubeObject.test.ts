@@ -4,6 +4,7 @@ import path from 'node:path';
 import { KubeObject } from './kubeObject.js';
 import type { TKubeObject } from './kubeObject.js';
 import { expect, jest, test, describe } from '@jest/globals';
+import { info } from 'node:console';
 
 /* 
 Remove teh absolute root to make the snapshot deterministic
@@ -52,7 +53,7 @@ describe('KubeObject', () => {
             kubeInstance.getOfAKind('CustomResourceDefinition').map(removeNonDeterministicRootDir)
         ).toMatchSnapshot();
 
-        console.info('Can get kube objects for a resource');
+        info('Can get kube objects for a resource');
         const graphqlMongo = kubeInstance.getForApp('services/graphql-mongo').map(removeNonDeterministicRootDir);
         expect(graphqlMongo).toMatchSnapshot();
         expect(graphqlMongo).toHaveLength(19);
@@ -80,8 +81,10 @@ describe('KubeObject', () => {
         const namespaces = kubeInstance.getForApp('infrastructure/namespaces').map(removeNonDeterministicRootDir);
         expect(namespaces).toMatchSnapshot();
         expect(namespaces).toHaveLength(7);
+    });
 
-        console.info('Can Update sealed secrets');
+    test('Can update sealed secrets', () => {
+        const kubeInstance = new KubeObject('test');
         expect(kubeInstance.getOfAKind('SealedSecret')).toHaveLength(0);
         kubeInstance.syncSealedSecrets();
         expect(kubeInstance.getOfAKind('SealedSecret')).toHaveLength(13);

@@ -49,7 +49,7 @@ function updateExistingSealedSecret({
     existingSealedSecretKubeObjects: TKubeObject<'SealedSecret'>[];
     onSealSecretValue: OnSealSecretValue;
 }): SealedSecretTemplate {
-    const { data, selectedSecretsForUpdate, metadata } = secretKubeObject;
+    const { data: secretData, selectedSecretsForUpdate, metadata } = secretKubeObject;
     const { name, namespace /* annotations */ } = metadata;
 
     if (!name && namespace) {
@@ -61,7 +61,6 @@ function updateExistingSealedSecret({
         m.name === name && m.namespace === namespace;
     const existingSealedSecretJsonData = existingSealedSecretKubeObjects?.find(matchesUnsealedSecret);
 
-    const secretData = data ?? {};
 
     // Pick only selected secrets for encytption
     const filteredSecretData = _.pickBy(secretData, (_v, k) => selectedSecretsForUpdate?.includes(k));
