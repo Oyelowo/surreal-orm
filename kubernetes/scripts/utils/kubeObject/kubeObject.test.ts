@@ -40,10 +40,9 @@ describe('KubeObject', () => {
         expect(
             kubeInstance.getOfAKind('CustomResourceDefinition').map(removeNonDeterministicRootDir)
         ).toMatchSnapshot();
-    });
 
-    test('Can get kube objects for a resource', () => {
-        const kubeInstance = new KubeObject('test');
+
+        console.info('Can get kube objects for a resource')
         const graphqlMongo = kubeInstance.getForApp('services/graphql-mongo').map(removeNonDeterministicRootDir);
         expect(graphqlMongo).toMatchSnapshot();
         expect(graphqlMongo).toHaveLength(19);
@@ -71,5 +70,10 @@ describe('KubeObject', () => {
         const namespaces = kubeInstance.getForApp('infrastructure/namespaces').map(removeNonDeterministicRootDir);
         expect(namespaces).toMatchSnapshot();
         expect(namespaces).toHaveLength(7);
+
+        expect(kubeInstance.getOfAKind("SealedSecret")).toHaveLength(0);
+        kubeInstance.syncSealedSecrets();
+        expect(kubeInstance.getOfAKind("SealedSecret")).toHaveLength(13);
+        expect(kubeInstance.getOfAKind("SealedSecret").map(removeNonDeterministicRootDir)).toMatchSnapshot();
     });
 });
