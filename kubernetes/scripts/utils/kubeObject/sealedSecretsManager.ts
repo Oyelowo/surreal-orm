@@ -31,7 +31,7 @@ function mergeUnsealedSecretToSealedSecretHelper({
     sealedSecretKubeObjects,
     secretKubeObject,
 }: {
-    secretKubeObject: TKubeObject<'Secreet'>;
+    secretKubeObject: TKubeObject<'Secret'>;
     sealedSecretKubeObjects: TKubeObject<'SealedSecret'>[];
 }): void {
     const { data, selectedSecretsForUpdate, metadata, path } = secretKubeObject;

@@ -21,23 +21,9 @@ export const getPlainSecretsConfigFilesBaseDir = () => {
     return path.join(getMainBaseDir(), '.secrets');
 };
 
-/** Directory of a generated manifests for an environment(local/production etc)  */
-export const getGeneratedEnvManifestsDir = (environment: Environment) => {
-    const MANIFESTS_DIR = getManifestsBaseDir();
-    return path.join(MANIFESTS_DIR, environment);
-};
-
 export const getGeneratedCrdsCodeDir = () => {
     const baseDir = getMainBaseDir();
     return path.join(baseDir, 'generatedCrdsTs');
-};
-
-export const getPathToResourcesDir = (
-    resourceName: ResourceName,
-    resourceType: ResourceType,
-    environment: Environment
-) => {
-    return path.join(getGeneratedEnvManifestsDir(environment), resourceType, resourceName);
 };
 
 /**
@@ -53,74 +39,80 @@ export const getRepoPathFromAbsolutePath = (absolutePath: string) => {
     return path.join('kubernetes', toolPath);
 };
 
-function getResourceProperties<T>(
-    resourceName: ResourceName,
-    onGetResourceProperties: (resourceName: ResourceType) => T
-): T {
-    switch (resourceName) {
-        case 'react-web':
-        case 'graphql-mongo':
-        case 'graphql-postgres':
-        case 'grpc-mongo': {
-            return onGetResourceProperties('services');
-        }
+// function getResourceProperties<T>(
+//     resourceName: ResourceName,
+//     onGetResourceProperties: (resourceName: ResourceType) => T
+// ): T {
+//     switch (resourceName) {
+//         case 'react-web':
+//         case 'graphql-mongo':
+//         case 'graphql-postgres':
+//         case 'grpc-mongo': {
+//             return onGetResourceProperties('services');
+//         }
 
-        case 'argocd':
-        case 'cert-manager':
-        case 'linkerd':
-        case 'sealed-secrets':
-        case 'linkerd-viz':
-        case 'namespaces':
-        case 'nginx-ingress':
-        case 'argocd-applications-children-infrastructure':
-        case 'argocd-applications-children-services':
-        case 'argocd-applications-parents': {
-            return onGetResourceProperties('infrastructure');
-        }
-    }
-    return assertUnreachable(resourceName);
-}
+//         case 'argocd':
+//         case 'cert-manager':
+//         case 'linkerd':
+//         case 'sealed-secrets':
+//         case 'linkerd-viz':
+//         case 'namespaces':
+//         case 'nginx-ingress':
+//         case 'argocd-applications-children-infrastructure':
+//         case 'argocd-applications-children-services':
+//         case 'argocd-applications-parents': {
+//             return onGetResourceProperties('infrastructure');
+//         }
+//     }
+//     return assertUnreachable(resourceName);
+// }
 
 export function assertUnreachable(_: never): never {
     throw new Error("Didn't expect to get here");
 }
 
-type GetPathToResourceProps = {
+export type GetPathToResourceProps = {
     resourceType: ResourceType;
     resourceName: ResourceName;
     environment: Environment;
+    /** Note: Optional: This is automatically derived but here specifically for testing.
+     * You likely should not need to provide it outside of testing*/
+    // envManifestDir?: string;
 };
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
-export const getPathToResourceType = (props: Omit<GetPathToResourceProps, 'resourceName'>): string => {
-    const resourcePath = path.join(getGeneratedEnvManifestsDir(props.environment), props.resourceType);
+/** Directory of a generated manifests for an environment(local/production etc)  */
+export const getGeneratedEnvManifestsDir = (environment: Environment) => {
+    const MANIFESTS_DIR = getManifestsBaseDir();
+    return path.join(MANIFESTS_DIR, environment);
+};
+
+export const getPathToResourceType = (
+    props: Omit<GetPathToResourceProps, 'resourceName'> & { manifestsDir?: string }
+): string => {
+    const resourcePath = path.join(
+        props.manifestsDir ?? getGeneratedEnvManifestsDir(props.environment),
+        props.resourceType
+    );
     return resourcePath;
 };
 
-export const getPathToResource = (props: GetPathToResourceProps): string => {
+export const getResourceAbsolutePath = (props: GetPathToResourceProps & { manifestsDir?: string }): string => {
     return path.join(getPathToResourceType(props), props.resourceName);
 };
 
-export function getResourceAbsolutePath(resourceName: ResourceName, environment: Environment): string {
-    return getResourceProperties(resourceName, (resourceType) => {
-        return getPathToResource({
-            resourceName,
-            resourceType,
-            environment,
-        });
-    });
-}
+// export const getResourceAbsolutePathForTest = (props: GetPathToResourceProps & { manifestsDir: string }): string => {
+//     return path.join(props.manifestsDir, props.resourceType, props.resourceName);
+// };
 
-export function getResourceRelativePath(resourceName: ResourceName, environment: Environment): string {
-    const pathAbsolute = getResourceAbsolutePath(resourceName, environment);
+export function getResourceRelativePath(props: GetPathToResourceProps): string {
+    const pathAbsolute = getResourceAbsolutePath(props);
     return getRepoPathFromAbsolutePath(pathAbsolute);
 }
 
-export function getResourceProvider(resourceName: ResourceName, environment: Environment): k8s.Provider {
-    return getResourceProperties(resourceName, (resourceType) => {
-        return new k8s.Provider(`${resourceType}-${resourceName}-${uuid()}`, {
-            renderYamlToDirectory: getResourceAbsolutePath(resourceName, environment),
-        });
+export function getResourceProvider(props: GetPathToResourceProps): k8s.Provider {
+    return new k8s.Provider(`${props.resourceType}-${props.resourceName}-${uuid()}`, {
+        renderYamlToDirectory: getResourceAbsolutePath(props),
     });
 }

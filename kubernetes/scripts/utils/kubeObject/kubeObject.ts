@@ -1,4 +1,3 @@
-import { ResourceName } from '../../../src/resources/types/ownTypes.js';
 import { mergeUnsealedSecretToSealedSecret } from './sealedSecretsManager.js';
 import { selectSecretKubeObjectsFromPrompt } from './secretsSelectorPrompter.js';
 import sh from 'shelljs';
@@ -6,6 +5,7 @@ import * as ramda from 'ramda';
 import _ from 'lodash';
 import z from 'zod';
 import { namespaceSchema } from '../../../src/resources/infrastructure/namespaces/util.js';
+import type { GetPathToResourceProps } from '../../../src/resources/shared/directoriesManager.js';
 import {
     getGeneratedEnvManifestsDir,
     getResourceAbsolutePath,
@@ -59,8 +59,8 @@ export type TKubeObjectBaseCommonProps<K extends ResourceKind> = KubeObjectSchem
 // have to add as above
 type KubeObjectCustom =
     | (TKubeObjectBaseCommonProps<'Secret'> & {
-        selectedSecretsForUpdate?: string[] | null;
-    })
+          selectedSecretsForUpdate?: string[] | null;
+      })
     | TKubeObjectBaseCommonProps<'SealedSecret'>
     | TKubeObjectBaseCommonProps<'CustomResourceDefinition'>
     | TKubeObjectBaseCommonProps<'Deployment'>
@@ -85,8 +85,25 @@ export class KubeObject {
 
     getEnvironment = (): Environment => this.environment;
 
-    getForApp = (resourceName: ResourceName): TKubeObject[] => {
-        const resourceDir = getResourceAbsolutePath(resourceName, this.environment);
+    // getResourceAbsolutePath(pathProps: GetPathToResourceProps) {
+    //     const { resourceName, resourceType } = pathProps;
+
+    //     return getResourceAbsolutePath({
+    //         resourceType,
+    //         resourceName,
+    //         environment: this.environment,
+    //         manifestsDir: this.getManifestsDir()
+    //     })
+    // }
+
+    getForApp = (pathProps: Omit<GetPathToResourceProps, 'environment'>): TKubeObject[] => {
+        const { resourceName, resourceType } = pathProps;
+        const resourceDir = getResourceAbsolutePath({
+            resourceType,
+            resourceName,
+            environment: this.environment,
+            manifestsDir: this.getManifestsDir(),
+        });
         return this.kubeObjectsAll.filter((m) => {
             // We check with the separator in case of two resources with similar starting name
             // e.g `linkerd` and `linkerd-viz`. Having the demarcator helps to do exact match.

@@ -4,7 +4,7 @@ import * as pulumi from '@pulumi/pulumi';
 import crds from '../../../generatedCrdsTs/index.js';
 import { DOCKER_REGISTRY_KEY } from '../infrastructure/argocd/docker.js';
 import { createArgocdApplication } from './createArgoApplication.js';
-import { getPathToResource } from './directoriesManager.js';
+import { getResourceAbsolutePath } from './directoriesManager.js';
 import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/ownTypes.js';
 import { getEnvironmentVariables } from './validations.js';
 import { generateService } from './helpers.js';
@@ -184,6 +184,8 @@ export class ServiceDeployment<
         // });
 
         this.argocdApplication = createArgocdApplication({
+            resourceType: 'services',
+            environment: ENVIRONMENT,
             sourceApplication: this.appName,
             outputSubDirName: 'argocd-applications-children-services',
             namespace: metadata.namespace,
@@ -234,7 +236,7 @@ export class ServiceDeployment<
     };
 
     getServiceDir = (): string => {
-        return getPathToResource({
+        return getResourceAbsolutePath({
             resourceType: 'services',
             environment: ENVIRONMENT,
             resourceName: this.appName,

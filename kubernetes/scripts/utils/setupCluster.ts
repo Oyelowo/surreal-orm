@@ -32,10 +32,10 @@ export async function setupCluster(environment: Environment) {
 
 function applySetupManifests(kubeObject: KubeObject) {
     // # Apply namespace first
-    applyResourceManifests('namespaces', kubeObject);
+    applyInfraResourceManifests('namespaces', kubeObject);
 
     // # Apply setups with sealed secret controller
-    applyResourceManifests('sealed-secrets', kubeObject);
+    applyInfraResourceManifests('sealed-secrets', kubeObject);
 
     const sealedSecretsName: ResourceName = 'sealed-secrets';
     // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
@@ -44,7 +44,7 @@ function applySetupManifests(kubeObject: KubeObject) {
     kubeObject.syncSealedSecrets();
 
     // # Apply setups with cert-manager controller
-    applyResourceManifests('cert-manager', kubeObject);
+    applyInfraResourceManifests('cert-manager', kubeObject);
 
     // # Wait for cert-manager and cert-manager-trust controllers to be in running phase so that we can use it to encrypt secrets
     const { certManager, certManagerTrust } = helmChartsInfo.jetstack.charts;
@@ -53,24 +53,24 @@ function applySetupManifests(kubeObject: KubeObject) {
 
     // Reapply cert-manager in case something did not apply the first time e.g the cert-managerr-trust
     // needs to be ready for Bundle to be applied
-    applyResourceManifests('cert-manager', kubeObject);
+    applyInfraResourceManifests('cert-manager', kubeObject);
 
     // # Apply setups with linkerd controller
-    applyResourceManifests('linkerd', kubeObject);
-    applyResourceManifests('linkerd-viz', kubeObject);
+    applyInfraResourceManifests('linkerd', kubeObject);
+    applyInfraResourceManifests('linkerd-viz', kubeObject);
 
     // For automated deployment, Use skaffold locally and argocd in other environments
     if (kubeObject.getEnvironment() !== 'local') {
-        applyResourceManifests('argocd', kubeObject);
+        applyInfraResourceManifests('argocd', kubeObject);
 
         sh.exec('kubectl -n argocd rollout restart deployment argocd-argo-cd-server');
 
-        applyResourceManifests('argocd-applications-parents', kubeObject);
+        applyInfraResourceManifests('argocd-applications-parents', kubeObject);
     }
 }
 
-function applyResourceManifests(resourceName: ResourceName, kubeObject: KubeObject) {
-    const resource = kubeObject.getForApp(resourceName);
+function applyInfraResourceManifests(resourceName: ResourceName, kubeObject: KubeObject) {
+    const resource = kubeObject.getForApp({ resourceName, resourceType: 'infrastructure' });
 
     // put crds and sealed secret resources first
     const manifestsToApply = _.sortBy(resource, [

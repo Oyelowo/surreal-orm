@@ -15,7 +15,14 @@ export function createContainerRegistrySecret(environment: Environment): void {
         environment
     ).getSecrets();
 
-    const dir = path.join(getResourceAbsolutePath('argocd-applications-parents', environment), '1-manifest');
+    const dir = path.join(
+        getResourceAbsolutePath({
+            resourceType: 'infrastructure',
+            resourceName: 'argocd-applications-parents',
+            environment,
+        }),
+        '1-manifest'
+    );
     const file = path.join(dir, 'secret-docker-registry.yaml');
 
     if (!DOCKER_USERNAME || !DOCKER_PASSWORD) {
