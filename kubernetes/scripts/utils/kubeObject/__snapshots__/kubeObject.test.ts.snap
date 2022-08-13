@@ -1,6 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Test of life 1`] = `
+exports[`KubeObject Can get kube objects for a resource 1`] = `Array []`;
+
+exports[`KubeObject Can get kube objects for a resource 2`] = `Array []`;
+
+exports[`KubeObject Can get kube objects for a resource 3`] = `Array []`;
+
+exports[`KubeObject Can get kube objects for a resource 4`] = `Array []`;
+
+exports[`KubeObject Can get kube objects for a resource 5`] = `Array []`;
+
+exports[`KubeObject Can get kube objects for a resource 6`] = `Array []`;
+
+exports[`KubeObject Can get kube objects for a resource 7`] = `Array []`;
+
+exports[`KubeObject Can sync resources 1`] = `
 Array [
   Object {
     "apiVersion": "bitnami.com/v1alpha1",
@@ -8555,7 +8569,7 @@ fi
 ]
 `;
 
-exports[`Test of life 2`] = `
+exports[`KubeObject Can sync resources 2`] = `
 Array [
   Object {
     "apiVersion": "apps/v1",
@@ -12130,7 +12144,7 @@ fi
 ]
 `;
 
-exports[`Test of life 3`] = `
+exports[`KubeObject Can sync resources 3`] = `
 Array [
   Object {
     "apiVersion": "v1",
@@ -12397,7 +12411,7 @@ Array [
 ]
 `;
 
-exports[`Test of life 4`] = `
+exports[`KubeObject Can sync resources 4`] = `
 Array [
   Object {
     "apiVersion": "bitnami.com/v1alpha1",
@@ -12764,7 +12778,7 @@ Array [
 ]
 `;
 
-exports[`Test of life 5`] = `
+exports[`KubeObject Can sync resources 5`] = `
 Array [
   Object {
     "apiVersion": "apiextensions.k8s.io/v1",

@@ -59,8 +59,8 @@ export type TKubeObjectBaseCommonProps<K extends ResourceKind> = KubeObjectSchem
 // have to add as above
 type KubeObjectCustom =
     | (TKubeObjectBaseCommonProps<'Secret'> & {
-          selectedSecretsForUpdate?: string[] | null;
-      })
+        selectedSecretsForUpdate?: string[] | null;
+    })
     | TKubeObjectBaseCommonProps<'SealedSecret'>
     | TKubeObjectBaseCommonProps<'CustomResourceDefinition'>
     | TKubeObjectBaseCommonProps<'Deployment'>
@@ -86,10 +86,12 @@ export class KubeObject {
     getEnvironment = (): Environment => this.environment;
 
     getForApp = (resourceName: ResourceName): TKubeObject[] => {
-        const envDir = getResourceAbsolutePath(resourceName, this.environment);
+        const resourceDir = getResourceAbsolutePath(resourceName, this.environment);
         return this.kubeObjectsAll.filter((m) => {
-            const manifestIsWithinDir = (demarcator: '/' | '\\') => m.path.startsWith(`${envDir}${demarcator}`);
-            return manifestIsWithinDir('/') || manifestIsWithinDir('\\');
+            // We check with the separator in case of two resources with similar starting name
+            // e.g `linkerd` and `linkerd-viz`. Having the demarcator helps to do exact match.
+            const matchResourceExactPath = (demarcator: '/' | '\\') => m.path.startsWith(`${resourceDir}${demarcator}`);
+            return matchResourceExactPath('/') || matchResourceExactPath('\\');
         });
     };
 
@@ -103,7 +105,7 @@ export class KubeObject {
         syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
     };
 
-    getManifestsDir():string {
+    getManifestsDir(): string {
         return getGeneratedEnvManifestsDir(this.environment);
     }
 
