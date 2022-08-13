@@ -184,10 +184,10 @@ export class ServiceDeployment<
         // });
 
         this.argocdApplication = createArgocdApplication({
-            resourceType: 'services',
+            sourceApplicationName: this.appName,
+            sourceApplicationPath: `services/${this.appName}`,
+            outputPath: `infrastructure/argocd-applications-children-services`,
             environment: ENVIRONMENT,
-            sourceApplication: this.appName,
-            outputSubDirName: 'argocd-applications-children-services',
             namespace: metadata.namespace,
             parent: this,
         });
@@ -237,9 +237,8 @@ export class ServiceDeployment<
 
     getServiceDir = (): string => {
         return getResourceAbsolutePath({
-            resourceType: 'services',
+            resourcePath: `services/${this.appName}`,
             environment: ENVIRONMENT,
-            resourceName: this.appName,
         });
     };
 }

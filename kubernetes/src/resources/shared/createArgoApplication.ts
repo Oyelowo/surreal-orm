@@ -1,34 +1,38 @@
+import { Environment } from './../types/ownTypes';
 import * as kx from '@pulumi/kubernetesx';
 import { Resource } from '@pulumi/pulumi';
 import crds from '../../../generatedCrdsTs/index.js';
 import { Namespace, namespaces } from '../infrastructure/namespaces/util.js';
-import { GetPathToResourceProps, getResourceProvider, getResourceRelativePath } from './directoriesManager.js';
+import { ResourcePathProps, getResourceProvider, getResourceRelativePath } from './directoriesManager.js';
 import { ResourceName } from '../types/ownTypes.js';
 import { getEnvironmentVariables } from './validations.js';
 import { PlainSecretJsonConfig } from '../../../scripts/utils/plainSecretJsonConfig.js';
 
-type ArgocdApplicationProps = Omit<GetPathToResourceProps, 'resourceName'> & {
+type ArgocdApplicationProps = {
     namespace: Namespace;
-    outputSubDirName: ResourceName;
+    environment: Environment;
+    sourceApplicationName: ResourceName;
+    outputPath: ResourcePathProps['resourcePath'];
+    // outputSubDirName: ResourceName;
     /** Source is a reference to the location of the application's manifests we are generating app for. */
-    sourceApplication: ResourceName;
+    sourceApplicationPath: ResourcePathProps['resourcePath'];
     // Typically services/infrastructure under which specific app is nested
     parent?: Resource;
 };
 
 export function createArgocdApplication({
-    sourceApplication,
-    outputSubDirName,
-    environment,
-    resourceType,
+    sourceApplicationName,
+    sourceApplicationPath,
+    outputPath,
     namespace,
+    environment,
     parent,
 }: ArgocdApplicationProps) {
     const argocdApplication = new crds.argoproj.v1alpha1.Application(
-        sourceApplication,
+        sourceApplicationName,
         {
             metadata: {
-                name: sourceApplication,
+                name: sourceApplicationName,
                 namespace: namespaces.argocd,
                 annotations: {
                     finalizers: ['resources-finalizer.argocd.argoproj.io'] as any,
@@ -44,9 +48,8 @@ export function createArgocdApplication({
                 source: {
                     repoURL: 'https://github.com/Oyelowo/modern-distributed-app-template',
                     path: getResourceRelativePath({
-                        resourceName: sourceApplication,
+                        resourcePath: sourceApplicationPath,
                         environment,
-                        resourceType,
                     }),
                     targetRevision: 'HEAD',
                     directory: {
@@ -62,7 +65,10 @@ export function createArgocdApplication({
             },
         },
         {
-            provider: getResourceProvider({ resourceName: outputSubDirName, environment, resourceType }),
+            provider: getResourceProvider({
+                resourcePath: outputPath,
+                environment,
+            }),
             parent,
         }
     );
@@ -93,8 +99,7 @@ export const argoCDApplicationsSecret = new kx.Secret(
     },
     {
         provider: getResourceProvider({
-            resourceType: 'infrastructure',
-            resourceName: 'argocd-applications-parents',
+            resourcePath: `infrastructure/argocd-applications-parents`,
             environment: ENVIRONMENT,
         }),
     }

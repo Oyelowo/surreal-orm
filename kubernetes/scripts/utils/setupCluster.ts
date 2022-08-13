@@ -7,6 +7,7 @@ import { helmChartsInfo } from '../../src/resources/shared/helmChartInfo.js';
 import { ResourceName } from '../../src/resources/types/ownTypes.js';
 import _ from 'lodash';
 import { KubeObject } from '../utils/kubeObject/kubeObject.js';
+import { ResourcePathProps } from '../../src/resources/shared/directoriesManager.js';
 
 export async function setupCluster(environment: Environment) {
     const { deletPlainJsonSecretsInput, deleteUnsealedSecretManifestsOutput } =
@@ -32,10 +33,10 @@ export async function setupCluster(environment: Environment) {
 
 function applySetupManifests(kubeObject: KubeObject) {
     // # Apply namespace first
-    applyInfraResourceManifests('namespaces', kubeObject);
+    applyResourceManifests('infrastructure/namespaces', kubeObject);
 
     // # Apply setups with sealed secret controller
-    applyInfraResourceManifests('sealed-secrets', kubeObject);
+    applyResourceManifests('infrastructure/sealed-secrets', kubeObject);
 
     const sealedSecretsName: ResourceName = 'sealed-secrets';
     // # Wait for bitnami sealed secrets controller to be in running phase so that we can use it to encrypt secrets
@@ -44,7 +45,7 @@ function applySetupManifests(kubeObject: KubeObject) {
     kubeObject.syncSealedSecrets();
 
     // # Apply setups with cert-manager controller
-    applyInfraResourceManifests('cert-manager', kubeObject);
+    applyResourceManifests('infrastructure/cert-manager', kubeObject);
 
     // # Wait for cert-manager and cert-manager-trust controllers to be in running phase so that we can use it to encrypt secrets
     const { certManager, certManagerTrust } = helmChartsInfo.jetstack.charts;
@@ -53,24 +54,24 @@ function applySetupManifests(kubeObject: KubeObject) {
 
     // Reapply cert-manager in case something did not apply the first time e.g the cert-managerr-trust
     // needs to be ready for Bundle to be applied
-    applyInfraResourceManifests('cert-manager', kubeObject);
+    applyResourceManifests('infrastructure/cert-manager', kubeObject);
 
     // # Apply setups with linkerd controller
-    applyInfraResourceManifests('linkerd', kubeObject);
-    applyInfraResourceManifests('linkerd-viz', kubeObject);
+    applyResourceManifests('infrastructure/linkerd', kubeObject);
+    applyResourceManifests('infrastructure/linkerd-viz', kubeObject);
 
     // For automated deployment, Use skaffold locally and argocd in other environments
     if (kubeObject.getEnvironment() !== 'local') {
-        applyInfraResourceManifests('argocd', kubeObject);
+        applyResourceManifests('infrastructure/argocd', kubeObject);
 
         sh.exec('kubectl -n argocd rollout restart deployment argocd-argo-cd-server');
 
-        applyInfraResourceManifests('argocd-applications-parents', kubeObject);
+        applyResourceManifests('infrastructure/argocd-applications-parents', kubeObject);
     }
 }
 
-function applyInfraResourceManifests(resourceName: ResourceName, kubeObject: KubeObject) {
-    const resource = kubeObject.getForApp({ resourceName, resourceType: 'infrastructure' });
+function applyResourceManifests(resourcePath: ResourcePathProps['resourcePath'], kubeObject: KubeObject) {
+    const resource = kubeObject.getForApp(resourcePath);
 
     // put crds and sealed secret resources first
     const manifestsToApply = _.sortBy(resource, [

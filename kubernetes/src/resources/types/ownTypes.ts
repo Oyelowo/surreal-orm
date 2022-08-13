@@ -2,6 +2,7 @@ import { TSecretJson } from '../../../scripts/utils/plainSecretJsonConfig.js';
 import * as z from 'zod';
 import { Namespace } from '../infrastructure/namespaces/util.js';
 export const appEnvironmentsSchema = z.union([
+    z.literal('test'),
     z.literal('local'),
     z.literal('development'),
     z.literal('staging'),
@@ -32,11 +33,11 @@ const InfrastructureNames = [
     'argocd',
 ] as const;
 
-export type InfrastructureName = typeof InfrastructureNames[number];
+export type InfrastructureName = typeof InfrastructureNames[number] | ArgocdAppResourceName;
 
 // A resource can have multiple kubernetes objects/resources e.g linkerd
 // e.g linkerd can have different
-export type ResourceName = InfrastructureName | ServiceName | ArgocdAppResourceName;
+export type ResourceName = InfrastructureName | ServiceName;
 
 export interface Settings<TAppName extends ServiceName> {
     requestMemory: Memory;

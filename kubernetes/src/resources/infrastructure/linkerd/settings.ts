@@ -4,14 +4,12 @@ import { getEnvironmentVariables } from '../../shared/validations.js';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 export const linkerdProvider = getResourceProvider({
-    resourceType: 'infrastructure',
-    resourceName: 'linkerd',
+    resourcePath: `infrastructure/linkerd`,
     environment: ENVIRONMENT,
 });
 
 export const linkerdVizProvider = getResourceProvider({
-    resourceType: 'infrastructure',
-    resourceName: 'linkerd-viz',
+    resourcePath: `infrastructure/linkerd-viz`,
     environment: ENVIRONMENT,
 });
 

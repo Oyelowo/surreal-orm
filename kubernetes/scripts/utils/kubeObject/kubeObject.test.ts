@@ -1,31 +1,21 @@
 import { getMainBaseDir } from './../../../src/resources/shared/directoriesManager';
 import path from 'node:path';
-// jest.useFakeTimers()
 import { KubeObject } from './kubeObject.js';
 import type { TKubeObject } from './kubeObject.js';
-import { expect, jest, test, describe } from '@jest/globals';
+import { expect, test, describe } from '@jest/globals';
 
-const mockManifestsPath = path.join('scripts', 'utils', '__tests__', 'generatedManifests', 'local');
-const rootDir = getMainBaseDir();
-const manifestDir = path.join(rootDir, mockManifestsPath);
-const getManifestsDirMock = jest.spyOn(KubeObject.prototype, 'getManifestsDir').mockImplementation(() => manifestDir);
-
-// const getResourceAbsolutePathMock = jest.spyOn(KubeObject.prototype, 'getResourceAbsolutePath').mockImplementation((props) => getResourceAbsolutePathForTest({
-//     environment: props.environment,
-//     resourceType: props.resourceType,
-//     resourceName: props.resourceName,
-//     manifestsDir: manifestDir
-// }));
-
-const diff = (diffMe: string, diffBy: string): string => diffMe.split(diffBy).join('');
+/* 
+Remove teh absolute root to make the snapshot deterministic
+// e.g
+    from -> "path": "/Users/oyelowo/Desktop/dev/modern-distributed-app-template/kubernetes/generatedManifests/local/infrastructure/namespaces/1-manifest/v1-namespace-cert-manager-cert-manager.yaml",
+    to   ->  "path": "generatedManifests/local/infrastructure/namespaces/1-manifest/v1-namespace-cert-manager-cert-manager.yaml",
+*/
+const removeNonDeterministicRootDir = (p: TKubeObject) => ({ ...p, path: path.relative(getMainBaseDir(), p.path) });
 
 describe('KubeObject', () => {
     test('Can sync resources', () => {
-        const kubeInstance = new KubeObject('local');
-        expect(kubeInstance.getManifestsDir()).toContain(mockManifestsPath);
-        expect(getManifestsDirMock).toHaveBeenCalled();
+        const kubeInstance = new KubeObject('test');
 
-        const removeNonDeterministicRootDir = (p: TKubeObject) => ({ ...p, path: diff(p.path, rootDir) });
         const inst = kubeInstance.getAll().map(removeNonDeterministicRootDir);
         expect(inst).toMatchSnapshot();
         expect(inst).toHaveLength(267);
@@ -41,33 +31,33 @@ describe('KubeObject', () => {
         ).toMatchSnapshot();
     });
 
-    test.only('Can get kube objects for a resource', () => {
-        const kubeInstance = new KubeObject('local');
-        const graphqlMongo = kubeInstance.getForApp({ resourceType: 'services', resourceName: 'graphql-mongo' });
+    test('Can get kube objects for a resource', () => {
+        const kubeInstance = new KubeObject('test');
+        const graphqlMongo = kubeInstance.getForApp('services/graphql-mongo').map(removeNonDeterministicRootDir);
         expect(graphqlMongo).toMatchSnapshot();
         expect(graphqlMongo).toHaveLength(22);
 
-        const reactWeb = kubeInstance.getForApp({ resourceType: 'services', resourceName: 'react-web' });
+        const reactWeb = kubeInstance.getForApp('services/react-web').map(removeNonDeterministicRootDir);
         expect(reactWeb).toMatchSnapshot();
         expect(reactWeb).toHaveLength(4);
 
-        const argocd = kubeInstance.getForApp({ resourceType: 'infrastructure', resourceName: 'argocd' });
+        const argocd = kubeInstance.getForApp('infrastructure/argocd').map(removeNonDeterministicRootDir);
         expect(argocd).toMatchSnapshot();
         expect(argocd).toHaveLength(36);
 
-        const linkerd = kubeInstance.getForApp({ resourceType: 'infrastructure', resourceName: 'linkerd' });
+        const linkerd = kubeInstance.getForApp('infrastructure/linkerd').map(removeNonDeterministicRootDir);
         expect(linkerd).toMatchSnapshot();
         expect(linkerd).toHaveLength(44);
 
-        const certManager = kubeInstance.getForApp({ resourceType: 'infrastructure', resourceName: 'cert-manager' });
+        const certManager = kubeInstance.getForApp('infrastructure/cert-manager').map(removeNonDeterministicRootDir);
         expect(certManager).toMatchSnapshot();
         expect(certManager).toHaveLength(57);
 
-        const nginxIngress = kubeInstance.getForApp({ resourceType: 'infrastructure', resourceName: 'nginx-ingress' });
+        const nginxIngress = kubeInstance.getForApp('infrastructure/nginx-ingress').map(removeNonDeterministicRootDir);
         expect(nginxIngress).toMatchSnapshot();
         expect(nginxIngress).toHaveLength(12);
 
-        const namespaces = kubeInstance.getForApp({ resourceType: 'infrastructure', resourceName: 'namespaces' });
+        const namespaces = kubeInstance.getForApp('infrastructure/namespaces').map(removeNonDeterministicRootDir);
         expect(namespaces).toMatchSnapshot();
         expect(namespaces).toHaveLength(7);
     });

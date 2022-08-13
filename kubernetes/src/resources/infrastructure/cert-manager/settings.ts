@@ -3,7 +3,6 @@ import { getEnvironmentVariables } from '../../shared/validations.js';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 export const certManagerProvider = getResourceProvider({
-    resourceType: 'infrastructure',
-    resourceName: 'cert-manager',
+    resourcePath: `infrastructure/cert-manager`,
     environment: ENVIRONMENT,
 });
