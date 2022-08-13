@@ -24,11 +24,17 @@ jest.spyOn(KubeObject.prototype, 'sealSecretValue').mockImplementation(
 );
 
 describe('KubeObject', () => {
-    beforeEach(() => {
+    beforeAll(() => {
         new KubeObject('test').getOfAKind('SealedSecret').forEach((ss) => {
             sh.rm('-rf', ss.path);
         });
     });
+    afterEach(() => {
+        new KubeObject('test').getOfAKind('SealedSecret').forEach((ss) => {
+            sh.rm('-rf', ss.path);
+        });
+    });
+
     test('Can sync resources', () => {
         const kubeInstance = new KubeObject('test');
 
