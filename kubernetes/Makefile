@@ -25,7 +25,7 @@ check:
 	npm run lint-check
 
 test:
-	# npm test
+	npm test
 
 
 #############

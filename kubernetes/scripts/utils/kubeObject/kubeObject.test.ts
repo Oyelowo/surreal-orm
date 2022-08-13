@@ -79,6 +79,20 @@ describe('KubeObject', () => {
         expect(kubeInstance.getOfAKind('SealedSecret')).toHaveLength(0);
         kubeInstance.syncSealedSecrets();
         expect(kubeInstance.getOfAKind('SealedSecret')).toHaveLength(13);
+
+        expect(kubeInstance.getOfAKind('SealedSecret')[0].spec.encryptedData).toEqual({
+            ADMIN_PASSWORD: 'lowo-testargocd-applications-secretargocd********',
+            password: 'lowo-testargocd-applications-secretargocd********',
+            type: 'lowo-testargocd-applications-secretargocd***',
+            url: 'lowo-testargocd-applications-secretargocd**********************************************************',
+            username: 'lowo-testargocd-applications-secretargocd*******',
+        });
+        expect(kubeInstance.getOfAKind('SealedSecret')[12].spec.encryptedData).toEqual({
+            APP_ENVIRONMENT: 'lowo-testreact-webapplications********',
+            APP_EXTERNAL_BASE_URL: 'lowo-testreact-webapplications****************************',
+            APP_HOST: 'lowo-testreact-webapplications************',
+            APP_PORT: 'lowo-testreact-webapplications********',
+        });
         expect(kubeInstance.getOfAKind('SealedSecret').map(removeNonDeterministicRootDir)).toMatchSnapshot();
     });
 });
