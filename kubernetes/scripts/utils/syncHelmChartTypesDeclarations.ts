@@ -1,3 +1,4 @@
+import yaml from 'yaml';
 import { helmChartsInfo } from '../../src/resources/shared/helmChartInfo.js';
 import chalk from 'chalk';
 import sh from 'shelljs';
@@ -24,8 +25,8 @@ export function syncHelmChartTypesDeclarations() {
         sh.exec(`helm repo update ${repoName}`);
 
         Object.values(charts).forEach(({ chart, version }) => {
-            const { stdout: valuesJson, stderr } = sh.exec(
-                `helm show values ${repoName}/${chart} --version ${version} | yq -o=json`,
+            const { stdout: valuesYaml, stderr } = sh.exec(
+                `helm show values ${repoName}/${chart} --version ${version}`,
                 {
                     silent: true,
                 }
@@ -37,7 +38,7 @@ export function syncHelmChartTypesDeclarations() {
 
             const typeFileName = _.camelCase(`${chart}${_.capitalize(repoName)}`);
 
-            const tsDec = JsonToTS.default(JSON.parse(valuesJson), {
+            const tsDec = JsonToTS.default(yaml.parse(valuesYaml, { strict: false }), {
                 rootName: `I${_.capitalize(typeFileName)}`,
             })
                 .map((typeInterface, i) => {

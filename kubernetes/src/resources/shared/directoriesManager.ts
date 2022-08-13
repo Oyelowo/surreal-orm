@@ -1,4 +1,4 @@
-import { ServiceName } from './../types/ownTypes';
+import { ServiceName } from './../types/ownTypes.js';
 import * as k8s from '@pulumi/kubernetes';
 import url from 'node:url';
 import path from 'node:path';

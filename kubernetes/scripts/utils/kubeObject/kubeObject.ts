@@ -1,14 +1,16 @@
+import fs from 'node:fs';
+import yaml from 'yaml';
 import { mergeUnsealedSecretToSealedSecret } from './sealedSecretsManager.js';
 import { selectSecretKubeObjectsFromPrompt } from './secretsSelectorPrompter.js';
 import sh from 'shelljs';
 import * as ramda from 'ramda';
+import path from 'node:path';
 import _ from 'lodash';
 import z from 'zod';
 import { namespaceSchema } from '../../../src/resources/infrastructure/namespaces/util.js';
 import { getGeneratedEnvManifestsDir, ResourcePathProps } from '../../../src/resources/shared/directoriesManager.js';
 import { getResourceAbsolutePath } from '../../../src/resources/shared/directoriesManager.js';
 import type { Environment } from '../../../src/resources/types/ownTypes.js';
-import { handleShellError } from '../shared.js';
 import { generateManifests } from './generateManifests.js';
 import { syncCrdsCode } from './syncCrdsCode.js';
 
@@ -26,6 +28,12 @@ const kubeObjectSchema = z.object({
     apiVersion: z.string(),
     type: z.string().optional(),
     path: z.string(),
+    /**
+     * If path path format ==> kubernetes/generatedManifests/environment/resourceType/resource-name/1-manifest/kubeManifest.yaml
+     *
+     * resourceBaseDir ==> kubernetes/generatedManifests/environment/resourceType/resource-name
+     */
+    resourceBaseDir: z.string(),
     metadata: z.object({
         name: z.string(),
         // CRDS have namespace as null
@@ -84,16 +92,10 @@ export class KubeObject {
 
     getForApp = (resourcePath: ResourcePathProps['resourcePath']): TKubeObject[] => {
         const resourceDir = getResourceAbsolutePath({
-            // resourcePath: `$${this.environment}/${this.}/argocd`,
             resourcePath,
             environment: this.environment,
         });
-        return this.kubeObjectsAll.filter((m) => {
-            // We check with the separator in case of two resources with similar starting name
-            // e.g `linkerd` and `linkerd-viz`. Having the demarcator helps to do exact match.
-            const matchResourceExactPath = (demarcator: '/' | '\\') => m.path.startsWith(`${resourceDir}${demarcator}`);
-            return matchResourceExactPath('/') || matchResourceExactPath('\\');
-        });
+        return this.kubeObjectsAll.filter((m) => m.path.startsWith(`${resourceDir}${path.sep}`));
     };
 
     getAll = (): TKubeObject[] => {
@@ -110,26 +112,26 @@ export class KubeObject {
     private syncAll = (): this => {
         const envDir = getGeneratedEnvManifestsDir(this.environment);
         const manifestsPaths = z.array(z.string()).min(5).parse(this.getManifestsPathWithinDir(envDir));
-        const exec = (cmd: string) => handleShellError(sh.exec(cmd, { silent: true })).stdout;
 
         // eslint-disable-next-line unicorn/no-array-reduce
-        this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, path, i) => {
-            if (!path) return acc;
+        this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, manifestPath, i) => {
+            if (!manifestPath) return acc;
 
             console.log('Extracting kubeobject from manifest', i);
 
-            const kubeObject = JSON.parse(exec(`cat ${path} | yq '.' -o json`)) as TKubeObject;
-
+            const kubeObject = yaml.parse(fs.readFileSync(manifestPath, 'utf8')) as TKubeObject;
             if (_.isEmpty(kubeObject)) return acc;
+
             // let's mutate to make it a bit faster and should be okay since we only do it here
-            kubeObject.path = path;
+            kubeObject.path = manifestPath;
+            kubeObject.resourceBaseDir = path.join(path.dirname(manifestPath), '..');
 
             // Encode stringData into Data field for Secret Objects. This is to
             // ensure consistency and a single source of truth in handling the data.
             if (kubeObject.kind === 'Secret') {
-                const encodedStringData = _.mapValues(kubeObject.stringData, (v) => {
-                    return Buffer.from(String(v)).toString('base64');
-                });
+                const encodedStringData = _.mapValues(kubeObject.stringData, (v): string =>
+                    Buffer.from(v ?? '').toString('base64')
+                );
 
                 kubeObject.data = ramda.mergeDeepRight(kubeObject.data ?? {}, encodedStringData);
             }
@@ -155,7 +157,7 @@ export class KubeObject {
     };
 
     getOfAKind = <K extends ResourceKind>(kind: K): TKubeObject<K>[] => {
-        return (this.kubeObjectsAll as TKubeObject<K>[]).filter((o) => o.kind === kind);
+        return this.kubeObjectsAll.filter((o) => o.kind === kind) as TKubeObject<K>[];
     };
 
     /**
@@ -173,10 +175,8 @@ which is cached locally but that would be more involved.
                 // Syncs all secrets
                 selectedSecretsForUpdate: Object.keys(s?.data ?? {}),
             };
-        }) as TKubeObject<'Secret'>[];
-        // console.log(chalk.cyanBright(`XXXXXXX...Secretssss`, JSON.stringify(secrets, null, 4)))
-        // return
-        // console.log(chalk.cyanBright(`this.getOfAKind('SealedSecret'). ${this.getOfAKind('SealedSecret')}`))
+        });
+
         mergeUnsealedSecretToSealedSecret({
             sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
             secretKubeObjects: secrets,

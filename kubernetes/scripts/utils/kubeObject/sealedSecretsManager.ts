@@ -5,6 +5,7 @@ import sh from 'shelljs';
 import { ResourceName } from '../../../src/resources/types/ownTypes.js';
 import _ from 'lodash';
 import z from 'zod';
+import yaml from 'yaml';
 
 const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets';
 
@@ -20,20 +21,38 @@ you are at present context
 */
 export function mergeUnsealedSecretToSealedSecret(props: Props): void {
     for (const secret of props.secretKubeObjects) {
-        mergeUnsealedSecretToSealedSecretHelper({
+        const { name, namespace } = secret.metadata;
+        const updatedSealedSecret = mergeUnsealedSecretToSealedSecretHelper({
             secretKubeObject: secret,
-            sealedSecretKubeObjects: props.sealedSecretKubeObjects,
+            existingSealedSecretKubeObjects: props.sealedSecretKubeObjects,
         });
+
+        const sealedSecretDir = p.join(secret.resourceBaseDir, SEALED_SECRETS_CONTROLLER_NAME);
+        sh.mkdir('-p', sealedSecretDir);
+
+        const sealedSecretFilePath = p.join(sealedSecretDir, `sealed-secret-${name}-${namespace}.yaml`);
+
+        sh.exec(`echo '${yaml.stringify(updatedSealedSecret)}' > ${sealedSecretFilePath}`);
     }
 }
 
+function sealSecretValue({ namespace, name, secretValue }: { namespace: string; name: string; secretValue: string }) {
+    return sh
+        .exec(
+            `echo ${secretValue} | base64 - d | kubeseal--controller - name=${SEALED_SECRETS_CONTROLLER_NAME} \
+            --raw --from - file=/dev/stdin --namespace ${namespace} \
+            --name ${name}`
+        )
+        .stdout.trim();
+}
+
 function mergeUnsealedSecretToSealedSecretHelper({
-    sealedSecretKubeObjects,
+    existingSealedSecretKubeObjects,
     secretKubeObject,
 }: {
     secretKubeObject: TKubeObject<'Secret'>;
-    sealedSecretKubeObjects: TKubeObject<'SealedSecret'>[];
-}): void {
+    existingSealedSecretKubeObjects: TKubeObject<'SealedSecret'>[];
+}): SealedSecretTemplate {
     const { data, selectedSecretsForUpdate, metadata, path } = secretKubeObject;
     const { name, namespace /* annotations */ } = metadata;
 
@@ -44,23 +63,16 @@ function mergeUnsealedSecretToSealedSecretHelper({
     // Get corresponding previously generated sealed secrets info(if it exists).
     const matchesUnsealedSecret = ({ metadata: m }: TKubeObject): boolean =>
         m.name === name && m.namespace === namespace;
-    const existingSealedSecretJsonData = sealedSecretKubeObjects?.find(matchesUnsealedSecret);
-
-    const sealSecretValue = (secretValue: string): string => {
-        return sh
-            .exec(
-                `echo ${secretValue} | base64 -d | kubeseal --controller-name=${SEALED_SECRETS_CONTROLLER_NAME} \
-            --raw --from-file=/dev/stdin --namespace ${namespace} \
-            --name ${name}`
-            )
-            .stdout.trim();
-    };
+    const existingSealedSecretJsonData = existingSealedSecretKubeObjects?.find(matchesUnsealedSecret);
 
     const secretData = data ?? {};
 
     // Pick only selected secrets for encytption
     const filteredSecretData = _.pickBy(secretData, (_v, k) => selectedSecretsForUpdate?.includes(k));
-    const updatedSealedSecretsData = _.mapValues(filteredSecretData, sealSecretValue);
+    const updatedSealedSecretsData = _.mapValues(
+        filteredSecretData,
+        (secretValue) => `sealSecretValue({ namespace, name, secretValue })`
+    );
 
     // Merge new secrets with old
     const encryptedDataa: Record<string, unknown> = {
@@ -98,15 +110,5 @@ function mergeUnsealedSecretToSealedSecretHelper({
         },
     };
 
-    // GET SEALED SECRET PATH USING UNSEALED SECRET PATH
-    const appManifestsDir = p.dirname(path);
-    // The path format is: kubernetes/generatedManifests/production/applications/graphql-mongo/1-manifest
-    // and we want as basedir: kubernetes/generatedManifests/production/applications/graphql-mongo
-    const appBaseDir = p.join(appManifestsDir, '..');
-    const sealedSecretDir = p.join(appBaseDir, SEALED_SECRETS_CONTROLLER_NAME);
-    sh.mkdir(sealedSecretDir);
-    const sealedSecretFilePath = p.join(sealedSecretDir, `sealed-secret-${name}-${namespace}.yaml`);
-
-    // sh.exec(`echo '${yaml.dump(updatedSealedSecrets)}' > ${sealedSecretFilePath}`);
-    sh.exec(`echo '${JSON.stringify(updatedSealedSecrets)}' | yq -P '.' -o yaml > ${sealedSecretFilePath}`);
+    return updatedSealedSecrets;
 }
