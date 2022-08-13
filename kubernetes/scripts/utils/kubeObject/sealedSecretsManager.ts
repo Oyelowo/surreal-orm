@@ -2,16 +2,19 @@ import { SealedSecretTemplate } from '../../../src/resources/types/sealedSecretT
 import type { TKubeObject } from './kubeObject.js';
 import p from 'node:path';
 import sh from 'shelljs';
-import { ResourceName } from '../../../src/resources/types/ownTypes.js';
+import type { ResourceName } from '../../../src/resources/types/ownTypes.js';
 import _ from 'lodash';
 import z from 'zod';
 import yaml from 'yaml';
 
 const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets';
 
+type OnSealSecretValue = ({ namespace: Namespace, name: ResourceName, secretValue: string }) => string;
+
 type Props = {
     secretKubeObjects: TKubeObject<'Secret'>[];
-    sealedSecretKubeObjects: TKubeObject<'SealedSecret'>[];
+    existingSealedSecretKubeObjects: TKubeObject<'SealedSecret'>[];
+    onSealSecretValue: OnSealSecretValue;
 };
 
 /*
@@ -22,9 +25,10 @@ you are at present context
 export function mergeUnsealedSecretToSealedSecret(props: Props): void {
     for (const secret of props.secretKubeObjects) {
         const { name, namespace } = secret.metadata;
-        const updatedSealedSecret = mergeUnsealedSecretToSealedSecretHelper({
+        const updatedSealedSecret = updateExistingSealedSecret({
             secretKubeObject: secret,
-            existingSealedSecretKubeObjects: props.sealedSecretKubeObjects,
+            existingSealedSecretKubeObjects: props.existingSealedSecretKubeObjects,
+            onSealSecretValue: props.onSealSecretValue,
         });
 
         const sealedSecretDir = p.join(secret.resourceBaseDir, SEALED_SECRETS_CONTROLLER_NAME);
@@ -36,24 +40,16 @@ export function mergeUnsealedSecretToSealedSecret(props: Props): void {
     }
 }
 
-function sealSecretValue({ namespace, name, secretValue }: { namespace: string; name: string; secretValue: string }) {
-    return sh
-        .exec(
-            `echo ${secretValue} | base64 - d | kubeseal--controller - name=${SEALED_SECRETS_CONTROLLER_NAME} \
-            --raw --from - file=/dev/stdin --namespace ${namespace} \
-            --name ${name}`
-        )
-        .stdout.trim();
-}
-
-function mergeUnsealedSecretToSealedSecretHelper({
+function updateExistingSealedSecret({
     existingSealedSecretKubeObjects,
     secretKubeObject,
+    onSealSecretValue,
 }: {
     secretKubeObject: TKubeObject<'Secret'>;
     existingSealedSecretKubeObjects: TKubeObject<'SealedSecret'>[];
+    onSealSecretValue: OnSealSecretValue;
 }): SealedSecretTemplate {
-    const { data, selectedSecretsForUpdate, metadata, path } = secretKubeObject;
+    const { data, selectedSecretsForUpdate, metadata } = secretKubeObject;
     const { name, namespace /* annotations */ } = metadata;
 
     if (!name && namespace) {
@@ -69,9 +65,8 @@ function mergeUnsealedSecretToSealedSecretHelper({
 
     // Pick only selected secrets for encytption
     const filteredSecretData = _.pickBy(secretData, (_v, k) => selectedSecretsForUpdate?.includes(k));
-    const updatedSealedSecretsData = _.mapValues(
-        filteredSecretData,
-        (secretValue) => `sealSecretValue({ namespace, name, secretValue })`
+    const updatedSealedSecretsData = _.mapValues(filteredSecretData, (secretValue) =>
+        onSealSecretValue({ namespace, name, secretValue })
     );
 
     // Merge new secrets with old

@@ -10,7 +10,7 @@ import z from 'zod';
 import { namespaceSchema } from '../../../src/resources/infrastructure/namespaces/util.js';
 import { getGeneratedEnvManifestsDir, ResourcePathProps } from '../../../src/resources/shared/directoriesManager.js';
 import { getResourceAbsolutePath } from '../../../src/resources/shared/directoriesManager.js';
-import type { Environment } from '../../../src/resources/types/ownTypes.js';
+import type { Environment, ResourceName } from '../../../src/resources/types/ownTypes.js';
 import { generateManifests } from './generateManifests.js';
 import { syncCrdsCode } from './syncCrdsCode.js';
 
@@ -178,8 +178,9 @@ which is cached locally but that would be more involved.
         });
 
         mergeUnsealedSecretToSealedSecret({
-            sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
+            existingSealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
             secretKubeObjects: secrets,
+            onSealSecretValue: this.sealSecretValue,
         });
 
         // Sync kube object info after sealed secrets manifests have been updated
@@ -195,12 +196,24 @@ secrets should never be pushed to git but they help to generate sealed secrets.
         const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(this.getOfAKind('Secret'));
 
         mergeUnsealedSecretToSealedSecret({
-            sealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
+            existingSealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
             // Syncs only selected secrets from the CLI prompt
             secretKubeObjects: selectedSecretObjects,
+            onSealSecretValue: this.sealSecretValue,
         });
 
         // Sync kube object info after sealed secrets manifests have been updated
         this.syncAll();
     };
+
+    sealSecretValue({ namespace, name, secretValue }: { namespace: string; name: string; secretValue: string }) {
+        const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets';
+        return sh
+            .exec(
+                `echo ${secretValue} | base64 - d | kubeseal--controller - name=${SEALED_SECRETS_CONTROLLER_NAME} \
+            --raw --from - file=/dev/stdin --namespace ${namespace} \
+            --name ${name}`
+            )
+            .stdout.trim();
+    }
 }

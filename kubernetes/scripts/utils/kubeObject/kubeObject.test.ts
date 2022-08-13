@@ -1,9 +1,9 @@
 import sh from 'shelljs';
-import { getMainBaseDir } from './../../../src/resources/shared/directoriesManager';
+import { getMainBaseDir } from './../../../src/resources/shared/directoriesManager.js';
 import path from 'node:path';
 import { KubeObject } from './kubeObject.js';
 import type { TKubeObject } from './kubeObject.js';
-import { expect, test, describe } from '@jest/globals';
+import { expect, jest, test, describe } from '@jest/globals';
 
 /* 
 Remove teh absolute root to make the snapshot deterministic
@@ -17,13 +17,18 @@ const removeNonDeterministicRootDir = (p: TKubeObject) => {
         path: path.relative(getMainBaseDir(), p.path),
         resourceBaseDir: path.relative(getMainBaseDir(), p.resourceBaseDir),
     } as TKubeObject;
-}
+};
+
+jest.spyOn(KubeObject.prototype, 'sealSecretValue').mockImplementation(
+    ({ name, namespace, secretValue }) => 'lowo-test' + name + namespace + '*'.repeat(secretValue.length)
+);
+
 describe('KubeObject', () => {
     beforeEach(() => {
-        new KubeObject('test').getOfAKind("SealedSecret").forEach(ss => {
-            sh.rm('-rf', ss.path)
-        })
-    })
+        new KubeObject('test').getOfAKind('SealedSecret').forEach((ss) => {
+            sh.rm('-rf', ss.path);
+        });
+    });
     test('Can sync resources', () => {
         const kubeInstance = new KubeObject('test');
 
@@ -41,8 +46,7 @@ describe('KubeObject', () => {
             kubeInstance.getOfAKind('CustomResourceDefinition').map(removeNonDeterministicRootDir)
         ).toMatchSnapshot();
 
-
-        console.info('Can get kube objects for a resource')
+        console.info('Can get kube objects for a resource');
         const graphqlMongo = kubeInstance.getForApp('services/graphql-mongo').map(removeNonDeterministicRootDir);
         expect(graphqlMongo).toMatchSnapshot();
         expect(graphqlMongo).toHaveLength(19);
@@ -71,9 +75,10 @@ describe('KubeObject', () => {
         expect(namespaces).toMatchSnapshot();
         expect(namespaces).toHaveLength(7);
 
-        expect(kubeInstance.getOfAKind("SealedSecret")).toHaveLength(0);
+        console.info('Can Update sealed secrets');
+        expect(kubeInstance.getOfAKind('SealedSecret')).toHaveLength(0);
         kubeInstance.syncSealedSecrets();
-        expect(kubeInstance.getOfAKind("SealedSecret")).toHaveLength(13);
-        expect(kubeInstance.getOfAKind("SealedSecret").map(removeNonDeterministicRootDir)).toMatchSnapshot();
+        expect(kubeInstance.getOfAKind('SealedSecret')).toHaveLength(13);
+        expect(kubeInstance.getOfAKind('SealedSecret').map(removeNonDeterministicRootDir)).toMatchSnapshot();
     });
 });
