@@ -1,0 +1,48 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRole","metadata":{"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"cert-manager","helm.sh/chart":"cert-manager-0.6.1"},"name":"cert-manager-controller-controller-issuers"},"rules":[{"apiGroups":["cert-manager.io"],"resources":["issuers","issuers/status"],"verbs":["update"]},{"apiGroups":["cert-manager.io"],"resources":["issuers"],"verbs":["get","list","watch"]},{"apiGroups":[""],"resources":["secrets"],"verbs":["get","list","watch","create","update","patch","delete"]},{"apiGroups":[""],"resources":["events"],"verbs":["create","patch"]}]}
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: cert-manager
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: cert-manager
+    helm.sh/chart: cert-manager-0.6.1
+  name: cert-manager-controller-controller-issuers
+rules:
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - issuers
+  - issuers/status
+  verbs:
+  - update
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - issuers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch

@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"StatefulSet","metadata":{"labels":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"redis","helm.sh/chart":"redis-16.8.9"},"name":"graphql-mongo-redis-master","namespace":"applications"},"spec":{"replicas":1,"selector":{"matchLabels":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/name":"redis"}},"serviceName":"graphql-mongo-redis-headless","template":{"metadata":{"annotations":{"checksum/configmap":"6f57cf9208511916e80bd8064d393590a176097d1ff524e72b1f95587da02513","checksum/health":"b1f770fa15f8bb15ac0176ba7a31391b52d924d5361b52cc3efee627e050e973","checksum/scripts":"7f5a69f15dcba18a677b168f00b5496b0bef29e6d64ab5ced7c6f7e8ab8ee813","checksum/secret":"cd0142dd7139f7c45a3bd1a57eccb67804d27c013d7e1e685fe35f610ae114f1"},"labels":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"redis","helm.sh/chart":"redis-16.8.9"}},"spec":{"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"podAffinityTerm":{"labelSelector":{"matchLabels":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/name":"redis"}},"namespaces":["applications"],"topologyKey":"kubernetes.io/hostname"},"weight":1}]}},"containers":[{"args":["-c","/opt/bitnami/scripts/start-scripts/start-master.sh"],"command":["/bin/bash"],"env":[{"name":"BITNAMI_DEBUG","value":"false"},{"name":"REDIS_REPLICATION_MODE","value":"master"},{"name":"ALLOW_EMPTY_PASSWORD","value":"no"},{"name":"REDIS_PASSWORD","valueFrom":{"secretKeyRef":{"key":"redis-password","name":"graphql-mongo-redis"}}},{"name":"REDIS_TLS_ENABLED","value":"no"},{"name":"REDIS_PORT","value":"6379"}],"image":"docker.io/bitnami/redis:6.2.7-debian-10-r0","imagePullPolicy":"IfNotPresent","livenessProbe":{"exec":{"command":["sh","-c","/health/ping_liveness_local.sh 5"]},"failureThreshold":5,"initialDelaySeconds":20,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":6},"name":"redis","ports":[{"containerPort":6379,"name":"redis"}],"readinessProbe":{"exec":{"command":["sh","-c","/health/ping_readiness_local.sh 1"]},"failureThreshold":5,"initialDelaySeconds":20,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":2},"resources":{"limits":{},"requests":{}},"securityContext":{"runAsUser":1001},"volumeMounts":[{"mountPath":"/opt/bitnami/scripts/start-scripts","name":"start-scripts"},{"mountPath":"/health","name":"health"},{"mountPath":"/data","name":"redis-data"},{"mountPath":"/opt/bitnami/redis/mounted-etc","name":"config"},{"mountPath":"/opt/bitnami/redis/etc/","name":"redis-tmp-conf"},{"mountPath":"/tmp","name":"tmp"}]}],"securityContext":{"fsGroup":1001},"serviceAccountName":"graphql-mongo-redis","terminationGracePeriodSeconds":30,"volumes":[{"configMap":{"defaultMode":493,"name":"graphql-mongo-redis-scripts"},"name":"start-scripts"},{"configMap":{"defaultMode":493,"name":"graphql-mongo-redis-health"},"name":"health"},{"configMap":{"name":"graphql-mongo-redis-configuration"},"name":"config"},{"emptyDir":{},"name":"redis-tmp-conf"},{"emptyDir":{},"name":"tmp"}]}},"updateStrategy":{"rollingUpdate":{},"type":"RollingUpdate"},"volumeClaimTemplates":[{"metadata":{"labels":{"app.kubernetes.io/component":"master","app.kubernetes.io/instance":"redis","app.kubernetes.io/name":"redis"},"name":"redis-data"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"8Gi"}}}}]}}
+  labels:
+    app.kubernetes.io/component: master
+    app.kubernetes.io/instance: redis
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: redis
+    helm.sh/chart: redis-16.8.9
+  name: graphql-mongo-redis-master
+  namespace: applications
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: master
+      app.kubernetes.io/instance: redis
+      app.kubernetes.io/name: redis
+  serviceName: graphql-mongo-redis-headless
+  template:
+    metadata:
+      annotations:
+        checksum/configmap: 6f57cf9208511916e80bd8064d393590a176097d1ff524e72b1f95587da02513
+        checksum/health: b1f770fa15f8bb15ac0176ba7a31391b52d924d5361b52cc3efee627e050e973
+        checksum/scripts: 7f5a69f15dcba18a677b168f00b5496b0bef29e6d64ab5ced7c6f7e8ab8ee813
+        checksum/secret: cd0142dd7139f7c45a3bd1a57eccb67804d27c013d7e1e685fe35f610ae114f1
+      labels:
+        app.kubernetes.io/component: master
+        app.kubernetes.io/instance: redis
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: redis
+        helm.sh/chart: redis-16.8.9
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: master
+                  app.kubernetes.io/instance: redis
+                  app.kubernetes.io/name: redis
+              namespaces:
+              - applications
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+      containers:
+      - args:
+        - -c
+        - /opt/bitnami/scripts/start-scripts/start-master.sh
+        command:
+        - /bin/bash
+        env:
+        - name: BITNAMI_DEBUG
+          value: "false"
+        - name: REDIS_REPLICATION_MODE
+          value: master
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "no"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: redis-password
+              name: graphql-mongo-redis
+        - name: REDIS_TLS_ENABLED
+          value: "no"
+        - name: REDIS_PORT
+          value: "6379"
+        image: docker.io/bitnami/redis:6.2.7-debian-10-r0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - /health/ping_liveness_local.sh 5
+          failureThreshold: 5
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 6
+        name: redis
+        ports:
+        - containerPort: 6379
+          name: redis
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - /health/ping_readiness_local.sh 1
+          failureThreshold: 5
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 2
+        resources:
+          limits: {}
+          requests: {}
+        securityContext:
+          runAsUser: 1001
+        volumeMounts:
+        - mountPath: /opt/bitnami/scripts/start-scripts
+          name: start-scripts
+        - mountPath: /health
+          name: health
+        - mountPath: /data
+          name: redis-data
+        - mountPath: /opt/bitnami/redis/mounted-etc
+          name: config
+        - mountPath: /opt/bitnami/redis/etc/
+          name: redis-tmp-conf
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 1001
+      serviceAccountName: graphql-mongo-redis
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 493
+          name: graphql-mongo-redis-scripts
+        name: start-scripts
+      - configMap:
+          defaultMode: 493
+          name: graphql-mongo-redis-health
+        name: health
+      - configMap:
+          name: graphql-mongo-redis-configuration
+        name: config
+      - emptyDir: {}
+        name: redis-tmp-conf
+      - emptyDir: {}
+        name: tmp
+  updateStrategy:
+    rollingUpdate: {}
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        app.kubernetes.io/component: master
+        app.kubernetes.io/instance: redis
+        app.kubernetes.io/name: redis
+      name: redis-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi

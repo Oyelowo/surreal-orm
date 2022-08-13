@@ -1,0 +1,57 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRole","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi","linkerd.io/control-plane-component":"proxy-injector","linkerd.io/control-plane-ns":"linkerd"},"name":"linkerd-linkerd-proxy-injector"},"rules":[{"apiGroups":[""],"resources":["events"],"verbs":["create","patch"]},{"apiGroups":[""],"resources":["namespaces","replicationcontrollers"],"verbs":["list","get","watch"]},{"apiGroups":[""],"resources":["pods"],"verbs":["list","watch"]},{"apiGroups":["extensions","apps"],"resources":["deployments","replicasets","daemonsets","statefulsets"],"verbs":["list","get","watch"]},{"apiGroups":["extensions","batch"],"resources":["cronjobs","jobs"],"verbs":["list","get","watch"]}]}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+    linkerd.io/control-plane-component: proxy-injector
+    linkerd.io/control-plane-ns: linkerd
+  name: linkerd-linkerd-proxy-injector
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  - replicationcontrollers
+  verbs:
+  - list
+  - get
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  - apps
+  resources:
+  - deployments
+  - replicasets
+  - daemonsets
+  - statefulsets
+  verbs:
+  - list
+  - get
+  - watch
+- apiGroups:
+  - extensions
+  - batch
+  resources:
+  - cronjobs
+  - jobs
+  verbs:
+  - list
+  - get
+  - watch
