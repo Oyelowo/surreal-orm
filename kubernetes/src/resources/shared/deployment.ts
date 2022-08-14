@@ -184,7 +184,6 @@ export class ServiceDeployment<
         // });
 
         this.argocdApplication = createArgocdApplication({
-            sourceApplicationName: this.appName,
             sourceApplicationPath: `services/${this.appName}`,
             outputPath: `infrastructure/argocd-applications-children-services`,
             environment: ENVIRONMENT,

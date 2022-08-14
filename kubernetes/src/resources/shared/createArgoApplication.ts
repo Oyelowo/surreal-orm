@@ -1,4 +1,4 @@
-import { Environment, ResourceNameSchema } from './../types/ownTypes';
+import { Environment, ResourceNameSchema } from './../types/ownTypes.js';
 import * as kx from '@pulumi/kubernetesx';
 import { Resource } from '@pulumi/pulumi';
 import crds from '../../../generatedCrdsTs/index.js';
