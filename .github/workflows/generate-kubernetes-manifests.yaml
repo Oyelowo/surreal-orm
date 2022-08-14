@@ -7,7 +7,7 @@ on:
       - 'kubernetes/**'
   workflow_run:
     # This  must match with the other two workflows
-    workflows: ["rust", "typescript"]
+    workflows: ["rust", "typescript", "kubernetes"]
     types:
       - completed
 

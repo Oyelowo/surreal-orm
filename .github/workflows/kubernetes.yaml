@@ -1,0 +1,47 @@
+name: kubernetes
+
+on:
+  workflow_dispatch:
+    paths: 
+      - 'kubernetes/**'
+  push:
+    branches: [master]
+    paths: 
+      - 'kubernetes/**'
+
+  pull_request:
+    paths: 
+      - 'kubernetes/**'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check_and_test_kubernetes_monorepo:
+    name: Run code checks for kubernetes
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kubernetes
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.7.0
+          cache: npm
+          cache-dependency-path: './kubernetes/package-lock.json'
+
+
+      - name: Install dependencies
+        run: make install
+
+      - name: Lint
+        run: make check
+
+      - name: Build & Unit Test
+        run: make test
