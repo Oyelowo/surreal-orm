@@ -56,7 +56,6 @@ describe('KubeObject', () => {
     afterAll(() => io.restore());
 
     beforeAll(() => {
-        faker.seed(1);
         io = stdin();
         deleteSealedSecrets();
     });

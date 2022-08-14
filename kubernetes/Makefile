@@ -36,7 +36,7 @@ bootsrap_cluster:
 # EXAMPLE USAGE: make generate_manifests_ci environment=local
 # environment options: local, development, staging, production
 generate_manifests_ci:
-	npx ts-node scripts/generateManifestsCI.ts --environment=$(environment)
+	npx ts-node scripts/generateManifestsCi.ts --environment=$(environment)
 
 generatae_sealed_secrets:
 	npx ts-node scripts/generateSealedSecrets.ts
