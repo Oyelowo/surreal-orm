@@ -53,9 +53,10 @@ const kubeObjectSchema = z.object({
 
 type KubeObjectSchema = Required<z.infer<typeof kubeObjectSchema>>;
 
-export type TKubeObjectBaseCommonProps<K extends ResourceKind> = KubeObjectSchema & {
+export interface TKubeObjectBaseCommonProps<K extends ResourceKind> extends KubeObjectSchema  {
     kind: Extract<ResourceKind, K>;
 };
+
 
 // The following is done to narrow down the type for specific object
 // in case it has extra properties and the expose a single `TKubeObject` with
@@ -194,7 +195,6 @@ secrets should never be pushed to git but they help to generate sealed secrets.
 */
     syncSealedSecretsWithPrompt = async (): Promise<void> => {
         const selectedSecretObjects = await selectSecretKubeObjectsFromPrompt(this.getOfAKind('Secret'));
-
         mergeUnsealedSecretToSealedSecret({
             existingSealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
             // Syncs only selected secrets from the CLI prompt

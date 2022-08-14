@@ -6,10 +6,19 @@ import type { ResourceName } from '../../../src/resources/types/ownTypes.js';
 import _ from 'lodash';
 import z from 'zod';
 import yaml from 'yaml';
+import { Namespace } from '../../../src/resources/infrastructure/namespaces/util.js';
 
 const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets';
 
-type OnSealSecretValue = ({ namespace: Namespace, name: ResourceName, secretValue: string }) => string;
+type OnSealSecretValue = ({
+    namespace,
+    name,
+    secretValue,
+}: {
+    namespace: Namespace;
+    name: string;
+    secretValue: string;
+}) => string;
 
 type Props = {
     secretKubeObjects: TKubeObject<'Secret'>[];
@@ -52,7 +61,7 @@ function updateExistingSealedSecret({
     const { data: secretData, selectedSecretsForUpdate, metadata } = secretKubeObject;
     const { name, namespace /* annotations */ } = metadata;
 
-    if (!name && namespace) {
+    if (!name || !namespace) {
         throw new Error('Name and namespace not provided in the secret');
     }
 
@@ -61,11 +70,10 @@ function updateExistingSealedSecret({
         m.name === name && m.namespace === namespace;
     const existingSealedSecretJsonData = existingSealedSecretKubeObjects?.find(matchesUnsealedSecret);
 
-
     // Pick only selected secrets for encytption
-    const filteredSecretData = _.pickBy(secretData, (_v, k) => selectedSecretsForUpdate?.includes(k));
-    const updatedSealedSecretsData = _.mapValues(filteredSecretData, (secretValue) =>
-        onSealSecretValue({ namespace, name, secretValue })
+    const filteredSecretData = _.pickBy(secretData, (_v, k): boolean => !!selectedSecretsForUpdate?.includes(k));
+    const updatedSealedSecretsData = _.mapValues(filteredSecretData, (secretValue): string =>
+        onSealSecretValue({ namespace, name, secretValue: String(secretValue) })
     );
 
     // Merge new secrets with old

@@ -58,6 +58,8 @@ export async function selectSecretKubeObjectsFromPrompt(
         name: 'selectedSecretObjects',
         choices: applicationList,
         validate(answer) {
+            console.log("Error" + JSON.stringify(answer.length));
+            
             if (answer.length === 0) {
                 return 'You must choose at least one secret.';
             }
@@ -68,16 +70,18 @@ export async function selectSecretKubeObjectsFromPrompt(
     });
 
     const secretkeysData = await promptSecretObjectDataSelection(promptResponse.selectedSecretObjects);
+    console.log("secretKubeObjectssecretKubeObjects", secretkeysData)
 
-    return secretKubeObjects.map((s) => {
+    return secretKubeObjects?.map((s) => {
+        console.log("s.metadata", s.metadata)
         const { name, namespace } = s?.metadata ?? {};
-        if (!namespace) {
+        if (!namespace || !name) {
             throw new Error('Namespace not found in secret');
         }
 
         return {
             ...s,
-            selectedSecretsForUpdate: secretkeysData[namespace][name],
+            selectedSecretsForUpdate: secretkeysData?.[namespace]?.[name] ?? [],
         };
     });
 }

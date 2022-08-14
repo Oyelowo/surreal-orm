@@ -24,7 +24,7 @@ jest.spyOn(KubeObject.prototype, 'sealSecretValue').mockImplementation(
     ({ name, namespace, secretValue }) => 'lowo-test' + name + namespace + '*'.repeat(secretValue.length)
 );
 
-describe('KubeObject', () => {
+describe.skip('KubeObject', () => {
     beforeAll(() => {
         new KubeObject('test').getOfAKind('SealedSecret').forEach((ss) => {
             sh.rm('-rf', ss.path);
