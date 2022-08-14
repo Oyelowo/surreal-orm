@@ -14,6 +14,7 @@ import type { Environment, ResourceName } from '../../../src/resources/types/own
 import { generateManifests } from './generateManifests.js';
 import { syncCrdsCode } from './syncCrdsCode.js';
 import cliProgress from 'cli-progress';
+import { PlainSecretJsonConfig } from '../plainSecretJsonConfig.js';
 
 type ResourceKind =
     | 'Secret'
@@ -65,8 +66,8 @@ export type TKubeObjectBaseCommonProps<K extends ResourceKind> = KubeObjectSchem
 // have to add as above
 type KubeObjectCustom =
     | (TKubeObjectBaseCommonProps<'Secret'> & {
-          selectedSecretsForUpdate?: string[] | null;
-      })
+        selectedSecretsForUpdate?: string[] | null;
+    })
     | TKubeObjectBaseCommonProps<'SealedSecret'>
     | TKubeObjectBaseCommonProps<'CustomResourceDefinition'>
     | TKubeObjectBaseCommonProps<'Deployment'>
@@ -104,6 +105,7 @@ export class KubeObject {
     };
 
     generateManifests = async (): Promise<void> => {
+        PlainSecretJsonConfig.syncAll()
         await generateManifests(this);
         this.syncAll();
         syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
@@ -147,6 +149,8 @@ export class KubeObject {
             bar1.update(i);
             return acc;
         }, []);
+
+        bar1.stop()
 
         return this;
     };
