@@ -3,7 +3,7 @@ import * as kx from '@pulumi/kubernetesx';
 import { Resource } from '@pulumi/pulumi';
 import crds from '../../../generatedCrdsTs/index.js';
 import { Namespace, namespaces } from '../infrastructure/namespaces/util.js';
-import { ResourcePathProps, getResourceProvider, getResourceRelativePath } from './directoriesManager.js';
+import { ResourceOutputDirProps, getResourceProvider, getResourceRelativePath } from './directoriesManager.js';
 import { getEnvironmentVariables } from './validations.js';
 import { PlainSecretJsonConfig } from '../../../scripts/utils/plainSecretJsonConfig.js';
 
@@ -11,21 +11,21 @@ type ArgocdApplicationProps = {
     namespace: Namespace;
     environment: Environment;
     /** Where the argocd aaplicaiton itself is going to be generated to. */
-    outputPath: ResourcePathProps['resourcePath'];
+    outputDirectory: ResourceOutputDirProps['outputDirectory'];
     /** Source is a reference to the location of the application's manifests we are generating app for. */
-    sourceApplicationPath: ResourcePathProps['resourcePath'];
+    sourceAppDirectory: ResourceOutputDirProps['outputDirectory'];
     // Typically services/infrastructure under which specific app is nested
     parent?: Resource;
 };
 
 export function createArgocdApplication({
-    sourceApplicationPath,
-    outputPath,
+    sourceAppDirectory,
+    outputDirectory,
     namespace,
     environment,
     parent,
 }: ArgocdApplicationProps) {
-    const sourceApplicationName = ResourceNameSchema.parse(sourceApplicationPath.split('/').at(-1));
+    const sourceApplicationName = ResourceNameSchema.parse(sourceAppDirectory.split('/').at(-1));
     const argocdApplication = new crds.argoproj.v1alpha1.Application(
         sourceApplicationName,
         {
@@ -46,7 +46,7 @@ export function createArgocdApplication({
                 source: {
                     repoURL: 'https://github.com/Oyelowo/modern-distributed-app-template',
                     path: getResourceRelativePath({
-                        resourcePath: sourceApplicationPath,
+                        outputDirectory: sourceAppDirectory,
                         environment,
                     }),
                     targetRevision: 'HEAD',
@@ -64,7 +64,7 @@ export function createArgocdApplication({
         },
         {
             provider: getResourceProvider({
-                resourcePath: outputPath,
+                outputDirectory: outputDirectory,
                 environment,
             }),
             parent,
@@ -97,7 +97,7 @@ export const argoCDApplicationsSecret = new kx.Secret(
     },
     {
         provider: getResourceProvider({
-            resourcePath: `infrastructure/argocd-applications-parents`,
+            outputDirectory: `infrastructure/argocd-applications-parents`,
             environment: ENVIRONMENT,
         }),
     }

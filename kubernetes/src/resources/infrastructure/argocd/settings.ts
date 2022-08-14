@@ -3,6 +3,6 @@ import { getEnvironmentVariables } from '../../shared/validations.js';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 export const argocdProvider = getResourceProvider({
-    resourcePath: `infrastructure/argocd`,
+    outputDirectory: `infrastructure/argocd`,
     environment: ENVIRONMENT,
 });

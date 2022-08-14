@@ -3,6 +3,6 @@ import { getEnvironmentVariables } from '../../shared/validations.js';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 export const namespacesNamesProvider = getResourceProvider({
-    resourcePath: `infrastructure/namespaces`,
+    outputDirectory: `infrastructure/namespaces`,
     environment: ENVIRONMENT,
 });

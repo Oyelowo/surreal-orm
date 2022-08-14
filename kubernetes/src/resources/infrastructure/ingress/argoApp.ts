@@ -3,8 +3,8 @@ import { getEnvironmentVariables } from '../../shared/validations.js';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 export const ingressControllerApplication = createArgocdApplication({
-    sourceApplicationPath: 'infrastructure/nginx-ingress',
-    outputPath: 'infrastructure/argocd-applications-children-infrastructure',
+    sourceAppDirectory: 'infrastructure/nginx-ingress',
+    outputDirectory: 'infrastructure/argocd-applications-children-infrastructure',
     environment: ENVIRONMENT,
     namespace: 'default',
 });

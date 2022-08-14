@@ -5,6 +5,6 @@ import { getEnvironmentVariables } from '../../shared/validations.js';
 const { ENVIRONMENT } = getEnvironmentVariables();
 export const sealedSecretsResourceName: ResourceName = 'sealed-secrets';
 export const sealedSecretsProvider = getResourceProvider({
-    resourcePath: `infrastructure/sealed-secrets`,
+    outputDirectory: `infrastructure/sealed-secrets`,
     environment: ENVIRONMENT,
 });
