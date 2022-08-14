@@ -17,27 +17,44 @@ export type Memory = `${number}${'E' | 'P' | 'T' | 'G' | 'M' | 'k' | 'm' | 'Ei' 
 
 export type CPU = `${number}${'m'}`;
 
-export type ResourceType = 'infrastructure' | 'services';
+export const ServiceNamesSchema = z.union([
+    z.literal('graphql-mongo'),
+    z.literal('graphql-postgres'),
+    z.literal('grpc-mongo'),
+    z.literal('react-web'),
+]);
+const ServiceNames = ['graphql-mongo', 'graphql-postgres', 'grpc-mongo', 'react-web'] as const;
+export type ServiceName = typeof ServiceNames[number];
 
-export type ServiceName = 'graphql-mongo' | 'graphql-postgres' | 'grpc-mongo' | 'react-web';
+const infrastructure = 'infrastructure';
+const services = 'services';
+export type ResourceCategory = typeof infrastructure | typeof services;
 
-export type ArgocdAppResourceName = `argocd-applications-children-${ResourceType}` | 'argocd-applications-parents';
+export const ArgocdAppResourceNameSchema = z.union([
+    z.literal(`argocd-applications-children-${infrastructure}`),
+    z.literal(`argocd-applications-children-${services}`),
+    z.literal('argocd-applications-parents'),
+]);
 
-const InfrastructureNames = [
-    'namespaces',
-    'sealed-secrets',
-    'cert-manager',
-    'nginx-ingress',
-    'linkerd',
-    'linkerd-viz',
-    'argocd',
-] as const;
+export type ArgocdAppResourceName = z.infer<typeof ArgocdAppResourceNameSchema>;
 
-export type InfrastructureName = typeof InfrastructureNames[number] | ArgocdAppResourceName;
+export const InfrastructureNamesSchema = z.union([
+    z.literal('namespaces'),
+    z.literal('sealed-secrets'),
+    z.literal('cert-manager'),
+    z.literal('nginx-ingress'),
+    z.literal('linkerd'),
+    z.literal('linkerd-viz'),
+    z.literal('argocd'),
+]);
+
+export type InfrastructureName = z.infer<typeof InfrastructureNamesSchema> | ArgocdAppResourceName;
+
+export const ResourceNameSchema = z.union([ServiceNamesSchema, InfrastructureNamesSchema, ArgocdAppResourceNameSchema]);
 
 // A resource can have multiple kubernetes objects/resources e.g linkerd
 // e.g linkerd can have different
-export type ResourceName = InfrastructureName | ServiceName;
+export type ResourceName = z.infer<typeof ResourceNameSchema>;
 
 export interface Settings<TAppName extends ServiceName> {
     requestMemory: Memory;

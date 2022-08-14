@@ -1,19 +1,17 @@
-import { Environment } from './../types/ownTypes';
+import { Environment, ResourceNameSchema } from './../types/ownTypes';
 import * as kx from '@pulumi/kubernetesx';
 import { Resource } from '@pulumi/pulumi';
 import crds from '../../../generatedCrdsTs/index.js';
 import { Namespace, namespaces } from '../infrastructure/namespaces/util.js';
 import { ResourcePathProps, getResourceProvider, getResourceRelativePath } from './directoriesManager.js';
-import { ResourceName } from '../types/ownTypes.js';
 import { getEnvironmentVariables } from './validations.js';
 import { PlainSecretJsonConfig } from '../../../scripts/utils/plainSecretJsonConfig.js';
 
 type ArgocdApplicationProps = {
     namespace: Namespace;
     environment: Environment;
-    sourceApplicationName: ResourceName;
+    /** Where the argocd aaplicaiton itself is going to be generated to. */
     outputPath: ResourcePathProps['resourcePath'];
-    // outputSubDirName: ResourceName;
     /** Source is a reference to the location of the application's manifests we are generating app for. */
     sourceApplicationPath: ResourcePathProps['resourcePath'];
     // Typically services/infrastructure under which specific app is nested
@@ -21,13 +19,13 @@ type ArgocdApplicationProps = {
 };
 
 export function createArgocdApplication({
-    sourceApplicationName,
     sourceApplicationPath,
     outputPath,
     namespace,
     environment,
     parent,
 }: ArgocdApplicationProps) {
+    const sourceApplicationName = ResourceNameSchema.parse(sourceApplicationPath.split('/').at(-1));
     const argocdApplication = new crds.argoproj.v1alpha1.Application(
         sourceApplicationName,
         {
