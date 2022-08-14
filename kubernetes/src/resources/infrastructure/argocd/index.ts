@@ -7,15 +7,15 @@ export * from './argocdBitnami.js';
 
 const { ENVIRONMENT } = getEnvironmentVariables();
 export const argoInfrastructureParentApplications = createArgocdApplication({
-    sourceApplicationPath: 'infrastructure/argocd-applications-children-infrastructure',
-    outputPath: 'infrastructure/argocd-applications-parents',
+    sourceAppDirectory: 'infrastructure/argocd-applications-children-infrastructure',
+    outputDirectory: 'infrastructure/argocd-applications-parents',
     environment: ENVIRONMENT,
     namespace: 'argocd',
 });
 
 export const argoServicesParentApplications = createArgocdApplication({
-    sourceApplicationPath: 'infrastructure/argocd-applications-children-services',
-    outputPath: 'infrastructure/argocd-applications-parents',
+    sourceAppDirectory: 'infrastructure/argocd-applications-children-services',
+    outputDirectory: 'infrastructure/argocd-applications-parents',
     environment: ENVIRONMENT,
     namespace: 'argocd',
 });

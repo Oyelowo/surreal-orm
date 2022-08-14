@@ -5,7 +5,7 @@ const { ENVIRONMENT } = getEnvironmentVariables();
 
 export const certManagerApplication = createArgocdApplication({
     environment: ENVIRONMENT,
-    sourceApplicationPath: 'infrastructeure/cert-manager',
-    outputPath: 'infrastructure/argocd-applications-children-infrastructure',
+    sourceAppDirectory: 'infrastructure/cert-manager',
+    outputDirectory: 'infrastructure/argocd-applications-children-infrastructure',
     namespace: 'cert-manager',
 });

@@ -8,7 +8,8 @@ import path from 'node:path';
 import _ from 'lodash';
 import z from 'zod';
 import { namespaceSchema } from '../../../src/resources/infrastructure/namespaces/util.js';
-import { getGeneratedEnvManifestsDir, ResourcePathProps } from '../../../src/resources/shared/directoriesManager.js';
+import { getGeneratedEnvManifestsDir } from '../../../src/resources/shared/directoriesManager.js';
+import type { ResourceOutputDirProps } from '../../../src/resources/shared/directoriesManager.js';
 import { getResourceAbsolutePath } from '../../../src/resources/shared/directoriesManager.js';
 import type { Environment, ResourceName } from '../../../src/resources/types/ownTypes.js';
 import { generateManifests } from './generateManifests.js';
@@ -92,9 +93,9 @@ export class KubeObject {
 
     getEnvironment = (): Environment => this.environment;
 
-    getForApp = (resourcePath: ResourcePathProps['resourcePath']): TKubeObject[] => {
+    getForApp = (outputDirectory: ResourceOutputDirProps['outputDirectory']): TKubeObject[] => {
         const resourceDir = getResourceAbsolutePath({
-            resourcePath,
+            outputDirectory,
             environment: this.environment,
         });
         return this.kubeObjectsAll.filter((m) => m.path.startsWith(`${resourceDir}${path.sep}`));

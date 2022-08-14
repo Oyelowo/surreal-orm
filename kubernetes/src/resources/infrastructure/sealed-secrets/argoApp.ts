@@ -6,8 +6,8 @@ const { ENVIRONMENT } = getEnvironmentVariables();
 // App that deploys sealedSecretsController resources themselves
 /* sealedSecretsController APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const sealedSecretsControllerApplication = createArgocdApplication({
-    sourceApplicationPath: 'infrastructure/sealed-secrets',
-    outputPath: 'infrastructure/argocd-applications-children-infrastructure',
+    sourceAppDirectory: 'infrastructure/sealed-secrets',
+    outputDirectory: 'infrastructure/argocd-applications-children-infrastructure',
     environment: ENVIRONMENT,
     namespace: namespaces.default,
 });

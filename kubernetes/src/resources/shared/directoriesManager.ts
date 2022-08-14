@@ -22,8 +22,8 @@ export const getGeneratedCrdsCodeDir = () => {
     return path.join(baseDir, 'generatedCrdsTs');
 };
 
-export type ResourcePathProps = {
-    resourcePath: `infrastructure/${InfrastructureName}` | `services/${ServiceName}`;
+export type ResourceOutputDirProps = {
+    outputDirectory: `infrastructure/${InfrastructureName}` | `services/${ServiceName}`;
     environment: Environment;
 };
 
@@ -32,17 +32,17 @@ export const getGeneratedEnvManifestsDir = (environment: Environment) => {
     return path.join(getMainBaseDir(), 'generatedManifests', environment);
 };
 
-export const getResourceAbsolutePath = (props: ResourcePathProps): string => {
-    return path.join(getGeneratedEnvManifestsDir(props.environment), path.normalize(props.resourcePath));
+export const getResourceAbsolutePath = (props: ResourceOutputDirProps): string => {
+    return path.join(getGeneratedEnvManifestsDir(props.environment), path.normalize(props.outputDirectory));
 };
 
-export function getResourceRelativePath(props: ResourcePathProps): string {
+export function getResourceRelativePath(props: ResourceOutputDirProps): string {
     const pathAbsolute = getResourceAbsolutePath(props);
     return path.relative(getMainBaseDir(), pathAbsolute);
 }
 
-export function getResourceProvider(props: ResourcePathProps): k8s.Provider {
-    return new k8s.Provider(`${props.resourcePath}-${uuid()}`, {
+export function getResourceProvider(props: ResourceOutputDirProps): k8s.Provider {
+    return new k8s.Provider(`${props.outputDirectory}-${uuid()}`, {
         renderYamlToDirectory: getResourceAbsolutePath(props),
     });
 }
