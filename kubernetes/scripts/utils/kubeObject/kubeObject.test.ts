@@ -6,19 +6,14 @@ import type { TKubeObject } from './kubeObject.js';
 import { expect, jest, test, describe } from '@jest/globals';
 import { info } from 'node:console';
 import { MockSTDIN, stdin } from 'mock-stdin';
-import { faker } from '@faker-js/faker';
 import _ from 'lodash';
-
-// jest.setTimeout(130_000)
 
 // Key codes
 const keys = {
     up: '\u001B\u005B\u0041',
     down: '\u001B\u005B\u0042',
     enter: '\u000D',
-    // space: ' ',
     space: '\u0020',
-    // a: 'a',
     a: '\u0041',
 };
 // helper function for timing
@@ -37,10 +32,8 @@ const removeNonDeterministicRootDir = (p: TKubeObject) => {
     } as TKubeObject;
 };
 
-faker.seed(1);
 jest.spyOn(KubeObject.prototype, 'sealSecretValue').mockImplementation(
-    ({ name, namespace, secretValue }) =>
-        'lowo-test' + name + namespace + faker.internet.password() + '*'.repeat(secretValue.length)
+    ({ name, namespace, secretValue }) => 'lowo-test' + name + namespace + '*'.repeat(secretValue.length)
 );
 
 function deleteSealedSecrets() {
@@ -117,17 +110,17 @@ describe('KubeObject', () => {
         expect(kubeInstance.getOfAKind('SealedSecret')).toHaveLength(13);
 
         expect(kubeInstance.getOfAKind('SealedSecret')[0].spec.encryptedData).toEqual({
-            ADMIN_PASSWORD: 'lowo-testargocd-applications-secretargocdHey7F2EAFyTqHbR********',
-            password: 'lowo-testargocd-applications-secretargocd4Kt6SwHLVIz3jme********',
-            type: 'lowo-testargocd-applications-secretargocdmbRtsuoo1tYIHS3***',
-            url: 'lowo-testargocd-applications-secretargocdbbkpHh_hKk6KMwv**********************************************************',
-            username: 'lowo-testargocd-applications-secretargocdRax5wOXVWX9c6SH*******',
+            ADMIN_PASSWORD: 'lowo-testargocd-applications-secretargocd********',
+            password: 'lowo-testargocd-applications-secretargocd********',
+            type: 'lowo-testargocd-applications-secretargocd***',
+            url: 'lowo-testargocd-applications-secretargocd**********************************************************',
+            username: 'lowo-testargocd-applications-secretargocd*******',
         });
         expect(kubeInstance.getOfAKind('SealedSecret')[12].spec.encryptedData).toEqual({
-            APP_ENVIRONMENT: 'lowo-testreact-webapplicationsLi05LARh9MsPbas********',
-            APP_EXTERNAL_BASE_URL: 'lowo-testreact-webapplicationsjBFrRymKcbhKWwm****************************',
-            APP_HOST: 'lowo-testreact-webapplicationsOrVoLanW8IVmUB8************',
-            APP_PORT: 'lowo-testreact-webapplicationsr38g8j9IRmEB5qi********',
+            APP_ENVIRONMENT: 'lowo-testreact-webapplications********',
+            APP_EXTERNAL_BASE_URL: 'lowo-testreact-webapplications****************************',
+            APP_HOST: 'lowo-testreact-webapplications************',
+            APP_PORT: 'lowo-testreact-webapplications********',
         });
         expect(kubeInstance.getOfAKind('SealedSecret').map(removeNonDeterministicRootDir)).toMatchSnapshot();
     });
@@ -214,8 +207,7 @@ describe('KubeObject', () => {
     test('Can update sealed secrets after initial', async () => {
         const kubeInstance = new KubeObject('test');
         jest.spyOn(kubeInstance, 'sealSecretValue').mockImplementation(
-            ({ name, namespace, secretValue }) =>
-                'inital-secrets' + name + namespace + faker.internet.password() + '*'.repeat(secretValue.length)
+            ({ name, namespace, secretValue }) => 'inital-secrets' + name + namespace + '*'.repeat(secretValue.length)
         );
 
         kubeInstance.syncSealedSecrets();
@@ -297,8 +289,7 @@ describe('KubeObject', () => {
 
         const kubeInstance2 = new KubeObject('test');
         jest.spyOn(kubeInstance2, 'sealSecretValue').mockImplementation(
-            ({ name, namespace, secretValue }) =>
-                'updated-secrets' + name + namespace + faker.internet.password() + '*'.repeat(secretValue.length)
+            ({ name, namespace, secretValue }) => 'updated-secrets' + name + namespace + '*'.repeat(secretValue.length)
         );
         await kubeInstance2.syncSealedSecretsWithPrompt();
         const sealedSecrets2 = kubeInstance2.getOfAKind('SealedSecret');
