@@ -1,0 +1,41 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"admissionregistration.k8s.io/v1","kind":"ValidatingWebhookConfiguration","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi","linkerd.io/control-plane-component":"destination","linkerd.io/control-plane-ns":"linkerd"},"name":"linkerd-sp-validator-webhook-config"},"webhooks":[{"admissionReviewVersions":["v1","v1beta1"],"clientConfig":{"caBundle":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURUVENDQWpXZ0F3SUJBZ0lSQUkrYUVCL0EzcmRkK0VDak5VYzhsYlF3RFFZSktvWklodmNOQVFFTEJRQXcKS3pFcE1DY0dBMVVFQXhNZ2JHbHVhMlZ5WkMxemNDMTJZV3hwWkdGMGIzSXViR2x1YTJWeVpDNXpkbU13SGhjTgpNakl3T0RFeE1EWTBNekl6V2hjTk1qTXdPREV4TURZME16SXpXakFyTVNrd0p3WURWUVFERXlCc2FXNXJaWEprCkxYTndMWFpoYkdsa1lYUnZjaTVzYVc1clpYSmtMbk4yWXpDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVAKQURDQ0FRb0NnZ0VCQUxwdU53cFZ2dEcvUkVoUXpCM1JiK1BvWU9iVTVOck5iSUJKTU4vNjlWY3FucnYweWQ0SQpjUllyWVIwMjJ5NE9UODk5THVtOHpiVGZDOGVPTXlnaFZ0akFwb0xzcWdtMkkwV3FIcVNtQ0NuR3l6cnJLbzNrCnNCODdsTmJDV1k2ekcvV0J4NFRpbFdsTzBiSDB5elM3NmRrR0d0eW1YNlFwLzdYV2kvMEUzblRhaWxYVHZ0M1kKcFpNTDhZREFQdjJtR1FHU0hhUkQxNG9LRTJDa2tEVm5mU0g4UU5Vd0sydys5cEY1aW82Q0oyTXRIeWhIZmF5NwpaUnBXK0hxLzYxVFhVTTVYR0hPNlpoZ0dLeWEzbnlseXhLa3lFR1QxUFZkMWtXUEhyQ0lXWjZoelArb3dZNzJXCm1NRklwbXJTNExDa0RTSVRBdW03RnpoMGZ0c2dJYmErUk9jQ0F3RUFBYU5zTUdvd0RnWURWUjBQQVFIL0JBUUQKQWdXZ01CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFNQmdOVkhSTUJBZjhFQWpBQQpNQ3NHQTFVZEVRUWtNQ0tDSUd4cGJtdGxjbVF0YzNBdGRtRnNhV1JoZEc5eUxteHBibXRsY21RdWMzWmpNQTBHCkNTcUdTSWIzRFFFQkN3VUFBNElCQVFBNVgvRnMwbXF0R1c4SjVhMVViTVFrTHpuazIzbzZCWkxhMnlydjBxbTYKSCtrdW5UWkVzMnAzUGR0SDJYeXVhVytrRDFmbmRyR2haRHErRkt2Qnc4ZDlmUERLMXBiVHU1RnprS1lrUU9CbwptajJtZVdJUjdMUlJ1UWFIbnJTd1BUQzNlbWtWRVpQMjBiaUNSclhpV3RLdWtaeEZyTmdrbXZwY0d1VWZPWlBUCkNmU0s1NzM4VXpUSVIzWWxHOXExdnVBbVcyQXNrYXNIbTE3M0ZLN2x2R3NwaE8wVTdRY3JFeEJiVmd0SUZ0Qk0KM0tJYktBZmg5VUs2aW1DNGpsazRlVFBicTZSTHlmNFJoK3Rwb3pWeTlmK295cDZ5eEVlUWwvMk5jNU1mQmxyOQp3MWtDUTczN2k0R1QzMXZmRDJST25JOU9ZZFMrV1VDSWs0dnlVL1l6eVdBawotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t","service":{"name":"linkerd-sp-validator","namespace":"linkerd","path":"/"}},"failurePolicy":"Ignore","name":"linkerd-sp-validator.linkerd.io","namespaceSelector":{"matchExpressions":[{"key":"config.linkerd.io/admission-webhooks","operator":"NotIn","values":["disabled"]}]},"rules":[{"apiGroups":["linkerd.io"],"apiVersions":["v1alpha1","v1alpha2"],"operations":["CREATE","UPDATE"],"resources":["serviceprofiles"]}],"sideEffects":"None"}]}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+    linkerd.io/control-plane-component: destination
+    linkerd.io/control-plane-ns: linkerd
+  name: linkerd-sp-validator-webhook-config
+webhooks:
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURUVENDQWpXZ0F3SUJBZ0lSQUkrYUVCL0EzcmRkK0VDak5VYzhsYlF3RFFZSktvWklodmNOQVFFTEJRQXcKS3pFcE1DY0dBMVVFQXhNZ2JHbHVhMlZ5WkMxemNDMTJZV3hwWkdGMGIzSXViR2x1YTJWeVpDNXpkbU13SGhjTgpNakl3T0RFeE1EWTBNekl6V2hjTk1qTXdPREV4TURZME16SXpXakFyTVNrd0p3WURWUVFERXlCc2FXNXJaWEprCkxYTndMWFpoYkdsa1lYUnZjaTVzYVc1clpYSmtMbk4yWXpDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVAKQURDQ0FRb0NnZ0VCQUxwdU53cFZ2dEcvUkVoUXpCM1JiK1BvWU9iVTVOck5iSUJKTU4vNjlWY3FucnYweWQ0SQpjUllyWVIwMjJ5NE9UODk5THVtOHpiVGZDOGVPTXlnaFZ0akFwb0xzcWdtMkkwV3FIcVNtQ0NuR3l6cnJLbzNrCnNCODdsTmJDV1k2ekcvV0J4NFRpbFdsTzBiSDB5elM3NmRrR0d0eW1YNlFwLzdYV2kvMEUzblRhaWxYVHZ0M1kKcFpNTDhZREFQdjJtR1FHU0hhUkQxNG9LRTJDa2tEVm5mU0g4UU5Vd0sydys5cEY1aW82Q0oyTXRIeWhIZmF5NwpaUnBXK0hxLzYxVFhVTTVYR0hPNlpoZ0dLeWEzbnlseXhLa3lFR1QxUFZkMWtXUEhyQ0lXWjZoelArb3dZNzJXCm1NRklwbXJTNExDa0RTSVRBdW03RnpoMGZ0c2dJYmErUk9jQ0F3RUFBYU5zTUdvd0RnWURWUjBQQVFIL0JBUUQKQWdXZ01CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFNQmdOVkhSTUJBZjhFQWpBQQpNQ3NHQTFVZEVRUWtNQ0tDSUd4cGJtdGxjbVF0YzNBdGRtRnNhV1JoZEc5eUxteHBibXRsY21RdWMzWmpNQTBHCkNTcUdTSWIzRFFFQkN3VUFBNElCQVFBNVgvRnMwbXF0R1c4SjVhMVViTVFrTHpuazIzbzZCWkxhMnlydjBxbTYKSCtrdW5UWkVzMnAzUGR0SDJYeXVhVytrRDFmbmRyR2haRHErRkt2Qnc4ZDlmUERLMXBiVHU1RnprS1lrUU9CbwptajJtZVdJUjdMUlJ1UWFIbnJTd1BUQzNlbWtWRVpQMjBiaUNSclhpV3RLdWtaeEZyTmdrbXZwY0d1VWZPWlBUCkNmU0s1NzM4VXpUSVIzWWxHOXExdnVBbVcyQXNrYXNIbTE3M0ZLN2x2R3NwaE8wVTdRY3JFeEJiVmd0SUZ0Qk0KM0tJYktBZmg5VUs2aW1DNGpsazRlVFBicTZSTHlmNFJoK3Rwb3pWeTlmK295cDZ5eEVlUWwvMk5jNU1mQmxyOQp3MWtDUTczN2k0R1QzMXZmRDJST25JOU9ZZFMrV1VDSWs0dnlVL1l6eVdBawotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t
+    service:
+      name: linkerd-sp-validator
+      namespace: linkerd
+      path: /
+  failurePolicy: Ignore
+  name: linkerd-sp-validator.linkerd.io
+  namespaceSelector:
+    matchExpressions:
+    - key: config.linkerd.io/admission-webhooks
+      operator: NotIn
+      values:
+      - disabled
+  rules:
+  - apiGroups:
+    - linkerd.io
+    apiVersions:
+    - v1alpha1
+    - v1alpha2
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - serviceprofiles
+  sideEffects: None

@@ -1,5 +1,5 @@
-import { TKubeObject, TSecretKubeObject } from './kubeObject.js';
-import { ResourceName } from '../../../src/resources/types/ownTypes.js';
+import type { TKubeObject } from './kubeObject.js';
+import type { ResourceName } from '../../../src/resources/types/ownTypes.js';
 import _ from 'lodash';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
@@ -21,8 +21,8 @@ type AppSecretKeysWithinNamespaces = Record<Namespace, Record<ResourceName | str
          - infra 2
  **/
 export async function selectSecretKubeObjectsFromPrompt(
-    secretKubeObjects: TSecretKubeObject[]
-): Promise<TSecretKubeObject[]> {
+    secretKubeObjects: TKubeObject<'Secret'>[]
+): Promise<TKubeObject<'Secret'>[]> {
     // We want secrets in applications namesapce first
     const secretKubeObjectsSorted = _.sortBy(secretKubeObjects, [(s) => s.metadata.namespace !== 'applications']);
     const sercretObjectsByNamespace = _.groupBy(secretKubeObjectsSorted, (s) => s.metadata.namespace);
@@ -51,7 +51,7 @@ export async function selectSecretKubeObjectsFromPrompt(
     ]);
 
     const promptResponse = await inquirer.prompt<{
-        selectedSecretObjects: TSecretKubeObject[];
+        selectedSecretObjects: TKubeObject<'Secret'>[];
     }>({
         type: 'checkbox',
         message: 'Which of the secrets do you want to update?',
@@ -69,17 +69,19 @@ export async function selectSecretKubeObjectsFromPrompt(
 
     const secretkeysData = await promptSecretObjectDataSelection(promptResponse.selectedSecretObjects);
 
-    return secretKubeObjects.map((s) => {
-        const { name, namespace } = s?.metadata ?? {};
-        if (!namespace) {
-            throw new Error('Namespace not found in secret');
-        }
+    return secretKubeObjects
+        ?.map((s) => {
+            const { name, namespace } = s?.metadata ?? {};
+            if (!namespace || !name) {
+                throw new Error('Namespace not found in secret');
+            }
 
-        return {
-            ...s,
-            selectedSecretsForUpdate: secretkeysData[namespace][name],
-        };
-    });
+            return {
+                ...s,
+                selectedSecretsForUpdate: secretkeysData?.[namespace]?.[name] ?? [],
+            };
+        })
+        .filter((s) => s.selectedSecretsForUpdate.length > 0);
 }
 
 /** Creates a list of Command line prompts that appear one after the other for
@@ -95,9 +97,9 @@ export async function selectSecretKubeObjectsFromPrompt(
  * ...
  */
 async function promptSecretObjectDataSelection(
-    secretKubeObjects: TSecretKubeObject[]
+    secretKubeObjects: TKubeObject<'Secret'>[]
 ): Promise<AppSecretKeysWithinNamespaces> {
-    const createAppSecretDataSelectionPrompt = (resource: TSecretKubeObject) => {
+    const createAppSecretDataSelectionPrompt = (resource: TKubeObject<'Secret'>) => {
         const { name, namespace } = resource.metadata;
         const secretKeys = Object.keys(resource.data);
         const promptKey = `${namespace}.${name}`;

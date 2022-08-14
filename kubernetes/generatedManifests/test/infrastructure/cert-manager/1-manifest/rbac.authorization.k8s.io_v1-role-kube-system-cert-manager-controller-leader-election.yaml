@@ -1,0 +1,47 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"Role","metadata":{"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"cert-manager","helm.sh/chart":"cert-manager-0.6.1"},"name":"cert-manager-controller-leader-election","namespace":"kube-system"},"rules":[{"apiGroups":[""],"resourceNames":["cert-manager-controller"],"resources":["configmaps"],"verbs":["get","update","patch"]},{"apiGroups":[""],"resources":["configmaps"],"verbs":["create"]},{"apiGroups":["coordination.k8s.io"],"resourceNames":["cert-manager-controller"],"resources":["leases"],"verbs":["get","update","patch"]},{"apiGroups":["coordination.k8s.io"],"resources":["leases"],"verbs":["create"]}]}
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: cert-manager
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: cert-manager
+    helm.sh/chart: cert-manager-0.6.1
+  name: cert-manager-controller-leader-election
+  namespace: kube-system
+rules:
+- apiGroups:
+  - ""
+  resourceNames:
+  - cert-manager-controller
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+- apiGroups:
+  - coordination.k8s.io
+  resourceNames:
+  - cert-manager-controller
+  resources:
+  - leases
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create

@@ -3,7 +3,8 @@ import c from 'chalk';
 import p from 'node:path';
 import sh from 'shelljs';
 import { getEnvVarsForScript, handleShellError } from '../shared.js';
-import { TKubeObject, KubeObject } from './kubeObject.js';
+import { KubeObject } from './kubeObject.js';
+import type { TKubeObject } from './kubeObject.js';
 import { getImageTagsFromDir } from '../getImageTagsFromDir.js';
 import path from 'node:path';
 

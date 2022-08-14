@@ -1,13 +1,13 @@
-import { Namespace } from '../infrastructure/namespaces/util.js';
-import crds from '../../../generatedCrdsTs/index.js';
+import type { Namespace } from '../infrastructure/namespaces/util.js';
+import type { bitnami } from '../../../generatedCrdsTs/index.js';
 
-type SealedSecretArguments = NonNullable<ConstructorParameters<typeof crds.bitnami.v1alpha1.SealedSecret>[1]>;
+type SealedSecretArguments = NonNullable<bitnami.v1alpha1.SealedSecretArgs>;
 export type SealedSecretTemplate = SealedSecretArguments & {
-    metadata: Welcome3Metadata;
+    metadata: Metadata;
     spec: Spec;
 };
 
-export type Welcome3Metadata = {
+export type Metadata = {
     name?: string;
     namespace?: Namespace;
 };

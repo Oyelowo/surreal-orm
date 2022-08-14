@@ -17,13 +17,13 @@
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        "types": ["node"],
+        "types": ["node", "jest"],
         "typeRoots": ["node_modules/@types"]
     },
     "ts-node": {
         "esm": true
     },
-    "include": ["**/*.ts", "**/*.mts", "**/*.cts"],
+    "include": ["src/**/*.ts", "src/**/*.mts", "src/**/*.cts"],
     "exclude": ["generatedCrdsTs", "node_modules"],
     "files": ["index.ts", "scripts/utils/syncHelmChartTypesDeclarations.ts"]
 }
