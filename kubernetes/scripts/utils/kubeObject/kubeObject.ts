@@ -13,6 +13,8 @@ import { getResourceAbsolutePath } from '../../../src/resources/shared/directori
 import type { Environment, ResourceName } from '../../../src/resources/types/ownTypes.js';
 import { generateManifests } from './generateManifests.js';
 import { syncCrdsCode } from './syncCrdsCode.js';
+import cliProgress from 'cli-progress';
+import { PlainSecretJsonConfig } from '../plainSecretJsonConfig.js';
 
 type ResourceKind =
     | 'Secret'
@@ -103,6 +105,7 @@ export class KubeObject {
     };
 
     generateManifests = async (): Promise<void> => {
+        PlainSecretJsonConfig.syncAll();
         await generateManifests(this);
         this.syncAll();
         syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
@@ -111,17 +114,17 @@ export class KubeObject {
     /** Extract information from all the manifests for an environment(local, staging etc)  */
     private syncAll = (): this => {
         const envDir = getGeneratedEnvManifestsDir(this.environment);
-
         const manifestsPaths = this.getManifestsPathWithinDir(envDir);
+        const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
-        // eslint-disable-next-line unicorn/no-array-reduce
-        this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, manifestPath, i) => {
-            if (!manifestPath) return acc;
+        console.log('Extracting kubeobject from manifest');
+        bar1.start(manifestsPaths.length, 0);
 
-            // console.log('Extracting kubeobject from manifest', i);
-
+        const kubeObjects: TKubeObject[] = [];
+        manifestsPaths.forEach((manifestPath, i) => {
+            if (!manifestPath) return;
             const kubeObject = yaml.parse(fs.readFileSync(manifestPath, 'utf8')) as TKubeObject;
-            if (_.isEmpty(kubeObject)) return acc;
+            if (_.isEmpty(kubeObject)) throw new Error('Manifest is empty. Check the directory that all is well');
 
             // let's mutate to make it a bit faster and should be okay since we only do it here
             kubeObject.path = manifestPath;
@@ -137,11 +140,12 @@ export class KubeObject {
                 kubeObject.data = R.mergeDeepRight(kubeObject.data ?? {}, encodedStringData);
             }
 
-            const updatedPath = kubeObjectSchema.parse(kubeObject) as TKubeObject;
+            kubeObjects.push(kubeObjectSchema.parse(kubeObject) as TKubeObject);
+            bar1.update(i);
+        });
 
-            acc.push(updatedPath);
-            return acc;
-        }, []);
+        this.kubeObjectsAll = kubeObjects;
+        bar1.stop();
 
         return this;
     };
