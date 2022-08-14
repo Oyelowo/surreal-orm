@@ -1,5 +1,182 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`KubeObject Can create sealed secrets from selected secrets 1`] = `
+Array [
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "argocd-secret",
+      "namespace": "argocd",
+    },
+    "path": "generatedManifests/test/infrastructure/argocd/sealed-secrets/sealed-secret-argocd-secret-argocd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/argocd",
+    "spec": Object {
+      "encryptedData": Object {
+        "admin.passwordMtime": "lowo-testargocd-secretargocdKfg0625T3ODf2xa****************************",
+        "clearPassword": "lowo-testargocd-secretargocd_lb07b4Zx_dRUNp************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"admin.password\\":\\"JDJhJDEwJDkwcG1lcUgvWlU1bTZ4TnR6b3NYQy5TdjAybm1OM3NlT3ZyQVFOSlg4a2JQTWpIM25ueExp\\",\\"admin.passwordMtime\\":\\"MjAyMi0wOC0xMVQwNjo0MzoyOFo=\\",\\"clearPassword\\":\\"b3llbG93bw==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"labels\\":{\\"app.kubernetes.io/instance\\":\\"argocd\\",\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"app.kubernetes.io/name\\":\\"argo-cd\\",\\"app.kubernetes.io/part-of\\":\\"argocd\\",\\"helm.sh/chart\\":\\"argo-cd-3.1.16\\"},\\"name\\":\\"argocd-secret\\",\\"namespace\\":\\"argocd\\"},\\"type\\":\\"Opaque\\"}
+",
+          },
+          "name": "argocd-secret",
+          "namespace": "argocd",
+        },
+        "type": "Opaque",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "linkerd-policy-validator-k8s-tls",
+      "namespace": "linkerd",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd/sealed-secrets/sealed-secret-linkerd-policy-validator-k8s-tls-linkerd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd",
+    "spec": Object {
+      "encryptedData": Object {
+        "tls.crt": "lowo-testlinkerd-policy-validator-k8s-tlslinkerdOJxdNDj0G4yISGK********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "lowo-testlinkerd-policy-validator-k8s-tlslinkerdfA2Khv5tZnhYyfC********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"tls.crt\\":\\"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURXVENDQWtHZ0F3SUJBZ0lSQUpxemFWRDJFQjluK3hzS3ZxSHV1MzB3RFFZSktvWklodmNOQVFFTEJRQXcKTHpFdE1Dc0dBMVVFQXhNa2JHbHVhMlZ5WkMxd2IyeHBZM2t0ZG1Gc2FXUmhkRzl5TG14cGJtdGxjbVF1YzNaagpNQjRYRFRJeU1EZ3hNVEEyTkRNeU0xb1hEVEl6TURneE1UQTJORE15TTFvd0x6RXRNQ3NHQTFVRUF4TWtiR2x1CmEyVnlaQzF3YjJ4cFkza3RkbUZzYVdSaGRHOXlMbXhwYm10bGNtUXVjM1pqTUlJQklqQU5CZ2txaGtpRzl3MEIKQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBemxQSG96bWRiWVo3ZUw0cVZRT0ovc2VIOXd4ZUtzQVN0bnVDUXBZeAp3MTRGRzA0di9xYzV0b1lGbXg5UnlwMExvUTRhVWtWMVpaRFNSNkExb0QvMHQzWDE5U2prbWF3Vng2SFF1eEdLCm9lTXdnN0IzV2Y4dFQxeExNSlN5UEVnL1lmMlFSdDZKa2pKVngzVHdoeXNyMFE4Sjl3SXJpQ3pvL1JoUGhqNnMKUnJqY1lpeXphR1RuT1BGNVFOci9ycjlqOThkYW5mMnVtTTZVdmRMMnBsMHVra3ZjQWQrbEY5aUVFMXBPRTUrWApnWUFEUGloT1JVWHFScUZidDRFT1JuVVRRSlQ1R3UxNmpPdVVjV3JhQ0NYNHRXUVFCKzdabWF0d0tqbFNJWTYrCkRuck5yUFFTaTNPU283NUpXaTA1UjRONWlPVEpRbHA2RnhGcjdaazk5cWZqZ1FJREFRQUJvM0F3YmpBT0JnTlYKSFE4QkFmOEVCQU1DQmFBd0hRWURWUjBsQkJZd0ZBWUlLd1lCQlFVSEF3RUdDQ3NHQVFVRkJ3TUNNQXdHQTFVZApFd0VCL3dRQ01BQXdMd1lEVlIwUkJDZ3dKb0lrYkdsdWEyVnlaQzF3YjJ4cFkza3RkbUZzYVdSaGRHOXlMbXhwCmJtdGxjbVF1YzNaak1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQ3VvelhFMWJZMkR1VHZLdzcya1NoQVE0c2YKeiszZGlYdEhSbGpiYjNKZWIyNFRWOUVqZ1RybmhsYlpFaG8rcFA5ME5kQlIvQTRvVHdXQjdVUFFienp5eHQ5aApCcHZmVXQ1N1pyQ3hQdGs5RXJVdXR2T3EvU2NqNkNDd1VBUjZ4b2pybnJWQzNqY3ZIZEp0TXBNNlA3QnlQVUtxCjZ6c1dVcVExT0p6Tjg0czV6TDRoMG9YZDA5T0RXOC8rNWRFUVBOY1JXM2pHallvdHFoUnYzVm5aSVVYejZlTVcKaXVveFlrTDZNc2NyNHhGZkROOXBDVnkyVWIvV0JUSGVQd2ZHOGduaTVlR3ErMjNUWGFCbm1xd2V2aFNZcXQ5eQpOcm9rMzVVZlFHamI2WUFRUVdyQlRxa1diSDZ2WVpYVUYrZGEwL2JrVnFwbDNDZGpJdHhHaWV4bnUxS1oKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==\\",\\"tls.key\\":\\"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBemxQSG96bWRiWVo3ZUw0cVZRT0ovc2VIOXd4ZUtzQVN0bnVDUXBZeHcxNEZHMDR2Ci9xYzV0b1lGbXg5UnlwMExvUTRhVWtWMVpaRFNSNkExb0QvMHQzWDE5U2prbWF3Vng2SFF1eEdLb2VNd2c3QjMKV2Y4dFQxeExNSlN5UEVnL1lmMlFSdDZKa2pKVngzVHdoeXNyMFE4Sjl3SXJpQ3pvL1JoUGhqNnNScmpjWWl5egphR1RuT1BGNVFOci9ycjlqOThkYW5mMnVtTTZVdmRMMnBsMHVra3ZjQWQrbEY5aUVFMXBPRTUrWGdZQURQaWhPClJVWHFScUZidDRFT1JuVVRRSlQ1R3UxNmpPdVVjV3JhQ0NYNHRXUVFCKzdabWF0d0tqbFNJWTYrRG5yTnJQUVMKaTNPU283NUpXaTA1UjRONWlPVEpRbHA2RnhGcjdaazk5cWZqZ1FJREFRQUJBb0lCQVFDcEorTEtuVmZHRGJWNAozbCtTWjE1aGRYQ3hTSUNEaUFsUGRwN3F2SHg3OGI4NkRiWW5qeTR2eUYwY09tY3lOK0xxM2NjU29FT0pTMXc2CndNeDJYempnbUdOWDVYalZ6RkhtNDNGZmpSZ2RkVWUzRDV3cU9wMEpMVit2cXBrZDl4V1AzdlRFUlhxQVU2Z2oKNkdteVIrQ2FlenZ1T09jN3M2WW9xaCs0cmZWTDNKU1F3ajZxQTZTbnAybERydmhsSXZ3ZFRNaEs2dnh5Y2xLego1a1o1ZkxUeWtZamxydW1kNEhkWU1BdDE5S2doRXBkYkEwRVlsT2hGRisxcDRjOWRtT3FLTW5oVmhHdVR0L010ClZxT09UN0pPU2tZRUpsWlUrZXBYSjVpeTV0bDA5UFpYOGRGSUZrVjNLSlN2c3NxdThnM0d6R2hUajZrVzFYU2wKT2tuMG9LZUpBb0dCQVAyNXUxQ3l3anJpc1Z5bThNMlRiNGxEejZ6YlVZVmJUc1VNL2lCRGJyYTFoYVlGM0ZqZQpzdEVuWXFHK3JtQ3B0dnhMT3Z6VUhKVyttSzJUY2o5VTNDeG1uYmpyWFd6QkNZWVBCbHExQWNvOW9NYy9UclE5ClhUS3BLSDNOcEdJZTBSYXFscDhrLzlnUm5nbEIyZzVSQ0U5LzVtQm5Tc2Z2STZzaDNCUlpWQkp2QW9HQkFOQXQKUm12blpTUHpLby9lcjNlajVWZGZCN1ZzWEhHRmVCWlVRRkwvL3Bia2gxY2FGQVBpUlJLUC9zaVlYcXBXVkNHZApBbThsSmNnRHpvcGw0NFZwQ0xUVDVvWktxUExDK2IzSDVkQVpRV1VXdm5oOEIxejNYemNDZlpybkpJT0FoZEp1CkE4dC9XQ0p6Vms5U1BHSEJyVHgvbnZyRUR0MGhSbGtPKzBTTWphRVBBb0dBSmpVcTVQc1dUcUhHamFwQ0J1TVYKMzdqTGREOU9wbU5hbUVmZG1PUXVydXJrNWx4cGt5UnVEeHI4T2xrcGp6cmZhRnkzMUV6b3hRLy9rOXZwVDJvcgpBYkN1UGFPTDNRMndyblJpdzVRUVlmRW4zZmxGazlUTnpRdzJJY091NW11M2xzODNnVjJqL1ZpaDBNa08yaXNQCnNsRVRVeDhhM3NLL1AwMEpCRE56ZXBjQ2dZRUFoTS9OdEx1Y3NCSEwzcHVRVUlEVXFTZ3NqOWRCSnYraXZJUWwKd1k0bWkzZml6SFFMdnVxVmJLRkhTQXpGb0dDUkxoeXdWOTVZTzBJS2ZBdEMyM05HSmE5bXk5aEg3eERyS2VPbApQMTFOZGtQTFlxeW1PZTVyNVhtR1R0UVdYSHNiWlVQZzBldzllMFVnRkZ6L3Z0SkVSbXVaTHB6MGFxbDI2d3grCnk1M3NJWXNDZ1lFQTJJVFVlZFQvdElucTJpTXNrR2s2ZExxWnZNWDFsVG4rb0o3ZUZFR2xkUGxuVGlzTFBvZ1AKVWRyTzU4Z2xPRHU2Mk9Qbm05YTJlVEJqTHhHa2o0bGdBK0xGT3g2R2U3V2NnR2MvTmt3UWNOTWUvNHFiUThPKwo4QTkxZGRqdzl1NXVZVFN5a0VqVHpxR2FOeVViQi8waHhheXZXY3BCUm1sZXFNOU0zc09LODRFPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"linkerd.io/created-by\\":\\"linkerd/helm stable-2.11.2\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"linkerd.io/control-plane-component\\":\\"destination\\",\\"linkerd.io/control-plane-ns\\":\\"linkerd\\"},\\"name\\":\\"linkerd-policy-validator-k8s-tls\\",\\"namespace\\":\\"linkerd\\"},\\"type\\":\\"kubernetes.io/tls\\"}
+",
+            "linkerd.io/created-by": "linkerd/helm stable-2.11.2",
+          },
+          "name": "linkerd-policy-validator-k8s-tls",
+          "namespace": "linkerd",
+        },
+        "type": "kubernetes.io/tls",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "graphql-mongo",
+      "namespace": "applications",
+    },
+    "path": "generatedManifests/test/services/graphql-mongo/sealed-secrets/sealed-secret-graphql-mongo-applications.yaml",
+    "resourceBaseDir": "generatedManifests/test/services/graphql-mongo",
+    "spec": Object {
+      "encryptedData": Object {
+        "APP_ENVIRONMENT": "lowo-testgraphql-mongoapplicationszIxkAlph3MF3vuD********",
+        "APP_EXTERNAL_BASE_URL": "lowo-testgraphql-mongoapplicationseSKOW44eqQW9ZBv****************************",
+        "APP_HOST": "lowo-testgraphql-mongoapplicationsukZkk1Wbxk3SSXg************",
+        "APP_PORT": "lowo-testgraphql-mongoapplicationsE9UK5Uiqen19ryr********",
+        "MONGODB_HOST": "lowo-testgraphql-mongoapplicationsVcGi4egHy9r6foR************************************************",
+        "MONGODB_NAME": "lowo-testgraphql-mongoapplicationsSdkiDIj1hcYGccj********************************",
+        "MONGODB_PASSWORD": "lowo-testgraphql-mongoapplicationsCve7S5Bwt1T34LM************",
+        "MONGODB_PORT": "lowo-testgraphql-mongoapplicationsKoYIYABa96MvGdt********",
+        "MONGODB_ROOT_PASSWORD": "lowo-testgraphql-mongoapplicationsUKKkLL_Jw0ZsiPz****************",
+        "MONGODB_ROOT_USERNAME": "lowo-testgraphql-mongoapplicationsPEqNWnzxR3qf8cV************",
+        "MONGODB_SERVICE_NAME": "lowo-testgraphql-mongoapplicationsTzrcp2VJzrorIJX********************************",
+        "MONGODB_STORAGE_CLASS": "lowo-testgraphql-mongoapplications9rmNSpygvO8r_HZ************************************",
+        "MONGODB_USERNAME": "lowo-testgraphql-mongoapplicationsaFEQS3uz5VdeVlQ************",
+        "OAUTH_GITHUB_CLIENT_ID": "lowo-testgraphql-mongoapplications5lvcjG21Gx7qGRH****************************",
+        "OAUTH_GITHUB_CLIENT_SECRET": "lowo-testgraphql-mongoapplicationsRDr9L8FlfJBc9mY********************************************************",
+        "OAUTH_GOOGLE_CLIENT_ID": "lowo-testgraphql-mongoapplicationsTrOrun2yX8vUKVx************************************************************************************************",
+        "OAUTH_GOOGLE_CLIENT_SECRET": "lowo-testgraphql-mongoapplicationsNKZyaF69HJzATki************************************************",
+        "REDIS_HOST": "lowo-testgraphql-mongoapplications1wAjVe1cIbh9bN6****************************************************",
+        "REDIS_PASSWORD": "lowo-testgraphql-mongoapplicationsRITD0B7dEP01UmQ************",
+        "REDIS_PORT": "lowo-testgraphql-mongoapplicationstj2LzIAPb0_Ao9q********",
+        "REDIS_SERVICE_NAME": "lowo-testgraphql-mongoapplicationsqUmIPZdQQ3rrneM****************************",
+        "REDIS_SERVICE_NAME_WITH_SUFFIX": "lowo-testgraphql-mongoapplicationsZMTVVMxIYqhOXHx************************************",
+        "REDIS_USERNAME": "lowo-testgraphql-mongoapplicationsO3IhXwc6D2gAliO************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"APP_ENVIRONMENT\\":\\"bG9jYWw=\\",\\"APP_EXTERNAL_BASE_URL\\":\\"aHR0cDovL2xvY2FsaG9zdDo4MDgw\\",\\"APP_HOST\\":\\"MC4wLjAuMA==\\",\\"APP_PORT\\":\\"ODAwMA==\\",\\"MONGODB_HOST\\":\\"Z3JhcGhxbC1tb25nby1kYXRhYmFzZS5hcHBsaWNhdGlvbnM=\\",\\"MONGODB_NAME\\":\\"Z3JhcGhxbC1tb25nby1kYXRhYmFzZQ==\\",\\"MONGODB_PASSWORD\\":\\"anVuZ2J1bnU=\\",\\"MONGODB_PORT\\":\\"MjcwMTc=\\",\\"MONGODB_ROOT_PASSWORD\\":\\"ZXhhcmVyZW1wbGU=\\",\\"MONGODB_ROOT_USERNAME\\":\\"ZXhhbXBsZQ==\\",\\"MONGODB_SERVICE_NAME\\":\\"Z3JhcGhxbC1tb25nby1kYXRhYmFzZQ==\\",\\"MONGODB_STORAGE_CLASS\\":\\"bGlub2RlLWJsb2NrLXN0b3JhZ2UtcmV0YWlu\\",\\"MONGODB_USERNAME\\":\\"ZXhhbXBsZW1t\\",\\"OAUTH_GITHUB_CLIENT_ID\\":\\"ODljMTkzNzRmN2U3YjViMzUxNjQ=\\",\\"OAUTH_GITHUB_CLIENT_SECRET\\":\\"MTI5NDg4Y2M5MmUyZDJmOTFlM2E1YTAyNDA4NjM5NmM0OGM2NTMzOQ==\\",\\"OAUTH_GOOGLE_CLIENT_ID\\":\\"ODU1MTc0MjA5NTQzLTZtMGYwODhlNTVkM21ldmhucjhiczBxamFwOGo2ZzBnLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29t\\",\\"OAUTH_GOOGLE_CLIENT_SECRET\\":\\"R09DU1BYLUNTMUpGaXNSSVNnZU4wSS13VGFWam8zNTJ6YlU=\\",\\"REDIS_HOST\\":\\"Z3JhcGhxbC1tb25nby1yZWRpcy1tYXN0ZXIuYXBwbGljYXRpb25z\\",\\"REDIS_PASSWORD\\":\\"anVuZ2J1bnU=\\",\\"REDIS_PORT\\":\\"NjM3OQ==\\",\\"REDIS_SERVICE_NAME\\":\\"Z3JhcGhxbC1tb25nby1yZWRpcw==\\",\\"REDIS_SERVICE_NAME_WITH_SUFFIX\\":\\"Z3JhcGhxbC1tb25nby1yZWRpcy1tYXN0ZXI=\\",\\"REDIS_USERNAME\\":\\"anVuZ2J1bnU=\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"sealedsecrets.bitnami.com/managed\\":\\"true\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\"},\\"name\\":\\"graphql-mongo\\",\\"namespace\\":\\"applications\\"}}
+",
+            "sealedsecrets.bitnami.com/managed": "true",
+          },
+          "name": "graphql-mongo",
+          "namespace": "applications",
+        },
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "graphql-mongo-redis",
+      "namespace": "applications",
+    },
+    "path": "generatedManifests/test/services/graphql-mongo/sealed-secrets/sealed-secret-graphql-mongo-redis-applications.yaml",
+    "resourceBaseDir": "generatedManifests/test/services/graphql-mongo",
+    "spec": Object {
+      "encryptedData": Object {
+        "redis-password": "lowo-testgraphql-mongo-redisapplicationsTRPB6JEMYHCgjUx************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"redis-password\\":\\"anVuZ2J1bnU=\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"labels\\":{\\"app.kubernetes.io/instance\\":\\"redis\\",\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"app.kubernetes.io/name\\":\\"redis\\",\\"helm.sh/chart\\":\\"redis-16.8.9\\"},\\"name\\":\\"graphql-mongo-redis\\",\\"namespace\\":\\"applications\\"},\\"type\\":\\"Opaque\\"}
+",
+          },
+          "name": "graphql-mongo-redis",
+          "namespace": "applications",
+        },
+        "type": "Opaque",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "react-web",
+      "namespace": "applications",
+    },
+    "path": "generatedManifests/test/services/react-web/sealed-secrets/sealed-secret-react-web-applications.yaml",
+    "resourceBaseDir": "generatedManifests/test/services/react-web",
+    "spec": Object {
+      "encryptedData": Object {
+        "APP_ENVIRONMENT": "lowo-testreact-webapplicationsuaB68JwQUDqziRn********",
+        "APP_EXTERNAL_BASE_URL": "lowo-testreact-webapplicationsW29tKodBj5PNS6C****************************",
+        "APP_PORT": "lowo-testreact-webapplicationsDgLfNKZucSsGhHs********",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"APP_ENVIRONMENT\\":\\"bG9jYWw=\\",\\"APP_EXTERNAL_BASE_URL\\":\\"aHR0cDovL2xvY2FsaG9zdDo4MDgw\\",\\"APP_HOST\\":\\"MC4wLjAuMA==\\",\\"APP_PORT\\":\\"MzAwMA==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"sealedsecrets.bitnami.com/managed\\":\\"true\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\"},\\"name\\":\\"react-web\\",\\"namespace\\":\\"applications\\"}}
+",
+            "sealedsecrets.bitnami.com/managed": "true",
+          },
+          "name": "react-web",
+          "namespace": "applications",
+        },
+      },
+    },
+  },
+]
+`;
+
 exports[`KubeObject Can sync resources 1`] = `
 Array [
   Object {
@@ -19084,11 +19261,11 @@ Array [
     "resourceBaseDir": "generatedManifests/test/infrastructure/argocd-applications-parents",
     "spec": Object {
       "encryptedData": Object {
-        "ADMIN_PASSWORD": "lowo-testargocd-applications-secretargocd********",
-        "password": "lowo-testargocd-applications-secretargocd********",
-        "type": "lowo-testargocd-applications-secretargocd***",
-        "url": "lowo-testargocd-applications-secretargocd**********************************************************",
-        "username": "lowo-testargocd-applications-secretargocd*******",
+        "ADMIN_PASSWORD": "lowo-testargocd-applications-secretargocdHey7F2EAFyTqHbR********",
+        "password": "lowo-testargocd-applications-secretargocd4Kt6SwHLVIz3jme********",
+        "type": "lowo-testargocd-applications-secretargocdmbRtsuoo1tYIHS3***",
+        "url": "lowo-testargocd-applications-secretargocdbbkpHh_hKk6KMwv**********************************************************",
+        "username": "lowo-testargocd-applications-secretargocdRax5wOXVWX9c6SH*******",
       },
       "template": Object {
         "metadata": Object {
@@ -19116,7 +19293,7 @@ Array [
     "resourceBaseDir": "generatedManifests/test/infrastructure/argocd",
     "spec": Object {
       "encryptedData": Object {
-        "redis-password": "lowo-testargocd-redisargocd****************",
+        "redis-password": "lowo-testargocd-redisargocd7ivjWjWSudBMwiM****************",
       },
       "template": Object {
         "metadata": Object {
@@ -19145,9 +19322,9 @@ Array [
     "resourceBaseDir": "generatedManifests/test/infrastructure/argocd",
     "spec": Object {
       "encryptedData": Object {
-        "admin.password": "lowo-testargocd-secretargocd********************************************************************************",
-        "admin.passwordMtime": "lowo-testargocd-secretargocd****************************",
-        "clearPassword": "lowo-testargocd-secretargocd************",
+        "admin.password": "lowo-testargocd-secretargocdbOHTiSQlzXtvTKu********************************************************************************",
+        "admin.passwordMtime": "lowo-testargocd-secretargocdmDFT0yCBWhetbhB****************************",
+        "clearPassword": "lowo-testargocd-secretargocdBiBvhItPkKBWzGE************",
       },
       "template": Object {
         "metadata": Object {
@@ -19176,8 +19353,8 @@ Array [
     "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd",
     "spec": Object {
       "encryptedData": Object {
-        "tls.crt": "lowo-testlinkerd-sp-validator-k8s-tlslinkerd********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
-        "tls.key": "lowo-testlinkerd-sp-validator-k8s-tlslinkerd********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.crt": "lowo-testlinkerd-sp-validator-k8s-tlslinkerdypbU1Mgy3cM6hQh********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "lowo-testlinkerd-sp-validator-k8s-tlslinkerd4xdR1FQ8rT7Up7X********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
       },
       "template": Object {
         "metadata": Object {
@@ -19207,8 +19384,8 @@ Array [
     "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd",
     "spec": Object {
       "encryptedData": Object {
-        "tls.crt": "lowo-testlinkerd-policy-validator-k8s-tlslinkerd********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
-        "tls.key": "lowo-testlinkerd-policy-validator-k8s-tlslinkerd********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.crt": "lowo-testlinkerd-policy-validator-k8s-tlslinkerdWHVCnm7emEIshgI********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "lowo-testlinkerd-policy-validator-k8s-tlslinkerdUICzxk6dV_CV48g********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
       },
       "template": Object {
         "metadata": Object {
@@ -19238,8 +19415,8 @@ Array [
     "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd",
     "spec": Object {
       "encryptedData": Object {
-        "tls.crt": "lowo-testlinkerd-proxy-injector-k8s-tlslinkerd********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
-        "tls.key": "lowo-testlinkerd-proxy-injector-k8s-tlslinkerd********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.crt": "lowo-testlinkerd-proxy-injector-k8s-tlslinkerd03zXDqg7O4ouiOn********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "lowo-testlinkerd-proxy-injector-k8s-tlslinkerdZiWLSXEQU5gxLiD********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
       },
       "template": Object {
         "metadata": Object {
@@ -19269,7 +19446,7 @@ Array [
     "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd-viz",
     "spec": Object {
       "encryptedData": Object {
-        "auth": "lowo-testlinkerd-viz-ingress-authlinkerd-viz****************************************************************************************",
+        "auth": "lowo-testlinkerd-viz-ingress-authlinkerd-vizvt7qwLITAlWOYY5****************************************************************************************",
       },
       "template": Object {
         "metadata": Object {
@@ -19297,8 +19474,8 @@ Array [
     "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd-viz",
     "spec": Object {
       "encryptedData": Object {
-        "tls.crt": "lowo-testtap-k8s-tlslinkerd-viz************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
-        "tls.key": "lowo-testtap-k8s-tlslinkerd-viz********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.crt": "lowo-testtap-k8s-tlslinkerd-vizwyFO0ZUKxmxCFZ1************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "lowo-testtap-k8s-tlslinkerd-vizBbQLoM1PumSAzBX********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
       },
       "template": Object {
         "metadata": Object {
@@ -19328,8 +19505,8 @@ Array [
     "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd-viz",
     "spec": Object {
       "encryptedData": Object {
-        "tls.crt": "lowo-testtap-injector-k8s-tlslinkerd-viz************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
-        "tls.key": "lowo-testtap-injector-k8s-tlslinkerd-viz********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.crt": "lowo-testtap-injector-k8s-tlslinkerd-viz54h0B9m3yWRpxff************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "lowo-testtap-injector-k8s-tlslinkerd-vizRjfw0ybI7fhFxU4********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
       },
       "template": Object {
         "metadata": Object {
@@ -19359,29 +19536,29 @@ Array [
     "resourceBaseDir": "generatedManifests/test/services/graphql-mongo",
     "spec": Object {
       "encryptedData": Object {
-        "APP_ENVIRONMENT": "lowo-testgraphql-mongoapplications********",
-        "APP_EXTERNAL_BASE_URL": "lowo-testgraphql-mongoapplications****************************",
-        "APP_HOST": "lowo-testgraphql-mongoapplications************",
-        "APP_PORT": "lowo-testgraphql-mongoapplications********",
-        "MONGODB_HOST": "lowo-testgraphql-mongoapplications************************************************",
-        "MONGODB_NAME": "lowo-testgraphql-mongoapplications********************************",
-        "MONGODB_PASSWORD": "lowo-testgraphql-mongoapplications************",
-        "MONGODB_PORT": "lowo-testgraphql-mongoapplications********",
-        "MONGODB_ROOT_PASSWORD": "lowo-testgraphql-mongoapplications****************",
-        "MONGODB_ROOT_USERNAME": "lowo-testgraphql-mongoapplications************",
-        "MONGODB_SERVICE_NAME": "lowo-testgraphql-mongoapplications********************************",
-        "MONGODB_STORAGE_CLASS": "lowo-testgraphql-mongoapplications************************************",
-        "MONGODB_USERNAME": "lowo-testgraphql-mongoapplications************",
-        "OAUTH_GITHUB_CLIENT_ID": "lowo-testgraphql-mongoapplications****************************",
-        "OAUTH_GITHUB_CLIENT_SECRET": "lowo-testgraphql-mongoapplications********************************************************",
-        "OAUTH_GOOGLE_CLIENT_ID": "lowo-testgraphql-mongoapplications************************************************************************************************",
-        "OAUTH_GOOGLE_CLIENT_SECRET": "lowo-testgraphql-mongoapplications************************************************",
-        "REDIS_HOST": "lowo-testgraphql-mongoapplications****************************************************",
-        "REDIS_PASSWORD": "lowo-testgraphql-mongoapplications************",
-        "REDIS_PORT": "lowo-testgraphql-mongoapplications********",
-        "REDIS_SERVICE_NAME": "lowo-testgraphql-mongoapplications****************************",
-        "REDIS_SERVICE_NAME_WITH_SUFFIX": "lowo-testgraphql-mongoapplications************************************",
-        "REDIS_USERNAME": "lowo-testgraphql-mongoapplications************",
+        "APP_ENVIRONMENT": "lowo-testgraphql-mongoapplicationsSVI0Iab3IA5ltyv********",
+        "APP_EXTERNAL_BASE_URL": "lowo-testgraphql-mongoapplicationsk_R8rTSrm2WfRKj****************************",
+        "APP_HOST": "lowo-testgraphql-mongoapplicationsWMnAjDd72nstb_W************",
+        "APP_PORT": "lowo-testgraphql-mongoapplications20RMvAN6qYpxTwM********",
+        "MONGODB_HOST": "lowo-testgraphql-mongoapplications95J3NPf4Q8qHZ7u************************************************",
+        "MONGODB_NAME": "lowo-testgraphql-mongoapplicationsRlN54aT_Qh6Rvkd********************************",
+        "MONGODB_PASSWORD": "lowo-testgraphql-mongoapplicationsFsqBTs4oreciZGl************",
+        "MONGODB_PORT": "lowo-testgraphql-mongoapplicationscXjf996AjlQKkKC********",
+        "MONGODB_ROOT_PASSWORD": "lowo-testgraphql-mongoapplicationsvUTH4T_SmLBuS0W****************",
+        "MONGODB_ROOT_USERNAME": "lowo-testgraphql-mongoapplicationsgxCermbNbO2pJUX************",
+        "MONGODB_SERVICE_NAME": "lowo-testgraphql-mongoapplicationsO4869hxL4tQM5el********************************",
+        "MONGODB_STORAGE_CLASS": "lowo-testgraphql-mongoapplicationsO4Yq0EPhkQvT5gm************************************",
+        "MONGODB_USERNAME": "lowo-testgraphql-mongoapplications9VdMD6QbLICnmEc************",
+        "OAUTH_GITHUB_CLIENT_ID": "lowo-testgraphql-mongoapplicationsLifAwqIno_fZaXL****************************",
+        "OAUTH_GITHUB_CLIENT_SECRET": "lowo-testgraphql-mongoapplicationsWChFEgpKKXNNmGk********************************************************",
+        "OAUTH_GOOGLE_CLIENT_ID": "lowo-testgraphql-mongoapplicationsv_jebZTjwulQwd2************************************************************************************************",
+        "OAUTH_GOOGLE_CLIENT_SECRET": "lowo-testgraphql-mongoapplicationspcwUrdgfwGW81Ou************************************************",
+        "REDIS_HOST": "lowo-testgraphql-mongoapplicationsntqnXlSPjwCxJQ6****************************************************",
+        "REDIS_PASSWORD": "lowo-testgraphql-mongoapplicationszqeOuRuruVQbLtP************",
+        "REDIS_PORT": "lowo-testgraphql-mongoapplicationsuW4nRpxRI08Dyuz********",
+        "REDIS_SERVICE_NAME": "lowo-testgraphql-mongoapplicationsWqDx6G6B1rZHn02****************************",
+        "REDIS_SERVICE_NAME_WITH_SUFFIX": "lowo-testgraphql-mongoapplicationsJc07tWNBF6PjR11************************************",
+        "REDIS_USERNAME": "lowo-testgraphql-mongoapplicationsXWynLYviYd3KtDZ************",
       },
       "template": Object {
         "metadata": Object {
@@ -19410,9 +19587,9 @@ Array [
     "resourceBaseDir": "generatedManifests/test/services/graphql-mongo",
     "spec": Object {
       "encryptedData": Object {
-        "mongodb-passwords": "lowo-testgraphql-mongo-databaseapplications****************************************",
-        "mongodb-replica-set-key": "lowo-testgraphql-mongo-databaseapplications****************",
-        "mongodb-root-password": "lowo-testgraphql-mongo-databaseapplications****************",
+        "mongodb-passwords": "lowo-testgraphql-mongo-databaseapplicationsJ8ms7unWT23kXHa****************************************",
+        "mongodb-replica-set-key": "lowo-testgraphql-mongo-databaseapplicationsFxWskD9Zo4WHBcX****************",
+        "mongodb-root-password": "lowo-testgraphql-mongo-databaseapplicationschrhkcvsMKCE7HG****************",
       },
       "template": Object {
         "metadata": Object {
@@ -19441,7 +19618,7 @@ Array [
     "resourceBaseDir": "generatedManifests/test/services/graphql-mongo",
     "spec": Object {
       "encryptedData": Object {
-        "redis-password": "lowo-testgraphql-mongo-redisapplications************",
+        "redis-password": "lowo-testgraphql-mongo-redisapplications0Hi3o0NBjO4fXMJ************",
       },
       "template": Object {
         "metadata": Object {
@@ -19470,10 +19647,856 @@ Array [
     "resourceBaseDir": "generatedManifests/test/services/react-web",
     "spec": Object {
       "encryptedData": Object {
-        "APP_ENVIRONMENT": "lowo-testreact-webapplications********",
-        "APP_EXTERNAL_BASE_URL": "lowo-testreact-webapplications****************************",
-        "APP_HOST": "lowo-testreact-webapplications************",
-        "APP_PORT": "lowo-testreact-webapplications********",
+        "APP_ENVIRONMENT": "lowo-testreact-webapplicationsLi05LARh9MsPbas********",
+        "APP_EXTERNAL_BASE_URL": "lowo-testreact-webapplicationsjBFrRymKcbhKWwm****************************",
+        "APP_HOST": "lowo-testreact-webapplicationsOrVoLanW8IVmUB8************",
+        "APP_PORT": "lowo-testreact-webapplicationsr38g8j9IRmEB5qi********",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"APP_ENVIRONMENT\\":\\"bG9jYWw=\\",\\"APP_EXTERNAL_BASE_URL\\":\\"aHR0cDovL2xvY2FsaG9zdDo4MDgw\\",\\"APP_HOST\\":\\"MC4wLjAuMA==\\",\\"APP_PORT\\":\\"MzAwMA==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"sealedsecrets.bitnami.com/managed\\":\\"true\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\"},\\"name\\":\\"react-web\\",\\"namespace\\":\\"applications\\"}}
+",
+            "sealedsecrets.bitnami.com/managed": "true",
+          },
+          "name": "react-web",
+          "namespace": "applications",
+        },
+      },
+    },
+  },
+]
+`;
+
+exports[`KubeObject Can update sealed secrets after initial 1`] = `
+Array [
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "argocd-applications-secret",
+      "namespace": "argocd",
+    },
+    "path": "generatedManifests/test/infrastructure/argocd-applications-parents/sealed-secrets/sealed-secret-argocd-applications-secret-argocd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/argocd-applications-parents",
+    "spec": Object {
+      "encryptedData": Object {
+        "ADMIN_PASSWORD": "inital-secretsargocd-applications-secretargocdvFPJE6PjioF2li3********",
+        "password": "inital-secretsargocd-applications-secretargocd2iAZ5bEFEz_XIAH********",
+        "type": "inital-secretsargocd-applications-secretargocdiGrQV5pcxUhfNBr***",
+        "url": "inital-secretsargocd-applications-secretargocdzAOlTNv9Kt99FgU**********************************************************",
+        "username": "inital-secretsargocd-applications-secretargocd5Prs76ECWRkDten*******",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"ADMIN_PASSWORD\\":\\"jungbunu\\",\\"password\\":\\"jungbunu\\",\\"type\\":\\"git\\",\\"url\\":\\"https://github.com/Oyelowo/modern-distributed-app-template\\",\\"username\\":\\"Oyelowo\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"argocd.argoproj.io/secret-type\\":\\"repository\\"},\\"name\\":\\"argocd-applications-secret\\",\\"namespace\\":\\"argocd\\"}}
+",
+          },
+          "name": "argocd-applications-secret",
+          "namespace": "argocd",
+        },
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "argocd-redis",
+      "namespace": "argocd",
+    },
+    "path": "generatedManifests/test/infrastructure/argocd/sealed-secrets/sealed-secret-argocd-redis-argocd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/argocd",
+    "spec": Object {
+      "encryptedData": Object {
+        "redis-password": "inital-secretsargocd-redisargocds_qo9K7QILsQMGj****************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"redis-password\\":\\"dGw0RVN2WTlrTA==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"labels\\":{\\"app.kubernetes.io/instance\\":\\"argocd\\",\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"app.kubernetes.io/name\\":\\"redis\\",\\"helm.sh/chart\\":\\"redis-16.8.9\\"},\\"name\\":\\"argocd-redis\\",\\"namespace\\":\\"argocd\\"},\\"type\\":\\"Opaque\\"}
+",
+          },
+          "name": "argocd-redis",
+          "namespace": "argocd",
+        },
+        "type": "Opaque",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "argocd-secret",
+      "namespace": "argocd",
+    },
+    "path": "generatedManifests/test/infrastructure/argocd/sealed-secrets/sealed-secret-argocd-secret-argocd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/argocd",
+    "spec": Object {
+      "encryptedData": Object {
+        "admin.password": "inital-secretsargocd-secretargocdBOSdATU8hIzjNuh********************************************************************************",
+        "admin.passwordMtime": "inital-secretsargocd-secretargocdIiMU5AQbt8Ii0SB****************************",
+        "clearPassword": "inital-secretsargocd-secretargocdl3inZLQd0JqsLtI************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"admin.password\\":\\"JDJhJDEwJDkwcG1lcUgvWlU1bTZ4TnR6b3NYQy5TdjAybm1OM3NlT3ZyQVFOSlg4a2JQTWpIM25ueExp\\",\\"admin.passwordMtime\\":\\"MjAyMi0wOC0xMVQwNjo0MzoyOFo=\\",\\"clearPassword\\":\\"b3llbG93bw==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"labels\\":{\\"app.kubernetes.io/instance\\":\\"argocd\\",\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"app.kubernetes.io/name\\":\\"argo-cd\\",\\"app.kubernetes.io/part-of\\":\\"argocd\\",\\"helm.sh/chart\\":\\"argo-cd-3.1.16\\"},\\"name\\":\\"argocd-secret\\",\\"namespace\\":\\"argocd\\"},\\"type\\":\\"Opaque\\"}
+",
+          },
+          "name": "argocd-secret",
+          "namespace": "argocd",
+        },
+        "type": "Opaque",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "linkerd-sp-validator-k8s-tls",
+      "namespace": "linkerd",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd/sealed-secrets/sealed-secret-linkerd-sp-validator-k8s-tls-linkerd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd",
+    "spec": Object {
+      "encryptedData": Object {
+        "tls.crt": "inital-secretslinkerd-sp-validator-k8s-tlslinkerdSp1COB7GzzdAvGJ********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "inital-secretslinkerd-sp-validator-k8s-tlslinkerdy7oz_b9PsacZZPf********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"tls.crt\\":\\"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURUVENDQWpXZ0F3SUJBZ0lSQUkrYUVCL0EzcmRkK0VDak5VYzhsYlF3RFFZSktvWklodmNOQVFFTEJRQXcKS3pFcE1DY0dBMVVFQXhNZ2JHbHVhMlZ5WkMxemNDMTJZV3hwWkdGMGIzSXViR2x1YTJWeVpDNXpkbU13SGhjTgpNakl3T0RFeE1EWTBNekl6V2hjTk1qTXdPREV4TURZME16SXpXakFyTVNrd0p3WURWUVFERXlCc2FXNXJaWEprCkxYTndMWFpoYkdsa1lYUnZjaTVzYVc1clpYSmtMbk4yWXpDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVAKQURDQ0FRb0NnZ0VCQUxwdU53cFZ2dEcvUkVoUXpCM1JiK1BvWU9iVTVOck5iSUJKTU4vNjlWY3FucnYweWQ0SQpjUllyWVIwMjJ5NE9UODk5THVtOHpiVGZDOGVPTXlnaFZ0akFwb0xzcWdtMkkwV3FIcVNtQ0NuR3l6cnJLbzNrCnNCODdsTmJDV1k2ekcvV0J4NFRpbFdsTzBiSDB5elM3NmRrR0d0eW1YNlFwLzdYV2kvMEUzblRhaWxYVHZ0M1kKcFpNTDhZREFQdjJtR1FHU0hhUkQxNG9LRTJDa2tEVm5mU0g4UU5Vd0sydys5cEY1aW82Q0oyTXRIeWhIZmF5NwpaUnBXK0hxLzYxVFhVTTVYR0hPNlpoZ0dLeWEzbnlseXhLa3lFR1QxUFZkMWtXUEhyQ0lXWjZoelArb3dZNzJXCm1NRklwbXJTNExDa0RTSVRBdW03RnpoMGZ0c2dJYmErUk9jQ0F3RUFBYU5zTUdvd0RnWURWUjBQQVFIL0JBUUQKQWdXZ01CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFNQmdOVkhSTUJBZjhFQWpBQQpNQ3NHQTFVZEVRUWtNQ0tDSUd4cGJtdGxjbVF0YzNBdGRtRnNhV1JoZEc5eUxteHBibXRsY21RdWMzWmpNQTBHCkNTcUdTSWIzRFFFQkN3VUFBNElCQVFBNVgvRnMwbXF0R1c4SjVhMVViTVFrTHpuazIzbzZCWkxhMnlydjBxbTYKSCtrdW5UWkVzMnAzUGR0SDJYeXVhVytrRDFmbmRyR2haRHErRkt2Qnc4ZDlmUERLMXBiVHU1RnprS1lrUU9CbwptajJtZVdJUjdMUlJ1UWFIbnJTd1BUQzNlbWtWRVpQMjBiaUNSclhpV3RLdWtaeEZyTmdrbXZwY0d1VWZPWlBUCkNmU0s1NzM4VXpUSVIzWWxHOXExdnVBbVcyQXNrYXNIbTE3M0ZLN2x2R3NwaE8wVTdRY3JFeEJiVmd0SUZ0Qk0KM0tJYktBZmg5VUs2aW1DNGpsazRlVFBicTZSTHlmNFJoK3Rwb3pWeTlmK295cDZ5eEVlUWwvMk5jNU1mQmxyOQp3MWtDUTczN2k0R1QzMXZmRDJST25JOU9ZZFMrV1VDSWs0dnlVL1l6eVdBawotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t\\",\\"tls.key\\":\\"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBdW00M0NsVyswYjlFU0ZETUhkRnY0K2hnNXRUazJzMXNnRWt3My9yMVZ5cWV1L1RKCjNnaHhGaXRoSFRiYkxnNVB6MzB1NmJ6TnROOEx4NDR6S0NGVzJNQ21ndXlxQ2JZalJhb2VwS1lJS2NiTE91c3EKamVTd0h6dVUxc0paanJNYjlZSEhoT0tWYVU3UnNmVExOTHZwMlFZYTNLWmZwQ24vdGRhTC9RVGVkTnFLVmRPKwozZGlsa3d2eGdNQSsvYVlaQVpJZHBFUFhpZ29UWUtTUU5XZDlJZnhBMVRBcmJENzJrWG1Lam9Jbll5MGZLRWQ5CnJMdGxHbGI0ZXIvclZOZFF6bGNZYzdwbUdBWXJKcmVmS1hMRXFUSVFaUFU5VjNXUlk4ZXNJaFpucUhNLzZqQmoKdlphWXdVaW1hdExnc0tRTkloTUM2YnNYT0hSKzJ5QWh0cjVFNXdJREFRQUJBb0lCQUc4a0VaQUp1aTZVMWdJKwptTkVWOEp4d0JvVFdXbkRPa21hUU82RHJuYU9QZHY0YVd0WVJOa20vSnJBaDZkeTFENE5rMzdqY284MjJRdkYrCnBxUy82MlJneFdPNzcwckcySlJKYk9jL1RCS0x2dENyTGIxVm5tR2dSWVVhYkFXVVpaQ2hBKzhHbllnZ1F3YlMKSnVxVE5ELzdVYnhGT3pORkRucTdJczErUDVodFFzNlA2U1NFTEpMNG1hK3l2NGdETFIyZm5QbUZIZCtia0xlSwozb3Y5aE1nVjBRRHZCbVVVaFlnZS9icHJCc2ZMd2QxaXRlcHQxNXRGT1RpVWs2NnI1WlFkZlhDY1BmTGd3bExCCkc0MlZLSFovNkxEaTR2Q2U4cXpoVW9KYzExaFlnQnZWYks5WVk1MEJTL21tNllvZmROWjlvMmFKNDk5cjF6R1cKR1FHKzBTRUNnWUVBeGFvWlArZXU5OU1FZmVPU0FVRVV4Zy9udlJiOVhaSnBMazQ0N3RQd2lRbkRSVTUxZXZzVAo0dHhjeWxhYStBNFJNdlVPcURqVTNnUEdKN0lmckVjY3JJMXJZbkZFb2xXSVBiR0xCMWRTOWMzejhBYTJHdkVLCitLdFNTWVYvQ1B4MFlNUHRybXMydmdwQVluRTJGZWU0YjFvVlBiNDZNQTRRcWtnNWtkdzcrKzhDZ1lFQThYTmYKcC8xU2k0b1ZJT3ZseWxoSk52SjVKdXhTcmsxN0gvOFgvdWM1UngyS0J5SFNzRFNiQTEvMFk3Q29aSHJMYkQwTAo5OHJxekxGa1g5WHhENml1ZmU5MzE1OVo4L0Exb2w3OTMzSk1Vd2hTQXZTK1d4Uy9yVUczamdRMjJ4RWN3cThUCmwvTDZlR0dpM2tBU0R1SVRLUFFMemxlUTdXVVRHZnJndWZrWXJva0NnWUVBcHlSTGo0OGdrNnlhMnJ5cEJHaDgKNFhJbm1ld3J1SWtLYWI1NVEvSnhMZC9VZi9GMVE5VzFuaHFLV0FwZHBpMTIrNmplaVA3dGVRS2w5NEVXYVQ0RQprQ0JSVW4vRzhxSHl2NEEydUxGdGxDNWYvSElnWUsyOGdrT1VKRmsrNzJGU0kxVHAwWmdWUlNNMENFb0Uyd2NECkhSMkdZcHhOWmI4dTlsNTJWOUZyNDM4Q2dZRUF5cE02K1Uydm1NVmtUcmU4bHRVVnNGVWxVb1BLSnRWNDdQSncKWm53RzhXU1dMcit3N2dkazJ5TUJmelp6UWNKSXMrcFFCVGtwWUUyZzRrczBNaWdiSml2cEIyNTU0UkZ6WG1TRwphWmVTODhNeVU2cVZud004Z2hkMThtQVV5aDJFWE03WkNJNWltT2VKNXlBb1JuWmxEdUlhbWFlY1A2Q2lzeFJxCndYMTl1TWtDZ1lBaE1Dc2t3aWplbUtGcUd3SnBkeUJ5bWRsemhZcEhaYlN5cm96bEZ3bUpFeHhWVlViVTRSaUEKY1lQOUx4bFZFQ0dETnBCK3NXdnFBdmtEKzRyelRpMDk5OHhWYW93QkNzMVZ1VU9ZMUs4T0FWU3hBVys0dWh0dQpZUWtkN1dnUHB1RS9ybkhIdmNnV29nRnpSQVB0ZVFHRzNpM1dNODdPOVFsSk5PcXVGbDFWSGc9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"linkerd.io/created-by\\":\\"linkerd/helm stable-2.11.2\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"linkerd.io/control-plane-component\\":\\"destination\\",\\"linkerd.io/control-plane-ns\\":\\"linkerd\\"},\\"name\\":\\"linkerd-sp-validator-k8s-tls\\",\\"namespace\\":\\"linkerd\\"},\\"type\\":\\"kubernetes.io/tls\\"}
+",
+            "linkerd.io/created-by": "linkerd/helm stable-2.11.2",
+          },
+          "name": "linkerd-sp-validator-k8s-tls",
+          "namespace": "linkerd",
+        },
+        "type": "kubernetes.io/tls",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "linkerd-policy-validator-k8s-tls",
+      "namespace": "linkerd",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd/sealed-secrets/sealed-secret-linkerd-policy-validator-k8s-tls-linkerd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd",
+    "spec": Object {
+      "encryptedData": Object {
+        "tls.crt": "inital-secretslinkerd-policy-validator-k8s-tlslinkerd9MZnbTkqWcSp8Ss********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "inital-secretslinkerd-policy-validator-k8s-tlslinkerdIhRv4otOYFSQr2g********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"tls.crt\\":\\"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURXVENDQWtHZ0F3SUJBZ0lSQUpxemFWRDJFQjluK3hzS3ZxSHV1MzB3RFFZSktvWklodmNOQVFFTEJRQXcKTHpFdE1Dc0dBMVVFQXhNa2JHbHVhMlZ5WkMxd2IyeHBZM2t0ZG1Gc2FXUmhkRzl5TG14cGJtdGxjbVF1YzNaagpNQjRYRFRJeU1EZ3hNVEEyTkRNeU0xb1hEVEl6TURneE1UQTJORE15TTFvd0x6RXRNQ3NHQTFVRUF4TWtiR2x1CmEyVnlaQzF3YjJ4cFkza3RkbUZzYVdSaGRHOXlMbXhwYm10bGNtUXVjM1pqTUlJQklqQU5CZ2txaGtpRzl3MEIKQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBemxQSG96bWRiWVo3ZUw0cVZRT0ovc2VIOXd4ZUtzQVN0bnVDUXBZeAp3MTRGRzA0di9xYzV0b1lGbXg5UnlwMExvUTRhVWtWMVpaRFNSNkExb0QvMHQzWDE5U2prbWF3Vng2SFF1eEdLCm9lTXdnN0IzV2Y4dFQxeExNSlN5UEVnL1lmMlFSdDZKa2pKVngzVHdoeXNyMFE4Sjl3SXJpQ3pvL1JoUGhqNnMKUnJqY1lpeXphR1RuT1BGNVFOci9ycjlqOThkYW5mMnVtTTZVdmRMMnBsMHVra3ZjQWQrbEY5aUVFMXBPRTUrWApnWUFEUGloT1JVWHFScUZidDRFT1JuVVRRSlQ1R3UxNmpPdVVjV3JhQ0NYNHRXUVFCKzdabWF0d0tqbFNJWTYrCkRuck5yUFFTaTNPU283NUpXaTA1UjRONWlPVEpRbHA2RnhGcjdaazk5cWZqZ1FJREFRQUJvM0F3YmpBT0JnTlYKSFE4QkFmOEVCQU1DQmFBd0hRWURWUjBsQkJZd0ZBWUlLd1lCQlFVSEF3RUdDQ3NHQVFVRkJ3TUNNQXdHQTFVZApFd0VCL3dRQ01BQXdMd1lEVlIwUkJDZ3dKb0lrYkdsdWEyVnlaQzF3YjJ4cFkza3RkbUZzYVdSaGRHOXlMbXhwCmJtdGxjbVF1YzNaak1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQ3VvelhFMWJZMkR1VHZLdzcya1NoQVE0c2YKeiszZGlYdEhSbGpiYjNKZWIyNFRWOUVqZ1RybmhsYlpFaG8rcFA5ME5kQlIvQTRvVHdXQjdVUFFienp5eHQ5aApCcHZmVXQ1N1pyQ3hQdGs5RXJVdXR2T3EvU2NqNkNDd1VBUjZ4b2pybnJWQzNqY3ZIZEp0TXBNNlA3QnlQVUtxCjZ6c1dVcVExT0p6Tjg0czV6TDRoMG9YZDA5T0RXOC8rNWRFUVBOY1JXM2pHallvdHFoUnYzVm5aSVVYejZlTVcKaXVveFlrTDZNc2NyNHhGZkROOXBDVnkyVWIvV0JUSGVQd2ZHOGduaTVlR3ErMjNUWGFCbm1xd2V2aFNZcXQ5eQpOcm9rMzVVZlFHamI2WUFRUVdyQlRxa1diSDZ2WVpYVUYrZGEwL2JrVnFwbDNDZGpJdHhHaWV4bnUxS1oKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==\\",\\"tls.key\\":\\"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBemxQSG96bWRiWVo3ZUw0cVZRT0ovc2VIOXd4ZUtzQVN0bnVDUXBZeHcxNEZHMDR2Ci9xYzV0b1lGbXg5UnlwMExvUTRhVWtWMVpaRFNSNkExb0QvMHQzWDE5U2prbWF3Vng2SFF1eEdLb2VNd2c3QjMKV2Y4dFQxeExNSlN5UEVnL1lmMlFSdDZKa2pKVngzVHdoeXNyMFE4Sjl3SXJpQ3pvL1JoUGhqNnNScmpjWWl5egphR1RuT1BGNVFOci9ycjlqOThkYW5mMnVtTTZVdmRMMnBsMHVra3ZjQWQrbEY5aUVFMXBPRTUrWGdZQURQaWhPClJVWHFScUZidDRFT1JuVVRRSlQ1R3UxNmpPdVVjV3JhQ0NYNHRXUVFCKzdabWF0d0tqbFNJWTYrRG5yTnJQUVMKaTNPU283NUpXaTA1UjRONWlPVEpRbHA2RnhGcjdaazk5cWZqZ1FJREFRQUJBb0lCQVFDcEorTEtuVmZHRGJWNAozbCtTWjE1aGRYQ3hTSUNEaUFsUGRwN3F2SHg3OGI4NkRiWW5qeTR2eUYwY09tY3lOK0xxM2NjU29FT0pTMXc2CndNeDJYempnbUdOWDVYalZ6RkhtNDNGZmpSZ2RkVWUzRDV3cU9wMEpMVit2cXBrZDl4V1AzdlRFUlhxQVU2Z2oKNkdteVIrQ2FlenZ1T09jN3M2WW9xaCs0cmZWTDNKU1F3ajZxQTZTbnAybERydmhsSXZ3ZFRNaEs2dnh5Y2xLego1a1o1ZkxUeWtZamxydW1kNEhkWU1BdDE5S2doRXBkYkEwRVlsT2hGRisxcDRjOWRtT3FLTW5oVmhHdVR0L010ClZxT09UN0pPU2tZRUpsWlUrZXBYSjVpeTV0bDA5UFpYOGRGSUZrVjNLSlN2c3NxdThnM0d6R2hUajZrVzFYU2wKT2tuMG9LZUpBb0dCQVAyNXUxQ3l3anJpc1Z5bThNMlRiNGxEejZ6YlVZVmJUc1VNL2lCRGJyYTFoYVlGM0ZqZQpzdEVuWXFHK3JtQ3B0dnhMT3Z6VUhKVyttSzJUY2o5VTNDeG1uYmpyWFd6QkNZWVBCbHExQWNvOW9NYy9UclE5ClhUS3BLSDNOcEdJZTBSYXFscDhrLzlnUm5nbEIyZzVSQ0U5LzVtQm5Tc2Z2STZzaDNCUlpWQkp2QW9HQkFOQXQKUm12blpTUHpLby9lcjNlajVWZGZCN1ZzWEhHRmVCWlVRRkwvL3Bia2gxY2FGQVBpUlJLUC9zaVlYcXBXVkNHZApBbThsSmNnRHpvcGw0NFZwQ0xUVDVvWktxUExDK2IzSDVkQVpRV1VXdm5oOEIxejNYemNDZlpybkpJT0FoZEp1CkE4dC9XQ0p6Vms5U1BHSEJyVHgvbnZyRUR0MGhSbGtPKzBTTWphRVBBb0dBSmpVcTVQc1dUcUhHamFwQ0J1TVYKMzdqTGREOU9wbU5hbUVmZG1PUXVydXJrNWx4cGt5UnVEeHI4T2xrcGp6cmZhRnkzMUV6b3hRLy9rOXZwVDJvcgpBYkN1UGFPTDNRMndyblJpdzVRUVlmRW4zZmxGazlUTnpRdzJJY091NW11M2xzODNnVjJqL1ZpaDBNa08yaXNQCnNsRVRVeDhhM3NLL1AwMEpCRE56ZXBjQ2dZRUFoTS9OdEx1Y3NCSEwzcHVRVUlEVXFTZ3NqOWRCSnYraXZJUWwKd1k0bWkzZml6SFFMdnVxVmJLRkhTQXpGb0dDUkxoeXdWOTVZTzBJS2ZBdEMyM05HSmE5bXk5aEg3eERyS2VPbApQMTFOZGtQTFlxeW1PZTVyNVhtR1R0UVdYSHNiWlVQZzBldzllMFVnRkZ6L3Z0SkVSbXVaTHB6MGFxbDI2d3grCnk1M3NJWXNDZ1lFQTJJVFVlZFQvdElucTJpTXNrR2s2ZExxWnZNWDFsVG4rb0o3ZUZFR2xkUGxuVGlzTFBvZ1AKVWRyTzU4Z2xPRHU2Mk9Qbm05YTJlVEJqTHhHa2o0bGdBK0xGT3g2R2U3V2NnR2MvTmt3UWNOTWUvNHFiUThPKwo4QTkxZGRqdzl1NXVZVFN5a0VqVHpxR2FOeVViQi8waHhheXZXY3BCUm1sZXFNOU0zc09LODRFPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"linkerd.io/created-by\\":\\"linkerd/helm stable-2.11.2\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"linkerd.io/control-plane-component\\":\\"destination\\",\\"linkerd.io/control-plane-ns\\":\\"linkerd\\"},\\"name\\":\\"linkerd-policy-validator-k8s-tls\\",\\"namespace\\":\\"linkerd\\"},\\"type\\":\\"kubernetes.io/tls\\"}
+",
+            "linkerd.io/created-by": "linkerd/helm stable-2.11.2",
+          },
+          "name": "linkerd-policy-validator-k8s-tls",
+          "namespace": "linkerd",
+        },
+        "type": "kubernetes.io/tls",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "linkerd-proxy-injector-k8s-tls",
+      "namespace": "linkerd",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd/sealed-secrets/sealed-secret-linkerd-proxy-injector-k8s-tls-linkerd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd",
+    "spec": Object {
+      "encryptedData": Object {
+        "tls.crt": "inital-secretslinkerd-proxy-injector-k8s-tlslinkerdtHV6Ye7vE0MqqZs********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "inital-secretslinkerd-proxy-injector-k8s-tlslinkerd5AYHYYUhlQS3h_J********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"tls.crt\\":\\"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURVekNDQWp1Z0F3SUJBZ0lSQUxsUXVZVlBqeVo1N0dhcWgzWXFJM3d3RFFZSktvWklodmNOQVFFTEJRQXcKTFRFck1Da0dBMVVFQXhNaWJHbHVhMlZ5WkMxd2NtOTRlUzFwYm1wbFkzUnZjaTVzYVc1clpYSmtMbk4yWXpBZQpGdzB5TWpBNE1URXdOalF6TWpOYUZ3MHlNekE0TVRFd05qUXpNak5hTUMweEt6QXBCZ05WQkFNVElteHBibXRsCmNtUXRjSEp2ZUhrdGFXNXFaV04wYjNJdWJHbHVhMlZ5WkM1emRtTXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUEKQTRJQkR3QXdnZ0VLQW9JQkFRRGduL3ZacVo4NGdEVWhuRG9OdEQxYU1zZXBReFFhTnRDcWdWR3lIOFZSZm9ySwpXMTdRcko0M2lvd3JvVXUzaWpQY3JPZnlQdFZxOWZSMXNlSCtBenY1WlFpczRQYUlNUFZ1b1AxV3ArK3pPTVpyCmJydE01TzNIdUNCcmVXYTRaU2ZoeXRkNDhxMzhEdTVnQ1I4WFByKzUwQU5BN2FVaUYxaG9uK3MycUVMbHY3b0UKL01FblR5eUhIUWhzNWFkajVMdWR3bXpBTXI1cGo4ZGlXc2d4WThLc0owYU8zVGJIUmJXTkRZTU9MZFNzZ3pFKwoxRmsxdTdMSWljRG9GQm1oRENZZVZzTURLYTV4Znk4TVUrU1FxVEpKVHRiUXNBTzdiQU5KTW9mMnJEZUhTeTU3CnhSRFBTczZNTjU2MXNadVdHaHdJQmpzZHZCMU5UcXp3ZFo4ekhjNWpBZ01CQUFHamJqQnNNQTRHQTFVZER3RUIKL3dRRUF3SUZvREFkQmdOVkhTVUVGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0RBWURWUjBUQVFILwpCQUl3QURBdEJnTlZIUkVFSmpBa2dpSnNhVzVyWlhKa0xYQnliM2g1TFdsdWFtVmpkRzl5TG14cGJtdGxjbVF1CmMzWmpNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUJ0NHNaNlNnclRSK01xbExON3F3bW9kMXplTkF1dDh6Q3IKYkc3NEhpdktIZ1Zhb3JwOUp1SlJKU0VEUlVQLzdocmNMd0pjRUlMTllGZHhmalpKYllBMUFnSmZkdUt2WDM0Ygo1SC9hc05QRkVzSTdIOWw0cmY3TDVHbjJ6QWlBR1k4WFpKcXpxclE0eGIrdWE0V3p1VGQ2VHRoSm9pMU96UTBNCnh3UWRFbHVBWTNYVzJZV2VrYzJub0FiRlFvNCtQK3VVcHg1NE8wY0NCa0xCM2NuSmtzZ2RRejViektXVzFITUkKQmRQekN3c0xTK1dPK2doTWRWSkVuV3hWY1krNTZpRjNCM2FQWG9WL01RNU56WEs5c2FBNVZhYWJKbjVYd2FqRAplR1l4QlJvZ0R2ZTNnaWwwbERDbnVxMHZZZFp2aktDd2dwRUxhaVBWS1dnZmxYcVR1bFVWCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=\\",\\"tls.key\\":\\"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBNEovNzJhbWZPSUExSVp3NkRiUTlXakxIcVVNVUdqYlFxb0ZSc2gvRlVYNkt5bHRlCjBLeWVONHFNSzZGTHQ0b3ozS3puOGo3VmF2WDBkYkhoL2dNNytXVUlyT0QyaUREMWJxRDlWcWZ2c3pqR2EyNjcKVE9UdHg3Z2dhM2xtdUdVbjRjclhlUEt0L0E3dVlBa2ZGejYvdWRBRFFPMmxJaGRZYUovck5xaEM1Yis2QlB6QgpKMDhzaHgwSWJPV25ZK1M3bmNKc3dESythWS9IWWxySU1XUENyQ2RHanQwMngwVzFqUTJERGkzVXJJTXhQdFJaCk5idXl5SW5BNkJRWm9Rd21IbGJEQXltdWNYOHZERlBra0treVNVN1cwTEFEdTJ3RFNUS0g5cXczaDBzdWU4VVEKejByT2pEZWV0YkdibGhvY0NBWTdIYndkVFU2czhIV2ZNeDNPWXdJREFRQUJBb0lCQUFyYTBGSFpaNDlVYXJ6ZwpEdElndHFKSU4rdlBDUWFuUlhnbjNhbk03VDBkNzFrT0IwdndPNGtWa2VaOTJlblpyTjNxSVI5TXVBVitNejBJCnhwSCsyQVFhUk13TjV2djMyYlJwNVRRdDAyQ0d5dGZnTnY3bFJUUlVpb1NIRGxhMDFMT05tTklJY0MzeERzWG4KU3ZCVm9QQTZ4QjE4SG5IQ1RReHBSZldUTmdCaUowYzE4UmNxMUViR2wvQUZHckIrMTZCZEdWK2dpOTR6MDNHaQo5R0ZkZHNPQTdRdzFsSk9iaDZ3OVhqZFZOU0l6dC9FbSs4eEd3VHdpaC9IQkZVQ2hib1g3djhQMUZtT0wwN1B2CitBd2NBTWJiNDN2c2F0TFlJVDc0SDR6U2xWZ29raG5zVDlaellwRkV4WWxsTktFQ3pOVjlQQXdDWVBZYmJvc3gKYzFrQVdIRUNnWUVBL0ZxejFnSUVQT1Z2OEJ6YXJ5bFVIUnJWSEt6WTdyeWc5Q0VzZ2ZSRDhoRU5zN3l6aWtEQQpVaXI4U2czaXpONldzNldCMkxxTVBpWGlaMlc2ek8wZEFobTNUNVFtRkx6NGdSMUt0OURGZmVaSTlyeTAwNExDCjFtU01uMlJHRlFtTHBoL3U0Mk5KeWN2RGp1TjRUajhua1hmNlhCenljWlVKdU1JWDUvQ1dueXNDZ1lFQTQ5NjYKWW5KK3k1eVlHZlhvOWxJMHlFa25OZjBNRnhKbllHNzdMNmtNdWt4a241VHJ4YytxdGU3TGxveS9aS1lxWmNOeApUYkpabkFLZlFvZUZIR00wOSs0aERDYnNJWFJUcHo1Y01UQm40SFBJVlUxTTJjb0EzMTJnU2ZzUlU2aXRmRnIrCnNjUURoZDc3Sm9XZFNwTGtLbGpwamVoQ3d3cWJaS2FsblRIbXNha0NnWUVBNC9JU1M1ZGF1SjhPODdjOG1jZ2QKSUlVaVIxcWlRVlBGbDM5M3NwTXY1TEllekdJQlV6cVYvaUt4N1RxSnlVQ3VvK3MyVk14ODdZNU82ZExzWHpzMwpYclJYN3R3Rlllb29Gb2ljKzFqcmE0UGVHSEh3YkxYS3hObmlZLyt4aGtNdkQ0bjh3UXpvbEEwb3dpTWFncU50ClhHc2hqSjdoS0ZQVmlqeFlWN3ZzY2kwQ2dZRUE0c0hsRmt5NzB1RU5GMkI0S0k4YnlXZktwbFlmYnVJNGoyVkIKZjJjcHJFYVRKNTdwbFJxWDFaNUJhSnE5WjJwWDdKYTJMTXhia2YybUFHMmR6K2NGY2VlOWFUdGVaZGc5MnNNYQp1VFJqV3ArOWJ1MlNtWFFFdEVLV1hLaUUwSXlkdjQ5SnZ4ckJLcm4va1pFTE9vZThtRXVNZDFQM0ErS05TbmJ2CmZlT0huNmtDZ1lFQXcrU3hManc3OWpFUjBWRzJrSTBaZkRCaXF6cEVjMmVyRkZOaFBnZGszSWtHSkZEZkF5S00KTEE4dEdWNDNkaEtpNWJtUytzeVMwYy8vQWJVTXBwbDVWb0tZekRhMjN4RkpPU1dEOXZYUkdXcXBMVVRwaXpEaQppVDdyQ253V253WHJ0YURBaUk5RE1zRU9mT2hKc1E0SGF0N0ZhQ2FLY0o1ak9SVDYzZ2Z6cXJRPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"linkerd.io/created-by\\":\\"linkerd/helm stable-2.11.2\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"linkerd.io/control-plane-component\\":\\"proxy-injector\\",\\"linkerd.io/control-plane-ns\\":\\"linkerd\\"},\\"name\\":\\"linkerd-proxy-injector-k8s-tls\\",\\"namespace\\":\\"linkerd\\"},\\"type\\":\\"kubernetes.io/tls\\"}
+",
+            "linkerd.io/created-by": "linkerd/helm stable-2.11.2",
+          },
+          "name": "linkerd-proxy-injector-k8s-tls",
+          "namespace": "linkerd",
+        },
+        "type": "kubernetes.io/tls",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "linkerd-viz-ingress-auth",
+      "namespace": "linkerd-viz",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd-viz/sealed-secrets/sealed-secret-linkerd-viz-ingress-auth-linkerd-viz.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd-viz",
+    "spec": Object {
+      "encryptedData": Object {
+        "auth": "inital-secretslinkerd-viz-ingress-authlinkerd-vizkev7l1FeSniNIID****************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"auth\\":\\"YWRtaW46JDJiJDEwJEEwS2pIb2oydlNhMFhOeFVyU0RLbGUzcHk5SHE5c2xVbG51M3ZUeXJnWlZWa2d2cDJZMWUu\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\"},\\"name\\":\\"linkerd-viz-ingress-auth\\",\\"namespace\\":\\"linkerd-viz\\"}}
+",
+          },
+          "name": "linkerd-viz-ingress-auth",
+          "namespace": "linkerd-viz",
+        },
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "tap-k8s-tls",
+      "namespace": "linkerd-viz",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd-viz/sealed-secrets/sealed-secret-tap-k8s-tls-linkerd-viz.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd-viz",
+    "spec": Object {
+      "encryptedData": Object {
+        "tls.crt": "inital-secretstap-k8s-tlslinkerd-vizLeXyOxDu8XcIrhL************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "inital-secretstap-k8s-tlslinkerd-vizmhMNbKKBcaQcZ4i********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"tls.crt\\":\\"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURKVENDQWcyZ0F3SUJBZ0lRQzQyZlBjc3B1VXhUaE1DdDVhMTE5VEFOQmdrcWhraUc5dzBCQVFzRkFEQWUKTVJ3d0dnWURWUVFERXhOMFlYQXViR2x1YTJWeVpDMTJhWG91YzNaak1CNFhEVEl5TURneE1UQTJORE15TTFvWApEVEl6TURneE1UQTJORE15TTFvd0hqRWNNQm9HQTFVRUF4TVRkR0Z3TG14cGJtdGxjbVF0ZG1sNkxuTjJZekNDCkFTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTHJYb3dJNWdpbUtmbEVOdU9QMjA0MnkKbUJpV0tYQjl6R0pjdEU1RHNyV3pZMHFySkFsMHlOQ1p4aFZpRDFCWUFFd3hGODcxdnpPdjdpUXpVcVNLTjJ2ZQpmOFZZNkNUejZjbVVYa1dyWmZaMHNORVBnSzYwcjVIM1ZaT3V3eFZta3UzL3FXT2Q4UFVxYUN2MWk1eHg1R3hRCmNXZmFSVWdWbUZQRHB5bUhvcEcrZlBkdmZDMWRtc1lJdEloYllVNGw0YWNvbHlUM3RWOG1tcFpKVjVqdWdzR3QKUnVDWTlucE1vZ0E5aUwxOWM5V0dESFFTbWVlWlZsTE90NG5BLzhOWEhMZlpiZDc2TG9lUUF3dGVPaXJZaFU1dApLNHZHNlZHMnc0RWh3ekpBeUhFMkJ1NHRnNnNrN3huOUFqcjB1TjJwNlV5QjFnR3paOTd2cWNyMC9vSkFPMThDCkF3RUFBYU5mTUYwd0RnWURWUjBQQVFIL0JBUURBZ1dnTUIwR0ExVWRKUVFXTUJRR0NDc0dBUVVGQndNQkJnZ3IKQmdFRkJRY0RBakFNQmdOVkhSTUJBZjhFQWpBQU1CNEdBMVVkRVFRWE1CV0NFM1JoY0M1c2FXNXJaWEprTFhacAplaTV6ZG1Nd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFBM3UxT1ZINEVPaEZSRU9PMEp1TzZEY2FJeDZqdnhXClRVR2ZQeS8rdTllcE9oY0pGSyszTnJFR2E4SDVwU0dvVWRVTitvUS9MTVZ0REh3ZnU3WnF2Y0NXWDk4bmtHaUMKOTVHYnRNeENpY2hjS2gwdkppcDdHT3VKeENQelpzRkJUTEwxWHJFalhIYmI3YzFtZnNzWTFGRFBtOWltSmVsUgpUb2lLQlZsV1o4akhaQWQyZ28yeCtlWHNFY3hQTVdFTFB5dnB1N1gweDkwaEtxRlp4OWRyR1RwZkdMd21nNXB0CkwydnIwM3FUVzJPdVdkMU5DMExDaWE2SFEzSlo4UnZJN2FDRUNVZkhqb0lsaGM4d0RkUytEbjdxM0RCQVh3SXUKRlREMlk4eGVZWlZqNzFKM3pRcjNMdGxScnd1TmlZbnhwSEkyYlRZbm90RkpwZjdkZ0w0ckVDaz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==\\",\\"tls.key\\":\\"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBdXRlakFqbUNLWXArVVEyNDQvYlRqYktZR0pZcGNIM01ZbHkwVGtPeXRiTmpTcXNrCkNYVEkwSm5HRldJUFVGZ0FUREVYenZXL002L3VKRE5TcElvM2E5NS94VmpvSlBQcHlaUmVSYXRsOW5TdzBRK0EKcnJTdmtmZFZrNjdERldhUzdmK3BZNTN3OVNwb0svV0xuSEhrYkZCeFo5cEZTQldZVThPbktZZWlrYjU4OTI5OApMVjJheGdpMGlGdGhUaVhocHlpWEpQZTFYeWFhbGtsWG1PNkN3YTFHNEpqMmVreWlBRDJJdlgxejFZWU1kQktaCjU1bFdVczYzaWNEL3cxY2N0OWx0M3ZvdWg1QURDMTQ2S3RpRlRtMHJpOGJwVWJiRGdTSERNa0RJY1RZRzdpMkQKcXlUdkdmMENPdlM0M2FucFRJSFdBYk5uM3UrcHl2VCtna0E3WHdJREFRQUJBb0lCQUhrbW43VXVrdjdhcFlOcgpFV3NIdmk5UUVaMUhxUUVmSU9yYXo3TTc1R0k3T25QTk91WEN5dit2NWlneFdGcXhaU2dDWVR5NlRrdDJsVVQxCjNtMkFqZVVzOWM2Q0VxejdWNmwwd2hnTXhtV2pUbytRck5FYnFnaE14em1taFNxWVEwZDlrbGxjclVSYlJnYlQKQmI3Z2Zzdlk4Vi8wd1IyM212a2RrWU8xUmkyWHFXODA5eGp3MDhLQnd4dHpCRTBRSE9UQ1ZnOGhzakIrTmQzbgpQQm9DVWQxdVNsTmh6QWw1MmJCc2dMR1JObUhOalloVWpkNDJSVUZybnhIWlNNZldkMXQ5ZFFVc2pjTjhjREJSCkgyTmdxckNnVWRQejBLUCtBMDJJT0ZNeTZyVGNQUmtiQWlEdkVKMnlDSGFhaFc1Y0RZaUpubGR3Zm5mZ3JJK2MKeFBwWlJ3a0NnWUVBeklrMEtveVpQSFRBSmJZeHY1SWgyVkFMQTVWbHJ1blB5bTFGTXQ5Q25tZWVMaHU2cEtZRgphakVjTFhPSSthc2pPTlpGSTc2Y2V4cUE0c2hwdUZyQmR3RTV4ejYrSm5PUVd5Q0JDWForWC9Bb3l5SFJDUEpNCmo3cXBrYjV3d0hMaEhvTWNpR0lHdmowdGdPOFNqZ1hHd3BGSWxqR2I2TEsvVzhKcFd0RVB3YnNDZ1lFQTZkcTcKV3k3Wlk0aFJWbWloR0F0Qmp2SlhONmlESWFIdkk4elFpakNuVlJqUFBEckt5dVdNNUxKeW4zUGxjL3dQWHU4RAp5d0E0aXFwcWQ2Ukx3MGpCekR1TXNJVWFtTy9NUENoSGZWMnVXNzlNcUQ3Sy9JQkVZVnQrZEFZUzJrYmh4RkdrCnRtcTRUOGxSZUpUZmkrNC9FZHdkZEVQN0piTEpraUs3R0VYQjhLMENnWUVBanZFQU5SQkhjem5BbzFwZUVCem4KYlFFRWdYK2lMWWlYd0VkM1NlTS9vb2FWeEhGNmtlQzQvZ3JPUDNGejg5QkhjRXhHeTRGRnlMNnYvazNEbktSSQplb3V2dm5BNTRaTjMra2VRQm5YNlFjQU1NbEl5elViUWZNNGQvWTRUTEZ2Y3VqODA3SmRkVVF4ZVJiSk96RlI3CklMVDUvb1V6Q1lBS1BlMXpSWlcvcGtzQ2dZRUFxTUJLaXRZWDBSZEJlcFV1Q21lMCt5NHRlZUNFSC9UMjJHS24KNmRDS0w0SWpxVmJUbCs1bDZYSkwvSHhwaTNUTXNyalBoK0cwNjN0bU1NZkNWRDFnZTd4TkhlUXUrVVd4bjRlQgpieG4zQkFYYmoxMGdwV3o1NnpkVzNPcTFHQVltVE1DTmw0VVRVNS8yeG9qSGQvYUlWSjcrTWpRTU8zdjBzUnVXCjMwRVhYbEVDZ1lFQWg3eFFhOFV1cW5QYmJ1TXlHVmRBenJITjYvYlorRm14R3FobXNHQ1dGK0EzeWtNeUprUWMKZi9HbkZ1ek1tSWRmYkhHM0pOUGMrNEYvL3N3azcyRi9rdFJtTE5Yc3hjUm96M0lNTitkeXE5dGUxeDJSN3NEbApZN3hORjdkTEVIQ2JXQTJuN2Nmc2RQQTJiaGJxNEhJU3VZcW0xWE1yVnF2THlETitjejZJT01NPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"linkerd.io/created-by\\":\\"linkerd/helm stable-2.11.2\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"component\\":\\"tap\\",\\"linkerd.io/extension\\":\\"viz\\",\\"namespace\\":\\"linkerd-viz\\"},\\"name\\":\\"tap-k8s-tls\\",\\"namespace\\":\\"linkerd-viz\\"},\\"type\\":\\"kubernetes.io/tls\\"}
+",
+            "linkerd.io/created-by": "linkerd/helm stable-2.11.2",
+          },
+          "name": "tap-k8s-tls",
+          "namespace": "linkerd-viz",
+        },
+        "type": "kubernetes.io/tls",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "tap-injector-k8s-tls",
+      "namespace": "linkerd-viz",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd-viz/sealed-secrets/sealed-secret-tap-injector-k8s-tls-linkerd-viz.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd-viz",
+    "spec": Object {
+      "encryptedData": Object {
+        "tls.crt": "inital-secretstap-injector-k8s-tlslinkerd-vizJx2XrwZoftweJRz************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "inital-secretstap-injector-k8s-tlslinkerd-vizY74qk_ryJXUy4Qr********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"tls.crt\\":\\"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURRVENDQWltZ0F3SUJBZ0lSQU9aT2Q5cTlhYmJDZ3pya3dLMHRleEF3RFFZSktvWklodmNOQVFFTEJRQXcKSnpFbE1DTUdBMVVFQXhNY2RHRndMV2x1YW1WamRHOXlMbXhwYm10bGNtUXRkbWw2TG5OMll6QWVGdzB5TWpBNApNVEV3TmpRek1qTmFGdzB5TXpBNE1URXdOalF6TWpOYU1DY3hKVEFqQmdOVkJBTVRISFJoY0MxcGJtcGxZM1J2CmNpNXNhVzVyWlhKa0xYWnBlaTV6ZG1Nd2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUIKQVFETnZwOU1ZYUVobE9kY3BtSlZSSGJjbzUwSmFBNXA0bG9hVnV3UnU4Q1RjRndYOXlyc3lOUVpYV1VOR0lQMQpNMGJBR0kxL2RIMlRIY2R6d0RDdU9NRUtCVzJ5U1J4L1hDNFZ2OHJTcnQzSktiSXJkSVIxWUd2QW9uTHVpdFlGCkx6T1dFR1dzS1BjcjkxV1E2WmZIWDdicVl2a1YvUUpWVFluZDNPRkt0NjlFdUFjN09yOXRiNHhJV3JxRGVhTXgKN2RVajNnVE05SG9rcjVRclFIN1M1V3RrL2cvVEo3R0twRS9qeloxenhaN04zOFJOWVpGM2dLT1ozbHhBU3M3bQpKemxmcnlzbHhpc21kVUE3MlFoYWxWeG41RXZSc3Q0UURMNUI5MzA3VmtPNDJKZkFmcjNmbW5yV01IcHpTL0srCitUZmljdDEzT3p5c0lYNTZON1hwSnNUWkFnTUJBQUdqYURCbU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlYKSFNVRUZqQVVCZ2dyQmdFRkJRY0RBUVlJS3dZQkJRVUhBd0l3REFZRFZSMFRBUUgvQkFJd0FEQW5CZ05WSFJFRQpJREFlZ2h4MFlYQXRhVzVxWldOMGIzSXViR2x1YTJWeVpDMTJhWG91YzNaak1BMEdDU3FHU0liM0RRRUJDd1VBCkE0SUJBUUFVVU5DWWZ2cDhsWFdadnF4Vy8wd1RWQ2J6UGEzSzB5Nk1wOTFaZmRQd1lHS05NUFJkV0tJbEQwMnEKL1ZKM2ZBV1AzcEw4VE1vSCt5VWxxRWdESEtvUDlQZzFCM3Ayb2tFOHNaVDdjSHR4U0orTlNkTzJseEVSV2U0VAovMU5tNC8vWGw1cVhCZWVmbHo2enM0VmMvK0tPL0JnZnpncTViaUhwamVISDhRcVRnVmw1U2h3b1RvQTVidDdiCjN5bitZM25aVStsdThXajQ5MjYvd1d1L2UwUDY0Z3ZJdDhMWDlTMHBJNXZZM3E4clR1eWgyalZFRDVIdmE0TUMKenJGSm5razVWT0UyTVRSYlZ4T0pnb3RkMzYzdmV4TmZJZjNkWWNDRHhMMkNTZE1XZkNhWmdLSGlFeHJDMCtGcgpzVFducHdFZ0llazJBbmN4UFFlbmRwQWdPSlNpCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=\\",\\"tls.key\\":\\"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBemI2ZlRHR2hJWlRuWEtaaVZVUjIzS09kQ1dnT2FlSmFHbGJzRWJ2QWszQmNGL2NxCjdNalVHVjFsRFJpRDlUTkd3QmlOZjNSOWt4M0hjOEF3cmpqQkNnVnRza2tjZjF3dUZiL0swcTdkeVNteUszU0UKZFdCcndLSnk3b3JXQlM4emxoQmxyQ2ozSy9kVmtPbVh4MSsyNm1MNUZmMENWVTJKM2R6aFNyZXZSTGdIT3pxLwpiVytNU0ZxNmczbWpNZTNWSTk0RXpQUjZKSytVSzBCKzB1VnJaUDRQMHlleGlxUlA0ODJkYzhXZXpkL0VUV0dSCmQ0Q2ptZDVjUUVyTzVpYzVYNjhySmNZckpuVkFPOWtJV3BWY1orUkwwYkxlRUF5K1FmZDlPMVpEdU5pWHdINjkKMzVwNjFqQjZjMHZ5dnZrMzRuTGRkenM4ckNGK2VqZTE2U2JFMlFJREFRQUJBb0lCQUJSVW5kRWlaSlc0N1JQTwpyVERYenhjR1krSW1FaWFNWTNMdTIrejBySmJsSjNTR3pBc1IzVU9VWXdQa1JFWGFoMGM4SmQ5T1Y0cE9Dd041CkhsWlk3VnBjSnZiVEdxbkxKaEtvSFJhc2lPWHo1Tk0rZEVoVSt0RFNQS0V0dnZCTU5jRENaZ21aRXJPWmdTOE0KcGg3aGFtWEcyZTQrVGhpM3pNUExxOGVDVnlObkRseEg2MXA3QjJ0VEQrbno4TVBnMEkyNWtoazNMbHBia08zSQpxTElESVhBREQ2dE8xN1IxRmtselZDdXlLalB6ajB5Z2s3U1hUTlpuZTNrcmY0WHdOYjFPSnFBTGxsZkJqdnNUClZXRnlNZ2lrY1dhYmoxbHVScEFKRGJGaytTMWdaMnZuVjhWQ1pXdzBNRFZpanNBSm9EZVFBcDYwZHRrSWY2UWwKRmo4bHZYRUNnWUVBei8wQmJkdXluV2ZQV0RUUDU3ejV5aFJoMG5FRzg0VWV0RFhsSGRLN0ZLNVVFODEwcTY2dgpxRVZRZjJPWTRFNUZmT2tOamRCNVJmWVgyN1J0TVhjLzVFbStwV0JXM0lWU05DdU9pTUVuNHJJOU0wT2NCUFhmCkU4U2pIblBDZGZ4VVgyV0ZJcjlZM3pNM0p6bEVoT1R0NE5sNEpNWmhqV2J4UVpVSzZrOGM5RDhDZ1lFQS9UMEcKNUY2NmZIWXdMWFJOU0Fqa3NES3BsYlUzWXRPcm9DNkkwZlBXdHJwSDloUDlPS1RsMTBXUFpVRzduSk9kVUJUTQpMSTlaaUd4cmdmR1VPQVVoWUVDakM1MHZMRmZGcFpOSWJNQ0FKNGdzZUdvb1VvQkMyc2ljWjlxYTBVZkNmU0JjClNZTFd4UFk5bmgxTXJtdlJkUWdGaTYwLzdhdGNmRWJkbzc3aG9PY0NnWUFjWUFzSzN0YytiRVE0WjNRWnpJbFQKalhaUERJYURRSjBRdnUyVUpRVEs3SUdoOWZ5OTAyWTVrY05LcmQ3VWN6azlzbG5jQ0I0VGNtQ000OCtsMlB3SgpmQm9iVzhwZDZYNXVpYWEzZDRxbWZlU2xrc3E5VG9IeG8za1JsWDlwTTFTYmN6RTNyVjFGamlvdkdyd0RXV3d1CnFkeWZQOFZkVWpjRjJIeVZ2TmRaWndLQmdRRHhuMy9xK0NPUlM2ZU9SekRSc1lLYVI4eWRSa254WnF1VDY3S3EKT0xFK3FpQ3RQOGRWZTZpOXJPWTBJL0xoWThzdXRKbFhUdk9MZ245VmZlNEJRWXZsN2VaajEzZENKUUUxaVlFSwpHdVpzVWJhMHNmMkZNbElYdEYvZmk2bzZVdkRVT01NMWRMeDlNOEg1RWxXdStycmdvbVhBTHU4WFUzQ3NOMldVCnJqVlVNd0tCZ1FDZlhEOE1yMElIWGR6cFlYL1VnTDQ2REVCUjB4aGt4YTUvQUl4c3Frcjgzeldad01FQ1E1dFoKdk5QZW9KUWVrMXI4M3ZRNHVpVlVLRUk2NmErU05wbnhDbDh0SVIwdjFwcGkyYnRVdDdrdEFjZWtnN0EwL1R6agpkSHc0eDBoSVVTb2pEYTQ1OUNRMk0zcXRBeHdvYXNlNERyQ3lBbmpKN0QxdWJEQ1d5Uy9Icnc9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"linkerd.io/created-by\\":\\"linkerd/helm stable-2.11.2\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"linkerd.io/extension\\":\\"viz\\"},\\"name\\":\\"tap-injector-k8s-tls\\",\\"namespace\\":\\"linkerd-viz\\"},\\"type\\":\\"kubernetes.io/tls\\"}
+",
+            "linkerd.io/created-by": "linkerd/helm stable-2.11.2",
+          },
+          "name": "tap-injector-k8s-tls",
+          "namespace": "linkerd-viz",
+        },
+        "type": "kubernetes.io/tls",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "graphql-mongo",
+      "namespace": "applications",
+    },
+    "path": "generatedManifests/test/services/graphql-mongo/sealed-secrets/sealed-secret-graphql-mongo-applications.yaml",
+    "resourceBaseDir": "generatedManifests/test/services/graphql-mongo",
+    "spec": Object {
+      "encryptedData": Object {
+        "APP_ENVIRONMENT": "inital-secretsgraphql-mongoapplicationsvnOtq3hqIANuqop********",
+        "APP_EXTERNAL_BASE_URL": "inital-secretsgraphql-mongoapplicationsCxYn3tIrlEqRm1H****************************",
+        "APP_HOST": "inital-secretsgraphql-mongoapplicationsDtNHpy3FLVJkOWH************",
+        "APP_PORT": "inital-secretsgraphql-mongoapplications9waoY2GbB4P2ou8********",
+        "MONGODB_HOST": "inital-secretsgraphql-mongoapplicationsX6I4dvskc9MoPPC************************************************",
+        "MONGODB_NAME": "inital-secretsgraphql-mongoapplications6xEkO9uQEF3eK31********************************",
+        "MONGODB_PASSWORD": "inital-secretsgraphql-mongoapplicationspgbY88AmmUtLIic************",
+        "MONGODB_PORT": "inital-secretsgraphql-mongoapplications9sYI3EO8VVguazP********",
+        "MONGODB_ROOT_PASSWORD": "inital-secretsgraphql-mongoapplications6Y12BqewIBEkHTn****************",
+        "MONGODB_ROOT_USERNAME": "inital-secretsgraphql-mongoapplicationsNCYukTCZW8F2FlF************",
+        "MONGODB_SERVICE_NAME": "inital-secretsgraphql-mongoapplicationsbGK_5VxQbYHgPTU********************************",
+        "MONGODB_STORAGE_CLASS": "inital-secretsgraphql-mongoapplicationscFydrs0b9zC7__L************************************",
+        "MONGODB_USERNAME": "inital-secretsgraphql-mongoapplicationsj5PAwEXTOAUSFca************",
+        "OAUTH_GITHUB_CLIENT_ID": "inital-secretsgraphql-mongoapplicationsMbVCP_ydYbWJg4i****************************",
+        "OAUTH_GITHUB_CLIENT_SECRET": "inital-secretsgraphql-mongoapplicationsR1SidSUkmHjyiQx********************************************************",
+        "OAUTH_GOOGLE_CLIENT_ID": "inital-secretsgraphql-mongoapplicationsiwYIpivgoJ55pEb************************************************************************************************",
+        "OAUTH_GOOGLE_CLIENT_SECRET": "inital-secretsgraphql-mongoapplicationsyOABO9wYelLacur************************************************",
+        "REDIS_HOST": "inital-secretsgraphql-mongoapplicationsjH1lpyqcRNFuuRK****************************************************",
+        "REDIS_PASSWORD": "inital-secretsgraphql-mongoapplicationsDdWL7ZgTjfZ26Sj************",
+        "REDIS_PORT": "inital-secretsgraphql-mongoapplicationsHvm5yY1CrwmyPwC********",
+        "REDIS_SERVICE_NAME": "inital-secretsgraphql-mongoapplicationsGBuN2XPKzIiJqmq****************************",
+        "REDIS_SERVICE_NAME_WITH_SUFFIX": "inital-secretsgraphql-mongoapplicationsunEzKFw6TKwZuTx************************************",
+        "REDIS_USERNAME": "inital-secretsgraphql-mongoapplicationsbitDC5VA0MK023Y************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"APP_ENVIRONMENT\\":\\"bG9jYWw=\\",\\"APP_EXTERNAL_BASE_URL\\":\\"aHR0cDovL2xvY2FsaG9zdDo4MDgw\\",\\"APP_HOST\\":\\"MC4wLjAuMA==\\",\\"APP_PORT\\":\\"ODAwMA==\\",\\"MONGODB_HOST\\":\\"Z3JhcGhxbC1tb25nby1kYXRhYmFzZS5hcHBsaWNhdGlvbnM=\\",\\"MONGODB_NAME\\":\\"Z3JhcGhxbC1tb25nby1kYXRhYmFzZQ==\\",\\"MONGODB_PASSWORD\\":\\"anVuZ2J1bnU=\\",\\"MONGODB_PORT\\":\\"MjcwMTc=\\",\\"MONGODB_ROOT_PASSWORD\\":\\"ZXhhcmVyZW1wbGU=\\",\\"MONGODB_ROOT_USERNAME\\":\\"ZXhhbXBsZQ==\\",\\"MONGODB_SERVICE_NAME\\":\\"Z3JhcGhxbC1tb25nby1kYXRhYmFzZQ==\\",\\"MONGODB_STORAGE_CLASS\\":\\"bGlub2RlLWJsb2NrLXN0b3JhZ2UtcmV0YWlu\\",\\"MONGODB_USERNAME\\":\\"ZXhhbXBsZW1t\\",\\"OAUTH_GITHUB_CLIENT_ID\\":\\"ODljMTkzNzRmN2U3YjViMzUxNjQ=\\",\\"OAUTH_GITHUB_CLIENT_SECRET\\":\\"MTI5NDg4Y2M5MmUyZDJmOTFlM2E1YTAyNDA4NjM5NmM0OGM2NTMzOQ==\\",\\"OAUTH_GOOGLE_CLIENT_ID\\":\\"ODU1MTc0MjA5NTQzLTZtMGYwODhlNTVkM21ldmhucjhiczBxamFwOGo2ZzBnLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29t\\",\\"OAUTH_GOOGLE_CLIENT_SECRET\\":\\"R09DU1BYLUNTMUpGaXNSSVNnZU4wSS13VGFWam8zNTJ6YlU=\\",\\"REDIS_HOST\\":\\"Z3JhcGhxbC1tb25nby1yZWRpcy1tYXN0ZXIuYXBwbGljYXRpb25z\\",\\"REDIS_PASSWORD\\":\\"anVuZ2J1bnU=\\",\\"REDIS_PORT\\":\\"NjM3OQ==\\",\\"REDIS_SERVICE_NAME\\":\\"Z3JhcGhxbC1tb25nby1yZWRpcw==\\",\\"REDIS_SERVICE_NAME_WITH_SUFFIX\\":\\"Z3JhcGhxbC1tb25nby1yZWRpcy1tYXN0ZXI=\\",\\"REDIS_USERNAME\\":\\"anVuZ2J1bnU=\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"sealedsecrets.bitnami.com/managed\\":\\"true\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\"},\\"name\\":\\"graphql-mongo\\",\\"namespace\\":\\"applications\\"}}
+",
+            "sealedsecrets.bitnami.com/managed": "true",
+          },
+          "name": "graphql-mongo",
+          "namespace": "applications",
+        },
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "graphql-mongo-database",
+      "namespace": "applications",
+    },
+    "path": "generatedManifests/test/services/graphql-mongo/sealed-secrets/sealed-secret-graphql-mongo-database-applications.yaml",
+    "resourceBaseDir": "generatedManifests/test/services/graphql-mongo",
+    "spec": Object {
+      "encryptedData": Object {
+        "mongodb-passwords": "inital-secretsgraphql-mongo-databaseapplicationsp3ynYabZO407LT3****************************************",
+        "mongodb-replica-set-key": "inital-secretsgraphql-mongo-databaseapplicationsAOfsemTq2Icsk_J****************",
+        "mongodb-root-password": "inital-secretsgraphql-mongo-databaseapplicationsXo4FSyuOsswrlaP****************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"mongodb-passwords\\":\\"anVuZ2J1bnUscGFzc3dvcmQxLHBhc3N3b3JkMg==\\",\\"mongodb-replica-set-key\\":\\"MkozZno3SlRmVA==\\",\\"mongodb-root-password\\":\\"ZXhhcmVyZW1wbGU=\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"labels\\":{\\"app.kubernetes.io/component\\":\\"mongodb\\",\\"app.kubernetes.io/instance\\":\\"graphql-mongo-database\\",\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"app.kubernetes.io/name\\":\\"mongodb\\",\\"helm.sh/chart\\":\\"mongodb-11.1.10\\"},\\"name\\":\\"graphql-mongo-database\\",\\"namespace\\":\\"applications\\"},\\"type\\":\\"Opaque\\"}
+",
+          },
+          "name": "graphql-mongo-database",
+          "namespace": "applications",
+        },
+        "type": "Opaque",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "graphql-mongo-redis",
+      "namespace": "applications",
+    },
+    "path": "generatedManifests/test/services/graphql-mongo/sealed-secrets/sealed-secret-graphql-mongo-redis-applications.yaml",
+    "resourceBaseDir": "generatedManifests/test/services/graphql-mongo",
+    "spec": Object {
+      "encryptedData": Object {
+        "redis-password": "inital-secretsgraphql-mongo-redisapplicationsbjWHsr8ON4Rsk96************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"redis-password\\":\\"anVuZ2J1bnU=\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"labels\\":{\\"app.kubernetes.io/instance\\":\\"redis\\",\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"app.kubernetes.io/name\\":\\"redis\\",\\"helm.sh/chart\\":\\"redis-16.8.9\\"},\\"name\\":\\"graphql-mongo-redis\\",\\"namespace\\":\\"applications\\"},\\"type\\":\\"Opaque\\"}
+",
+          },
+          "name": "graphql-mongo-redis",
+          "namespace": "applications",
+        },
+        "type": "Opaque",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "react-web",
+      "namespace": "applications",
+    },
+    "path": "generatedManifests/test/services/react-web/sealed-secrets/sealed-secret-react-web-applications.yaml",
+    "resourceBaseDir": "generatedManifests/test/services/react-web",
+    "spec": Object {
+      "encryptedData": Object {
+        "APP_ENVIRONMENT": "inital-secretsreact-webapplications0uO9CYOEcOPTBA0********",
+        "APP_EXTERNAL_BASE_URL": "inital-secretsreact-webapplicationsz4mzr2pyByPGrU2****************************",
+        "APP_HOST": "inital-secretsreact-webapplicationsfJ2FOVeOb1_xJxx************",
+        "APP_PORT": "inital-secretsreact-webapplicationsOMm9zF7bX1o6_yP********",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"APP_ENVIRONMENT\\":\\"bG9jYWw=\\",\\"APP_EXTERNAL_BASE_URL\\":\\"aHR0cDovL2xvY2FsaG9zdDo4MDgw\\",\\"APP_HOST\\":\\"MC4wLjAuMA==\\",\\"APP_PORT\\":\\"MzAwMA==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"sealedsecrets.bitnami.com/managed\\":\\"true\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\"},\\"name\\":\\"react-web\\",\\"namespace\\":\\"applications\\"}}
+",
+            "sealedsecrets.bitnami.com/managed": "true",
+          },
+          "name": "react-web",
+          "namespace": "applications",
+        },
+      },
+    },
+  },
+]
+`;
+
+exports[`KubeObject Can update sealed secrets after initial 2`] = `
+Array [
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "argocd-applications-secret",
+      "namespace": "argocd",
+    },
+    "path": "generatedManifests/test/infrastructure/argocd-applications-parents/sealed-secrets/sealed-secret-argocd-applications-secret-argocd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/argocd-applications-parents",
+    "spec": Object {
+      "encryptedData": Object {
+        "ADMIN_PASSWORD": "inital-secretsargocd-applications-secretargocdvFPJE6PjioF2li3********",
+        "password": "inital-secretsargocd-applications-secretargocd2iAZ5bEFEz_XIAH********",
+        "type": "inital-secretsargocd-applications-secretargocdiGrQV5pcxUhfNBr***",
+        "url": "inital-secretsargocd-applications-secretargocdzAOlTNv9Kt99FgU**********************************************************",
+        "username": "inital-secretsargocd-applications-secretargocd5Prs76ECWRkDten*******",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"ADMIN_PASSWORD\\":\\"jungbunu\\",\\"password\\":\\"jungbunu\\",\\"type\\":\\"git\\",\\"url\\":\\"https://github.com/Oyelowo/modern-distributed-app-template\\",\\"username\\":\\"Oyelowo\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"argocd.argoproj.io/secret-type\\":\\"repository\\"},\\"name\\":\\"argocd-applications-secret\\",\\"namespace\\":\\"argocd\\"}}
+",
+          },
+          "name": "argocd-applications-secret",
+          "namespace": "argocd",
+        },
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "argocd-redis",
+      "namespace": "argocd",
+    },
+    "path": "generatedManifests/test/infrastructure/argocd/sealed-secrets/sealed-secret-argocd-redis-argocd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/argocd",
+    "spec": Object {
+      "encryptedData": Object {
+        "redis-password": "inital-secretsargocd-redisargocds_qo9K7QILsQMGj****************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"redis-password\\":\\"dGw0RVN2WTlrTA==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"labels\\":{\\"app.kubernetes.io/instance\\":\\"argocd\\",\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"app.kubernetes.io/name\\":\\"redis\\",\\"helm.sh/chart\\":\\"redis-16.8.9\\"},\\"name\\":\\"argocd-redis\\",\\"namespace\\":\\"argocd\\"},\\"type\\":\\"Opaque\\"}
+",
+          },
+          "name": "argocd-redis",
+          "namespace": "argocd",
+        },
+        "type": "Opaque",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "argocd-secret",
+      "namespace": "argocd",
+    },
+    "path": "generatedManifests/test/infrastructure/argocd/sealed-secrets/sealed-secret-argocd-secret-argocd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/argocd",
+    "spec": Object {
+      "encryptedData": Object {
+        "admin.password": "inital-secretsargocd-secretargocdBOSdATU8hIzjNuh********************************************************************************",
+        "admin.passwordMtime": "updated-secretsargocd-secretargocduAPqFJxMqS0pg3a****************************",
+        "clearPassword": "updated-secretsargocd-secretargocdGU4kB83cAsatuUf************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"admin.password\\":\\"JDJhJDEwJDkwcG1lcUgvWlU1bTZ4TnR6b3NYQy5TdjAybm1OM3NlT3ZyQVFOSlg4a2JQTWpIM25ueExp\\",\\"admin.passwordMtime\\":\\"MjAyMi0wOC0xMVQwNjo0MzoyOFo=\\",\\"clearPassword\\":\\"b3llbG93bw==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"labels\\":{\\"app.kubernetes.io/instance\\":\\"argocd\\",\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"app.kubernetes.io/name\\":\\"argo-cd\\",\\"app.kubernetes.io/part-of\\":\\"argocd\\",\\"helm.sh/chart\\":\\"argo-cd-3.1.16\\"},\\"name\\":\\"argocd-secret\\",\\"namespace\\":\\"argocd\\"},\\"type\\":\\"Opaque\\"}
+",
+          },
+          "name": "argocd-secret",
+          "namespace": "argocd",
+        },
+        "type": "Opaque",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "linkerd-sp-validator-k8s-tls",
+      "namespace": "linkerd",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd/sealed-secrets/sealed-secret-linkerd-sp-validator-k8s-tls-linkerd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd",
+    "spec": Object {
+      "encryptedData": Object {
+        "tls.crt": "inital-secretslinkerd-sp-validator-k8s-tlslinkerdSp1COB7GzzdAvGJ********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "inital-secretslinkerd-sp-validator-k8s-tlslinkerdy7oz_b9PsacZZPf********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"tls.crt\\":\\"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURUVENDQWpXZ0F3SUJBZ0lSQUkrYUVCL0EzcmRkK0VDak5VYzhsYlF3RFFZSktvWklodmNOQVFFTEJRQXcKS3pFcE1DY0dBMVVFQXhNZ2JHbHVhMlZ5WkMxemNDMTJZV3hwWkdGMGIzSXViR2x1YTJWeVpDNXpkbU13SGhjTgpNakl3T0RFeE1EWTBNekl6V2hjTk1qTXdPREV4TURZME16SXpXakFyTVNrd0p3WURWUVFERXlCc2FXNXJaWEprCkxYTndMWFpoYkdsa1lYUnZjaTVzYVc1clpYSmtMbk4yWXpDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVAKQURDQ0FRb0NnZ0VCQUxwdU53cFZ2dEcvUkVoUXpCM1JiK1BvWU9iVTVOck5iSUJKTU4vNjlWY3FucnYweWQ0SQpjUllyWVIwMjJ5NE9UODk5THVtOHpiVGZDOGVPTXlnaFZ0akFwb0xzcWdtMkkwV3FIcVNtQ0NuR3l6cnJLbzNrCnNCODdsTmJDV1k2ekcvV0J4NFRpbFdsTzBiSDB5elM3NmRrR0d0eW1YNlFwLzdYV2kvMEUzblRhaWxYVHZ0M1kKcFpNTDhZREFQdjJtR1FHU0hhUkQxNG9LRTJDa2tEVm5mU0g4UU5Vd0sydys5cEY1aW82Q0oyTXRIeWhIZmF5NwpaUnBXK0hxLzYxVFhVTTVYR0hPNlpoZ0dLeWEzbnlseXhLa3lFR1QxUFZkMWtXUEhyQ0lXWjZoelArb3dZNzJXCm1NRklwbXJTNExDa0RTSVRBdW03RnpoMGZ0c2dJYmErUk9jQ0F3RUFBYU5zTUdvd0RnWURWUjBQQVFIL0JBUUQKQWdXZ01CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFNQmdOVkhSTUJBZjhFQWpBQQpNQ3NHQTFVZEVRUWtNQ0tDSUd4cGJtdGxjbVF0YzNBdGRtRnNhV1JoZEc5eUxteHBibXRsY21RdWMzWmpNQTBHCkNTcUdTSWIzRFFFQkN3VUFBNElCQVFBNVgvRnMwbXF0R1c4SjVhMVViTVFrTHpuazIzbzZCWkxhMnlydjBxbTYKSCtrdW5UWkVzMnAzUGR0SDJYeXVhVytrRDFmbmRyR2haRHErRkt2Qnc4ZDlmUERLMXBiVHU1RnprS1lrUU9CbwptajJtZVdJUjdMUlJ1UWFIbnJTd1BUQzNlbWtWRVpQMjBiaUNSclhpV3RLdWtaeEZyTmdrbXZwY0d1VWZPWlBUCkNmU0s1NzM4VXpUSVIzWWxHOXExdnVBbVcyQXNrYXNIbTE3M0ZLN2x2R3NwaE8wVTdRY3JFeEJiVmd0SUZ0Qk0KM0tJYktBZmg5VUs2aW1DNGpsazRlVFBicTZSTHlmNFJoK3Rwb3pWeTlmK295cDZ5eEVlUWwvMk5jNU1mQmxyOQp3MWtDUTczN2k0R1QzMXZmRDJST25JOU9ZZFMrV1VDSWs0dnlVL1l6eVdBawotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t\\",\\"tls.key\\":\\"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBdW00M0NsVyswYjlFU0ZETUhkRnY0K2hnNXRUazJzMXNnRWt3My9yMVZ5cWV1L1RKCjNnaHhGaXRoSFRiYkxnNVB6MzB1NmJ6TnROOEx4NDR6S0NGVzJNQ21ndXlxQ2JZalJhb2VwS1lJS2NiTE91c3EKamVTd0h6dVUxc0paanJNYjlZSEhoT0tWYVU3UnNmVExOTHZwMlFZYTNLWmZwQ24vdGRhTC9RVGVkTnFLVmRPKwozZGlsa3d2eGdNQSsvYVlaQVpJZHBFUFhpZ29UWUtTUU5XZDlJZnhBMVRBcmJENzJrWG1Lam9Jbll5MGZLRWQ5CnJMdGxHbGI0ZXIvclZOZFF6bGNZYzdwbUdBWXJKcmVmS1hMRXFUSVFaUFU5VjNXUlk4ZXNJaFpucUhNLzZqQmoKdlphWXdVaW1hdExnc0tRTkloTUM2YnNYT0hSKzJ5QWh0cjVFNXdJREFRQUJBb0lCQUc4a0VaQUp1aTZVMWdJKwptTkVWOEp4d0JvVFdXbkRPa21hUU82RHJuYU9QZHY0YVd0WVJOa20vSnJBaDZkeTFENE5rMzdqY284MjJRdkYrCnBxUy82MlJneFdPNzcwckcySlJKYk9jL1RCS0x2dENyTGIxVm5tR2dSWVVhYkFXVVpaQ2hBKzhHbllnZ1F3YlMKSnVxVE5ELzdVYnhGT3pORkRucTdJczErUDVodFFzNlA2U1NFTEpMNG1hK3l2NGdETFIyZm5QbUZIZCtia0xlSwozb3Y5aE1nVjBRRHZCbVVVaFlnZS9icHJCc2ZMd2QxaXRlcHQxNXRGT1RpVWs2NnI1WlFkZlhDY1BmTGd3bExCCkc0MlZLSFovNkxEaTR2Q2U4cXpoVW9KYzExaFlnQnZWYks5WVk1MEJTL21tNllvZmROWjlvMmFKNDk5cjF6R1cKR1FHKzBTRUNnWUVBeGFvWlArZXU5OU1FZmVPU0FVRVV4Zy9udlJiOVhaSnBMazQ0N3RQd2lRbkRSVTUxZXZzVAo0dHhjeWxhYStBNFJNdlVPcURqVTNnUEdKN0lmckVjY3JJMXJZbkZFb2xXSVBiR0xCMWRTOWMzejhBYTJHdkVLCitLdFNTWVYvQ1B4MFlNUHRybXMydmdwQVluRTJGZWU0YjFvVlBiNDZNQTRRcWtnNWtkdzcrKzhDZ1lFQThYTmYKcC8xU2k0b1ZJT3ZseWxoSk52SjVKdXhTcmsxN0gvOFgvdWM1UngyS0J5SFNzRFNiQTEvMFk3Q29aSHJMYkQwTAo5OHJxekxGa1g5WHhENml1ZmU5MzE1OVo4L0Exb2w3OTMzSk1Vd2hTQXZTK1d4Uy9yVUczamdRMjJ4RWN3cThUCmwvTDZlR0dpM2tBU0R1SVRLUFFMemxlUTdXVVRHZnJndWZrWXJva0NnWUVBcHlSTGo0OGdrNnlhMnJ5cEJHaDgKNFhJbm1ld3J1SWtLYWI1NVEvSnhMZC9VZi9GMVE5VzFuaHFLV0FwZHBpMTIrNmplaVA3dGVRS2w5NEVXYVQ0RQprQ0JSVW4vRzhxSHl2NEEydUxGdGxDNWYvSElnWUsyOGdrT1VKRmsrNzJGU0kxVHAwWmdWUlNNMENFb0Uyd2NECkhSMkdZcHhOWmI4dTlsNTJWOUZyNDM4Q2dZRUF5cE02K1Uydm1NVmtUcmU4bHRVVnNGVWxVb1BLSnRWNDdQSncKWm53RzhXU1dMcit3N2dkazJ5TUJmelp6UWNKSXMrcFFCVGtwWUUyZzRrczBNaWdiSml2cEIyNTU0UkZ6WG1TRwphWmVTODhNeVU2cVZud004Z2hkMThtQVV5aDJFWE03WkNJNWltT2VKNXlBb1JuWmxEdUlhbWFlY1A2Q2lzeFJxCndYMTl1TWtDZ1lBaE1Dc2t3aWplbUtGcUd3SnBkeUJ5bWRsemhZcEhaYlN5cm96bEZ3bUpFeHhWVlViVTRSaUEKY1lQOUx4bFZFQ0dETnBCK3NXdnFBdmtEKzRyelRpMDk5OHhWYW93QkNzMVZ1VU9ZMUs4T0FWU3hBVys0dWh0dQpZUWtkN1dnUHB1RS9ybkhIdmNnV29nRnpSQVB0ZVFHRzNpM1dNODdPOVFsSk5PcXVGbDFWSGc9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"linkerd.io/created-by\\":\\"linkerd/helm stable-2.11.2\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"linkerd.io/control-plane-component\\":\\"destination\\",\\"linkerd.io/control-plane-ns\\":\\"linkerd\\"},\\"name\\":\\"linkerd-sp-validator-k8s-tls\\",\\"namespace\\":\\"linkerd\\"},\\"type\\":\\"kubernetes.io/tls\\"}
+",
+            "linkerd.io/created-by": "linkerd/helm stable-2.11.2",
+          },
+          "name": "linkerd-sp-validator-k8s-tls",
+          "namespace": "linkerd",
+        },
+        "type": "kubernetes.io/tls",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "linkerd-policy-validator-k8s-tls",
+      "namespace": "linkerd",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd/sealed-secrets/sealed-secret-linkerd-policy-validator-k8s-tls-linkerd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd",
+    "spec": Object {
+      "encryptedData": Object {
+        "tls.crt": "updated-secretslinkerd-policy-validator-k8s-tlslinkerdwJryAnCmmHsi3mv********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "updated-secretslinkerd-policy-validator-k8s-tlslinkerdLrUuQ2bNa4RoUQ0********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"tls.crt\\":\\"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURXVENDQWtHZ0F3SUJBZ0lSQUpxemFWRDJFQjluK3hzS3ZxSHV1MzB3RFFZSktvWklodmNOQVFFTEJRQXcKTHpFdE1Dc0dBMVVFQXhNa2JHbHVhMlZ5WkMxd2IyeHBZM2t0ZG1Gc2FXUmhkRzl5TG14cGJtdGxjbVF1YzNaagpNQjRYRFRJeU1EZ3hNVEEyTkRNeU0xb1hEVEl6TURneE1UQTJORE15TTFvd0x6RXRNQ3NHQTFVRUF4TWtiR2x1CmEyVnlaQzF3YjJ4cFkza3RkbUZzYVdSaGRHOXlMbXhwYm10bGNtUXVjM1pqTUlJQklqQU5CZ2txaGtpRzl3MEIKQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBemxQSG96bWRiWVo3ZUw0cVZRT0ovc2VIOXd4ZUtzQVN0bnVDUXBZeAp3MTRGRzA0di9xYzV0b1lGbXg5UnlwMExvUTRhVWtWMVpaRFNSNkExb0QvMHQzWDE5U2prbWF3Vng2SFF1eEdLCm9lTXdnN0IzV2Y4dFQxeExNSlN5UEVnL1lmMlFSdDZKa2pKVngzVHdoeXNyMFE4Sjl3SXJpQ3pvL1JoUGhqNnMKUnJqY1lpeXphR1RuT1BGNVFOci9ycjlqOThkYW5mMnVtTTZVdmRMMnBsMHVra3ZjQWQrbEY5aUVFMXBPRTUrWApnWUFEUGloT1JVWHFScUZidDRFT1JuVVRRSlQ1R3UxNmpPdVVjV3JhQ0NYNHRXUVFCKzdabWF0d0tqbFNJWTYrCkRuck5yUFFTaTNPU283NUpXaTA1UjRONWlPVEpRbHA2RnhGcjdaazk5cWZqZ1FJREFRQUJvM0F3YmpBT0JnTlYKSFE4QkFmOEVCQU1DQmFBd0hRWURWUjBsQkJZd0ZBWUlLd1lCQlFVSEF3RUdDQ3NHQVFVRkJ3TUNNQXdHQTFVZApFd0VCL3dRQ01BQXdMd1lEVlIwUkJDZ3dKb0lrYkdsdWEyVnlaQzF3YjJ4cFkza3RkbUZzYVdSaGRHOXlMbXhwCmJtdGxjbVF1YzNaak1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQ3VvelhFMWJZMkR1VHZLdzcya1NoQVE0c2YKeiszZGlYdEhSbGpiYjNKZWIyNFRWOUVqZ1RybmhsYlpFaG8rcFA5ME5kQlIvQTRvVHdXQjdVUFFienp5eHQ5aApCcHZmVXQ1N1pyQ3hQdGs5RXJVdXR2T3EvU2NqNkNDd1VBUjZ4b2pybnJWQzNqY3ZIZEp0TXBNNlA3QnlQVUtxCjZ6c1dVcVExT0p6Tjg0czV6TDRoMG9YZDA5T0RXOC8rNWRFUVBOY1JXM2pHallvdHFoUnYzVm5aSVVYejZlTVcKaXVveFlrTDZNc2NyNHhGZkROOXBDVnkyVWIvV0JUSGVQd2ZHOGduaTVlR3ErMjNUWGFCbm1xd2V2aFNZcXQ5eQpOcm9rMzVVZlFHamI2WUFRUVdyQlRxa1diSDZ2WVpYVUYrZGEwL2JrVnFwbDNDZGpJdHhHaWV4bnUxS1oKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==\\",\\"tls.key\\":\\"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBemxQSG96bWRiWVo3ZUw0cVZRT0ovc2VIOXd4ZUtzQVN0bnVDUXBZeHcxNEZHMDR2Ci9xYzV0b1lGbXg5UnlwMExvUTRhVWtWMVpaRFNSNkExb0QvMHQzWDE5U2prbWF3Vng2SFF1eEdLb2VNd2c3QjMKV2Y4dFQxeExNSlN5UEVnL1lmMlFSdDZKa2pKVngzVHdoeXNyMFE4Sjl3SXJpQ3pvL1JoUGhqNnNScmpjWWl5egphR1RuT1BGNVFOci9ycjlqOThkYW5mMnVtTTZVdmRMMnBsMHVra3ZjQWQrbEY5aUVFMXBPRTUrWGdZQURQaWhPClJVWHFScUZidDRFT1JuVVRRSlQ1R3UxNmpPdVVjV3JhQ0NYNHRXUVFCKzdabWF0d0tqbFNJWTYrRG5yTnJQUVMKaTNPU283NUpXaTA1UjRONWlPVEpRbHA2RnhGcjdaazk5cWZqZ1FJREFRQUJBb0lCQVFDcEorTEtuVmZHRGJWNAozbCtTWjE1aGRYQ3hTSUNEaUFsUGRwN3F2SHg3OGI4NkRiWW5qeTR2eUYwY09tY3lOK0xxM2NjU29FT0pTMXc2CndNeDJYempnbUdOWDVYalZ6RkhtNDNGZmpSZ2RkVWUzRDV3cU9wMEpMVit2cXBrZDl4V1AzdlRFUlhxQVU2Z2oKNkdteVIrQ2FlenZ1T09jN3M2WW9xaCs0cmZWTDNKU1F3ajZxQTZTbnAybERydmhsSXZ3ZFRNaEs2dnh5Y2xLego1a1o1ZkxUeWtZamxydW1kNEhkWU1BdDE5S2doRXBkYkEwRVlsT2hGRisxcDRjOWRtT3FLTW5oVmhHdVR0L010ClZxT09UN0pPU2tZRUpsWlUrZXBYSjVpeTV0bDA5UFpYOGRGSUZrVjNLSlN2c3NxdThnM0d6R2hUajZrVzFYU2wKT2tuMG9LZUpBb0dCQVAyNXUxQ3l3anJpc1Z5bThNMlRiNGxEejZ6YlVZVmJUc1VNL2lCRGJyYTFoYVlGM0ZqZQpzdEVuWXFHK3JtQ3B0dnhMT3Z6VUhKVyttSzJUY2o5VTNDeG1uYmpyWFd6QkNZWVBCbHExQWNvOW9NYy9UclE5ClhUS3BLSDNOcEdJZTBSYXFscDhrLzlnUm5nbEIyZzVSQ0U5LzVtQm5Tc2Z2STZzaDNCUlpWQkp2QW9HQkFOQXQKUm12blpTUHpLby9lcjNlajVWZGZCN1ZzWEhHRmVCWlVRRkwvL3Bia2gxY2FGQVBpUlJLUC9zaVlYcXBXVkNHZApBbThsSmNnRHpvcGw0NFZwQ0xUVDVvWktxUExDK2IzSDVkQVpRV1VXdm5oOEIxejNYemNDZlpybkpJT0FoZEp1CkE4dC9XQ0p6Vms5U1BHSEJyVHgvbnZyRUR0MGhSbGtPKzBTTWphRVBBb0dBSmpVcTVQc1dUcUhHamFwQ0J1TVYKMzdqTGREOU9wbU5hbUVmZG1PUXVydXJrNWx4cGt5UnVEeHI4T2xrcGp6cmZhRnkzMUV6b3hRLy9rOXZwVDJvcgpBYkN1UGFPTDNRMndyblJpdzVRUVlmRW4zZmxGazlUTnpRdzJJY091NW11M2xzODNnVjJqL1ZpaDBNa08yaXNQCnNsRVRVeDhhM3NLL1AwMEpCRE56ZXBjQ2dZRUFoTS9OdEx1Y3NCSEwzcHVRVUlEVXFTZ3NqOWRCSnYraXZJUWwKd1k0bWkzZml6SFFMdnVxVmJLRkhTQXpGb0dDUkxoeXdWOTVZTzBJS2ZBdEMyM05HSmE5bXk5aEg3eERyS2VPbApQMTFOZGtQTFlxeW1PZTVyNVhtR1R0UVdYSHNiWlVQZzBldzllMFVnRkZ6L3Z0SkVSbXVaTHB6MGFxbDI2d3grCnk1M3NJWXNDZ1lFQTJJVFVlZFQvdElucTJpTXNrR2s2ZExxWnZNWDFsVG4rb0o3ZUZFR2xkUGxuVGlzTFBvZ1AKVWRyTzU4Z2xPRHU2Mk9Qbm05YTJlVEJqTHhHa2o0bGdBK0xGT3g2R2U3V2NnR2MvTmt3UWNOTWUvNHFiUThPKwo4QTkxZGRqdzl1NXVZVFN5a0VqVHpxR2FOeVViQi8waHhheXZXY3BCUm1sZXFNOU0zc09LODRFPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"linkerd.io/created-by\\":\\"linkerd/helm stable-2.11.2\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"linkerd.io/control-plane-component\\":\\"destination\\",\\"linkerd.io/control-plane-ns\\":\\"linkerd\\"},\\"name\\":\\"linkerd-policy-validator-k8s-tls\\",\\"namespace\\":\\"linkerd\\"},\\"type\\":\\"kubernetes.io/tls\\"}
+",
+            "linkerd.io/created-by": "linkerd/helm stable-2.11.2",
+          },
+          "name": "linkerd-policy-validator-k8s-tls",
+          "namespace": "linkerd",
+        },
+        "type": "kubernetes.io/tls",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "linkerd-proxy-injector-k8s-tls",
+      "namespace": "linkerd",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd/sealed-secrets/sealed-secret-linkerd-proxy-injector-k8s-tls-linkerd.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd",
+    "spec": Object {
+      "encryptedData": Object {
+        "tls.crt": "inital-secretslinkerd-proxy-injector-k8s-tlslinkerdtHV6Ye7vE0MqqZs********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "inital-secretslinkerd-proxy-injector-k8s-tlslinkerd5AYHYYUhlQS3h_J********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"tls.crt\\":\\"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURVekNDQWp1Z0F3SUJBZ0lSQUxsUXVZVlBqeVo1N0dhcWgzWXFJM3d3RFFZSktvWklodmNOQVFFTEJRQXcKTFRFck1Da0dBMVVFQXhNaWJHbHVhMlZ5WkMxd2NtOTRlUzFwYm1wbFkzUnZjaTVzYVc1clpYSmtMbk4yWXpBZQpGdzB5TWpBNE1URXdOalF6TWpOYUZ3MHlNekE0TVRFd05qUXpNak5hTUMweEt6QXBCZ05WQkFNVElteHBibXRsCmNtUXRjSEp2ZUhrdGFXNXFaV04wYjNJdWJHbHVhMlZ5WkM1emRtTXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUEKQTRJQkR3QXdnZ0VLQW9JQkFRRGduL3ZacVo4NGdEVWhuRG9OdEQxYU1zZXBReFFhTnRDcWdWR3lIOFZSZm9ySwpXMTdRcko0M2lvd3JvVXUzaWpQY3JPZnlQdFZxOWZSMXNlSCtBenY1WlFpczRQYUlNUFZ1b1AxV3ArK3pPTVpyCmJydE01TzNIdUNCcmVXYTRaU2ZoeXRkNDhxMzhEdTVnQ1I4WFByKzUwQU5BN2FVaUYxaG9uK3MycUVMbHY3b0UKL01FblR5eUhIUWhzNWFkajVMdWR3bXpBTXI1cGo4ZGlXc2d4WThLc0owYU8zVGJIUmJXTkRZTU9MZFNzZ3pFKwoxRmsxdTdMSWljRG9GQm1oRENZZVZzTURLYTV4Znk4TVUrU1FxVEpKVHRiUXNBTzdiQU5KTW9mMnJEZUhTeTU3CnhSRFBTczZNTjU2MXNadVdHaHdJQmpzZHZCMU5UcXp3ZFo4ekhjNWpBZ01CQUFHamJqQnNNQTRHQTFVZER3RUIKL3dRRUF3SUZvREFkQmdOVkhTVUVGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0RBWURWUjBUQVFILwpCQUl3QURBdEJnTlZIUkVFSmpBa2dpSnNhVzVyWlhKa0xYQnliM2g1TFdsdWFtVmpkRzl5TG14cGJtdGxjbVF1CmMzWmpNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUJ0NHNaNlNnclRSK01xbExON3F3bW9kMXplTkF1dDh6Q3IKYkc3NEhpdktIZ1Zhb3JwOUp1SlJKU0VEUlVQLzdocmNMd0pjRUlMTllGZHhmalpKYllBMUFnSmZkdUt2WDM0Ygo1SC9hc05QRkVzSTdIOWw0cmY3TDVHbjJ6QWlBR1k4WFpKcXpxclE0eGIrdWE0V3p1VGQ2VHRoSm9pMU96UTBNCnh3UWRFbHVBWTNYVzJZV2VrYzJub0FiRlFvNCtQK3VVcHg1NE8wY0NCa0xCM2NuSmtzZ2RRejViektXVzFITUkKQmRQekN3c0xTK1dPK2doTWRWSkVuV3hWY1krNTZpRjNCM2FQWG9WL01RNU56WEs5c2FBNVZhYWJKbjVYd2FqRAplR1l4QlJvZ0R2ZTNnaWwwbERDbnVxMHZZZFp2aktDd2dwRUxhaVBWS1dnZmxYcVR1bFVWCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=\\",\\"tls.key\\":\\"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBNEovNzJhbWZPSUExSVp3NkRiUTlXakxIcVVNVUdqYlFxb0ZSc2gvRlVYNkt5bHRlCjBLeWVONHFNSzZGTHQ0b3ozS3puOGo3VmF2WDBkYkhoL2dNNytXVUlyT0QyaUREMWJxRDlWcWZ2c3pqR2EyNjcKVE9UdHg3Z2dhM2xtdUdVbjRjclhlUEt0L0E3dVlBa2ZGejYvdWRBRFFPMmxJaGRZYUovck5xaEM1Yis2QlB6QgpKMDhzaHgwSWJPV25ZK1M3bmNKc3dESythWS9IWWxySU1XUENyQ2RHanQwMngwVzFqUTJERGkzVXJJTXhQdFJaCk5idXl5SW5BNkJRWm9Rd21IbGJEQXltdWNYOHZERlBra0treVNVN1cwTEFEdTJ3RFNUS0g5cXczaDBzdWU4VVEKejByT2pEZWV0YkdibGhvY0NBWTdIYndkVFU2czhIV2ZNeDNPWXdJREFRQUJBb0lCQUFyYTBGSFpaNDlVYXJ6ZwpEdElndHFKSU4rdlBDUWFuUlhnbjNhbk03VDBkNzFrT0IwdndPNGtWa2VaOTJlblpyTjNxSVI5TXVBVitNejBJCnhwSCsyQVFhUk13TjV2djMyYlJwNVRRdDAyQ0d5dGZnTnY3bFJUUlVpb1NIRGxhMDFMT05tTklJY0MzeERzWG4KU3ZCVm9QQTZ4QjE4SG5IQ1RReHBSZldUTmdCaUowYzE4UmNxMUViR2wvQUZHckIrMTZCZEdWK2dpOTR6MDNHaQo5R0ZkZHNPQTdRdzFsSk9iaDZ3OVhqZFZOU0l6dC9FbSs4eEd3VHdpaC9IQkZVQ2hib1g3djhQMUZtT0wwN1B2CitBd2NBTWJiNDN2c2F0TFlJVDc0SDR6U2xWZ29raG5zVDlaellwRkV4WWxsTktFQ3pOVjlQQXdDWVBZYmJvc3gKYzFrQVdIRUNnWUVBL0ZxejFnSUVQT1Z2OEJ6YXJ5bFVIUnJWSEt6WTdyeWc5Q0VzZ2ZSRDhoRU5zN3l6aWtEQQpVaXI4U2czaXpONldzNldCMkxxTVBpWGlaMlc2ek8wZEFobTNUNVFtRkx6NGdSMUt0OURGZmVaSTlyeTAwNExDCjFtU01uMlJHRlFtTHBoL3U0Mk5KeWN2RGp1TjRUajhua1hmNlhCenljWlVKdU1JWDUvQ1dueXNDZ1lFQTQ5NjYKWW5KK3k1eVlHZlhvOWxJMHlFa25OZjBNRnhKbllHNzdMNmtNdWt4a241VHJ4YytxdGU3TGxveS9aS1lxWmNOeApUYkpabkFLZlFvZUZIR00wOSs0aERDYnNJWFJUcHo1Y01UQm40SFBJVlUxTTJjb0EzMTJnU2ZzUlU2aXRmRnIrCnNjUURoZDc3Sm9XZFNwTGtLbGpwamVoQ3d3cWJaS2FsblRIbXNha0NnWUVBNC9JU1M1ZGF1SjhPODdjOG1jZ2QKSUlVaVIxcWlRVlBGbDM5M3NwTXY1TEllekdJQlV6cVYvaUt4N1RxSnlVQ3VvK3MyVk14ODdZNU82ZExzWHpzMwpYclJYN3R3Rlllb29Gb2ljKzFqcmE0UGVHSEh3YkxYS3hObmlZLyt4aGtNdkQ0bjh3UXpvbEEwb3dpTWFncU50ClhHc2hqSjdoS0ZQVmlqeFlWN3ZzY2kwQ2dZRUE0c0hsRmt5NzB1RU5GMkI0S0k4YnlXZktwbFlmYnVJNGoyVkIKZjJjcHJFYVRKNTdwbFJxWDFaNUJhSnE5WjJwWDdKYTJMTXhia2YybUFHMmR6K2NGY2VlOWFUdGVaZGc5MnNNYQp1VFJqV3ArOWJ1MlNtWFFFdEVLV1hLaUUwSXlkdjQ5SnZ4ckJLcm4va1pFTE9vZThtRXVNZDFQM0ErS05TbmJ2CmZlT0huNmtDZ1lFQXcrU3hManc3OWpFUjBWRzJrSTBaZkRCaXF6cEVjMmVyRkZOaFBnZGszSWtHSkZEZkF5S00KTEE4dEdWNDNkaEtpNWJtUytzeVMwYy8vQWJVTXBwbDVWb0tZekRhMjN4RkpPU1dEOXZYUkdXcXBMVVRwaXpEaQppVDdyQ253V253WHJ0YURBaUk5RE1zRU9mT2hKc1E0SGF0N0ZhQ2FLY0o1ak9SVDYzZ2Z6cXJRPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"linkerd.io/created-by\\":\\"linkerd/helm stable-2.11.2\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"linkerd.io/control-plane-component\\":\\"proxy-injector\\",\\"linkerd.io/control-plane-ns\\":\\"linkerd\\"},\\"name\\":\\"linkerd-proxy-injector-k8s-tls\\",\\"namespace\\":\\"linkerd\\"},\\"type\\":\\"kubernetes.io/tls\\"}
+",
+            "linkerd.io/created-by": "linkerd/helm stable-2.11.2",
+          },
+          "name": "linkerd-proxy-injector-k8s-tls",
+          "namespace": "linkerd",
+        },
+        "type": "kubernetes.io/tls",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "linkerd-viz-ingress-auth",
+      "namespace": "linkerd-viz",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd-viz/sealed-secrets/sealed-secret-linkerd-viz-ingress-auth-linkerd-viz.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd-viz",
+    "spec": Object {
+      "encryptedData": Object {
+        "auth": "inital-secretslinkerd-viz-ingress-authlinkerd-vizkev7l1FeSniNIID****************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"auth\\":\\"YWRtaW46JDJiJDEwJEEwS2pIb2oydlNhMFhOeFVyU0RLbGUzcHk5SHE5c2xVbG51M3ZUeXJnWlZWa2d2cDJZMWUu\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\"},\\"name\\":\\"linkerd-viz-ingress-auth\\",\\"namespace\\":\\"linkerd-viz\\"}}
+",
+          },
+          "name": "linkerd-viz-ingress-auth",
+          "namespace": "linkerd-viz",
+        },
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "tap-k8s-tls",
+      "namespace": "linkerd-viz",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd-viz/sealed-secrets/sealed-secret-tap-k8s-tls-linkerd-viz.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd-viz",
+    "spec": Object {
+      "encryptedData": Object {
+        "tls.crt": "inital-secretstap-k8s-tlslinkerd-vizLeXyOxDu8XcIrhL************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "inital-secretstap-k8s-tlslinkerd-vizmhMNbKKBcaQcZ4i********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"tls.crt\\":\\"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURKVENDQWcyZ0F3SUJBZ0lRQzQyZlBjc3B1VXhUaE1DdDVhMTE5VEFOQmdrcWhraUc5dzBCQVFzRkFEQWUKTVJ3d0dnWURWUVFERXhOMFlYQXViR2x1YTJWeVpDMTJhWG91YzNaak1CNFhEVEl5TURneE1UQTJORE15TTFvWApEVEl6TURneE1UQTJORE15TTFvd0hqRWNNQm9HQTFVRUF4TVRkR0Z3TG14cGJtdGxjbVF0ZG1sNkxuTjJZekNDCkFTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTHJYb3dJNWdpbUtmbEVOdU9QMjA0MnkKbUJpV0tYQjl6R0pjdEU1RHNyV3pZMHFySkFsMHlOQ1p4aFZpRDFCWUFFd3hGODcxdnpPdjdpUXpVcVNLTjJ2ZQpmOFZZNkNUejZjbVVYa1dyWmZaMHNORVBnSzYwcjVIM1ZaT3V3eFZta3UzL3FXT2Q4UFVxYUN2MWk1eHg1R3hRCmNXZmFSVWdWbUZQRHB5bUhvcEcrZlBkdmZDMWRtc1lJdEloYllVNGw0YWNvbHlUM3RWOG1tcFpKVjVqdWdzR3QKUnVDWTlucE1vZ0E5aUwxOWM5V0dESFFTbWVlWlZsTE90NG5BLzhOWEhMZlpiZDc2TG9lUUF3dGVPaXJZaFU1dApLNHZHNlZHMnc0RWh3ekpBeUhFMkJ1NHRnNnNrN3huOUFqcjB1TjJwNlV5QjFnR3paOTd2cWNyMC9vSkFPMThDCkF3RUFBYU5mTUYwd0RnWURWUjBQQVFIL0JBUURBZ1dnTUIwR0ExVWRKUVFXTUJRR0NDc0dBUVVGQndNQkJnZ3IKQmdFRkJRY0RBakFNQmdOVkhSTUJBZjhFQWpBQU1CNEdBMVVkRVFRWE1CV0NFM1JoY0M1c2FXNXJaWEprTFhacAplaTV6ZG1Nd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFBM3UxT1ZINEVPaEZSRU9PMEp1TzZEY2FJeDZqdnhXClRVR2ZQeS8rdTllcE9oY0pGSyszTnJFR2E4SDVwU0dvVWRVTitvUS9MTVZ0REh3ZnU3WnF2Y0NXWDk4bmtHaUMKOTVHYnRNeENpY2hjS2gwdkppcDdHT3VKeENQelpzRkJUTEwxWHJFalhIYmI3YzFtZnNzWTFGRFBtOWltSmVsUgpUb2lLQlZsV1o4akhaQWQyZ28yeCtlWHNFY3hQTVdFTFB5dnB1N1gweDkwaEtxRlp4OWRyR1RwZkdMd21nNXB0CkwydnIwM3FUVzJPdVdkMU5DMExDaWE2SFEzSlo4UnZJN2FDRUNVZkhqb0lsaGM4d0RkUytEbjdxM0RCQVh3SXUKRlREMlk4eGVZWlZqNzFKM3pRcjNMdGxScnd1TmlZbnhwSEkyYlRZbm90RkpwZjdkZ0w0ckVDaz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==\\",\\"tls.key\\":\\"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBdXRlakFqbUNLWXArVVEyNDQvYlRqYktZR0pZcGNIM01ZbHkwVGtPeXRiTmpTcXNrCkNYVEkwSm5HRldJUFVGZ0FUREVYenZXL002L3VKRE5TcElvM2E5NS94VmpvSlBQcHlaUmVSYXRsOW5TdzBRK0EKcnJTdmtmZFZrNjdERldhUzdmK3BZNTN3OVNwb0svV0xuSEhrYkZCeFo5cEZTQldZVThPbktZZWlrYjU4OTI5OApMVjJheGdpMGlGdGhUaVhocHlpWEpQZTFYeWFhbGtsWG1PNkN3YTFHNEpqMmVreWlBRDJJdlgxejFZWU1kQktaCjU1bFdVczYzaWNEL3cxY2N0OWx0M3ZvdWg1QURDMTQ2S3RpRlRtMHJpOGJwVWJiRGdTSERNa0RJY1RZRzdpMkQKcXlUdkdmMENPdlM0M2FucFRJSFdBYk5uM3UrcHl2VCtna0E3WHdJREFRQUJBb0lCQUhrbW43VXVrdjdhcFlOcgpFV3NIdmk5UUVaMUhxUUVmSU9yYXo3TTc1R0k3T25QTk91WEN5dit2NWlneFdGcXhaU2dDWVR5NlRrdDJsVVQxCjNtMkFqZVVzOWM2Q0VxejdWNmwwd2hnTXhtV2pUbytRck5FYnFnaE14em1taFNxWVEwZDlrbGxjclVSYlJnYlQKQmI3Z2Zzdlk4Vi8wd1IyM212a2RrWU8xUmkyWHFXODA5eGp3MDhLQnd4dHpCRTBRSE9UQ1ZnOGhzakIrTmQzbgpQQm9DVWQxdVNsTmh6QWw1MmJCc2dMR1JObUhOalloVWpkNDJSVUZybnhIWlNNZldkMXQ5ZFFVc2pjTjhjREJSCkgyTmdxckNnVWRQejBLUCtBMDJJT0ZNeTZyVGNQUmtiQWlEdkVKMnlDSGFhaFc1Y0RZaUpubGR3Zm5mZ3JJK2MKeFBwWlJ3a0NnWUVBeklrMEtveVpQSFRBSmJZeHY1SWgyVkFMQTVWbHJ1blB5bTFGTXQ5Q25tZWVMaHU2cEtZRgphakVjTFhPSSthc2pPTlpGSTc2Y2V4cUE0c2hwdUZyQmR3RTV4ejYrSm5PUVd5Q0JDWForWC9Bb3l5SFJDUEpNCmo3cXBrYjV3d0hMaEhvTWNpR0lHdmowdGdPOFNqZ1hHd3BGSWxqR2I2TEsvVzhKcFd0RVB3YnNDZ1lFQTZkcTcKV3k3Wlk0aFJWbWloR0F0Qmp2SlhONmlESWFIdkk4elFpakNuVlJqUFBEckt5dVdNNUxKeW4zUGxjL3dQWHU4RAp5d0E0aXFwcWQ2Ukx3MGpCekR1TXNJVWFtTy9NUENoSGZWMnVXNzlNcUQ3Sy9JQkVZVnQrZEFZUzJrYmh4RkdrCnRtcTRUOGxSZUpUZmkrNC9FZHdkZEVQN0piTEpraUs3R0VYQjhLMENnWUVBanZFQU5SQkhjem5BbzFwZUVCem4KYlFFRWdYK2lMWWlYd0VkM1NlTS9vb2FWeEhGNmtlQzQvZ3JPUDNGejg5QkhjRXhHeTRGRnlMNnYvazNEbktSSQplb3V2dm5BNTRaTjMra2VRQm5YNlFjQU1NbEl5elViUWZNNGQvWTRUTEZ2Y3VqODA3SmRkVVF4ZVJiSk96RlI3CklMVDUvb1V6Q1lBS1BlMXpSWlcvcGtzQ2dZRUFxTUJLaXRZWDBSZEJlcFV1Q21lMCt5NHRlZUNFSC9UMjJHS24KNmRDS0w0SWpxVmJUbCs1bDZYSkwvSHhwaTNUTXNyalBoK0cwNjN0bU1NZkNWRDFnZTd4TkhlUXUrVVd4bjRlQgpieG4zQkFYYmoxMGdwV3o1NnpkVzNPcTFHQVltVE1DTmw0VVRVNS8yeG9qSGQvYUlWSjcrTWpRTU8zdjBzUnVXCjMwRVhYbEVDZ1lFQWg3eFFhOFV1cW5QYmJ1TXlHVmRBenJITjYvYlorRm14R3FobXNHQ1dGK0EzeWtNeUprUWMKZi9HbkZ1ek1tSWRmYkhHM0pOUGMrNEYvL3N3azcyRi9rdFJtTE5Yc3hjUm96M0lNTitkeXE5dGUxeDJSN3NEbApZN3hORjdkTEVIQ2JXQTJuN2Nmc2RQQTJiaGJxNEhJU3VZcW0xWE1yVnF2THlETitjejZJT01NPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"linkerd.io/created-by\\":\\"linkerd/helm stable-2.11.2\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"component\\":\\"tap\\",\\"linkerd.io/extension\\":\\"viz\\",\\"namespace\\":\\"linkerd-viz\\"},\\"name\\":\\"tap-k8s-tls\\",\\"namespace\\":\\"linkerd-viz\\"},\\"type\\":\\"kubernetes.io/tls\\"}
+",
+            "linkerd.io/created-by": "linkerd/helm stable-2.11.2",
+          },
+          "name": "tap-k8s-tls",
+          "namespace": "linkerd-viz",
+        },
+        "type": "kubernetes.io/tls",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "tap-injector-k8s-tls",
+      "namespace": "linkerd-viz",
+    },
+    "path": "generatedManifests/test/infrastructure/linkerd-viz/sealed-secrets/sealed-secret-tap-injector-k8s-tls-linkerd-viz.yaml",
+    "resourceBaseDir": "generatedManifests/test/infrastructure/linkerd-viz",
+    "spec": Object {
+      "encryptedData": Object {
+        "tls.crt": "inital-secretstap-injector-k8s-tlslinkerd-vizJx2XrwZoftweJRz************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+        "tls.key": "inital-secretstap-injector-k8s-tlslinkerd-vizY74qk_ryJXUy4Qr********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"tls.crt\\":\\"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURRVENDQWltZ0F3SUJBZ0lSQU9aT2Q5cTlhYmJDZ3pya3dLMHRleEF3RFFZSktvWklodmNOQVFFTEJRQXcKSnpFbE1DTUdBMVVFQXhNY2RHRndMV2x1YW1WamRHOXlMbXhwYm10bGNtUXRkbWw2TG5OMll6QWVGdzB5TWpBNApNVEV3TmpRek1qTmFGdzB5TXpBNE1URXdOalF6TWpOYU1DY3hKVEFqQmdOVkJBTVRISFJoY0MxcGJtcGxZM1J2CmNpNXNhVzVyWlhKa0xYWnBlaTV6ZG1Nd2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUIKQVFETnZwOU1ZYUVobE9kY3BtSlZSSGJjbzUwSmFBNXA0bG9hVnV3UnU4Q1RjRndYOXlyc3lOUVpYV1VOR0lQMQpNMGJBR0kxL2RIMlRIY2R6d0RDdU9NRUtCVzJ5U1J4L1hDNFZ2OHJTcnQzSktiSXJkSVIxWUd2QW9uTHVpdFlGCkx6T1dFR1dzS1BjcjkxV1E2WmZIWDdicVl2a1YvUUpWVFluZDNPRkt0NjlFdUFjN09yOXRiNHhJV3JxRGVhTXgKN2RVajNnVE05SG9rcjVRclFIN1M1V3RrL2cvVEo3R0twRS9qeloxenhaN04zOFJOWVpGM2dLT1ozbHhBU3M3bQpKemxmcnlzbHhpc21kVUE3MlFoYWxWeG41RXZSc3Q0UURMNUI5MzA3VmtPNDJKZkFmcjNmbW5yV01IcHpTL0srCitUZmljdDEzT3p5c0lYNTZON1hwSnNUWkFnTUJBQUdqYURCbU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlYKSFNVRUZqQVVCZ2dyQmdFRkJRY0RBUVlJS3dZQkJRVUhBd0l3REFZRFZSMFRBUUgvQkFJd0FEQW5CZ05WSFJFRQpJREFlZ2h4MFlYQXRhVzVxWldOMGIzSXViR2x1YTJWeVpDMTJhWG91YzNaak1BMEdDU3FHU0liM0RRRUJDd1VBCkE0SUJBUUFVVU5DWWZ2cDhsWFdadnF4Vy8wd1RWQ2J6UGEzSzB5Nk1wOTFaZmRQd1lHS05NUFJkV0tJbEQwMnEKL1ZKM2ZBV1AzcEw4VE1vSCt5VWxxRWdESEtvUDlQZzFCM3Ayb2tFOHNaVDdjSHR4U0orTlNkTzJseEVSV2U0VAovMU5tNC8vWGw1cVhCZWVmbHo2enM0VmMvK0tPL0JnZnpncTViaUhwamVISDhRcVRnVmw1U2h3b1RvQTVidDdiCjN5bitZM25aVStsdThXajQ5MjYvd1d1L2UwUDY0Z3ZJdDhMWDlTMHBJNXZZM3E4clR1eWgyalZFRDVIdmE0TUMKenJGSm5razVWT0UyTVRSYlZ4T0pnb3RkMzYzdmV4TmZJZjNkWWNDRHhMMkNTZE1XZkNhWmdLSGlFeHJDMCtGcgpzVFducHdFZ0llazJBbmN4UFFlbmRwQWdPSlNpCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=\\",\\"tls.key\\":\\"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBemI2ZlRHR2hJWlRuWEtaaVZVUjIzS09kQ1dnT2FlSmFHbGJzRWJ2QWszQmNGL2NxCjdNalVHVjFsRFJpRDlUTkd3QmlOZjNSOWt4M0hjOEF3cmpqQkNnVnRza2tjZjF3dUZiL0swcTdkeVNteUszU0UKZFdCcndLSnk3b3JXQlM4emxoQmxyQ2ozSy9kVmtPbVh4MSsyNm1MNUZmMENWVTJKM2R6aFNyZXZSTGdIT3pxLwpiVytNU0ZxNmczbWpNZTNWSTk0RXpQUjZKSytVSzBCKzB1VnJaUDRQMHlleGlxUlA0ODJkYzhXZXpkL0VUV0dSCmQ0Q2ptZDVjUUVyTzVpYzVYNjhySmNZckpuVkFPOWtJV3BWY1orUkwwYkxlRUF5K1FmZDlPMVpEdU5pWHdINjkKMzVwNjFqQjZjMHZ5dnZrMzRuTGRkenM4ckNGK2VqZTE2U2JFMlFJREFRQUJBb0lCQUJSVW5kRWlaSlc0N1JQTwpyVERYenhjR1krSW1FaWFNWTNMdTIrejBySmJsSjNTR3pBc1IzVU9VWXdQa1JFWGFoMGM4SmQ5T1Y0cE9Dd041CkhsWlk3VnBjSnZiVEdxbkxKaEtvSFJhc2lPWHo1Tk0rZEVoVSt0RFNQS0V0dnZCTU5jRENaZ21aRXJPWmdTOE0KcGg3aGFtWEcyZTQrVGhpM3pNUExxOGVDVnlObkRseEg2MXA3QjJ0VEQrbno4TVBnMEkyNWtoazNMbHBia08zSQpxTElESVhBREQ2dE8xN1IxRmtselZDdXlLalB6ajB5Z2s3U1hUTlpuZTNrcmY0WHdOYjFPSnFBTGxsZkJqdnNUClZXRnlNZ2lrY1dhYmoxbHVScEFKRGJGaytTMWdaMnZuVjhWQ1pXdzBNRFZpanNBSm9EZVFBcDYwZHRrSWY2UWwKRmo4bHZYRUNnWUVBei8wQmJkdXluV2ZQV0RUUDU3ejV5aFJoMG5FRzg0VWV0RFhsSGRLN0ZLNVVFODEwcTY2dgpxRVZRZjJPWTRFNUZmT2tOamRCNVJmWVgyN1J0TVhjLzVFbStwV0JXM0lWU05DdU9pTUVuNHJJOU0wT2NCUFhmCkU4U2pIblBDZGZ4VVgyV0ZJcjlZM3pNM0p6bEVoT1R0NE5sNEpNWmhqV2J4UVpVSzZrOGM5RDhDZ1lFQS9UMEcKNUY2NmZIWXdMWFJOU0Fqa3NES3BsYlUzWXRPcm9DNkkwZlBXdHJwSDloUDlPS1RsMTBXUFpVRzduSk9kVUJUTQpMSTlaaUd4cmdmR1VPQVVoWUVDakM1MHZMRmZGcFpOSWJNQ0FKNGdzZUdvb1VvQkMyc2ljWjlxYTBVZkNmU0JjClNZTFd4UFk5bmgxTXJtdlJkUWdGaTYwLzdhdGNmRWJkbzc3aG9PY0NnWUFjWUFzSzN0YytiRVE0WjNRWnpJbFQKalhaUERJYURRSjBRdnUyVUpRVEs3SUdoOWZ5OTAyWTVrY05LcmQ3VWN6azlzbG5jQ0I0VGNtQ000OCtsMlB3SgpmQm9iVzhwZDZYNXVpYWEzZDRxbWZlU2xrc3E5VG9IeG8za1JsWDlwTTFTYmN6RTNyVjFGamlvdkdyd0RXV3d1CnFkeWZQOFZkVWpjRjJIeVZ2TmRaWndLQmdRRHhuMy9xK0NPUlM2ZU9SekRSc1lLYVI4eWRSa254WnF1VDY3S3EKT0xFK3FpQ3RQOGRWZTZpOXJPWTBJL0xoWThzdXRKbFhUdk9MZ245VmZlNEJRWXZsN2VaajEzZENKUUUxaVlFSwpHdVpzVWJhMHNmMkZNbElYdEYvZmk2bzZVdkRVT01NMWRMeDlNOEg1RWxXdStycmdvbVhBTHU4WFUzQ3NOMldVCnJqVlVNd0tCZ1FDZlhEOE1yMElIWGR6cFlYL1VnTDQ2REVCUjB4aGt4YTUvQUl4c3Frcjgzeldad01FQ1E1dFoKdk5QZW9KUWVrMXI4M3ZRNHVpVlVLRUk2NmErU05wbnhDbDh0SVIwdjFwcGkyYnRVdDdrdEFjZWtnN0EwL1R6agpkSHc0eDBoSVVTb2pEYTQ1OUNRMk0zcXRBeHdvYXNlNERyQ3lBbmpKN0QxdWJEQ1d5Uy9Icnc9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"linkerd.io/created-by\\":\\"linkerd/helm stable-2.11.2\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"linkerd.io/extension\\":\\"viz\\"},\\"name\\":\\"tap-injector-k8s-tls\\",\\"namespace\\":\\"linkerd-viz\\"},\\"type\\":\\"kubernetes.io/tls\\"}
+",
+            "linkerd.io/created-by": "linkerd/helm stable-2.11.2",
+          },
+          "name": "tap-injector-k8s-tls",
+          "namespace": "linkerd-viz",
+        },
+        "type": "kubernetes.io/tls",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "graphql-mongo",
+      "namespace": "applications",
+    },
+    "path": "generatedManifests/test/services/graphql-mongo/sealed-secrets/sealed-secret-graphql-mongo-applications.yaml",
+    "resourceBaseDir": "generatedManifests/test/services/graphql-mongo",
+    "spec": Object {
+      "encryptedData": Object {
+        "APP_ENVIRONMENT": "updated-secretsgraphql-mongoapplicationso0D1zGgH9oXNF6a********",
+        "APP_EXTERNAL_BASE_URL": "updated-secretsgraphql-mongoapplicationsi1VMunQGRDU3vqf****************************",
+        "APP_HOST": "updated-secretsgraphql-mongoapplicationsGag7ZYhtx9iYzbt************",
+        "APP_PORT": "updated-secretsgraphql-mongoapplicationsNg_0qg2GrfCsuTl********",
+        "MONGODB_HOST": "updated-secretsgraphql-mongoapplicationsMZbHf1H3NtZpXqy************************************************",
+        "MONGODB_NAME": "updated-secretsgraphql-mongoapplications_WeFEDvnBUKaU7A********************************",
+        "MONGODB_PASSWORD": "updated-secretsgraphql-mongoapplications0jQWlbzvNzUp4rv************",
+        "MONGODB_PORT": "updated-secretsgraphql-mongoapplicationsdvTSpY6Ik8qydKF********",
+        "MONGODB_ROOT_PASSWORD": "updated-secretsgraphql-mongoapplicationsO97DqwzTX5zOhhL****************",
+        "MONGODB_ROOT_USERNAME": "updated-secretsgraphql-mongoapplications5Soo7Edg7FiIvXC************",
+        "MONGODB_SERVICE_NAME": "updated-secretsgraphql-mongoapplicationsV11bqj07tZCr4nx********************************",
+        "MONGODB_STORAGE_CLASS": "updated-secretsgraphql-mongoapplicationslCnQrLyu9JyzSUR************************************",
+        "MONGODB_USERNAME": "updated-secretsgraphql-mongoapplicationseDVSOr9t8Z5glkP************",
+        "OAUTH_GITHUB_CLIENT_ID": "updated-secretsgraphql-mongoapplications8rjzSTgyQRF7EyO****************************",
+        "OAUTH_GITHUB_CLIENT_SECRET": "updated-secretsgraphql-mongoapplicationsysF5g1Qm93HxDvS********************************************************",
+        "OAUTH_GOOGLE_CLIENT_ID": "updated-secretsgraphql-mongoapplicationsvrZBIJNH6eMYfZE************************************************************************************************",
+        "OAUTH_GOOGLE_CLIENT_SECRET": "updated-secretsgraphql-mongoapplicationse7ExyNUHVqZ5FPf************************************************",
+        "REDIS_HOST": "updated-secretsgraphql-mongoapplicationsnmNARFBd2RSB038****************************************************",
+        "REDIS_PASSWORD": "updated-secretsgraphql-mongoapplications5NMd1_Ke_zaq_wD************",
+        "REDIS_PORT": "updated-secretsgraphql-mongoapplicationshHyNysN3UtNWche********",
+        "REDIS_SERVICE_NAME": "updated-secretsgraphql-mongoapplicationsBx6pUsoqmWSlvjH****************************",
+        "REDIS_SERVICE_NAME_WITH_SUFFIX": "updated-secretsgraphql-mongoapplicationsd80mvpCED7wgmeh************************************",
+        "REDIS_USERNAME": "updated-secretsgraphql-mongoapplicationsLCXtS8UOF3jC8S_************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"APP_ENVIRONMENT\\":\\"bG9jYWw=\\",\\"APP_EXTERNAL_BASE_URL\\":\\"aHR0cDovL2xvY2FsaG9zdDo4MDgw\\",\\"APP_HOST\\":\\"MC4wLjAuMA==\\",\\"APP_PORT\\":\\"ODAwMA==\\",\\"MONGODB_HOST\\":\\"Z3JhcGhxbC1tb25nby1kYXRhYmFzZS5hcHBsaWNhdGlvbnM=\\",\\"MONGODB_NAME\\":\\"Z3JhcGhxbC1tb25nby1kYXRhYmFzZQ==\\",\\"MONGODB_PASSWORD\\":\\"anVuZ2J1bnU=\\",\\"MONGODB_PORT\\":\\"MjcwMTc=\\",\\"MONGODB_ROOT_PASSWORD\\":\\"ZXhhcmVyZW1wbGU=\\",\\"MONGODB_ROOT_USERNAME\\":\\"ZXhhbXBsZQ==\\",\\"MONGODB_SERVICE_NAME\\":\\"Z3JhcGhxbC1tb25nby1kYXRhYmFzZQ==\\",\\"MONGODB_STORAGE_CLASS\\":\\"bGlub2RlLWJsb2NrLXN0b3JhZ2UtcmV0YWlu\\",\\"MONGODB_USERNAME\\":\\"ZXhhbXBsZW1t\\",\\"OAUTH_GITHUB_CLIENT_ID\\":\\"ODljMTkzNzRmN2U3YjViMzUxNjQ=\\",\\"OAUTH_GITHUB_CLIENT_SECRET\\":\\"MTI5NDg4Y2M5MmUyZDJmOTFlM2E1YTAyNDA4NjM5NmM0OGM2NTMzOQ==\\",\\"OAUTH_GOOGLE_CLIENT_ID\\":\\"ODU1MTc0MjA5NTQzLTZtMGYwODhlNTVkM21ldmhucjhiczBxamFwOGo2ZzBnLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29t\\",\\"OAUTH_GOOGLE_CLIENT_SECRET\\":\\"R09DU1BYLUNTMUpGaXNSSVNnZU4wSS13VGFWam8zNTJ6YlU=\\",\\"REDIS_HOST\\":\\"Z3JhcGhxbC1tb25nby1yZWRpcy1tYXN0ZXIuYXBwbGljYXRpb25z\\",\\"REDIS_PASSWORD\\":\\"anVuZ2J1bnU=\\",\\"REDIS_PORT\\":\\"NjM3OQ==\\",\\"REDIS_SERVICE_NAME\\":\\"Z3JhcGhxbC1tb25nby1yZWRpcw==\\",\\"REDIS_SERVICE_NAME_WITH_SUFFIX\\":\\"Z3JhcGhxbC1tb25nby1yZWRpcy1tYXN0ZXI=\\",\\"REDIS_USERNAME\\":\\"anVuZ2J1bnU=\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"annotations\\":{\\"sealedsecrets.bitnami.com/managed\\":\\"true\\"},\\"labels\\":{\\"app.kubernetes.io/managed-by\\":\\"pulumi\\"},\\"name\\":\\"graphql-mongo\\",\\"namespace\\":\\"applications\\"}}
+",
+            "sealedsecrets.bitnami.com/managed": "true",
+          },
+          "name": "graphql-mongo",
+          "namespace": "applications",
+        },
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "graphql-mongo-database",
+      "namespace": "applications",
+    },
+    "path": "generatedManifests/test/services/graphql-mongo/sealed-secrets/sealed-secret-graphql-mongo-database-applications.yaml",
+    "resourceBaseDir": "generatedManifests/test/services/graphql-mongo",
+    "spec": Object {
+      "encryptedData": Object {
+        "mongodb-passwords": "inital-secretsgraphql-mongo-databaseapplicationsp3ynYabZO407LT3****************************************",
+        "mongodb-replica-set-key": "inital-secretsgraphql-mongo-databaseapplicationsAOfsemTq2Icsk_J****************",
+        "mongodb-root-password": "inital-secretsgraphql-mongo-databaseapplicationsXo4FSyuOsswrlaP****************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"mongodb-passwords\\":\\"anVuZ2J1bnUscGFzc3dvcmQxLHBhc3N3b3JkMg==\\",\\"mongodb-replica-set-key\\":\\"MkozZno3SlRmVA==\\",\\"mongodb-root-password\\":\\"ZXhhcmVyZW1wbGU=\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"labels\\":{\\"app.kubernetes.io/component\\":\\"mongodb\\",\\"app.kubernetes.io/instance\\":\\"graphql-mongo-database\\",\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"app.kubernetes.io/name\\":\\"mongodb\\",\\"helm.sh/chart\\":\\"mongodb-11.1.10\\"},\\"name\\":\\"graphql-mongo-database\\",\\"namespace\\":\\"applications\\"},\\"type\\":\\"Opaque\\"}
+",
+          },
+          "name": "graphql-mongo-database",
+          "namespace": "applications",
+        },
+        "type": "Opaque",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "graphql-mongo-redis",
+      "namespace": "applications",
+    },
+    "path": "generatedManifests/test/services/graphql-mongo/sealed-secrets/sealed-secret-graphql-mongo-redis-applications.yaml",
+    "resourceBaseDir": "generatedManifests/test/services/graphql-mongo",
+    "spec": Object {
+      "encryptedData": Object {
+        "redis-password": "updated-secretsgraphql-mongo-redisapplicationsE5sevnTG88wad7j************",
+      },
+      "template": Object {
+        "metadata": Object {
+          "annotations": Object {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\\"apiVersion\\":\\"v1\\",\\"data\\":{\\"redis-password\\":\\"anVuZ2J1bnU=\\"},\\"kind\\":\\"Secret\\",\\"metadata\\":{\\"labels\\":{\\"app.kubernetes.io/instance\\":\\"redis\\",\\"app.kubernetes.io/managed-by\\":\\"pulumi\\",\\"app.kubernetes.io/name\\":\\"redis\\",\\"helm.sh/chart\\":\\"redis-16.8.9\\"},\\"name\\":\\"graphql-mongo-redis\\",\\"namespace\\":\\"applications\\"},\\"type\\":\\"Opaque\\"}
+",
+          },
+          "name": "graphql-mongo-redis",
+          "namespace": "applications",
+        },
+        "type": "Opaque",
+      },
+    },
+  },
+  Object {
+    "apiVersion": "bitnami.com/v1alpha1",
+    "kind": "SealedSecret",
+    "metadata": Object {
+      "annotations": Object {
+        "sealedsecrets.bitnami.com/managed": "true",
+      },
+      "name": "react-web",
+      "namespace": "applications",
+    },
+    "path": "generatedManifests/test/services/react-web/sealed-secrets/sealed-secret-react-web-applications.yaml",
+    "resourceBaseDir": "generatedManifests/test/services/react-web",
+    "spec": Object {
+      "encryptedData": Object {
+        "APP_ENVIRONMENT": "updated-secretsreact-webapplicationsNVUkX79De9R7_Ln********",
+        "APP_EXTERNAL_BASE_URL": "updated-secretsreact-webapplicationsmJKVGtc2SVDwFqF****************************",
+        "APP_HOST": "inital-secretsreact-webapplicationsfJ2FOVeOb1_xJxx************",
+        "APP_PORT": "updated-secretsreact-webapplicationsnSPxCGD3GTIp6MO********",
       },
       "template": Object {
         "metadata": Object {

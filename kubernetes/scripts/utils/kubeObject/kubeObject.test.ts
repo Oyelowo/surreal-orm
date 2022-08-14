@@ -5,7 +5,24 @@ import { KubeObject } from './kubeObject.js';
 import type { TKubeObject } from './kubeObject.js';
 import { expect, jest, test, describe } from '@jest/globals';
 import { info } from 'node:console';
+import { MockSTDIN, stdin } from 'mock-stdin';
+import { faker } from '@faker-js/faker';
+import _ from 'lodash';
 
+// jest.setTimeout(130_000)
+
+// Key codes
+const keys = {
+    up: '\u001B\u005B\u0041',
+    down: '\u001B\u005B\u0042',
+    enter: '\u000D',
+    // space: ' ',
+    space: '\u0020',
+    // a: 'a',
+    a: '\u0041',
+};
+// helper function for timing
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 /* 
 Remove teh absolute root to make the snapshot deterministic
 // e.g
@@ -20,20 +37,31 @@ const removeNonDeterministicRootDir = (p: TKubeObject) => {
     } as TKubeObject;
 };
 
+faker.seed(1);
 jest.spyOn(KubeObject.prototype, 'sealSecretValue').mockImplementation(
-    ({ name, namespace, secretValue }) => 'lowo-test' + name + namespace + '*'.repeat(secretValue.length)
+    ({ name, namespace, secretValue }) =>
+        'lowo-test' + name + namespace + faker.internet.password() + '*'.repeat(secretValue.length)
 );
 
-describe.skip('KubeObject', () => {
+function deleteSealedSecrets() {
+    new KubeObject('test').getOfAKind('SealedSecret').forEach((ss) => {
+        sh.rm('-rf', ss.path);
+    });
+}
+
+describe('KubeObject', () => {
+    // Mock stdin so we can send messages to the CLI
+
+    let io: MockSTDIN | undefined;
+    afterAll(() => io.restore());
+
     beforeAll(() => {
-        new KubeObject('test').getOfAKind('SealedSecret').forEach((ss) => {
-            sh.rm('-rf', ss.path);
-        });
+        faker.seed(1);
+        io = stdin();
+        deleteSealedSecrets();
     });
     afterEach(() => {
-        new KubeObject('test').getOfAKind('SealedSecret').forEach((ss) => {
-            sh.rm('-rf', ss.path);
-        });
+        deleteSealedSecrets();
     });
 
     test('Can sync resources', () => {
@@ -90,18 +118,196 @@ describe.skip('KubeObject', () => {
         expect(kubeInstance.getOfAKind('SealedSecret')).toHaveLength(13);
 
         expect(kubeInstance.getOfAKind('SealedSecret')[0].spec.encryptedData).toEqual({
-            ADMIN_PASSWORD: 'lowo-testargocd-applications-secretargocd********',
-            password: 'lowo-testargocd-applications-secretargocd********',
-            type: 'lowo-testargocd-applications-secretargocd***',
-            url: 'lowo-testargocd-applications-secretargocd**********************************************************',
-            username: 'lowo-testargocd-applications-secretargocd*******',
+            ADMIN_PASSWORD: 'lowo-testargocd-applications-secretargocdHey7F2EAFyTqHbR********',
+            password: 'lowo-testargocd-applications-secretargocd4Kt6SwHLVIz3jme********',
+            type: 'lowo-testargocd-applications-secretargocdmbRtsuoo1tYIHS3***',
+            url: 'lowo-testargocd-applications-secretargocdbbkpHh_hKk6KMwv**********************************************************',
+            username: 'lowo-testargocd-applications-secretargocdRax5wOXVWX9c6SH*******',
         });
         expect(kubeInstance.getOfAKind('SealedSecret')[12].spec.encryptedData).toEqual({
-            APP_ENVIRONMENT: 'lowo-testreact-webapplications********',
-            APP_EXTERNAL_BASE_URL: 'lowo-testreact-webapplications****************************',
-            APP_HOST: 'lowo-testreact-webapplications************',
-            APP_PORT: 'lowo-testreact-webapplications********',
+            APP_ENVIRONMENT: 'lowo-testreact-webapplicationsLi05LARh9MsPbas********',
+            APP_EXTERNAL_BASE_URL: 'lowo-testreact-webapplicationsjBFrRymKcbhKWwm****************************',
+            APP_HOST: 'lowo-testreact-webapplicationsOrVoLanW8IVmUB8************',
+            APP_PORT: 'lowo-testreact-webapplicationsr38g8j9IRmEB5qi********',
         });
         expect(kubeInstance.getOfAKind('SealedSecret').map(removeNonDeterministicRootDir)).toMatchSnapshot();
+    });
+
+    test('Can create sealed secrets from selected secrets', async () => {
+        const sendKeystrokes = async () => {
+            // Selection 1
+            io.send(keys.down);
+            io.send(keys.space);
+
+            //  Selection 2
+            io.send(keys.down);
+            io.send(keys.space);
+
+            //  Selection 3
+            io.send(keys.down);
+            io.send(keys.space);
+
+            //  Selection 4
+            io.send(keys.down);
+            io.send(keys.down);
+            io.send(keys.space);
+
+            //  Selection 5
+            io.send(keys.down);
+            io.send(keys.down);
+            io.send(keys.down);
+            io.send(keys.space);
+            io.send(keys.enter);
+            await delay(10);
+
+            // Subselection for Selection 1
+            io.send(keys.a);
+            // io.send(keys.a, 'ascii')
+            io.send(keys.enter);
+            await delay(10);
+
+            // Subselection for Selection 2
+            io.send(keys.a);
+            io.send(keys.enter);
+            await delay(10);
+
+            // Subselection for Selection 3
+            io.send(keys.down);
+            io.send(keys.space);
+
+            io.send(keys.down);
+            io.send(keys.down);
+            io.send(keys.space);
+
+            io.send(keys.down);
+            io.send(keys.space);
+            io.send(keys.enter);
+            await delay(10);
+
+            // Subselection for Selection 4
+            io.send(keys.down);
+            io.send(keys.space);
+
+            io.send(keys.down);
+            io.send(keys.space);
+
+            io.send(keys.enter);
+            await delay(10);
+
+            // Subselection for Selection 5
+            io.send(keys.a);
+            io.send(keys.enter);
+            await delay(10);
+        };
+        setTimeout(() => sendKeystrokes().then(), 5);
+
+        const kubeInstance = new KubeObject('test');
+        await kubeInstance.syncSealedSecretsWithPrompt();
+
+        const sealedecrets = kubeInstance.getOfAKind('SealedSecret');
+
+        info('Should have five selections cos we have updated only 5 sealed secrets');
+        expect(sealedecrets).toHaveLength(5);
+        expect(sealedecrets.filter((ss) => !_.isEmpty(ss.spec.encryptedData))).toHaveLength(5);
+        expect(sealedecrets.map(removeNonDeterministicRootDir)).toMatchSnapshot();
+    });
+
+    test('Can update sealed secrets after initial', async () => {
+        const kubeInstance = new KubeObject('test');
+        jest.spyOn(kubeInstance, 'sealSecretValue').mockImplementation(
+            ({ name, namespace, secretValue }) =>
+                'inital-secrets' + name + namespace + faker.internet.password() + '*'.repeat(secretValue.length)
+        );
+
+        kubeInstance.syncSealedSecrets();
+        const sealedSecrets = kubeInstance.getOfAKind('SealedSecret');
+        const secrets = kubeInstance.getOfAKind('SealedSecret');
+
+        info('Should have 13 sealed secrets initially generated from 13 secrets');
+        expect(secrets).toHaveLength(13);
+        expect(sealedSecrets).toHaveLength(13);
+        expect(sealedSecrets.filter((ss) => !_.isEmpty(ss.spec.encryptedData))).toHaveLength(13);
+        expect(sealedSecrets.map(removeNonDeterministicRootDir)).toMatchSnapshot();
+
+        const sendKeystrokes = async () => {
+            // Selection 1
+            io.send(keys.down);
+            io.send(keys.space);
+
+            //  Selection 2
+            io.send(keys.down);
+            io.send(keys.space);
+
+            //  Selection 3
+            io.send(keys.down);
+            io.send(keys.space);
+
+            //  Selection 4
+            io.send(keys.down);
+            io.send(keys.down);
+            io.send(keys.space);
+
+            //  Selection 5
+            io.send(keys.down);
+            io.send(keys.down);
+            io.send(keys.down);
+            io.send(keys.space);
+            io.send(keys.enter);
+            await delay(10);
+
+            // Subselection for Selection 1
+            io.send(keys.a);
+            // io.send(keys.a, 'ascii')
+            io.send(keys.enter);
+            await delay(10);
+
+            // Subselection for Selection 2
+            io.send(keys.a);
+            io.send(keys.enter);
+            await delay(10);
+
+            // Subselection for Selection 3
+            io.send(keys.down);
+            io.send(keys.space);
+
+            io.send(keys.down);
+            io.send(keys.down);
+            io.send(keys.space);
+
+            io.send(keys.down);
+            io.send(keys.space);
+            io.send(keys.enter);
+            await delay(10);
+
+            // Subselection for Selection 4
+            io.send(keys.down);
+            io.send(keys.space);
+
+            io.send(keys.down);
+            io.send(keys.space);
+
+            io.send(keys.enter);
+            await delay(10);
+
+            // Subselection for Selection 5
+            io.send(keys.a);
+            io.send(keys.enter);
+            await delay(10);
+        };
+        setTimeout(() => sendKeystrokes().then(), 5);
+
+
+        const kubeInstance2 = new KubeObject('test');
+        jest.spyOn(kubeInstance2, 'sealSecretValue').mockImplementation(
+            ({ name, namespace, secretValue }) =>
+                'updated-secrets' + name + namespace + faker.internet.password() + '*'.repeat(secretValue.length)
+        );
+        await kubeInstance2.syncSealedSecretsWithPrompt();
+        const sealedSecrets2 = kubeInstance2.getOfAKind('SealedSecret');
+
+        info('Should update from 13 sealed secrets still, with specific secret data fields updated.');
+        expect(sealedSecrets2).toHaveLength(13);
+        expect(sealedSecrets2.filter((ss) => !_.isEmpty(ss.spec.encryptedData))).toHaveLength(13);
+        expect(sealedSecrets2.map(removeNonDeterministicRootDir)).toMatchSnapshot();
     });
 });

@@ -70,10 +70,8 @@ export async function selectSecretKubeObjectsFromPrompt(
     });
 
     const secretkeysData = await promptSecretObjectDataSelection(promptResponse.selectedSecretObjects);
-    console.log("secretKubeObjectssecretKubeObjects", secretkeysData)
 
     return secretKubeObjects?.map((s) => {
-        console.log("s.metadata", s.metadata)
         const { name, namespace } = s?.metadata ?? {};
         if (!namespace || !name) {
             throw new Error('Namespace not found in secret');
@@ -83,7 +81,7 @@ export async function selectSecretKubeObjectsFromPrompt(
             ...s,
             selectedSecretsForUpdate: secretkeysData?.[namespace]?.[name] ?? [],
         };
-    });
+    }).filter(s=>s.selectedSecretsForUpdate.length > 0);
 }
 
 /** Creates a list of Command line prompts that appear one after the other for
