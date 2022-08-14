@@ -3,7 +3,7 @@ import yaml from 'yaml';
 import { mergeUnsealedSecretToSealedSecret } from './sealedSecretsManager.js';
 import { selectSecretKubeObjectsFromPrompt } from './secretsSelectorPrompter.js';
 import sh from 'shelljs';
-import * as ramda from 'ramda';
+import * as R from 'ramda';
 import path from 'node:path';
 import _ from 'lodash';
 import z from 'zod';
@@ -111,13 +111,14 @@ export class KubeObject {
     /** Extract information from all the manifests for an environment(local, staging etc)  */
     private syncAll = (): this => {
         const envDir = getGeneratedEnvManifestsDir(this.environment);
-        const manifestsPaths = z.array(z.string()).min(5).parse(this.getManifestsPathWithinDir(envDir));
+
+        const manifestsPaths = this.getManifestsPathWithinDir(envDir);
 
         // eslint-disable-next-line unicorn/no-array-reduce
         this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, manifestPath, i) => {
             if (!manifestPath) return acc;
 
-            console.log('Extracting kubeobject from manifest', i);
+            // console.log('Extracting kubeobject from manifest', i);
 
             const kubeObject = yaml.parse(fs.readFileSync(manifestPath, 'utf8')) as TKubeObject;
             if (_.isEmpty(kubeObject)) return acc;
@@ -133,7 +134,7 @@ export class KubeObject {
                     Buffer.from(v ?? '').toString('base64')
                 );
 
-                kubeObject.data = ramda.mergeDeepRight(kubeObject.data ?? {}, encodedStringData);
+                kubeObject.data = R.mergeDeepRight(kubeObject.data ?? {}, encodedStringData);
             }
 
             const updatedPath = kubeObjectSchema.parse(kubeObject) as TKubeObject;
@@ -176,7 +177,6 @@ which is cached locally but that would be more involved.
                 selectedSecretsForUpdate: Object.keys(s?.data ?? {}),
             };
         });
-
         mergeUnsealedSecretToSealedSecret({
             existingSealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
             secretKubeObjects: secrets,

@@ -58,8 +58,6 @@ export async function selectSecretKubeObjectsFromPrompt(
         name: 'selectedSecretObjects',
         choices: applicationList,
         validate(answer) {
-            console.log('Error' + JSON.stringify(answer.length));
-
             if (answer.length === 0) {
                 return 'You must choose at least one secret.';
             }

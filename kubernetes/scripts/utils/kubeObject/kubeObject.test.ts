@@ -1,12 +1,8 @@
 import sh from 'shelljs';
-import { getMainBaseDir } from './../../../src/resources/shared/directoriesManager.js';
-import path from 'node:path';
 import { KubeObject } from './kubeObject.js';
-import type { TKubeObject } from './kubeObject.js';
 import { expect, jest, test, describe } from '@jest/globals';
 import { info } from 'node:console';
 import { MockSTDIN, stdin } from 'mock-stdin';
-import _ from 'lodash';
 
 // Key codes
 const keys = {
@@ -18,19 +14,6 @@ const keys = {
 };
 // helper function for timing
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-/* 
-Remove teh absolute root to make the snapshot deterministic
-// e.g
-    from -> "path": "/Users/oyelowo/Desktop/dev/modern-distributed-app-template/kubernetes/generatedManifests/local/infrastructure/namespaces/1-manifest/v1-namespace-cert-manager-cert-manager.yaml",
-    to   ->  "path": "generatedManifests/local/infrastructure/namespaces/1-manifest/v1-namespace-cert-manager-cert-manager.yaml",
-*/
-const removeNonDeterministicRootDir = (p: TKubeObject) => {
-    return {
-        ...p,
-        path: path.relative(getMainBaseDir(), p.path),
-        resourceBaseDir: path.relative(getMainBaseDir(), p.resourceBaseDir),
-    } as TKubeObject;
-};
 
 jest.spyOn(KubeObject.prototype, 'sealSecretValue').mockImplementation(
     ({ name, namespace, secretValue }) => 'lowo-test' + name + namespace + '*'.repeat(secretValue.length)
@@ -59,70 +42,44 @@ describe('KubeObject', () => {
     test('Can sync resources', () => {
         const kubeInstance = new KubeObject('test');
 
-        const inst = kubeInstance.getAll().map(removeNonDeterministicRootDir);
-        expect(inst).toMatchSnapshot();
+        const inst = kubeInstance.getAll();
         expect(inst).toHaveLength(255);
 
-        const inst2 = kubeInstance.getOfAKind('Deployment').map(removeNonDeterministicRootDir);
-        expect(inst2).toMatchSnapshot();
+        const inst2 = kubeInstance.getOfAKind('Deployment');
         expect(inst2).toHaveLength(21);
 
-        expect(kubeInstance.getOfAKind('Secret').map(removeNonDeterministicRootDir)).toMatchSnapshot();
-        expect(kubeInstance.getOfAKind('SealedSecret').map(removeNonDeterministicRootDir)).toMatchSnapshot();
-        expect(
-            kubeInstance.getOfAKind('CustomResourceDefinition').map(removeNonDeterministicRootDir)
-        ).toMatchSnapshot();
-
         info('Can get kube objects for a resource');
-        const graphqlMongo = kubeInstance.getForApp('services/graphql-mongo').map(removeNonDeterministicRootDir);
-        expect(graphqlMongo).toMatchSnapshot();
+        const graphqlMongo = kubeInstance.getForApp('services/graphql-mongo');
         expect(graphqlMongo).toHaveLength(19);
 
-        const reactWeb = kubeInstance.getForApp('services/react-web').map(removeNonDeterministicRootDir);
-        expect(reactWeb).toMatchSnapshot();
+        const reactWeb = kubeInstance.getForApp('services/react-web');
         expect(reactWeb).toHaveLength(4);
 
-        const argocd = kubeInstance.getForApp('infrastructure/argocd').map(removeNonDeterministicRootDir);
-        expect(argocd).toMatchSnapshot();
+        const argocd = kubeInstance.getForApp('infrastructure/argocd');
         expect(argocd).toHaveLength(34);
 
-        const linkerd = kubeInstance.getForApp('infrastructure/linkerd').map(removeNonDeterministicRootDir);
-        expect(linkerd).toMatchSnapshot();
+        const linkerd = kubeInstance.getForApp('infrastructure/linkerd');
         expect(linkerd).toHaveLength(41);
 
-        const certManager = kubeInstance.getForApp('infrastructure/cert-manager').map(removeNonDeterministicRootDir);
-        expect(certManager).toMatchSnapshot();
+        const certManager = kubeInstance.getForApp('infrastructure/cert-manager');
         expect(certManager).toHaveLength(57);
 
-        const nginxIngress = kubeInstance.getForApp('infrastructure/nginx-ingress').map(removeNonDeterministicRootDir);
-        expect(nginxIngress).toMatchSnapshot();
+        const nginxIngress = kubeInstance.getForApp('infrastructure/nginx-ingress');
         expect(nginxIngress).toHaveLength(12);
 
-        const namespaces = kubeInstance.getForApp('infrastructure/namespaces').map(removeNonDeterministicRootDir);
-        expect(namespaces).toMatchSnapshot();
+        const namespaces = kubeInstance.getForApp('infrastructure/namespaces');
         expect(namespaces).toHaveLength(7);
     });
 
     test('Can update sealed secrets', () => {
         const kubeInstance = new KubeObject('test');
-        expect(kubeInstance.getOfAKind('SealedSecret')).toHaveLength(0);
-        kubeInstance.syncSealedSecrets();
-        expect(kubeInstance.getOfAKind('SealedSecret')).toHaveLength(13);
+        const sealedSecrets = kubeInstance.getOfAKind('SealedSecret');
+        expect(sealedSecrets).toHaveLength(0);
 
-        expect(kubeInstance.getOfAKind('SealedSecret')[0].spec.encryptedData).toEqual({
-            ADMIN_PASSWORD: 'lowo-testargocd-applications-secretargocd********',
-            password: 'lowo-testargocd-applications-secretargocd********',
-            type: 'lowo-testargocd-applications-secretargocd***',
-            url: 'lowo-testargocd-applications-secretargocd**********************************************************',
-            username: 'lowo-testargocd-applications-secretargocd*******',
-        });
-        expect(kubeInstance.getOfAKind('SealedSecret')[12].spec.encryptedData).toEqual({
-            APP_ENVIRONMENT: 'lowo-testreact-webapplications********',
-            APP_EXTERNAL_BASE_URL: 'lowo-testreact-webapplications****************************',
-            APP_HOST: 'lowo-testreact-webapplications************',
-            APP_PORT: 'lowo-testreact-webapplications********',
-        });
-        expect(kubeInstance.getOfAKind('SealedSecret').map(removeNonDeterministicRootDir)).toMatchSnapshot();
+        kubeInstance.syncSealedSecrets();
+
+        const sealedSecretsUpdated = kubeInstance.getOfAKind('SealedSecret');
+        expect(sealedSecretsUpdated).toHaveLength(13);
     });
 
     test('Can create sealed secrets from selected secrets', async () => {
@@ -146,9 +103,9 @@ describe('KubeObject', () => {
 
             //  Selection 5
             io.send(keys.down);
-            io.send(keys.down);
-            io.send(keys.down);
             io.send(keys.space);
+
+            // First Confirmation
             io.send(keys.enter);
             await delay(10);
 
@@ -167,19 +124,10 @@ describe('KubeObject', () => {
             io.send(keys.down);
             io.send(keys.space);
 
-            io.send(keys.down);
-            io.send(keys.down);
-            io.send(keys.space);
-
-            io.send(keys.down);
-            io.send(keys.space);
             io.send(keys.enter);
             await delay(10);
 
             // Subselection for Selection 4
-            io.send(keys.down);
-            io.send(keys.space);
-
             io.send(keys.down);
             io.send(keys.space);
 
@@ -191,7 +139,7 @@ describe('KubeObject', () => {
             io.send(keys.enter);
             await delay(10);
         };
-        setTimeout(() => sendKeystrokes().then(), 5);
+        setTimeout(() => sendKeystrokes().then(), 10);
 
         const kubeInstance = new KubeObject('test');
         await kubeInstance.syncSealedSecretsWithPrompt();
@@ -200,25 +148,22 @@ describe('KubeObject', () => {
 
         info('Should have five selections cos we have updated only 5 sealed secrets');
         expect(sealedecrets).toHaveLength(5);
-        expect(sealedecrets.filter((ss) => !_.isEmpty(ss.spec.encryptedData))).toHaveLength(5);
-        expect(sealedecrets.map(removeNonDeterministicRootDir)).toMatchSnapshot();
     });
 
     test('Can update sealed secrets after initial', async () => {
         const kubeInstance = new KubeObject('test');
-        jest.spyOn(kubeInstance, 'sealSecretValue').mockImplementation(
-            ({ name, namespace, secretValue }) => 'inital-secrets' + name + namespace + '*'.repeat(secretValue.length)
-        );
+        jest.spyOn(kubeInstance, 'sealSecretValue').mockImplementation(() => 'inital-secrets');
 
         kubeInstance.syncSealedSecrets();
         const sealedSecrets = kubeInstance.getOfAKind('SealedSecret');
-        const secrets = kubeInstance.getOfAKind('SealedSecret');
+        const secrets = kubeInstance.getOfAKind('Secret');
 
         info('Should have 13 sealed secrets initially generated from 13 secrets');
         expect(secrets).toHaveLength(13);
         expect(sealedSecrets).toHaveLength(13);
-        expect(sealedSecrets.filter((ss) => !_.isEmpty(ss.spec.encryptedData))).toHaveLength(13);
-        expect(sealedSecrets.map(removeNonDeterministicRootDir)).toMatchSnapshot();
+        expect(
+            Object.values(sealedSecrets.filter((ss) => Object.values(ss.spec.encryptedData).includes('inital-secrets')))
+        ).toHaveLength(13);
 
         const sendKeystrokes = async () => {
             // Selection 1
@@ -288,15 +233,17 @@ describe('KubeObject', () => {
         setTimeout(() => sendKeystrokes().then(), 5);
 
         const kubeInstance2 = new KubeObject('test');
-        jest.spyOn(kubeInstance2, 'sealSecretValue').mockImplementation(
-            ({ name, namespace, secretValue }) => 'updated-secrets' + name + namespace + '*'.repeat(secretValue.length)
-        );
+        jest.spyOn(kubeInstance2, 'sealSecretValue').mockImplementation(() => 'updated-secrets');
         await kubeInstance2.syncSealedSecretsWithPrompt();
         const sealedSecrets2 = kubeInstance2.getOfAKind('SealedSecret');
 
         info('Should update from 13 sealed secrets still, with specific secret data fields updated.');
         expect(sealedSecrets2).toHaveLength(13);
-        expect(sealedSecrets2.filter((ss) => !_.isEmpty(ss.spec.encryptedData))).toHaveLength(13);
-        expect(sealedSecrets2.map(removeNonDeterministicRootDir)).toMatchSnapshot();
+        // 5 secrets have been updated
+        expect(
+            Object.values(
+                sealedSecrets2.filter((ss) => Object.values(ss.spec.encryptedData).includes('updated-secrets'))
+            )
+        ).toHaveLength(5);
     });
 });

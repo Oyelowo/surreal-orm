@@ -17,7 +17,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  check_and_test_kubernetes_monorepo:
+  check_and_test_kubernetes:
     name: Run code checks for kubernetes
     timeout-minutes: 10
     runs-on: ubuntu-latest
@@ -38,10 +38,13 @@ jobs:
 
 
       - name: Install dependencies
-        run: make install
+        run: npm ci
 
       - name: Lint
         run: make check
 
-      - name: Build & Unit Test
-        run: make test
+      - name: Unit Test
+        run: npm test
+        env:
+        # https://github.com/actions/setup-node/issues/159
+          FORCE_COLOR: true

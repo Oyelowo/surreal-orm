@@ -44,7 +44,6 @@ export function mergeUnsealedSecretToSealedSecret(props: Props): void {
         sh.mkdir('-p', sealedSecretDir);
 
         const sealedSecretFilePath = p.join(sealedSecretDir, `sealed-secret-${name}-${namespace}.yaml`);
-
         sh.exec(`echo '${yaml.stringify(updatedSealedSecret)}' > ${sealedSecretFilePath}`);
     }
 }
