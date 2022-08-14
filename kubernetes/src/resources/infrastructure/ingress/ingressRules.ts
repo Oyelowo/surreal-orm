@@ -17,7 +17,7 @@ const SECRET_NAME_NGINX = 'nginx-ingress-tls';
 const name = 'oyelowo-ingress';
 
 type CertManagerAnnotations = {
-    // NOTE: Make sure you specify the right one, if using cluster-issuer, user cluster-issuer annotations, otherwise, use mere issuer
+    // NOTE: Make sure you specify the right one, if using cluster-issuer, use `cluster-issuer` annotations, otherwise, use `issuer`
     // which is namespaced
     'cert-manager.io/cluster-issuer': typeof CLUSTER_ISSUER_NAME;
     'cert-manager.io/issuer': string; // We don't yet have an issuer. We are still using cluster issuer
@@ -28,7 +28,7 @@ export const annotations: Partial<IngressAnnotations> = {
     // 'nginx.ingress.kubernetes.io/ssl-redirect': isLocal ? 'false' : 'true',
     'nginx.ingress.kubernetes.io/ssl-redirect': 'false',
     'nginx.ingress.kubernetes.io/use-regex': 'true',
-    // 'cert-manager.io/cluster-issuer': CLUSTER_ISSUER_NAME,
+    'cert-manager.io/cluster-issuer': CLUSTER_ISSUER_NAME,
     // 'nginx.ingress.kubernetes.io/enable-cors': isLocal ? 'false' : 'true',
 };
 
@@ -43,10 +43,10 @@ export const appIngress = new k8s.networking.v1.Ingress(
         spec: {
             ingressClassName: INGRESS_CLASSNAME_NGINX,
             tls: [
-                // {
-                //     hosts: getHosts(ENVIRONMENT),
-                //     secretName: SECRET_NAME_NGINX,
-                // },
+                {
+                    hosts: [getIngressUrlHost({ environment: ENVIRONMENT })],
+                    secretName: SECRET_NAME_NGINX,
+                },
             ],
             rules: [
                 {
