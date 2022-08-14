@@ -13,6 +13,7 @@ import { getResourceAbsolutePath } from '../../../src/resources/shared/directori
 import type { Environment, ResourceName } from '../../../src/resources/types/ownTypes.js';
 import { generateManifests } from './generateManifests.js';
 import { syncCrdsCode } from './syncCrdsCode.js';
+import cliProgress from 'cli-progress';
 
 type ResourceKind =
     | 'Secret'
@@ -114,12 +115,15 @@ export class KubeObject {
 
         const manifestsPaths = this.getManifestsPathWithinDir(envDir);
 
+        // create a new progress bar instance and use shades_classic theme
+        const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+
+        // start the progress bar with a total value of 200 and start value of 0
+        bar1.start(manifestsPaths.length, 0);
+        console.log('Extracting kubeobject from manifest');
         // eslint-disable-next-line unicorn/no-array-reduce
         this.kubeObjectsAll = manifestsPaths.reduce<TKubeObject[]>((acc, manifestPath, i) => {
             if (!manifestPath) return acc;
-
-            // console.log('Extracting kubeobject from manifest', i);
-
             const kubeObject = yaml.parse(fs.readFileSync(manifestPath, 'utf8')) as TKubeObject;
             if (_.isEmpty(kubeObject)) return acc;
 
@@ -140,6 +144,7 @@ export class KubeObject {
             const updatedPath = kubeObjectSchema.parse(kubeObject) as TKubeObject;
 
             acc.push(updatedPath);
+            bar1.update(i);
             return acc;
         }, []);
 
