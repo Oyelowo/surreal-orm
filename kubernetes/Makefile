@@ -3,7 +3,6 @@
 #############
 install:
 	npm install
-	make sync
 
 upgrade:
 	npm update
