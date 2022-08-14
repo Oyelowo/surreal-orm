@@ -53,10 +53,9 @@ const kubeObjectSchema = z.object({
 
 type KubeObjectSchema = Required<z.infer<typeof kubeObjectSchema>>;
 
-export interface TKubeObjectBaseCommonProps<K extends ResourceKind> extends KubeObjectSchema  {
+export type TKubeObjectBaseCommonProps<K extends ResourceKind> = KubeObjectSchema & {
     kind: Extract<ResourceKind, K>;
 };
-
 
 // The following is done to narrow down the type for specific object
 // in case it has extra properties and the expose a single `TKubeObject` with
@@ -65,8 +64,8 @@ export interface TKubeObjectBaseCommonProps<K extends ResourceKind> extends Kube
 // have to add as above
 type KubeObjectCustom =
     | (TKubeObjectBaseCommonProps<'Secret'> & {
-        selectedSecretsForUpdate?: string[] | null;
-    })
+          selectedSecretsForUpdate?: string[] | null;
+      })
     | TKubeObjectBaseCommonProps<'SealedSecret'>
     | TKubeObjectBaseCommonProps<'CustomResourceDefinition'>
     | TKubeObjectBaseCommonProps<'Deployment'>
@@ -181,7 +180,7 @@ which is cached locally but that would be more involved.
         mergeUnsealedSecretToSealedSecret({
             existingSealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
             secretKubeObjects: secrets,
-            onSealSecretValue: this.sealSecretValue
+            onSealSecretValue: this.sealSecretValue,
         });
 
         // Sync kube object info after sealed secrets manifests have been updated
@@ -199,7 +198,7 @@ secrets should never be pushed to git but they help to generate sealed secrets.
             existingSealedSecretKubeObjects: this.getOfAKind('SealedSecret'),
             // Syncs only selected secrets from the CLI prompt
             secretKubeObjects: selectedSecretObjects,
-            onSealSecretValue: this.sealSecretValue
+            onSealSecretValue: this.sealSecretValue,
         });
 
         // Sync kube object info after sealed secrets manifests have been updated

@@ -296,7 +296,6 @@ describe('KubeObject', () => {
         };
         setTimeout(() => sendKeystrokes().then(), 5);
 
-
         const kubeInstance2 = new KubeObject('test');
         jest.spyOn(kubeInstance2, 'sealSecretValue').mockImplementation(
             ({ name, namespace, secretValue }) =>
