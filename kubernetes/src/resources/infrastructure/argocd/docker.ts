@@ -17,8 +17,7 @@ export function createContainerRegistrySecret(environment: Environment): void {
 
     const dir = path.join(
         getResourceAbsolutePath({
-            resourceType: 'infrastructure',
-            resourceName: 'argocd-applications-parents',
+            resourcePath: 'infrastructure/argocd-applications-parents',
             environment,
         }),
         '1-manifest'

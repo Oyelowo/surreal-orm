@@ -4,9 +4,9 @@ import { getEnvironmentVariables } from '../../shared/validations.js';
 const { ENVIRONMENT } = getEnvironmentVariables();
 
 export const certManagerApplication = createArgocdApplication({
-    resourceType: 'infrastructure',
     environment: ENVIRONMENT,
-    sourceApplication: 'cert-manager',
-    outputSubDirName: 'argocd-applications-children-infrastructure',
+    sourceApplicationName: 'cert-manager',
+    sourceApplicationPath: 'infrastructure/cert-manager',
+    outputPath: 'infrastructure/argocd-applications-children-infrastructure',
     namespace: 'cert-manager',
 });

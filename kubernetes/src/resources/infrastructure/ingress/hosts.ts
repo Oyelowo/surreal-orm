@@ -27,6 +27,7 @@ type IngressHost = `${Subdomain}.${IngressBaseHost}` | IngressBaseHost;
 const ingressBaseHosts: Record<Environment, IngressBaseHost> = {
     // For local host, we add a port, otherwise leave out
     local: `localhost:${INGRESS_EXTERNAL_PORT_LOCAL}`,
+    test: `localhost:${INGRESS_EXTERNAL_PORT_LOCAL}`,
     development: BASE_INGRESS_HOST,
     staging: BASE_INGRESS_HOST,
     production: BASE_INGRESS_HOST,

@@ -5,9 +5,9 @@ import { namespaces } from './util.js';
 const { ENVIRONMENT } = getEnvironmentVariables();
 
 export const namespacesArgoApps = createArgocdApplication({
-    resourceType: 'infrastructure',
+    sourceApplicationName: 'namespaces',
+    sourceApplicationPath: 'infrastructure/namespaces',
+    outputPath: 'infrastructure/argocd-applications-children-infrastructure',
     environment: ENVIRONMENT,
-    sourceApplication: 'namespaces',
-    outputSubDirName: 'argocd-applications-children-infrastructure',
     namespace: namespaces.default,
 });
