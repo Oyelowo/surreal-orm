@@ -12,13 +12,16 @@ import path from 'node:path';
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 */
 
+const mainDir = getMainBaseDir();
+export const tsConfigPath = path.join(mainDir, 'tsconfig.pulumi.json');
 export async function generateManifests(kubeObject: KubeObject) {
     sh.exec('make install');
-    sh.rm('-rf', './login');
-    sh.mkdir('./login');
+    const loginDir = '.loginxxxxxxx';
+    sh.rm('-rf', `./${loginDir}`);
+    sh.mkdir(`./${loginDir}`);
 
     // https://www.pulumi.com/docs/intro/concepts/state/#logging-into-the-local-filesystem-backend
-    sh.exec('pulumi login file://login');
+    sh.exec(`pulumi login file://${loginDir}`);
 
     sh.echo(c.blueBright(`DELETE EXISTING RESOURCES(except sealed secrets)`));
 
@@ -33,8 +36,6 @@ export async function generateManifests(kubeObject: KubeObject) {
     handleShellError(sh.exec("export PULUMI_CONFIG_PASSPHRASE='not-needed' && pulumi stack init --stack dev"));
 
     const imageTags = await getImageTagsFromDir();
-    const mainDir = getMainBaseDir();
-    const tsConfigPath = path.join(mainDir, 'tsconfig.pulumi.json');
     // Pulumi needs some environment variables set for generating deployments with image tag
     /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
      */

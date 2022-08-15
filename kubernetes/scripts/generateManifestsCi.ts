@@ -7,7 +7,7 @@ Does not handle sealed secret generation/syncing
 import yargs from 'yargs';
 import { ENVIRONMENTS_ALL } from './utils/shared.js';
 
-export const ARGV = yargs(process.argv.slice(2))
+export const ARGV_ENVIRONMENTS = yargs(process.argv.slice(2))
     .options({
         environment: {
             alias: 'e',
@@ -19,7 +19,7 @@ export const ARGV = yargs(process.argv.slice(2))
     .parseSync();
 
 async function main() {
-    const kubeObject = new KubeObject(ARGV.environment);
+    const kubeObject = new KubeObject(ARGV_ENVIRONMENTS.environment);
     await kubeObject.generateManifests();
 }
 
