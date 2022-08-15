@@ -13,7 +13,7 @@ GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
 */
 
 export async function generateManifests(kubeObject: KubeObject) {
-    sh.exec('npm i');
+    sh.exec('make install');
     sh.rm('-rf', './login');
     sh.mkdir('./login');
 
