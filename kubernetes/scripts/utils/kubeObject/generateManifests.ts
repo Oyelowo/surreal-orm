@@ -17,6 +17,7 @@ export async function generateManifests(kubeObject: KubeObject) {
     sh.rm('-rf', './login');
     sh.mkdir('./login');
 
+    // https://www.pulumi.com/docs/intro/concepts/state/#logging-into-the-local-filesystem-backend
     sh.exec('pulumi login file://login');
 
     sh.echo(c.blueBright(`DELETE EXISTING RESOURCES(except sealed secrets)`));
