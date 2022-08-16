@@ -8,3 +8,13 @@ export const domain = new linode.Domain('domain-production', {
     // refreshSec
     // masterIps
 });
+
+
+// export const domainR = new linode.DomainRecord('domain-production-record', {
+//     domainId: domain.id,
+//     name: "www",
+//     recordType: "CNAME",
+//     target: 'oyelowo.dev',
+//     // refreshSec
+//     // masterIps
+// });

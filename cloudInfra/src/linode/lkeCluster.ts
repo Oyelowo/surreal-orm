@@ -1,6 +1,6 @@
 import * as linode from '@pulumi/linode';
+import { Environment } from '../utils.js';
 // import * as pulumi from '@pulumi/pulumi';
-import { Environment } from '../../resources/types/ownTypes.js';
 import { LINODE_REGION_ID } from './shared.js';
 
 // const profile = pulumi.output(linode.getProfile({ async: true }));
