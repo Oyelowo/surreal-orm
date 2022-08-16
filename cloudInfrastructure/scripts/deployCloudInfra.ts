@@ -4,7 +4,6 @@ import yargs from 'yargs';
 import c from 'chalk';
 import { ARGV_ENVIRONMENTS, tsConfigPath } from './utils/argv.js';
 
-
 export function handleShellError(shellCommand: ShellString) {
     if (shellCommand.stderr) {
         console.log(c.bgRedBright(shellCommand.stderr));
@@ -12,7 +11,6 @@ export function handleShellError(shellCommand: ShellString) {
     }
     return shellCommand;
 }
-
 
 export const Argv = yargs(process.argv.slice(2))
     .options({

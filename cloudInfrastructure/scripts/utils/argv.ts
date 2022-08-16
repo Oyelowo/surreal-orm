@@ -15,6 +15,5 @@ export const ARGV_ENVIRONMENTS = yargs(process.argv.slice(2))
     })
     .parseSync();
 
-
 const mainDir = process.cwd();
 export const tsConfigPath = path.join(mainDir, 'tsconfig.pulumi.json');

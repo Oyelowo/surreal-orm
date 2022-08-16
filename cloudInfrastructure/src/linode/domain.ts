@@ -9,7 +9,6 @@ export const domain = new linode.Domain('domain-production', {
     // masterIps
 });
 
-
 // export const domainR = new linode.DomainRecord('domain-production-record', {
 //     domainId: domain.id,
 //     name: "www",
