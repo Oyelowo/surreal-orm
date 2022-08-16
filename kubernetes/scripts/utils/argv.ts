@@ -1,11 +1,7 @@
-import { KubeObject } from './utils/kubeObject/kubeObject.js';
-
-/* 
-Does not handle sealed secret generation/syncing
-*/
-
+import path from 'node:path';
 import yargs from 'yargs';
-import { ENVIRONMENTS_ALL } from './utils/shared.js';
+import { getMainBaseDir } from '../../src/resources/shared/directoriesManager.js';
+import { ENVIRONMENTS_ALL } from '../utils/shared.js';
 
 export const ARGV_ENVIRONMENTS = yargs(process.argv.slice(2))
     .options({
@@ -18,9 +14,6 @@ export const ARGV_ENVIRONMENTS = yargs(process.argv.slice(2))
     })
     .parseSync();
 
-async function main() {
-    const kubeObject = new KubeObject(ARGV_ENVIRONMENTS.environment);
-    await kubeObject.generateManifests();
-}
+const mainDir = getMainBaseDir();
 
-await main();
+export const tsConfigPath = path.join(mainDir, 'tsconfig.pulumi.json');

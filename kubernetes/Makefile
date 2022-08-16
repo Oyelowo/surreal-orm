@@ -27,9 +27,13 @@ test:
 	npm test
 
 
+
 #############
 ## INFRA SPECIFIC
 #############
+deploy:
+	npx ts-node scripts/deployCloudInfra.ts --environment=$(environment)
+
 bootsrap_cluster:
 	npx ts-node scripts/bootstrapCluster.ts
 
