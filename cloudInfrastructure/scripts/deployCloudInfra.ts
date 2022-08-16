@@ -45,9 +45,9 @@ function main() {
     sh.exec(`pulumi login file://${cloudManifestsDir}`);
 
     try {
-        handleShellError(sh.rm('-rf', `${path.join(baseDir, `Pulumi.${environment}.yaml`)}`));
+        // handleShellError(sh.rm('-rf', `${path.join(baseDir, `Pulumi.${environment}.yaml`)}`));
         handleShellError(
-            sh.exec(`export PULUMI_CONFIG_PASSPHRASE='not-needed' && pulumi stack init --stack ${environment}`)
+            sh.exec(`export PULUMI_CONFIG_PASSPHRASE=${Argv.pulumiPassphrase} && pulumi stack init --stack ${environment}`)
         );
     } catch {
         console.log(`Already created`);
