@@ -7,6 +7,7 @@ import { KubeObject } from './kubeObject.js';
 import type { TKubeObject } from './kubeObject.js';
 import { getImageTagsFromDir } from '../getImageTagsFromDir.js';
 import path from 'node:path';
+import { randomUUID } from 'node:crypto';
 
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
@@ -16,9 +17,9 @@ const mainDir = getMainBaseDir();
 export const tsConfigPath = path.join(mainDir, 'tsconfig.pulumi.json');
 export async function generateManifests(kubeObject: KubeObject) {
     sh.exec('make install');
-    const loginDir = '.loginxxxxxxx';
-    sh.rm('-rf', `./${loginDir}`);
-    sh.mkdir(`./${loginDir}`);
+    const loginDir = path.join(mainDir, `.login-${randomUUID()}`);
+    sh.rm('-rf', loginDir);
+    sh.mkdir('-p', loginDir);
 
     // https://www.pulumi.com/docs/intro/concepts/state/#logging-into-the-local-filesystem-backend
     sh.exec(`pulumi login file://${loginDir}`);
@@ -51,5 +52,5 @@ export async function generateManifests(kubeObject: KubeObject) {
        `
         )
     );
-    sh.rm('-rf', './login');
+    sh.rm('-rf', loginDir);
 }
