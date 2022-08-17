@@ -61,6 +61,7 @@
         "chalk": "^5.0.1",
         "cli-progress": "^3.11.2",
         "cross-env": "^7.0.3",
+        "dotenv": "^16.0.1",
         "eslint-plugin-unused-imports": "^2.0.0",
         "find-free-port": "^2.0.0",
         "get-port": "^6.1.2",

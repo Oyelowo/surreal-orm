@@ -1,12 +1,13 @@
 import { ENVIRONMENTS_ALL } from '../utils/shared.js';
 import path from 'node:path';
 import sh from 'shelljs';
-import { Environment, ResourceName } from '../../src/resources/types/ownTypes.js';
+import { Environment, EnvironmentVariableKey, EnvVarAll, ResourceName } from '../../src/resources/types/ownTypes.js';
 import { z } from 'zod';
 import * as R from 'ramda';
 import _ from 'lodash';
 import { getPlainSecretsConfigFilesBaseDir } from '../../src/resources/shared/directoriesManager.js';
-
+import prettier from 'prettier'
+// prettier.format()
 // Note: If these starts growing too much, we can separate
 // each apps schema and merge them all
 export const getSecretsSchema = ({
@@ -19,8 +20,8 @@ export const getSecretsSchema = ({
     const isLocal = environment === 'local';
     const getDefault =
         (defaultValue: string) =>
-        (v: string): string =>
-            isLocal && _.isEmpty(v) ? defaultValue : v;
+            (v: string): string =>
+                isLocal && _.isEmpty(v) ? defaultValue : v;
     const stringNoDefault = z.string().min(allowEmptyValues ? 0 : 1);
     const string = stringNoDefault
         // We want to populate the values for local environment
@@ -30,47 +31,45 @@ export const getSecretsSchema = ({
         .transform(getDefault('example'));
 
     const secretsSample = z.object({
-        'graphql-mongo': z.object({
-            MONGODB_USERNAME: string,
-            MONGODB_PASSWORD: string,
-            MONGODB_ROOT_USERNAME: string,
-            MONGODB_ROOT_PASSWORD: string,
-            REDIS_USERNAME: string,
-            REDIS_PASSWORD: string,
-            OAUTH_GITHUB_CLIENT_ID: string,
-            OAUTH_GITHUB_CLIENT_SECRET: string,
-            OAUTH_GOOGLE_CLIENT_ID: string,
-            OAUTH_GOOGLE_CLIENT_SECRET: string,
-        }),
-        'grpc-mongo': z.object({
-            MONGODB_USERNAME: string,
-            MONGODB_PASSWORD: string,
-            MONGODB_ROOT_USERNAME: string,
-            MONGODB_ROOT_PASSWORD: string,
-        }),
-        'graphql-postgres': z.object({
-            POSTGRES_USERNAME: string,
-            POSTGRES_PASSWORD: string,
-        }),
-        'react-web': z.object({}),
-        argocd: z.object({
-            ADMIN_PASSWORD: string,
-            type: stringNoDefault.transform(getDefault('git')),
-            url: stringNoDefault.transform(getDefault('https://github.com/Oyelowo/modern-distributed-app-template')),
-            username: stringNoDefault.transform(getDefault('Oyelowo')),
-            password: string,
-        }),
-        'argocd-applications-children-infrastructure': z.object({}),
-        'argocd-applications-children-services': z.object({}),
-        'argocd-applications-parents': z.object({}),
-        'cert-manager': z.object({}),
-        linkerd: z.object({}),
-        'linkerd-viz': z.object({
-            PASSWORD: string,
-        }),
-        namespaces: z.object({}),
-        'nginx-ingress': z.object({}),
-        'sealed-secrets': z.object({}),
+        SERVICE__GRAPHQL_MONGO__MONGODB_USERNAMEs: string,
+        SERVICE__GRAPHQL_MONGO__MONGODB_PASSWORD: string,
+        SERVICE__GRAPHQL_MONGO__MONGODB_ROOT_USERNAME: string,
+        SERVICE__GRAPHQL_MONGO__MONGODB_ROOT_PASSWORD: string,
+        SERVICE__GRAPHQL_MONGO__REDIS_USERNAME: string,
+        SERVICE__GRAPHQL_MONGO__REDIS_PASSWORD: string,
+        SERVICE__GRAPHQL_MONGO__OAUTH_GITHUB_CLIENT_ID: string,
+        SERVICE__GRAPHQL_MONGO__OAUTH_GITHUB_CLIENT_SECRET: string,
+        SERVICE__GRAPHQL_MONGO__OAUTH_GOOGLE_CLIENT_ID: string,
+        SERVICE__GRAPHQL_MONGO__OAUTH_GOOGLE_CLIENT_SECRET: string,
+
+        SERVICE__GRPC_MONGO__MONGODB_USERNAME: string,
+        SERVICE__GRPC_MONGO__MONGODB_PASSWORD: string,
+        SERVICE__GRPC_MONGO__MONGODB_ROOT_USERNAME: string,
+        SERVICE__GRPC_MONGO__MONGODB_ROOT_PASSWORD: string,
+
+        SERVICE__GRAPHQL_POSTGRES__POSTGRES_USERNAME: string,
+        SERVICE__GRAPHQL_POSTGRES__POSTGRES_PASSWORD: string,
+
+        SERVICE__REACT_WEB__: string,
+
+        INFRASTRUCTURE__ARGOCD__ADMIN_PASSWORD: string,
+        INFRASTRUCTURE__ARGOCD__TYPE: stringNoDefault.transform(getDefault('git')),
+        INFRASTRUCTURE__ARGOCD__URL: stringNoDefault.transform(getDefault('https://github.com/Oyelowo/modern-distributed-app-template')),
+        INFRASTRUCTURE__ARGOCD__USERNAME: stringNoDefault.transform(getDefault('Oyelowo')),
+        INFRASTRUCTURE__ARGOCD__PASSWORD: string,
+
+        INFRASTRUCTURE__ARGOCD_APPLICATIONS_CHILDREN_INFRASTRUCTURE__: string,
+        INFRASTRUCTURE__ARGOCD_APPLICATIONS_CHILDREN_SERVICES__: string,
+        INFRASTRUCTURE__ARGOCD_APPLICATIONS_PARENTS__: string,
+
+        INFRASTRUCTURE__CERT_MANAGER__: string,
+        INFRASTRUCTURE__LINKERD__: string,
+        INFRASTRUCTURE__LINKERD_VIZ__PASSWORD: string,
+        INFRASTRUCTURE__NAMESPACES__: string,
+
+        INFRASTRUCTURE__NGINX_INGRESS__: string,
+
+        INFRASTRUCTURE__SEALED_SECRETS__: string,
     });
 
     return secretsSample;
@@ -78,7 +77,52 @@ export const getSecretsSchema = ({
 
 export type TSecretJson = z.infer<ReturnType<typeof getSecretsSchema>>;
 
-const checkType = <T extends Record<ResourceName, unknown>>(obj: T): T => obj;
+const checkType = <T extends EnvVarAll<string>>(obj: T): T => obj;
+const kk: EnvVarAll<string> = {
+
+}
+// <ResourceCategory>__<ResourceName>__<A secret key>
+const secretsSample1: TSecretJson = checkType({
+    SERVICE__GRAPHQL_MONGO__MONGODB_USERNAME: "",
+    SERVICE__GRAPHQL_MONGO__MONGODB_PASSWORD: "",
+    SERVICE__GRAPHQL_MONGO__MONGODB_ROOT_USERNAME: "",
+    SERVICE__GRAPHQL_MONGO__MONGODB_ROOT_PASSWORD: "",
+    SERVICE__GRAPHQL_MONGO__REDIS_USERNAME: "",
+    SERVICE__GRAPHQL_MONGO__REDIS_PASSWORD: "",
+    SERVICE__GRAPHQL_MONGO__OAUTH_GITHUB_CLIENT_ID: "",
+    SERVICE__GRAPHQL_MONGO__OAUTH_GITHUB_CLIENT_SECRET: "",
+    SERVICE__GRAPHQL_MONGO__OAUTH_GOOGLE_CLIENT_ID: "",
+    SERVICE__GRAPHQL_MONGO__OAUTH_GOOGLE_CLIENT_SECRET: "",
+
+    SERVICE__GRPC_MONGO__MONGODB_USERNAME: "",
+    SERVICE__GRPC_MONGO__MONGODB_PASSWORD: "",
+    SERVICE__GRPC_MONGO__MONGODB_ROOT_USERNAME: "",
+    SERVICE__GRPC_MONGO__MONGODB_ROOT_PASSWORD: "",
+
+    SERVICE__GRAPHQL_POSTGRES__POSTGRES_USERNAME: "",
+    SERVICE__GRAPHQL_POSTGRES__POSTGRES_PASSWORD: "",
+
+    SERVICE__REACT_WEB__: "",
+
+    INFRASTRUCTURE__ARGOCD__ADMIN_PASSWORD: "",
+    INFRASTRUCTURE__ARGOCD__TYPE: "",
+    INFRASTRUCTURE__ARGOCD__URL: "",
+    INFRASTRUCTURE__ARGOCD__USERNAME: "",
+    INFRASTRUCTURE__ARGOCD__PASSWORD: "",
+
+    INFRASTRUCTURE__ARGOCD_APPLICATIONS_CHILDREN_INFRASTRUCTURE__: "",
+    INFRASTRUCTURE__ARGOCD_APPLICATIONS_CHILDREN_SERVICES__: "",
+    INFRASTRUCTURE__ARGOCD_APPLICATIONS_PARENTS__: "",
+
+    INFRASTRUCTURE__CERT_MANAGER__: "",
+    INFRASTRUCTURE__LINKERD__: "",
+    INFRASTRUCTURE__LINKERD_VIZ__PASSWORD: "",
+    INFRASTRUCTURE__NAMESPACES__: "",
+
+    INFRASTRUCTURE__NGINX_INGRESS__: "",
+
+    INFRASTRUCTURE__SEALED_SECRETS__: "",
+} as const);
 
 const secretsSample: TSecretJson = checkType({
     'graphql-mongo': {
@@ -122,7 +166,7 @@ const secretsSample: TSecretJson = checkType({
 const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 
 export class PlainSecretJsonConfig<App extends ResourceName> {
-    constructor(private resourceName: App, private environment: Environment) {}
+    constructor(private resourceName: App, private environment: Environment) { }
 
     getSecrets = (): TSecretJson[App] => {
         // PlainSecretJsonConfig.syncAll();
@@ -166,22 +210,16 @@ export class PlainSecretJsonConfig<App extends ResourceName> {
         });
     };
 
-    static #getSecretJsonObject = (environment: Environment): object | undefined => {
-        const envPath = PlainSecretJsonConfig.#getSecretPath(environment);
+    // static #getSecretJsonObject = (environment: Environment): object | undefined => {
+    //     const envPath = PlainSecretJsonConfig.#getSecretPath(environment);
 
-        const existingEnvSecret = this.#parseJson<object>(sh.exec(`cat ${envPath}`, { silent: true }).stdout.trim());
-        return existingEnvSecret;
-    };
+    //     const existingEnvSecret = this.#parseJson<object>(sh.exec(`cat ${envPath}`, { silent: true }).stdout.trim());
+    //     return existingEnvSecret;
+    // };
 
     static #getSecretPath = (environment: Environment): string => {
         return path.join(PLAIN_SECRETS_CONFIGS_DIR, `${environment}.json`);
     };
 
-    static #parseJson = <T>(json: string): T | undefined => {
-        try {
-            return JSON.parse(json) as T;
-        } catch {
-            return undefined;
-        }
-    };
+
 }
