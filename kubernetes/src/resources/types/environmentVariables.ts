@@ -1,4 +1,5 @@
 import {
+    Environment,
     EnvVarsCommon,
     InfrastructureName,
     ResourceCategory,
@@ -6,7 +7,9 @@ import {
     TInfrastructure,
     TServices,
 } from './ownTypes.js';
-import { Simplify, SnakeCase } from 'type-fest';
+import { Exact, Simplify, SnakeCase } from 'type-fest';
+import z from 'zod';
+import _ from 'lodash';
 
 type GraphqlMongo = EnvVarsCommon<'graphql-mongo', 'applications', 'app' | 'mongodb' | 'oauth' | 'redis'>;
 
@@ -95,8 +98,62 @@ type SelectedSecretsEnvVars = SelectSecretsFromServicesEnvVars<
         'MONGODB_ROOT_PASSWORD' | 'MONGODB_PASSWORD' | 'MONGODB_ROOT_USERNAME' | 'MONGODB_USERNAME'
     > &
     SelectSecretsFromInfraEnvVars<'argocd', 'ADMIN_PASSWORD' | 'password' | 'type' | 'url' | 'username'> &
-    SelectSecretsFromInfraEnvVars<'linkerd-viz', 'PASSWORD'>
-    ;
+    SelectSecretsFromInfraEnvVars<'linkerd-viz', 'PASSWORD'>;
+
+export const getSecretsSchema = ({
+    allowEmptyValues,
+    environment,
+}: {
+    allowEmptyValues: boolean;
+    environment: Environment;
+}) => {
+    const isLocal = environment === 'local';
+    const getDefault =
+        (defaultValue: string) =>
+            (v: string): string =>
+                isLocal && _.isEmpty(v) ? defaultValue : v;
+    const stringNoDefault = z.string().min(allowEmptyValues ? 0 : 1);
+    const string = stringNoDefault
+        // We want to populate the values for local environment
+        // for the first time but not for other environments
+        // So that the dev can properly see which secrets have not been added
+        // it's okay to make mistake in local
+        .transform(getDefault('example'));
+
+    const secretsSample1: Record<keyof SelectedSecretsEnvVars, z.ZodEffects<z.ZodString, string, string>> = {
+        SERVICES__GRAPHQL_MONGO__MONGODB_USERNAME: string,
+        SERVICES__GRAPHQL_MONGO__MONGODB_PASSWORD: string,
+        SERVICES__GRAPHQL_MONGO__MONGODB_ROOT_USERNAME: string,
+        SERVICES__GRAPHQL_MONGO__MONGODB_ROOT_PASSWORD: string,
+        SERVICES__GRAPHQL_MONGO__REDIS_USERNAME: string,
+        SERVICES__GRAPHQL_MONGO__REDIS_PASSWORD: string,
+        SERVICES__GRAPHQL_MONGO__OAUTH_GITHUB_CLIENT_ID: string,
+        SERVICES__GRAPHQL_MONGO__OAUTH_GITHUB_CLIENT_SECRET: string,
+        SERVICES__GRAPHQL_MONGO__OAUTH_GOOGLE_CLIENT_ID: string,
+        SERVICES__GRAPHQL_MONGO__OAUTH_GOOGLE_CLIENT_SECRET: string,
+
+        SERVICES__GRPC_MONGO__MONGODB_USERNAME: string,
+        SERVICES__GRPC_MONGO__MONGODB_PASSWORD: string,
+        SERVICES__GRPC_MONGO__MONGODB_ROOT_USERNAME: string,
+        SERVICES__GRPC_MONGO__MONGODB_ROOT_PASSWORD: string,
+
+        SERVICES__GRAPHQL_POSTGRES__POSTGRES_USERNAME: string,
+        SERVICES__GRAPHQL_POSTGRES__POSTGRES_PASSWORD: string,
+
+        INFRASTRUCTURE__ARGOCD__ADMIN_PASSWORD: string,
+        INFRASTRUCTURE__ARGOCD__TYPE: stringNoDefault.transform(getDefault('git')),
+        INFRASTRUCTURE__ARGOCD__URL: stringNoDefault.transform(
+            getDefault('https://github.com/Oyelowo/modern-distributed-app-template')
+        ),
+        INFRASTRUCTURE__ARGOCD__USERNAME: stringNoDefault.transform(getDefault('Oyelowo')),
+        INFRASTRUCTURE__ARGOCD__PASSWORD: string,
+
+        INFRASTRUCTURE__LINKERD_VIZ__PASSWORD: string,
+    };
+    const secretsSample = z.object(secretsSample1);
+
+    return secretsSample;
+};
 
 // type Momo = Record<Uppercase<`${TServices}__${SnakeCase<N>}__`>, string>>
 const envv: SelectedSecretsEnvVars = {
@@ -125,6 +182,6 @@ const envv: SelectedSecretsEnvVars = {
     INFRASTRUCTURE__ARGOCD__URL: '',
     INFRASTRUCTURE__ARGOCD__USERNAME: '',
 
-    INFRASTRUCTURE__LINKERD_VIZ__PASSWORD: ""
+    INFRASTRUCTURE__LINKERD_VIZ__PASSWORD: '',
     // SERVICES__ARGOCD__ADMIN_PASSWORD
 };
