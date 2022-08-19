@@ -1,4 +1,5 @@
-import { TSecretJson } from '../../../scripts/utils/plainSecretJsonConfig.js';
+import type { ValueOf } from 'type-fest';
+
 import * as z from 'zod';
 import { Namespace } from '../infrastructure/namespaces/util.js';
 export const appEnvironmentsSchema = z.union([
@@ -55,15 +56,16 @@ export const ResourceNameSchema = z.union([ServiceNamesSchema, InfrastructureNam
 // A resource can have multiple kubernetes objects/resources e.g linkerd
 // e.g linkerd can have different
 export type ResourceName = z.infer<typeof ResourceNameSchema>;
+export type NoUnion<T, U = T> = T extends U ? ([U] extends [T] ? T : never) : never;
 
-export interface Settings<TAppName extends ServiceName> {
+export interface Settings<N extends ServiceName> {
     requestMemory: Memory;
     requestCpu: CPU;
     limitMemory: Memory;
     limitCpu: CPU;
     replicaCount: number;
     host: string;
-    image: `ghcr.io/oyelowo/${TAppName}:${string}`;
+    image: `ghcr.io/oyelowo/${N}:${string}`;
     readinessProbePort?: number;
 }
 
@@ -72,15 +74,8 @@ export interface Settings<TAppName extends ServiceName> {
 // otherwise, it will make class methods optional as well.
 export type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
 
-type MongoDb = 'mongodb';
-type PostgresDb = 'postgresdb';
-type DoesNotHaveDb = 'doesNotHaveDb';
-
-export type DBType = MongoDb | PostgresDb | DoesNotHaveDb;
-
 export const STORAGE_CLASS = 'linode-block-storage-retain';
 export type MongoDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
-    dbType: MongoDb;
     MONGODB_NAME: DBN;
     MONGODB_USERNAME: string;
     MONGODB_PASSWORD: string;
@@ -93,7 +88,6 @@ export type MongoDbEnvVars<DBN extends `${ServiceName}-database`, NS extends Nam
 };
 
 export type PostgresDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
-    dbType: PostgresDb;
     POSTGRES_NAME: DBN;
     POSTGRES_DATABASE_NAME: DBN;
     POSTGRES_USERNAME: string;
@@ -104,50 +98,100 @@ export type PostgresDbEnvVars<DBN extends `${ServiceName}-database`, NS extends 
     POSTGRES_STORAGE_CLASS: string;
 };
 
-type RedisServiceName<AN extends ServiceName> = `${AN}-redis`;
-type RedisServiceNameWithSuffix<AN extends ServiceName> = `${RedisServiceName<AN>}-master`;
+type RedisServiceNameMaster<N extends `${ServiceName}-redis`> = `${N}-master`;
 
-export type RedisDbEnvVars<AN extends ServiceName, NS extends NamespaceOfApps> = {
-    REDIS_USERNAME?: string;
-    REDIS_PASSWORD?: string;
-    REDIS_HOST?: `${RedisServiceNameWithSuffix<AN>}.${NS}`; // The application will also need this
-    REDIS_SERVICE_NAME?: RedisServiceName<AN>; // THIS is used redis helm chart config itself which adds a suffix(e.g master)
-    REDIS_SERVICE_NAME_WITH_SUFFIX?: RedisServiceNameWithSuffix<AN>;
-    REDIS_PORT?: '6379';
+export type RedisDbEnvVars<N extends `${ServiceName}-redis`, NS extends NamespaceOfApps> = {
+    REDIS_USERNAME: string;
+    REDIS_PASSWORD: string;
+    REDIS_HOST: `${RedisServiceNameMaster<N>}.${NS}`; // The application will also need this
+    REDIS_SERVICE_NAME: N; // THIS is used in redis helm chart config itself which adds a suffix(e.g master)
+    REDIS_SERVICE_NAME_MASTER: RedisServiceNameMaster<N>;
+    REDIS_PORT: '6379';
 };
 
-type DatabaseEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> =
-    | MongoDbEnvVars<DBN, NS>
-    | PostgresDbEnvVars<DBN, NS>
-    | { dbType: DoesNotHaveDb };
-
-export type AppEnvVars<AN extends ServiceName, NS extends NamespaceOfApps> = {
+export type AppEnvVars = {
     APP_ENVIRONMENT: Environment;
     APP_HOST: '0.0.0.0';
     APP_PORT: '8000' | '50051' | '3000';
     // the url of the ingress e.g oyelowo.com // localhost:8080 (for local dev)
     APP_EXTERNAL_BASE_URL: string;
-} & DatabaseEnvVars<`${AN}-database`, NS> &
-    RedisDbEnvVars<AN, NS>;
-
-export type OtherEnvVars = {
-    OAUTH_GITHUB_CLIENT_ID?: string;
-    OAUTH_GITHUB_CLIENT_SECRET?: string;
-    OAUTH_GOOGLE_CLIENT_ID?: string;
-    OAUTH_GOOGLE_CLIENT_SECRET?: string;
 };
-type EnvironmentVariables<AN extends ServiceName, NS extends NamespaceOfApps, DBT extends DBType> = Extract<
-    AppEnvVars<AN, NS>,
-    { dbType: DBT }
->;
 
-export type NoUnion<T, U = T> = T extends U ? ([U] extends [T] ? T : never) : never;
+export type OauthEnvVars = {
+    OAUTH_GITHUB_CLIENT_ID: string;
+    OAUTH_GITHUB_CLIENT_SECRET: string;
+    OAUTH_GOOGLE_CLIENT_ID: string;
+    OAUTH_GOOGLE_CLIENT_SECRET: string;
+};
 
-export type AppConfigs<AN extends ServiceName, DBT extends DBType, NS extends NamespaceOfApps> = {
-    kubeConfig: Settings<NoUnion<AN>>;
-    envVars: Omit<EnvironmentVariables<AN, NS, DBT>, 'dbType'> & OtherEnvVars & TSecretJson[AN];
+type EnvVariables<S extends ServiceName, NS extends NamespaceOfApps> = {
+    mongodb: MongoDbEnvVars<`${S}-database`, NS>;
+    postgresdb: PostgresDbEnvVars<`${S}-database`, NS>;
+    redis: RedisDbEnvVars<`${S}-redis`, NS>;
+    app: AppEnvVars;
+    oauth: OauthEnvVars;
+    // others: T;
+};
+
+export type EnvironmentVariables<
+    N extends ServiceName,
+    NS extends NamespaceOfApps,
+    EnvKey extends keyof EnvVariables<N, NS>
+    > = ValueOf<Pick<EnvVariables<N, NS>, EnvKey>>;
+const h: EnvironmentVariables<"graphql-mongo", "applications", "oauth"> ={
+
+}
+export type AppConfigs<N extends ServiceName, NS extends NamespaceOfApps, EnvKey extends keyof EnvVariables<N, NS>> = {
+    kubeConfig: Settings<N>;
+    envVars: EnvironmentVariables<N, NS, EnvKey>;
     metadata: {
-        name: AN;
+        name: N;
         namespace: NS;
     };
+};
+
+
+export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'applications', 'mongodb' | "oauth" | "redis" | "app"> = {
+    kubeConfig: {
+        requestMemory: '70Mi',
+        requestCpu: '100m',
+        limitMemory: '200Mi',
+        limitCpu: '100m',
+        replicaCount: 2,
+        readinessProbePort: 8000,
+        host: '0.0.0.0',
+        image: `ghcr.io/oyelowo/graphql-mongo:${"IMAGE_TAG_GRAPHQL_MONGO"}`,
+    },
+
+    envVars: {
+        APP_ENVIRONMENT: "local",
+        APP_HOST: '0.0.0.0',
+        APP_PORT: '8000',
+        APP_EXTERNAL_BASE_URL: "",
+        OAUTH_GITHUB_CLIENT_ID: process.env.OAUTH_GITHUB_CLIENT_ID,
+        OAUTH_GITHUB_CLIENT_SECRET: process.env.OAUTH_GITHUB_CLIENT_SECRET,
+        OAUTH_GOOGLE_CLIENT_ID: process.env.OAUTH_GOOGLE_CLIENT_ID,
+        OAUTH_GOOGLE_CLIENT_SECRET: process.env.OAUTH_GOOGLE_CLIENT_SECRET,
+
+        MONGODB_NAME: 'graphql-mongo-database',
+        MONGODB_USERNAME: "process.env.MONGODB_USERNAME",
+        MONGODB_PASSWORD: "process.env.MONGODB_PASSWORD",
+        MONGODB_ROOT_USERNAME: "process.env.MONGODB_ROOT_USERNAME",
+        MONGODB_ROOT_PASSWORD: "process.env.MONGODB_ROOT_PASSWORD",
+        MONGODB_HOST: 'graphql-mongo-database.applications',
+        MONGODB_SERVICE_NAME: 'graphql-mongo-database',
+        MONGODB_STORAGE_CLASS: 'linode-block-storage-retain',
+        MONGODB_PORT: '27017',
+
+        REDIS_USERNAME: process.env.REDIS_USERNAME,
+        REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+        REDIS_HOST: 'graphql-mongo-redis-master.applications',
+        REDIS_SERVICE_NAME: 'graphql-mongo-redis', // helm chart adds suffix to the name e.g (master) which the rust application must use as above
+        REDIS_SERVICE_NAME_MASTER: 'graphql-mongo-redis-master',
+        REDIS_PORT: '6379',
+    },
+    metadata: {
+        name: 'graphql-mongo',
+        namespace: 'applications',
+    },
 };
