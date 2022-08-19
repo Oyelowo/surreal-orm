@@ -1,4 +1,4 @@
-import type { ValueOf } from 'type-fest';
+import type { ValueOf, Simplify, UnionToIntersection } from 'type-fest';
 
 import * as z from 'zod';
 import { Namespace } from '../infrastructure/namespaces/util.js';
@@ -29,7 +29,11 @@ export type ServiceName = typeof ServiceNames[number];
 
 const infrastructure = 'infrastructure';
 const services = 'services';
-export type ResourceCategory = typeof infrastructure | typeof services;
+export type TInfrastructure = typeof infrastructure;
+export type TServices = typeof services;
+export type ResourceCategory = TInfrastructure | TServices;
+
+export type ResourcePaths = `${TInfrastructure}/${InfrastructureName}` | `${TServices}/${ServiceName}`
 
 export const ArgocdAppResourceNameSchema = z.union([
     z.literal(`argocd-applications-children-${infrastructure}`),
@@ -133,65 +137,23 @@ type EnvVariables<S extends ServiceName, NS extends NamespaceOfApps> = {
     // others: T;
 };
 
-export type EnvironmentVariables<
+/**
+ *  @example
+ * @argument type Kamo = EnvironmentVariablesCommon<ServiceName, Namespace, [ListOfSelectedEnvVars]>
+ * type Kamo = EnvironmentVariablesCommon<"graphql-mongo", "applications", ["app", "mongodb"]>
+ */
+export type EnvVarsCommon<
     N extends ServiceName,
     NS extends NamespaceOfApps,
-    EnvKey extends keyof EnvVariables<N, NS>
-    > = ValueOf<Pick<EnvVariables<N, NS>, EnvKey>>;
-const h: EnvironmentVariables<"graphql-mongo", "applications", "oauth"> ={
+    SelectedEnvKey extends keyof EnvVariables<N, NS>
+    > = Simplify<UnionToIntersection<ValueOf<Pick<EnvVariables<N, NS>, SelectedEnvKey>>>>;
 
-}
-export type AppConfigs<N extends ServiceName, NS extends NamespaceOfApps, EnvKey extends keyof EnvVariables<N, NS>> = {
+
+export type AppConfigs<N extends ServiceName, NS extends NamespaceOfApps, EnvKey extends Array<keyof EnvVariables<N, NS>>> = {
     kubeConfig: Settings<N>;
-    envVars: EnvironmentVariables<N, NS, EnvKey>;
+    envVars: EnvVarsCommon<N, NS, EnvKey>;
     metadata: {
         name: N;
         namespace: NS;
     };
-};
-
-
-export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'applications', 'mongodb' | "oauth" | "redis" | "app"> = {
-    kubeConfig: {
-        requestMemory: '70Mi',
-        requestCpu: '100m',
-        limitMemory: '200Mi',
-        limitCpu: '100m',
-        replicaCount: 2,
-        readinessProbePort: 8000,
-        host: '0.0.0.0',
-        image: `ghcr.io/oyelowo/graphql-mongo:${"IMAGE_TAG_GRAPHQL_MONGO"}`,
-    },
-
-    envVars: {
-        APP_ENVIRONMENT: "local",
-        APP_HOST: '0.0.0.0',
-        APP_PORT: '8000',
-        APP_EXTERNAL_BASE_URL: "",
-        OAUTH_GITHUB_CLIENT_ID: process.env.OAUTH_GITHUB_CLIENT_ID,
-        OAUTH_GITHUB_CLIENT_SECRET: process.env.OAUTH_GITHUB_CLIENT_SECRET,
-        OAUTH_GOOGLE_CLIENT_ID: process.env.OAUTH_GOOGLE_CLIENT_ID,
-        OAUTH_GOOGLE_CLIENT_SECRET: process.env.OAUTH_GOOGLE_CLIENT_SECRET,
-
-        MONGODB_NAME: 'graphql-mongo-database',
-        MONGODB_USERNAME: "process.env.MONGODB_USERNAME",
-        MONGODB_PASSWORD: "process.env.MONGODB_PASSWORD",
-        MONGODB_ROOT_USERNAME: "process.env.MONGODB_ROOT_USERNAME",
-        MONGODB_ROOT_PASSWORD: "process.env.MONGODB_ROOT_PASSWORD",
-        MONGODB_HOST: 'graphql-mongo-database.applications',
-        MONGODB_SERVICE_NAME: 'graphql-mongo-database',
-        MONGODB_STORAGE_CLASS: 'linode-block-storage-retain',
-        MONGODB_PORT: '27017',
-
-        REDIS_USERNAME: process.env.REDIS_USERNAME,
-        REDIS_PASSWORD: process.env.REDIS_PASSWORD,
-        REDIS_HOST: 'graphql-mongo-redis-master.applications',
-        REDIS_SERVICE_NAME: 'graphql-mongo-redis', // helm chart adds suffix to the name e.g (master) which the rust application must use as above
-        REDIS_SERVICE_NAME_MASTER: 'graphql-mongo-redis-master',
-        REDIS_PORT: '6379',
-    },
-    metadata: {
-        name: 'graphql-mongo',
-        namespace: 'applications',
-    },
 };
