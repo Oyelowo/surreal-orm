@@ -28,19 +28,27 @@ type ArgoCd = {
     password: string;
 };
 
-type ServiceEnvVars = Simplify<
+type LinkerdViz = {
+    PASSWORD: string;
+};
+
+// Creates Record<ResourceName, Record<EnvVarName, string>>
+type ServicesEnvVars = Simplify<
     RecordServiceEnvVars<'graphql-mongo', GraphqlMongo> &
     RecordServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
     RecordServiceEnvVars<'grpc-mongo', GrpcMongo>
 >;
-type InfrastructureEnvVars = Simplify<RecordInfraEnvVars<'argocd', ArgoCd>>;
+type InfrastructureEnvVars = Simplify<
+    RecordInfraEnvVars<'argocd', ArgoCd> & RecordInfraEnvVars<'linkerd-viz', LinkerdViz>
+>;
 
-type Secc = {
+type EnvVarsByResourceCategory = {
     infrastructure: InfrastructureEnvVars;
-    services: ServiceEnvVars;
+    services: ServicesEnvVars;
 };
 
 // type EnvVarsSecrets<T, K extends keyof T[keyof T], E extends keyof T[keyof T][K]> = Record<Uppercase<`${TServices}__${SnakeCase<Extract<K, string>>}__${keyof Pick<T[keyof T][K], Extract<E, string>>}`>, string>;
+
 type Stringified<T> = Extract<T, string>;
 /** Generates the format in all caps:  \<ResourceCategory>\__\<ResourceName>\__\<EnvironmentVariableNaame>
  * @example SERVICES__GRAPHQL_MONGO__REDIS_PASSWORD */
@@ -48,25 +56,24 @@ type CreateEnvCarsCreator<
     RCat extends ResourceCategory,
     ResourceEnvVar,
     RName extends keyof ResourceEnvVar,
-    EnvVarNames extends keyof ResourceEnvVar[RName],
+    EnvVarNames extends keyof ResourceEnvVar[RName]
     > = Record<
-        Uppercase<`${RCat}__${SnakeCase<Stringified<RName>>}__${keyof Pick<ResourceEnvVar[RName], Stringified<EnvVarNames>>}`>,
+        Uppercase<`${RCat}__${SnakeCase<Stringified<RName>>}__${keyof Pick<
+            ResourceEnvVar[RName],
+            Stringified<EnvVarNames>
+        >}`>,
         string
     >;
 
-type SelectSecretsFromServicesEnvVars<RName extends keyof ServiceEnvVars, EnvVarNames extends keyof ServiceEnvVars[RName]> = CreateEnvCarsCreator<
-    'services',
-    ServiceEnvVars,
-    RName,
-    EnvVarNames
->;
-type SelectSecretsFromInfraEnvVars<RName extends keyof InfrastructureEnvVars, EnvVarNames extends keyof InfrastructureEnvVars[RName]> = CreateEnvCarsCreator<
-    'infrastructure',
-    InfrastructureEnvVars,
-    RName,
-    EnvVarNames
->;
+type SelectSecretsFromServicesEnvVars<
+    RName extends keyof ServicesEnvVars,
+    EnvVarNames extends keyof ServicesEnvVars[RName]
+    > = CreateEnvCarsCreator<'services', ServicesEnvVars, RName, EnvVarNames>;
 
+type SelectSecretsFromInfraEnvVars<
+    RName extends keyof InfrastructureEnvVars,
+    EnvVarNames extends keyof InfrastructureEnvVars[RName]
+    > = CreateEnvCarsCreator<'infrastructure', InfrastructureEnvVars, RName, EnvVarNames>;
 
 // The service, Selected Environment variables that would be passed when generating kubernetes secrets manifests
 type SelectedSecretsEnvVars = SelectSecretsFromServicesEnvVars<
@@ -87,7 +94,9 @@ type SelectedSecretsEnvVars = SelectSecretsFromServicesEnvVars<
         'grpc-mongo',
         'MONGODB_ROOT_PASSWORD' | 'MONGODB_PASSWORD' | 'MONGODB_ROOT_USERNAME' | 'MONGODB_USERNAME'
     > &
-    SelectSecretsFromInfraEnvVars<'argocd', 'ADMIN_PASSWORD' | 'password' | 'type' | 'url' | 'username'>;
+    SelectSecretsFromInfraEnvVars<'argocd', 'ADMIN_PASSWORD' | 'password' | 'type' | 'url' | 'username'> &
+    SelectSecretsFromInfraEnvVars<'linkerd-viz', 'PASSWORD'>
+    ;
 
 // type Momo = Record<Uppercase<`${TServices}__${SnakeCase<N>}__`>, string>>
 const envv: SelectedSecretsEnvVars = {
@@ -116,5 +125,6 @@ const envv: SelectedSecretsEnvVars = {
     INFRASTRUCTURE__ARGOCD__URL: '',
     INFRASTRUCTURE__ARGOCD__USERNAME: '',
 
+    INFRASTRUCTURE__LINKERD_VIZ__PASSWORD: ""
     // SERVICES__ARGOCD__ADMIN_PASSWORD
 };
