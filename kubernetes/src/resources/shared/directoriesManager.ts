@@ -1,9 +1,9 @@
-import { ServiceName } from './../types/ownTypes.js';
+import { ResourcePaths } from './../types/ownTypes.js';
 import * as k8s from '@pulumi/kubernetes';
 import url from 'node:url';
 import path from 'node:path';
 import { v4 as uuid } from 'uuid';
-import { Environment, InfrastructureName } from '../types/ownTypes.js';
+import { Environment } from '../types/ownTypes.js';
 
 // const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
@@ -23,7 +23,7 @@ export const getGeneratedCrdsCodeDir = () => {
 };
 
 export type ResourceOutputDirProps = {
-    outputDirectory: `infrastructure/${InfrastructureName}` | `services/${ServiceName}`;
+    outputDirectory: ResourcePaths;
     environment: Environment;
 };
 
