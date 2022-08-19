@@ -1,5 +1,5 @@
 import { AppConfigs } from '../../types/ownTypes.js';
-import { getEnvironmentVariables } from '../../shared/validations.js';
+import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 
 const environment = getEnvironmentVariables().ENVIRONMENT;

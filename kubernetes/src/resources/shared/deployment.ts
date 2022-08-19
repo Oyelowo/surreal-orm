@@ -11,7 +11,7 @@ import { generateService } from './helpers.js';
 import { toBase64 } from './converters.js';
 import _ from 'lodash';
 
-const { ENVIRONMENT } = getEnvironmentVariables();
+const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
 
 // eslint-disable-next-line no-restricted-syntax
 export class ServiceDeployment<

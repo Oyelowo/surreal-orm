@@ -10,7 +10,8 @@ import { argocdProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { getIngressUrlHost } from '../ingress/hosts.js';
 
-const { ENVIRONMENT } = getEnvironmentVariables();
+const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
+
 const argocdHost = getIngressUrlHost({ environment: ENVIRONMENT, subDomain: 'argocd' });
 const saltRounds = 10;
 const myPlaintextPassword = 'oyelowo';

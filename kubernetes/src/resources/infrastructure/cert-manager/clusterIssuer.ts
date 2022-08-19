@@ -1,9 +1,10 @@
 import crds from '../../../../generatedCrdsTs/index.js';
-import { getEnvironmentVariables } from '../../shared/validations.js';
+import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
 
 import { certManagerProvider } from './settings.js';
-const { ENVIRONMENT } = getEnvironmentVariables();
+const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
+
 export const CLUSTER_ISSUER_NAME = 'letsencrypt-cluster-issuer';
 
 const acme: crds.types.input.certmanager.v1.ClusterIssuerSpecAcmeArgs = {

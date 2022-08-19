@@ -4,11 +4,11 @@ import { namespaces } from '../namespaces/util.js';
 import { graphqlMongoSettings } from '../../services/graphql-mongo/settings.js';
 import { reactWebSettings } from '../../services/react-web/settings.js';
 import { NginxConfiguration } from '../../types/nginxConfigurations.js';
-import { getEnvironmentVariables } from '../../shared/validations.js';
+import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 import { CLUSTER_ISSUER_NAME } from '../cert-manager/index.js';
 import { nginxIngressProvider } from './settings.js';
 
-const { ENVIRONMENT } = getEnvironmentVariables();
+const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
 
 type IngressClassName = 'nginx' | 'traefik';
 export const INGRESS_CLASSNAME_NGINX: IngressClassName = 'nginx';

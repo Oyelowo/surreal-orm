@@ -82,7 +82,8 @@ const metadata = {
     },
 };
 
-const { ENVIRONMENT } = getEnvironmentVariables();
+const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
+
 const secrets = new PlainSecretJsonConfig('argocd', ENVIRONMENT).getSecrets();
 export const argoCDApplicationsSecret = new kx.Secret(
     'argocd-secret',

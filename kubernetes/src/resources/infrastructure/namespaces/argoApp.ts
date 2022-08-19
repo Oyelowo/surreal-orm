@@ -1,8 +1,8 @@
 import { createArgocdApplication } from '../../shared/createArgoApplication.js';
-import { getEnvironmentVariables } from '../../shared/validations.js';
+import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 import { namespaces } from './util.js';
 
-const { ENVIRONMENT } = getEnvironmentVariables();
+const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
 
 export const namespacesArgoApps = createArgocdApplication({
     sourceAppDirectory: 'infrastructure/namespaces',

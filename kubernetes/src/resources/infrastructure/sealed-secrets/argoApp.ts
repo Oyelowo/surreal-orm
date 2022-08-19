@@ -1,8 +1,9 @@
 import { namespaces } from '../namespaces/index.js';
 import { createArgocdApplication } from '../../shared/createArgoApplication.js';
-import { getEnvironmentVariables } from '../../shared/validations.js';
+import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 
-const { ENVIRONMENT } = getEnvironmentVariables();
+const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
+
 // App that deploys sealedSecretsController resources themselves
 /* sealedSecretsController APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const sealedSecretsControllerApplication = createArgocdApplication({

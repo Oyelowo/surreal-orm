@@ -3,7 +3,7 @@ import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../../infrastructure/namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
-import { getEnvironmentVariables } from '../../shared/validations.js';
+import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 import { graphqlMongo } from './app.js';
 import { graphqlMongoSettings } from './settings.js';
 

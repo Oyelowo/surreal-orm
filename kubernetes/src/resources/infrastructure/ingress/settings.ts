@@ -1,7 +1,7 @@
 import { getResourceProvider } from '../../shared/directoriesManager.js';
-import { getEnvironmentVariables } from '../../shared/validations.js';
+import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 
-const { ENVIRONMENT } = getEnvironmentVariables();
+const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
 
 export const nginxIngressProvider = getResourceProvider({
     outputDirectory: `infrastructure/nginx-ingress`,
