@@ -1,12 +1,9 @@
-import { PlainSecretJsonConfig } from '../../../../scripts/utils/plainSecretJsonConfig.js';
 import { AppConfigs } from '../../types/ownTypes.js';
-import { getEnvironmentVariables } from '../../shared/validations.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
+import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 
-const environment = getEnvironmentVariables().ENVIRONMENT;
-const secretsFromLocalConfigs = new PlainSecretJsonConfig('graphql-postgres', environment).getSecrets();
-
-export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'postgresdb', 'applications'> = {
+const env = getEnvVarsForKubeManifestGenerator();
+export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'applications'> = {
     kubeConfig: {
         requestMemory: '70Mi',
         requestCpu: '100m',
@@ -15,18 +12,18 @@ export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'postgresdb
         replicaCount: 3,
         host: '0.0.0.0',
         readinessProbePort: 8000,
-        image: `ghcr.io/oyelowo/graphql-postgres:${getEnvironmentVariables().IMAGE_TAG_GRAPHQL_POSTGRES}`,
+        image: `ghcr.io/oyelowo/graphql-postgres:${env.IMAGE_TAG_GRAPHQL_POSTGRES}`,
     },
 
     envVars: {
-        APP_ENVIRONMENT: environment,
+        APP_ENVIRONMENT: env.ENVIRONMENT,
         APP_HOST: '0.0.0.0',
         APP_PORT: '8000',
-        APP_EXTERNAL_BASE_URL: getIngressUrl({ environment }),
+        APP_EXTERNAL_BASE_URL: getIngressUrl({ environment: env.ENVIRONMENT }),
         POSTGRES_DATABASE_NAME: 'graphql-postgres-database',
         POSTGRES_NAME: 'graphql-postgres-database',
-        POSTGRES_USERNAME: secretsFromLocalConfigs.POSTGRES_USERNAME,
-        POSTGRES_PASSWORD: secretsFromLocalConfigs.POSTGRES_PASSWORD,
+        POSTGRES_USERNAME: env.SERVICES__GRAPHQL_POSTGRES__POSTGRES_USERNAME,
+        POSTGRES_PASSWORD: env.SERVICES__GRAPHQL_POSTGRES__POSTGRES_PASSWORD,
         POSTGRES_HOST: 'graphql-postgres-database.applications', // the name of the postgres service being connected to. The name has suffices(primary|read etc) if using replcated architecture
         POSTGRES_PORT: '5432',
         POSTGRES_SERVICE_NAME: 'graphql-postgres-database',

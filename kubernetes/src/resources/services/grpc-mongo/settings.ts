@@ -1,15 +1,10 @@
-import { getEnvironmentVariables } from '../../shared/validations.js';
 import { AppConfigs } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
-import { PlainSecretJsonConfig } from '../../../../scripts/utils/plainSecretJsonConfig.js';
+import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 
-const environmentVariables = getEnvironmentVariables();
-const environment = environmentVariables.ENVIRONMENT;
+const env = getEnvVarsForKubeManifestGenerator();
 
-// Maybe?: Rethink this abstraction for secret. Maybe can be gotten directly from the typescript secret file which is gitignored locally?
-const secretsFromLocalConfigs = new PlainSecretJsonConfig('grpc-mongo', environment).getSecrets();
-
-export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'mongodb', 'applications'> = {
+export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'applications'> = {
     kubeConfig: {
         requestMemory: '70Mi',
         requestCpu: '100m',
@@ -18,19 +13,19 @@ export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'mongodb', 'application
         replicaCount: 3,
         readinessProbePort: 5000,
         host: '0.0.0.0',
-        image: `ghcr.io/oyelowo/grpc-mongo:${environmentVariables.IMAGE_TAG_GRPC_MONGO}`,
+        image: `ghcr.io/oyelowo/grpc-mongo:${env.IMAGE_TAG_GRPC_MONGO}`,
     },
 
     envVars: {
-        APP_ENVIRONMENT: environment,
+        APP_ENVIRONMENT: env.ENVIRONMENT,
         APP_HOST: '0.0.0.0',
         APP_PORT: '50051',
-        APP_EXTERNAL_BASE_URL: getIngressUrl({ environment }),
+        APP_EXTERNAL_BASE_URL: getIngressUrl({ environment: env.ENVIRONMENT }),
         MONGODB_NAME: 'grpc-mongo-database',
-        MONGODB_USERNAME: secretsFromLocalConfigs.MONGODB_USERNAME,
-        MONGODB_PASSWORD: secretsFromLocalConfigs.MONGODB_PASSWORD,
-        MONGODB_ROOT_USERNAME: secretsFromLocalConfigs.MONGODB_ROOT_USERNAME,
-        MONGODB_ROOT_PASSWORD: secretsFromLocalConfigs.MONGODB_ROOT_PASSWORD,
+        MONGODB_USERNAME: env.SERVICES__GRAPHQL_MONGO__MONGODB_USERNAME,
+        MONGODB_PASSWORD: env.SERVICES__GRAPHQL_MONGO__MONGODB_PASSWORD,
+        MONGODB_ROOT_USERNAME: env.SERVICES__GRAPHQL_MONGO__MONGODB_ROOT_USERNAME,
+        MONGODB_ROOT_PASSWORD: env.SERVICES__GRAPHQL_MONGO__MONGODB_ROOT_PASSWORD,
         MONGODB_HOST: 'grpc-mongo-database.applications',
         MONGODB_SERVICE_NAME: 'grpc-mongo-database',
         MONGODB_STORAGE_CLASS: 'linode-block-storage-retain',

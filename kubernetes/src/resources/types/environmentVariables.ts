@@ -1,13 +1,12 @@
 import {
+    appEnvironmentsSchema,
     Environment,
     EnvVarsCommon,
     InfrastructureName,
     ResourceCategory,
     ServiceName,
-    TInfrastructure,
-    TServices,
 } from './ownTypes.js';
-import { Exact, Simplify, SnakeCase } from 'type-fest';
+import { Simplify, SnakeCase } from 'type-fest';
 import z from 'zod';
 import _ from 'lodash';
 
@@ -19,9 +18,6 @@ type GrpcMongo = EnvVarsCommon<'grpc-mongo', 'applications', 'app' | 'mongodb'>;
 
 type RecordServiceEnvVars<N extends ServiceName, EnvVars> = Record<N, EnvVars>;
 type RecordInfraEnvVars<N extends InfrastructureName, EnvVars> = Record<N, EnvVars>;
-
-// type CatWithEnv<RCat extends ResourceCategory, V> = Record<RCat, V>;
-// type L = CatWithEnv<"services", Enva>
 
 type ArgoCd = {
     ADMIN_PASSWORD: string;
@@ -38,19 +34,18 @@ type LinkerdViz = {
 // Creates Record<ResourceName, Record<EnvVarName, string>>
 type ServicesEnvVars = Simplify<
     RecordServiceEnvVars<'graphql-mongo', GraphqlMongo> &
-    RecordServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
-    RecordServiceEnvVars<'grpc-mongo', GrpcMongo>
+        RecordServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
+        RecordServiceEnvVars<'grpc-mongo', GrpcMongo> &
+        RecordServiceEnvVars<'react-web', null>
 >;
 type InfrastructureEnvVars = Simplify<
     RecordInfraEnvVars<'argocd', ArgoCd> & RecordInfraEnvVars<'linkerd-viz', LinkerdViz>
 >;
 
-type EnvVarsByResourceCategory = {
-    infrastructure: InfrastructureEnvVars;
-    services: ServicesEnvVars;
-};
+type EnvVarsByCategory<RCat extends ResourceCategory, V> = Record<RCat, V>;
 
-// type EnvVarsSecrets<T, K extends keyof T[keyof T], E extends keyof T[keyof T][K]> = Record<Uppercase<`${TServices}__${SnakeCase<Extract<K, string>>}__${keyof Pick<T[keyof T][K], Extract<E, string>>}`>, string>;
+export type EnvVarsByResourceCategory = EnvVarsByCategory<'infrastructure', InfrastructureEnvVars> &
+    EnvVarsByCategory<'services', ServicesEnvVars>;
 
 type Stringified<T> = Extract<T, string>;
 /** Generates the format in all caps:  \<ResourceCategory>\__\<ResourceName>\__\<EnvironmentVariableNaame>
@@ -60,45 +55,54 @@ type CreateEnvCarsCreator<
     ResourceEnvVar,
     RName extends keyof ResourceEnvVar,
     EnvVarNames extends keyof ResourceEnvVar[RName]
-    > = Record<
-        Uppercase<`${RCat}__${SnakeCase<Stringified<RName>>}__${keyof Pick<
-            ResourceEnvVar[RName],
-            Stringified<EnvVarNames>
-        >}`>,
-        string
-    >;
+> = Record<
+    Uppercase<`${RCat}__${SnakeCase<Stringified<RName>>}__${keyof Pick<
+        ResourceEnvVar[RName],
+        Stringified<EnvVarNames>
+    >}`>,
+    string
+>;
 
 type SelectSecretsFromServicesEnvVars<
     RName extends keyof ServicesEnvVars,
     EnvVarNames extends keyof ServicesEnvVars[RName]
-    > = CreateEnvCarsCreator<'services', ServicesEnvVars, RName, EnvVarNames>;
+> = CreateEnvCarsCreator<'services', ServicesEnvVars, RName, EnvVarNames>;
 
 type SelectSecretsFromInfraEnvVars<
     RName extends keyof InfrastructureEnvVars,
     EnvVarNames extends keyof InfrastructureEnvVars[RName]
-    > = CreateEnvCarsCreator<'infrastructure', InfrastructureEnvVars, RName, EnvVarNames>;
+> = CreateEnvCarsCreator<'infrastructure', InfrastructureEnvVars, RName, EnvVarNames>;
 
 // The service, Selected Environment variables that would be passed when generating kubernetes secrets manifests
-type SelectedSecretsEnvVars = SelectSecretsFromServicesEnvVars<
-    'graphql-mongo',
-    | 'MONGODB_ROOT_PASSWORD'
-    | 'MONGODB_PASSWORD'
-    | 'MONGODB_ROOT_USERNAME'
-    | 'MONGODB_USERNAME'
-    | 'REDIS_PASSWORD'
-    | 'REDIS_USERNAME'
-    | 'OAUTH_GITHUB_CLIENT_ID'
-    | 'OAUTH_GITHUB_CLIENT_SECRET'
-    | 'OAUTH_GOOGLE_CLIENT_ID'
-    | 'OAUTH_GOOGLE_CLIENT_SECRET'
-> &
-    SelectSecretsFromServicesEnvVars<'graphql-postgres', 'POSTGRES_PASSWORD' | 'POSTGRES_USERNAME'> &
-    SelectSecretsFromServicesEnvVars<
-        'grpc-mongo',
-        'MONGODB_ROOT_PASSWORD' | 'MONGODB_PASSWORD' | 'MONGODB_ROOT_USERNAME' | 'MONGODB_USERNAME'
+type SelectedSecretsEnvVars = Simplify<
+    {
+        ENVIRONMENT: Environment;
+        // This is provided fro, within the CI pipeline where the manifests are generated and pushed to the repo
+        IMAGE_TAG_REACT_WEB: string;
+        IMAGE_TAG_GRAPHQL_MONGO: string;
+        IMAGE_TAG_GRPC_MONGO: string;
+        IMAGE_TAG_GRAPHQL_POSTGRES: string;
+    } & SelectSecretsFromServicesEnvVars<
+        'graphql-mongo',
+        | 'MONGODB_ROOT_PASSWORD'
+        | 'MONGODB_PASSWORD'
+        | 'MONGODB_ROOT_USERNAME'
+        | 'MONGODB_USERNAME'
+        | 'REDIS_PASSWORD'
+        | 'REDIS_USERNAME'
+        | 'OAUTH_GITHUB_CLIENT_ID'
+        | 'OAUTH_GITHUB_CLIENT_SECRET'
+        | 'OAUTH_GOOGLE_CLIENT_ID'
+        | 'OAUTH_GOOGLE_CLIENT_SECRET'
     > &
-    SelectSecretsFromInfraEnvVars<'argocd', 'ADMIN_PASSWORD' | 'password' | 'type' | 'url' | 'username'> &
-    SelectSecretsFromInfraEnvVars<'linkerd-viz', 'PASSWORD'>;
+        SelectSecretsFromServicesEnvVars<'graphql-postgres', 'POSTGRES_PASSWORD' | 'POSTGRES_USERNAME'> &
+        SelectSecretsFromServicesEnvVars<
+            'grpc-mongo',
+            'MONGODB_ROOT_PASSWORD' | 'MONGODB_PASSWORD' | 'MONGODB_ROOT_USERNAME' | 'MONGODB_USERNAME'
+        > &
+        SelectSecretsFromInfraEnvVars<'argocd', 'ADMIN_PASSWORD' | 'password' | 'type' | 'url' | 'username'> &
+        SelectSecretsFromInfraEnvVars<'linkerd-viz', 'PASSWORD'>
+>;
 
 export const getSecretsSchema = ({
     allowEmptyValues,
@@ -110,8 +114,8 @@ export const getSecretsSchema = ({
     const isLocal = environment === 'local';
     const getDefault =
         (defaultValue: string) =>
-            (v: string): string =>
-                isLocal && _.isEmpty(v) ? defaultValue : v;
+        (v: string): string =>
+            isLocal && _.isEmpty(v) ? defaultValue : v;
     const stringNoDefault = z.string().min(allowEmptyValues ? 0 : 1);
     const string = stringNoDefault
         // We want to populate the values for local environment
@@ -120,7 +124,13 @@ export const getSecretsSchema = ({
         // it's okay to make mistake in local
         .transform(getDefault('example'));
 
-    const secretsSample1: Record<keyof SelectedSecretsEnvVars, z.ZodEffects<z.ZodString, string, string>> = {
+    const secretsSample1: Record<keyof SelectedSecretsEnvVars, z.ZodType<any, any>> = {
+        ENVIRONMENT: appEnvironmentsSchema,
+        // This is provided fro, within the CI pipeline where the manifests are generated and pushed to the repo
+        IMAGE_TAG_REACT_WEB: string,
+        IMAGE_TAG_GRAPHQL_MONGO: string,
+        IMAGE_TAG_GRPC_MONGO: string,
+        IMAGE_TAG_GRAPHQL_POSTGRES: string,
         SERVICES__GRAPHQL_MONGO__MONGODB_USERNAME: string,
         SERVICES__GRAPHQL_MONGO__MONGODB_PASSWORD: string,
         SERVICES__GRAPHQL_MONGO__MONGODB_ROOT_USERNAME: string,
@@ -150,13 +160,19 @@ export const getSecretsSchema = ({
 
         INFRASTRUCTURE__LINKERD_VIZ__PASSWORD: string,
     };
-    const secretsSample = z.object(secretsSample1);
 
-    return secretsSample;
+    return z.object(secretsSample1);
 };
 
 // type Momo = Record<Uppercase<`${TServices}__${SnakeCase<N>}__`>, string>>
 const envv: SelectedSecretsEnvVars = {
+    ENVIRONMENT: 'local',
+    // This is provided fro, within the CI pipeline where the manifests are generated and pushed to the repo
+    IMAGE_TAG_REACT_WEB: '',
+    IMAGE_TAG_GRAPHQL_MONGO: '',
+    IMAGE_TAG_GRPC_MONGO: '',
+    IMAGE_TAG_GRAPHQL_POSTGRES: '',
+
     SERVICES__GRAPHQL_MONGO__MONGODB_PASSWORD: '',
     SERVICES__GRAPHQL_MONGO__MONGODB_ROOT_PASSWORD: '',
     SERVICES__GRAPHQL_MONGO__MONGODB_ROOT_USERNAME: '',
@@ -183,5 +199,11 @@ const envv: SelectedSecretsEnvVars = {
     INFRASTRUCTURE__ARGOCD__USERNAME: '',
 
     INFRASTRUCTURE__LINKERD_VIZ__PASSWORD: '',
-    // SERVICES__ARGOCD__ADMIN_PASSWORD
+};
+
+// export const getEnvVarsForKubeManifestGenerator = (): SelectedSecretsEnvVars => {
+export const getEnvVarsForKubeManifestGenerator = () => {
+    const environment = appEnvironmentsSchema.parse(process.env);
+    const schema = getSecretsSchema({ allowEmptyValues: true, environment });
+    return schema.parse(process.env);
 };

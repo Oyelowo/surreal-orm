@@ -2,6 +2,7 @@ import type { ValueOf, Simplify, UnionToIntersection } from 'type-fest';
 
 import * as z from 'zod';
 import { Namespace } from '../infrastructure/namespaces/util.js';
+import { EnvVarsByResourceCategory } from './environmentVariables.js';
 export const appEnvironmentsSchema = z.union([
     z.literal('test'),
     z.literal('local'),
@@ -33,7 +34,7 @@ export type TInfrastructure = typeof infrastructure;
 export type TServices = typeof services;
 export type ResourceCategory = TInfrastructure | TServices;
 
-export type ResourcePaths = `${TInfrastructure}/${InfrastructureName}` | `${TServices}/${ServiceName}`
+export type ResourcePaths = `${TInfrastructure}/${InfrastructureName}` | `${TServices}/${ServiceName}`;
 
 export const ArgocdAppResourceNameSchema = z.union([
     z.literal(`argocd-applications-children-${infrastructure}`),
@@ -146,12 +147,11 @@ export type EnvVarsCommon<
     N extends ServiceName,
     NS extends NamespaceOfApps,
     SelectedEnvKey extends keyof EnvVariables<N, NS>
-    > = Simplify<UnionToIntersection<ValueOf<Pick<EnvVariables<N, NS>, SelectedEnvKey>>>>;
+> = Simplify<UnionToIntersection<ValueOf<Pick<EnvVariables<N, NS>, SelectedEnvKey>>>>;
 
-
-export type AppConfigs<N extends ServiceName, NS extends NamespaceOfApps, EnvKey extends Array<keyof EnvVariables<N, NS>>> = {
+export type AppConfigs<N extends ServiceName, NS extends NamespaceOfApps> = {
     kubeConfig: Settings<N>;
-    envVars: EnvVarsCommon<N, NS, EnvKey>;
+    envVars: EnvVarsByResourceCategory['services'][N];
     metadata: {
         name: N;
         namespace: NS;
