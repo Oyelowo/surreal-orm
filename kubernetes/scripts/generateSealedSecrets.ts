@@ -3,7 +3,8 @@ import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSw
 import { promptSecretsDeletionConfirmations } from './utils/promptSecretsDeletionConfirmations.js';
 import { KubeObject } from './utils/kubeObject/kubeObject.js';
 import { promptEnvironmentSelection } from './utils/shared.js';
-import { PlainSecretJsonConfig } from './utils/plainSecretJsonConfig.js';
+import { kubeBuildEnvVarsManager } from '../src/resources/types/environmentVariables.js';
+
 
 async function main() {
     const { environment } = await promptEnvironmentSelection();
@@ -14,13 +15,13 @@ async function main() {
     const kubeObject = new KubeObject(environment);
 
     await kubeObject.generateManifests();
-    PlainSecretJsonConfig.syncAll();
+    kubeBuildEnvVarsManager.syncAll();
 
     // This requires the cluster to be on and switch to its context
     await kubeObject.syncSealedSecretsWithPrompt();
 
     if (deletPlainJsonSecretsInput) {
-        PlainSecretJsonConfig.resetValues(environment);
+        kubeBuildEnvVarsManager.resetValues();
     }
 
     if (deleteUnsealedSecretManifestsOutput) {

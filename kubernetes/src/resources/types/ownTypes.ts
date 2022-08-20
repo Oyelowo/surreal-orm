@@ -34,7 +34,6 @@ export type TInfrastructure = typeof infrastructure;
 export type TServices = typeof services;
 export type ResourceCategory = TInfrastructure | TServices;
 
-export type ResourcePaths = `${TInfrastructure}/${InfrastructureName}` | `${TServices}/${ServiceName}`;
 
 export const ArgocdAppResourceNameSchema = z.union([
     z.literal(`argocd-applications-children-${infrastructure}`),

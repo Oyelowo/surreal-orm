@@ -43,7 +43,8 @@ export function createContainerRegistrySecret(environment: Environment): void {
 //     };
 // }
 
-// const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = new PlainSecretJsonConfig(
+// const DOCKER_USERNAME = env.INFRASTRUCTURE__ARGOCD__USERNAME
+// const DOCKER_PASSWORD = env.INFRASTRUCTURE__ARGOCD__PASSWORD
 // 'argocd',
 //     environment
 //     ).getSecretsForResource();

@@ -1,9 +1,8 @@
-import { ResourcePaths } from './../types/ownTypes.js';
 import * as k8s from '@pulumi/kubernetes';
 import url from 'node:url';
 import path from 'node:path';
 import { v4 as uuid } from 'uuid';
-import { Environment } from '../types/ownTypes.js';
+import { Environment, InfrastructureName, ServiceName, TInfrastructure, TServices } from '../types/ownTypes.js';
 
 // const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
@@ -22,6 +21,7 @@ export const getGeneratedCrdsCodeDir = () => {
     return path.join(baseDir, 'generatedCrdsTs');
 };
 
+type ResourcePaths = `${TInfrastructure}/${InfrastructureName}` | `${TServices}/${ServiceName}`;
 export type ResourceOutputDirProps = {
     outputDirectory: ResourcePaths;
     environment: Environment;

@@ -12,22 +12,19 @@ import {
 import { Simplify, SnakeCase } from 'type-fest';
 import z from 'zod';
 import _ from 'lodash';
+import sh from 'shelljs';
+import path from 'node:path';
+import * as R from 'ramda';
+import { getMainBaseDir } from '../shared/directoriesManager.js';
 
-// This is provided fro, within the CI pipeline where the manifests are generated and pushed to the repo
-//     IMAGE_TAG_REACT_WEB: string;
-// IMAGE_TAG_GRAPHQL_MONGO: string;
-// IMAGE_TAG_GRPC_MONGO: string;
-// IMAGE_TAG_GRAPHQL_POSTGRES: string;
+
 type GraphqlMongo = EnvVarsCommon<'graphql-mongo', 'applications', 'app' | 'mongodb' | 'oauth' | 'redis'>;
-
 type GraphqlPostgres = EnvVarsCommon<'graphql-postgres', 'applications', 'app' | 'postgresdb'>;
-
 type GrpcMongo = EnvVarsCommon<'grpc-mongo', 'applications', 'app' | 'mongodb'>;
-
 type ReactWeb = EnvVarsCommon<'grpc-mongo', 'applications', 'app'>;
 
-type RecordServiceEnvVars<N extends ServiceName, EnvVars> = Record<N, EnvVars>;
-type RecordInfraEnvVars<N extends InfrastructureName, EnvVars> = Record<N, EnvVars>;
+type ServiceEnvVars<N extends ServiceName, EnvVars> = Record<N, EnvVars>;
+type InfraEnvVars<N extends InfrastructureName, EnvVars> = Record<N, EnvVars>;
 
 type ArgoCd = {
     ADMIN_PASSWORD: string;
@@ -43,13 +40,13 @@ type LinkerdViz = {
 
 // Creates Record<ResourceName, Record<EnvVarName, string>>
 type ServicesEnvVars = Simplify<
-    RecordServiceEnvVars<'graphql-mongo', GraphqlMongo> &
-    RecordServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
-    RecordServiceEnvVars<'grpc-mongo', GrpcMongo> &
-    RecordServiceEnvVars<'react-web', ReactWeb>
+    ServiceEnvVars<'graphql-mongo', GraphqlMongo> &
+    ServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
+    ServiceEnvVars<'grpc-mongo', GrpcMongo> &
+    ServiceEnvVars<'react-web', ReactWeb>
 >;
 type InfrastructureEnvVars = Simplify<
-    RecordInfraEnvVars<'argocd', ArgoCd> & RecordInfraEnvVars<'linkerd-viz', LinkerdViz>
+    InfraEnvVars<'argocd', ArgoCd> & InfraEnvVars<'linkerd-viz', LinkerdViz>
 >;
 
 type EnvVarsByCategory<RCat extends ResourceCategory, V> = Record<RCat, V>;
@@ -187,4 +184,49 @@ export const getEnvVarsForKubeManifests = (option?: Option): KubeBuildEnvVars =>
     const schema = getKubeBuildEnvVarsSchema({ allowEmptyValues: true });
     return (shouldCheck ? schema.parse(process.env) : process.env) as KubeBuildEnvVars;
 };
+
+
+
+const envPath = path.join(getMainBaseDir(), `.env`);
+
+export const kubeBuildEnvVarsManager = {
+    resetValues: (): void => {
+        sh.echo(`Emptying dot env values`);
+
+        const kubeBuildEnvVarsSample = getKubeBuildEnvVarsSample();
+
+        const dotEnvConfig = generateDotEnvFile(kubeBuildEnvVarsSample)
+        sh.exec(`echo '${dotEnvConfig}' > ${envPath}`);
+        sh.exec(`npx prettier --write ${envPath}`);
+    },
+
+    syncAll: (): void => {
+        sh.echo(`Syncing Secret .env config`);
+
+        const existingEnvSecret = getEnvVarsForKubeManifests({ check: false })
+
+        if (_.isEmpty(existingEnvSecret)) sh.touch(envPath);
+
+        // Allows us to only get valid keys out, so we can parse the merged secrets out.
+        const secretsSchema = getKubeBuildEnvVarsSchema({ allowEmptyValues: true });
+        const kubeBuildEnvVarsSample = getKubeBuildEnvVarsSample();
+
+        // Parse the object to filter out stale keys in existing local secret configs
+        // This also persists the values of existing secrets
+        const mergedObject = R.mergeDeepLeft(existingEnvSecret, kubeBuildEnvVarsSample);
+
+        const envVars = secretsSchema.parse(mergedObject) as KubeBuildEnvVars;
+
+        const updatedEnvVars = generateDotEnvFile(envVars);
+
+        sh.exec(`echo '${updatedEnvVars}' > ${envPath}`);
+    },
+};
+
+
+function generateDotEnvFile(envVars: KubeBuildEnvVars) {
+    return Object.entries(envVars)
+        .map(([name, value]) => `${name}=${value}`)
+        .join('\n');
+}
 
