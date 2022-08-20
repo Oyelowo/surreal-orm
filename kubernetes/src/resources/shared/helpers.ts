@@ -1,10 +1,11 @@
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
-import { AppConfigs } from '../types/ownTypes.js';
+import { AppConfigs, NamespaceOfApps, ServiceName } from '../types/ownTypes.js';
 
-export function getFQDNFromSettings(config: AppConfigs<any, any, any>) {
+// export function getFQDNFromSettings(config: AppConfigs<any, any>) {
+export function getFQDNFromSettings<N extends ServiceName, NS extends NamespaceOfApps>(config: AppConfigs<N, NS>) {
     const { namespace, name } = config.metadata;
-    const host = config.envVars.APP_PORT;
+    const host = config.envVars?.APP_PORT;
     return `${name}.${namespace}:${host}`;
 }
 
@@ -43,4 +44,9 @@ export function generateService({ serviceFileName, deployment, args = {} }: Serv
         },
         { parent: deployment }
     );
+}
+
+
+export function toBase64(text: string): string {
+    return Buffer.from(text).toString('base64');
 }

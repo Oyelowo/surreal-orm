@@ -4,8 +4,7 @@ import { Resource } from '@pulumi/pulumi';
 import crds from '../../../generatedCrdsTs/index.js';
 import { Namespace, namespaces } from '../infrastructure/namespaces/util.js';
 import { ResourceOutputDirProps, getResourceProvider, getResourceRelativePath } from './directoriesManager.js';
-import { getEnvironmentVariables } from './validations.js';
-import { PlainSecretJsonConfig } from '../../../scripts/utils/plainSecretJsonConfig.js';
+import { getEnvVarsForKubeManifestGenerator } from '../types/environmentVariables.js';
 
 type ArgocdApplicationProps = {
     namespace: Namespace;
@@ -82,14 +81,16 @@ const metadata = {
     },
 };
 
-const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
-
-const secrets = new PlainSecretJsonConfig('argocd', ENVIRONMENT).getSecrets();
+const env = getEnvVarsForKubeManifestGenerator();
 export const argoCDApplicationsSecret = new kx.Secret(
     'argocd-secret',
     {
         data: {
-            ...secrets,
+            ADMIN_PASSWORD: env.INFRASTRUCTURE__ARGOCD__ADMIN_PASSWORD,
+            type: 'git',
+            url: 'https://github.com/Oyelowo/modern-distributed-app-template',
+            username: env.INFRASTRUCTURE__ARGOCD__URL,
+            password: env.INFRASTRUCTURE__ARGOCD__PASSWORD,
         },
         metadata: {
             ...metadata,
@@ -99,7 +100,7 @@ export const argoCDApplicationsSecret = new kx.Secret(
     {
         provider: getResourceProvider({
             outputDirectory: `infrastructure/argocd-applications-parents`,
-            environment: ENVIRONMENT,
+            environment: env.ENVIRONMENT,
         }),
     }
 );

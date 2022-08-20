@@ -5,20 +5,16 @@ import crds from '../../../generatedCrdsTs/index.js';
 import { DOCKER_REGISTRY_KEY } from '../infrastructure/argocd/docker.js';
 import { createArgocdApplication } from './createArgoApplication.js';
 import { getResourceAbsolutePath } from './directoriesManager.js';
-import { AppConfigs, DBType, NamespaceOfApps, NoUnion, ServiceName } from '../types/ownTypes.js';
-import { getEnvironmentVariables } from './validations.js';
+import { AppConfigs, NamespaceOfApps, NoUnion, ServiceName } from '../types/ownTypes.js';
 import { generateService } from './helpers.js';
-import { toBase64 } from './converters.js';
+import { toBase64 } from './helpers.js';
 import _ from 'lodash';
+import { getEnvVarsForKubeManifestGenerator } from '../types/environmentVariables.js';
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
 
 // eslint-disable-next-line no-restricted-syntax
-export class ServiceDeployment<
-    AN extends ServiceName,
-    DBT extends DBType,
-    NS extends NamespaceOfApps
-> extends pulumi.ComponentResource {
+export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps> extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
     public readonly secret: kx.Secret;
@@ -27,11 +23,11 @@ export class ServiceDeployment<
     public readonly ipAddress?: pulumi.Output<string>;
     public readonly provider?: pulumi.ProviderResource;
     public readonly secretProvider?: pulumi.ProviderResource;
-    public readonly appName: AN;
+    public readonly appName: N;
 
     constructor(
-        private name: NoUnion<AN>,
-        private args: AppConfigs<AN, DBT, NS> // opts: pulumi.ComponentResourceOptions
+        private name: NoUnion<N>,
+        private args: AppConfigs<N, NS> // opts: pulumi.ComponentResourceOptions
     ) {
         super('k8sjs:service:ServiceDeployment', name, {} /* opts */);
         this.appName = name;
@@ -58,7 +54,6 @@ export class ServiceDeployment<
             { provider: this.getProvider(), parent: this }
         );
 
-        // const plainSecrets = new PlainSecretJsonConfig(this.appName, ENVIRONMENT).getSecrets();
         const encodedSecrets = _.mapValues(envVars, toBase64) as typeof envVars;
 
         // Create a Kubernetes Secret.
@@ -81,11 +76,25 @@ export class ServiceDeployment<
             initContainers: [],
             containers: [
                 {
-                    env: {
-                        ...this.secretsObjectToEnv({ secretInstance: this.secret, secretObject: envVars }),
-                    },
+                    /**
+ Maps custom secret object to what kx can understand to produce secretRef automagically
+ * @example
+ {
+    MONGODB_USERNAME: "xxxx",
+    MONGODB_PASSWORD: "xxxx",
+ }
+ 
+ to
+ {
+    MONGODB_USERNAME:
+        secretRef:
+          ...
+  ...
+ }
+*/
+                    env: _.mapKeys(envVars, (key) => [key, this.secret.asEnvValue(key)]),
                     image: kubeConfig.image,
-                    ports: { http: Number(envVars.APP_PORT) },
+                    ports: { http: Number(envVars?.APP_PORT) },
                     volumeMounts: [],
                     resources: {
                         limits: {
@@ -163,10 +172,10 @@ export class ServiceDeployment<
                 type: kx.types.ServiceType.ClusterIP,
                 ports: [
                     {
-                        port: Number(envVars.APP_PORT),
+                        port: Number(envVars?.APP_PORT),
                         protocol: 'TCP',
                         name: `${resourceName}-http`,
-                        targetPort: Number(envVars.APP_PORT),
+                        targetPort: Number(envVars?.APP_PORT),
                     },
                 ],
             },
@@ -195,45 +204,9 @@ export class ServiceDeployment<
         this.ipAddress = useLoadBalancer ? this.service.status.loadBalancer.ingress[0].ip : this.service.spec.clusterIP;
     }
 
-    /**
-     Maps custom secret object to what kx can understand to produce secretRef automagically
-     * @example
-     {
-        "graphql-mongo": {
-            MONGODB_USERNAME: "xxxx",
-            MONGODB_PASSWORD: "xxxx",
-            REDIS_USERNAME: "xxxx",
-            REDIS_PASSWORD: "xxxx",
-        };
-        "graphql-postgres": {
-            POSTGRES_USERNAME: "xxxx",
-            POSTGRES_PASSWORD: "xxxx",
-        };
-     }
-     
-     to
-     {
-        MONGODB_USERNAME:
-            secretRef:
-              ...
-      ...
-     }
-    */
-    private secretsObjectToEnv = ({
-        secretInstance,
-        secretObject,
-    }: {
-        secretInstance: kx.Secret;
-        secretObject: AppConfigs<AN, DBT, NS>['envVars'];
-    }) => {
-        const keyValueEntries = Object.keys(secretObject).map((key) => [key, secretInstance.asEnvValue(key)]);
-        return Object.fromEntries(keyValueEntries);
-    };
-
-    getProvider = () => {
-        return this.provider;
-    };
-
+    getProvider() {
+        return this.provider
+    }
     getServiceDir = (): string => {
         return getResourceAbsolutePath({
             outputDirectory: `services/${this.appName}`,

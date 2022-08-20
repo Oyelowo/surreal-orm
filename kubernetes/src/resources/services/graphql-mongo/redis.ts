@@ -3,11 +3,12 @@ import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../../infrastructure/namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
-import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 import { graphqlMongo } from './index.js';
 import { graphqlMongoSettings } from './settings.js';
+import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 
 const { envVars } = graphqlMongoSettings;
+const env = getEnvVarsForKubeManifestGenerator();
 
 export const redisValues: DeepPartial<IRedisbitnami> = {
     architecture: 'standalone',
@@ -19,7 +20,7 @@ export const redisValues: DeepPartial<IRedisbitnami> = {
         redis: {
             password: envVars.REDIS_PASSWORD,
         },
-        storageClass: getEnvironmentVariables().ENVIRONMENT === 'local' ? '' : envVars.MONGODB_STORAGE_CLASS,
+        storageClass: env.ENVIRONMENT === 'local' ? '' : envVars.MONGODB_STORAGE_CLASS,
     },
 
     auth: {
