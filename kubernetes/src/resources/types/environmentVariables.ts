@@ -1,4 +1,7 @@
+import * as dotenv from 'dotenv';
+
 import {
+    appEnvironmentsSchema,
     Environment,
     EnvVarsCommon,
     InfrastructureName,
@@ -68,12 +71,12 @@ type CreateEnvCarsCreator<
     EnvVarNames extends keyof ResourceCategoryEnvVar[RName]
     > = Record<PrefixEnvVar<RCat, RName, keyof Pick<ResourceCategoryEnvVar[RName], Stringified<EnvVarNames>>>, string>;
 
-type SelectSecretsFromServicesEnvVars<
+type SelectFromServicesEnvVars<
     RName extends keyof ServicesEnvVars,
     EnvVarNames extends keyof ServicesEnvVars[RName]
     > = CreateEnvCarsCreator<'services', ServicesEnvVars, RName, EnvVarNames>;
 
-type SelectSecretsFromInfraEnvVars<
+type SelectFromInfraEnvVars<
     RName extends keyof InfrastructureEnvVars,
     EnvVarNames extends keyof InfrastructureEnvVars[RName]
     > = CreateEnvCarsCreator<'infrastructure', InfrastructureEnvVars, RName, EnvVarNames>;
@@ -92,11 +95,11 @@ export const imageTagsObjectValidator = z.object(imageTagsSchema);
 export type ImageTags = z.infer<typeof imageTagsObjectValidator>;
 
 // The service, Selected Environment variables that would be passed when generating kubernetes secrets manifests
-type SelectedSecretsEnvVars = Simplify<
+type KubeBuildEnvVars = Simplify<
     {
         ENVIRONMENT: Environment;
     } & ImageTags &
-    SelectSecretsFromServicesEnvVars<
+    SelectFromServicesEnvVars<
         'graphql-mongo',
         | 'MONGODB_ROOT_PASSWORD'
         | 'MONGODB_PASSWORD'
@@ -109,67 +112,73 @@ type SelectedSecretsEnvVars = Simplify<
         | 'OAUTH_GOOGLE_CLIENT_ID'
         | 'OAUTH_GOOGLE_CLIENT_SECRET'
     > &
-    SelectSecretsFromServicesEnvVars<'graphql-postgres', 'POSTGRES_PASSWORD' | 'POSTGRES_USERNAME'> &
-    SelectSecretsFromServicesEnvVars<
+    SelectFromServicesEnvVars<'graphql-postgres', 'POSTGRES_PASSWORD' | 'POSTGRES_USERNAME'> &
+    SelectFromServicesEnvVars<
         'grpc-mongo',
         'MONGODB_ROOT_PASSWORD' | 'MONGODB_PASSWORD' | 'MONGODB_ROOT_USERNAME' | 'MONGODB_USERNAME'
     > &
-    SelectSecretsFromInfraEnvVars<'argocd', 'ADMIN_PASSWORD' | 'password' | 'type' | 'url' | 'username'> &
-    SelectSecretsFromInfraEnvVars<'linkerd-viz', 'PASSWORD'>
+    SelectFromInfraEnvVars<'argocd', 'ADMIN_PASSWORD' | 'password' | 'type' | 'url' | 'username'> &
+    SelectFromInfraEnvVars<'linkerd-viz', 'PASSWORD'>
 >;
 
 // type Momo = Record<Uppercase<`${TServices}__${SnakeCase<N>}__`>, string>>
-export const kubeBuildEnvVarsSample: SelectedSecretsEnvVars = {
-    ENVIRONMENT: 'local',
-    // This is provided fro, within the CI pipeline where the manifests are generated and pushed to the repo
-    SERVICES__GRAPHQL_MONGO__IMAGE_TAG: "",
-    SERVICES__GRAPHQL_POSTGRES__IMAGE_TAG: "",
-    SERVICES__GRPC_MONGO__IMAGE_TAG: "",
-    SERVICES__REACT_WEB__IMAGE_TAG: "",
+export const getKubeBuildEnvVarsSample = ({ environment }: { environment: Environment }): KubeBuildEnvVars => {
+    return {
+        ENVIRONMENT: environment as Environment,
+        // This is provided fro, within the CI pipeline where the manifests are generated and pushed to the repo
+        SERVICES__GRAPHQL_MONGO__IMAGE_TAG: "",
+        SERVICES__GRAPHQL_POSTGRES__IMAGE_TAG: "",
+        SERVICES__GRPC_MONGO__IMAGE_TAG: "",
+        SERVICES__REACT_WEB__IMAGE_TAG: "",
 
-    SERVICES__GRAPHQL_MONGO__MONGODB_PASSWORD: '',
-    SERVICES__GRAPHQL_MONGO__MONGODB_ROOT_PASSWORD: '',
-    SERVICES__GRAPHQL_MONGO__MONGODB_ROOT_USERNAME: '',
-    SERVICES__GRAPHQL_MONGO__MONGODB_USERNAME: '',
-    SERVICES__GRAPHQL_MONGO__OAUTH_GITHUB_CLIENT_ID: '',
-    SERVICES__GRAPHQL_MONGO__OAUTH_GITHUB_CLIENT_SECRET: '',
-    SERVICES__GRAPHQL_MONGO__OAUTH_GOOGLE_CLIENT_ID: '',
-    SERVICES__GRAPHQL_MONGO__OAUTH_GOOGLE_CLIENT_SECRET: '',
-    SERVICES__GRAPHQL_MONGO__REDIS_PASSWORD: '',
-    SERVICES__GRAPHQL_MONGO__REDIS_USERNAME: '',
+        SERVICES__GRAPHQL_MONGO__MONGODB_PASSWORD: '',
+        SERVICES__GRAPHQL_MONGO__MONGODB_ROOT_PASSWORD: '',
+        SERVICES__GRAPHQL_MONGO__MONGODB_ROOT_USERNAME: '',
+        SERVICES__GRAPHQL_MONGO__MONGODB_USERNAME: '',
+        SERVICES__GRAPHQL_MONGO__OAUTH_GITHUB_CLIENT_ID: '',
+        SERVICES__GRAPHQL_MONGO__OAUTH_GITHUB_CLIENT_SECRET: '',
+        SERVICES__GRAPHQL_MONGO__OAUTH_GOOGLE_CLIENT_ID: '',
+        SERVICES__GRAPHQL_MONGO__OAUTH_GOOGLE_CLIENT_SECRET: '',
+        SERVICES__GRAPHQL_MONGO__REDIS_PASSWORD: '',
+        SERVICES__GRAPHQL_MONGO__REDIS_USERNAME: '',
 
-    SERVICES__GRPC_MONGO__MONGODB_PASSWORD: '',
-    SERVICES__GRPC_MONGO__MONGODB_ROOT_PASSWORD: '',
-    SERVICES__GRPC_MONGO__MONGODB_ROOT_USERNAME: '',
-    SERVICES__GRPC_MONGO__MONGODB_USERNAME: '',
+        SERVICES__GRPC_MONGO__MONGODB_PASSWORD: '',
+        SERVICES__GRPC_MONGO__MONGODB_ROOT_PASSWORD: '',
+        SERVICES__GRPC_MONGO__MONGODB_ROOT_USERNAME: '',
+        SERVICES__GRPC_MONGO__MONGODB_USERNAME: '',
 
-    SERVICES__GRAPHQL_POSTGRES__POSTGRES_PASSWORD: '',
-    SERVICES__GRAPHQL_POSTGRES__POSTGRES_USERNAME: '',
+        SERVICES__GRAPHQL_POSTGRES__POSTGRES_PASSWORD: '',
+        SERVICES__GRAPHQL_POSTGRES__POSTGRES_USERNAME: '',
 
-    INFRASTRUCTURE__ARGOCD__ADMIN_PASSWORD: '',
-    INFRASTRUCTURE__ARGOCD__PASSWORD: '',
-    INFRASTRUCTURE__ARGOCD__TYPE: '',
-    INFRASTRUCTURE__ARGOCD__URL: '',
-    INFRASTRUCTURE__ARGOCD__USERNAME: '',
+        INFRASTRUCTURE__ARGOCD__ADMIN_PASSWORD: '',
+        INFRASTRUCTURE__ARGOCD__PASSWORD: '',
+        INFRASTRUCTURE__ARGOCD__TYPE: '',
+        INFRASTRUCTURE__ARGOCD__URL: '',
+        INFRASTRUCTURE__ARGOCD__USERNAME: '',
 
-    INFRASTRUCTURE__LINKERD_VIZ__PASSWORD: '',
-};
+        INFRASTRUCTURE__LINKERD_VIZ__PASSWORD: '',
+    };
 
-export const getSecretsSchema = ({ allowEmptyValues }: { allowEmptyValues: boolean }) => {
-    const stringNoDefault = z.string().min(allowEmptyValues ? 0 : 1);
+}
+export const getKubeBuildEnvVarsSchema = ({ allowEmptyValues }: { allowEmptyValues: boolean }) => {
+    // This is done to allow us sync local .env files.
+    // When parsing to sync the env var names/keys, we want the values to allow empty
+    const string = z.string().min(allowEmptyValues ? 0 : 1);
+    const kubeBuildEnvVarsSample = getKubeBuildEnvVarsSample({ environment: "local" })
 
-    const secretsSample1: Record<keyof SelectedSecretsEnvVars, z.ZodString> = _.mapValues(
+    const kubeBuildEnvVarsSchema: Record<keyof KubeBuildEnvVars, z.ZodString> = _.mapValues(
         kubeBuildEnvVarsSample,
-        (_) => stringNoDefault
+        (_) => string
     );
+    kubeBuildEnvVarsSchema.ENVIRONMENT = appEnvironmentsSchema as any;
 
-    return z.object(secretsSample1);
+    return z.object(kubeBuildEnvVarsSchema);
 };
 
-// export const getEnvVarsForKubeManifestGenerator = (): SelectedSecretsEnvVars => {
-export const getEnvVarsForKubeManifestGenerator = (): SelectedSecretsEnvVars => {
-    // console.log("XXX", process.)
-    // const environment = appEnvironmentsSchema.parse(process.env.ENVIRONMENT);
-    const schema = getSecretsSchema({ allowEmptyValues: true });
-    return schema.parse(process.env) as SelectedSecretsEnvVars;
+// dotenv.config({ path: getSecretPath(ARGV_ENVIRONMENTS.environment) });
+export const getEnvVarsForKubeManifestGenerator = (): KubeBuildEnvVars => {
+    dotenv.config();
+
+    const schema = getKubeBuildEnvVarsSchema({ allowEmptyValues: true });
+    return schema.parse(process.env) as KubeBuildEnvVars;
 };

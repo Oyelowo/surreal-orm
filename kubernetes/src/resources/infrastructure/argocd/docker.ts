@@ -1,19 +1,18 @@
-import { PlainSecretJsonConfig } from '../../../../scripts/utils/plainSecretJsonConfig.js';
 import c from 'chalk';
 import path from 'node:path';
 import sh from 'shelljs';
 import { getResourceAbsolutePath } from '../../shared/directoriesManager.js';
 import { Environment } from '../../types/ownTypes.js';
 import { namespaces } from '../namespaces/util.js';
+import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 
 const DOCKER_SERVER = 'ghcr.io';
 export const DOCKER_REGISTRY_KEY = 'my-registry-key';
 
+const env = getEnvVarsForKubeManifestGenerator()
 export function createContainerRegistrySecret(environment: Environment): void {
-    const { username: DOCKER_USERNAME, password: DOCKER_PASSWORD } = new PlainSecretJsonConfig(
-        'argocd',
-        environment
-    ).getSecrets();
+    const DOCKER_USERNAME = env.INFRASTRUCTURE__ARGOCD__USERNAME
+    const DOCKER_PASSWORD = env.INFRASTRUCTURE__ARGOCD__PASSWORD
 
     const dir = path.join(
         getResourceAbsolutePath({

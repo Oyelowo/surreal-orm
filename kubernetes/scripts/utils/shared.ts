@@ -2,16 +2,21 @@ import c from 'chalk';
 import fs from 'node:fs';
 import inquirer from 'inquirer';
 import sh, { ShellString } from 'shelljs';
+import yargs from 'yargs';
 import { Environment } from '../../src/resources/types/ownTypes.js';
 import { getEnvVarsForKubeManifestGenerator } from '../../src/resources/types/environmentVariables.js';
 
-export function getEnvVarsForScript() {
-    const env = getEnvVarsForKubeManifestGenerator();
+const env = getEnvVarsForKubeManifestGenerator();
+const ENVIRONMENT_KEY: keyof Pick<typeof env, "ENVIRONMENT"> = "ENVIRONMENT"
+// const envx: Extract<keyof typeof env, "ENVIRONMENT"> = "ENVIRONMENT"
+export function getEnvVarsForScript({ environment }: { environment: Environment }) {
+
     const imageEnvVarSetterForPulumi = Object.entries(env)
         .map(([k, v]) => `export ${k}=${v}`)
         .join(' ');
     return `
       ${imageEnvVarSetterForPulumi}
+      export ${ENVIRONMENT_KEY}=${environment}
   `;
 }
 
@@ -54,3 +59,16 @@ export async function promptEnvironmentSelection() {
 
     return answers;
 }
+
+;
+
+export const ARGV_ENVIRONMENTS = yargs(process.argv.slice(2))
+    .options({
+        environment: {
+            alias: 'e',
+            choices: ENVIRONMENTS_ALL,
+            describe: "The environment you're generating the manifests for.",
+            demandOption: true,
+        },
+    })
+    .parseSync();
