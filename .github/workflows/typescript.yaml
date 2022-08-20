@@ -74,7 +74,7 @@ jobs:
           CONTAINER_REGISTRY=ghcr.io/oyelowo
           IMAGE_TAG=$GITHUB_REF_NAME-$GITHUB_SHA
 
-          echo "IMAGE_TAG_REACT_WEB=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "SERVICES__REACT_WEB__IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
           IMAGE_NAME_REACT_WEB=$CONTAINER_REGISTRY/react-web
 
           echo "IMAGE_WITH_TAG_REACT_WEB=$IMAGE_NAME_REACT_WEB:$IMAGE_TAG, $IMAGE_NAME_REACT_WEB:latest" >> $GITHUB_ENV
@@ -110,8 +110,8 @@ jobs:
           cache-to: |
             type=gha,scope=react-web,mode=max
 
-      - name: Update repo with IMAGE_TAG_REACT_WEB to /kubernetes/image-tags/IMAGE_TAG_REACT_WEB
-        run: echo ${{env.IMAGE_TAG_REACT_WEB}} > ../kubernetes/image-tags/IMAGE_TAG_REACT_WEB
+      - name: Update repo with SERVICES__REACT_WEB__IMAGE_TAG to /kubernetes/imageTags/SERVICES__REACT_WEB__IMAGE_TAG
+        run: echo ${{env.SERVICES__REACT_WEB__IMAGE_TAG}} > ../kubernetes/imageTags/SERVICES__REACT_WEB__IMAGE_TAG
 
       - name: Commit files
         run: |
