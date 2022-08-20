@@ -9,9 +9,9 @@ import { AppConfigs, NamespaceOfApps, NoUnion, ServiceName } from '../types/ownT
 import { generateService } from './helpers.js';
 import { toBase64 } from './helpers.js';
 import _ from 'lodash';
-import { getEnvVarsForKubeManifestGenerator } from '../types/environmentVariables.js';
+import { getEnvVarsForKubeManifests } from '../types/environmentVariables.js';
 
-const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
+const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
 // eslint-disable-next-line no-restricted-syntax
 export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps> extends pulumi.ComponentResource {

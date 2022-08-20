@@ -10,7 +10,7 @@ import { DeepPartial, ResourceName } from '../../types/ownTypes.js';
 import { CLUSTER_ISSUER_NAME } from '../cert-manager/clusterIssuer.js';
 import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
 import { linkerdVizProvider } from './settings.js';
-import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
+import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 import { getIngressUrlHost } from '../ingress/hosts.js';
 
 const values: DeepPartial<ILinkerdvizlinkerd> = {};
@@ -55,7 +55,7 @@ const nginxAnnotions: Partial<NginxConfiguration> = {
 };
 
 const SECRET_NAME_NGINX = 'linkerd-nginx-ingress-tls';
-const { ENVIRONMENT, INFRASTRUCTURE__LINKERD_VIZ__PASSWORD } = getEnvVarsForKubeManifestGenerator();
+const { ENVIRONMENT, INFRASTRUCTURE__LINKERD_VIZ__PASSWORD } = getEnvVarsForKubeManifests();
 
 const linkerdIngressHostName = getIngressUrlHost({ environment: ENVIRONMENT, subDomain: 'linkerd' });
 export const linkerVizIngress = new k8s.networking.v1.Ingress(

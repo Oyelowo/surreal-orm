@@ -95,7 +95,7 @@ export const imageTagsObjectValidator = z.object(imageTagsSchema);
 export type ImageTags = z.infer<typeof imageTagsObjectValidator>;
 
 // The service, Selected Environment variables that would be passed when generating kubernetes secrets manifests
-type KubeBuildEnvVars = Simplify<
+export type KubeBuildEnvVars = Simplify<
     {
         ENVIRONMENT: Environment;
     } & ImageTags &
@@ -122,9 +122,9 @@ type KubeBuildEnvVars = Simplify<
 >;
 
 // type Momo = Record<Uppercase<`${TServices}__${SnakeCase<N>}__`>, string>>
-export const getKubeBuildEnvVarsSample = ({ environment }: { environment: Environment }): KubeBuildEnvVars => {
+export const getKubeBuildEnvVarsSample = (): KubeBuildEnvVars => {
     return {
-        ENVIRONMENT: environment as Environment,
+        ENVIRONMENT: "" as Environment,
         // This is provided fro, within the CI pipeline where the manifests are generated and pushed to the repo
         SERVICES__GRAPHQL_MONGO__IMAGE_TAG: "",
         SERVICES__GRAPHQL_POSTGRES__IMAGE_TAG: "",
@@ -164,7 +164,7 @@ export const getKubeBuildEnvVarsSchema = ({ allowEmptyValues }: { allowEmptyValu
     // This is done to allow us sync local .env files.
     // When parsing to sync the env var names/keys, we want the values to allow empty
     const string = z.string().min(allowEmptyValues ? 0 : 1);
-    const kubeBuildEnvVarsSample = getKubeBuildEnvVarsSample({ environment: "local" })
+    const kubeBuildEnvVarsSample = getKubeBuildEnvVarsSample()
 
     const kubeBuildEnvVarsSchema: Record<keyof KubeBuildEnvVars, z.ZodString> = _.mapValues(
         kubeBuildEnvVarsSample,
@@ -175,10 +175,16 @@ export const getKubeBuildEnvVarsSchema = ({ allowEmptyValues }: { allowEmptyValu
     return z.object(kubeBuildEnvVarsSchema);
 };
 
-// dotenv.config({ path: getSecretPath(ARGV_ENVIRONMENTS.environment) });
-export const getEnvVarsForKubeManifestGenerator = (): KubeBuildEnvVars => {
-    dotenv.config();
+
+type Option = {
+    check: boolean;
+}
+export const getEnvVarsForKubeManifests = (option?: Option): KubeBuildEnvVars => {
+    dotenv.config({ debug: true });
+    const shouldCheck = option?.check === undefined ? true : option.check
+
 
     const schema = getKubeBuildEnvVarsSchema({ allowEmptyValues: true });
-    return schema.parse(process.env) as KubeBuildEnvVars;
+    return (shouldCheck ? schema.parse(process.env) : process.env) as KubeBuildEnvVars;
 };
+

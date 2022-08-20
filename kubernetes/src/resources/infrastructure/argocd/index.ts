@@ -1,11 +1,11 @@
 import { createArgocdApplication } from '../../shared/createArgoApplication.js';
-import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
+import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 
 // I am keeping bitnami version in the meantime for reference purpose. 26th April, 2022.
 export * from './argocdBitnami.js';
 // export * from "./argocdOfficial.js";
 
-const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
+const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
 export const argoInfrastructureParentApplications = createArgocdApplication({
     sourceAppDirectory: 'infrastructure/argocd-applications-children-infrastructure',

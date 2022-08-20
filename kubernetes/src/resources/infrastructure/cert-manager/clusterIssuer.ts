@@ -1,9 +1,9 @@
 import crds from '../../../../generatedCrdsTs/index.js';
-import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
+import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
 
 import { certManagerProvider } from './settings.js';
-const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
+const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
 export const CLUSTER_ISSUER_NAME = 'letsencrypt-cluster-issuer';
 

@@ -1,8 +1,8 @@
 import { AppConfigs } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
-import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
+import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 
-const env = getEnvVarsForKubeManifestGenerator();
+const env = getEnvVarsForKubeManifests();
 export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'applications'> = {
     kubeConfig: {
         requestMemory: '70Mi',

@@ -4,7 +4,7 @@ import { Resource } from '@pulumi/pulumi';
 import crds from '../../../generatedCrdsTs/index.js';
 import { Namespace, namespaces } from '../infrastructure/namespaces/util.js';
 import { ResourceOutputDirProps, getResourceProvider, getResourceRelativePath } from './directoriesManager.js';
-import { getEnvVarsForKubeManifestGenerator } from '../types/environmentVariables.js';
+import { getEnvVarsForKubeManifests } from '../types/environmentVariables.js';
 
 type ArgocdApplicationProps = {
     namespace: Namespace;
@@ -81,7 +81,7 @@ const metadata = {
     },
 };
 
-const env = getEnvVarsForKubeManifestGenerator();
+const env = getEnvVarsForKubeManifests();
 export const argoCDApplicationsSecret = new kx.Secret(
     'argocd-secret',
     {

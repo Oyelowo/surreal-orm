@@ -1,7 +1,7 @@
 import { getResourceProvider } from '../../shared/directoriesManager.js';
-import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
+import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 
-const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
+const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
 export const linkerdProvider = getResourceProvider({
     outputDirectory: `infrastructure/linkerd`,

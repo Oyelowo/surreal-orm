@@ -5,10 +5,10 @@ import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { graphqlMongo } from './index.js';
 import { graphqlMongoSettings } from './settings.js';
-import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
+import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 
 const { envVars } = graphqlMongoSettings;
-const env = getEnvVarsForKubeManifestGenerator();
+const env = getEnvVarsForKubeManifests();
 
 export const redisValues: DeepPartial<IRedisbitnami> = {
     architecture: 'standalone',

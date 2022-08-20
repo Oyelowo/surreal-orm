@@ -1,7 +1,7 @@
 import { createArgocdApplication } from '../../shared/createArgoApplication.js';
-import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
+import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 
-const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
+const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
 export const ingressControllerApplication = createArgocdApplication({
     sourceAppDirectory: 'infrastructure/nginx-ingress',

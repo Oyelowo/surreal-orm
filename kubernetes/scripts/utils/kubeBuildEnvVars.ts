@@ -1,71 +1,55 @@
 import sh from 'shelljs';
-import { getEnvVarsForKubeManifestGenerator, getKubeBuildEnvVarsSchema, getKubeBuildEnvVarsSample } from '../../src/resources/types/environmentVariables.js';
-import * as dotenv from 'dotenv'; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
-import { Environment } from '../../src/resources/types/ownTypes.js';
-import { getPlainSecretsConfigFilesBaseDir } from '../../src/resources/shared/directoriesManager.js';
-import { ARGV_ENVIRONMENTS, ENVIRONMENTS_ALL } from '../utils/shared.js';
 import path from 'node:path';
-import * as R from 'ramda';
 import _ from 'lodash';
+import * as R from 'ramda';
+import {
+    getKubeBuildEnvVarsSchema,
+    getKubeBuildEnvVarsSample,
+    KubeBuildEnvVars,
+    getEnvVarsForKubeManifests,
+} from '../../src/resources/types/environmentVariables.js';
+import { getMainBaseDir } from '../../src/resources/shared/directoriesManager.js';
 
-
-const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
-
-const getSecretPath = (e: Environment) => path.join(PLAIN_SECRETS_CONFIGS_DIR, `.env.${e}`)
-
-const getSecretJsonObject = (environment: Environment) => {
-    const envPath = getSecretPath(environment);
-
-    const existingEnvSecret = dotenv.parse(sh.exec(`cat ${envPath}`, { silent: true }).stdout.trim());
-    return existingEnvSecret;
-};
-
-
-
-
+const envPath = path.join(getMainBaseDir(), `.env`);
 
 export const kubeBuildEnvVarsManager = {
-    // getEnvVars = () => {
-    //     return getEnvVarsForKubeManifestGenerator()
-    // };
+    resetValues: (): void => {
+        sh.echo(`Emptying dot env values`);
 
-    resetValues: (environment: Environment): void => {
-        sh.echo(`Empting secret JSON config for ${environment}`);
-        sh.mkdir('-p', PLAIN_SECRETS_CONFIGS_DIR);
-        const envPath = getSecretPath(environment);
+        const kubeBuildEnvVarsSample = getKubeBuildEnvVarsSample();
 
-        const kubeBuildEnvVarsSample = getKubeBuildEnvVarsSample({ environment })
-        sh.exec(`echo '${JSON.stringify(kubeBuildEnvVarsSample)}' > ${envPath}`);
+        const dotEnvConfig = generateDotEnvFile(kubeBuildEnvVarsSample)
+        sh.exec(`echo '${dotEnvConfig}' > ${envPath}`);
         sh.exec(`npx prettier --write ${envPath}`);
     },
 
     syncAll: (): void => {
-        ENVIRONMENTS_ALL.forEach((environment) => {
-            sh.echo(`Syncing Secret JSON config for ${environment}`);
-            sh.mkdir('-p', PLAIN_SECRETS_CONFIGS_DIR);
+        sh.echo(`Syncing Secret .env config`);
 
-            const envPath = getSecretPath(environment);
-            const existingEnvSecret = getSecretJsonObject(environment)
-            // const existingEnvSecret = process.env
+        const existingEnvSecret = getEnvVarsForKubeManifests({ check: false })
 
-            if (_.isEmpty(existingEnvSecret)) sh.touch(envPath);
+        if (_.isEmpty(existingEnvSecret)) sh.touch(envPath);
 
-            // Allows us to only get valid keys out, so we can parse the merged secrets out.
-            const secretsSchema = getKubeBuildEnvVarsSchema({ allowEmptyValues: true });
-            const kubeBuildEnvVarsSample = getKubeBuildEnvVarsSample({ environment })
-            // Parse the object to filter out stale keys in existing local secret configs
-            // This also persists the values of existing secrets
-            const mergedObject = R.mergeDeepLeft(existingEnvSecret, kubeBuildEnvVarsSample);
-            mergedObject.ENVIRONMENT = environment
+        // Allows us to only get valid keys out, so we can parse the merged secrets out.
+        const secretsSchema = getKubeBuildEnvVarsSchema({ allowEmptyValues: true });
+        const kubeBuildEnvVarsSample = getKubeBuildEnvVarsSample();
 
-            const envVars = secretsSchema.parse(mergedObject);
+        // Parse the object to filter out stale keys in existing local secret configs
+        // This also persists the values of existing secrets
+        const mergedObject = R.mergeDeepLeft(existingEnvSecret, kubeBuildEnvVarsSample);
 
-            const updatedEnvVars = Object.entries(envVars).map(([name, value]) => `${name}=${value}`).join('\n');
+        const envVars = secretsSchema.parse(mergedObject) as KubeBuildEnvVars;
 
-            sh.exec(`echo '${updatedEnvVars}' > ${envPath}`);
-        });
-    }
+        const updatedEnvVars = generateDotEnvFile(envVars);
 
+        sh.exec(`echo '${updatedEnvVars}' > ${envPath}`);
+    },
+};
+
+
+function generateDotEnvFile(envVars: KubeBuildEnvVars) {
+    return Object.entries(envVars)
+        .map(([name, value]) => `${name}=${value}`)
+        .join('\n');
 }
 
-// kubeBuildEnvVarsManager.syncAll()

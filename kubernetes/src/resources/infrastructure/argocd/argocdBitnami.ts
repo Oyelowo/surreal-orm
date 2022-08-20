@@ -3,12 +3,12 @@ import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { DeepPartial, STORAGE_CLASS } from '../../types/ownTypes.js';
-import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
+import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 import { argocdProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { getIngressUrlHost } from '../ingress/hosts.js';
 
-const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
+const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
 const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
     config: {

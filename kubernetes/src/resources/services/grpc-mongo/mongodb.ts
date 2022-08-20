@@ -5,7 +5,7 @@ import * as k8s from '@pulumi/kubernetes';
 
 import { grpcMongoSettings } from './settings.js';
 import { DeepPartial } from '../../types/ownTypes.js';
-import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
+import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 
 const environmentVariables = getEnvironmentVariables();

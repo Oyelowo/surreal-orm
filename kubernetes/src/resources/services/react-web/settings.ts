@@ -1,9 +1,9 @@
 import { AppConfigs } from '../../types/ownTypes.js';
-import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
+import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 
 
-const env = getEnvVarsForKubeManifestGenerator();
+const env = getEnvVarsForKubeManifests();
 
 const isLocal = env.ENVIRONMENT === 'local';
 export const reactWebSettings: AppConfigs<'react-web', 'applications'> = {
