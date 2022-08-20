@@ -91,20 +91,19 @@ export type ImageTags = z.infer<typeof imageTagsObjectValidator>;
 export type KubeBuildEnvVars = Simplify<
     {
         ENVIRONMENT: Environment;
-    } & ImageTags &
-        SelectFromServicesEnvVars<
-            'graphql-mongo',
-            | 'MONGODB_ROOT_PASSWORD'
-            | 'MONGODB_PASSWORD'
-            | 'MONGODB_ROOT_USERNAME'
-            | 'MONGODB_USERNAME'
-            | 'REDIS_PASSWORD'
-            | 'REDIS_USERNAME'
-            | 'OAUTH_GITHUB_CLIENT_ID'
-            | 'OAUTH_GITHUB_CLIENT_SECRET'
-            | 'OAUTH_GOOGLE_CLIENT_ID'
-            | 'OAUTH_GOOGLE_CLIENT_SECRET'
-        > &
+    } & SelectFromServicesEnvVars<
+        'graphql-mongo',
+        | 'MONGODB_ROOT_PASSWORD'
+        | 'MONGODB_PASSWORD'
+        | 'MONGODB_ROOT_USERNAME'
+        | 'MONGODB_USERNAME'
+        | 'REDIS_PASSWORD'
+        | 'REDIS_USERNAME'
+        | 'OAUTH_GITHUB_CLIENT_ID'
+        | 'OAUTH_GITHUB_CLIENT_SECRET'
+        | 'OAUTH_GOOGLE_CLIENT_ID'
+        | 'OAUTH_GOOGLE_CLIENT_SECRET'
+    > &
         SelectFromServicesEnvVars<'graphql-postgres', 'POSTGRES_PASSWORD' | 'POSTGRES_USERNAME'> &
         SelectFromServicesEnvVars<
             'grpc-mongo',
@@ -118,11 +117,6 @@ export type KubeBuildEnvVars = Simplify<
 export const getKubeBuildEnvVarsSample = (): KubeBuildEnvVars => {
     return {
         ENVIRONMENT: '' as Environment,
-        // This is provided fro, within the CI pipeline where the manifests are generated and pushed to the repo
-        SERVICES__GRAPHQL_MONGO__IMAGE_TAG: '',
-        SERVICES__GRAPHQL_POSTGRES__IMAGE_TAG: '',
-        SERVICES__GRPC_MONGO__IMAGE_TAG: '',
-        SERVICES__REACT_WEB__IMAGE_TAG: '',
 
         SERVICES__GRAPHQL_MONGO__MONGODB_PASSWORD: '',
         SERVICES__GRAPHQL_MONGO__MONGODB_ROOT_PASSWORD: '',

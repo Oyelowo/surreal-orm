@@ -5,7 +5,6 @@ import sh from 'shelljs';
 import { handleShellError } from '../shared.js';
 import { KubeObject } from './kubeObject.js';
 import type { TKubeObject } from './kubeObject.js';
-import { getImageTagsFromDir } from '../getImageTagsFromDir.js';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { getEnvVarsForScript } from '../../../src/resources/types/environmentVariables.js';
@@ -37,10 +36,6 @@ export async function generateManifests(kubeObject: KubeObject) {
     handleShellError(sh.rm('-rf', `${p.join(getMainBaseDir(), 'Pulumi.dev.yaml')}`));
     handleShellError(sh.exec("export PULUMI_CONFIG_PASSPHRASE='not-needed' && pulumi stack init --stack dev"));
 
-    const imageTags = await getImageTagsFromDir();
-    // Pulumi needs some environment variables set for generating deployments with image tag
-    /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
-     */
     handleShellError(
         sh.exec(
             `

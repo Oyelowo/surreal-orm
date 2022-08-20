@@ -1,5 +1,11 @@
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
+import fs from 'node:fs';
+import glob from 'glob';
+import path from 'node:path';
+import util from 'node:util';
+import { getMainBaseDir } from './directoriesManager.js';
+import { ImageTags, imageTagsObjectValidator } from '../types/environmentVariables.js';
 import { AppConfigs, NamespaceOfApps, ServiceName } from '../types/ownTypes.js';
 
 // export function getFQDNFromSettings(config: AppConfigs<any, any>) {
@@ -49,3 +55,25 @@ export function generateService({ serviceFileName, deployment, args = {} }: Serv
 export function toBase64(text: string): string {
     return Buffer.from(text).toString('base64');
 }
+
+const globAsync = util.promisify(glob);
+const mainDir = getMainBaseDir();
+const IMAGE_TAGS_FILES = path.join(mainDir, 'imageTags', '*');
+
+async function getImageTagsFromDir(): Promise<ImageTags> {
+    const imageTagsPaths = await globAsync(IMAGE_TAGS_FILES, {
+        dot: true,
+    });
+
+    const imageTagsList = imageTagsPaths.map((x) => {
+        const imageTagKey = path.basename(x);
+        const imageTagValue = fs.readFileSync(x, { encoding: 'utf8' });
+        return [imageTagKey, imageTagValue];
+    });
+
+    const imageTagsObject = imageTagsObjectValidator.parse(Object.fromEntries(imageTagsList));
+
+    return imageTagsObject;
+}
+
+export const imageTags = await getImageTagsFromDir();

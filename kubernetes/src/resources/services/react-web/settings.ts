@@ -1,6 +1,7 @@
 import { AppConfigs } from '../../types/ownTypes.js';
 import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
+import { imageTags } from '../../shared/helpers.js';
 
 const env = getEnvVarsForKubeManifests();
 
@@ -13,7 +14,7 @@ export const reactWebSettings: AppConfigs<'react-web', 'applications'> = {
         limitCpu: isLocal ? '700m' : '300m',
         replicaCount: 2,
         host: '0.0.0.0',
-        image: `ghcr.io/oyelowo/react-web:${env.SERVICES__REACT_WEB__IMAGE_TAG}`,
+        image: `ghcr.io/oyelowo/react-web:${imageTags.SERVICES__REACT_WEB__IMAGE_TAG}`,
     },
 
     envVars: {

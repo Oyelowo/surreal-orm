@@ -1,6 +1,7 @@
 import { AppConfigs } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
+import { imageTags } from '../../shared/helpers.js';
 
 const env = getEnvVarsForKubeManifests();
 
@@ -13,7 +14,7 @@ export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'applications'> =
         replicaCount: 2,
         readinessProbePort: 8000,
         host: '0.0.0.0',
-        image: `ghcr.io/oyelowo/graphql-mongo:${env.SERVICES__GRAPHQL_MONGO__IMAGE_TAG}`,
+        image: `ghcr.io/oyelowo/graphql-mongo:${imageTags.SERVICES__GRAPHQL_MONGO__IMAGE_TAG}`,
     },
 
     envVars: {

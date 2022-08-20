@@ -1,6 +1,7 @@
 import { AppConfigs } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
+import { imageTags } from '../../shared/helpers.js';
 
 const env = getEnvVarsForKubeManifests();
 
@@ -13,7 +14,7 @@ export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'applications'> = {
         replicaCount: 3,
         readinessProbePort: 5000,
         host: '0.0.0.0',
-        image: `ghcr.io/oyelowo/grpc-mongo:${env.SERVICES__GRPC_MONGO__IMAGE_TAG}`,
+        image: `ghcr.io/oyelowo/grpc-mongo:${imageTags.SERVICES__GRPC_MONGO__IMAGE_TAG}`,
     },
 
     envVars: {

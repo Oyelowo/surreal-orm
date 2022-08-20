@@ -1,6 +1,7 @@
 import { AppConfigs } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
+import { imageTags } from '../../shared/helpers.js';
 
 const env = getEnvVarsForKubeManifests();
 export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'applications'> = {
@@ -12,7 +13,7 @@ export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'applicatio
         replicaCount: 3,
         host: '0.0.0.0',
         readinessProbePort: 8000,
-        image: `ghcr.io/oyelowo/graphql-postgres:${env.SERVICES__GRAPHQL_POSTGRES__IMAGE_TAG}`,
+        image: `ghcr.io/oyelowo/graphql-postgres:${imageTags.SERVICES__GRAPHQL_POSTGRES__IMAGE_TAG}`,
     },
 
     envVars: {
