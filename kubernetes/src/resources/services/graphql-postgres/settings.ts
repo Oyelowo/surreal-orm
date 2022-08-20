@@ -12,7 +12,7 @@ export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'applicatio
         replicaCount: 3,
         host: '0.0.0.0',
         readinessProbePort: 8000,
-        image: `ghcr.io/oyelowo/graphql-postgres:${env.IMAGE_TAG_GRAPHQL_POSTGRES}`,
+        image: `ghcr.io/oyelowo/graphql-postgres:${env.SERVICES__GRAPHQL_POSTGRES__IMAGE_TAG}`,
     },
 
     envVars: {

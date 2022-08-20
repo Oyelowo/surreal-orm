@@ -3,16 +3,15 @@ import fs from 'node:fs';
 import inquirer from 'inquirer';
 import sh, { ShellString } from 'shelljs';
 import { Environment } from '../../src/resources/types/ownTypes.js';
-import { ImageTags } from '../../src/resources/shared/validations.js';
+import { getEnvVarsForKubeManifestGenerator } from '../../src/resources/types/environmentVariables.js';
 
-const ENVIRONMENT_KEY = 'ENVIRONMENT';
-export function getEnvVarsForScript(environment: Environment, imageTags: ImageTags) {
-    const imageEnvVarSetterForPulumi = Object.entries(imageTags)
+export function getEnvVarsForScript() {
+    const env = getEnvVarsForKubeManifestGenerator();
+    const imageEnvVarSetterForPulumi = Object.entries(env)
         .map(([k, v]) => `export ${k}=${v}`)
         .join(' ');
     return `
-      ${imageEnvVarSetterForPulumi} 
-      export ${ENVIRONMENT_KEY}=${environment}  
+      ${imageEnvVarSetterForPulumi}
   `;
 }
 

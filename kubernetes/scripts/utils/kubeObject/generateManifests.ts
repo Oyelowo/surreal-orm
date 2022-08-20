@@ -43,7 +43,7 @@ export async function generateManifests(kubeObject: KubeObject) {
     handleShellError(
         sh.exec(
             `
-        ${getEnvVarsForScript(kubeObject.getEnvironment(), imageTags)}
+        ${getEnvVarsForScript()}
         export PULUMI_CONFIG_PASSPHRASE="not-needed"
         export PULUMI_NODEJS_TRANSPILE_ONLY=true
         export PULUMI_SKIP_CONFIRMATIONS=true

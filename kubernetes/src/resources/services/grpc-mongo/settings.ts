@@ -13,7 +13,7 @@ export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'applications'> = {
         replicaCount: 3,
         readinessProbePort: 5000,
         host: '0.0.0.0',
-        image: `ghcr.io/oyelowo/grpc-mongo:${env.IMAGE_TAG_GRPC_MONGO}`,
+        image: `ghcr.io/oyelowo/grpc-mongo:${env.SERVICES__GRPC_MONGO__IMAGE_TAG}`,
     },
 
     envVars: {

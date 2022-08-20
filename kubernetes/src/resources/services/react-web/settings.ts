@@ -2,10 +2,11 @@ import { AppConfigs } from '../../types/ownTypes.js';
 import { getEnvVarsForKubeManifestGenerator } from '../../types/environmentVariables.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 
-const environment = getEnvironmentVariables().ENVIRONMENT;
 
-const isLocal = environment === 'local';
-export const reactWebSettings: AppConfigs<'react-web', 'doesNotHaveDb', 'applications'> = {
+const env = getEnvVarsForKubeManifestGenerator();
+
+const isLocal = env.ENVIRONMENT === 'local';
+export const reactWebSettings: AppConfigs<'react-web', 'applications'> = {
     kubeConfig: {
         requestMemory: isLocal ? '1.3Gi' : '300Mi',
         requestCpu: isLocal ? '500m' : '200m',
@@ -13,14 +14,14 @@ export const reactWebSettings: AppConfigs<'react-web', 'doesNotHaveDb', 'applica
         limitCpu: isLocal ? '700m' : '300m',
         replicaCount: 2,
         host: '0.0.0.0',
-        image: `ghcr.io/oyelowo/react-web:${getEnvironmentVariables().IMAGE_TAG_REACT_WEB}`,
+        image: `ghcr.io/oyelowo/react-web:${env.SERVICES__REACT_WEB__IMAGE_TAG}`,
     },
 
     envVars: {
-        APP_ENVIRONMENT: environment,
+        APP_ENVIRONMENT: env.ENVIRONMENT,
         APP_HOST: '0.0.0.0',
         APP_PORT: '3000',
-        APP_EXTERNAL_BASE_URL: getIngressUrl({ environment }),
+        APP_EXTERNAL_BASE_URL: getIngressUrl({ environment: env.ENVIRONMENT }),
         // Not really used as all backend functionality has been moved to rust backend.
         // So, not using typescript for any backend work. Keeping for reference purpose
         // GRAPHQL_MONGO_URL: getFQDNFromSettings(graphqlMongoSettings), // Get Url mongoFQDN

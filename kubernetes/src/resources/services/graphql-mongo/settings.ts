@@ -13,7 +13,7 @@ export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'applications'> =
         replicaCount: 2,
         readinessProbePort: 8000,
         host: '0.0.0.0',
-        image: `ghcr.io/oyelowo/graphql-mongo:${env.IMAGE_TAG_GRAPHQL_MONGO}`,
+        image: `ghcr.io/oyelowo/graphql-mongo:${env.SERVICES__GRAPHQL_MONGO__IMAGE_TAG}`,
     },
 
     envVars: {

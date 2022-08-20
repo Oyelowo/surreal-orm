@@ -4,12 +4,13 @@ import glob from 'glob';
 import path from 'node:path';
 import util from 'node:util';
 import { getMainBaseDir } from '../../src/resources/shared/directoriesManager.js';
-import { ImageTags, imageTagsObjectValidator } from '../../src/resources/shared/validations.js';
+import { ImageTags, imageTagsObjectValidator } from '../../src/resources/types/environmentVariables.js';
+
 
 const globAsync = util.promisify(glob);
 
 const MANIFESTS_DIR = getMainBaseDir();
-const IMAGE_TAGS_FILES = path.join(MANIFESTS_DIR, 'image-tags', '*');
+const IMAGE_TAGS_FILES = path.join(MANIFESTS_DIR, 'imageTags', '*');
 
 export async function getImageTagsFromDir(): Promise<ImageTags> {
     const imageTagsPaths = await globAsync(IMAGE_TAGS_FILES, {
