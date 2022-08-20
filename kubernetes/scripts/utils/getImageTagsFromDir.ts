@@ -6,7 +6,6 @@ import util from 'node:util';
 import { getMainBaseDir } from '../../src/resources/shared/directoriesManager.js';
 import { ImageTags, imageTagsObjectValidator } from '../../src/resources/types/environmentVariables.js';
 
-
 const globAsync = util.promisify(glob);
 
 const MANIFESTS_DIR = getMainBaseDir();

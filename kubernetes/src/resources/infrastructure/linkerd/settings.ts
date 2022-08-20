@@ -12,4 +12,3 @@ export const linkerdVizProvider = getResourceProvider({
     outputDirectory: `infrastructure/linkerd-viz`,
     environment: ENVIRONMENT,
 });
-

@@ -9,10 +9,10 @@ import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js'
 const DOCKER_SERVER = 'ghcr.io';
 export const DOCKER_REGISTRY_KEY = 'my-registry-key';
 
-const env = getEnvVarsForKubeManifests()
+const env = getEnvVarsForKubeManifests();
 export function createContainerRegistrySecret(environment: Environment): void {
-    const DOCKER_USERNAME = env.INFRASTRUCTURE__ARGOCD__USERNAME
-    const DOCKER_PASSWORD = env.INFRASTRUCTURE__ARGOCD__PASSWORD
+    const DOCKER_USERNAME = env.INFRASTRUCTURE__ARGOCD__USERNAME;
+    const DOCKER_PASSWORD = env.INFRASTRUCTURE__ARGOCD__PASSWORD;
 
     const dir = path.join(
         getResourceAbsolutePath({

@@ -1,4 +1,3 @@
-
 import { kubeBuildEnvVarsManager } from '../src/resources/types/environmentVariables.js';
 import { KubeObject } from './utils/kubeObject/kubeObject.js';
 import { syncEtcHostsWithCustomHosts } from './utils/syncEtcHostsWithCustomHosts.js';

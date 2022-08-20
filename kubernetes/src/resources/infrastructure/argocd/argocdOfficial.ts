@@ -1,5 +1,5 @@
-import { getEnvironmentVariables } from './../../../resources/shared/validations';
-import { IArgocdargo } from '../../types/helm-charts/argoCdArgo.js';
+// import { IArgocdargo } from '../../../types/helm-charts/argoCdArgo.js';
+import { IArgocdargo } from '../../../../generatedHelmChartsTsTypes/argoCdArgo.js';
 import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
@@ -9,8 +9,9 @@ import bcrypt from 'bcrypt';
 import { argocdProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { getIngressUrlHost } from '../ingress/hosts.js';
+import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 
-const { ENVIRONMENT } = getEnvVarsForKubeManifestGenerator();
+const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
 const argocdHost = getIngressUrlHost({ environment: ENVIRONMENT, subDomain: 'argocd' });
 const saltRounds = 10;

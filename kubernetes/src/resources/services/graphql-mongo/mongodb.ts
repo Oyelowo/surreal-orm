@@ -3,7 +3,6 @@ import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../../infrastructure/namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
-import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 import { graphqlMongo } from './app.js';
 import { graphqlMongoSettings } from './settings.js';
 
@@ -61,7 +60,7 @@ Currently the only mode supported by the Linode Block Storage CSI driver is Read
     Note
 In order to retain your Block Storage Volume and its data, even after the associated PVC is deleted, you must use the linode-block-storage-retain StorageClass. If, instead, you prefer to have your Block Storage Volume and its data deleted along with its PVC, use the linode-block-storage StorageClass. See the Delete a Persistent Volume Claim for steps on deleting a PVC.
     */
-        storageClass: getEnvironmentVariables().ENVIRONMENT === 'local' ? '' : envVars.MONGODB_STORAGE_CLASS,
+        storageClass: envVars.APP_ENVIRONMENT === 'local' ? '' : envVars.MONGODB_STORAGE_CLASS,
     },
 
     auth: {

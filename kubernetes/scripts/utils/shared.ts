@@ -7,10 +7,9 @@ import { Environment } from '../../src/resources/types/ownTypes.js';
 import { getEnvVarsForKubeManifestGenerator } from '../../src/resources/types/environmentVariables.js';
 
 const env = getEnvVarsForKubeManifestGenerator();
-const ENVIRONMENT_KEY: keyof Pick<typeof env, "ENVIRONMENT"> = "ENVIRONMENT"
+const ENVIRONMENT_KEY: keyof Pick<typeof env, 'ENVIRONMENT'> = 'ENVIRONMENT';
 // const envx: Extract<keyof typeof env, "ENVIRONMENT"> = "ENVIRONMENT"
 export function getEnvVarsForScript({ environment }: { environment: Environment }) {
-
     const imageEnvVarSetterForPulumi = Object.entries(env)
         .map(([k, v]) => `export ${k}=${v}`)
         .join(' ');
@@ -59,8 +58,6 @@ export async function promptEnvironmentSelection() {
 
     return answers;
 }
-
-;
 
 export const ARGV_ENVIRONMENTS = yargs(process.argv.slice(2))
     .options({

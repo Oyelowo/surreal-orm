@@ -5,7 +5,6 @@ import { KubeObject } from './utils/kubeObject/kubeObject.js';
 import { promptEnvironmentSelection } from './utils/shared.js';
 import { kubeBuildEnvVarsManager } from '../src/resources/types/environmentVariables.js';
 
-
 async function main() {
     const { environment } = await promptEnvironmentSelection();
     await promptKubernetesClusterSwitch(environment);

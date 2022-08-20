@@ -205,7 +205,7 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
     }
 
     getProvider() {
-        return this.provider
+        return this.provider;
     }
     getServiceDir = (): string => {
         return getResourceAbsolutePath({

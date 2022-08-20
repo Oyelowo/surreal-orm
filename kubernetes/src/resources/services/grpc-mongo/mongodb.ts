@@ -1,4 +1,4 @@
-import { IMongodbbitnami } from '../../types/helm-charts/mongodbBitnami.js';
+import { IMongodbbitnami } from '../../../../generatedHelmChartsTsTypes/mongodbBitnami.js';
 import { grpcMongo } from './app.js';
 import { namespaces } from '../../infrastructure/namespaces/util.js';
 import * as k8s from '@pulumi/kubernetes';
@@ -8,7 +8,7 @@ import { DeepPartial } from '../../types/ownTypes.js';
 import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 
-const environmentVariables = getEnvironmentVariables();
+const environmentVariables = getEnvVarsForKubeManifests();
 
 /* MONGODB STATEFULSET */
 type Credentials = {
