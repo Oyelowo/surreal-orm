@@ -165,7 +165,7 @@ type Option = {
     check: boolean;
 };
 export const getEnvVarsForKubeManifests = (option?: Option): KubeBuildEnvVars => {
-    dotenv.config({ debug: true });
+    dotenv.config();
     const shouldCheck = option?.check === undefined ? true : option.check;
 
     const schema = getKubeBuildEnvVarsSchema({ allowEmptyValues: true });

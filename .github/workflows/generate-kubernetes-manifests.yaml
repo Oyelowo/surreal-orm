@@ -49,7 +49,7 @@ jobs:
       - name: Install pulumi
         uses: pulumi/setup-pulumi@v2
         with:
-          pulumi-version: 3.37.2
+          pulumi-version: 3.38.0
       - run: |
           # make generate_manifests_ci environment=development
           # make generate_manifests_ci environment=staging

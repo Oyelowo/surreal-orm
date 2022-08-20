@@ -4,7 +4,6 @@ import * as kx from '@pulumi/kubernetesx';
 import * as bcrypt from 'bcrypt';
 import { namespaces } from '../namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
-import { toBase64 } from '../../shared/converters.js';
 import { NginxConfiguration } from '../../types/nginxConfigurations.js';
 import { DeepPartial, ResourceName } from '../../types/ownTypes.js';
 import { CLUSTER_ISSUER_NAME } from '../cert-manager/clusterIssuer.js';
@@ -12,6 +11,7 @@ import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
 import { linkerdVizProvider } from './settings.js';
 import { getEnvVarsForKubeManifests } from '../../types/environmentVariables.js';
 import { getIngressUrlHost } from '../ingress/hosts.js';
+import { toBase64 } from '../../shared/helpers.js';
 
 const values: DeepPartial<ILinkerdvizlinkerd> = {};
 const resourceName: ResourceName = 'linkerd-viz';

@@ -10,6 +10,7 @@ import { generateService } from './helpers.js';
 import { toBase64 } from './helpers.js';
 import _ from 'lodash';
 import { getEnvVarsForKubeManifests } from '../types/environmentVariables.js';
+import z from 'zod';
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
@@ -32,6 +33,7 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
         super('k8sjs:service:ServiceDeployment', name, {} /* opts */);
         this.appName = name;
         const { envVars, kubeConfig } = args;
+        const encodedSecrets = z.record(z.string()).parse(_.mapValues(envVars, toBase64));
         const metadata = {
             ...args.metadata,
         };
@@ -54,7 +56,6 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
             { provider: this.getProvider(), parent: this }
         );
 
-        const encodedSecrets = _.mapValues(envVars, toBase64) as typeof envVars;
 
         // Create a Kubernetes Secret.
         this.secret = new kx.Secret(
@@ -92,7 +93,7 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
   ...
  }
 */
-                    env: _.mapKeys(envVars, (key) => [key, this.secret.asEnvValue(key)]),
+                    env: _.mapKeys(encodedSecrets, (key) => [key, this.secret.asEnvValue(key)]),
                     image: kubeConfig.image,
                     ports: { http: Number(envVars?.APP_PORT) },
                     volumeMounts: [],

@@ -21,7 +21,7 @@ const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
         },
     },
     global: {
-        storageClass: getEnvironmentVariables().ENVIRONMENT === 'local' ? '' : STORAGE_CLASS,
+        storageClass: ENVIRONMENT === 'local' ? '' : STORAGE_CLASS,
     },
     server: {
         ingress: {
