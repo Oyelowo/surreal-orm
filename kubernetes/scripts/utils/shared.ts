@@ -4,20 +4,6 @@ import inquirer from 'inquirer';
 import sh, { ShellString } from 'shelljs';
 import yargs from 'yargs';
 import { Environment } from '../../src/resources/types/ownTypes.js';
-import { getEnvVarsForKubeManifestGenerator } from '../../src/resources/types/environmentVariables.js';
-
-const env = getEnvVarsForKubeManifestGenerator();
-const ENVIRONMENT_KEY: keyof Pick<typeof env, 'ENVIRONMENT'> = 'ENVIRONMENT';
-// const envx: Extract<keyof typeof env, "ENVIRONMENT"> = "ENVIRONMENT"
-export function getEnvVarsForScript({ environment }: { environment: Environment }) {
-    const imageEnvVarSetterForPulumi = Object.entries(env)
-        .map(([k, v]) => `export ${k}=${v}`)
-        .join(' ');
-    return `
-      ${imageEnvVarSetterForPulumi}
-      export ${ENVIRONMENT_KEY}=${environment}
-  `;
-}
 
 export function isFileEmpty(fileName: string, ignoreWhitespace = true): Promise<boolean> {
     return new Promise((resolve, reject) => {

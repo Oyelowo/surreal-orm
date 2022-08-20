@@ -2,12 +2,13 @@ import { getMainBaseDir } from '../../../src/resources/shared/directoriesManager
 import c from 'chalk';
 import p from 'node:path';
 import sh from 'shelljs';
-import { getEnvVarsForScript, handleShellError } from '../shared.js';
+import { handleShellError } from '../shared.js';
 import { KubeObject } from './kubeObject.js';
 import type { TKubeObject } from './kubeObject.js';
 import { getImageTagsFromDir } from '../getImageTagsFromDir.js';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { getEnvVarsForScript } from '../../../src/resources/types/environmentVariables.js';
 
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI

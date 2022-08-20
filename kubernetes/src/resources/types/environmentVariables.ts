@@ -219,3 +219,15 @@ function generateDotEnvFile(envVars: KubeBuildEnvVars) {
         .map(([name, value]) => `${name}=${value}`)
         .join('\n');
 }
+
+const env = getEnvVarsForKubeManifests();
+const ENVIRONMENT_KEY: keyof Pick<typeof env, 'ENVIRONMENT'> = 'ENVIRONMENT';
+export function getEnvVarsForScript({ environment }: { environment: Environment }) {
+    const imageEnvVarSetterForPulumi = Object.entries(env)
+        .map(([k, v]) => `export ${k}=${v}`)
+        .join(' ');
+    return `
+      ${imageEnvVarSetterForPulumi}
+      export ${ENVIRONMENT_KEY}=${environment}
+  `;
+}
