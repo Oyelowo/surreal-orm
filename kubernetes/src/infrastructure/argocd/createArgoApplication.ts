@@ -9,7 +9,7 @@ import {
     getResourceRelativePath,
 } from '../../shared/directoriesManager.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
-import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainKubeBuildSecretsManager.js';
+import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 
 type ArgocdApplicationProps = {
     namespace: Namespace;

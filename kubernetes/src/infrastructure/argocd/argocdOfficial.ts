@@ -10,7 +10,7 @@ import { argocdProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { getIngressUrlHost } from '../ingress/hosts.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
-import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainKubeBuildSecretsManager.js';
+import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 import { INGRESS_CLASSNAME_NGINX } from '../../types/nginxConfigurations.js';
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();

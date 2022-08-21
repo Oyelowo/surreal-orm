@@ -1,6 +1,6 @@
 import { AppConfigs } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
-import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainKubeBuildSecretsManager.js';
+import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentVariablesForManifests.js';
 
 const env = getEnvVarsForKubeManifests();

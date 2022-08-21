@@ -1,7 +1,7 @@
 import { AppConfigs } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentVariablesForManifests.js';
-import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainKubeBuildSecretsManager.js';
+import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 
 const env = getEnvVarsForKubeManifests();
 const secrets = new PlainKubeBuildSecretsManager('services', 'grpc-mongo', env.ENVIRONMENT).getSecrets();

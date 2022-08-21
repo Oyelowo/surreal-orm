@@ -6,7 +6,10 @@ import sh from 'shelljs';
 import path from 'node:path';
 import * as R from 'ramda';
 import { getPlainSecretsConfigFilesBaseDir } from '../../src/shared/directoriesManager.js';
-
+/* 
+Manages plain secrets which is used for generating kubernetes secrets data
+which is eventually sealed with bitnami sealed secrets
+*/
 type ResourceSecrets<
     TCat extends keyof EnvVarsByCategories,
     TResource extends keyof EnvVarsByCategories[TCat],

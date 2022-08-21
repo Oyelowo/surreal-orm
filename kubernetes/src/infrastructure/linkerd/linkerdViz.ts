@@ -11,7 +11,7 @@ import { linkerdVizProvider } from './settings.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
 import { getIngressUrlHost } from '../ingress/hosts.js';
 import { toBase64 } from '../../shared/helpers.js';
-import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainKubeBuildSecretsManager.js';
+import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 
 const values: DeepPartial<ILinkerdvizlinkerd> = {};
 const resourceName: ResourceName = 'linkerd-viz';

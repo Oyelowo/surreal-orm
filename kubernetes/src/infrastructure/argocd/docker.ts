@@ -5,7 +5,7 @@ import { getResourceAbsolutePath } from '../../shared/directoriesManager.js';
 import { Environment } from '../../types/ownTypes.js';
 import { namespaces } from '../namespaces/util.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
-import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainKubeBuildSecretsManager.js';
+import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 
 const DOCKER_SERVER = 'ghcr.io';
 export const DOCKER_REGISTRY_KEY = 'my-registry-key';
