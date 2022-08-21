@@ -1,4 +1,4 @@
-import { getIngressUrl } from '../src/resources/infrastructure/ingress/hosts.js';
+import { getIngressUrl } from '../src/infrastructure/ingress/hosts.js';
 
 import sh from 'shelljs';
 

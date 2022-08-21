@@ -23,7 +23,7 @@
     "ts-node": {
         "esm": true
     },
-    "include": ["src/**/*.ts", "src/**/*.mts", "src/**/*.cts"],
+    "include": ["src/**/*.ts", "src/**/*.mts", "src/**/*.cts", "scripts/utils/plainSecretsManager.ts"],
     "exclude": ["generatedCrdsTs", "node_modules"],
     "files": ["index.ts", "scripts/utils/syncHelmChartTypesDeclarations.ts"]
 }

@@ -1,6 +1,6 @@
 import path from 'node:path';
 import yargs from 'yargs';
-import { getMainBaseDir } from '../../src/resources/shared/directoriesManager.js';
+import { getMainBaseDir } from '../../src/shared/directoriesManager.js';
 import { ENVIRONMENTS_ALL } from '../utils/shared.js';
 
 export const ARGV_ENVIRONMENTS = yargs(process.argv.slice(2))

@@ -49,9 +49,9 @@ interface VolumePermissions {
     enabled: boolean;
     image: Image2;
     resources: Resources;
-    containerSecurityContext: ContainerSecurityContext2;
+    containerSecurityContext: ContainerSecurityContext3;
 }
-interface ContainerSecurityContext2 {
+interface ContainerSecurityContext3 {
     runAsUser: number;
 }
 interface Image2 {
@@ -101,7 +101,7 @@ interface Dex {
     customReadinessProbe: CommonLabels;
     resources: Resources;
     podSecurityContext: PodSecurityContext;
-    containerSecurityContext: ContainerSecurityContext;
+    containerSecurityContext: ContainerSecurityContext2;
     service: Service4;
     containerPorts: ContainerPorts4;
     metrics: Metrics2;
@@ -122,6 +122,7 @@ interface Dex {
     topologySpreadConstraints: any[];
     updateStrategy: UpdateStrategy;
     priorityClassName: string;
+    runtimeClassName: string;
     lifecycleHooks: CommonLabels;
     extraEnvVars: any[];
     extraEnvVarsCM: string;
@@ -157,6 +158,13 @@ interface Ports2 {
     http: number;
     grpc: number;
 }
+interface ContainerSecurityContext2 {
+    enabled: boolean;
+    runAsUser: number;
+    allowPrivilegeEscalation: boolean;
+    readOnlyRootFilesystem: boolean;
+    runAsNonRoot: boolean;
+}
 interface RepoServer {
     replicaCount: number;
     startupProbe: StartupProbe;
@@ -191,6 +199,7 @@ interface RepoServer {
     topologySpreadConstraints: any[];
     updateStrategy: UpdateStrategy;
     priorityClassName: string;
+    runtimeClassName: string;
     lifecycleHooks: CommonLabels;
     extraEnvVars: any[];
     extraEnvVarsCM: string;
@@ -243,6 +252,7 @@ interface Server {
     topologySpreadConstraints: any[];
     updateStrategy: UpdateStrategy;
     priorityClassName: string;
+    runtimeClassName: string;
     lifecycleHooks: CommonLabels;
     extraEnvVars: any[];
     extraEnvVarsCM: string;
@@ -298,6 +308,7 @@ interface Ingress {
     extraTls: any[];
     secrets: any[];
     ingressClassName: string;
+    extraRules: any[];
 }
 interface Config {
     url: string;
@@ -347,6 +358,7 @@ interface Controller {
     topologySpreadConstraints: any[];
     updateStrategy: UpdateStrategy;
     priorityClassName: string;
+    runtimeClassName: string;
     lifecycleHooks: CommonLabels;
     extraEnvVars: any[];
     extraEnvVarsCM: string;
@@ -432,7 +444,13 @@ interface ServiceAccount {
 interface ContainerSecurityContext {
     enabled: boolean;
     runAsUser: number;
+    allowPrivilegeEscalation: boolean;
+    capabilities: Capabilities;
+    readOnlyRootFilesystem: boolean;
     runAsNonRoot: boolean;
+}
+interface Capabilities {
+    drop: string[];
 }
 interface PodSecurityContext {
     enabled: boolean;

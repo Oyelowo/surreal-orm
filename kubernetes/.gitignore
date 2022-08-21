@@ -1,5 +1,8 @@
-/.secrets-unsealed
-/.secrets
+.secrets-unsealed
 .secrets
-/login
+.secrets
+.login
 Pulumi.dev.yaml
+.env*
+./generatedManifests/**/local
+./generatedManifests/**/**/secret-*.yaml

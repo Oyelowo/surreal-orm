@@ -1,10 +1,10 @@
 import yaml from 'yaml';
-import { helmChartsInfo } from '../../src/resources/shared/helmChartInfo.js';
+import { helmChartsInfo } from '../../src/shared/helmChartInfo.js';
 import chalk from 'chalk';
 import sh from 'shelljs';
 import JsonToTS from 'json-to-ts';
 import _ from 'lodash';
-import { getMainBaseDir } from '../../src/resources/shared/directoriesManager.js';
+import { getMainBaseDir } from '../../src/shared/directoriesManager.js';
 import path from 'node:path';
 
 export const getHelmChartTypesDir = () => {

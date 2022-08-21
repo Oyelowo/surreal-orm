@@ -1,13 +1,13 @@
-import { getMainBaseDir } from '../../../src/resources/shared/directoriesManager.js';
+import { getMainBaseDir } from '../../../src/shared/directoriesManager.js';
 import c from 'chalk';
 import p from 'node:path';
 import sh from 'shelljs';
-import { getEnvVarsForScript, handleShellError } from '../shared.js';
+import { handleShellError } from '../shared.js';
 import { KubeObject } from './kubeObject.js';
 import type { TKubeObject } from './kubeObject.js';
-import { getImageTagsFromDir } from '../getImageTagsFromDir.js';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { Environment } from '../../../src/types/ownTypes.js';
+import { imageTags } from '../../../src/shared/environmentVariablesForManifests.js';
 
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
@@ -17,7 +17,7 @@ const mainDir = getMainBaseDir();
 export const tsConfigPath = path.join(mainDir, 'tsconfig.pulumi.json');
 export async function generateManifests(kubeObject: KubeObject) {
     sh.exec('make install');
-    const loginDir = path.join(mainDir, `.login-${randomUUID()}`);
+    const loginDir = path.join(mainDir, `.login`);
     sh.rm('-rf', loginDir);
     sh.mkdir('-p', loginDir);
 
@@ -36,14 +36,10 @@ export async function generateManifests(kubeObject: KubeObject) {
     handleShellError(sh.rm('-rf', `${p.join(getMainBaseDir(), 'Pulumi.dev.yaml')}`));
     handleShellError(sh.exec("export PULUMI_CONFIG_PASSPHRASE='not-needed' && pulumi stack init --stack dev"));
 
-    const imageTags = await getImageTagsFromDir();
-    // Pulumi needs some environment variables set for generating deployments with image tag
-    /* `export ${IMAGE_TAG_REACT_WEB}=tag-web export ${IMAGE_TAG_GRAPHQL_MONGO}=tag-mongo`
-     */
     handleShellError(
         sh.exec(
             `
-        ${getEnvVarsForScript(kubeObject.getEnvironment(), imageTags)}
+        ${getEnvVarsForScript({ environment: kubeObject.getEnvironment() })}
         export PULUMI_CONFIG_PASSPHRASE="not-needed"
         export PULUMI_NODEJS_TRANSPILE_ONLY=true
         export PULUMI_SKIP_CONFIRMATIONS=true
@@ -53,4 +49,18 @@ export async function generateManifests(kubeObject: KubeObject) {
         )
     );
     sh.rm('-rf', loginDir);
+}
+
+const ENVIRONMENT_KEY = 'ENVIRONMENT';
+// export function getEnvVarsForScript(environment: Environment, imageTags: ImageTags) {
+function getEnvVarsForScript({ environment }: { environment: Environment }) {
+    // Not really necessary to have the image tags as environment variable
+    // here aas I'm already using it directly in the manifests function
+    const imageEnvVarSetterForPulumi = Object.entries(imageTags)
+        .map(([k, v]) => `export ${k}=${v}`)
+        .join(' ');
+    return `
+      ${imageEnvVarSetterForPulumi} 
+      export ${ENVIRONMENT_KEY}=${environment}  
+  `;
 }

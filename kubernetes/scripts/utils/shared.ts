@@ -2,19 +2,8 @@ import c from 'chalk';
 import fs from 'node:fs';
 import inquirer from 'inquirer';
 import sh, { ShellString } from 'shelljs';
-import { Environment } from '../../src/resources/types/ownTypes.js';
-import { ImageTags } from '../../src/resources/shared/validations.js';
-
-const ENVIRONMENT_KEY = 'ENVIRONMENT';
-export function getEnvVarsForScript(environment: Environment, imageTags: ImageTags) {
-    const imageEnvVarSetterForPulumi = Object.entries(imageTags)
-        .map(([k, v]) => `export ${k}=${v}`)
-        .join(' ');
-    return `
-      ${imageEnvVarSetterForPulumi} 
-      export ${ENVIRONMENT_KEY}=${environment}  
-  `;
-}
+import yargs from 'yargs';
+import { Environment } from '../../src/types/ownTypes.js';
 
 export function isFileEmpty(fileName: string, ignoreWhitespace = true): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -55,3 +44,15 @@ export async function promptEnvironmentSelection() {
 
     return answers;
 }
+
+export const getArgvEnvironments = () =>
+    yargs(process.argv.slice(2))
+        .options({
+            environment: {
+                alias: 'e',
+                choices: ENVIRONMENTS_ALL,
+                describe: "The environment you're generating the manifests for.",
+                demandOption: true,
+            },
+        })
+        .parseSync();

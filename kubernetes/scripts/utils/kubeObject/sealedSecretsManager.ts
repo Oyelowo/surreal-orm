@@ -1,12 +1,12 @@
-import { SealedSecretTemplate } from '../../../src/resources/types/sealedSecretTemplate.js';
+import { SealedSecretTemplate } from '../../../src/types/sealedSecretTemplate.js';
 import type { TKubeObject } from './kubeObject.js';
 import p from 'node:path';
 import sh from 'shelljs';
-import type { ResourceName } from '../../../src/resources/types/ownTypes.js';
+import type { ResourceName } from '../../../src/types/ownTypes.js';
 import _ from 'lodash';
 import z from 'zod';
 import yaml from 'yaml';
-import { Namespace } from '../../../src/resources/infrastructure/namespaces/util.js';
+import { Namespace } from '../../../src/infrastructure/namespaces/util.js';
 
 const SEALED_SECRETS_CONTROLLER_NAME: ResourceName = 'sealed-secrets';
 

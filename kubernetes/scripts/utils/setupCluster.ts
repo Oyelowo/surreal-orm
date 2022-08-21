@@ -1,13 +1,13 @@
-import { Environment } from '../../src/resources/types/ownTypes.js';
-import { PlainSecretJsonConfig } from '../utils/plainSecretJsonConfig.js';
+import { Environment } from '../../src/types/ownTypes.js';
 import sh from 'shelljs';
 import { promptSecretsDeletionConfirmations } from '../utils/promptSecretsDeletionConfirmations.js';
-import { namespaces } from '../../src/resources/infrastructure/namespaces/util.js';
-import { helmChartsInfo } from '../../src/resources/shared/helmChartInfo.js';
-import { ResourceName } from '../../src/resources/types/ownTypes.js';
+import { namespaces } from '../../src/infrastructure/namespaces/util.js';
+import { helmChartsInfo } from '../../src/shared/helmChartInfo.js';
+import { ResourceName } from '../../src/types/ownTypes.js';
 import _ from 'lodash';
 import { KubeObject } from '../utils/kubeObject/kubeObject.js';
-import { ResourcePathProps } from '../../src/resources/shared/directoriesManager.js';
+import { ResourceOutputDirProps } from '../../src/shared/directoriesManager.js';
+import { PlainKubeBuildSecretsManager } from './plainKubeBuildSecretsManager';
 
 export async function setupCluster(environment: Environment) {
     const { deletPlainJsonSecretsInput, deleteUnsealedSecretManifestsOutput } =
@@ -16,12 +16,12 @@ export async function setupCluster(environment: Environment) {
     const kubeObject = new KubeObject(environment);
     await kubeObject.generateManifests();
 
-    PlainSecretJsonConfig.syncAll();
+    PlainKubeBuildSecretsManager.syncAll();
 
     applySetupManifests(kubeObject);
 
     if (deletPlainJsonSecretsInput) {
-        PlainSecretJsonConfig.resetValues(environment);
+        PlainKubeBuildSecretsManager.resetValues();
     }
 
     if (deleteUnsealedSecretManifestsOutput) {
@@ -70,7 +70,7 @@ function applySetupManifests(kubeObject: KubeObject) {
     }
 }
 
-function applyResourceManifests(resourcePath: ResourcePathProps['resourcePath'], kubeObject: KubeObject) {
+function applyResourceManifests(resourcePath: ResourceOutputDirProps['outputDirectory'], kubeObject: KubeObject) {
     const resource = kubeObject.getForApp(resourcePath);
 
     // put crds and sealed secret resources first

@@ -7,15 +7,15 @@ import * as R from 'ramda';
 import path from 'node:path';
 import _ from 'lodash';
 import z from 'zod';
-import { namespaceSchema } from '../../../src/resources/infrastructure/namespaces/util.js';
-import { getGeneratedEnvManifestsDir } from '../../../src/resources/shared/directoriesManager.js';
-import type { ResourceOutputDirProps } from '../../../src/resources/shared/directoriesManager.js';
-import { getResourceAbsolutePath } from '../../../src/resources/shared/directoriesManager.js';
-import type { Environment, ResourceName } from '../../../src/resources/types/ownTypes.js';
+import { namespaceSchema } from '../../../src/infrastructure/namespaces/util.js';
+import { getGeneratedEnvManifestsDir } from '../../../src/shared/directoriesManager.js';
+import type { ResourceOutputDirProps } from '../../../src/shared/directoriesManager.js';
+import { getResourceAbsolutePath } from '../../../src/shared/directoriesManager.js';
+import type { Environment, ResourceName } from '../../../src/types/ownTypes.js';
 import { generateManifests } from './generateManifests.js';
 import { syncCrdsCode } from './syncCrdsCode.js';
 import cliProgress from 'cli-progress';
-import { PlainSecretJsonConfig } from '../plainSecretJsonConfig.js';
+import { PlainSecretsManager } from '../plainSecretsManager.js';
 
 type ResourceKind =
     | 'Secret'
@@ -106,7 +106,7 @@ export class KubeObject {
     };
 
     generateManifests = async (): Promise<void> => {
-        PlainSecretJsonConfig.syncAll();
+        PlainSecretsManager.syncAll();
         await generateManifests(this);
         this.syncAll();
         syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
