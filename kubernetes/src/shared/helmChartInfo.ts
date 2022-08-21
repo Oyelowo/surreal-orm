@@ -38,7 +38,7 @@ export const helmChartsInfo = checkConstType({
             },
             argocd: {
                 chart: 'argo-cd',
-                version: '3.1.16',
+                version: '4.0.6',
             },
             postgresql: {
                 chart: 'postgresql',

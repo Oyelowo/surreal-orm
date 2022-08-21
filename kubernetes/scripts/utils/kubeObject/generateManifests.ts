@@ -6,7 +6,6 @@ import { handleShellError } from '../shared.js';
 import { KubeObject } from './kubeObject.js';
 import type { TKubeObject } from './kubeObject.js';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
 import { Environment } from '../../../src/types/ownTypes.js';
 import { imageTags } from '../../../src/shared/environmentVariablesForManifests.js';
 
@@ -18,7 +17,7 @@ const mainDir = getMainBaseDir();
 export const tsConfigPath = path.join(mainDir, 'tsconfig.pulumi.json');
 export async function generateManifests(kubeObject: KubeObject) {
     sh.exec('make install');
-    const loginDir = path.join(mainDir, `.login-${randomUUID()}`);
+    const loginDir = path.join(mainDir, `.login`);
     sh.rm('-rf', loginDir);
     sh.mkdir('-p', loginDir);
 
@@ -54,7 +53,7 @@ export async function generateManifests(kubeObject: KubeObject) {
 
 const ENVIRONMENT_KEY = 'ENVIRONMENT';
 // export function getEnvVarsForScript(environment: Environment, imageTags: ImageTags) {
-export function getEnvVarsForScript({ environment }: { environment: Environment }) {
+function getEnvVarsForScript({ environment }: { environment: Environment }) {
     // Not really necessary to have the image tags as environment variable
     // here aas I'm already using it directly in the manifests function
     const imageEnvVarSetterForPulumi = Object.entries(imageTags)
