@@ -10,11 +10,11 @@ import { argocdProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { getIngressUrlHost } from '../ingress/hosts.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
-import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
+import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 import { INGRESS_CLASSNAME_NGINX } from '../../types/nginxConfigurations.js';
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
-const secrets = new PlainKubeBuildSecretsManager('infrastructure', 'argocd', ENVIRONMENT).getSecrets();
+const secrets = new PlainSecretsManager('infrastructure', 'argocd', ENVIRONMENT).getSecrets();
 const argocdHost = getIngressUrlHost({ environment: ENVIRONMENT, subDomain: 'argocd' });
 const saltRounds = 10;
 

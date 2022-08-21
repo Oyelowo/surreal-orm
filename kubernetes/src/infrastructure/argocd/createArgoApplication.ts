@@ -9,7 +9,7 @@ import {
     getResourceRelativePath,
 } from '../../shared/directoriesManager.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
-import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
+import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 
 type ArgocdApplicationProps = {
     namespace: Namespace;
@@ -87,7 +87,7 @@ const metadata = {
 };
 
 const env = getEnvVarsForKubeManifests();
-const secrets = new PlainKubeBuildSecretsManager('infrastructure', 'argocd', env.ENVIRONMENT).getSecrets();
+const secrets = new PlainSecretsManager('infrastructure', 'argocd', env.ENVIRONMENT).getSecrets();
 
 export const argoCDApplicationsSecret = new kx.Secret(
     'argocd-secret',

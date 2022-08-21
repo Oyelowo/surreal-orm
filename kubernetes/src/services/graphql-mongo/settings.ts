@@ -1,11 +1,11 @@
 import { AppConfigs } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
-import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
+import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentVariablesForManifests.js';
 
 const env = getEnvVarsForKubeManifests();
 
-const secrets = new PlainKubeBuildSecretsManager('services', 'graphql-mongo', 'local').getSecrets();
+const secrets = new PlainSecretsManager('services', 'graphql-mongo', 'local').getSecrets();
 export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'applications'> = {
     kubeConfig: {
         requestMemory: '70Mi',

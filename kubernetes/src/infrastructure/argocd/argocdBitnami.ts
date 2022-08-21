@@ -7,11 +7,11 @@ import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesFor
 import { argocdProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { getIngressUrlHost } from '../ingress/hosts.js';
-import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
+import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 import { INGRESS_CLASSNAME_NGINX } from '../../types/nginxConfigurations.js';
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
-const secrets = new PlainKubeBuildSecretsManager('infrastructure', 'argocd', ENVIRONMENT).getSecrets();
+const secrets = new PlainSecretsManager('infrastructure', 'argocd', ENVIRONMENT).getSecrets();
 const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
     config: {
         secret: {

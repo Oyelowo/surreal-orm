@@ -118,14 +118,14 @@ function parseSecrets(obj: any, option?: SchemaOption): TSecretsKubeManifests {
 const PLAIN_SECRETS_CONFIGS_DIR = getPlainSecretsConfigFilesBaseDir();
 const ENVIRONMENTS_ALL: Environment[] = ['test', 'local', 'development', 'staging', 'staging'];
 
-export class PlainKubeBuildSecretsManager<
+export class PlainSecretsManager<
     TCat extends keyof TSecretsKubeManifests,
     TResource extends keyof TSecretsKubeManifests[TCat]
 > {
     constructor(private resourceCat: TCat, private resourceName: TResource, private environment: Environment) {}
 
     getSecrets = (): TSecretsKubeManifests[TCat][TResource] => {
-        const allSecretsJson = PlainKubeBuildSecretsManager.#getSecretJsonObject(this.environment);
+        const allSecretsJson = PlainSecretsManager.#getSecretJsonObject(this.environment);
         return parseSecrets(allSecretsJson, { requireValues: false })[this.resourceCat][this.resourceName];
     };
 
@@ -164,7 +164,7 @@ export class PlainKubeBuildSecretsManager<
     };
 
     static #getSecretJsonObject = (environment: Environment): object | undefined => {
-        const envPath = PlainKubeBuildSecretsManager.#getSecretPath(environment);
+        const envPath = PlainSecretsManager.#getSecretPath(environment);
 
         const existingEnvSecret = this.#parseJson<object>(sh.exec(`cat ${envPath}`, { silent: true }).stdout.trim());
         return existingEnvSecret;

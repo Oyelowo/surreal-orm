@@ -5,13 +5,13 @@ import { getResourceAbsolutePath } from '../../shared/directoriesManager.js';
 import { Environment } from '../../types/ownTypes.js';
 import { namespaces } from '../namespaces/util.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
-import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
+import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 
 const DOCKER_SERVER = 'ghcr.io';
 export const DOCKER_REGISTRY_KEY = 'my-registry-key';
 
 const env = getEnvVarsForKubeManifests();
-const secrets = new PlainKubeBuildSecretsManager('infrastructure', 'argocd', env.ENVIRONMENT).getSecrets();
+const secrets = new PlainSecretsManager('infrastructure', 'argocd', env.ENVIRONMENT).getSecrets();
 const DOCKER_USERNAME = secrets.CONTAINER_REGISTRY_USERNAME;
 const DOCKER_PASSWORD = secrets.CONTAINER_REGISTRY_PASSWORD;
 

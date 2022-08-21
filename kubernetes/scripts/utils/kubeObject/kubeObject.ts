@@ -15,7 +15,7 @@ import type { Environment, ResourceName } from '../../../src/types/ownTypes.js';
 import { generateManifests } from './generateManifests.js';
 import { syncCrdsCode } from './syncCrdsCode.js';
 import cliProgress from 'cli-progress';
-import { PlainKubeBuildSecretsManager } from '../plainKubeBuildSecretsManager.js';
+import { PlainSecretsManager } from '../plainSecretsManager.js';
 
 type ResourceKind =
     | 'Secret'
@@ -106,7 +106,7 @@ export class KubeObject {
     };
 
     generateManifests = async (): Promise<void> => {
-        PlainKubeBuildSecretsManager.syncAll();
+        PlainSecretsManager.syncAll();
         await generateManifests(this);
         this.syncAll();
         syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));

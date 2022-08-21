@@ -11,7 +11,7 @@ import { linkerdVizProvider } from './settings.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
 import { getIngressUrlHost } from '../ingress/hosts.js';
 import { toBase64 } from '../../shared/helpers.js';
-import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
+import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 
 const values: DeepPartial<ILinkerdvizlinkerd> = {};
 const resourceName: ResourceName = 'linkerd-viz';
@@ -104,7 +104,7 @@ export const linkerVizIngress = new k8s.networking.v1.Ingress(
 );
 
 const saltRounds = 10;
-const secrets = new PlainKubeBuildSecretsManager('infrastructure', 'linkerd-viz', ENVIRONMENT).getSecrets();
+const secrets = new PlainSecretsManager('infrastructure', 'linkerd-viz', ENVIRONMENT).getSecrets();
 const hash = bcrypt.hashSync(secrets.PASSWORD, saltRounds);
 export const linkerdVizSecret = new kx.Secret(
     linkerdVizSecretName,
