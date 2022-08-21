@@ -23,7 +23,7 @@
     "ts-node": {
         "esm": true
     },
-    "include": ["src/**/*.ts", "src/**/*.mts", "src/**/*.cts", "scripts/utils/PlainKubeBuildSecretsManager.ts"],
+    "include": ["src/**/*.ts", "src/**/*.mts", "src/**/*.cts", "scripts/utils/plainKubeBuildSecretsManager.ts"],
     "exclude": ["generatedCrdsTs", "node_modules"],
     "files": ["index.ts", "scripts/utils/syncHelmChartTypesDeclarations.ts"]
 }

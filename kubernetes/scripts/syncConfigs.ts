@@ -1,11 +1,11 @@
 // import { KubeObject } from './utils/kubeObject/kubeObject.js';
 import { PlainKubeBuildSecretsManager } from './utils/plainKubeBuildSecretsManager.js';
-import { syncEtcHostsWithCustomHosts } from './utils/syncEtcHostsWithCustomHosts.js';
-import { syncHelmChartTypesDeclarations } from './utils/syncHelmChartTypesDeclarations.js';
+// import { syncEtcHostsWithCustomHosts } from './utils/syncEtcHostsWithCustomHosts.js';
+// import { syncHelmChartTypesDeclarations } from './utils/syncHelmChartTypesDeclarations.js';
 
 async function main() {
-    syncEtcHostsWithCustomHosts();
-    syncHelmChartTypesDeclarations();
+    // syncEtcHostsWithCustomHosts();
+    // syncHelmChartTypesDeclarations();
 
     PlainKubeBuildSecretsManager.syncAll();
 

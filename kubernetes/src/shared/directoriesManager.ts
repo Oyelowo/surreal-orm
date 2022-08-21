@@ -1,15 +1,19 @@
 import * as k8s from '@pulumi/kubernetes';
-import url from 'node:url';
+// import url from 'node:url';
 import path from 'node:path';
 import { v4 as uuid } from 'uuid';
 import { Environment, InfrastructureName, ServiceName, TInfrastructure, TServices } from '../types/ownTypes.js';
 
 // const __filename = url.fileURLToPath(import.meta.url);
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+// const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 export const getMainBaseDir = () => {
-    const mainBaseDir = path.join(__dirname, '..', '..', '..');
-    return mainBaseDir;
+    // const mainBaseDir = path.join(__dirname, '..', '..');
+    // return mainBaseDir
+    // This is more resilient to folder structure change compared to
+    // the above but requires user to actually run program from the root
+    // Keep the alternative for reference purpose.
+    return process.cwd();
 };
 
 export const getPlainSecretsConfigFilesBaseDir = () => {
