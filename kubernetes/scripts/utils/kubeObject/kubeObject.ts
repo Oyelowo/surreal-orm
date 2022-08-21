@@ -15,7 +15,7 @@ import type { Environment, ResourceName } from '../../../src/types/ownTypes.js';
 import { generateManifests } from './generateManifests.js';
 import { syncCrdsCode } from './syncCrdsCode.js';
 import cliProgress from 'cli-progress';
-import { kubeBuildEnvVarsManager } from '../../../src/types/environmentVariables.js';
+import { PlainKubeBuildSecretsManager } from '../plainKubeBuildSecretsManager.js';
 
 type ResourceKind =
     | 'Secret'
@@ -106,7 +106,7 @@ export class KubeObject {
     };
 
     generateManifests = async (): Promise<void> => {
-        kubeBuildEnvVarsManager.syncAll();
+        PlainKubeBuildSecretsManager.syncAll();
         await generateManifests(this);
         this.syncAll();
         syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
