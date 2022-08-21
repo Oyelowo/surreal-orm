@@ -7,7 +7,7 @@ import { KubeObject } from './kubeObject.js';
 import type { TKubeObject } from './kubeObject.js';
 import path from 'node:path';
 import { Environment } from '../../../src/types/ownTypes.js';
-import { imageTags } from '../../../src/shared/environmentVariablesForManifests.js';
+import { EnvironmentVariables, imageTags } from '../../../src/shared/environmentVariablesForManifests.js';
 
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
@@ -51,7 +51,7 @@ export async function generateManifests(kubeObject: KubeObject) {
     sh.rm('-rf', loginDir);
 }
 
-const ENVIRONMENT_KEY = 'ENVIRONMENT';
+const ENVIRONMENT_KEY: keyof Pick<EnvironmentVariables, 'ENVIRONMENT'> = 'ENVIRONMENT';
 // export function getEnvVarsForScript(environment: Environment, imageTags: ImageTags) {
 function getEnvVarsForScript({ environment }: { environment: Environment }) {
     // Not really necessary to have the image tags as environment variable

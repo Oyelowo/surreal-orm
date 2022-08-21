@@ -3,7 +3,7 @@ import { getMainBaseDir } from './directoriesManager.js';
 import { ServiceName, TServices } from '../types/ownTypes.js';
 import * as z from 'zod';
 import { appEnvironmentsSchema } from '../types/ownTypes.js';
-import { SnakeCase } from 'type-fest';
+import { Simplify, SnakeCase } from 'type-fest';
 import _ from 'lodash';
 import sh from 'shelljs';
 
@@ -31,7 +31,7 @@ const environmentVariablesValidator = z
     })
     .and(imageTagsObjectValidator);
 
-export type EnvironmentVariables = z.infer<typeof environmentVariablesValidator>;
+export type EnvironmentVariables = Simplify<z.infer<typeof environmentVariablesValidator>>;
 
 export const getEnvVarsForKubeManifests = () => environmentVariablesValidator.parse(process.env);
 
