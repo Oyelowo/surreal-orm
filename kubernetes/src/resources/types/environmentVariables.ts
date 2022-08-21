@@ -40,9 +40,9 @@ type LinkerdViz = {
 // Creates Record<ResourceName, Record<EnvVarName, string>>
 type ServicesEnvVars = Simplify<
     ServiceEnvVars<'graphql-mongo', GraphqlMongo> &
-        ServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
-        ServiceEnvVars<'grpc-mongo', GrpcMongo> &
-        ServiceEnvVars<'react-web', ReactWeb>
+    ServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
+    ServiceEnvVars<'grpc-mongo', GrpcMongo> &
+    ServiceEnvVars<'react-web', ReactWeb>
 >;
 type InfrastructureEnvVars = Simplify<InfraEnvVars<'argocd', ArgoCd> & InfraEnvVars<'linkerd-viz', LinkerdViz>>;
 
@@ -63,17 +63,17 @@ type CreateEnvCarsCreator<
     ResourceCategoryEnvVar,
     RName extends keyof ResourceCategoryEnvVar,
     EnvVarNames extends keyof ResourceCategoryEnvVar[RName]
-> = Record<PrefixEnvVar<RCat, RName, keyof Pick<ResourceCategoryEnvVar[RName], Stringified<EnvVarNames>>>, string>;
+    > = Record<PrefixEnvVar<RCat, RName, keyof Pick<ResourceCategoryEnvVar[RName], Stringified<EnvVarNames>>>, string>;
 
 type SelectFromServicesEnvVars<
     RName extends keyof ServicesEnvVars,
     EnvVarNames extends keyof ServicesEnvVars[RName]
-> = CreateEnvCarsCreator<'services', ServicesEnvVars, RName, EnvVarNames>;
+    > = CreateEnvCarsCreator<'services', ServicesEnvVars, RName, EnvVarNames>;
 
 type SelectFromInfraEnvVars<
     RName extends keyof InfrastructureEnvVars,
     EnvVarNames extends keyof InfrastructureEnvVars[RName]
-> = CreateEnvCarsCreator<'infrastructure', InfrastructureEnvVars, RName, EnvVarNames>;
+    > = CreateEnvCarsCreator<'infrastructure', InfrastructureEnvVars, RName, EnvVarNames>;
 
 const imageTagsSchema: Record<PrefixEnvVar<TServices, ServiceName, 'IMAGE_TAG'>, z.ZodString> = {
     // This is provided fro, within the CI pipeline where the manifests are generated and pushed to the repo
@@ -104,13 +104,13 @@ export type KubeBuildEnvVars = Simplify<
         | 'OAUTH_GOOGLE_CLIENT_ID'
         | 'OAUTH_GOOGLE_CLIENT_SECRET'
     > &
-        SelectFromServicesEnvVars<'graphql-postgres', 'POSTGRES_PASSWORD' | 'POSTGRES_USERNAME'> &
-        SelectFromServicesEnvVars<
-            'grpc-mongo',
-            'MONGODB_ROOT_PASSWORD' | 'MONGODB_PASSWORD' | 'MONGODB_ROOT_USERNAME' | 'MONGODB_USERNAME'
-        > &
-        SelectFromInfraEnvVars<'argocd', 'ADMIN_PASSWORD' | 'password' | 'type' | 'url' | 'username'> &
-        SelectFromInfraEnvVars<'linkerd-viz', 'PASSWORD'>
+    SelectFromServicesEnvVars<'graphql-postgres', 'POSTGRES_PASSWORD' | 'POSTGRES_USERNAME'> &
+    SelectFromServicesEnvVars<
+        'grpc-mongo',
+        'MONGODB_ROOT_PASSWORD' | 'MONGODB_PASSWORD' | 'MONGODB_ROOT_USERNAME' | 'MONGODB_USERNAME'
+    > &
+    SelectFromInfraEnvVars<'argocd', 'ADMIN_PASSWORD' | 'password' | 'type' | 'url' | 'username'> &
+    SelectFromInfraEnvVars<'linkerd-viz', 'PASSWORD'>
 >;
 
 // type Momo = Record<Uppercase<`${TServices}__${SnakeCase<N>}__`>, string>>
@@ -146,17 +146,23 @@ export const getKubeBuildEnvVarsSample = (): KubeBuildEnvVars => {
         INFRASTRUCTURE__LINKERD_VIZ__PASSWORD: '',
     };
 };
-export const getKubeBuildEnvVarsSchema = ({ allowEmptyValues }: { allowEmptyValues: boolean }) => {
+export const getKubeBuildEnvVarsSchema = ({
+    allowEmptyValues,
+    requireValues,
+}: {
+    allowEmptyValues: boolean;
+    requireValues?: boolean;
+}) => {
     // This is done to allow us sync local .env files.
     // When parsing to sync the env var names/keys, we want the values to allow empty
-    const string = z.string().min(allowEmptyValues ? 0 : 1);
+    const string = z.string().min(allowEmptyValues ? 0 : 1)
     const kubeBuildEnvVarsSample = getKubeBuildEnvVarsSample();
 
-    const kubeBuildEnvVarsSchema: Record<keyof KubeBuildEnvVars, z.ZodString> = _.mapValues(
+    const kubeBuildEnvVarsSchema: Record<keyof KubeBuildEnvVars, z.ZodOptional<z.ZodString> | z.ZodString> = _.mapValues(
         kubeBuildEnvVarsSample,
-        (_) => string
+        (_) => requireValues ? string : string.optional()
     );
-    kubeBuildEnvVarsSchema.ENVIRONMENT = appEnvironmentsSchema as any;
+    kubeBuildEnvVarsSchema.ENVIRONMENT = requireValues ? appEnvironmentsSchema as any : appEnvironmentsSchema.optional();
 
     return z.object(kubeBuildEnvVarsSchema);
 };

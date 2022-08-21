@@ -45,7 +45,7 @@ export async function promptEnvironmentSelection() {
     return answers;
 }
 
-export const ARGV_ENVIRONMENTS = yargs(process.argv.slice(2))
+export const getArgvEnvironments = () => yargs(process.argv.slice(2))
     .options({
         environment: {
             alias: 'e',
@@ -54,4 +54,4 @@ export const ARGV_ENVIRONMENTS = yargs(process.argv.slice(2))
             demandOption: true,
         },
     })
-    .parseSync();
+    .parseSync()
