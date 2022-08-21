@@ -3,15 +3,13 @@ import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { graphqlMongoSettings } from '../../services/graphql-mongo/settings.js';
 import { reactWebSettings } from '../../services/react-web/settings.js';
-import { NginxConfiguration } from '../../types/nginxConfigurations.js';
+import { INGRESS_CLASSNAME_NGINX, NginxConfiguration } from '../../types/nginxConfigurations.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
 import { CLUSTER_ISSUER_NAME } from '../cert-manager/index.js';
 import { nginxIngressProvider } from './settings.js';
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
-type IngressClassName = 'nginx' | 'traefik';
-export const INGRESS_CLASSNAME_NGINX: IngressClassName = 'nginx';
 const SECRET_NAME_NGINX = 'nginx-ingress-tls';
 
 const name = 'oyelowo-ingress';

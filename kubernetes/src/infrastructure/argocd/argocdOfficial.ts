@@ -1,6 +1,6 @@
 // import { IArgocdargo } from '../../../types/helm-charts/argoCdArgo.js';
 import { IArgocdargo } from '../../../generatedHelmChartsTsTypes/argoCdArgo.js';
-import { annotations, INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
+import { annotations } from '../ingress/ingressRules.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 
@@ -11,12 +11,12 @@ import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { getIngressUrlHost } from '../ingress/hosts.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
 import { PlainKubeBuildSecretsManager } from '../../../scripts/utils/plainKubeBuildSecretsManager.js';
+import { INGRESS_CLASSNAME_NGINX } from '../../types/nginxConfigurations.js';
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 const secrets = new PlainKubeBuildSecretsManager('infrastructure', 'argocd', ENVIRONMENT).getSecrets();
 const argocdHost = getIngressUrlHost({ environment: ENVIRONMENT, subDomain: 'argocd' });
 const saltRounds = 10;
-// TODO: Change
 
 const myPlaintextPassword = secrets.ADMIN_PASSWORD;
 const hash = bcrypt.hashSync(myPlaintextPassword, saltRounds);

@@ -1,6 +1,6 @@
 import crds from '../../../generatedCrdsTs/index.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
-import { INGRESS_CLASSNAME_NGINX } from '../ingress/ingressRules.js';
+import { INGRESS_CLASSNAME_NGINX } from '../../types/nginxConfigurations.js';
 
 import { certManagerProvider } from './settings.js';
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();

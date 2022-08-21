@@ -1,3 +1,6 @@
+type IngressClassName = 'nginx' | 'traefik';
+export const INGRESS_CLASSNAME_NGINX: IngressClassName = 'nginx';
+
 export type NginxConfiguration = {
     'nginx.ingress.kubernetes.io/app-root': string;
     'nginx.ingress.kubernetes.io/affinity': 'cookie';
