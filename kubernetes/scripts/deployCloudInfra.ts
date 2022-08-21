@@ -1,7 +1,7 @@
 import path from 'node:path';
 import sh from 'shelljs';
 import yargs from 'yargs';
-import { getMainBaseDir } from '../src/resources/shared/directoriesManager.js';
+import { getMainBaseDir } from '../src/shared/directoriesManager.js';
 import { ARGV_ENVIRONMENTS, tsConfigPath } from './utils/argv.js';
 import { handleShellError } from './utils/shared.js';
 

@@ -1,5 +1,5 @@
+import { ARGV_ENVIRONMENTS } from './utils/argv.js';
 import { KubeObject } from './utils/kubeObject/kubeObject.js';
-import { ARGV_ENVIRONMENTS } from './utils/shared.js';
 
 /* 
 Does not handle sealed secret generation/syncing

@@ -3,4 +3,4 @@
 .secrets
 /login
 Pulumi.dev.yaml
-.env
+.env*

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import inquirer from 'inquirer';
 import sh, { ShellString } from 'shelljs';
 import yargs from 'yargs';
-import { Environment } from '../../src/resources/types/ownTypes.js';
+import { Environment } from '../../src/types/ownTypes.js';
 
 export function isFileEmpty(fileName: string, ignoreWhitespace = true): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -45,13 +45,14 @@ export async function promptEnvironmentSelection() {
     return answers;
 }
 
-export const getArgvEnvironments = () => yargs(process.argv.slice(2))
-    .options({
-        environment: {
-            alias: 'e',
-            choices: ENVIRONMENTS_ALL,
-            describe: "The environment you're generating the manifests for.",
-            demandOption: true,
-        },
-    })
-    .parseSync()
+export const getArgvEnvironments = () =>
+    yargs(process.argv.slice(2))
+        .options({
+            environment: {
+                alias: 'e',
+                choices: ENVIRONMENTS_ALL,
+                describe: "The environment you're generating the manifests for.",
+                demandOption: true,
+            },
+        })
+        .parseSync();

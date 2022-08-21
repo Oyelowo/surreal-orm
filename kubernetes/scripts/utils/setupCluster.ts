@@ -1,13 +1,13 @@
-import { Environment } from '../../src/resources/types/ownTypes.js';
+import { Environment } from '../../src/types/ownTypes.js';
 import sh from 'shelljs';
 import { promptSecretsDeletionConfirmations } from '../utils/promptSecretsDeletionConfirmations.js';
-import { namespaces } from '../../src/resources/infrastructure/namespaces/util.js';
-import { helmChartsInfo } from '../../src/resources/shared/helmChartInfo.js';
-import { ResourceName } from '../../src/resources/types/ownTypes.js';
+import { namespaces } from '../../src/infrastructure/namespaces/util.js';
+import { helmChartsInfo } from '../../src/shared/helmChartInfo.js';
+import { ResourceName } from '../../src/types/ownTypes.js';
 import _ from 'lodash';
 import { KubeObject } from '../utils/kubeObject/kubeObject.js';
-import { ResourceOutputDirProps } from '../../src/resources/shared/directoriesManager.js';
-import { kubeBuildEnvVarsManager } from '../../src/resources/types/environmentVariables.js';
+import { ResourceOutputDirProps } from '../../src/shared/directoriesManager.js';
+import { PlainKubeBuildSecretsManager } from './plainKubeBuildSecretsManager';
 
 export async function setupCluster(environment: Environment) {
     const { deletPlainJsonSecretsInput, deleteUnsealedSecretManifestsOutput } =
@@ -16,12 +16,12 @@ export async function setupCluster(environment: Environment) {
     const kubeObject = new KubeObject(environment);
     await kubeObject.generateManifests();
 
-    kubeBuildEnvVarsManager.syncAll();
+    PlainKubeBuildSecretsManager.syncAll();
 
     applySetupManifests(kubeObject);
 
     if (deletPlainJsonSecretsInput) {
-        kubeBuildEnvVarsManager.resetValues();
+        PlainKubeBuildSecretsManager.resetValues();
     }
 
     if (deleteUnsealedSecretManifestsOutput) {

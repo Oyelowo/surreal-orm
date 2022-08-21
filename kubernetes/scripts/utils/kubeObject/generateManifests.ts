@@ -1,4 +1,4 @@
-import { getMainBaseDir } from '../../../src/resources/shared/directoriesManager.js';
+import { getMainBaseDir } from '../../../src/shared/directoriesManager.js';
 import c from 'chalk';
 import p from 'node:path';
 import sh from 'shelljs';
@@ -7,7 +7,8 @@ import { KubeObject } from './kubeObject.js';
 import type { TKubeObject } from './kubeObject.js';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { getEnvVarsForScript } from '../../../src/resources/types/environmentVariables.js';
+import { Environment } from '../../../src/types/ownTypes.js';
+import { imageTags } from '../../../src/shared/environmentVariablesForManifests.js';
 
 /*
 GENERATE ALL KUBERNETES MANIFESTS USING PULUMI
@@ -49,4 +50,18 @@ export async function generateManifests(kubeObject: KubeObject) {
         )
     );
     sh.rm('-rf', loginDir);
+}
+
+const ENVIRONMENT_KEY = 'ENVIRONMENT';
+// export function getEnvVarsForScript(environment: Environment, imageTags: ImageTags) {
+export function getEnvVarsForScript({ environment }: { environment: Environment }) {
+    // Not really necessary to have the image tags as environment variable
+    // here aas I'm already using it directly in the manifests function
+    const imageEnvVarSetterForPulumi = Object.entries(imageTags)
+        .map(([k, v]) => `export ${k}=${v}`)
+        .join(' ');
+    return `
+      ${imageEnvVarSetterForPulumi} 
+      export ${ENVIRONMENT_KEY}=${environment}  
+  `;
 }

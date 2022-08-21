@@ -1,5 +1,5 @@
-import { kubeBuildEnvVarsManager } from '../src/resources/types/environmentVariables.js';
 // import { KubeObject } from './utils/kubeObject/kubeObject.js';
+import { PlainKubeBuildSecretsManager } from './utils/plainKubeBuildSecretsManager.js';
 import { syncEtcHostsWithCustomHosts } from './utils/syncEtcHostsWithCustomHosts.js';
 import { syncHelmChartTypesDeclarations } from './utils/syncHelmChartTypesDeclarations.js';
 
@@ -7,7 +7,7 @@ async function main() {
     syncEtcHostsWithCustomHosts();
     syncHelmChartTypesDeclarations();
 
-    kubeBuildEnvVarsManager.syncAll();
+    PlainKubeBuildSecretsManager.syncAll();
 
     // Use local manifests to syn/generate new CRD codes
     // const kubeObjectInstance = new KubeObject('local');
