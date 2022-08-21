@@ -56,4 +56,3 @@ async function getImageTagsFromDir(): Promise<ImageTags> {
 }
 
 export const imageTags = await getImageTagsFromDir();
-console.log('Xxx', imageTags);
