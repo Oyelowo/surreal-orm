@@ -4,3 +4,5 @@
 /login
 Pulumi.dev.yaml
 .env*
+./generatedManifests/**/local
+./generatedManifests/**/**/secret-*.yaml
