@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use common::configurations::{application::ApplicationConfigs, redis::RedisConfigError};
 use derive_more::{From, Into};
 use oauth2::{
@@ -52,35 +54,44 @@ pub(crate) struct Evidence {
     pub(crate) pkce_code_verifier: PkceCodeVerifier,
 }
 
+use super::cache_generic::{CacheStorage, CacheStorage2, CacheStorage3};
 impl Evidence {
-    const CSRF_STATE_REDIS_KEY: &'static str = "CSRF_STATE_REDIS_KEY";
+    const OAUTH_CSRF_STATE_KEY: &'static str = "OAUTH_CSRF_STATE_KEY";
 
     fn redis_key(csrf_token: CsrfToken) -> String {
         format!(
             "{}{:?}",
-            Self::CSRF_STATE_REDIS_KEY,
+            Self::OAUTH_CSRF_STATE_KEY,
             csrf_token.secret().as_str()
         )
     }
 
     pub(crate) async fn verify_csrf_token(
         csrf_token: CsrfToken,
-        connection: &mut redis::aio::Connection,
-    ) -> OauthResult<Self> {
-        let key = &Self::redis_key(csrf_token);
+        storage: impl CacheStorage3,
+    ) -> Option<Self> {
+        let key = Self::redis_key(csrf_token);
+        // Send + Sync + Clone + Eq + Hash + 'static
+        // let m = HashMap::new();
+        // m.insert("xxx", 4);
+        let p = "rer";
+        let evidence = storage.get(p.to_string()).await.unwrap();
+        // let evidence: String = storage.get(key).await?;
+        // let evidence: String = connection.get(key).await?;
 
-        let evidence: String = connection.get(key).await?;
-
-        Ok(serde_json::from_str::<Self>(evidence.as_str())?)
+        // Ok(serde_json::from_str::<Self>(evidence.as_str())?)
+        Some(evidence)
     }
 
-    pub(crate) async fn cache(self, connection: &mut redis::aio::Connection) -> OauthResult<Self> {
+    // pub(crate) async fn cache(self, connection: &mut redis::aio::Connection) -> OauthResult<Self> {
+    pub(crate) async fn cache(self, storage: impl CacheStorage3 ) -> OauthResult<()> {
         let key = &Self::redis_key(self.csrf_token.clone());
-        let csrf_state_data_string = serde_json::to_string(&self)?;
+        // let csrf_state_data_string = serde_json::to_string(&self)?;
 
-        connection.set(key, csrf_state_data_string).await?;
-        connection.expire::<_, u16>(key, 600).await?;
-        Ok(self)
+        // connection.set(key, csrf_state_data_string).await?;
+        // connection.expire::<_, u16>(key, 600).await?;
+        storage.save(key.to_owned(), self);
+        Ok(())
     }
 }
 

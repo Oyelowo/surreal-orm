@@ -14,6 +14,7 @@ use redis::RedisError;
 use reqwest::{header, StatusCode};
 use url::Url;
 
+use crate::oauth::cache_generic as cg;
 use crate::oauth::github::GithubConfig;
 use crate::oauth::google::GoogleConfig;
 use crate::oauth::utils::{
@@ -101,9 +102,9 @@ impl IntoResponse for RedirectCustom {
 pub async fn oauth_login_initiator(
     Path(oauth_provider): Path<OauthProvider>,
     session: &Session,
-    redis: Data<&redis::Client>,
+    redis: Data<&'static redis::Client>,
 ) -> Result<RedirectCustom> {
-    let mut connection = get_redis_connection(redis).await?;
+    // let mut connection = get_redis_connection(redis).await?;
     let session = TypedSession(session.to_owned());
     let env = ApplicationConfigs::default();
 
@@ -116,10 +117,11 @@ pub async fn oauth_login_initiator(
         OauthProvider::Github => GithubConfig::new().basic_config().generate_auth_url(),
         OauthProvider::Google => GoogleConfig::new().basic_config().generate_auth_url(),
     };
+    let cache = cg::RedisCache(*redis);
 
     auth_url_data
         .evidence
-        .cache(&mut connection)
+        .cache(cache)
         .await
         .map_err(HandlerError::StorageError)
         .map_err(InternalServerError)?;
@@ -134,7 +136,7 @@ pub async fn oauth_login_authentication(
     uri: &Uri,
     session: &Session,
     db: Data<&Database>,
-    redis: Data<&redis::Client>,
+    redis: Data<&'static redis::Client>,
 ) -> Result<RedirectCustom> {
     let user = authenticate_user(uri, redis, session, db).await;
     let base_url = ApplicationConfigs::default().external_base_url;
@@ -147,11 +149,11 @@ pub async fn oauth_login_authentication(
 
 async fn authenticate_user(
     uri: &Uri,
-    redis: Data<&redis::Client>,
+    redis: Data<&'static redis::Client>,
     session: &Session,
     db: Data<&Database>,
 ) -> Result<User> {
-    let mut connection = get_redis_connection(redis).await?;
+    // let mut connection = get_redis_connection(redis.clone()).await?;
     let base_url = ApplicationConfigs::default().external_base_url;
 
     let redirect_url = Url::parse(&format!("{base_url}{uri}"))
@@ -170,10 +172,10 @@ async fn authenticate_user(
         .map_err(HandlerError::MalformedState)
         .map_err(BadRequest)?;
 
-    let evidence = Evidence::verify_csrf_token(csrf_token, &mut connection)
+    let cache = cg::RedisCache(*redis);
+    let evidence = Evidence::verify_csrf_token(csrf_token, cache)
         .await
-        .map_err(HandlerError::InvalidState)
-        .map_err(BadRequest)?;
+        .unwrap();
 
     let account_oauth = match evidence.provider {
         OauthProvider::Github => {
