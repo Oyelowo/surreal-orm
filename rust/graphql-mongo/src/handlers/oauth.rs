@@ -102,7 +102,7 @@ impl IntoResponse for RedirectCustom {
 pub async fn oauth_login_initiator(
     Path(oauth_provider): Path<OauthProvider>,
     session: &Session,
-    redis: Data<&'static redis::Client>,
+    redis: Data<&redis::Client>,
 ) -> Result<RedirectCustom> {
     // let mut connection = get_redis_connection(redis).await?;
     let session = TypedSession(session.to_owned());
@@ -117,7 +117,8 @@ pub async fn oauth_login_initiator(
         OauthProvider::Github => GithubConfig::new().basic_config().generate_auth_url(),
         OauthProvider::Google => GoogleConfig::new().basic_config().generate_auth_url(),
     };
-    let cache = cg::RedisCache(*redis);
+    // let k = redis.clone();
+    let cache = cg::RedisCache(redis.clone());
 
     auth_url_data
         .evidence
@@ -136,7 +137,7 @@ pub async fn oauth_login_authentication(
     uri: &Uri,
     session: &Session,
     db: Data<&Database>,
-    redis: Data<&'static redis::Client>,
+    redis: Data<&redis::Client>,
 ) -> Result<RedirectCustom> {
     let user = authenticate_user(uri, redis, session, db).await;
     let base_url = ApplicationConfigs::default().external_base_url;
@@ -149,7 +150,7 @@ pub async fn oauth_login_authentication(
 
 async fn authenticate_user(
     uri: &Uri,
-    redis: Data<&'static redis::Client>,
+    redis: Data<&redis::Client>,
     session: &Session,
     db: Data<&Database>,
 ) -> Result<User> {
@@ -172,7 +173,7 @@ async fn authenticate_user(
         .map_err(HandlerError::MalformedState)
         .map_err(BadRequest)?;
 
-    let cache = cg::RedisCache(*redis);
+    let cache = cg::RedisCache(redis.clone());
     let evidence = Evidence::verify_csrf_token(csrf_token, cache)
         .await
         .unwrap();

@@ -69,9 +69,10 @@ use std::future::Future;
 // type Haha = impl Future<Output = ()>;
 
 #[derive(Clone)]
-pub struct RedisCache<'a>(pub(crate) &'a redis::Client);
+pub struct RedisCache(pub(crate) redis::Client);
+// pub struct RedisCache<'a>(pub(crate) &'a redis::Client);
 
-impl<'a> RedisCache<'a> {
+impl RedisCache {
     async fn get_connection(self) -> redis::aio::Connection {
         self.0.get_async_connection().await.unwrap()
     }
@@ -81,7 +82,7 @@ impl<'a> RedisCache<'a> {
 // let mut v2: Vec<Box<dyn Fn() -> Box<dyn Future<Output = ()>>>> = vec![];
 
 #[async_trait::async_trait]
-impl CacheStorage3 for RedisCache<'static> {
+impl CacheStorage3 for RedisCache {
     // fn get<'life0, 'async_trait>(
     //     &'life0 self,
     //     key: String,
