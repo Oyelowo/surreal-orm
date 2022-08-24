@@ -54,7 +54,7 @@ pub(crate) struct Evidence {
     pub(crate) pkce_code_verifier: PkceCodeVerifier,
 }
 
-use super::cache_generic::{CacheStorage, CacheStorage2, CacheStorage3};
+use super::cache_generic::CacheStorage;
 impl Evidence {
     const OAUTH_CSRF_STATE_KEY: &'static str = "OAUTH_CSRF_STATE_KEY";
 
@@ -68,23 +68,15 @@ impl Evidence {
 
     pub(crate) async fn verify_csrf_token(
         csrf_token: CsrfToken,
-        storage: impl CacheStorage3,
+        storage: impl CacheStorage,
     ) -> Option<Self> {
         let key = Self::redis_key(csrf_token);
-        // Send + Sync + Clone + Eq + Hash + 'static
-        // let m = HashMap::new();
-        // m.insert("xxx", 4);
-        let p = "rer";
-        let evidence = storage.get(p.to_string()).await.unwrap();
-        // let evidence: String = storage.get(key).await?;
-        // let evidence: String = connection.get(key).await?;
-
-        // Ok(serde_json::from_str::<Self>(evidence.as_str())?)
+        let evidence = storage.get(key).await.unwrap();
         Some(evidence)
     }
 
     // pub(crate) async fn cache(self, connection: &mut redis::aio::Connection) -> OauthResult<Self> {
-    pub(crate) async fn cache(self, storage: impl CacheStorage3 ) -> OauthResult<()> {
+    pub(crate) async fn cache(self, storage: impl CacheStorage) -> OauthResult<()> {
         let key = &Self::redis_key(self.csrf_token.clone());
         // let csrf_state_data_string = serde_json::to_string(&self)?;
 
