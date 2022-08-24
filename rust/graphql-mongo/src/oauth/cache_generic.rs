@@ -20,6 +20,7 @@ pub trait CacheStorage: Send + Sync + Clone + 'static {
     async fn get(&self, key: String) -> Option<AuthUrlData>;
     /// Save the query by `key`.
     async fn save(&self, key: String, AuthUrlData: &AuthUrlData);
+    async fn remove(&self, key: String);
 }
 
 use redis::{AsyncCommands, RedisError};
@@ -57,6 +58,9 @@ impl CacheStorage for RedisCache {
         con.expire::<_, u16>(key, 600).await?;
         // Ok(self)
         // todo!()
+    }
+    async fn remove(&self, key: String) {
+        self.0.del(&key);
     }
 
     /*
@@ -106,9 +110,9 @@ impl CacheStorage for HashMapCache {
     }
 
     //
-    // fn remove(&mut self, key: &Self::Key) {
-    //     self.0.remove(key);
-    // }
+    async fn remove(&self, key: String) {
+        self.0.remove(&key);
+    }
 
     //
     // fn clear(&mut self) {
@@ -128,7 +132,12 @@ impl CacheStorage for LruCache {
     }
 
     async fn save(&self, key: String, value: &AuthUrlData) {
-        self.0.put(key, value.into_owned());
+        self.0.put(key, value);
+        // self.0.put(key, value.into_owned());
+    }
+
+    async fn remove(&self, key: String) {
+        self.0.pop(&key);
     }
 
     //
