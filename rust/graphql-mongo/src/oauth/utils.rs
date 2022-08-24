@@ -55,37 +55,6 @@ pub(crate) struct Evidence {
 }
 
 use super::cache_generic::CacheStorage;
-impl Evidence {
-    const OAUTH_CSRF_STATE_KEY: &'static str = "OAUTH_CSRF_STATE_KEY";
-
-    fn redis_key(csrf_token: CsrfToken) -> String {
-        format!(
-            "{}{:?}",
-            Self::OAUTH_CSRF_STATE_KEY,
-            csrf_token.secret().as_str()
-        )
-    }
-
-    pub(crate) async fn verify_csrf_token(
-        csrf_token: CsrfToken,
-        storage: impl CacheStorage,
-    ) -> Option<Self> {
-        let key = Self::redis_key(csrf_token);
-        let evidence = storage.get(key).await.unwrap();
-        Some(evidence)
-    }
-
-    // pub(crate) async fn cache(self, connection: &mut redis::aio::Connection) -> OauthResult<Self> {
-    pub(crate) async fn cache(self, storage: impl CacheStorage) -> OauthResult<()> {
-        let key = &Self::redis_key(self.csrf_token.clone());
-        // let csrf_state_data_string = serde_json::to_string(&self)?;
-
-        // connection.set(key, csrf_state_data_string).await?;
-        // connection.expire::<_, u16>(key, 600).await?;
-        storage.save(key.to_owned(), self);
-        Ok(())
-    }
-}
 
 /// The url returned by the oauth provider with code and state(which should be the one we send)
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -195,6 +164,33 @@ pub(crate) trait OauthProviderTrait {
 pub(crate) struct AuthUrlData {
     pub(crate) authorize_url: RedirectUrlReturned,
     pub(crate) evidence: Evidence,
+}
+
+impl AuthUrlData {
+    const OAUTH_CSRF_STATE_KEY: &'static str = "OAUTH_CSRF_STATE_KEY";
+
+    fn redis_key(csrf_token: CsrfToken) -> String {
+        format!(
+            "{}{:?}",
+            Self::OAUTH_CSRF_STATE_KEY,
+            csrf_token.secret().as_str()
+        )
+    }
+
+    pub(crate) async fn verify_csrf_token(
+        csrf_token: CsrfToken,
+        storage: impl CacheStorage,
+    ) -> Option<Self> {
+        let key = Self::redis_key(csrf_token);
+        let auth_url_data = storage.get(key).await.unwrap();
+        Some(auth_url_data)
+    }
+
+    pub(crate) async fn cache(&self, storage: impl CacheStorage) -> OauthResult<()> {
+        let key = &Self::redis_key(self.evidence.csrf_token.clone());
+        storage.save(key.to_owned(), self);
+        Ok(())
+    }
 }
 
 #[async_trait::async_trait]

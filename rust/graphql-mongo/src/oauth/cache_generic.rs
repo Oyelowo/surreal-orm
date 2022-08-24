@@ -5,7 +5,7 @@ use std::{
     marker::PhantomData,
 };
 
-use super::utils::Evidence;
+use super::utils::AuthUrlData;
 use lru;
 use redis::Commands;
 
@@ -15,11 +15,11 @@ use redis::Commands;
 pub trait CacheStorage: Send + Sync + Clone + 'static {
     // pub trait CacheStorage3: Send + Sync + Clone + 'static {
     //  type K: Eq + Hash;
-    //  type Value: Evidence;
+    //  type Value: AuthUrlData;
     /// Load the query by `key`.
-    async fn get(&self, key: String) -> Option<Evidence>;
+    async fn get(&self, key: String) -> Option<AuthUrlData>;
     /// Save the query by `key`.
-    async fn save(&self, key: String, evidence: Evidence);
+    async fn save(&self, key: String, AuthUrlData: &AuthUrlData);
 }
 
 use redis::{AsyncCommands, RedisError};
@@ -34,8 +34,8 @@ pub struct RedisCache(pub(crate) redis::Client);
 
 #[async_trait::async_trait]
 impl CacheStorage for RedisCache {
-    async fn get(&self, key: String) -> Option<Evidence> {
-        let evidence: String = self
+    async fn get(&self, key: String) -> Option<AuthUrlData> {
+        let AuthUrlData: String = self
             .0
             .get_async_connection()
             .await
@@ -44,40 +44,40 @@ impl CacheStorage for RedisCache {
             .await
             .unwrap();
 
-        Some(serde_json::from_str::<Evidence>(evidence.as_str()).unwrap())
+        Some(serde_json::from_str::<AuthUrlData>(AuthUrlData.as_str()).unwrap())
     }
 
-    async fn save(&self, key: String, value: Evidence) {
+    async fn save(&self, key: String, value: &AuthUrlData) {
         // let key = &Self::redis_key(self.csrf_token.clone());
         // let csrf_state_data_string = serde_json::to_string(&self)?;
         let con = self.0.get_async_connection().await.unwrap();
-        // let k = Evidence{ }
-        // con.set::<oauth2::CsrfToken, Evidence>(key, value).await?;
-        con.set::<String, Evidence>(key, value).await?;
+        // let k = AuthUrlData{ }
+        // con.set::<oauth2::CsrfToken, AuthUrlData>(key, value).await?;
+        con.set::<String, AuthUrlData>(key, value).await?;
         con.expire::<_, u16>(key, 600).await?;
         // Ok(self)
         // todo!()
     }
 
     /*
-        async fn get(&self, key: &oauth2::CsrfToken) -> Option<&utils::Evidence> {
+        async fn get(&self, key: &oauth2::CsrfToken) -> Option<&utils::AuthUrlData> {
         // todo!()
         // let key = &Self::redis_key(csrf_token);
         // connection./
-        // let evidence: String = self.connection.get(key).await?;
-        let evidence: String = self.0.get(key.secret().as_str()).await.unwrap();
-        // let evidence: String = self.0.get(key).await?;
+        // let AuthUrlData: String = self.connection.get(key).await?;
+        let AuthUrlData: String = self.0.get(key.secret().as_str()).await.unwrap();
+        // let AuthUrlData: String = self.0.get(key).await?;
 
-        Ok(serde_json::from_str::<Self>(evidence.as_str())?)
+        Ok(serde_json::from_str::<Self>(AuthUrlData.as_str())?)
     }
 
-    async fn save(&mut self, key: &oauth2::CsrfToken, value: utils::Evidence) {
+    async fn save(&mut self, key: &oauth2::CsrfToken, value: utils::AuthUrlData) {
         // let key = &Self::redis_key(self.csrf_token.clone());
         // let csrf_state_data_string = serde_json::to_string(&self)?;
 
-        // let k = Evidence{ }
+        // let k = AuthUrlData{ }
         self.0
-            .set::<oauth2::CsrfToken, utils::Evidence>(key, value)
+            .set::<oauth2::CsrfToken, utils::AuthUrlData>(key, value)
             .await?;
         self.0.expire::<_, u16>(key, 600).await?;
         Ok(self)
@@ -90,18 +90,18 @@ impl CacheStorage for RedisCache {
 }
 
 #[derive(Clone)]
-struct HashMapCache(HashMap<String, Evidence>);
+struct HashMapCache(HashMap<String, AuthUrlData>);
 
 #[async_trait::async_trait]
 impl CacheStorage for HashMapCache {
     // type Key = String;
-    // type Value = Evidence;
+    // type Value = AuthUrlData;
 
-    async fn get(&self, key: String) -> Option<Evidence> {
+    async fn get(&self, key: String) -> Option<AuthUrlData> {
         self.0.get(&key)
     }
 
-    async fn save(&self, key: String, value: Evidence) {
+    async fn save(&self, key: String, value: &AuthUrlData) {
         self.0.insert(key.into_owned(), value.into_owned());
     }
 
@@ -119,15 +119,15 @@ impl CacheStorage for HashMapCache {
 /// LRU cache.
 
 #[derive(Clone)]
-struct LruCache(lru::LruCache<String, Evidence>);
+struct LruCache(lru::LruCache<String, AuthUrlData>);
 
 #[async_trait::async_trait]
 impl CacheStorage for LruCache {
-    async fn get(&self, key: String) -> Option<Evidence> {
+    async fn get(&self, key: String) -> Option<AuthUrlData> {
         self.0.get(&key)
     }
 
-    async fn save(&self, key: String, value: Evidence) {
+    async fn save(&self, key: String, value: &AuthUrlData) {
         self.0.put(key, value.into_owned());
     }
 
@@ -171,9 +171,9 @@ impl CacheStorage for LruCache {
 // //     ) -> OauthResult<Self> {
 // //         let key = &Self::redis_key(csrf_token);
 // // // connection./
-// //         let evidence: String = connection.get(key).await?;
+// //         let AuthUrlData: String = connection.get(key).await?;
 
-// //         Ok(serde_json::from_str::<Self>(evidence.as_str())?)
+// //         Ok(serde_json::from_str::<Self>(AuthUrlData.as_str())?)
 // //     }
 
 // //     pub(crate) async fn cache(self, connection: &mut redis::aio::Connection) -> OauthResult<Self> {

@@ -18,7 +18,7 @@ use crate::oauth::cache_generic as cg;
 use crate::oauth::github::GithubConfig;
 use crate::oauth::google::GoogleConfig;
 use crate::oauth::utils::{
-    Evidence, OauthConfigTrait, OauthError, OauthProviderTrait, RedirectUrlReturned,
+    AuthUrlData, Evidence, OauthConfigTrait, OauthError, OauthProviderTrait, RedirectUrlReturned,
 };
 use common::configurations::redis::RedisConfigError;
 
@@ -117,11 +117,10 @@ pub async fn oauth_login_initiator(
         OauthProvider::Github => GithubConfig::new().basic_config().generate_auth_url(),
         OauthProvider::Google => GoogleConfig::new().basic_config().generate_auth_url(),
     };
-    // let k = redis.clone();
+
     let cache = cg::RedisCache(redis.clone());
 
     auth_url_data
-        .evidence
         .cache(cache)
         .await
         .map_err(HandlerError::StorageError)
@@ -174,9 +173,10 @@ async fn authenticate_user(
         .map_err(BadRequest)?;
 
     let cache = cg::RedisCache(redis.clone());
-    let evidence = Evidence::verify_csrf_token(csrf_token, cache)
+    let evidence = AuthUrlData::verify_csrf_token(csrf_token, cache)
         .await
-        .unwrap();
+        .unwrap()
+        .evidence;
 
     let account_oauth = match evidence.provider {
         OauthProvider::Github => {
