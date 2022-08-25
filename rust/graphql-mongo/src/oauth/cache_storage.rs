@@ -38,8 +38,8 @@ impl CacheStorage for RedisCache {
         let mut con = self.0.get_async_connection().await.unwrap();
         // let k = AuthUrlData{ }
         // con.set::<oauth2::CsrfToken, AuthUrlData>(key, value).await?;
-        // con.set(key, value).await.unwrap();
-        ::redis::cmd("SET").arg(key.clone()).arg(value);
+        con.set::<String, String, String>(key.clone(), value);
+        // ::redis::cmd("SET").arg(key.clone()).arg(value);
         con.expire::<_, u16>(key, 600).await.unwrap();
         // Ok(self)
         // todo!()
