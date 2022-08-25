@@ -5,11 +5,14 @@ pub fn get_env_vars_by_prefix<T: DeserializeOwned>(config_prefix: &str) -> T {
         .from_env::<T>()
         .map_err(|e| match e {
             envy::Error::MissingValue(value) => {
-                format!("{config_prefix}{}", value.to_ascii_uppercase())
+                let e = format!("{config_prefix}{}", value.to_ascii_uppercase());
+                format!("You are missing {e}. Please provide it as an environment variable")
             }
-            envy::Error::Custom(e) => e,
+            envy::Error::Custom(e) => {
+                format!("{e}. Check that all your environment variables have the right types.")
+            }
         })
         .unwrap_or_else(|e| {
-            panic!("You are missing {e}. Please provide it as an environment variable",);
+            panic!("{e}");
         })
 }
