@@ -110,3 +110,80 @@ impl OauthProviderTrait for GoogleConfig {
         Ok(account)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::oauth::utils::{OauthConfigTrait, RedirectUrlReturned};
+    use multimap::MultiMap;
+    use std::env;
+
+    #[test]
+    fn it_works() {
+        let result = 2 + 2;
+        // env::set_var("OAUTH_GOOGLE_CLIENT_ID", "1234");
+        // env::set_var("OAUTH_GOOGLE_CLIENT_SECRET", "string_secret");
+        // env::set_var("APP_PORT", "5000");
+        // env::set_var("APP_PORT", "5000");
+
+        env::set_var("APP_ENVIRONMENT", "local");
+        env::set_var("APP_HOST", "random_APP_HOST");
+        env::set_var("APP_PORT", "5000");
+        env::set_var("APP_EXTERNAL_BASE_URL", "http://oyelowo.test");
+        env::set_var("OAUTH_GITHUB_CLIENT_ID", "random_OAUTH_GITHUB_CLIENT_ID");
+        env::set_var(
+            "OAUTH_GITHUB_CLIENT_SECRET",
+            "random_OAUTH_GITHUB_CLIENT_SECRET",
+        );
+        env::set_var("OAUTH_GOOGLE_CLIENT_ID", "random_OAUTH_GOOGLE_CLIENT_ID");
+        env::set_var(
+            "OAUTH_GOOGLE_CLIENT_SECRET",
+            "random_OAUTH_GOOGLE_CLIENT_SECRET",
+        );
+        env::set_var("MONGODB_NAME", "random_MONGODB_NAME");
+        env::set_var("MONGODB_USERNAME", "random_MONGODB_USERNAME");
+        env::set_var("MONGODB_PASSWORD", "random_MONGODB_PASSWORD");
+        env::set_var("MONGODB_ROOT_USERNAME", "random_MONGODB_ROOT_USERNAME");
+        env::set_var("MONGODB_ROOT_PASSWORD", "random_MONGODB_ROOT_PASSWORD");
+        env::set_var("MONGODB_HOST", "random_MONGODB_HOST");
+        env::set_var("MONGODB_SERVICE_NAME", "random_MONGODB_SERVICE_NAME");
+        env::set_var("MONGODB_STORAGE_CLASS", "random_MONGODB_STORAGE_CLASS");
+        env::set_var("MONGODB_PORT", "27017");
+        env::set_var("REDIS_USERNAME", "random_REDIS_USERNAME");
+        env::set_var("REDIS_PASSWORD", "random_REDIS_PASSWORD");
+        env::set_var("REDIS_HOST", "random_REDIS_HOST");
+        env::set_var("REDIS_SERVICE_NAME", "random_REDIS_SERVICE_NAME");
+        env::set_var(
+            "REDIS_SERVICE_NAME_MASTER",
+            "random_REDIS_SERVICE_NAME_MASTER",
+        );
+        env::set_var("REDIS_PORT", "6379");
+
+        let google_config = GoogleConfig::new().basic_config();
+        let auth_url_dataa = google_config.clone().generate_auth_url();
+
+        let auth_url = auth_url_dataa.authorize_url.clone().0;
+        let hash_query: MultiMap<_, _> = auth_url_dataa
+            .authorize_url
+            .into_inner()
+            .query_pairs()
+            .into_owned()
+            .collect();
+
+        assert_eq!(auth_url.as_str().len(), 302);
+
+        let state = hash_query.get("state").unwrap();
+        let code_challenge = hash_query.get("code_challenge").unwrap();
+        assert_eq!(state.len(), 22);
+        assert_eq!(code_challenge.len(), 43);
+        assert_eq!(
+            auth_url.as_str(),
+            format!(
+                "https://accounts.google.com/o/oauth2/v2/auth?\
+            response_type=code&client_id=random_OAUTH_GOOGLE_CLIENT_ID&\
+            state={state}&code_challenge={code_challenge}&code_challenge_method=S256&\
+            redirect_uri=http%3A%2F%2Foyelowo.test%2Fapi%2Foauth%2Fcallback&scope=profile+email"
+            )
+        );
+    }
+}
