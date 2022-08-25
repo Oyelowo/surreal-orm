@@ -14,7 +14,7 @@ use redis::RedisError;
 use reqwest::{header, StatusCode};
 use url::Url;
 
-use crate::oauth::cache_generic as cg;
+use crate::oauth::cache_storage as cg;
 use crate::oauth::github::GithubConfig;
 use crate::oauth::google::GoogleConfig;
 use crate::oauth::utils::{
@@ -121,7 +121,7 @@ pub async fn oauth_login_initiator(
     let cache = cg::RedisCache(redis.clone());
 
     auth_url_data
-        .cache(cache)
+        .save(cache)
         .await
         .map_err(HandlerError::StorageError)
         .map_err(InternalServerError)?;

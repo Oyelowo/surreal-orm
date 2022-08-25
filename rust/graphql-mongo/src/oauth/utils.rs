@@ -54,7 +54,7 @@ pub(crate) struct Evidence {
     pub(crate) pkce_code_verifier: PkceCodeVerifier,
 }
 
-use super::cache_generic::CacheStorage;
+use super::cache_storage::CacheStorage;
 
 /// The url returned by the oauth provider with code and state(which should be the one we send)
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -169,7 +169,7 @@ pub(crate) struct AuthUrlData {
 impl AuthUrlData {
     const OAUTH_CSRF_STATE_KEY: &'static str = "OAUTH_CSRF_STATE_KEY";
 
-    fn redis_key(csrf_token: CsrfToken) -> String {
+    fn oauth_cache_key_prefix(csrf_token: CsrfToken) -> String {
         format!(
             "{}{:?}",
             Self::OAUTH_CSRF_STATE_KEY,
@@ -181,14 +181,18 @@ impl AuthUrlData {
         csrf_token: CsrfToken,
         storage: impl CacheStorage,
     ) -> Option<Self> {
-        let key = Self::redis_key(csrf_token);
+        let key = Self::oauth_cache_key_prefix(csrf_token);
         let auth_url_data = storage.get(key).await.unwrap();
+
+        let auth_url_data = serde_json::from_str::<Self>(&auth_url_data.as_str()).unwrap();
+
         Some(auth_url_data)
     }
 
-    pub(crate) async fn cache(&self, storage: impl CacheStorage) -> OauthResult<()> {
-        let key = &Self::redis_key(self.evidence.csrf_token.clone());
-        storage.save(key.to_owned(), self);
+    pub(crate) async fn save(&self, storage: impl CacheStorage) -> OauthResult<()> {
+        let key = Self::oauth_cache_key_prefix(self.evidence.csrf_token.clone());
+        let csrf_state_data_string = serde_json::to_string(&self)?;
+        storage.set(key, csrf_state_data_string);
         Ok(())
     }
 }
