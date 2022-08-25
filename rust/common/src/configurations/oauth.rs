@@ -3,12 +3,12 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
-pub struct OauthGoogleConfigs {
+pub struct OauthGoogleCredentials {
     pub client_id: String,
     pub client_secret: String,
 }
 
-impl Default for OauthGoogleConfigs {
+impl Default for OauthGoogleCredentials {
     fn default() -> Self {
         get_env_vars_by_prefix("OAUTH_GOOGLE_")
     }
@@ -16,12 +16,12 @@ impl Default for OauthGoogleConfigs {
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
-pub struct OauthGithubConfigs {
+pub struct OauthGithubCredentials {
     pub client_id: String,
     pub client_secret: String,
 }
 
-impl Default for OauthGithubConfigs {
+impl Default for OauthGithubCredentials {
     fn default() -> Self {
         get_env_vars_by_prefix("OAUTH_GITHUB_")
     }
@@ -29,15 +29,15 @@ impl Default for OauthGithubConfigs {
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
-pub struct OauthConfigs {
+pub struct OauthCredentials {
     #[serde(flatten)]
-    pub google: OauthGoogleConfigs,
+    pub google: OauthGoogleCredentials,
 
     #[serde(flatten)]
-    pub github: OauthGithubConfigs,
+    pub github: OauthGithubCredentials,
 }
 
-impl Default for OauthConfigs {
+impl Default for OauthCredentials {
     fn default() -> Self {
         get_env_vars_by_prefix("OAUTH_")
     }

@@ -4,6 +4,7 @@ pub mod error_handling;
 mod macros;
 pub mod middleware;
 pub mod utils;
+pub mod oauth;
 
 pub use macros::{calculator, helpers};
 

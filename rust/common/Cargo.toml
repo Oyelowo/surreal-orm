@@ -63,3 +63,16 @@ redis = { version = "0.21.5", features = [
 
 bson = "2.4.0"
 mongodb = { version = "2.3.0", features = ["bson-chrono-0_4"] }
+
+
+# For Oauth
+url = "2.2.2"
+typed-builder = "0.10.0"
+reqwest = { version = "0.11.11", default-features = false, features = [
+  "rustls-tls",
+] }
+oauth2 = "4.2.3"
+derive_more = "0.99.17"
+my-macros = { path = "../my-macros" }
+validator = { version = "0.16.0", features = ["derive"] }
+multimap = "0.8.3"

@@ -1,13 +1,16 @@
 use chrono::{Duration, Utc};
-use common::configurations::oauth::OauthGithubCredentials;
 use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, PkceCodeVerifier, RedirectUrl, Scope,
     TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
 
-use super::utils::{get_redirect_url, OauthConfig, OauthProviderTrait, OauthResult, OauthUrl};
-use crate::app::user::{AccountOauth, OauthProvider, TokenType};
+use crate::configurations::oauth::OauthGithubCredentials;
+
+use super::{
+    utils::{get_redirect_url, OauthConfig, OauthProviderTrait, OauthResult, OauthUrl},
+    AccountOauth, OauthProvider, TokenType,
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 struct GithubUserData {
@@ -31,21 +34,30 @@ struct GithubEmail {
 }
 
 #[derive(Debug, Clone)]
+pub struct OauthSettings {
+    pub base_url: String,
+    pub credentials: OauthGithubCredentials,
+}
+
 pub(crate) struct GithubConfig {
     pub(crate) basic_config: OauthConfig,
 }
 
 impl GithubConfig {
-    pub fn new() -> Self {
-        let env = OauthGithubCredentials::default();
+    /// Creates a new [`GithubConfig`].
+    /// Takes in the settings
+    pub fn new(settings: OauthSettings) -> Self {
+        let oauth_credentials = settings.credentials;
+        // let env = OauthGithubCredentials::default();
         let basic_config = OauthConfig {
-            client_id: ClientId::new(env.client_id),
-            client_secret: ClientSecret::new(env.client_secret),
+            client_id: ClientId::new(oauth_credentials.client_id),
+            client_secret: ClientSecret::new(oauth_credentials.client_secret),
             auth_url: AuthUrl::new("https://github.com/login/oauth/authorize".to_string())
                 .expect("Invalid authorization endpoint URL"),
             token_url: TokenUrl::new("https://github.com/login/oauth/access_token".to_string())
                 .expect("Invalid token endpoint URL"),
-            redirect_url: RedirectUrl::new(get_redirect_url()).expect("Invalid redirect URL"),
+            redirect_url: RedirectUrl::new(get_redirect_url(settings.base_url))
+                .expect("Invalid redirect URL"),
             scopes: vec![
                 Scope::new("public_repo".into()),
                 Scope::new("read:user".into()),
@@ -60,6 +72,8 @@ impl GithubConfig {
 
 #[async_trait::async_trait]
 impl OauthProviderTrait for GithubConfig {
+    type OauthResponse = AccountOauth;
+
     fn basic_config(&self) -> OauthConfig {
         self.basic_config.to_owned()
     }
@@ -68,7 +82,7 @@ impl OauthProviderTrait for GithubConfig {
         &self,
         code: AuthorizationCode,
         pkce_code_verifier: PkceCodeVerifier,
-    ) -> OauthResult<AccountOauth> {
+    ) -> OauthResult<Self::OauthResponse> {
         let token = self.exchange_token(code, pkce_code_verifier).await?;
 
         let profile = OauthUrl("https://api.github.com/user")
