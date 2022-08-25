@@ -127,3 +127,57 @@ impl OauthProviderTrait for GithubConfig {
         Ok(account)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::oauth::utils::OauthConfigTrait;
+    use multimap::MultiMap;
+    #[cfg(test)]
+    use pretty_assertions::{assert_eq, assert_ne, assert_str_eq};
+
+    #[test]
+    fn it_should_properly_generate_auth_url() {
+        let client_id = String::from("oyelowo_1234");
+        let client_secret = String::from("secret_xxx");
+        let credentials = OauthGithubCredentials {
+            client_id: client_id.clone(),
+            client_secret: client_secret.clone(),
+        };
+
+        const HOST_NAME: &str = "oyelowo.test";
+        let base_url = format!("http://{HOST_NAME}");
+
+        let settins = OauthSettings {
+            base_url: base_url.clone(),
+            credentials,
+        };
+        let google_config = GithubConfig::new(settins).basic_config();
+        let auth_url_data = google_config.clone().generate_auth_url();
+
+        let auth_url = auth_url_data.authorize_url.clone().0;
+        let hash_query: MultiMap<_, _> = auth_url_data
+            .authorize_url
+            .into_inner()
+            .query_pairs()
+            .into_owned()
+            .collect();
+
+        let state = hash_query.get("state").unwrap();
+        let code_challenge = hash_query.get("code_challenge").unwrap();
+        assert_eq!(auth_url.as_str().len(), 304);
+        assert_eq!(state, auth_url_data.evidence.csrf_token.secret().as_str());
+        assert_eq!(OauthProvider::Github, auth_url_data.evidence.provider);
+        assert_eq!(state.len(), 22);
+        assert_eq!(code_challenge.len(), 43);
+        assert_str_eq!(
+            auth_url.as_str(),
+            format!(
+                "https://github.com/login/oauth/authorize?\
+            response_type=code&client_id={client_id}&\
+            state={state}&code_challenge={code_challenge}&code_challenge_method=S256&\
+            redirect_uri=http%3A%2F%2F{HOST_NAME}%2Fapi%2Foauth%2Fcallback&scope=public_repo+read%3Auser+user%3Aemail"
+            )
+        );
+    }
+}
