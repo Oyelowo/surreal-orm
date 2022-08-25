@@ -76,3 +76,7 @@ derive_more = "0.99.17"
 my-macros = { path = "../my-macros" }
 validator = { version = "0.16.0", features = ["derive"] }
 multimap = "0.8.3"
+
+
+[dev-dependencies]
+pretty_assertions = "1.2.1"
