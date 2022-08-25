@@ -18,7 +18,7 @@ use crate::oauth::cache_storage as cg;
 use crate::oauth::github::GithubConfig;
 use crate::oauth::google::GoogleConfig;
 use crate::oauth::utils::{
-    AuthUrlData, Evidence, OauthConfigTrait, OauthError, OauthProviderTrait, RedirectUrlReturned,
+    AuthUrlData, OauthConfigTrait, OauthError, OauthProviderTrait, RedirectUrlReturned,
 };
 use common::configurations::redis::RedisConfigError;
 
@@ -37,9 +37,8 @@ pub(crate) enum HandlerError {
     #[error("Server error. Unable to retrieve code. Please try again")]
     MalformedState(#[source] OauthError),
 
-    #[error("The state token provided is invalid.")]
-    InvalidState(#[source] OauthError),
-
+    // #[error("The state token provided is invalid.")]
+    // InvalidState(#[source] OauthError),
     #[error("The auth code provided is invalid.")]
     InvalidAuthCode(#[source] OauthError),
 

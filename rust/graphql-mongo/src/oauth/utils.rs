@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use common::configurations::{application::ApplicationConfigs, redis::RedisConfigError};
 use derive_more::{From, Into};
 use oauth2::{
@@ -10,12 +8,13 @@ use oauth2::{
     PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, RevocationUrl, Scope, StandardTokenResponse,
     TokenResponse, TokenUrl,
 };
-use redis::{AsyncCommands, RedisError};
+use redis::RedisError;
 use reqwest::header::{ACCEPT, USER_AGENT};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use url::Url;
 
+use super::cache_storage::CacheStorage;
 use crate::app::user::{AccountOauth, OauthProvider};
 
 pub(crate) fn get_redirect_url() -> String {
@@ -53,8 +52,6 @@ pub(crate) struct Evidence {
     pub(crate) provider: OauthProvider,
     pub(crate) pkce_code_verifier: PkceCodeVerifier,
 }
-
-use super::cache_storage::CacheStorage;
 
 /// The url returned by the oauth provider with code and state(which should be the one we send)
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -192,7 +189,7 @@ impl AuthUrlData {
     pub(crate) async fn save(&self, storage: impl CacheStorage) -> OauthResult<()> {
         let key = Self::oauth_cache_key_prefix(self.evidence.csrf_token.clone());
         let csrf_state_data_string = serde_json::to_string(&self)?;
-        storage.set(key, csrf_state_data_string);
+        storage.set(key, csrf_state_data_string).await;
         Ok(())
     }
 }
