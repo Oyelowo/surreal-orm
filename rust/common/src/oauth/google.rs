@@ -88,8 +88,8 @@ impl OauthProviderTrait for GoogleConfig {
 
     /// Fetch oauth account. You can override this method
     ///
-    /// # Errors: 
-    /// Exhange token problem: 
+    /// # Errors:
+    /// Exhange token problem:
     ///
     /// This function will return an error if .
     async fn fetch_oauth_account(
@@ -138,7 +138,7 @@ mod tests {
     use multimap::MultiMap;
 
     #[test]
-    fn it_works() {
+    fn it_should_properly_generate_auth_url() {
         let client_id = String::from("oyelowo_1234");
         let client_secret = String::from("secret_xxx");
         let credentials = OauthGoogleCredentials {
@@ -154,10 +154,10 @@ mod tests {
             credentials,
         };
         let google_config = GoogleConfig::new(settins).basic_config();
-        let auth_url_dataa = google_config.clone().generate_auth_url();
+        let auth_url_data = google_config.clone().generate_auth_url();
 
-        let auth_url = auth_url_dataa.authorize_url.clone().0;
-        let hash_query: MultiMap<_, _> = auth_url_dataa
+        let auth_url = auth_url_data.authorize_url.clone().0;
+        let hash_query: MultiMap<_, _> = auth_url_data
             .authorize_url
             .into_inner()
             .query_pairs()
@@ -168,6 +168,8 @@ mod tests {
 
         let state = hash_query.get("state").unwrap();
         let code_challenge = hash_query.get("code_challenge").unwrap();
+        assert_eq!(state, auth_url_data.evidence.csrf_token.secret().as_str());
+        assert_eq!(OauthProvider::Google, auth_url_data.evidence.provider);
         assert_eq!(state.len(), 22);
         assert_eq!(code_challenge.len(), 43);
         assert_eq!(
