@@ -1,4 +1,4 @@
-use std::{ops::DerefMut, fmt::Debug};
+use std::{fmt::Debug, ops::DerefMut};
 
 // use common::configurations::{application::ApplicationConfigs, redis::RedisConfigError};
 use derive_more::{From, Into};
@@ -74,7 +74,7 @@ impl RedirectUrlReturned {
         self.0
     }
 
-    pub(crate) fn authorization_code(&self) -> Option<AuthorizationCode> {
+    pub(crate) fn get_authorization_code(&self) -> Option<AuthorizationCode> {
         let value = self
             .get_query_param_value("code")
             .map(AuthorizationCode::new);
@@ -82,10 +82,12 @@ impl RedirectUrlReturned {
         value
     }
 
-    pub(crate) fn csrf_token(&self) -> Option<CsrfToken> {
+    pub(crate) fn get_csrf_token(&self) -> Option<CsrfToken> {
         // let value = self.get_query_param_value("state");
         // Ok(CsrfToken::new(value.into_owned()))
-        self.get_query_param_value("state").map(CsrfToken::new)
+        let p = self.get_query_param_value("state").map(CsrfToken::new);
+        println!("csrf_token: {}", p.clone().unwrap().clone().secret());
+        p
     }
 
     fn get_query_param_value(&self, query_param: &str) -> Option<String> {
@@ -112,7 +114,7 @@ pub struct AuthUrlData {
 impl AuthUrlData {
     fn oauth_cache_key_prefix(csrf_token: CsrfToken) -> String {
         let oauth_csrf_state_key = "OAUTH_CSRF_STATE_KEY";
-        format!("{}_{}", oauth_csrf_state_key, csrf_token.secret().as_str())
+        format!("{oauth_csrf_state_key}_{}", csrf_token.secret().as_str())
     }
 
     pub(crate) async fn verify_csrf_token<C: CacheStorage + Debug>(
@@ -121,8 +123,7 @@ impl AuthUrlData {
     ) -> Option<Self> {
         let key = Self::oauth_cache_key_prefix(csrf_token);
         // TODO: Handle error properly
-        print!("{storage:?}");
-        let auth_url_data = storage.get(key).await;
+        let auth_url_data = storage.get(key.clone()).await;
 
         let auth_url_data = serde_json::from_str::<Self>(&auth_url_data.unwrap().as_str()).unwrap();
 

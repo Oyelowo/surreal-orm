@@ -52,15 +52,14 @@ impl Config {
         // let uri = redirect_url
         let redirect_url_wrapped = RedirectUrlReturned(redirect_url.clone());
 
-        let code = redirect_url_wrapped.authorization_code().ok_or(
+        let code = redirect_url_wrapped.get_authorization_code().ok_or(
             OauthError::AuthorizationCodeNotFoundInRedirectUrl(redirect_url.to_string()),
         )?;
 
         // make .verify give me back both the csrf token and the provider
         let csrf_token = redirect_url_wrapped
-            .csrf_token()
+            .get_csrf_token()
             .ok_or(OauthError::CsrfTokenNotFoundInRedirectUrl(redirect_url.to_string()))?;
-
         // let cache = cg::RedisCache(redis.clone());
         let evidence = AuthUrlData::verify_csrf_token(csrf_token, &cache_storage)
             .await

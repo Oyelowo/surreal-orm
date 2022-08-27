@@ -75,12 +75,12 @@ mod tests {
             let _ = env_logger::try_init;
             // Arrange
             let server = MockServer::start_async().await;
-            // let mock = server
-            //     .mock_async(|when, then| {
-            //         when.path_contains("google.com");
-            //         then.status(200);
-            //     })
-            //     .await;
+            let mock = server
+                .mock_async(|when, then| {
+                    when.path_contains("google.com");
+                    then.status(200);
+                })
+                .await;
             // https://accounts.google.com/o/oauth2/auth?client_id=XXXXX&redirect_uri=http://localhost:8080/WEBAPP/youtube-callback.html&response_type=code&scope=https://www.googleapis.com/auth/youtube.upload
 
             // let redirect_uri = "https://oyelowo.test/redirect?code=g0ZGZmNjVmOWI&state=dkZmYxMzE2";
@@ -113,7 +113,7 @@ mod tests {
                 "OAUTH_CSRF_STATE_KEY_{}",
                 auth_url_data
                     .authorize_url
-                    .csrf_token()
+                    .get_csrf_token()
                     .unwrap()
                     .secret()
                     .as_str()
@@ -124,13 +124,13 @@ mod tests {
             //     .unwrap();
 
             let state = hash_query.get("state").unwrap();
-            let redirect_uri = format!("redirect?code=g0ZGZmNjVmOWI&state={:?}", state);
+            let redirect_uri = format!("redirect?code=g0ZGZmNjVmOWI&state={}", state);
             // let redirect_uri = "https://oyelowo.test/redirect?code=g0ZGZmNjVmOWI&state=dkZmYxMzE2";
             //
             let redirect_url =
                 Url::parse(format!("https://oyelowo.test/{redirect_uri}").as_str()).unwrap();
             // assert_eq!("x".to_string(), redirect_url.to_string());
-            assert!(cache_storage.get(m.to_string()).await.unwrap().contains(state));
+            // assert!(cache_storage.get(m.to_string()).await.unwrap().contains(state));
             // assert_eq!(
             //     redirect_url.to_string(),
             //     cache_storage.get(m).await.unwrap()
