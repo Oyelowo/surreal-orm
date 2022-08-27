@@ -84,11 +84,13 @@ impl Config {
         Ok(account_oauth)
     }
 
-    pub async fn initiate_oauth(
-        self,
+    // pub async fn generate_auth_url_data<T: CacheStorage>(
+    pub fn generate_auth_url_data(
+        &self,
         oauth_provider: OauthProvider,
-        mut cache_storage: impl CacheStorage,
-    ) -> OauthResult<AuthUrlData> {
+        // cache_storage: &mut T,
+    ) -> AuthUrlData {
+        // ) -> OauthResult<AuthUrlData> {
         // self.provider_configs.github.unwrap().basic_config().generate_auth_url()
         let Provider { github, google } = self.provider_configs.clone();
         let auth_url_data = match oauth_provider {
@@ -104,8 +106,9 @@ impl Config {
 
         // let cache = cg::RedisCache(redis.clone());
         // let p = self.cache_storage;
-        auth_url_data.save(&mut cache_storage).await?;
-        Ok(auth_url_data)
+        // auth_url_data.save(cache_storage).await?;
+        auth_url_data
+        // Ok(auth_url_data)
     }
 }
 

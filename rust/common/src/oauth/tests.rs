@@ -7,10 +7,11 @@ use super::{
 mod tests {
     use async_std;
     use httpmock::prelude::*;
+    use multimap::MultiMap;
     use std::collections::HashMap;
 
     use oauth2::http::Uri;
-    use pretty_assertions::{assert_str_eq, assert_eq};
+    use pretty_assertions::{assert_eq, assert_str_eq};
 
     use crate::{
         configurations::oauth::{OauthCredentials, OauthGithubCredentials, OauthGoogleCredentials},
@@ -73,22 +74,22 @@ mod tests {
             let _ = env_logger::try_init;
             // Arrange
             let server = MockServer::start_async().await;
-            let mock = server
-                .mock_async(|when, then| {
-                    when.path_contains("google.com");
-                    then.status(200);
-                })
-                .await;
-// https://accounts.google.com/o/oauth2/auth?client_id=XXXXX&redirect_uri=http://localhost:8080/WEBAPP/youtube-callback.html&response_type=code&scope=https://www.googleapis.com/auth/youtube.upload
+            // let mock = server
+            //     .mock_async(|when, then| {
+            //         when.path_contains("google.com");
+            //         then.status(200);
+            //     })
+            //     .await;
+            // https://accounts.google.com/o/oauth2/auth?client_id=XXXXX&redirect_uri=http://localhost:8080/WEBAPP/youtube-callback.html&response_type=code&scope=https://www.googleapis.com/auth/youtube.upload
 
             let redirect_uri = "https://oyelowo.test/redirect?code=g0ZGZmNjVmOWI&state=dkZmYxMzE2";
             // let redirect_uri = "https://oyelowo.test/redirect?code=g0ZGZmNjVmOWI&state=dkZmYxMzE2";
-//             let redirect_uri = "https://accounts.google.com/o/oauth2/v2/auth?\
-//  scope=email%20profile&\
-//  response_type=code&\
-//  state=security_token%3D138r5719ru3e1%26url%3Dhttps%3A%2F%2Foauth2.example.com%2Ftoken&\
-//  redirect_uri=oyelowo.test%3A/oauth/callback&\
-//  client_id=client_id";
+            //             let redirect_uri = "https://accounts.google.com/o/oauth2/v2/auth?\
+            //  scope=email%20profile&\
+            //  response_type=code&\
+            //  state=security_token%3D138r5719ru3e1%26url%3Dhttps%3A%2F%2Foauth2.example.com%2Ftoken&\
+            //  redirect_uri=oyelowo.test%3A/oauth/callback&\
+            //  client_id=client_id";
 
             let conf = Config::builder()
                 .base_url("https://oyelowo.test".to_string())
@@ -97,27 +98,49 @@ mod tests {
                 .provider_configs(providers)
                 // .cache_storage(&mut cache_storage)
                 .build();
+            // cache_storage.0.i
+            let auth_url_data = conf.generate_auth_url_data(crate::oauth::OauthProvider::Google);
 
+            let hash_query: MultiMap<_, _> = auth_url_data
+                .authorize_url.0
+                // .into_inner()
+                .query_pairs()
+                .into_owned()
+                .collect();
+            auth_url_data.save(&mut cache_storage).await.unwrap();
+            let m = format!(
+                "OAUTH_CSRF_STATE_KEY_{}",
+                auth_url_data
+                    .authorize_url
+                    .csrf_token()
+                    .unwrap()
+                    .secret()
+                    .as_str()
+            );
             // let p = conf
-            //     .initiate_oauth(crate::oauth::OauthProvider::Google,  cache_storage.clone())
+            //     .generate_auth_url_data(crate::oauth::OauthProvider::Google,  &mut cache_storage)
             //     .await
             //     .unwrap();
 
-            let p = conf.fetch_account(cache_storage).await.unwrap();
+            let p = conf.fetch_account(cache_storage.clone()).await.unwrap();
 
             // let k = o.0.insert("key".to_string(), "query".to_string());
             assert_eq!(4, 4);
-            mock.assert_async().await;
+            // mock.assert_async().await;
             // let s = HashMap::from([
             //     ("1".to_string(), "2".to_string()),
             //     ("3".to_string(), "4".to_string()),
             // ]);
-            // assert_eq!(cache_storage.0, s);
+            let n = cache_storage.0.get(&m).unwrap().to_owned();
+            // let  mm= hash_query.get(&m);
+            // assert_eq!(n, "".to_string());
+            assert_eq!(hash_query, MultiMap::from_iter(cache_storage.0));
+            // assert!(n.contains(hash_query.get(&m).unwrap()));
         });
     }
 }
 
-/* 
+/*
 https://accounts.google.com/o/oauth2/v2/auth?
  scope=email%20profile&
  response_type=code&
@@ -125,7 +148,7 @@ https://accounts.google.com/o/oauth2/v2/auth?
  redirect_uri=com.example.app%3A/oauth2redirect&
  client_id=client_id
  */
-/* 
+/*
 https://accounts.google.com/o/oauth2/v2/auth?
  scope=https%3A//www.googleapis.com/auth/drive.metadata.readonly&
  access_type=offline&
@@ -136,8 +159,7 @@ https://accounts.google.com/o/oauth2/v2/auth?
  client_id=client_id
 */
 
-
-/* 
+/*
 https://accounts.google.com/o/oauth2/v2/auth?
  scope=https%3A//www.googleapis.com/auth/drive.metadata.readonly&
  access_type=offline&
@@ -148,8 +170,7 @@ https://accounts.google.com/o/oauth2/v2/auth?
  client_id=client_id
 */
 
-
-/* 
+/*
 https://accounts.google.com/o/oauth2/auth?
   client_id=21302922996.apps.googleusercontent.com&
   redirect_uri=https://www.example.com/back&
@@ -158,10 +179,9 @@ https://accounts.google.com/o/oauth2/auth?
   state=asdafwswdwefwsdg,
 */
 
-/* 
+/*
 https://accounts.google.com/o/oauth2/auth?client_id={clientid}.apps.googleusercontent.com&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=https://www.googleapis.com/auth/analytics.readonly&response_type=code
 */
-
 
 /*
 async_std::task::block_on(async {

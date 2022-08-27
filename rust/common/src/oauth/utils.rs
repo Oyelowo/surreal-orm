@@ -120,6 +120,7 @@ impl AuthUrlData {
         storage: impl CacheStorage,
     ) -> Option<Self> {
         let key = Self::oauth_cache_key_prefix(csrf_token);
+        // TODO: Handle error properly
         let auth_url_data = storage.get(key).await.unwrap();
 
         let auth_url_data = serde_json::from_str::<Self>(&auth_url_data.as_str()).unwrap();
