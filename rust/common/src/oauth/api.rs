@@ -102,18 +102,14 @@ impl<Cache: CacheStorage> Config<Cache> {
     }
 }
 
-// async fn save_csrf_token() {
 
-//     let auth_url_data = match oauth_provider {
-//         OauthProvider::Github => GithubConfig::new().basic_config().generate_auth_url(),
-//         OauthProvider::Google => GoogleConfig::new().basic_config().generate_auth_url(),
-//     };
 
-//     let cache = cg::RedisCache(redis.clone());
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-//     auth_url_data
-//         .save(cache)
-//         .await
-//         .map_err(HandlerError::StorageError)
-//         .map_err(InternalServerError)?;
+//     #[test]
+//     fn internal() {
+//         assert_eq!(4, 2);
+//     }
 // }

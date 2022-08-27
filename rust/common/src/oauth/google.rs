@@ -4,6 +4,7 @@ use oauth2::{
     RevocationUrl, Scope, TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
+use typed_builder::TypedBuilder;
 
 use crate::configurations::oauth::OauthGoogleCredentials;
 
@@ -32,8 +33,8 @@ struct GoogleUserData {
     locale: String,
 }
 
-#[derive(Debug, Clone)]
-pub struct OauthSettings {
+#[derive(Debug, Clone, TypedBuilder)]
+pub struct OauthGoogleSettings {
     pub base_url: String,
     pub credentials: OauthGoogleCredentials,
 }
@@ -44,7 +45,7 @@ pub struct GoogleConfig {
 }
 
 impl GoogleConfig {
-    pub fn new(settings: OauthSettings) -> Self {
+    pub fn new(settings: OauthGoogleSettings) -> Self {
         // let env = OauthGoogleCredentials::default();
         let credentials = settings.credentials;
         let basic_config = OauthConfig::builder()
@@ -149,7 +150,7 @@ mod tests {
         const HOST_NAME: &str = "oyelowo.test";
         let base_url = format!("http://{HOST_NAME}");
 
-        let settins = OauthSettings {
+        let settins = OauthGoogleSettings {
             base_url: base_url.clone(),
             credentials,
         };

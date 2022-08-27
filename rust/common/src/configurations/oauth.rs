@@ -1,7 +1,8 @@
 use super::utils::get_env_vars_by_prefix;
 use serde::Deserialize;
+use typed_builder::TypedBuilder;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "lowercase")]
 pub struct OauthGoogleCredentials {
     pub client_id: String,
@@ -14,7 +15,7 @@ impl Default for OauthGoogleCredentials {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "lowercase")]
 pub struct OauthGithubCredentials {
     pub client_id: String,
@@ -27,7 +28,7 @@ impl Default for OauthGithubCredentials {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "lowercase")]
 pub struct OauthCredentials {
     #[serde(flatten)]

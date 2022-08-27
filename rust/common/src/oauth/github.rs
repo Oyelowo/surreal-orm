@@ -4,6 +4,7 @@ use oauth2::{
     TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
+use typed_builder::TypedBuilder;
 
 use crate::configurations::oauth::OauthGithubCredentials;
 
@@ -33,8 +34,8 @@ struct GithubEmail {
     // visibility: Option<String>,
 }
 
-#[derive(Debug, Clone)]
-pub struct OauthSettings {
+#[derive(Debug, Clone, TypedBuilder)]
+pub struct OauthGithubSettings {
     pub base_url: String,
     pub credentials: OauthGithubCredentials,
 }
@@ -47,7 +48,7 @@ pub struct GithubConfig {
 impl GithubConfig {
     /// Creates a new [`GithubConfig`].
     /// Takes in the settings
-    pub fn new(settings: OauthSettings) -> Self {
+    pub fn new(settings: OauthGithubSettings) -> Self {
         let oauth_credentials = settings.credentials;
         // let env = OauthGithubCredentials::default();
         let basic_config = OauthConfig {
@@ -149,7 +150,7 @@ mod tests {
         const HOST_NAME: &str = "oyelowo.test";
         let base_url = format!("http://{HOST_NAME}");
 
-        let settins = OauthSettings {
+        let settins = OauthGithubSettings {
             base_url: base_url.clone(),
             credentials,
         };
