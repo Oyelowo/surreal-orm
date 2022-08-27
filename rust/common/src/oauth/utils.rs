@@ -1,5 +1,8 @@
+use std::ops::DerefMut;
+
 // use common::configurations::{application::ApplicationConfigs, redis::RedisConfigError};
 use derive_more::{From, Into};
+use multimap::MultiMap;
 use oauth2::{
     basic::{BasicClient, BasicTokenType},
     http::HeaderMap,
@@ -24,23 +27,32 @@ pub(crate) fn get_redirect_url(base_url: String) -> String {
 }
 
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum OauthError {
+pub enum OauthError {
     #[error("Failed to fetch token. Error: {0}")]
     TokenFetchFailed(String),
 
     #[error("Failed to fetch resource. Error: {0}")]
     ResourceFetchFailed(String),
 
-    #[error("Failed to get query param from URL: {0}")]
-    GetUrlQueryParamFailed(String),
+    // #[error("Failed to get query param from URL: {0}")]
+    // GetUrlQueryParamFailed(String),
+
+    #[error("Authorization code not found in redirect URL: {0}")]
+    AuthorizationCodeNotFoundInRedirectUrl(String),
+
+    #[error("Csrf Token not found in redirect Url: {0}")]
+    CsrfTokenNotFoundInRedirectUrl(String),
 
     // #[error("Failed to fetch data. Please try again")]
     #[error(transparent)]
     RedisError(#[from] RedisError),
 
+    // #[error("Failed to fetch data. Please try again")]
+    #[error(transparent)]
+    UrlParamsNotFound(#[from] ::url::ParseError),
+
     // #[error(transparent)]
     // RedisConfigError(#[from] RedisConfigError),
-
     #[error(transparent)]
     SerializationError(#[from] serde_json::Error),
 }
@@ -63,23 +75,31 @@ impl RedirectUrlReturned {
         self.0
     }
 
-    pub fn authorization_code(&self) -> OauthResult<AuthorizationCode> {
-        let value = self.get_query_param_value("code")?;
-        Ok(AuthorizationCode::new(value.into_owned()))
+    pub(crate) fn authorization_code(&self) -> Option<AuthorizationCode> {
+        let value = self
+            .get_query_param_value("code")
+            .map(AuthorizationCode::new);
+        // Ok(AuthorizationCode::new(value.into_owned()))
+        value
     }
 
-    pub(crate) fn csrf_token(&self) -> OauthResult<CsrfToken> {
-        let value = self.get_query_param_value("state")?;
-        Ok(CsrfToken::new(value.into_owned()))
+    pub(crate) fn csrf_token(&self) -> Option<CsrfToken> {
+        // let value = self.get_query_param_value("state");
+        // Ok(CsrfToken::new(value.into_owned()))
+        self.get_query_param_value("state").map(CsrfToken::new)
     }
 
-    fn get_query_param_value(&self, query_param: &str) -> OauthResult<std::borrow::Cow<str>> {
-        let (_, value) = self
-            .0
-            .query_pairs()
-            .find(|&(ref key, _)| key == query_param)
-            .ok_or_else(|| OauthError::GetUrlQueryParamFailed(query_param.into()))?;
-        Ok(value)
+    fn get_query_param_value(&self, query_param: &str) -> Option<String> {
+        // let (_, value) = self
+        //     .0
+        //     .query_pairs()
+        //     .find(|&(ref key, _)| key == query_param)
+        //     .ok_or_else(|| OauthError::UrlParamsNotFound(query_param.into()))?;
+        // Ok(value)
+        // let auth_url = self.0.clone();
+        let hash_query: MultiMap<_, _> = self.0.query_pairs().into_owned().collect();
+        let p = hash_query.get(query_param).map(|v| v.clone());
+        p
     }
 }
 
@@ -149,7 +169,7 @@ impl OauthUrl {
 }
 
 #[derive(Debug, TypedBuilder, Clone)]
-pub(crate) struct OauthConfig {
+pub struct OauthConfig {
     pub client_id: ClientId,
     pub client_secret: ClientSecret,
     pub auth_url: AuthUrl,
@@ -166,7 +186,7 @@ pub(crate) struct OauthConfig {
 // Linking Accounts to Users happen automatically, only when they have the same e-mail address, and the user is currently signed in. Check the FAQ for more information why this is a requirement.
 #[async_trait::async_trait]
 pub(crate) trait OauthProviderTrait {
-    type OauthResponse : DeserializeOwned;
+    type OauthResponse: DeserializeOwned;
 
     fn basic_config(&self) -> OauthConfig;
 

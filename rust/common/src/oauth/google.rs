@@ -39,7 +39,7 @@ pub struct OauthSettings {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct GoogleConfig {
+pub struct GoogleConfig {
     basic_config: OauthConfig,
 }
 

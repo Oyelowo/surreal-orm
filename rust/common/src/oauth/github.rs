@@ -39,8 +39,9 @@ pub struct OauthSettings {
     pub credentials: OauthGithubCredentials,
 }
 
-pub(crate) struct GithubConfig {
-    pub(crate) basic_config: OauthConfig,
+#[derive(Debug, Clone)]
+pub struct GithubConfig {
+    pub basic_config: OauthConfig,
 }
 
 impl GithubConfig {

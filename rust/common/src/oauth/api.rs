@@ -11,7 +11,7 @@ use super::{
 };
 
 #[derive(Debug, TypedBuilder)]
-struct Provider {
+pub struct Provider {
     #[builder(default, setter(strip_option))]
     github: Option<GithubConfig>,
     #[builder(default, setter(strip_option))]
@@ -19,29 +19,33 @@ struct Provider {
 }
 
 #[derive(Debug, TypedBuilder)]
-struct Config<T: CacheStorage> {
+pub struct Config<T: CacheStorage> {
     base_url: String,
     uri: Uri,
-    cache: T,
     provider_configs: Provider,
+    cache_storage: T,
 }
 
-async fn api<T>(config: Config<T>) -> OauthResult<AccountOauth>
+pub async fn fetch_account<T>(config: Config<T>) -> OauthResult<AccountOauth>
 where
     T: CacheStorage,
 {
     let Config {
         base_url,
         uri,
-        cache,
+        cache_storage: cache,
         provider_configs,
     } = config;
     let redirect_url = Url::parse(&format!("{base_url}{uri}")).map(RedirectUrlReturned)?;
 
-    let code = redirect_url.authorization_code();
+    let code = redirect_url.authorization_code().ok_or(
+        OauthError::AuthorizationCodeNotFoundInRedirectUrl(uri.to_string()),
+    )?;
 
     // make .verify give me back both the csrf token and the provider
-    let csrf_token = redirect_url.csrf_token();
+    let csrf_token = redirect_url
+        .csrf_token()
+        .ok_or(OauthError::CsrfTokenNotFoundInRedirectUrl(uri.to_string()))?;
 
     // let cache = cg::RedisCache(redis.clone());
     let evidence = AuthUrlData::verify_csrf_token(csrf_token, cache)
