@@ -5,9 +5,12 @@ use super::{
 
 #[cfg(test)]
 mod tests {
+    use async_std;
+    use httpmock::prelude::*;
     use std::collections::HashMap;
 
     use oauth2::http::Uri;
+    use pretty_assertions::{assert_str_eq, assert_eq};
 
     use crate::{
         configurations::oauth::{OauthCredentials, OauthGithubCredentials, OauthGoogleCredentials},
@@ -41,10 +44,10 @@ mod tests {
             .client_secret(String::from("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"))
             .build();
 
-        let oauth_credentials = OauthCredentials::builder()
-            .google(google_credentials.clone())
-            .github(github_credentials.clone())
-            .build();
+        // let oauth_credentials = OauthCredentials::builder()
+        //     .google(google_credentials.clone())
+        //     .github(github_credentials.clone())
+        //     .build();
         let oauth_github_settings = OauthGithubSettings::builder()
             .base_url("https://oyelowo.test".to_string())
             .credentials(github_credentials)
@@ -58,18 +61,69 @@ mod tests {
 
         let providers = Provider::builder().github(github).google(google).build();
         // let cache = HashMap::new();
-        let cache_storage = HashMapCache::new();
-        let conf = Config::builder()
-            .base_url("base_url".to_string())
-            .uri(Uri::from_static("src"))
-            .provider_configs(providers)
-            .cache_storage(cache_storage)
-            .build();
-            
-        let p = conf.fetch_account();
+        let mut cache_storage = HashMapCache::new();
+        // {
 
-        assert_eq!(4, 4);
+        // }
+
+        async_std::task::block_on(async {
+            // use httpmock::{Mock, MockServer};
+            // use std::time::{Duration, SystemTime};
+            // use tokio_test::block_on;
+            let _ = env_logger::try_init;
+            // Arrange
+            let server = MockServer::start_async().await;
+            // let mock = server
+            //     .mock_async(|when, then| {
+            //         when.path_contains("oyelowo");
+            //         then.status(200);
+            //     })
+            //     .await;
+
+            let conf = Config::builder()
+                .base_url("base_url".to_string())
+                .uri(Uri::from_static("/oauth/callback"))
+                .provider_configs(providers)
+                .cache_storage(&mut cache_storage)
+                .build();
+            let p = conf
+                .initiate_oauth(crate::oauth::OauthProvider::Google)
+                .await
+                .unwrap();
+            // let p = conf.fetch_account().await.unwrap();
+
+            // let k = o.0.insert("key".to_string(), "query".to_string());
+            // mock.assert_async().await;
+            assert_eq!(4, 4);
+            // let x = cache_storage.clone().0;
+            let s = HashMap::from([
+                ("1".to_string(), "2".to_string()),
+                ("3".to_string(), "4".to_string()),
+            ]);
+            assert_eq!(cache_storage.0, s);
+        });
     }
 }
 
+/*
+async_std::task::block_on(async {
+    use std::time::{SystemTime, Duration};
+    use httpmock::{MockServer, Mock};
+    use tokio_test::block_on;
+    let _ = env_logger::try_init();
 
+    // Arrange
+    let server = MockServer::start_async().await;
+
+    let mock = Mock::new()
+        .return_status(200)
+        .create_on_async(&server)
+        .await;
+
+    // Act
+    let response = isahc::get_async(server.url("/delay")).await.unwrap();
+
+    // Assert
+    mock.assert_async().await;
+});
+*/

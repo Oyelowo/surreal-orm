@@ -79,4 +79,8 @@ multimap = "0.8.3"
 
 
 [dev-dependencies]
+async-std = "1.12.0"
+env_logger = "0.9.0"
+tokio-test = "0.4.2"
 pretty_assertions = "1.2.1"
+httpmock = "0.6.6"

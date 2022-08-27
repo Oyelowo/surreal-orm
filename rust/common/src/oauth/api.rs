@@ -21,16 +21,16 @@ pub struct Provider {
     google: Option<GoogleConfig>,
 }
 
-#[derive(Debug, TypedBuilder, Clone)]
-pub struct Config<Cache: CacheStorage> {
+#[derive(Debug, TypedBuilder)]
+pub struct Config<'a, Cache: CacheStorage> {
     base_url: String,
     uri: Uri,
     provider_configs: Provider,
-    cache_storage: Cache,
+    cache_storage: &'a mut Cache,
 }
 
 // #[async_trait::async_trait]
-impl<Cache: CacheStorage> Config<Cache> {
+impl<'a, Cache: CacheStorage> Config<'a, Cache> {
     // pub async fn fetch_account<T>(config: Config<T>) -> OauthResult<AccountOauth>
     // where
     // T: CacheStorage,
@@ -81,7 +81,7 @@ impl<Cache: CacheStorage> Config<Cache> {
         Ok(account_oauth)
     }
 
-    async fn save_csrf_token(&self, oauth_provider: OauthProvider) -> OauthResult<AuthUrlData> {
+    pub async fn initiate_oauth(self, oauth_provider: OauthProvider) -> OauthResult<AuthUrlData> {
         // self.provider_configs.github.unwrap().basic_config().generate_auth_url()
         let Provider { github, google } = self.provider_configs.clone();
         let auth_url_data = match oauth_provider {
@@ -96,13 +96,23 @@ impl<Cache: CacheStorage> Config<Cache> {
         };
 
         // let cache = cg::RedisCache(redis.clone());
-
-        auth_url_data.save(self.cache_storage.clone()).await?;
+        let p = &mut *self.cache_storage;
+        auth_url_data.save(p).await?;
         Ok(auth_url_data)
     }
 }
 
+/*
+   let auth_url_data = match oauth_provider {
+       OauthProvider::Github => GithubConfig::new().basic_config().generate_auth_url(),
+       OauthProvider::Google => GoogleConfig::new().basic_config().generate_auth_url(),
+   };
 
+   let cache = cg::RedisCache(redis.clone());
+
+   auth_url_data
+       .save(cache)
+*/
 
 // #[cfg(test)]
 // mod tests {

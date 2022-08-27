@@ -36,7 +36,6 @@ pub enum OauthError {
 
     // #[error("Failed to get query param from URL: {0}")]
     // GetUrlQueryParamFailed(String),
-
     #[error("Authorization code not found in redirect URL: {0}")]
     AuthorizationCodeNotFoundInRedirectUrl(String),
 
@@ -59,16 +58,16 @@ pub enum OauthError {
 
 /// Tokens stored in redis for returned url oauth verification
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct Evidence {
-    pub(crate) csrf_token: CsrfToken,
-    pub(crate) provider: OauthProvider,
-    pub(crate) pkce_code_verifier: PkceCodeVerifier,
+pub struct Evidence {
+    pub csrf_token: CsrfToken,
+    pub provider: OauthProvider,
+    pub pkce_code_verifier: PkceCodeVerifier,
 }
 
 pub(crate) type OauthResult<T> = Result<T, OauthError>;
 /// The url returned by the oauth provider with code and state(which should be the one we send)
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct RedirectUrlReturned(pub(crate) Url);
+pub struct RedirectUrlReturned(pub Url);
 
 impl RedirectUrlReturned {
     pub(crate) fn into_inner(self) -> Url {
@@ -105,18 +104,18 @@ impl RedirectUrlReturned {
 
 /// authorization URL to which we'll redirect the user
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct AuthUrlData {
-    pub(crate) authorize_url: RedirectUrlReturned,
-    pub(crate) evidence: Evidence,
+pub struct AuthUrlData {
+    pub authorize_url: RedirectUrlReturned,
+    pub evidence: Evidence,
 }
 
 impl AuthUrlData {
-    const OAUTH_CSRF_STATE_KEY: &'static str = "OAUTH_CSRF_STATE_KEY";
-
+    
     fn oauth_cache_key_prefix(csrf_token: CsrfToken) -> String {
+        let oauth_csrf_state_key = "OAUTH_CSRF_STATE_KEY";
         format!(
-            "{}{:?}",
-            Self::OAUTH_CSRF_STATE_KEY,
+            "{}_{}",
+            oauth_csrf_state_key,
             csrf_token.secret().as_str()
         )
     }
@@ -133,7 +132,10 @@ impl AuthUrlData {
         Some(auth_url_data)
     }
 
-    pub(crate) async fn save(&self, storage: impl CacheStorage) -> OauthResult<()> {
+    pub(crate) async fn save<C>(&self, storage: &mut C) -> OauthResult<()>
+    where
+        C: CacheStorage,
+    {
         let key = Self::oauth_cache_key_prefix(self.evidence.csrf_token.clone());
         let csrf_state_data_string = serde_json::to_string(&self)?;
         storage.set(key, csrf_state_data_string).await;

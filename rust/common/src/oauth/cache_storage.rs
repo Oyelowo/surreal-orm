@@ -13,7 +13,7 @@ pub trait CacheStorage: Send + Sync + Clone + 'static {
     /// Load the query by `key`.
     async fn get(&self, key: String) -> Option<String>;
     /// Save the query by `key`.
-    async fn set(&self, key: String, query: String);
+    async fn set(&mut self, key: String, query: String);
 }
 
 use redis::AsyncCommands;
@@ -36,7 +36,7 @@ impl CacheStorage for RedisCache {
         Some(data)
     }
 
-    async fn set(&self, key: String, value: String) {
+    async fn set(&mut self, key: String, value: String) {
         let mut con = self.0.get_async_connection().await.unwrap();
         con.set::<String, String, String>(key.clone(), value);
 
@@ -49,7 +49,7 @@ impl CacheStorage for RedisCache {
 }
 
 #[derive(Debug, Clone)]
-pub struct HashMapCache(HashMap<String, String>);
+pub struct HashMapCache(pub HashMap<String, String>);
 // pub struct HashMapCache(HashMap<String, String>);
 
 impl HashMapCache {
@@ -66,8 +66,10 @@ impl CacheStorage for HashMapCache {
         data
     }
 
-    async fn set(&self, key: String, value: String) {
-        self.set(key, value).await;
+    // #[warn(unused_must_use)]
+    async fn set(&mut self, key: String, value: String) {
+        // let mut  p = &self.0;
+        self.0.insert(key, value);
     }
 }
 
