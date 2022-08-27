@@ -73,37 +73,95 @@ mod tests {
             let _ = env_logger::try_init;
             // Arrange
             let server = MockServer::start_async().await;
-            // let mock = server
-            //     .mock_async(|when, then| {
-            //         when.path_contains("oyelowo");
-            //         then.status(200);
-            //     })
-            //     .await;
+            let mock = server
+                .mock_async(|when, then| {
+                    when.path_contains("google.com");
+                    then.status(200);
+                })
+                .await;
+// https://accounts.google.com/o/oauth2/auth?client_id=XXXXX&redirect_uri=http://localhost:8080/WEBAPP/youtube-callback.html&response_type=code&scope=https://www.googleapis.com/auth/youtube.upload
+
+            let redirect_uri = "https://oyelowo.test/redirect?code=g0ZGZmNjVmOWI&state=dkZmYxMzE2";
+            // let redirect_uri = "https://oyelowo.test/redirect?code=g0ZGZmNjVmOWI&state=dkZmYxMzE2";
+//             let redirect_uri = "https://accounts.google.com/o/oauth2/v2/auth?\
+//  scope=email%20profile&\
+//  response_type=code&\
+//  state=security_token%3D138r5719ru3e1%26url%3Dhttps%3A%2F%2Foauth2.example.com%2Ftoken&\
+//  redirect_uri=oyelowo.test%3A/oauth/callback&\
+//  client_id=client_id";
 
             let conf = Config::builder()
-                .base_url("base_url".to_string())
-                .uri(Uri::from_static("/oauth/callback"))
+                .base_url("https://oyelowo.test".to_string())
+                .uri(Uri::from_static(redirect_uri))
+                // .uri(Uri::from("/oauth/callback"))
                 .provider_configs(providers)
-                .cache_storage(&mut cache_storage)
+                // .cache_storage(&mut cache_storage)
                 .build();
-            let p = conf
-                .initiate_oauth(crate::oauth::OauthProvider::Google)
-                .await
-                .unwrap();
-            // let p = conf.fetch_account().await.unwrap();
+
+            // let p = conf
+            //     .initiate_oauth(crate::oauth::OauthProvider::Google,  cache_storage.clone())
+            //     .await
+            //     .unwrap();
+
+            let p = conf.fetch_account(cache_storage).await.unwrap();
 
             // let k = o.0.insert("key".to_string(), "query".to_string());
-            // mock.assert_async().await;
             assert_eq!(4, 4);
-            // let x = cache_storage.clone().0;
-            let s = HashMap::from([
-                ("1".to_string(), "2".to_string()),
-                ("3".to_string(), "4".to_string()),
-            ]);
-            assert_eq!(cache_storage.0, s);
+            mock.assert_async().await;
+            // let s = HashMap::from([
+            //     ("1".to_string(), "2".to_string()),
+            //     ("3".to_string(), "4".to_string()),
+            // ]);
+            // assert_eq!(cache_storage.0, s);
         });
     }
 }
+
+/* 
+https://accounts.google.com/o/oauth2/v2/auth?
+ scope=email%20profile&
+ response_type=code&
+ state=security_token%3D138r5719ru3e1%26url%3Dhttps%3A%2F%2Foauth2.example.com%2Ftoken&
+ redirect_uri=com.example.app%3A/oauth2redirect&
+ client_id=client_id
+ */
+/* 
+https://accounts.google.com/o/oauth2/v2/auth?
+ scope=https%3A//www.googleapis.com/auth/drive.metadata.readonly&
+ access_type=offline&
+ include_granted_scopes=true&
+ response_type=code&
+ state=state_parameter_passthrough_value&
+ redirect_uri=https%3A//oauth2.example.com/code&
+ client_id=client_id
+*/
+
+
+/* 
+https://accounts.google.com/o/oauth2/v2/auth?
+ scope=https%3A//www.googleapis.com/auth/drive.metadata.readonly&
+ access_type=offline&
+ include_granted_scopes=true&
+ response_type=code&
+ state=state_parameter_passthrough_value&
+ redirect_uri=https%3A//oauth2.example.com/code&
+ client_id=client_id
+*/
+
+
+/* 
+https://accounts.google.com/o/oauth2/auth?
+  client_id=21302922996.apps.googleusercontent.com&
+  redirect_uri=https://www.example.com/back&
+  scope=https://www.google.com/m8/feeds/&
+  response_type=token&
+  state=asdafwswdwefwsdg,
+*/
+
+/* 
+https://accounts.google.com/o/oauth2/auth?client_id={clientid}.apps.googleusercontent.com&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=https://www.googleapis.com/auth/analytics.readonly&response_type=code
+*/
+
 
 /*
 async_std::task::block_on(async {

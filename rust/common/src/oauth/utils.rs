@@ -110,14 +110,9 @@ pub struct AuthUrlData {
 }
 
 impl AuthUrlData {
-    
     fn oauth_cache_key_prefix(csrf_token: CsrfToken) -> String {
         let oauth_csrf_state_key = "OAUTH_CSRF_STATE_KEY";
-        format!(
-            "{}_{}",
-            oauth_csrf_state_key,
-            csrf_token.secret().as_str()
-        )
+        format!("{}_{}", oauth_csrf_state_key, csrf_token.secret().as_str())
     }
 
     pub(crate) async fn verify_csrf_token(

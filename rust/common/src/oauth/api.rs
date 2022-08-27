@@ -22,19 +22,22 @@ pub struct Provider {
 }
 
 #[derive(Debug, TypedBuilder)]
-pub struct Config<'a, Cache: CacheStorage> {
+pub struct Config {
     base_url: String,
     uri: Uri,
     provider_configs: Provider,
-    cache_storage: &'a mut Cache,
+    // cache_storage: &'a mut Cache,
 }
 
 // #[async_trait::async_trait]
-impl<'a, Cache: CacheStorage> Config<'a, Cache> {
+impl Config {
     // pub async fn fetch_account<T>(config: Config<T>) -> OauthResult<AccountOauth>
     // where
     // T: CacheStorage,
-    pub async fn fetch_account(&self) -> OauthResult<AccountOauth> {
+    pub async fn fetch_account(
+        &self,
+        cache_storage: impl CacheStorage,
+    ) -> OauthResult<AccountOauth> {
         let Config {
             base_url,
             uri,
@@ -54,7 +57,7 @@ impl<'a, Cache: CacheStorage> Config<'a, Cache> {
             .ok_or(OauthError::CsrfTokenNotFoundInRedirectUrl(uri.to_string()))?;
 
         // let cache = cg::RedisCache(redis.clone());
-        let evidence = AuthUrlData::verify_csrf_token(csrf_token, self.cache_storage.clone())
+        let evidence = AuthUrlData::verify_csrf_token(csrf_token, cache_storage)
             .await
             .unwrap()
             .evidence;
@@ -81,7 +84,11 @@ impl<'a, Cache: CacheStorage> Config<'a, Cache> {
         Ok(account_oauth)
     }
 
-    pub async fn initiate_oauth(self, oauth_provider: OauthProvider) -> OauthResult<AuthUrlData> {
+    pub async fn initiate_oauth(
+        self,
+        oauth_provider: OauthProvider,
+        mut cache_storage: impl CacheStorage,
+    ) -> OauthResult<AuthUrlData> {
         // self.provider_configs.github.unwrap().basic_config().generate_auth_url()
         let Provider { github, google } = self.provider_configs.clone();
         let auth_url_data = match oauth_provider {
@@ -96,8 +103,8 @@ impl<'a, Cache: CacheStorage> Config<'a, Cache> {
         };
 
         // let cache = cg::RedisCache(redis.clone());
-        let p = &mut *self.cache_storage;
-        auth_url_data.save(p).await?;
+        // let p = self.cache_storage;
+        auth_url_data.save(&mut cache_storage).await?;
         Ok(auth_url_data)
     }
 }
