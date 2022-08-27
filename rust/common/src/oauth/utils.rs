@@ -1,4 +1,4 @@
-use std::ops::DerefMut;
+use std::{ops::DerefMut, fmt::Debug};
 
 // use common::configurations::{application::ApplicationConfigs, redis::RedisConfigError};
 use derive_more::{From, Into};
@@ -115,15 +115,16 @@ impl AuthUrlData {
         format!("{}_{}", oauth_csrf_state_key, csrf_token.secret().as_str())
     }
 
-    pub(crate) async fn verify_csrf_token(
+    pub(crate) async fn verify_csrf_token<C: CacheStorage + Debug>(
         csrf_token: CsrfToken,
-        storage: impl CacheStorage,
+        storage: &C,
     ) -> Option<Self> {
         let key = Self::oauth_cache_key_prefix(csrf_token);
         // TODO: Handle error properly
-        let auth_url_data = storage.get(key).await.unwrap();
+        print!("{storage:?}");
+        let auth_url_data = storage.get(key).await;
 
-        let auth_url_data = serde_json::from_str::<Self>(&auth_url_data.as_str()).unwrap();
+        let auth_url_data = serde_json::from_str::<Self>(&auth_url_data.unwrap().as_str()).unwrap();
 
         Some(auth_url_data)
     }

@@ -9,6 +9,7 @@ mod tests {
     use httpmock::prelude::*;
     use multimap::MultiMap;
     use std::collections::HashMap;
+    use url::Url;
 
     use oauth2::http::Uri;
     use pretty_assertions::{assert_eq, assert_str_eq};
@@ -82,7 +83,6 @@ mod tests {
             //     .await;
             // https://accounts.google.com/o/oauth2/auth?client_id=XXXXX&redirect_uri=http://localhost:8080/WEBAPP/youtube-callback.html&response_type=code&scope=https://www.googleapis.com/auth/youtube.upload
 
-            let redirect_uri = "https://oyelowo.test/redirect?code=g0ZGZmNjVmOWI&state=dkZmYxMzE2";
             // let redirect_uri = "https://oyelowo.test/redirect?code=g0ZGZmNjVmOWI&state=dkZmYxMzE2";
             //             let redirect_uri = "https://accounts.google.com/o/oauth2/v2/auth?\
             //  scope=email%20profile&\
@@ -92,8 +92,8 @@ mod tests {
             //  client_id=client_id";
 
             let conf = Config::builder()
-                .base_url("https://oyelowo.test".to_string())
-                .uri(Uri::from_static(redirect_uri))
+                // .base_url("https://oyelowo.test".to_string())
+                // .uri(Uri::from_static(redirect_uri))
                 // .uri(Uri::from("/oauth/callback"))
                 .provider_configs(providers)
                 // .cache_storage(&mut cache_storage)
@@ -102,13 +102,14 @@ mod tests {
             let auth_url_data = conf.generate_auth_url_data(crate::oauth::OauthProvider::Google);
 
             let hash_query: MultiMap<_, _> = auth_url_data
-                .authorize_url.0
+                .authorize_url
+                .0
                 // .into_inner()
                 .query_pairs()
                 .into_owned()
                 .collect();
             auth_url_data.save(&mut cache_storage).await.unwrap();
-            let m = format!(
+            let  m = format!(
                 "OAUTH_CSRF_STATE_KEY_{}",
                 auth_url_data
                     .authorize_url
@@ -122,8 +123,23 @@ mod tests {
             //     .await
             //     .unwrap();
 
-            let p = conf.fetch_account(cache_storage.clone()).await.unwrap();
+            let state = hash_query.get("state").unwrap();
+            let redirect_uri = format!("redirect?code=g0ZGZmNjVmOWI&state={:?}", state);
+            // let redirect_uri = "https://oyelowo.test/redirect?code=g0ZGZmNjVmOWI&state=dkZmYxMzE2";
+            //
+            let redirect_url =
+                Url::parse(format!("https://oyelowo.test/{redirect_uri}").as_str()).unwrap();
+            // assert_eq!("x".to_string(), redirect_url.to_string());
+            assert!(cache_storage.get(m.to_string()).await.unwrap().contains(state));
+            // assert_eq!(
+            //     redirect_url.to_string(),
+            //     cache_storage.get(m).await.unwrap()
+            // );
 
+            let p = conf
+                .fetch_account(redirect_url, cache_storage)
+                .await
+                .unwrap();
             // let k = o.0.insert("key".to_string(), "query".to_string());
             assert_eq!(4, 4);
             // mock.assert_async().await;
@@ -131,10 +147,10 @@ mod tests {
             //     ("1".to_string(), "2".to_string()),
             //     ("3".to_string(), "4".to_string()),
             // ]);
-            let n = cache_storage.0.get(&m).unwrap().to_owned();
+            // let n = cache_storage.0.get(&m).unwrap().to_owned();
             // let  mm= hash_query.get(&m);
             // assert_eq!(n, "".to_string());
-            assert_eq!(hash_query, MultiMap::from_iter(cache_storage.0));
+            // assert_eq!(hash_query, MultiMap::from_iter(cache_storage.0));
             // assert!(n.contains(hash_query.get(&m).unwrap()));
         });
     }

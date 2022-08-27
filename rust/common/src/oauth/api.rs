@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use oauth2::http::Uri;
 use typed_builder::TypedBuilder;
 use url::Url;
@@ -23,8 +25,8 @@ pub struct Provider {
 
 #[derive(Debug, TypedBuilder)]
 pub struct Config {
-    base_url: String,
-    uri: Uri,
+    // base_url: String,
+    // uri: Uri,
     provider_configs: Provider,
     // cache_storage: &'a mut Cache,
 }
@@ -34,30 +36,33 @@ impl Config {
     // pub async fn fetch_account<T>(config: Config<T>) -> OauthResult<AccountOauth>
     // where
     // T: CacheStorage,
-    pub async fn fetch_account(
+    pub async fn fetch_account<C: CacheStorage + Debug>(
         &self,
-        cache_storage: impl CacheStorage,
+        redirect_url: Url,
+        cache_storage: C,
     ) -> OauthResult<AccountOauth> {
         let Config {
-            base_url,
-            uri,
+            // base_url,
+            // uri,
             // cache_storage: cache,
             provider_configs,
             ..
         } = self;
-        let redirect_url = Url::parse(&format!("{base_url}{uri}")).map(RedirectUrlReturned)?;
+        // let redirect_url = Url::parse(&format!("{base_url}{uri}")).map(RedirectUrlReturned)?;
+        // let uri = redirect_url
+        let redirect_url_wrapped = RedirectUrlReturned(redirect_url.clone());
 
-        let code = redirect_url.authorization_code().ok_or(
-            OauthError::AuthorizationCodeNotFoundInRedirectUrl(uri.to_string()),
+        let code = redirect_url_wrapped.authorization_code().ok_or(
+            OauthError::AuthorizationCodeNotFoundInRedirectUrl(redirect_url.to_string()),
         )?;
 
         // make .verify give me back both the csrf token and the provider
-        let csrf_token = redirect_url
+        let csrf_token = redirect_url_wrapped
             .csrf_token()
-            .ok_or(OauthError::CsrfTokenNotFoundInRedirectUrl(uri.to_string()))?;
+            .ok_or(OauthError::CsrfTokenNotFoundInRedirectUrl(redirect_url.to_string()))?;
 
         // let cache = cg::RedisCache(redis.clone());
-        let evidence = AuthUrlData::verify_csrf_token(csrf_token, cache_storage)
+        let evidence = AuthUrlData::verify_csrf_token(csrf_token, &cache_storage)
             .await
             .unwrap()
             .evidence;
