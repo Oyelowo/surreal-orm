@@ -98,7 +98,7 @@ impl RedirectUrlReturned {
         // Ok(value)
         // let auth_url = self.0.clone();
         let hash_query: MultiMap<_, _> = self.0.query_pairs().into_owned().collect();
-        let p = hash_query.get(query_param).map(|v| v.clone());
+        let p = hash_query.get(query_param).map(String::from);
         p
     }
 }

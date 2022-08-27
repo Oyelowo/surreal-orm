@@ -6,11 +6,14 @@ use super::{
     cache_storage::CacheStorage,
     github::GithubConfig,
     google::GoogleConfig,
-    utils::{AuthUrlData, OauthError, OauthProviderTrait, OauthResult, RedirectUrlReturned},
+    utils::{
+        AuthUrlData, OauthConfigTrait, OauthError, OauthProviderTrait, OauthResult,
+        RedirectUrlReturned,
+    },
     AccountOauth, OauthProvider,
 };
 
-#[derive(Debug, TypedBuilder)]
+#[derive(Debug, TypedBuilder, Clone)]
 pub struct Provider {
     #[builder(default, setter(strip_option))]
     github: Option<GithubConfig>,
@@ -18,57 +21,99 @@ pub struct Provider {
     google: Option<GoogleConfig>,
 }
 
-#[derive(Debug, TypedBuilder)]
-pub struct Config<T: CacheStorage> {
+#[derive(Debug, TypedBuilder, Clone)]
+pub struct Config<Cache: CacheStorage> {
     base_url: String,
     uri: Uri,
     provider_configs: Provider,
-    cache_storage: T,
+    cache_storage: Cache,
 }
 
-pub async fn fetch_account<T>(config: Config<T>) -> OauthResult<AccountOauth>
-where
-    T: CacheStorage,
-{
-    let Config {
-        base_url,
-        uri,
-        cache_storage: cache,
-        provider_configs,
-    } = config;
-    let redirect_url = Url::parse(&format!("{base_url}{uri}")).map(RedirectUrlReturned)?;
+// #[async_trait::async_trait]
+impl<Cache: CacheStorage> Config<Cache> {
+    // pub async fn fetch_account<T>(config: Config<T>) -> OauthResult<AccountOauth>
+    // where
+    // T: CacheStorage,
+    pub async fn fetch_account(&self) -> OauthResult<AccountOauth> {
+        let Config {
+            base_url,
+            uri,
+            // cache_storage: cache,
+            provider_configs,
+            ..
+        } = self;
+        let redirect_url = Url::parse(&format!("{base_url}{uri}")).map(RedirectUrlReturned)?;
 
-    let code = redirect_url.authorization_code().ok_or(
-        OauthError::AuthorizationCodeNotFoundInRedirectUrl(uri.to_string()),
-    )?;
+        let code = redirect_url.authorization_code().ok_or(
+            OauthError::AuthorizationCodeNotFoundInRedirectUrl(uri.to_string()),
+        )?;
 
-    // make .verify give me back both the csrf token and the provider
-    let csrf_token = redirect_url
-        .csrf_token()
-        .ok_or(OauthError::CsrfTokenNotFoundInRedirectUrl(uri.to_string()))?;
+        // make .verify give me back both the csrf token and the provider
+        let csrf_token = redirect_url
+            .csrf_token()
+            .ok_or(OauthError::CsrfTokenNotFoundInRedirectUrl(uri.to_string()))?;
 
-    // let cache = cg::RedisCache(redis.clone());
-    let evidence = AuthUrlData::verify_csrf_token(csrf_token, cache)
-        .await
-        .unwrap()
-        .evidence;
+        // let cache = cg::RedisCache(redis.clone());
+        let evidence = AuthUrlData::verify_csrf_token(csrf_token, self.cache_storage.clone())
+            .await
+            .unwrap()
+            .evidence;
 
-    let account_oauth = match evidence.provider {
-        OauthProvider::Github => {
-            provider_configs
-                .github
-                .expect("You must provide github credentials")
-                .fetch_oauth_account(code, evidence.pkce_code_verifier)
-                .await
-        }
-        OauthProvider::Google => {
-            provider_configs
-                .google
-                .expect("You must provide google oauth credentials")
-                .fetch_oauth_account(code, evidence.pkce_code_verifier)
-                .await
-        }
-    }?;
+        let account_oauth = match evidence.provider {
+            OauthProvider::Github => {
+                provider_configs
+                    .github
+                    .as_ref()
+                    .expect("You must provide github credentials")
+                    .fetch_oauth_account(code, evidence.pkce_code_verifier)
+                    .await
+            }
+            OauthProvider::Google => {
+                provider_configs
+                    .google
+                    .as_ref()
+                    .expect("You must provide google oauth credentials")
+                    .fetch_oauth_account(code, evidence.pkce_code_verifier)
+                    .await
+            }
+        }?;
 
-    Ok(account_oauth)
+        Ok(account_oauth)
+    }
+
+    async fn save_csrf_token(&self, oauth_provider: OauthProvider) -> OauthResult<AuthUrlData> {
+        // self.provider_configs.github.unwrap().basic_config().generate_auth_url()
+        let Provider { github, google } = self.provider_configs.clone();
+        let auth_url_data = match oauth_provider {
+            OauthProvider::Github => github
+                .expect("no github config")
+                .basic_config()
+                .generate_auth_url(),
+            OauthProvider::Google => google
+                .expect("no google config")
+                .basic_config()
+                .generate_auth_url(),
+        };
+
+        // let cache = cg::RedisCache(redis.clone());
+
+        auth_url_data.save(self.cache_storage.clone()).await?;
+        Ok(auth_url_data)
+    }
 }
+
+// async fn save_csrf_token() {
+
+//     let auth_url_data = match oauth_provider {
+//         OauthProvider::Github => GithubConfig::new().basic_config().generate_auth_url(),
+//         OauthProvider::Google => GoogleConfig::new().basic_config().generate_auth_url(),
+//     };
+
+//     let cache = cg::RedisCache(redis.clone());
+
+//     auth_url_data
+//         .save(cache)
+//         .await
+//         .map_err(HandlerError::StorageError)
+//         .map_err(InternalServerError)?;
+// }
