@@ -17,13 +17,11 @@ use super::{
     client::OauthClient,
     OauthProvider,
 };
+use crate::oauth::cache_storage::LruCache;
 use crate::oauth::utils::AuthUrlData;
 use crate::{
     configurations::oauth::{OauthCredentials, OauthGithubCredentials, OauthGoogleCredentials},
-    oauth::{
-        github::GithubConfig,
-        google::{GoogleConfig},
-    },
+    oauth::{github::GithubConfig, google::GoogleConfig},
 };
 
 fn prepare_client() -> (GithubConfig, GoogleConfig) {
@@ -103,4 +101,97 @@ async fn generates_and_stores_and_get_right_auth_url_for_google_oauth() {
     )
     .await
     .is_ok());
+}
+
+#[tokio::test]
+async fn lru_generates_and_stores_and_get_right_auth_url_for_github_oauth() {
+    let mut cache_storage = LruCache::new(2000);
+    let (github, google) = prepare_client();
+    let mut oauth_client = OauthClient::builder()
+        .github(&github)
+        .google(&google)
+        .cache_storage(&mut cache_storage)
+        .build();
+
+    // Act
+    let auth_url_data = oauth_client
+        .generate_auth_url_data(OauthProvider::Github)
+        .await
+        .unwrap();
+
+    let prefixed_csrf_token =
+        AuthUrlData::oauth_cache_key_prefix(auth_url_data.authorize_url.get_csrf_token().unwrap());
+
+    // Assert
+    assert!(cache_storage.get(prefixed_csrf_token.to_string()).await.unwrap().clone().contains("https://github.com/login/oauth/authorize?response_type=code&client_id=89c19374f7e7b5b35164&state"));
+
+    assert!(AuthUrlData::verify_csrf_token(
+        auth_url_data.authorize_url.get_csrf_token().unwrap(),
+        &mut cache_storage
+    )
+    .await
+    .is_ok());
+}
+
+#[tokio::test]
+async fn lru_generates_and_stores_and_get_right_auth_url_for_google_oauth() {
+    let mut cache_storage = LruCache::new(10);
+    let (github, google) = prepare_client();
+    let mut oauth_client = OauthClient::builder()
+        .github(&github)
+        .google(&google)
+        .cache_storage(&mut cache_storage)
+        .build();
+
+    // Act
+    let auth_url_data = oauth_client
+        .generate_auth_url_data(OauthProvider::Google)
+        .await
+        .unwrap();
+
+    let prefixed_csrf_token =
+        AuthUrlData::oauth_cache_key_prefix(auth_url_data.authorize_url.get_csrf_token().unwrap());
+
+    // Assert
+    assert!(cache_storage.get(prefixed_csrf_token.to_string()).await.unwrap().clone().contains("https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=855174209543-6m0f088e55d3mevhnr8bs0qjap8j6g0g.apps.googleusercontent.com&state"));
+
+    assert!(AuthUrlData::verify_csrf_token(
+        auth_url_data.authorize_url.get_csrf_token().unwrap(),
+        &mut cache_storage
+    )
+    .await
+    .is_ok());
+}
+
+#[tokio::test]
+async fn lru_empty_generates_and_stores_and_get_right_auth_url_for_google_oauth() {
+    let mut cache_storage = LruCache::new(0);
+    let (github, google) = prepare_client();
+    let mut oauth_client = OauthClient::builder()
+        .github(&github)
+        .google(&google)
+        .cache_storage(&mut cache_storage)
+        .build();
+
+    // Act
+    let auth_url_data = oauth_client
+        .generate_auth_url_data(OauthProvider::Google)
+        .await
+        .unwrap();
+
+    let prefixed_csrf_token =
+        AuthUrlData::oauth_cache_key_prefix(auth_url_data.authorize_url.get_csrf_token().unwrap());
+
+    // Assert
+    assert!(cache_storage
+        .get(prefixed_csrf_token.to_string())
+        .await
+        .is_none());
+
+    assert!(AuthUrlData::verify_csrf_token(
+        auth_url_data.authorize_url.get_csrf_token().unwrap(),
+        &mut cache_storage
+    )
+    .await
+    .is_err());
 }

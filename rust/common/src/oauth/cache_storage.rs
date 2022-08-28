@@ -72,13 +72,12 @@ impl CacheStorage for HashMapCache {
     }
 }
 
+
 /// LRU cache.
-// #[derive(Clone)]
-// pub struct LruCache {
-//     cap: usize,
-// }
-// #[derive(Clone)]
-struct LruCache(lru::LruCache<String, String>);
+/// 
+
+#[derive(Debug)]
+pub struct LruCache(lru::LruCache<String, String>);
 
 impl LruCache {
     pub fn new(cap: u16) -> Self {
