@@ -51,7 +51,7 @@ where
         Ok(auth_url_data)
     }
 
-    pub async fn fetch_account(&self, redirect_url: Url) -> OauthResult<AccountOauth> {
+    pub async fn fetch_account(&mut self, redirect_url: Url) -> OauthResult<AccountOauth> {
         // let redirect_url = Url::parse(&format!("{base_url}{uri}")).map(RedirectUrlReturned)?;
         let redirect_url_wrapped = RedirectUrlReturned(redirect_url.clone());
 

@@ -22,7 +22,7 @@ use crate::{
     configurations::oauth::{OauthCredentials, OauthGithubCredentials, OauthGoogleCredentials},
     oauth::{
         github::GithubConfig,
-        google::{GoogleConfig, OauthGoogleSettings},
+        google::{GoogleConfig},
     },
 };
 

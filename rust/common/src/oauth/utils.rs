@@ -122,7 +122,7 @@ impl AuthUrlData {
 
     pub async fn verify_csrf_token<C: CacheStorage + Debug>(
         csrf_token: CsrfToken,
-        storage: &C,
+        storage: &mut C,
     ) -> OauthResult<Self> {
         let key = Self::oauth_cache_key_prefix(csrf_token);
         // TODO: Handle error properly

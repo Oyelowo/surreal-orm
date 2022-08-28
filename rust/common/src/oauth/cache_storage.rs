@@ -5,13 +5,13 @@ use std::{
     marker::PhantomData,
 };
 
-// use lru;
+use lru;
 use redis::Commands;
 
 #[async_trait::async_trait]
-pub trait CacheStorage: Send + Sync + Clone + 'static {
+pub trait CacheStorage: Send + Sync + 'static {
     /// Load the query by `key`.
-    async fn get(&self, key: String) -> Option<String>;
+    async fn get(&mut self, key: String) -> Option<String>;
     /// Save the query by `key`.
     async fn set(&mut self, key: String, query: String);
 }
@@ -23,7 +23,7 @@ pub struct RedisCache(pub(crate) redis::Client);
 
 #[async_trait::async_trait]
 impl CacheStorage for RedisCache {
-    async fn get(&self, key: String) -> Option<String> {
+    async fn get(&mut self, key: String) -> Option<String> {
         let data: String = self
             .0
             .get_async_connection()
@@ -60,7 +60,7 @@ impl HashMapCache {
 
 #[async_trait::async_trait]
 impl CacheStorage for HashMapCache {
-    async fn get(&self, key: String) -> Option<String> {
+    async fn get(&mut self, key: String) -> Option<String> {
         let data = self.0.get(&key).map(String::from);
 
         data
@@ -72,21 +72,32 @@ impl CacheStorage for HashMapCache {
     }
 }
 
-// /// LRU cache.
+/// LRU cache.
+// #[derive(Clone)]
 // pub struct LruCache {
 //     cap: usize,
 // }
+// #[derive(Clone)]
+struct LruCache(lru::LruCache<String, String>);
 
-// struct LruCacheImpl(pub(crate) lru::LruCache<String, String>);
+impl LruCache {
+    // pub fn new(cap: u16) -> Self {
+    pub fn new(cap: u16) -> Self {
+        let p: lru::LruCache<String, String> = lru::LruCache::new(cap as usize);
+        // Self { cap }
+        // p
+        Self(p)
+        // Self(lru::LruCache<String, String>::new())
+    }
+}
 
-// impl CacheStorage for LruCacheImpl {
-//     #[inline]
-//     fn get(&self, key: String) -> Option<String> {
-//         self.0.get(key)
-//     }
+#[async_trait::async_trait]
+impl CacheStorage for LruCache {
+    async fn get(&mut self, key: String) -> Option<String> {
+        self.0.get(&key).map(|v| v.clone())
+    }
 
-//     #[inline]
-//     fn set(&mut self, key: String, val: String) {
-//         self.0.put(key.into_owned(), val.into_owned());
-//     }
-// }
+    async fn set(&mut self, key: String, value: String) {
+        self.0.put(key, value);
+    }
+}
