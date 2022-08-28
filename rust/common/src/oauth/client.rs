@@ -3,14 +3,13 @@ use typed_builder::TypedBuilder;
 use url::Url;
 
 use super::{
+    account::{OauthProvider, UserAccount},
     cache_storage::CacheStorage,
+    error::{OauthError, OauthResult},
     github::GithubConfig,
     google::GoogleConfig,
-    utils::{
-        AuthUrlData, OauthConfigTrait, OauthError, OauthProviderTrait, OauthResult,
-        RedirectUrlReturned,
-    },
-    AccountOauth, OauthProvider,
+    oauth_config::{OauthConfigTrait, OauthProviderTrait},
+    urls::{AuthUrlData, RedirectUrlReturned},
 };
 
 #[derive(Debug, TypedBuilder)]
@@ -50,7 +49,7 @@ where
         Ok(auth_url_data)
     }
 
-    pub async fn fetch_account(&mut self, redirect_url: Url) -> OauthResult<AccountOauth> {
+    pub async fn fetch_account(&mut self, redirect_url: Url) -> OauthResult<UserAccount> {
         let redirect_url_wrapped = RedirectUrlReturned::new(redirect_url.clone());
 
         let code = redirect_url_wrapped.get_authorization_code().ok_or(

@@ -14,41 +14,19 @@ use oauth2::{
 use redis::RedisError;
 use reqwest::header::{ACCEPT, USER_AGENT};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use typed_builder::TypedBuilder;
 use url::Url;
 
-use super::{cache_storage::CacheStorage, OauthProvider};
+use super::{
+    account::OauthProvider,
+    cache_storage::CacheStorage,
+    error::{OauthError, OauthResult},
+};
 
 pub(crate) fn get_redirect_url(base_url: &String) -> String {
     // let base_url = ApplicationConfigs::default().external_base_url;
     // Has to be defined in app router
     format!("{base_url}/api/oauth/callback")
 }
-
-#[derive(Debug, thiserror::Error)]
-pub enum OauthError {
-    #[error("Failed to fetch token. Error: {0}")]
-    TokenFetchFailed(String),
-
-    #[error("Failed to fetch resource. Error: {0}")]
-    ResourceFetchFailed(String),
-
-    #[error("Authorization code not found in redirect URL: {0}")]
-    AuthorizationCodeNotFoundInRedirectUrl(String),
-
-    #[error("Csrf Token not found in redirect Url: {0}")]
-    CsrfTokenNotFoundInRedirectUrl(String),
-
-    #[error("Auth url data not found in cache")]
-    AuthUrlDataNotFoundInCache,
-
-    #[error(transparent)]
-    RedisError(#[from] RedisError),
-
-    #[error(transparent)]
-    SerializationError(#[from] serde_json::Error),
-}
-
 /// Tokens stored in redis for returned url oauth verification
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Evidence {
@@ -57,7 +35,6 @@ pub struct Evidence {
     pub pkce_code_verifier: PkceCodeVerifier,
 }
 
-pub(crate) type OauthResult<T> = Result<T, OauthError>;
 /// The url returned by the oauth provider with code and state(which should be the one we send)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RedirectUrlReturned(Url);
@@ -98,12 +75,11 @@ impl AuthUrlData {
         format!("{oauth_csrf_state_key}_{}", csrf_token.secret().as_str())
     }
 
-    pub async fn verify_csrf_token<C: CacheStorage + Debug>(
-        csrf_token: CsrfToken,
-        storage: &mut C,
-    ) -> OauthResult<Self> {
+    pub async fn verify_csrf_token<C>(csrf_token: CsrfToken, storage: &mut C) -> OauthResult<Self>
+    where
+        C: CacheStorage,
+    {
         let key = Self::oauth_cache_key_prefix(csrf_token);
-        // TODO: Handle error properly
         let auth_url_data = storage
             .get(key)
             .await
@@ -147,99 +123,5 @@ impl OauthUrl {
             .map_err(|_| OauthError::ResourceFetchFailed(self.0.to_string()))?;
 
         Ok(serde_json::from_str::<T>(remote_data.as_str())?)
-    }
-}
-
-#[derive(Debug, TypedBuilder, Clone)]
-pub struct OauthConfig {
-    pub client_id: ClientId,
-    pub client_secret: ClientSecret,
-    pub auth_url: AuthUrl,
-    pub token_url: TokenUrl,
-    pub redirect_url: RedirectUrl,
-
-    #[builder(default, setter(strip_option))]
-    pub revocation_url: Option<RevocationUrl>,
-    pub scopes: Vec<Scope>,
-    pub provider: OauthProvider, // pub csrf_token: CsrfToken,
-}
-
-// Nice to have: Account linking. User has to be logged in to link another account.
-// Linking Accounts to Users happen automatically, only when they have the same e-mail address, and the user is currently signed in. Check the FAQ for more information why this is a requirement.
-#[async_trait::async_trait]
-pub(crate) trait OauthProviderTrait {
-    type OauthResponse: DeserializeOwned;
-
-    fn basic_config(&self) -> OauthConfig;
-
-    async fn exchange_token(
-        &self,
-        code: AuthorizationCode,
-        pkce_code_verifier: PkceCodeVerifier,
-    ) -> OauthResult<StandardTokenResponse<EmptyExtraTokenFields, BasicTokenType>> {
-        let token = self
-            .basic_config()
-            .client()
-            .exchange_code(code)
-            .set_pkce_verifier(pkce_code_verifier)
-            .request_async(async_http_client)
-            .await
-            .map_err(|e| OauthError::TokenFetchFailed(e.to_string()))?;
-        Ok(token)
-    }
-
-    async fn fetch_oauth_account(
-        &self,
-        code: AuthorizationCode,
-        pkce_code_verifier: PkceCodeVerifier,
-    ) -> OauthResult<Self::OauthResponse>;
-}
-
-#[async_trait::async_trait]
-pub(crate) trait OauthConfigTrait {
-    fn client(self) -> BasicClient;
-
-    fn generate_auth_url(&self) -> AuthUrlData;
-}
-
-#[async_trait::async_trait]
-impl OauthConfigTrait for OauthConfig {
-    fn client(self) -> BasicClient {
-        let client = BasicClient::new(
-            self.client_id,
-            Some(self.client_secret),
-            self.auth_url,
-            Some(self.token_url),
-        )
-        .set_redirect_uri(self.redirect_url);
-
-        if let Some(url) = self.revocation_url {
-            return client.set_revocation_uri(url);
-        }
-        client
-    }
-
-    /// Generate the authorization URL to which we'll redirect the user.
-    fn generate_auth_url(&self) -> AuthUrlData {
-        let (pkce_code_challenge, pkce_code_verifier) = PkceCodeChallenge::new_random_sha256();
-
-        let (authorize_url, csrf_token) = self
-            .clone()
-            .client()
-            .authorize_url(CsrfToken::new_random)
-            .add_scopes(self.clone().scopes)
-            .set_pkce_challenge(pkce_code_challenge)
-            .url();
-
-        let evidence = Evidence {
-            csrf_token,
-            pkce_code_verifier,
-            provider: self.provider,
-        };
-
-        AuthUrlData {
-            evidence,
-            authorize_url: RedirectUrlReturned(authorize_url),
-        }
     }
 }

@@ -8,8 +8,8 @@ use serde::{Deserialize, Serialize};
 use crate::configurations::oauth::OauthGoogleCredentials;
 
 use super::{
-    utils::{get_redirect_url, OauthConfig, OauthProviderTrait, OauthResult, OauthUrl},
-    AccountOauth, OauthProvider, TokenType,
+    account::{OauthProvider, TokenType, UserAccount},
+    urls::{get_redirect_url, OauthUrl}, oauth_config::{OauthConfig, OauthProviderTrait}, error::OauthResult,
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -71,7 +71,7 @@ impl GoogleConfig {
 
 #[async_trait::async_trait]
 impl OauthProviderTrait for GoogleConfig {
-    type OauthResponse = AccountOauth;
+    type OauthResponse = UserAccount;
 
     fn basic_config(&self) -> OauthConfig {
         self.basic_config.to_owned()
@@ -110,7 +110,7 @@ impl OauthProviderTrait for GoogleConfig {
             .map(|x| x.to_string())
             .collect::<Vec<String>>();
 
-        let account = AccountOauth::builder()
+        let account = UserAccount::builder()
             .id(profile.sub.to_string())
             .provider(OauthProvider::Google)
             .provider_account_id(OauthProvider::Google)
@@ -131,7 +131,7 @@ impl OauthProviderTrait for GoogleConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::oauth::utils::OauthConfigTrait;
+    use crate::oauth::oauth_config::OauthConfigTrait;
     use multimap::MultiMap;
 
     #[test]

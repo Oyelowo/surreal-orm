@@ -1,10 +1,9 @@
 use super::{
     cache_storage::{CacheStorage, HashMapCache},
     client::OauthClient,
-    OauthProvider,
 };
-use crate::oauth::cache_storage::LruCache;
-use crate::oauth::utils::AuthUrlData;
+use crate::oauth::urls::AuthUrlData;
+use crate::oauth::{account::OauthProvider, cache_storage::LruCache};
 use crate::{
     configurations::oauth::{OauthGithubCredentials, OauthGoogleCredentials},
     oauth::{github::GithubConfig, google::GoogleConfig},

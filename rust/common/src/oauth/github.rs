@@ -1,15 +1,17 @@
 use chrono::{Duration, Utc};
 use oauth2::{
-    AuthUrl, AuthorizationCode, ClientId, ClientSecret, PkceCodeVerifier, RedirectUrl, Scope,
-    TokenResponse, TokenUrl,
+    AuthUrl, AuthorizationCode, ClientId, ClientSecret, PkceCodeVerifier, RedirectUrl,
+    RevocationUrl, Scope, TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::configurations::oauth::OauthGithubCredentials;
 
 use super::{
-    utils::{get_redirect_url, OauthConfig, OauthProviderTrait, OauthResult, OauthUrl},
-    AccountOauth, OauthProvider, TokenType,
+    account::{OauthProvider, TokenType, UserAccount},
+    error::OauthResult,
+    oauth_config::{OauthConfig, OauthProviderTrait},
+    urls::{get_redirect_url, OauthUrl},
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -42,7 +44,6 @@ impl GithubConfig {
     /// Creates a new [`GithubConfig`].
     /// Takes in the settings
     pub fn new(base_url: &String, credentials: OauthGithubCredentials) -> Self {
-        // let env = OauthGithubCredentials::default();
         let basic_config = OauthConfig {
             client_id: ClientId::new(credentials.client_id),
             client_secret: ClientSecret::new(credentials.client_secret),
@@ -66,7 +67,7 @@ impl GithubConfig {
 
 #[async_trait::async_trait]
 impl OauthProviderTrait for GithubConfig {
-    type OauthResponse = AccountOauth;
+    type OauthResponse = UserAccount;
 
     fn basic_config(&self) -> OauthConfig {
         self.basic_config.to_owned()
@@ -104,7 +105,7 @@ impl OauthProviderTrait for GithubConfig {
             .or_else(|| user_emails.first());
 
         let email = primary_email.map(|p| p.email.to_string());
-        let account = AccountOauth::builder()
+        let account = UserAccount::builder()
             .id(profile.id.to_string())
             .display_name(Some(profile.login.clone()))
             .provider(OauthProvider::Github)
@@ -125,7 +126,7 @@ impl OauthProviderTrait for GithubConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::oauth::utils::OauthConfigTrait;
+    use crate::oauth::oauth_config::OauthConfigTrait;
     use multimap::MultiMap;
     #[cfg(test)]
     use pretty_assertions::{assert_eq, assert_str_eq};
