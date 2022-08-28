@@ -41,13 +41,19 @@ async fn hello_reqwest() {
     let github = GithubConfig::new(&base_url, github_creds);
     let google = GoogleConfig::new(&base_url, google_creds);
 
-    let providers = Providers::builder().github(&github).google(&google).build();
     let mut cache_storage = HashMapCache::new();
+    let mut providers = Providers::builder()
+        .github(&github)
+        .google(&google)
+        .cache_storage(&mut cache_storage)
+        .build();
 
     // Act
-    let auth_url_data = providers.generate_auth_url_data(super::OauthProvider::Github);
+    let auth_url_data = providers
+        .generate_auth_url_data(super::OauthProvider::Github)
+        .await;
 
-    auth_url_data.save(&mut cache_storage).await.unwrap();
+    // auth_url_data.save(&mut cache_storage).await.unwrap();
 
     let m =
         AuthUrlData::oauth_cache_key_prefix(auth_url_data.authorize_url.get_csrf_token().unwrap());

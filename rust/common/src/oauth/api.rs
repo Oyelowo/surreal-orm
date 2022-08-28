@@ -15,21 +15,24 @@ use super::{
     AccountOauth, OauthProvider,
 };
 
-#[derive(Debug, TypedBuilder, Clone)]
-pub struct Providers<'a> {
+#[derive(Debug, TypedBuilder)]
+pub struct Providers<'a, C>
+where
+    C: CacheStorage + Debug,
+{
     #[builder(default, setter(strip_option))]
     github: Option<&'a GithubConfig>,
     #[builder(default, setter(strip_option))]
     google: Option<&'a GoogleConfig>,
+    cache_storage: &'a mut C,
 }
 
 // #[async_trait::async_trait]
-impl<'a> Providers<'a> {
-    pub async fn fetch_account<C: CacheStorage + Debug>(
-        &self,
-        redirect_url: Url,
-        cache_storage: C,
-    ) -> OauthResult<AccountOauth> {
+impl<'a, C> Providers<'a, C>
+where
+    C: CacheStorage + Debug + 'a,
+{
+    pub async fn fetch_account(&self, redirect_url: Url) -> OauthResult<AccountOauth> {
         // let redirect_url = Url::parse(&format!("{base_url}{uri}")).map(RedirectUrlReturned)?;
         let redirect_url_wrapped = RedirectUrlReturned(redirect_url.clone());
 
@@ -42,7 +45,7 @@ impl<'a> Providers<'a> {
             OauthError::CsrfTokenNotFoundInRedirectUrl(redirect_url.to_string()),
         )?;
 
-        let evidence = AuthUrlData::verify_csrf_token(csrf_token, &cache_storage)
+        let evidence = AuthUrlData::verify_csrf_token(csrf_token, self.cache_storage)
             .await
             .unwrap()
             .evidence;
@@ -66,8 +69,8 @@ impl<'a> Providers<'a> {
     }
 
     // pub async fn generate_auth_url_data<T: CacheStorage>(
-    pub fn generate_auth_url_data(
-        &self,
+    pub async fn generate_auth_url_data(
+        &mut self,
         oauth_provider: OauthProvider,
         // cache_storage: &mut T,
     ) -> AuthUrlData {
@@ -88,7 +91,8 @@ impl<'a> Providers<'a> {
 
         // let cache = cg::RedisCache(redis.clone());
         // let p = self.cache_storage;
-        // auth_url_data.save(cache_storage).await?;
+        // auth_url_data.save(&mut self.cache_storage).await?;
+        auth_url_data.save(self.cache_storage).await.unwrap();
         auth_url_data
         // Ok(auth_url_data)
     }
