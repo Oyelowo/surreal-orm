@@ -68,7 +68,6 @@ impl CacheStorage for HashMapCache {
 
     // #[warn(unused_must_use)]
     async fn set(&mut self, key: String, value: String) {
-        // let mut  p = &self.0;
         self.0.insert(key, value);
     }
 }
@@ -78,33 +77,16 @@ impl CacheStorage for HashMapCache {
 //     cap: usize,
 // }
 
-// struct LruCacheImpl<K, V>(lru::LruCache<K, V>);
+// struct LruCacheImpl(pub(crate) lru::LruCache<String, String>);
 
-// impl<K, V> CacheStorage for LruCacheImpl<K, V>
-// where
-//     K: Send + Sync + Clone + Eq + Hash + 'static,
-//     V: Send + Sync + Clone + 'static,
-// {
-//     type Key = K;
-//     type Value = V;
-
+// impl CacheStorage for LruCacheImpl {
 //     #[inline]
-//     fn get(&mut self, key: &Self::Key) -> Option<&Self::Value> {
+//     fn get(&self, key: String) -> Option<String> {
 //         self.0.get(key)
 //     }
 
 //     #[inline]
-//     fn insert(&mut self, key: Cow<'_, Self::Key>, val: Cow<'_, Self::Value>) {
+//     fn set(&mut self, key: String, val: String) {
 //         self.0.put(key.into_owned(), val.into_owned());
-//     }
-
-//     #[inline]
-//     fn remove(&mut self, key: &Self::Key) {
-//         self.0.pop(key);
-//     }
-
-//     #[inline]
-//     fn clear(&mut self) {
-//         self.0.clear();
 //     }
 // }

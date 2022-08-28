@@ -53,10 +53,9 @@ async fn hello_reqwest() {
         .generate_auth_url_data(super::OauthProvider::Github)
         .await;
 
-    // auth_url_data.save(&mut cache_storage).await.unwrap();
-
     let m =
         AuthUrlData::oauth_cache_key_prefix(auth_url_data.authorize_url.get_csrf_token().unwrap());
+
     // Assert
     assert!(cache_storage.0.get(&m).unwrap().clone().contains("https://github.com/login/oauth/authorize?response_type=code&client_id=89c19374f7e7b5b35164&state"));
 
