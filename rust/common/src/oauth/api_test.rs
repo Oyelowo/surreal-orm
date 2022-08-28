@@ -94,7 +94,6 @@ async fn generates_and_stores_and_get_right_auth_url_for_google_oauth() {
         AuthUrlData::oauth_cache_key_prefix(auth_url_data.authorize_url.get_csrf_token().unwrap());
 
     // Assert
-    // Right auth url
     assert!(cache_storage.get(prefixed_csrf_token.to_string()).await.unwrap().clone().contains("https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=855174209543-6m0f088e55d3mevhnr8bs0qjap8j6g0g.apps.googleusercontent.com&state"));
 
     assert!(AuthUrlData::verify_csrf_token(
