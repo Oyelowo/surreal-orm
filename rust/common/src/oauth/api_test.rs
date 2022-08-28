@@ -73,7 +73,7 @@ async fn hello_reqwest() {
         .base_url("https://oyelowo.test".to_string())
         .credentials(google_credentials)
         .build();
-    let github = GithubConfig::new(oauth_github_settings, "mock_server.uri()".to_string());
+    let github = GithubConfig::new(oauth_github_settings);
     let google = GoogleConfig::new(oauth_goole_settings);
 
     let providers = Provider::builder().github(github).google(google).build();
@@ -104,6 +104,7 @@ async fn hello_reqwest() {
     )
     .await
     .is_some());
+    // conf.fetch_account(Url::parse(format!("https://oyelowo.test/redirect?code=g0ZGZmNjVmOWI&state={m}").as_str()).unwrap(), cache_storage).await.unwrap();
     // assert_eq!(cache_storage.0.get(&m).unwrap().clone(), "".to_string());
     // providers
     // assert_eq!(mock_server.address().to_string(), mock_server.uri());

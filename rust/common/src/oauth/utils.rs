@@ -142,7 +142,7 @@ impl AuthUrlData {
 }
 
 #[derive(Debug, From, Into, Clone)]
-pub(crate) struct OauthUrl(pub(crate) String);
+pub(crate) struct OauthUrl(pub(crate) &'static str);
 
 impl OauthUrl {
     pub async fn fetch_resource<T: DeserializeOwned>(
