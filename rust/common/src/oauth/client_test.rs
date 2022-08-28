@@ -13,8 +13,9 @@ use oauth2::http::Uri;
 use pretty_assertions::{assert_eq, assert_str_eq};
 
 use super::{
-    client::OauthClient,
     cache_storage::{CacheStorage, HashMapCache, RedisCache},
+    client::OauthClient,
+    OauthProvider,
 };
 use crate::oauth::utils::AuthUrlData;
 use crate::{
@@ -56,7 +57,7 @@ async fn generates_and_stores_and_get_right_auth_url_for_github_oauth() {
 
     // Act
     let auth_url_data = oauth_client
-        .generate_auth_url_data(super::OauthProvider::Github)
+        .generate_auth_url_data(OauthProvider::Github)
         .await
         .unwrap();
 
@@ -86,7 +87,7 @@ async fn generates_and_stores_and_get_right_auth_url_for_google_oauth() {
 
     // Act
     let auth_url_data = oauth_client
-        .generate_auth_url_data(super::OauthProvider::Google)
+        .generate_auth_url_data(OauthProvider::Google)
         .await
         .unwrap();
 
