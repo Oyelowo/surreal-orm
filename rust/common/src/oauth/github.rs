@@ -1,6 +1,7 @@
 use chrono::{Duration, Utc};
 use oauth2::{
-    AuthUrl, AuthorizationCode, ClientId, ClientSecret, PkceCodeVerifier, RedirectUrl, Scope, TokenResponse, TokenUrl,
+    AuthUrl, AuthorizationCode, ClientId, ClientSecret, PkceCodeVerifier, RedirectUrl, Scope,
+    TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
 

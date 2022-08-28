@@ -1,7 +1,5 @@
 use redis::RedisError;
 
-
-
 #[derive(Debug, thiserror::Error)]
 pub enum OauthError {
     #[error("Failed to fetch token. Error: {0}")]
@@ -27,4 +25,3 @@ pub enum OauthError {
 }
 
 pub(crate) type OauthResult<T> = Result<T, OauthError>;
-

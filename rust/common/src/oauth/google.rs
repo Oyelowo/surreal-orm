@@ -9,7 +9,9 @@ use crate::configurations::oauth::OauthGoogleCredentials;
 
 use super::{
     account::{OauthProvider, TokenType, UserAccount},
-    urls::{get_redirect_url, OauthUrl}, oauth_config::{OauthConfig, OauthProviderTrait}, error::OauthResult,
+    error::OauthResult,
+    oauth_config::{OauthConfig, OauthProviderTrait},
+    urls::{get_redirect_url, OauthUrl},
 };
 
 #[derive(Debug, Deserialize, Serialize)]
