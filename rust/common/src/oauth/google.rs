@@ -33,12 +33,6 @@ struct GoogleUserData {
     locale: String,
 }
 
-#[derive(Debug, Clone, TypedBuilder)]
-pub struct OauthGoogleSettings {
-    pub base_url: String,
-    pub credentials: OauthGoogleCredentials,
-}
-
 #[derive(Debug, Clone)]
 pub struct GoogleConfig {
     basic_config: OauthConfig,
