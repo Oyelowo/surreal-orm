@@ -1,25 +1,17 @@
-use std::fmt::Debug;
-
-// use common::configurations::{application::ApplicationConfigs, redis::RedisConfigError};
-use derive_more::{From, Into};
-use multimap::MultiMap;
 use oauth2::{
     basic::{BasicClient, BasicTokenType},
-    http::HeaderMap,
     reqwest::async_http_client,
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyExtraTokenFields,
     PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, RevocationUrl, Scope, StandardTokenResponse,
-    TokenResponse, TokenUrl,
+    TokenUrl,
 };
-use redis::RedisError;
-use reqwest::header::{ACCEPT, USER_AGENT};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use std::fmt::Debug;
+
+use serde::de::DeserializeOwned;
 use typed_builder::TypedBuilder;
-use url::Url;
 
 use super::{
     account::OauthProvider,
-    cache_storage::CacheStorage,
     error::{OauthError, OauthResult},
     urls::{AuthUrlData, Evidence, RedirectUrlReturned},
 };
