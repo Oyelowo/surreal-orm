@@ -41,7 +41,7 @@ async fn hello_reqwest() {
     let github = GithubConfig::new(&base_url, github_creds);
     let google = GoogleConfig::new(&base_url, google_creds);
 
-    let providers = Providers::builder().github(github).google(google).build();
+    let providers = Providers::builder().github(&github).google(&google).build();
     let mut cache_storage = HashMapCache::new();
 
     // Act

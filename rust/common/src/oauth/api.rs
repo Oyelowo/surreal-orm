@@ -16,15 +16,15 @@ use super::{
 };
 
 #[derive(Debug, TypedBuilder, Clone)]
-pub struct Providers {
+pub struct Providers<'a> {
     #[builder(default, setter(strip_option))]
-    github: Option<GithubConfig>,
+    github: Option<&'a GithubConfig>,
     #[builder(default, setter(strip_option))]
-    google: Option<GoogleConfig>,
+    google: Option<&'a GoogleConfig>,
 }
 
 // #[async_trait::async_trait]
-impl Providers {
+impl<'a> Providers<'a> {
     pub async fn fetch_account<C: CacheStorage + Debug>(
         &self,
         redirect_url: Url,
@@ -50,14 +50,12 @@ impl Providers {
         let account_oauth = match evidence.provider {
             OauthProvider::Github => {
                 self.github
-                    .as_ref()
                     .expect("You must provide github credentials")
                     .fetch_oauth_account(code, evidence.pkce_code_verifier)
                     .await
             }
             OauthProvider::Google => {
                 self.google
-                    .as_ref()
                     .expect("You must provide google oauth credentials")
                     .fetch_oauth_account(code, evidence.pkce_code_verifier)
                     .await
@@ -78,13 +76,11 @@ impl Providers {
         let auth_url_data = match oauth_provider {
             OauthProvider::Github => self
                 .github
-                .as_ref()
                 .expect("no github config")
                 .basic_config()
                 .generate_auth_url(),
             OauthProvider::Google => self
                 .google
-                .as_ref()
                 .expect("no google config")
                 .basic_config()
                 .generate_auth_url(),
