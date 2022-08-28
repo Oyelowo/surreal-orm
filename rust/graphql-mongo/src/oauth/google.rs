@@ -114,18 +114,12 @@ impl OauthProviderTrait for GoogleConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::oauth::utils::{OauthConfigTrait, RedirectUrlReturned};
+    use crate::oauth::utils::OauthConfigTrait;
     use multimap::MultiMap;
     use std::env;
 
     #[test]
     fn it_works() {
-        let result = 2 + 2;
-        // env::set_var("OAUTH_GOOGLE_CLIENT_ID", "1234");
-        // env::set_var("OAUTH_GOOGLE_CLIENT_SECRET", "string_secret");
-        // env::set_var("APP_PORT", "5000");
-        // env::set_var("APP_PORT", "5000");
-
         env::set_var("APP_ENVIRONMENT", "local");
         env::set_var("APP_HOST", "random_APP_HOST");
         env::set_var("APP_PORT", "5000");

@@ -66,16 +66,16 @@ impl RedirectUrlReturned {
     pub fn new(url: Url) -> Self {
         Self(url)
     }
-    pub(crate) fn into_inner(self) -> Url {
+    pub fn into_inner(self) -> Url {
         self.0
     }
 
-    pub(crate) fn get_authorization_code(&self) -> Option<AuthorizationCode> {
+    pub fn get_authorization_code(&self) -> Option<AuthorizationCode> {
         self.get_query_param_value("code")
             .map(AuthorizationCode::new)
     }
 
-    pub(crate) fn get_csrf_token(&self) -> Option<CsrfToken> {
+    pub fn get_csrf_token(&self) -> Option<CsrfToken> {
         self.get_query_param_value("state").map(CsrfToken::new)
     }
 
