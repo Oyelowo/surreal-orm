@@ -25,7 +25,6 @@ where
     cache_storage: &'a mut C,
 }
 
-// #[async_trait::async_trait]
 impl<'a, C> OauthClient<'a, C>
 where
     C: CacheStorage + Debug + 'a,
@@ -52,8 +51,7 @@ where
     }
 
     pub async fn fetch_account(&mut self, redirect_url: Url) -> OauthResult<AccountOauth> {
-        // let redirect_url = Url::parse(&format!("{base_url}{uri}")).map(RedirectUrlReturned)?;
-        let redirect_url_wrapped = RedirectUrlReturned(redirect_url.clone());
+        let redirect_url_wrapped = RedirectUrlReturned::new(redirect_url.clone());
 
         let code = redirect_url_wrapped.get_authorization_code().ok_or(
             OauthError::AuthorizationCodeNotFoundInRedirectUrl(redirect_url.to_string()),

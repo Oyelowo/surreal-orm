@@ -4,7 +4,6 @@ use oauth2::{
     RevocationUrl, Scope, TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
-use typed_builder::TypedBuilder;
 
 use crate::configurations::oauth::OauthGoogleCredentials;
 
@@ -40,7 +39,6 @@ pub struct GoogleConfig {
 
 impl GoogleConfig {
     pub fn new(base_url: &String, credentials: OauthGoogleCredentials) -> Self {
-        // let env = OauthGoogleCredentials::default();
         let basic_config = OauthConfig::builder()
             .client_id(ClientId::new(credentials.client_id))
             .client_secret(ClientSecret::new(credentials.client_secret))
@@ -82,9 +80,15 @@ impl OauthProviderTrait for GoogleConfig {
     /// Fetch oauth account. You can override this method
     ///
     /// # Errors:
-    /// Exhange token problem:
+    /// Exhange token problem
     ///
-    /// This function will return an error if .
+    /// Problem fetching user's oauth data
+    ///
+    /// This function will return an error if.
+    ///
+    /// Oauth verification fails during token/authorization code exchange with the provider
+    ///
+    /// User data fetching fails
     async fn fetch_oauth_account(
         &self,
         code: AuthorizationCode,
@@ -145,13 +149,8 @@ mod tests {
         let google_config = GoogleConfig::new(&base_url, credentials).basic_config();
         let auth_url_data = google_config.clone().generate_auth_url();
 
-        let auth_url = auth_url_data.authorize_url.clone().0;
-        let hash_query: MultiMap<_, _> = auth_url_data
-            .authorize_url
-            .into_inner()
-            .query_pairs()
-            .into_owned()
-            .collect();
+        let auth_url = auth_url_data.authorize_url.into_inner().clone();
+        let hash_query: MultiMap<_, _> = auth_url.query_pairs().into_owned().collect();
 
         assert_eq!(auth_url.as_str().len(), 285);
 

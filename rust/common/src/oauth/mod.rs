@@ -1,17 +1,14 @@
 use chrono::{DateTime, Utc};
-// use async_graphql::Enum;
-// use chrono::{DateTime, Utc};
-
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
 
-pub mod client;
 pub mod cache_storage;
-pub mod github;
-pub mod google;
+pub mod client;
 #[cfg(test)]
 mod client_test;
+pub mod github;
+pub mod google;
 
 pub mod utils;
 
@@ -30,7 +27,6 @@ pub enum OauthProvider {
 
 #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone, Validate)]
 #[serde(rename_all = "camelCase")]
-// #[graphql(input_name = "AccountOauthInput")]
 pub struct AccountOauth {
     /// unique identifier for the oauth provider. Don't use name of user because that could be changed
     pub id: String,

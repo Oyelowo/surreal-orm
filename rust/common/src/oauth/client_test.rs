@@ -1,26 +1,12 @@
-use multimap::MultiMap;
-use serde_json::json;
-use std::collections::HashMap;
-use std::fmt::Debug;
-use surf::{Client, StatusCode};
-use url::Url;
-use wiremock::matchers::{
-    any, body_json, body_partial_json, body_string, method, path, path_regex, PathExactMatcher,
-};
-use wiremock::{Mock, MockServer, ResponseTemplate};
-
-use oauth2::http::Uri;
-use pretty_assertions::{assert_eq, assert_str_eq};
-
 use super::{
-    cache_storage::{CacheStorage, HashMapCache, RedisCache},
+    cache_storage::{CacheStorage, HashMapCache},
     client::OauthClient,
     OauthProvider,
 };
 use crate::oauth::cache_storage::LruCache;
 use crate::oauth::utils::AuthUrlData;
 use crate::{
-    configurations::oauth::{OauthCredentials, OauthGithubCredentials, OauthGoogleCredentials},
+    configurations::oauth::{OauthGithubCredentials, OauthGoogleCredentials},
     oauth::{github::GithubConfig, google::GoogleConfig},
 };
 

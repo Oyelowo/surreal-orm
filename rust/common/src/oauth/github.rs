@@ -4,7 +4,6 @@ use oauth2::{
     TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
-use typed_builder::TypedBuilder;
 
 use crate::configurations::oauth::OauthGithubCredentials;
 
@@ -129,7 +128,7 @@ mod tests {
     use crate::oauth::utils::OauthConfigTrait;
     use multimap::MultiMap;
     #[cfg(test)]
-    use pretty_assertions::{assert_eq, assert_ne, assert_str_eq};
+    use pretty_assertions::{assert_eq, assert_str_eq};
 
     #[test]
     fn it_should_properly_generate_auth_url() {
@@ -146,13 +145,8 @@ mod tests {
         let google_config = GithubConfig::new(&base_url, credentials).basic_config();
         let auth_url_data = google_config.clone().generate_auth_url();
 
-        let auth_url = auth_url_data.authorize_url.clone().0;
-        let hash_query: MultiMap<_, _> = auth_url_data
-            .authorize_url
-            .into_inner()
-            .query_pairs()
-            .into_owned()
-            .collect();
+        let auth_url = auth_url_data.authorize_url.into_inner();
+        let hash_query: MultiMap<_, _> = auth_url.query_pairs().into_owned().collect();
 
         let state = hash_query.get("state").unwrap();
         let code_challenge = hash_query.get("code_challenge").unwrap();

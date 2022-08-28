@@ -1,5 +1,3 @@
-use std::process;
-
 pub fn get_current_filename() -> &'static str {
     std::path::Path::new(file!())
         .file_stem()

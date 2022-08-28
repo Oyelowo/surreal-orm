@@ -1,12 +1,5 @@
-use std::{
-    borrow::Cow,
-    collections::{hash_map::RandomState, HashMap},
-    hash::{BuildHasher, Hash},
-    marker::PhantomData,
-};
-
 use lru;
-use redis::Commands;
+use std::collections::HashMap;
 
 #[async_trait::async_trait]
 pub trait CacheStorage: Send + Sync + 'static {
@@ -42,15 +35,10 @@ impl CacheStorage for RedisCache {
 
         con.expire::<_, u16>(key, 600).await.unwrap();
     }
-
-    // async fn remove(&self, key: String) {
-    //     self.0.del(&key);
-    // }
 }
 
 #[derive(Debug, Clone)]
 pub struct HashMapCache(HashMap<String, String>);
-// pub struct HashMapCache(HashMap<String, String>);
 
 impl HashMapCache {
     pub fn new() -> Self {
@@ -66,16 +54,12 @@ impl CacheStorage for HashMapCache {
         data
     }
 
-    // #[warn(unused_must_use)]
     async fn set(&mut self, key: String, value: String) {
         self.0.insert(key, value);
     }
 }
 
-
 /// LRU cache.
-/// 
-
 #[derive(Debug)]
 pub struct LruCache(lru::LruCache<String, String>);
 

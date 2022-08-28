@@ -1,4 +1,4 @@
-use std::{fmt::Debug, ops::DerefMut};
+use std::fmt::Debug;
 
 // use common::configurations::{application::ApplicationConfigs, redis::RedisConfigError};
 use derive_more::{From, Into};
@@ -18,7 +18,6 @@ use typed_builder::TypedBuilder;
 use url::Url;
 
 use super::{cache_storage::CacheStorage, OauthProvider};
-// use crate::app::user::{AccountOauth, OauthProvider};
 
 pub(crate) fn get_redirect_url(base_url: &String) -> String {
     // let base_url = ApplicationConfigs::default().external_base_url;
@@ -34,8 +33,6 @@ pub enum OauthError {
     #[error("Failed to fetch resource. Error: {0}")]
     ResourceFetchFailed(String),
 
-    // #[error("Failed to get query param from URL: {0}")]
-    // GetUrlQueryParamFailed(String),
     #[error("Authorization code not found in redirect URL: {0}")]
     AuthorizationCodeNotFoundInRedirectUrl(String),
 
@@ -45,16 +42,9 @@ pub enum OauthError {
     #[error("Auth url data not found in cache")]
     AuthUrlDataNotFoundInCache,
 
-    // #[error("Failed to fetch data. Please try again")]
     #[error(transparent)]
     RedisError(#[from] RedisError),
 
-    // #[error("Failed to fetch data. Please try again")]
-    #[error(transparent)]
-    UrlParamsNotFound(#[from] ::url::ParseError),
-
-    // #[error(transparent)]
-    // RedisConfigError(#[from] RedisConfigError),
     #[error(transparent)]
     SerializationError(#[from] serde_json::Error),
 }
@@ -70,40 +60,28 @@ pub struct Evidence {
 pub(crate) type OauthResult<T> = Result<T, OauthError>;
 /// The url returned by the oauth provider with code and state(which should be the one we send)
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RedirectUrlReturned(pub Url);
+pub struct RedirectUrlReturned(Url);
 
 impl RedirectUrlReturned {
+    pub fn new(url: Url) -> Self {
+        Self(url)
+    }
     pub(crate) fn into_inner(self) -> Url {
         self.0
     }
 
     pub(crate) fn get_authorization_code(&self) -> Option<AuthorizationCode> {
-        let value = self
-            .get_query_param_value("code")
-            .map(AuthorizationCode::new);
-        // Ok(AuthorizationCode::new(value.into_owned()))
-        value
+        self.get_query_param_value("code")
+            .map(AuthorizationCode::new)
     }
 
     pub(crate) fn get_csrf_token(&self) -> Option<CsrfToken> {
-        // let value = self.get_query_param_value("state");
-        // Ok(CsrfToken::new(value.into_owned()))
-        let p = self.get_query_param_value("state").map(CsrfToken::new);
-        println!("csrf_token: {}", p.clone().unwrap().clone().secret());
-        p
+        self.get_query_param_value("state").map(CsrfToken::new)
     }
 
     fn get_query_param_value(&self, query_param: &str) -> Option<String> {
-        // let (_, value) = self
-        //     .0
-        //     .query_pairs()
-        //     .find(|&(ref key, _)| key == query_param)
-        //     .ok_or_else(|| OauthError::UrlParamsNotFound(query_param.into()))?;
-        // Ok(value)
-        // let auth_url = self.0.clone();
         let hash_query: MultiMap<_, _> = self.0.query_pairs().into_owned().collect();
-        let p = hash_query.get(query_param).map(String::from);
-        p
+        hash_query.get(query_param).map(String::from)
     }
 }
 

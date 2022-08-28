@@ -3,8 +3,8 @@ pub mod configurations;
 pub mod error_handling;
 mod macros;
 pub mod middleware;
-pub mod utils;
 pub mod oauth;
+pub mod utils;
 
 pub use macros::{calculator, helpers};
 
