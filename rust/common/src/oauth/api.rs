@@ -14,7 +14,7 @@ use super::{
 };
 
 #[derive(Debug, TypedBuilder)]
-pub struct Providers<'a, C>
+pub struct OauthClient<'a, C>
 where
     C: CacheStorage + Debug,
 {
@@ -26,7 +26,7 @@ where
 }
 
 // #[async_trait::async_trait]
-impl<'a, C> Providers<'a, C>
+impl<'a, C> OauthClient<'a, C>
 where
     C: CacheStorage + Debug + 'a,
 {

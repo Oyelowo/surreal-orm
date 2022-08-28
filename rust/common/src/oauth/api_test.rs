@@ -12,7 +12,7 @@ use oauth2::http::Uri;
 use pretty_assertions::{assert_eq, assert_str_eq};
 
 use super::{
-    api::Providers,
+    api::OauthClient,
     cache_storage::{CacheStorage, HashMapCache, RedisCache},
 };
 use crate::oauth::utils::AuthUrlData;
@@ -42,23 +42,23 @@ async fn hello_reqwest() {
     let google = GoogleConfig::new(&base_url, google_creds);
 
     let mut cache_storage = HashMapCache::new();
-    let mut providers = Providers::builder()
+    let mut oauth_client = OauthClient::builder()
         .github(&github)
         .google(&google)
         .cache_storage(&mut cache_storage)
         .build();
 
     // Act
-    let auth_url_data = providers
+    let auth_url_data = oauth_client
         .generate_auth_url_data(super::OauthProvider::Github)
         .await
         .unwrap();
 
-    let m =
+    let prefixed_csrf_token =
         AuthUrlData::oauth_cache_key_prefix(auth_url_data.authorize_url.get_csrf_token().unwrap());
 
     // Assert
-    assert!(cache_storage.0.get(&m).unwrap().clone().contains("https://github.com/login/oauth/authorize?response_type=code&client_id=89c19374f7e7b5b35164&state"));
+    assert!(cache_storage.0.get(&prefixed_csrf_token).unwrap().clone().contains("https://github.com/login/oauth/authorize?response_type=code&client_id=89c19374f7e7b5b35164&state"));
 
     assert!(AuthUrlData::verify_csrf_token(
         auth_url_data.authorize_url.get_csrf_token().unwrap(),
