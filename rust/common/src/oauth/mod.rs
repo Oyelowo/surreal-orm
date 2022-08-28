@@ -6,13 +6,13 @@ use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
 
-pub mod api;
+pub mod client;
 pub mod cache_storage;
 pub mod github;
 pub mod google;
 // mod tests;
 #[cfg(test)]
-mod api_test;
+mod client_test;
 
 pub mod utils;
 

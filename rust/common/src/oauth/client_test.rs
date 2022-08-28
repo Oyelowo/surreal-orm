@@ -13,7 +13,7 @@ use oauth2::http::Uri;
 use pretty_assertions::{assert_eq, assert_str_eq};
 
 use super::{
-    api::OauthClient,
+    client::OauthClient,
     cache_storage::{CacheStorage, HashMapCache, RedisCache},
 };
 use crate::oauth::utils::AuthUrlData;
