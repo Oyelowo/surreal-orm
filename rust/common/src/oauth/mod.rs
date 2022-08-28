@@ -10,7 +10,6 @@ pub mod client;
 pub mod cache_storage;
 pub mod github;
 pub mod google;
-// mod tests;
 #[cfg(test)]
 mod client_test;
 
