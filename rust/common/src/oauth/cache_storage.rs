@@ -49,7 +49,7 @@ impl CacheStorage for RedisCache {
 }
 
 #[derive(Debug, Clone)]
-pub struct HashMapCache(pub HashMap<String, String>);
+pub struct HashMapCache(HashMap<String, String>);
 // pub struct HashMapCache(HashMap<String, String>);
 
 impl HashMapCache {
