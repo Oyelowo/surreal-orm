@@ -81,13 +81,8 @@ impl CacheStorage for HashMapCache {
 struct LruCache(lru::LruCache<String, String>);
 
 impl LruCache {
-    // pub fn new(cap: u16) -> Self {
     pub fn new(cap: u16) -> Self {
-        let p: lru::LruCache<String, String> = lru::LruCache::new(cap as usize);
-        // Self { cap }
-        // p
-        Self(p)
-        // Self(lru::LruCache<String, String>::new())
+        Self(lru::LruCache::new(cap as usize))
     }
 }
 
