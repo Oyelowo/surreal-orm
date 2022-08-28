@@ -42,6 +42,9 @@ pub enum OauthError {
     #[error("Csrf Token not found in redirect Url: {0}")]
     CsrfTokenNotFoundInRedirectUrl(String),
 
+    #[error("Auth url data not found in cache")]
+    AuthUrlDataNotFoundInCache,
+
     // #[error("Failed to fetch data. Please try again")]
     #[error(transparent)]
     RedisError(#[from] RedisError),
@@ -120,14 +123,15 @@ impl AuthUrlData {
     pub async fn verify_csrf_token<C: CacheStorage + Debug>(
         csrf_token: CsrfToken,
         storage: &C,
-    ) -> Option<Self> {
+    ) -> OauthResult<Self> {
         let key = Self::oauth_cache_key_prefix(csrf_token);
         // TODO: Handle error properly
-        let auth_url_data = storage.get(key.clone()).await;
+        let auth_url_data = storage
+            .get(key)
+            .await
+            .ok_or(OauthError::AuthUrlDataNotFoundInCache)?;
 
-        let auth_url_data = serde_json::from_str::<Self>(&auth_url_data.unwrap().as_str()).unwrap();
-
-        Some(auth_url_data)
+        Ok(serde_json::from_str::<Self>(&auth_url_data.as_str())?)
     }
 
     pub async fn save<C>(&self, storage: &mut C) -> OauthResult<()>

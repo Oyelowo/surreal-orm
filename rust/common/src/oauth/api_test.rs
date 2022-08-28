@@ -64,5 +64,5 @@ async fn hello_reqwest() {
         &mut cache_storage
     )
     .await
-    .is_some());
+    .is_ok());
 }
