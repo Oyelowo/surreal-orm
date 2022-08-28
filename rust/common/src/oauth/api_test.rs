@@ -51,7 +51,8 @@ async fn hello_reqwest() {
     // Act
     let auth_url_data = providers
         .generate_auth_url_data(super::OauthProvider::Github)
-        .await;
+        .await
+        .unwrap();
 
     let m =
         AuthUrlData::oauth_cache_key_prefix(auth_url_data.authorize_url.get_csrf_token().unwrap());

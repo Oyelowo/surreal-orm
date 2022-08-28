@@ -1,6 +1,4 @@
 use std::fmt::Debug;
-
-use oauth2::http::Uri;
 use typed_builder::TypedBuilder;
 use url::Url;
 
@@ -68,14 +66,10 @@ where
         Ok(account_oauth)
     }
 
-    // pub async fn generate_auth_url_data<T: CacheStorage>(
     pub async fn generate_auth_url_data(
         &mut self,
         oauth_provider: OauthProvider,
-        // cache_storage: &mut T,
-    ) -> AuthUrlData {
-        // ) -> OauthResult<AuthUrlData> {
-        // self.provider_configs.github.unwrap().basic_config().generate_auth_url()
+    ) -> OauthResult<AuthUrlData> {
         let auth_url_data = match oauth_provider {
             OauthProvider::Github => self
                 .github
@@ -89,11 +83,7 @@ where
                 .generate_auth_url(),
         };
 
-        // let cache = cg::RedisCache(redis.clone());
-        // let p = self.cache_storage;
-        // auth_url_data.save(&mut self.cache_storage).await?;
-        auth_url_data.save(self.cache_storage).await.unwrap();
-        auth_url_data
-        // Ok(auth_url_data)
+        auth_url_data.save(self.cache_storage).await?;
+        Ok(auth_url_data)
     }
 }
