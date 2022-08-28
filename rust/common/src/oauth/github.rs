@@ -89,11 +89,11 @@ impl OauthProviderTrait for GithubConfig {
         let token = self.exchange_token(code, pkce_code_verifier).await?;
         
         // let profile = OauthUrl("https://api.github.com/user")
-        let profile = OauthUrl(format!("{}/user", self.base_url).into())
+        let profile = OauthUrl(format!("{}/user", "https://api.github.com/user").into())
             .fetch_resource::<GithubUserData>(&token, None)
             .await?;
 
-        let user_emails = OauthUrl(format!("{}/user/emails", self.base_url).into())
+        let user_emails = OauthUrl(format!("{}/user/emails", "https://api.github.com/user").into())
             .fetch_resource::<Vec<GithubEmail>>(&token, None)
             .await?;
 

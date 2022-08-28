@@ -112,12 +112,12 @@ pub struct AuthUrlData {
 }
 
 impl AuthUrlData {
-    fn oauth_cache_key_prefix(csrf_token: CsrfToken) -> String {
+    pub fn oauth_cache_key_prefix(csrf_token: CsrfToken) -> String {
         let oauth_csrf_state_key = "OAUTH_CSRF_STATE_KEY";
         format!("{oauth_csrf_state_key}_{}", csrf_token.secret().as_str())
     }
 
-    pub(crate) async fn verify_csrf_token<C: CacheStorage + Debug>(
+    pub async fn verify_csrf_token<C: CacheStorage + Debug>(
         csrf_token: CsrfToken,
         storage: &C,
     ) -> Option<Self> {
@@ -130,7 +130,7 @@ impl AuthUrlData {
         Some(auth_url_data)
     }
 
-    pub(crate) async fn save<C>(&self, storage: &mut C) -> OauthResult<()>
+    pub async fn save<C>(&self, storage: &mut C) -> OauthResult<()>
     where
         C: CacheStorage,
     {

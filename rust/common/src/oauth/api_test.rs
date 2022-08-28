@@ -15,6 +15,7 @@ use super::{
     api::{Config, Provider},
     cache_storage::{CacheStorage, HashMapCache, RedisCache},
 };
+use crate::oauth::utils::AuthUrlData;
 use crate::{
     configurations::oauth::{OauthCredentials, OauthGithubCredentials, OauthGoogleCredentials},
     oauth::{
@@ -38,7 +39,7 @@ async fn hello_reqwest() {
         // .and(path_regex("/[a-z]+[0-9]+/v2"))
         // .and(path_regex("/[a-z]+2/v2"))
         // .and(path("/o/oauth2/v2/auth"))
-        .and(PathExactMatcher::new("https://api.github.com/user"))
+        // .and(PathExactMatcher::new("https://api.github.com/user"))
         // .and(PathExactMatcher::new("o/oauth2/v2/auth"))
         // .and(PathExactMatcher::new("google"))
         // .and(path("accounts.google.com/o/oauth2/v2/auth"))
@@ -72,7 +73,7 @@ async fn hello_reqwest() {
         .base_url("https://oyelowo.test".to_string())
         .credentials(google_credentials)
         .build();
-    let github = GithubConfig::new(oauth_github_settings, mock_server.uri());
+    let github = GithubConfig::new(oauth_github_settings, "mock_server.uri()".to_string());
     let google = GoogleConfig::new(oauth_goole_settings);
 
     let providers = Provider::builder().github(github).google(google).build();
@@ -88,10 +89,22 @@ async fn hello_reqwest() {
     //     .unwrap();
 
     let conf = Config::builder().provider_configs(providers).build();
-    conf.generate_auth_url_data(super::OauthProvider::Github).save(&mut cache_storage).await.unwrap();
+    let auth_url_data = conf.generate_auth_url_data(super::OauthProvider::Github);
 
+    auth_url_data.save(&mut cache_storage).await.unwrap();
+
+    let m =
+        AuthUrlData::oauth_cache_key_prefix(auth_url_data.authorize_url.get_csrf_token().unwrap());
     // Assert
-    assert_eq!(cache_storage.0, HashMap::new());
+    assert!(cache_storage.0.get(&m).unwrap().clone().contains("https://github.com/login/oauth/authorize?response_type=code&client_id=89c19374f7e7b5b35164&state"));
+
+    assert!(AuthUrlData::verify_csrf_token(
+        auth_url_data.authorize_url.get_csrf_token().unwrap(),
+        &mut cache_storage
+    )
+    .await
+    .is_some());
+    // assert_eq!(cache_storage.0.get(&m).unwrap().clone(), "".to_string());
     // providers
     // assert_eq!(mock_server.address().to_string(), mock_server.uri());
     // assert_eq!(response.status(), StatusCode::Ok);
