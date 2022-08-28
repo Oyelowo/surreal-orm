@@ -16,40 +16,21 @@ use super::{
 };
 
 #[derive(Debug, TypedBuilder, Clone)]
-pub struct Provider {
+pub struct Providers {
     #[builder(default, setter(strip_option))]
     github: Option<GithubConfig>,
     #[builder(default, setter(strip_option))]
     google: Option<GoogleConfig>,
 }
 
-#[derive(Debug, TypedBuilder)]
-pub struct Config {
-    // base_url: String,
-    // uri: Uri,
-    provider_configs: Provider,
-    // cache_storage: &'a mut Cache,
-}
-
 // #[async_trait::async_trait]
-impl Config {
-    // pub async fn fetch_account<T>(config: Config<T>) -> OauthResult<AccountOauth>
-    // where
-    // T: CacheStorage,
+impl Providers {
     pub async fn fetch_account<C: CacheStorage + Debug>(
         &self,
         redirect_url: Url,
         cache_storage: C,
     ) -> OauthResult<AccountOauth> {
-        let Config {
-            // base_url,
-            // uri,
-            // cache_storage: cache,
-            provider_configs,
-            ..
-        } = self;
         // let redirect_url = Url::parse(&format!("{base_url}{uri}")).map(RedirectUrlReturned)?;
-        // let uri = redirect_url
         let redirect_url_wrapped = RedirectUrlReturned(redirect_url.clone());
 
         let code = redirect_url_wrapped.get_authorization_code().ok_or(
@@ -57,9 +38,9 @@ impl Config {
         )?;
 
         // make .verify give me back both the csrf token and the provider
-        let csrf_token = redirect_url_wrapped
-            .get_csrf_token()
-            .ok_or(OauthError::CsrfTokenNotFoundInRedirectUrl(redirect_url.to_string()))?;
+        let csrf_token = redirect_url_wrapped.get_csrf_token().ok_or(
+            OauthError::CsrfTokenNotFoundInRedirectUrl(redirect_url.to_string()),
+        )?;
 
         let evidence = AuthUrlData::verify_csrf_token(csrf_token, &cache_storage)
             .await
@@ -68,16 +49,14 @@ impl Config {
 
         let account_oauth = match evidence.provider {
             OauthProvider::Github => {
-                provider_configs
-                    .github
+                self.github
                     .as_ref()
                     .expect("You must provide github credentials")
                     .fetch_oauth_account(code, evidence.pkce_code_verifier)
                     .await
             }
             OauthProvider::Google => {
-                provider_configs
-                    .google
+                self.google
                     .as_ref()
                     .expect("You must provide google oauth credentials")
                     .fetch_oauth_account(code, evidence.pkce_code_verifier)
@@ -96,13 +75,16 @@ impl Config {
     ) -> AuthUrlData {
         // ) -> OauthResult<AuthUrlData> {
         // self.provider_configs.github.unwrap().basic_config().generate_auth_url()
-        let Provider { github, google } = self.provider_configs.clone();
         let auth_url_data = match oauth_provider {
-            OauthProvider::Github => github
+            OauthProvider::Github => self
+                .github
+                .as_ref()
                 .expect("no github config")
                 .basic_config()
                 .generate_auth_url(),
-            OauthProvider::Google => google
+            OauthProvider::Google => self
+                .google
+                .as_ref()
                 .expect("no google config")
                 .basic_config()
                 .generate_auth_url(),

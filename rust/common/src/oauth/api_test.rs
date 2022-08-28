@@ -12,7 +12,7 @@ use oauth2::http::Uri;
 use pretty_assertions::{assert_eq, assert_str_eq};
 
 use super::{
-    api::{Config, Provider},
+    api::Providers,
     cache_storage::{CacheStorage, HashMapCache, RedisCache},
 };
 use crate::oauth::utils::AuthUrlData;
@@ -41,12 +41,11 @@ async fn hello_reqwest() {
     let github = GithubConfig::new(&base_url, github_creds);
     let google = GoogleConfig::new(&base_url, google_creds);
 
-    let providers = Provider::builder().github(github).google(google).build();
+    let providers = Providers::builder().github(github).google(google).build();
     let mut cache_storage = HashMapCache::new();
 
     // Act
-    let conf = Config::builder().provider_configs(providers).build();
-    let auth_url_data = conf.generate_auth_url_data(super::OauthProvider::Github);
+    let auth_url_data = providers.generate_auth_url_data(super::OauthProvider::Github);
 
     auth_url_data.save(&mut cache_storage).await.unwrap();
 
