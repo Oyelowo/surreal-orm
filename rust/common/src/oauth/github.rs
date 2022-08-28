@@ -34,12 +34,6 @@ struct GithubEmail {
     // visibility: Option<String>,
 }
 
-#[derive(Debug, Clone, TypedBuilder)]
-pub struct OauthGithubSettings {
-    pub base_url: String,
-    pub credentials: OauthGithubCredentials,
-}
-
 #[derive(Debug, Clone)]
 pub struct GithubConfig {
     pub basic_config: OauthConfig,
@@ -48,17 +42,16 @@ pub struct GithubConfig {
 impl GithubConfig {
     /// Creates a new [`GithubConfig`].
     /// Takes in the settings
-    pub fn new(settings: OauthGithubSettings) -> Self {
-        let oauth_credentials = settings.credentials;
+    pub fn new(base_url: &String, credentials: OauthGithubCredentials) -> Self {
         // let env = OauthGithubCredentials::default();
         let basic_config = OauthConfig {
-            client_id: ClientId::new(oauth_credentials.client_id),
-            client_secret: ClientSecret::new(oauth_credentials.client_secret),
+            client_id: ClientId::new(credentials.client_id),
+            client_secret: ClientSecret::new(credentials.client_secret),
             auth_url: AuthUrl::new("https://github.com/login/oauth/authorize".to_string())
                 .expect("Invalid authorization endpoint URL"),
             token_url: TokenUrl::new("https://github.com/login/oauth/access_token".to_string())
                 .expect("Invalid token endpoint URL"),
-            redirect_url: RedirectUrl::new(get_redirect_url(settings.base_url))
+            redirect_url: RedirectUrl::new(get_redirect_url(base_url))
                 .expect("Invalid redirect URL"),
             scopes: vec![
                 Scope::new("public_repo".into()),
@@ -150,11 +143,7 @@ mod tests {
         const HOST_NAME: &str = "oyelowo.test";
         let base_url = format!("http://{HOST_NAME}");
 
-        let settins = OauthGithubSettings {
-            base_url: base_url.clone(),
-            credentials,
-        };
-        let google_config = GithubConfig::new(settins).basic_config();
+        let google_config = GithubConfig::new(&base_url, credentials).basic_config();
         let auth_url_data = google_config.clone().generate_auth_url();
 
         let auth_url = auth_url_data.authorize_url.clone().0;

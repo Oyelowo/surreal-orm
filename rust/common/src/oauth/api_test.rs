@@ -19,75 +19,32 @@ use crate::oauth::utils::AuthUrlData;
 use crate::{
     configurations::oauth::{OauthCredentials, OauthGithubCredentials, OauthGoogleCredentials},
     oauth::{
-        github::{GithubConfig, OauthGithubSettings},
+        github::GithubConfig,
         google::{GoogleConfig, OauthGoogleSettings},
     },
 };
 
 #[tokio::test]
 async fn hello_reqwest() {
-    // Arrange
-    // Arrange
-    let expected_body = json!({ "a": 1, "c": { "e": 2 } });
-    let body = json!({ "a": 1, "b": 2, "c": { "d": 1, "e": 2 } });
-
-    let mock_server = MockServer::start().await;
-    let response = ResponseTemplate::new(200);
-    // let mock = Mock::given(method("GET"))
-    let mock = Mock::given(any())
-        // .and(path_regex("/[a-z]+[0-9]+/v2"))
-        // .and(path_regex("/[a-z]+[0-9]+/v2"))
-        // .and(path_regex("/[a-z]+2/v2"))
-        // .and(path("/o/oauth2/v2/auth"))
-        // .and(PathExactMatcher::new("https://api.github.com/user"))
-        // .and(PathExactMatcher::new("o/oauth2/v2/auth"))
-        // .and(PathExactMatcher::new("google"))
-        // .and(path("accounts.google.com/o/oauth2/v2/auth"))
-        .and(body_partial_json(expected_body))
-        .respond_with(response);
-    mock_server.register(mock).await;
-
-    // ////////
-    // let giCrede = OauthCredentials::builder().google(google).
-    let github_credentials = OauthGithubCredentials::builder()
+    let base_url = String::from("https://oyelowo.test");
+    let github_creds = OauthGithubCredentials::builder()
         .client_id(String::from("89c19374f7e7b5b35164"))
         .client_secret(String::from("129488cc92e2d2f91e3a5a024086396c48c65339"))
         .build();
 
-    let google_credentials = OauthGoogleCredentials::builder()
-        .client_id(String::from(
-            "855174209543-6m0f088e55d3mevhnr8bs0qjap8j6g0g.apps.googleusercontent.com",
-        ))
-        .client_secret(String::from("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"))
-        .build();
+    let google_creds = OauthGoogleCredentials {
+        client_id: "855174209543-6m0f088e55d3mevhnr8bs0qjap8j6g0g.apps.googleusercontent.com"
+            .to_string(),
+        client_secret: "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".to_string(),
+    };
 
-    // let oauth_credentials = OauthCredentials::builder()
-    //     .google(google_credentials.clone())
-    //     .github(github_credentials.clone())
-    //     .build();
-    let oauth_github_settings = OauthGithubSettings::builder()
-        .base_url("https://oyelowo.test".to_string())
-        .credentials(github_credentials)
-        .build();
-    let oauth_goole_settings = OauthGoogleSettings::builder()
-        .base_url("https://oyelowo.test".to_string())
-        .credentials(google_credentials)
-        .build();
-    let github = GithubConfig::new(oauth_github_settings);
-    let google = GoogleConfig::new(oauth_goole_settings);
+    let github = GithubConfig::new(&base_url, github_creds);
+    let google = GoogleConfig::new(&base_url, google_creds);
 
     let providers = Provider::builder().github(github).google(google).build();
-    // let cache = HashMap::new();
     let mut cache_storage = HashMapCache::new();
 
     // Act
-    // let response = surf::get(mock_server.uri()).body(body).await.unwrap();
-    // let response = surf::get(format!("{}/o/oauth2/v2/auth", mock_server.uri()))
-    // let response = surf::get(format!("https://api.github.com/user"))
-    //     .body(body)
-    //     .await
-    //     .unwrap();
-
     let conf = Config::builder().provider_configs(providers).build();
     let auth_url_data = conf.generate_auth_url_data(super::OauthProvider::Github);
 
@@ -104,10 +61,4 @@ async fn hello_reqwest() {
     )
     .await
     .is_some());
-    // conf.fetch_account(Url::parse(format!("https://oyelowo.test/redirect?code=g0ZGZmNjVmOWI&state={m}").as_str()).unwrap(), cache_storage).await.unwrap();
-    // assert_eq!(cache_storage.0.get(&m).unwrap().clone(), "".to_string());
-    // providers
-    // assert_eq!(mock_server.address().to_string(), mock_server.uri());
-    // assert_eq!(response.status(), StatusCode::Ok);
-    // assert_eq!(response.status(), StatusCode::Ok);
 }

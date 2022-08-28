@@ -45,9 +45,8 @@ pub struct GoogleConfig {
 }
 
 impl GoogleConfig {
-    pub fn new(settings: OauthGoogleSettings) -> Self {
+    pub fn new(base_url: &String, credentials: OauthGoogleCredentials) -> Self {
         // let env = OauthGoogleCredentials::default();
-        let credentials = settings.credentials;
         let basic_config = OauthConfig::builder()
             .client_id(ClientId::new(credentials.client_id))
             .client_secret(ClientSecret::new(credentials.client_secret))
@@ -60,8 +59,7 @@ impl GoogleConfig {
                     .expect("Invalid token endpoint URL"),
             )
             .redirect_url(
-                RedirectUrl::new(get_redirect_url(settings.base_url))
-                    .expect("Invalid redirect URL"),
+                RedirectUrl::new(get_redirect_url(base_url)).expect("Invalid redirect URL"),
             )
             .scopes(vec![
                 Scope::new("profile".into()),
@@ -150,11 +148,7 @@ mod tests {
         const HOST_NAME: &str = "oyelowo.test";
         let base_url = format!("http://{HOST_NAME}");
 
-        let settins = OauthGoogleSettings {
-            base_url: base_url.clone(),
-            credentials,
-        };
-        let google_config = GoogleConfig::new(settins).basic_config();
+        let google_config = GoogleConfig::new(&base_url, credentials).basic_config();
         let auth_url_data = google_config.clone().generate_auth_url();
 
         let auth_url = auth_url_data.authorize_url.clone().0;

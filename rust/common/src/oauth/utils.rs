@@ -20,7 +20,7 @@ use url::Url;
 use super::{cache_storage::CacheStorage, OauthProvider};
 // use crate::app::user::{AccountOauth, OauthProvider};
 
-pub(crate) fn get_redirect_url(base_url: String) -> String {
+pub(crate) fn get_redirect_url(base_url: &String) -> String {
     // let base_url = ApplicationConfigs::default().external_base_url;
     // Has to be defined in app router
     format!("{base_url}/api/oauth/callback")
