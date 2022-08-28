@@ -100,7 +100,7 @@ impl OauthProviderTrait for GoogleConfig {
     ) -> OauthResult<Self::OauthResponse> {
         let token = self.exchange_token(code, pkce_code_verifier).await?;
 
-        let profile = OauthUrl("https://www.googleapis.com/oauth2/v3/userinfo")
+        let profile = OauthUrl("https://www.googleapis.com/oauth2/v3/userinfo".to_string())
             .fetch_resource::<GoogleUserData>(&token, None)
             .await?;
 

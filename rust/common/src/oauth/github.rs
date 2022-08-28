@@ -43,12 +43,13 @@ pub struct OauthGithubSettings {
 #[derive(Debug, Clone)]
 pub struct GithubConfig {
     pub basic_config: OauthConfig,
+    pub base_url: String,
 }
 
 impl GithubConfig {
     /// Creates a new [`GithubConfig`].
     /// Takes in the settings
-    pub fn new(settings: OauthGithubSettings) -> Self {
+    pub fn new(settings: OauthGithubSettings, base_url: String) -> Self {
         let oauth_credentials = settings.credentials;
         // let env = OauthGithubCredentials::default();
         let basic_config = OauthConfig {
@@ -68,7 +69,7 @@ impl GithubConfig {
             provider: OauthProvider::Github,
             revocation_url: None,
         };
-        Self { basic_config }
+        Self { basic_config, base_url }
     }
 }
 
@@ -86,12 +87,13 @@ impl OauthProviderTrait for GithubConfig {
         pkce_code_verifier: PkceCodeVerifier,
     ) -> OauthResult<Self::OauthResponse> {
         let token = self.exchange_token(code, pkce_code_verifier).await?;
-
-        let profile = OauthUrl("https://api.github.com/user")
+        
+        // let profile = OauthUrl("https://api.github.com/user")
+        let profile = OauthUrl(format!("{}/user", self.base_url).into())
             .fetch_resource::<GithubUserData>(&token, None)
             .await?;
 
-        let user_emails = OauthUrl("https://api.github.com/user/emails")
+        let user_emails = OauthUrl(format!("{}/user/emails", self.base_url).into())
             .fetch_resource::<Vec<GithubEmail>>(&token, None)
             .await?;
 
@@ -154,7 +156,7 @@ mod tests {
             base_url: base_url.clone(),
             credentials,
         };
-        let google_config = GithubConfig::new(settins).basic_config();
+        let google_config = GithubConfig::new(settins, "api.github.com".to_string()).basic_config();
         let auth_url_data = google_config.clone().generate_auth_url();
 
         let auth_url = auth_url_data.authorize_url.clone().0;

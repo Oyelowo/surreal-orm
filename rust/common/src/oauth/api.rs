@@ -60,7 +60,7 @@ impl Config {
         let csrf_token = redirect_url_wrapped
             .get_csrf_token()
             .ok_or(OauthError::CsrfTokenNotFoundInRedirectUrl(redirect_url.to_string()))?;
-        // let cache = cg::RedisCache(redis.clone());
+
         let evidence = AuthUrlData::verify_csrf_token(csrf_token, &cache_storage)
             .await
             .unwrap()

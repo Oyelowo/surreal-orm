@@ -142,7 +142,7 @@ impl AuthUrlData {
 }
 
 #[derive(Debug, From, Into, Clone)]
-pub(crate) struct OauthUrl(pub(crate) &'static str);
+pub(crate) struct OauthUrl(pub(crate) String);
 
 impl OauthUrl {
     pub async fn fetch_resource<T: DeserializeOwned>(
@@ -152,7 +152,7 @@ impl OauthUrl {
     ) -> OauthResult<T> {
         let headers = headers.unwrap_or_default();
         let remote_data = reqwest::Client::new()
-            .get(self.0)
+            .get(self.0.to_string())
             .header(ACCEPT, "application/vnd.github.v3+json")
             .header(USER_AGENT, "oyelowo")
             .headers(headers)

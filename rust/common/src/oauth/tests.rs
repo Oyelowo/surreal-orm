@@ -77,7 +77,13 @@ mod tests {
             let server = MockServer::start_async().await;
             let mock = server
                 .mock_async(|when, then| {
-                    when.path_contains("google");
+                    when.path_contains("https://accounts.google.com/o/oauth2/v2/auth");
+                    then.status(200);
+                })
+                .await;
+            let mock2 = server
+                .mock_async(|when, then| {
+                    when.path_contains("https://www.googleapis.com/oauth2/v4/token");
                     then.status(200);
                 })
                 .await;

@@ -10,8 +10,10 @@ pub mod api;
 pub mod cache_storage;
 pub mod github;
 pub mod google;
-mod tests;
-// mod tests2;
+// mod tests;
+#[cfg(test)]
+mod api_test;
+
 pub mod utils;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, Copy)]
