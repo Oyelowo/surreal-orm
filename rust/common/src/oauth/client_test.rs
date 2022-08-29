@@ -38,7 +38,7 @@ where
 #[tokio::test]
 async fn generates_and_stores_and_get_right_auth_url_for_github_oauth() {
     // Act
-    let mut oauth_client = get_client(HashMapCache::new());
+    let mut oauth_client = get_client(HashMapCache::default());
     let auth_url_data = oauth_client
         .generate_auth_url_data(OauthProvider::Github)
         .await
@@ -106,7 +106,7 @@ async fn lru_generates_and_stores_and_get_right_auth_url_for_github_oauth() {
 
 #[tokio::test]
 async fn lru_generates_and_stores_and_get_right_auth_url_for_google_oauth() {
-    let mut oauth_client = get_client(LruCache::new(10));
+    let mut oauth_client = get_client(LruCache::default());
 
     // Act
     let auth_url_data = oauth_client
