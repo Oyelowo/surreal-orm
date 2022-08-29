@@ -79,7 +79,6 @@ multimap = "0.8.3"
 lru = "0.7.8"
 
 [dev-dependencies]
-async-std = { version = "1.9.0", features = ["attributes"] }
 surf = "2.3.2"
 reqwest = "0.11.3"
 tokio = { version = "1.5.0", features = ["macros"] }

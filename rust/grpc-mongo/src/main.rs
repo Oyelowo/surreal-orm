@@ -1,3 +1,4 @@
+#![allow(clippy::derive_partial_eq_without_eq)]
 use std::{net::SocketAddr, process};
 
 use anyhow::Result;

@@ -59,15 +59,13 @@ impl RedisConfigs {
     }
 
     pub async fn get_async_connection(self) -> Result<redis::aio::Connection, RedisConfigError> {
-        let con = self
-            .get_client()?
+        self.get_client()?
             .get_async_connection()
             .await
             .map_err(|e| {
                 log::error!("Problem getting connection. Error:{e:?}");
                 RedisConfigError::ConnectionFailure(e)
-            });
-        con
+            })
     }
 
     pub async fn get_connection_manager(self) -> Result<ConnectionManager, RedisConfigError> {

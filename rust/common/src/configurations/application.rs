@@ -3,7 +3,7 @@ use serde_aux::prelude::deserialize_number_from_string;
 
 use super::utils::get_env_vars_by_prefix;
 
-#[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
+#[derive(PartialEq, Eq, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Environment {
     Local,

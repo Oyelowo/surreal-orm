@@ -38,12 +38,10 @@ impl UserQueryRoot {
             .build();
         let user_key = User::get_fields_serialized();
 
-        let user = User::collection(db)
+        User::collection(db)
             .find_one(doc! {user_key._id: id}, find_one_options)
             .await?
-            .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend());
-
-        user
+            .ok_or_else(|| ApiHttpStatus::NotFound("User not found".into()).extend())
     }
 
     pub async fn get_user(&self, ctx: &Context<'_>, user_by: UserBy) -> Result<User> {

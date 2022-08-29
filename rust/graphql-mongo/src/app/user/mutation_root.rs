@@ -95,7 +95,7 @@ impl UserMutationRoot {
         let maybe_user_id = session.get_user_id::<ObjectId>().ok();
 
         // Return user if found from session
-        let user = match maybe_user_id {
+        match maybe_user_id {
             Some(ref user_id) => {
                 let user = User::find_by_id(db, user_id).await;
                 session.renew();
@@ -128,9 +128,7 @@ impl UserMutationRoot {
                 session.insert_user_id(&user_id);
                 Ok(user)
             }
-        };
-
-        user
+        }
     }
 
     async fn sign_out(&self, ctx: &async_graphql::Context<'_>) -> Result<SignOutMessage> {

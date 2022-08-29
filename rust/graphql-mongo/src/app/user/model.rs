@@ -244,8 +244,7 @@ impl User {
         let db = get_db_from_ctx(ctx)?;
         let user_id = TypedSession::from_ctx(ctx)?.get_user_id::<ObjectId>()?;
 
-        let user = Self::find_by_id(db, &user_id).await;
-        user
+        Self::find_by_id(db, &user_id).await
     }
 
     pub async fn get_user(db: &Database, user_by: UserBy) -> Result<Self> {
