@@ -33,14 +33,13 @@ async fn generates_and_stores_and_get_right_auth_url_for_github_oauth() {
     let mut cache_storage = HashMapCache::new();
     let (github, google) = prepare_client();
     let mut oauth_client = OauthClient::builder()
-        .github(&github)
-        .google(&google)
-        .cache_storage(&mut cache_storage)
+        .github(github)
+        .google(google)
         .build();
 
     // Act
     let auth_url_data = oauth_client
-        .generate_auth_url_data(OauthProvider::Github)
+        .generate_auth_url_data(OauthProvider::Github, &mut cache_storage)
         .await
         .unwrap();
 
@@ -63,14 +62,13 @@ async fn generates_and_stores_and_get_right_auth_url_for_google_oauth() {
     let mut cache_storage = HashMapCache::new();
     let (github, google) = prepare_client();
     let mut oauth_client = OauthClient::builder()
-        .github(&github)
-        .google(&google)
-        .cache_storage(&mut cache_storage)
+        .github(github)
+        .google(google)
         .build();
 
     // Act
     let auth_url_data = oauth_client
-        .generate_auth_url_data(OauthProvider::Google)
+        .generate_auth_url_data(OauthProvider::Google, &mut cache_storage)
         .await
         .unwrap();
 
@@ -93,14 +91,13 @@ async fn lru_generates_and_stores_and_get_right_auth_url_for_github_oauth() {
     let mut cache_storage = LruCache::new(2000);
     let (github, google) = prepare_client();
     let mut oauth_client = OauthClient::builder()
-        .github(&github)
-        .google(&google)
-        .cache_storage(&mut cache_storage)
+        .github(github)
+        .google(google)
         .build();
 
     // Act
     let auth_url_data = oauth_client
-        .generate_auth_url_data(OauthProvider::Github)
+        .generate_auth_url_data(OauthProvider::Github, &mut cache_storage)
         .await
         .unwrap();
 
@@ -123,14 +120,13 @@ async fn lru_generates_and_stores_and_get_right_auth_url_for_google_oauth() {
     let mut cache_storage = LruCache::new(10);
     let (github, google) = prepare_client();
     let mut oauth_client = OauthClient::builder()
-        .github(&github)
-        .google(&google)
-        .cache_storage(&mut cache_storage)
+        .github(github)
+        .google(google)
         .build();
 
     // Act
     let auth_url_data = oauth_client
-        .generate_auth_url_data(OauthProvider::Google)
+        .generate_auth_url_data(OauthProvider::Google, &mut cache_storage)
         .await
         .unwrap();
 
@@ -153,14 +149,13 @@ async fn lru_empty_generates_and_stores_and_get_right_auth_url_for_google_oauth(
     let mut cache_storage = LruCache::new(0);
     let (github, google) = prepare_client();
     let mut oauth_client = OauthClient::builder()
-        .github(&github)
-        .google(&google)
-        .cache_storage(&mut cache_storage)
+        .github(github)
+        .google(google)
         .build();
 
     // Act
     let auth_url_data = oauth_client
-        .generate_auth_url_data(OauthProvider::Google)
+        .generate_auth_url_data(OauthProvider::Google, &mut cache_storage)
         .await
         .unwrap();
 
