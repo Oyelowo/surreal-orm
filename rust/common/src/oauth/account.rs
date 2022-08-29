@@ -46,7 +46,7 @@ pub struct UserAccount {
     A single User can have multiple Accounts, but each Account can only have one User.
                  */
     #[builder(default, setter(strip_option))]
-    oauth_token: Option<String>,
+    pub oauth_token: Option<String>,
     #[builder(default, setter(strip_option))]
-    oauth_token_secret: Option<String>,
+    pub oauth_token_secret: Option<String>,
 }

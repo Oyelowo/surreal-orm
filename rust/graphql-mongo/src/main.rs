@@ -4,9 +4,15 @@ use common::{
     configurations::{
         application::{ApplicationConfigs, Environment},
         mongodb::MongodbConfigs,
+        oauth::{OauthGithubCredentials, OauthGoogleCredentials},
         redis::RedisConfigs,
     },
     middleware,
+    oauth::{
+        cache_storage::{self, RedisCache},
+        github::GithubConfig,
+        google::GoogleConfig,
+    },
 };
 
 use backoff::future::retry;
@@ -50,6 +56,7 @@ async fn run_app() -> anyhow::Result<()> {
         .get_client()
         .context("Problem getting redis")?;
 
+    let oauth_client = get_oauth_client(redis.clone());
     let database = MongodbConfigs::default()
         .get_database()
         .context("Problem getting database")?;
@@ -78,6 +85,7 @@ async fn run_app() -> anyhow::Result<()> {
         .data(database)
         .data(redis)
         .data(redis_config)
+        .data(oauth_client)
         .with(session)
         .with(middleware::get_cors(environment))
         // .with(Logger)
@@ -90,4 +98,24 @@ async fn run_app() -> anyhow::Result<()> {
         .await
         .context("Problem running server")?;
     Ok(())
+}
+
+use common::oauth::cache_storage::CacheStorage;
+use common::oauth::client::OauthClient;
+
+fn get_oauth_client(redis_client: redis::Client) -> OauthClient<RedisCache> {
+    let cache_storage = RedisCache::new(redis_client);
+    let base_url = String::from("https://oyelowo.test");
+    let github_creds = OauthGithubCredentials::default();
+
+    let google_creds = OauthGoogleCredentials::default();
+
+    let github = GithubConfig::new(&base_url, github_creds);
+    let google = GoogleConfig::new(&base_url, google_creds);
+
+    OauthClient::builder()
+        .github(github)
+        .google(google)
+        .cache_storage(cache_storage)
+        .build()
 }

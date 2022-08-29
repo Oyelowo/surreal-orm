@@ -150,6 +150,28 @@ pub struct AccountOauth {
     oauth_token_secret: Option<String>,
 }
 
+impl From<common::oauth::account::UserAccount> for AccountOauth {
+    fn from(user_account: common::oauth::account::UserAccount) -> Self {
+        Self {
+            id: user_account.id,
+            display_name: user_account.display_name,
+            email: user_account.email,
+            email_verified: user_account.email_verified,
+            provider: user_account.provider.into(),
+            provider_account_id: user_account.provider_account_id.into(),
+            access_token: user_account.access_token,
+            refresh_token: user_account.refresh_token,
+            expires_at: user_account.expires_at,
+            token_type: Some(user_account.token_type.unwrap().into()),
+            scopes: user_account.scopes,
+            id_token: user_account.id_token,
+            oauth_token: user_account.oauth_token,
+            oauth_token_secret: user_account.oauth_token_secret,
+        }
+    }
+    // fn into(self) -> common::oauth::account::UserAccount {}
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone, Enum, PartialEq, Eq, Copy, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum OauthProvider {
@@ -157,10 +179,46 @@ pub enum OauthProvider {
     Google,
 }
 
+impl From<common::oauth::account::OauthProvider> for OauthProvider {
+    fn from(o: common::oauth::account::OauthProvider) -> Self {
+        match o {
+            common::oauth::account::OauthProvider::Github => Self::Github,
+            common::oauth::account::OauthProvider::Google => Self::Google,
+        }
+    }
+}
+
+impl Into<common::oauth::account::OauthProvider> for OauthProvider {
+    fn into(self) -> common::oauth::account::OauthProvider {
+        match self {
+            OauthProvider::Github => common::oauth::account::OauthProvider::Github,
+            OauthProvider::Google => common::oauth::account::OauthProvider::Google,
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone, Enum, PartialEq, Eq, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum TokenType {
     Bearer,
+}
+
+impl From<common::oauth::account::TokenType> for TokenType {
+    fn from(o: common::oauth::account::TokenType) -> Self {
+        match o {
+            common::oauth::account::TokenType::Bearer => Self::Bearer,
+            // common::oauth::account::OauthProvider::Google => Self::Google,
+        }
+    }
+}
+
+impl Into<common::oauth::account::TokenType> for TokenType {
+    fn into(self) -> common::oauth::account::TokenType {
+        match self {
+            TokenType::Bearer => common::oauth::account::TokenType::Bearer,
+            // OauthProvider::Google => common::oauth::account::OauthProvider::Google,
+        }
+    }
 }
 
 /*
