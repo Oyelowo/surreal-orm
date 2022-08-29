@@ -51,7 +51,7 @@ impl OauthClient {
     pub async fn fetch_account<C>(
         &mut self,
         redirect_url: Url,
-         cache_storage: &mut C,
+        cache_storage: &mut C,
     ) -> OauthResult<UserAccount>
     where
         C: CacheStorage + Debug,
