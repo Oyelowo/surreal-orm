@@ -13,22 +13,25 @@ use super::{
 };
 
 #[derive(Debug, TypedBuilder, Clone)]
-pub struct OauthClient {
+pub struct OauthClient<C>
+where
+    C: CacheStorage + Debug,
+{
     #[builder(default, setter(strip_option))]
     github: Option<GithubConfig>,
     #[builder(default, setter(strip_option))]
     google: Option<GoogleConfig>,
+    cache_storage: C,
 }
 
-impl OauthClient {
-    pub async fn generate_auth_url_data<C>(
+impl<C> OauthClient<C>
+where
+    C: CacheStorage + Debug,
+{
+    pub async fn generate_auth_url_data(
         &mut self,
         oauth_provider: OauthProvider,
-        cache_storage: &mut C,
-    ) -> OauthResult<AuthUrlData>
-    where
-        C: CacheStorage + Debug,
-    {
+    ) -> OauthResult<AuthUrlData> {
         let auth_url_data = match oauth_provider {
             OauthProvider::Github => self
                 .github
@@ -44,18 +47,11 @@ impl OauthClient {
                 .generate_auth_url(),
         };
 
-        auth_url_data.save(cache_storage).await?;
+        auth_url_data.save(&mut self.cache_storage).await?;
         Ok(auth_url_data)
     }
 
-    pub async fn fetch_account<C>(
-        &mut self,
-        redirect_url: Url,
-        cache_storage: &mut C,
-    ) -> OauthResult<UserAccount>
-    where
-        C: CacheStorage + Debug,
-    {
+    pub async fn fetch_account(&mut self, redirect_url: Url) -> OauthResult<UserAccount> {
         let redirect_url_wrapped = RedirectUrlReturned::new(redirect_url.clone());
 
         let code = redirect_url_wrapped.get_authorization_code().ok_or(
@@ -67,7 +63,7 @@ impl OauthClient {
             OauthError::CsrfTokenNotFoundInRedirectUrl(redirect_url.to_string()),
         )?;
 
-        let evidence = AuthUrlData::verify_csrf_token(csrf_token, cache_storage)
+        let evidence = AuthUrlData::verify_csrf_token(csrf_token, &mut self.cache_storage)
             .await?
             .evidence;
 
@@ -89,5 +85,16 @@ impl OauthClient {
         }?;
 
         Ok(account_oauth)
+    }
+
+    pub fn get_cache_mut_ref(&mut self) -> &mut C {
+        &mut self.cache_storage
+    }
+
+    pub fn get_cache_owned(self) -> C {
+        self.cache_storage
+    }
+    pub fn get_cache_ref(&self) -> &C {
+        &self.cache_storage
     }
 }
