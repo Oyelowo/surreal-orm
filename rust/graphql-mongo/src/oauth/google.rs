@@ -154,7 +154,7 @@ mod tests {
         env::set_var("REDIS_PORT", "6379");
 
         let google_config = GoogleConfig::new().basic_config();
-        let auth_url_dataa = google_config.clone().generate_auth_url();
+        let auth_url_dataa = google_config.generate_auth_url();
 
         let auth_url = auth_url_dataa.authorize_url.clone().0;
         let hash_query: MultiMap<_, _> = auth_url_dataa

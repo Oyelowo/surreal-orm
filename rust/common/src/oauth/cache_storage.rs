@@ -40,6 +40,12 @@ impl CacheStorage for RedisCache {
 #[derive(Debug, Clone)]
 pub struct HashMapCache(HashMap<String, String>);
 
+impl Default for HashMapCache {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl HashMapCache {
     pub fn new() -> Self {
         Self(HashMap::new())
@@ -72,7 +78,7 @@ impl LruCache {
 #[async_trait::async_trait]
 impl CacheStorage for LruCache {
     async fn get(&mut self, key: String) -> Option<String> {
-        self.0.get(&key).map(|v| v.clone())
+        self.0.get(&key).cloned()
     }
 
     async fn set(&mut self, key: String, value: String) {

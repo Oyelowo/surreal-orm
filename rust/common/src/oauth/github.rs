@@ -137,14 +137,14 @@ mod tests {
         let client_secret = String::from("secret_xxx");
         let credentials = OauthGithubCredentials {
             client_id: client_id.clone(),
-            client_secret: client_secret.clone(),
+            client_secret,
         };
 
         const HOST_NAME: &str = "oyelowo.test";
         let base_url = format!("http://{HOST_NAME}");
 
         let google_config = GithubConfig::new(&base_url, credentials).basic_config();
-        let auth_url_data = google_config.clone().generate_auth_url();
+        let auth_url_data = google_config.generate_auth_url();
 
         let auth_url = auth_url_data.authorize_url.into_inner();
         let hash_query: MultiMap<_, _> = auth_url.query_pairs().into_owned().collect();

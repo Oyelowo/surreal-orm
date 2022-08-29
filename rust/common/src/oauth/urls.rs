@@ -79,7 +79,7 @@ impl AuthUrlData {
             .await
             .ok_or(OauthError::AuthUrlDataNotFoundInCache)?;
 
-        Ok(serde_json::from_str::<Self>(&auth_url_data.as_str())?)
+        Ok(serde_json::from_str::<Self>(auth_url_data.as_str())?)
     }
 
     pub async fn save<C>(&self, storage: &mut C) -> OauthResult<()>

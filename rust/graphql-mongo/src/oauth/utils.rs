@@ -108,7 +108,7 @@ impl AuthUrlData {
         let key = Self::oauth_cache_key_prefix(csrf_token);
         let auth_url_data = storage.get(key).await.unwrap();
 
-        let auth_url_data = serde_json::from_str::<Self>(&auth_url_data.as_str()).unwrap();
+        let auth_url_data = serde_json::from_str::<Self>(auth_url_data.as_str()).unwrap();
 
         Some(auth_url_data)
     }

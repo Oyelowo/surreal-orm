@@ -54,14 +54,16 @@ where
     pub async fn fetch_account(&mut self, redirect_url: Url) -> OauthResult<UserAccount> {
         let redirect_url_wrapped = RedirectUrlReturned::new(redirect_url.clone());
 
-        let code = redirect_url_wrapped.get_authorization_code().ok_or(
-            OauthError::AuthorizationCodeNotFoundInRedirectUrl(redirect_url.to_string()),
-        )?;
+        let code = redirect_url_wrapped
+            .get_authorization_code()
+            .ok_or_else(|| {
+                OauthError::AuthorizationCodeNotFoundInRedirectUrl(redirect_url.to_string())
+            })?;
 
         // make .verify give me back both the csrf token and the provider
-        let csrf_token = redirect_url_wrapped.get_csrf_token().ok_or(
-            OauthError::CsrfTokenNotFoundInRedirectUrl(redirect_url.to_string()),
-        )?;
+        let csrf_token = redirect_url_wrapped
+            .get_csrf_token()
+            .ok_or_else(|| OauthError::CsrfTokenNotFoundInRedirectUrl(redirect_url.to_string()))?;
 
         let evidence = AuthUrlData::verify_csrf_token(csrf_token, &mut self.cache_storage)
             .await?
