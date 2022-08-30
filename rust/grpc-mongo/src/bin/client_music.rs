@@ -1,6 +1,7 @@
 use anyhow::Result;
 use music::{fan_client::FanClient, CreateMusicLoverRequest, Empty, GetMusicLoverRequest};
 pub mod music {
+    #![allow(clippy::derive_partial_eq_without_eq)]
     tonic::include_proto!("music");
 }
 
