@@ -19,7 +19,7 @@ fn ddefault_to_how_fields_are_written_if_no_rename_all_struct_attribute_specifie
     assert_eq!(age, "age");
 }
 
-fn keys_getter_1() {
+fn field_rename_attributes_takes_precendence() {
     #[derive(FieldsGetter, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct Consumer {
@@ -40,7 +40,7 @@ fn keys_getter_1() {
 }
 
 #[test]
-fn keys_getter_4() {
+fn struct_level_rename_attribute_can_camelize() {
     #[derive(FieldsGetter, Serialize, Deserialize)]
     #[field_getter(rename_all = "camelCase")]
     pub struct Consumer {
@@ -56,7 +56,7 @@ fn keys_getter_4() {
 }
 
 #[test]
-fn keys_getter_5() {
+fn struct_level_rename_attribute_can_snake_caseize() {
     #[derive(FieldsGetter, Serialize, Deserialize)]
     #[field_getter(rename_all = "snake_case")]
     pub struct Consumer {
@@ -73,7 +73,7 @@ fn keys_getter_5() {
 }
 
 #[test]
-fn keys_getter_6() {
+fn struct_level_rename_attribute_can_snake_caseize_all_without_overriding_field_rename_attribute() {
     #[derive(FieldsGetter, Serialize, Deserialize)]
     #[field_getter(rename_all = "snake_case")]
     pub struct Consumer {
@@ -98,7 +98,7 @@ fn keys_getter_6() {
 }
 
 #[test]
-fn keys_getter_7() {
+fn serde_and_field_gettter_field_level_attribute_take_precendence_over_struct_level_rename() {
     #[derive(FieldsGetter, Serialize, Deserialize)]
     #[field_getter(rename_all = "snake_case")]
     pub struct Consumer {
@@ -124,7 +124,7 @@ fn keys_getter_7() {
 }
 
 #[test]
-fn keys_getter_8() {
+fn can_properly_handle_kebab_case_and_respect_field_attribute() {
     #[derive(FieldsGetter, Serialize, Deserialize)]
     #[field_getter(rename_all = "kebab-case")]
     pub struct Consumer {
@@ -149,7 +149,7 @@ fn keys_getter_8() {
 }
 
 #[test]
-fn handle_nested_values() {
+fn handles_nested_field_getter_rename_attributes_mixed_with_serde_field_attributes() {
     #[derive(FieldsGetter, Serialize, Deserialize)]
     #[field_getter(rename_all = "camelCase")]
     pub struct Consumer {
@@ -175,7 +175,7 @@ fn handle_nested_values() {
 }
 
 #[test]
-fn handle_nested_values_at_struct_lvel() {
+fn handles_nested_serde_rename_attributes_attributes() {
     #[derive(FieldsGetter, Serialize, Deserialize)]
     #[serde(rename_all(serialize = "camelCase"))]
     pub struct Consumer {
