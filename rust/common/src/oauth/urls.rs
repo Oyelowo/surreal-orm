@@ -69,10 +69,7 @@ impl AuthUrlData {
         C: CacheStorage,
     {
         let key = Self::oauth_cache_key_prefix(csrf_token);
-        let auth_url_data = storage
-            .get(key)
-            .await
-            .ok_or(OauthError::AuthUrlDataNotFoundInCache)?;
+        let auth_url_data = storage.get(key).await?;
 
         Ok(serde_json::from_str::<Self>(auth_url_data.as_str())?)
     }
@@ -83,7 +80,7 @@ impl AuthUrlData {
     {
         let key = Self::oauth_cache_key_prefix(self.evidence.csrf_token.clone());
         let csrf_state_data_string = serde_json::to_string(&self)?;
-        storage.set(key, csrf_state_data_string).await;
+        storage.set(key, csrf_state_data_string).await?;
         Ok(())
     }
 }
