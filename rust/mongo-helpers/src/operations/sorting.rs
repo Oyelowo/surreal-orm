@@ -3,7 +3,7 @@ use mongodb::bson::Bson;
 /// Index sort order (useful for compound indexes).
 ///
 /// [Mongo manual](https://docs.mongodb.com/manual/core/index-compound/#sort-order)
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum SortOrder {
     Ascending,
     Descending,

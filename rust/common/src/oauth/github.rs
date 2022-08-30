@@ -1,13 +1,18 @@
 use chrono::{Duration, Utc};
-use common::configurations::oauth::OauthGithubCredentials;
 use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, PkceCodeVerifier, RedirectUrl, Scope,
     TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
 
-use super::utils::{get_redirect_url, OauthConfig, OauthProviderTrait, OauthResult, OauthUrl};
-use crate::app::user::{AccountOauth, OauthProvider, TokenType};
+use crate::configurations::oauth::OauthGithubCredentials;
+
+use super::{
+    account::{OauthProvider, TokenType, UserAccount},
+    error::OauthResult,
+    oauth_config::{OauthConfig, OauthProviderTrait},
+    urls::{get_redirect_url, OauthUrl},
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 struct GithubUserData {
@@ -31,21 +36,23 @@ struct GithubEmail {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct GithubConfig {
-    pub(crate) basic_config: OauthConfig,
+pub struct GithubConfig {
+    pub basic_config: OauthConfig,
 }
 
 impl GithubConfig {
-    pub fn new() -> Self {
-        let env = OauthGithubCredentials::default();
+    /// Creates a new [`GithubConfig`].
+    /// Takes in the settings
+    pub fn new(base_url: &String, credentials: OauthGithubCredentials) -> Self {
         let basic_config = OauthConfig {
-            client_id: ClientId::new(env.client_id),
-            client_secret: ClientSecret::new(env.client_secret),
+            client_id: ClientId::new(credentials.client_id),
+            client_secret: ClientSecret::new(credentials.client_secret),
             auth_url: AuthUrl::new("https://github.com/login/oauth/authorize".to_string())
                 .expect("Invalid authorization endpoint URL"),
             token_url: TokenUrl::new("https://github.com/login/oauth/access_token".to_string())
                 .expect("Invalid token endpoint URL"),
-            redirect_url: RedirectUrl::new(get_redirect_url()).expect("Invalid redirect URL"),
+            redirect_url: RedirectUrl::new(get_redirect_url(base_url))
+                .expect("Invalid redirect URL"),
             scopes: vec![
                 Scope::new("public_repo".into()),
                 Scope::new("read:user".into()),
@@ -60,6 +67,8 @@ impl GithubConfig {
 
 #[async_trait::async_trait]
 impl OauthProviderTrait for GithubConfig {
+    type OauthResponse = UserAccount;
+
     fn basic_config(&self) -> OauthConfig {
         self.basic_config.to_owned()
     }
@@ -68,7 +77,7 @@ impl OauthProviderTrait for GithubConfig {
         &self,
         code: AuthorizationCode,
         pkce_code_verifier: PkceCodeVerifier,
-    ) -> OauthResult<AccountOauth> {
+    ) -> OauthResult<Self::OauthResponse> {
         let token = self.exchange_token(code, pkce_code_verifier).await?;
 
         let profile = OauthUrl("https://api.github.com/user")
@@ -96,7 +105,7 @@ impl OauthProviderTrait for GithubConfig {
             .or_else(|| user_emails.first());
 
         let email = primary_email.map(|p| p.email.to_string());
-        let account = AccountOauth::builder()
+        let account = UserAccount::builder()
             .id(profile.id.to_string())
             .display_name(Some(profile.login.clone()))
             .provider(OauthProvider::Github)
@@ -111,5 +120,50 @@ impl OauthProviderTrait for GithubConfig {
             .build();
 
         Ok(account)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::oauth::oauth_config::OauthConfigTrait;
+    use multimap::MultiMap;
+    #[cfg(test)]
+    use pretty_assertions::{assert_eq, assert_str_eq};
+
+    #[test]
+    fn it_should_properly_generate_auth_url() {
+        let client_id = String::from("oyelowo_1234");
+        let client_secret = String::from("secret_xxx");
+        let credentials = OauthGithubCredentials {
+            client_id: client_id.clone(),
+            client_secret,
+        };
+
+        const HOST_NAME: &str = "oyelowo.test";
+        let base_url = format!("http://{HOST_NAME}");
+
+        let google_config = GithubConfig::new(&base_url, credentials).basic_config();
+        let auth_url_data = google_config.generate_auth_url();
+
+        let auth_url = auth_url_data.authorize_url.into_inner();
+        let hash_query: MultiMap<_, _> = auth_url.query_pairs().into_owned().collect();
+
+        let state = hash_query.get("state").unwrap();
+        let code_challenge = hash_query.get("code_challenge").unwrap();
+        assert_eq!(auth_url.as_str().len(), 304);
+        assert_eq!(state, auth_url_data.evidence.csrf_token.secret().as_str());
+        assert_eq!(OauthProvider::Github, auth_url_data.evidence.provider);
+        assert_eq!(state.len(), 22);
+        assert_eq!(code_challenge.len(), 43);
+        assert_str_eq!(
+            auth_url.as_str(),
+            format!(
+                "https://github.com/login/oauth/authorize?\
+            response_type=code&client_id={client_id}&\
+            state={state}&code_challenge={code_challenge}&code_challenge_method=S256&\
+            redirect_uri=http%3A%2F%2F{HOST_NAME}%2Fapi%2Foauth%2Fcallback&scope=public_repo+read%3Auser+user%3Aemail"
+            )
+        );
     }
 }

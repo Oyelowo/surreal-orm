@@ -8,12 +8,13 @@ use oauth2::{
     PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, RevocationUrl, Scope, StandardTokenResponse,
     TokenResponse, TokenUrl,
 };
-use redis::{AsyncCommands, RedisError};
+use redis::RedisError;
 use reqwest::header::{ACCEPT, USER_AGENT};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use url::Url;
 
+use super::cache_storage::CacheStorage;
 use crate::app::user::{AccountOauth, OauthProvider};
 
 pub(crate) fn get_redirect_url() -> String {
@@ -52,38 +53,7 @@ pub(crate) struct Evidence {
     pub(crate) pkce_code_verifier: PkceCodeVerifier,
 }
 
-impl Evidence {
-    const CSRF_STATE_REDIS_KEY: &'static str = "CSRF_STATE_REDIS_KEY";
-
-    fn redis_key(csrf_token: CsrfToken) -> String {
-        format!(
-            "{}{:?}",
-            Self::CSRF_STATE_REDIS_KEY,
-            csrf_token.secret().as_str()
-        )
-    }
-
-    pub(crate) async fn verify_csrf_token(
-        csrf_token: CsrfToken,
-        connection: &mut redis::aio::Connection,
-    ) -> OauthResult<Self> {
-        let key = &Self::redis_key(csrf_token);
-
-        let evidence: String = connection.get(key).await?;
-
-        Ok(serde_json::from_str::<Self>(evidence.as_str())?)
-    }
-
-    pub(crate) async fn cache(self, connection: &mut redis::aio::Connection) -> OauthResult<Self> {
-        let key = &Self::redis_key(self.csrf_token.clone());
-        let csrf_state_data_string = serde_json::to_string(&self)?;
-
-        connection.set(key, csrf_state_data_string).await?;
-        connection.expire::<_, u16>(key, 600).await?;
-        Ok(self)
-    }
-}
-
+pub(crate) type OauthResult<T> = Result<T, OauthError>;
 /// The url returned by the oauth provider with code and state(which should be the one we send)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct RedirectUrlReturned(pub(crate) Url);
@@ -92,11 +62,7 @@ impl RedirectUrlReturned {
     pub(crate) fn into_inner(self) -> Url {
         self.0
     }
-}
 
-pub(crate) type OauthResult<T> = Result<T, OauthError>;
-
-impl RedirectUrlReturned {
     pub fn authorization_code(&self) -> OauthResult<AuthorizationCode> {
         let value = self.get_query_param_value("code")?;
         Ok(AuthorizationCode::new(value.into_owned()))
@@ -114,6 +80,44 @@ impl RedirectUrlReturned {
             .find(|&(ref key, _)| key == query_param)
             .ok_or_else(|| OauthError::GetUrlQueryParamFailed(query_param.into()))?;
         Ok(value)
+    }
+}
+
+/// authorization URL to which we'll redirect the user
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct AuthUrlData {
+    pub(crate) authorize_url: RedirectUrlReturned,
+    pub(crate) evidence: Evidence,
+}
+
+impl AuthUrlData {
+    const OAUTH_CSRF_STATE_KEY: &'static str = "OAUTH_CSRF_STATE_KEY";
+
+    fn oauth_cache_key_prefix(csrf_token: CsrfToken) -> String {
+        format!(
+            "{}{:?}",
+            Self::OAUTH_CSRF_STATE_KEY,
+            csrf_token.secret().as_str()
+        )
+    }
+
+    pub(crate) async fn verify_csrf_token(
+        csrf_token: CsrfToken,
+        storage: impl CacheStorage,
+    ) -> Option<Self> {
+        let key = Self::oauth_cache_key_prefix(csrf_token);
+        let auth_url_data = storage.get(key).await.unwrap();
+
+        let auth_url_data = serde_json::from_str::<Self>(auth_url_data.as_str()).unwrap();
+
+        Some(auth_url_data)
+    }
+
+    pub(crate) async fn save(&self, storage: impl CacheStorage) -> OauthResult<()> {
+        let key = Self::oauth_cache_key_prefix(self.evidence.csrf_token.clone());
+        let csrf_state_data_string = serde_json::to_string(&self)?;
+        storage.set(key, csrf_state_data_string).await;
+        Ok(())
     }
 }
 
@@ -185,13 +189,6 @@ pub(crate) trait OauthProviderTrait {
         code: AuthorizationCode,
         pkce_code_verifier: PkceCodeVerifier,
     ) -> OauthResult<AccountOauth>;
-}
-
-/// authorization URL to which we'll redirect the user
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct AuthUrlData {
-    pub(crate) authorize_url: RedirectUrlReturned,
-    pub(crate) evidence: Evidence,
 }
 
 #[async_trait::async_trait]

@@ -1,6 +1,7 @@
 # Update gitignore
 
 mongo
+show dbs
 use graphql-mongo-database
 db.auth("username0","password0")
 

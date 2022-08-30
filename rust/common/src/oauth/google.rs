@@ -1,13 +1,18 @@
 use chrono::{Duration, Utc};
-use common::configurations::oauth::OauthGoogleCredentials;
 use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, PkceCodeVerifier, RedirectUrl,
     RevocationUrl, Scope, TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
 
-use super::utils::{get_redirect_url, OauthConfig, OauthProviderTrait, OauthResult, OauthUrl};
-use crate::app::user::{AccountOauth, OauthProvider, TokenType};
+use crate::configurations::oauth::OauthGoogleCredentials;
+
+use super::{
+    account::{OauthProvider, TokenType, UserAccount},
+    error::OauthResult,
+    oauth_config::{OauthConfig, OauthProviderTrait},
+    urls::{get_redirect_url, OauthUrl},
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 enum GoogleScopes {
@@ -30,17 +35,15 @@ struct GoogleUserData {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct GoogleConfig {
+pub struct GoogleConfig {
     basic_config: OauthConfig,
 }
 
 impl GoogleConfig {
-    pub fn new() -> Self {
-        let env = OauthGoogleCredentials::default();
-
+    pub fn new(base_url: &String, credentials: OauthGoogleCredentials) -> Self {
         let basic_config = OauthConfig::builder()
-            .client_id(ClientId::new(env.client_id))
-            .client_secret(ClientSecret::new(env.client_secret))
+            .client_id(ClientId::new(credentials.client_id))
+            .client_secret(ClientSecret::new(credentials.client_secret))
             .auth_url(
                 AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".to_string())
                     .expect("Invalid authorization endpoint URL"),
@@ -49,7 +52,9 @@ impl GoogleConfig {
                 TokenUrl::new("https://www.googleapis.com/oauth2/v4/token".to_string())
                     .expect("Invalid token endpoint URL"),
             )
-            .redirect_url(RedirectUrl::new(get_redirect_url()).expect("Invalid redirect URL"))
+            .redirect_url(
+                RedirectUrl::new(get_redirect_url(base_url)).expect("Invalid redirect URL"),
+            )
             .scopes(vec![
                 Scope::new("profile".into()),
                 Scope::new("email".into()),
@@ -68,15 +73,29 @@ impl GoogleConfig {
 
 #[async_trait::async_trait]
 impl OauthProviderTrait for GoogleConfig {
+    type OauthResponse = UserAccount;
+
     fn basic_config(&self) -> OauthConfig {
         self.basic_config.to_owned()
     }
 
+    /// Fetch oauth account. You can override this method
+    ///
+    /// # Errors:
+    /// Exhange token problem
+    ///
+    /// Problem fetching user's oauth data
+    ///
+    /// This function will return an error if.
+    ///
+    /// Oauth verification fails during token/authorization code exchange with the provider
+    ///
+    /// User data fetching fails
     async fn fetch_oauth_account(
         &self,
         code: AuthorizationCode,
         pkce_code_verifier: PkceCodeVerifier,
-    ) -> OauthResult<AccountOauth> {
+    ) -> OauthResult<Self::OauthResponse> {
         let token = self.exchange_token(code, pkce_code_verifier).await?;
 
         let profile = OauthUrl("https://www.googleapis.com/oauth2/v3/userinfo")
@@ -93,7 +112,7 @@ impl OauthProviderTrait for GoogleConfig {
             .map(|x| x.to_string())
             .collect::<Vec<String>>();
 
-        let account = AccountOauth::builder()
+        let account = UserAccount::builder()
             .id(profile.sub.to_string())
             .provider(OauthProvider::Google)
             .provider_account_id(OauthProvider::Google)
@@ -114,69 +133,42 @@ impl OauthProviderTrait for GoogleConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::oauth::utils::OauthConfigTrait;
+    use crate::oauth::oauth_config::OauthConfigTrait;
     use multimap::MultiMap;
-    use std::env;
 
     #[test]
-    fn it_works() {
-        env::set_var("APP_ENVIRONMENT", "local");
-        env::set_var("APP_HOST", "random_APP_HOST");
-        env::set_var("APP_PORT", "5000");
-        env::set_var("APP_EXTERNAL_BASE_URL", "http://oyelowo.test");
-        env::set_var("OAUTH_GITHUB_CLIENT_ID", "random_OAUTH_GITHUB_CLIENT_ID");
-        env::set_var(
-            "OAUTH_GITHUB_CLIENT_SECRET",
-            "random_OAUTH_GITHUB_CLIENT_SECRET",
-        );
-        env::set_var("OAUTH_GOOGLE_CLIENT_ID", "random_OAUTH_GOOGLE_CLIENT_ID");
-        env::set_var(
-            "OAUTH_GOOGLE_CLIENT_SECRET",
-            "random_OAUTH_GOOGLE_CLIENT_SECRET",
-        );
-        env::set_var("MONGODB_NAME", "random_MONGODB_NAME");
-        env::set_var("MONGODB_USERNAME", "random_MONGODB_USERNAME");
-        env::set_var("MONGODB_PASSWORD", "random_MONGODB_PASSWORD");
-        env::set_var("MONGODB_ROOT_USERNAME", "random_MONGODB_ROOT_USERNAME");
-        env::set_var("MONGODB_ROOT_PASSWORD", "random_MONGODB_ROOT_PASSWORD");
-        env::set_var("MONGODB_HOST", "random_MONGODB_HOST");
-        env::set_var("MONGODB_SERVICE_NAME", "random_MONGODB_SERVICE_NAME");
-        env::set_var("MONGODB_STORAGE_CLASS", "random_MONGODB_STORAGE_CLASS");
-        env::set_var("MONGODB_PORT", "27017");
-        env::set_var("REDIS_USERNAME", "random_REDIS_USERNAME");
-        env::set_var("REDIS_PASSWORD", "random_REDIS_PASSWORD");
-        env::set_var("REDIS_HOST", "random_REDIS_HOST");
-        env::set_var("REDIS_SERVICE_NAME", "random_REDIS_SERVICE_NAME");
-        env::set_var(
-            "REDIS_SERVICE_NAME_MASTER",
-            "random_REDIS_SERVICE_NAME_MASTER",
-        );
-        env::set_var("REDIS_PORT", "6379");
+    fn it_should_properly_generate_auth_url() {
+        let client_id = String::from("oyelowo_1234");
+        let client_secret = String::from("secret_xxx");
+        let credentials = OauthGoogleCredentials {
+            client_id: client_id.clone(),
+            client_secret,
+        };
 
-        let google_config = GoogleConfig::new().basic_config();
-        let auth_url_dataa = google_config.generate_auth_url();
+        const HOST_NAME: &str = "oyelowo.test";
+        let base_url = format!("http://{HOST_NAME}");
 
-        let auth_url = auth_url_dataa.authorize_url.clone().0;
-        let hash_query: MultiMap<_, _> = auth_url_dataa
-            .authorize_url
-            .into_inner()
-            .query_pairs()
-            .into_owned()
-            .collect();
+        let google_config = GoogleConfig::new(&base_url, credentials).basic_config();
+        let auth_url_data = google_config.generate_auth_url();
 
-        assert_eq!(auth_url.as_str().len(), 302);
+        let auth_url = auth_url_data.authorize_url.into_inner();
+        let hash_query: MultiMap<_, _> = auth_url.query_pairs().into_owned().collect();
+
+        assert_eq!(auth_url.as_str().len(), 285);
 
         let state = hash_query.get("state").unwrap();
         let code_challenge = hash_query.get("code_challenge").unwrap();
+        assert_eq!(state, auth_url_data.evidence.csrf_token.secret().as_str());
+        assert_eq!(OauthProvider::Google, auth_url_data.evidence.provider);
         assert_eq!(state.len(), 22);
         assert_eq!(code_challenge.len(), 43);
         assert_eq!(
             auth_url.as_str(),
             format!(
                 "https://accounts.google.com/o/oauth2/v2/auth?\
-            response_type=code&client_id=random_OAUTH_GOOGLE_CLIENT_ID&\
+            response_type=code&client_id={client_id}&\
             state={state}&code_challenge={code_challenge}&code_challenge_method=S256&\
-            redirect_uri=http%3A%2F%2Foyelowo.test%2Fapi%2Foauth%2Fcallback&scope=profile+email"
+            redirect_uri=http%3A%2F%2F{HOST_NAME}%2Fapi%2Foauth%2Fcallback&scope=profile+email"
             )
         );
     }

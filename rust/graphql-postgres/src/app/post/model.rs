@@ -14,6 +14,7 @@ use crate::{app::user::user, utils::postgresdb::get_pg_connection_from_ctx};
 #[derive(
     Clone,
     PartialEq,
+    Eq,
     DeriveEntityModel,
     SimpleObject,
     Validate,

@@ -4,7 +4,7 @@ use derive_more::From;
 use log::warn;
 use poem::http::HeaderMap;
 
-#[derive(From, PartialEq)]
+#[derive(From, PartialEq, Eq)]
 pub struct Token(pub String);
 
 impl Token {

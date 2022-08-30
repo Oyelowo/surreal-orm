@@ -4,6 +4,7 @@ use app_analytics::{
 };
 
 pub mod app_analytics {
+    #![allow(clippy::derive_partial_eq_without_eq)]
     tonic::include_proto!("app_analytics");
 }
 
