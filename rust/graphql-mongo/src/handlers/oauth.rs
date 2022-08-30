@@ -5,6 +5,7 @@ use bson::oid::ObjectId;
 use common::authentication::TypedSession;
 
 use common::configurations::application::ApplicationConfigs;
+use common::oauth::account;
 use common::oauth::cache_storage::RedisCache;
 use mongodb::Database;
 use poem::error as poem_error;
@@ -12,7 +13,6 @@ use poem::session::Session;
 use poem::web::Data;
 use poem::{error::Result, handler, http::Uri, web::Path};
 use poem::{IntoResponse, Response};
-use redis::RedisError;
 use reqwest::{header, StatusCode};
 use url::Url;
 
@@ -54,6 +54,15 @@ impl IntoResponse for RedirectCustom {
         self.status
             .with_header(header::LOCATION, self.uri)
             .into_response()
+    }
+}
+
+impl From<OauthProvider> for account::OauthProvider {
+    fn from(o: OauthProvider) -> Self {
+        match o {
+            OauthProvider::Github => Self::Github,
+            OauthProvider::Google => Self::Google,
+        }
     }
 }
 
@@ -118,7 +127,8 @@ async fn authenticate_user(
 
     let user = User::find_or_create_for_oauth(&db, account_oauth.into())
         .await
-        .context("User not found nor created. Try again later")?;
+        .map_err(|_e| HandlerError::GetAccountFailed)
+        .map_err(poem_error::BadRequest)?;
 
     let session = TypedSession(session.to_owned());
     session.insert_user_id(&user.id);

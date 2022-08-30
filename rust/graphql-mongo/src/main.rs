@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use anyhow::Context;
 use backoff::ExponentialBackoff;
 use common::oauth::client::OauthClient;
@@ -98,13 +100,14 @@ async fn run_app() -> anyhow::Result<()> {
 
 fn get_oauth_client(redis_client: redis::Client) -> OauthClient<RedisCache> {
     let cache_storage = RedisCache::new(redis_client);
-    let base_url = String::from("https://oyelowo.test");
+    let base_url = ApplicationConfigs::default().external_base_url;
+    let redirect_url = format!("{base_url}/api/oauth/callback");
     let github_creds = OauthGithubCredentials::default();
 
     let google_creds = OauthGoogleCredentials::default();
 
-    let github = GithubConfig::new(&base_url, github_creds);
-    let google = GoogleConfig::new(&base_url, google_creds);
+    let github = GithubConfig::new(redirect_url.clone(), github_creds);
+    let google = GoogleConfig::new(redirect_url, google_creds);
 
     OauthClient::builder()
         .github(github)

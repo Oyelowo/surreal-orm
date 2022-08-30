@@ -1,5 +1,8 @@
+use super::guards::{AuthGuard, RoleGuard};
+use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
 use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
+use common::oauth::account;
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
 use futures_util::TryStreamExt;
 use mongo_helpers::{as_bson, operator};
@@ -13,9 +16,6 @@ use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
 use wither::Model;
-
-use super::guards::{AuthGuard, RoleGuard};
-use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
 
 #[derive(
     Model,
@@ -179,20 +179,11 @@ pub enum OauthProvider {
     Google,
 }
 
-impl From<common::oauth::account::OauthProvider> for OauthProvider {
-    fn from(o: common::oauth::account::OauthProvider) -> Self {
+impl From<account::OauthProvider> for OauthProvider {
+    fn from(o: account::OauthProvider) -> Self {
         match o {
-            common::oauth::account::OauthProvider::Github => Self::Github,
-            common::oauth::account::OauthProvider::Google => Self::Google,
-        }
-    }
-}
-
-impl Into<common::oauth::account::OauthProvider> for OauthProvider {
-    fn into(self) -> common::oauth::account::OauthProvider {
-        match self {
-            OauthProvider::Github => common::oauth::account::OauthProvider::Github,
-            OauthProvider::Google => common::oauth::account::OauthProvider::Google,
+            account::OauthProvider::Github => Self::Github,
+            account::OauthProvider::Google => Self::Google,
         }
     }
 }
@@ -203,20 +194,10 @@ pub enum TokenType {
     Bearer,
 }
 
-impl From<common::oauth::account::TokenType> for TokenType {
-    fn from(o: common::oauth::account::TokenType) -> Self {
+impl From<account::TokenType> for TokenType {
+    fn from(o: account::TokenType) -> Self {
         match o {
-            common::oauth::account::TokenType::Bearer => Self::Bearer,
-            // common::oauth::account::OauthProvider::Google => Self::Google,
-        }
-    }
-}
-
-impl Into<common::oauth::account::TokenType> for TokenType {
-    fn into(self) -> common::oauth::account::TokenType {
-        match self {
-            TokenType::Bearer => common::oauth::account::TokenType::Bearer,
-            // OauthProvider::Google => common::oauth::account::OauthProvider::Google,
+            account::TokenType::Bearer => Self::Bearer,
         }
     }
 }
