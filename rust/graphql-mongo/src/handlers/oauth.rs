@@ -1,12 +1,13 @@
 use std::fmt::Display;
 
+use anyhow::Context;
 use bson::oid::ObjectId;
 use common::authentication::TypedSession;
 
 use common::configurations::application::ApplicationConfigs;
 use common::oauth::cache_storage::RedisCache;
 use mongodb::Database;
-use poem::error::{BadRequest, InternalServerError};
+use poem::error as poem_error;
 use poem::session::Session;
 use poem::web::Data;
 use poem::{error::Result, handler, http::Uri, web::Path};
@@ -15,18 +16,10 @@ use redis::RedisError;
 use reqwest::{header, StatusCode};
 use url::Url;
 
-use crate::oauth::cache_storage as cg;
-use crate::oauth::github::GithubConfig;
-use crate::oauth::google::GoogleConfig;
-use crate::oauth::utils::{
-    AuthUrlData, OauthConfigTrait, OauthError, OauthProviderTrait, RedirectUrlReturned,
-};
-use common::configurations::redis::RedisConfigError;
-
 use crate::app::user::{OauthProvider, User};
 use common::oauth::client::OauthClient;
 
-/// These are created to map internral error message that we
+/// These are created to map internal error message that we
 /// only want to expose as logs for debugging to messages we
 /// would want to show to the client/frontend.
 /// Otherwise, we could have mapped directly. We could also use poem's
@@ -36,46 +29,8 @@ pub(crate) enum HandlerError {
     #[error(transparent)]
     OauthError(#[from] common::oauth::error::OauthError),
 
-    #[error("Server error. Please try again")]
-    StorageError(#[source] OauthError),
-
-    #[error("Server error. Unable to retrieve code. Please try again")]
-    MalformedState(#[source] OauthError),
-
-    // #[error("The state token provided is invalid.")]
-    // InvalidState(#[source] OauthError),
-    #[error("The auth code provided is invalid.")]
-    InvalidAuthCode(#[source] OauthError),
-
-    #[error("Problem fetching account")]
-    FetchAccountFailed(#[source] OauthError),
-
     #[error("Problem retrieving account")]
     GetAccountFailed,
-
-    #[error("Server error. Failed to retrieve data. Please, try again laater")]
-    RedisError(#[source] RedisError),
-
-    #[error("Server error. Try again laater")]
-    RedisConfigError(#[from] RedisConfigError),
-
-    #[error("Malformed data. Try again laater")]
-    SerializationError(#[from] serde_json::Error),
-
-    #[error("Malformed url. Try again laater")]
-    ParseError(#[from] url::ParseError),
-}
-
-pub async fn get_redis_connection(
-    // redis: Data<&RedisConfigs>,
-    redis: Data<&redis::Client>,
-) -> Result<redis::aio::Connection, poem::Error> {
-    redis
-        .get_async_connection()
-        .await
-        // First transform message to client message. So we dont expose server error to client
-        .map_err(HandlerError::RedisError)
-        .map_err(InternalServerError)
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -103,38 +58,25 @@ impl IntoResponse for RedirectCustom {
 }
 
 #[handler]
-pub async fn oauth_login_initiator(
+pub async fn start_authentication(
     Path(oauth_provider): Path<OauthProvider>,
     session: &Session,
-    // redis: Data<&redis::Client>,
     oauth_client: Data<&OauthClient<RedisCache>>,
 ) -> Result<RedirectCustom> {
-    // let mut connection = get_redis_connection(redis).await?;
     let session = TypedSession(session.to_owned());
     let env = ApplicationConfigs::default();
 
+    // If session still valid, redirect to home page
     if let Ok(_s) = session.get_user_id::<ObjectId>() {
         session.renew();
         return Ok(RedirectCustom::found(env.external_base_url));
     };
 
-    // let auth_url_data = match oauth_provider {
-    //     OauthProvider::Github => GithubConfig::new().basic_config().generate_auth_url(),
-    //     OauthProvider::Google => GoogleConfig::new().basic_config().generate_auth_url(),
-    // };
-
-    // // let cache = cg::RedisCache(redis.clone());
-
-    // auth_url_data
-    //     .save(cache)
-    //     .await
-    //     .map_err(HandlerError::StorageError)
-    //     .map_err(InternalServerError)?;
     let auth_url_data = oauth_client
         .to_owned()
         .generate_auth_url_data(oauth_provider.into())
         .await
-        .unwrap();
+        .map_err(poem_error::BadGateway)?;
 
     Ok(RedirectCustom::found(
         auth_url_data.authorize_url.into_inner(),
@@ -142,11 +84,10 @@ pub async fn oauth_login_initiator(
 }
 
 #[handler]
-pub async fn oauth_login_authentication(
+pub async fn complete_authentication(
     uri: &Uri,
     session: &Session,
     db: Data<&Database>,
-    // redis: Data<&redis::Client>,
     oauth_client: Data<&OauthClient<RedisCache>>,
 ) -> Result<RedirectCustom> {
     let base_url = ApplicationConfigs::default().external_base_url;
@@ -159,41 +100,6 @@ pub async fn oauth_login_authentication(
         Err(e) => Ok(RedirectCustom::found(format!("{base_url}/login?error={e}"))),
     }
 }
-// #[handler]
-// pub async fn oauth_login_authentication(
-//     uri: &Uri,
-//     session: &Session,
-//     db: Data<&Database>,
-//     // redis: Data<&redis::Client>,
-//     oauth_client: Data<&OauthClient<RedisCache>>,
-// ) -> Result<RedirectCustom> {
-//     let base_url = ApplicationConfigs::default().external_base_url;
-
-//     let redirect_url = Url::parse(&format!("{base_url}{uri}"))
-//         .map_err(HandlerError::ParseError)
-//         .map_err(InternalServerError)?;
-
-//     let account_oauth = oauth_client
-//         .clone()
-//         .fetch_account(redirect_url)
-//         .await
-//         .unwrap();
-
-//     let user = User::find_or_create_for_oauth(&db, account_oauth.into())
-//         .await
-//         .map_err(|_e| HandlerError::GetAccountFailed)
-//         .map_err(BadRequest);
-
-//     match user {
-//         // Redirect to the frontend app which is served at base.
-//         Ok(u) => {
-//             let session = TypedSession(session.to_owned());
-//             session.insert_user_id(&u.id);
-//             Ok(RedirectCustom::found(base_url))
-//         }
-//         Err(e) => Ok(RedirectCustom::found(format!("{base_url}/login?error={e}"))),
-//     }
-// }
 
 async fn authenticate_user(
     uri: &Uri,
@@ -202,22 +108,17 @@ async fn authenticate_user(
     oauth_client: Data<&OauthClient<RedisCache>>,
 ) -> Result<User> {
     let base_url = ApplicationConfigs::default().external_base_url;
-
-    let redirect_url = Url::parse(&format!("{base_url}{uri}"))
-        .map_err(HandlerError::ParseError)
-        .map_err(InternalServerError)?;
+    let redirect_url = Url::parse(&format!("{base_url}{uri}")).context("Problem parsing URL")?;
 
     let account_oauth = oauth_client
         .clone()
         .fetch_account(redirect_url)
         .await
-        .map_err(HandlerError::OauthError)
-        .map_err(BadRequest)?;
+        .context("Problem fetching Oauth account")?;
 
     let user = User::find_or_create_for_oauth(&db, account_oauth.into())
         .await
-        .map_err(|_e| HandlerError::GetAccountFailed)
-        .map_err(BadRequest)?;
+        .context("User not found nor created. Try again later")?;
 
     let session = TypedSession(session.to_owned());
     session.insert_user_id(&user.id);

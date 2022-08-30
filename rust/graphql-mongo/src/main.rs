@@ -1,5 +1,6 @@
 use anyhow::Context;
 use backoff::ExponentialBackoff;
+use common::oauth::client::OauthClient;
 use common::{
     configurations::{
         application::{ApplicationConfigs, Environment},
@@ -8,11 +9,7 @@ use common::{
         redis::RedisConfigs,
     },
     middleware,
-    oauth::{
-        cache_storage::{self, RedisCache},
-        github::GithubConfig,
-        google::GoogleConfig,
-    },
+    oauth::{cache_storage::RedisCache, github::GithubConfig, google::GoogleConfig},
 };
 
 use backoff::future::retry;
@@ -20,7 +17,7 @@ use graphql_mongo::{
     app::sync_mongo_models,
     handlers::{
         healthcheck::{healthz, liveness},
-        oauth::{oauth_login_authentication, oauth_login_initiator},
+        oauth::{complete_authentication, start_authentication},
     },
     utils::graphql::{graphql_handler, graphql_handler_ws, graphql_playground, setup_graphql},
 };
@@ -74,8 +71,8 @@ async fn run_app() -> anyhow::Result<()> {
     let api_routes = Route::new()
         .at("/healthz", get(healthz))
         .at("/liveness", get(liveness))
-        .at("/oauth/signin/:oauth_provider", get(oauth_login_initiator))
-        .at("/oauth/callback", get(oauth_login_authentication))
+        .at("/oauth/signin/:oauth_provider", get(start_authentication))
+        .at("/oauth/callback", get(complete_authentication))
         .at("/graphql", get(graphql_playground).post(graphql_handler))
         .at("/graphql/ws", get(graphql_handler_ws));
 
@@ -84,7 +81,6 @@ async fn run_app() -> anyhow::Result<()> {
         .data(schema)
         .data(database)
         .data(redis)
-        .data(redis_config)
         .data(oauth_client)
         .with(session)
         .with(middleware::get_cors(environment))
@@ -99,9 +95,6 @@ async fn run_app() -> anyhow::Result<()> {
         .context("Problem running server")?;
     Ok(())
 }
-
-use common::oauth::cache_storage::CacheStorage;
-use common::oauth::client::OauthClient;
 
 fn get_oauth_client(redis_client: redis::Client) -> OauthClient<RedisCache> {
     let cache_storage = RedisCache::new(redis_client);
