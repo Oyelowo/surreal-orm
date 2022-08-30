@@ -150,8 +150,8 @@ pub struct AccountOauth {
     oauth_token_secret: Option<String>,
 }
 
-impl From<common::oauth::account::UserAccount> for AccountOauth {
-    fn from(user_account: common::oauth::account::UserAccount) -> Self {
+impl From<account::UserAccount> for AccountOauth {
+    fn from(user_account: account::UserAccount) -> Self {
         Self {
             id: user_account.id,
             display_name: user_account.display_name,
@@ -162,14 +162,13 @@ impl From<common::oauth::account::UserAccount> for AccountOauth {
             access_token: user_account.access_token,
             refresh_token: user_account.refresh_token,
             expires_at: user_account.expires_at,
-            token_type: Some(user_account.token_type.unwrap().into()),
+            token_type: user_account.token_type.map(Into::into),
             scopes: user_account.scopes,
             id_token: user_account.id_token,
             oauth_token: user_account.oauth_token,
             oauth_token_secret: user_account.oauth_token_secret,
         }
     }
-    // fn into(self) -> common::oauth::account::UserAccount {}
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Enum, PartialEq, Eq, Copy, Hash)]

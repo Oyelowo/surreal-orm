@@ -146,7 +146,7 @@ async fn lru_empty_generates_and_stores_and_get_right_auth_url_for_google_oauth(
         .get_cache_mut_ref()
         .get(prefixed_csrf_token.to_string())
         .await
-        .is_none());
+        .is_err());
 
     assert!(AuthUrlData::verify_csrf_token(
         auth_url_data.authorize_url.get_csrf_token().unwrap(),

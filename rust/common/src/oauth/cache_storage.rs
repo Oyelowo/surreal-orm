@@ -1,15 +1,16 @@
 use lru;
+use redis::AsyncCommands;
 use std::collections::HashMap;
+
+use super::error::{OauthError, OauthResult};
 
 #[async_trait::async_trait]
 pub trait CacheStorage: Send + Sync + 'static {
     /// Load the query by `key`.
-    async fn get(&mut self, key: String) -> Option<String>;
+    async fn get(&mut self, key: String) -> OauthResult<String>;
     /// Save the query by `key`.
-    async fn set(&mut self, key: String, query: String);
+    async fn set(&mut self, key: String, query: String) -> OauthResult<()>;
 }
-
-use redis::AsyncCommands;
 
 #[derive(Clone, Debug)]
 pub struct RedisCache(redis::Client);
@@ -22,24 +23,18 @@ impl RedisCache {
 
 #[async_trait::async_trait]
 impl CacheStorage for RedisCache {
-    async fn get(&mut self, key: String) -> Option<String> {
-        let data: String = self
-            .0
-            .get_async_connection()
-            .await
-            .unwrap()
-            .get(key)
-            .await
-            .unwrap();
+    async fn get(&mut self, key: String) -> OauthResult<String> {
+        let data: String = self.0.get_async_connection().await?.get(key).await?;
 
-        Some(data)
+        Ok(data)
     }
 
-    async fn set(&mut self, key: String, value: String) {
-        let mut con = self.0.get_async_connection().await.unwrap();
+    async fn set(&mut self, key: String, value: String) -> OauthResult<()> {
+        let mut con = self.0.get_async_connection().await?;
         con.set::<String, String, String>(key.clone(), value);
 
-        con.expire::<_, u16>(key, 600).await.unwrap();
+        con.expire::<_, u16>(key, 600).await?;
+        Ok(())
     }
 }
 
@@ -60,14 +55,19 @@ impl HashMapCache {
 
 #[async_trait::async_trait]
 impl CacheStorage for HashMapCache {
-    async fn get(&mut self, key: String) -> Option<String> {
-        let data = self.0.get(&key).map(String::from);
+    async fn get(&mut self, key: String) -> OauthResult<String> {
+        let data = self
+            .0
+            .get(&key)
+            .map(String::from)
+            .ok_or(OauthError::AuthUrlDataNotFoundInCache)?;
 
-        data
+        Ok(data)
     }
 
-    async fn set(&mut self, key: String, value: String) {
+    async fn set(&mut self, key: String, value: String) -> OauthResult<()> {
         self.0.insert(key, value);
+        Ok(())
     }
 }
 
@@ -89,11 +89,17 @@ impl LruCache {
 
 #[async_trait::async_trait]
 impl CacheStorage for LruCache {
-    async fn get(&mut self, key: String) -> Option<String> {
-        self.0.get(&key).cloned()
+    async fn get(&mut self, key: String) -> OauthResult<String> {
+        let data = self
+            .0
+            .get(&key)
+            .cloned()
+            .ok_or(OauthError::AuthUrlDataNotFoundInCache)?;
+        Ok(data)
     }
 
-    async fn set(&mut self, key: String, value: String) {
+    async fn set(&mut self, key: String, value: String) -> OauthResult<()> {
         self.0.put(key, value);
+        Ok(())
     }
 }
