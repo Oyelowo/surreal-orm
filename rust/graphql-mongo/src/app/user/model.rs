@@ -1,5 +1,8 @@
+use super::guards::{AuthGuard, RoleGuard};
+use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
 use async_graphql::*;
 use chrono::{serde::ts_nanoseconds_option, DateTime, Utc};
+use common::oauth::account;
 use common::{authentication::TypedSession, error_handling::ApiHttpStatus};
 use futures_util::TryStreamExt;
 use mongo_helpers::{as_bson, operator};
@@ -13,9 +16,6 @@ use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use validator::Validate;
 use wither::Model;
-
-use super::guards::{AuthGuard, RoleGuard};
-use crate::{app::post::Post, utils::mongodb::get_db_from_ctx};
 
 #[derive(
     Model,
@@ -150,6 +150,28 @@ pub struct AccountOauth {
     oauth_token_secret: Option<String>,
 }
 
+impl From<common::oauth::account::UserAccount> for AccountOauth {
+    fn from(user_account: common::oauth::account::UserAccount) -> Self {
+        Self {
+            id: user_account.id,
+            display_name: user_account.display_name,
+            email: user_account.email,
+            email_verified: user_account.email_verified,
+            provider: user_account.provider.into(),
+            provider_account_id: user_account.provider_account_id.into(),
+            access_token: user_account.access_token,
+            refresh_token: user_account.refresh_token,
+            expires_at: user_account.expires_at,
+            token_type: Some(user_account.token_type.unwrap().into()),
+            scopes: user_account.scopes,
+            id_token: user_account.id_token,
+            oauth_token: user_account.oauth_token,
+            oauth_token_secret: user_account.oauth_token_secret,
+        }
+    }
+    // fn into(self) -> common::oauth::account::UserAccount {}
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone, Enum, PartialEq, Eq, Copy, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum OauthProvider {
@@ -157,10 +179,27 @@ pub enum OauthProvider {
     Google,
 }
 
+impl From<account::OauthProvider> for OauthProvider {
+    fn from(provider: account::OauthProvider) -> Self {
+        match provider {
+            account::OauthProvider::Github => Self::Github,
+            account::OauthProvider::Google => Self::Google,
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone, Enum, PartialEq, Eq, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum TokenType {
     Bearer,
+}
+
+impl From<account::TokenType> for TokenType {
+    fn from(token_type: account::TokenType) -> Self {
+        match token_type {
+            account::TokenType::Bearer => Self::Bearer,
+        }
+    }
 }
 
 /*

@@ -11,7 +11,7 @@ use super::{
     account::{OauthProvider, TokenType, UserAccount},
     error::OauthResult,
     oauth_config::{OauthConfig, OauthProviderTrait},
-    urls::{get_redirect_url, OauthUrl},
+    urls::OauthUrl,
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -43,7 +43,7 @@ pub struct GithubConfig {
 impl GithubConfig {
     /// Creates a new [`GithubConfig`].
     /// Takes in the settings
-    pub fn new(base_url: &String, credentials: OauthGithubCredentials) -> Self {
+    pub fn new(redirect_url: String, credentials: OauthGithubCredentials) -> Self {
         let basic_config = OauthConfig {
             client_id: ClientId::new(credentials.client_id),
             client_secret: ClientSecret::new(credentials.client_secret),
@@ -51,8 +51,7 @@ impl GithubConfig {
                 .expect("Invalid authorization endpoint URL"),
             token_url: TokenUrl::new("https://github.com/login/oauth/access_token".to_string())
                 .expect("Invalid token endpoint URL"),
-            redirect_url: RedirectUrl::new(get_redirect_url(base_url))
-                .expect("Invalid redirect URL"),
+            redirect_url: RedirectUrl::new(redirect_url).expect("Invalid redirect URL"),
             scopes: vec![
                 Scope::new("public_repo".into()),
                 Scope::new("read:user".into()),
@@ -141,9 +140,9 @@ mod tests {
         };
 
         const HOST_NAME: &str = "oyelowo.test";
-        let base_url = format!("http://{HOST_NAME}");
+        let redirect_url = format!("http://{HOST_NAME}/api/oauth/callback");
 
-        let google_config = GithubConfig::new(&base_url, credentials).basic_config();
+        let google_config = GithubConfig::new(redirect_url, credentials).basic_config();
         let auth_url_data = google_config.generate_auth_url();
 
         let auth_url = auth_url_data.authorize_url.into_inner();

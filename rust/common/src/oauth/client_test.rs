@@ -13,7 +13,7 @@ fn get_client<C>(cache_storage: C) -> OauthClient<C>
 where
     C: CacheStorage + std::fmt::Debug,
 {
-    let base_url = String::from("https://oyelowo.test");
+    let redirect_url = String::from("https://oyelowo.test/api/oauth/callback");
     let github_creds = OauthGithubCredentials::builder()
         .client_id(String::from("89c19374f7e7b5b35164"))
         .client_secret(String::from("129488cc92e2d2f91e3a5a024086396c48c65339"))
@@ -25,8 +25,8 @@ where
         client_secret: "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".to_string(),
     };
 
-    let github = GithubConfig::new(&base_url, github_creds);
-    let google = GoogleConfig::new(&base_url, google_creds);
+    let github = GithubConfig::new(redirect_url.clone(), github_creds);
+    let google = GoogleConfig::new(redirect_url, google_creds);
 
     OauthClient::builder()
         .github(github)

@@ -11,8 +11,14 @@ pub trait CacheStorage: Send + Sync + 'static {
 
 use redis::AsyncCommands;
 
-#[derive(Clone)]
-pub struct RedisCache(pub(crate) redis::Client);
+#[derive(Clone, Debug)]
+pub struct RedisCache(redis::Client);
+
+impl RedisCache {
+    pub fn new(client: redis::Client) -> Self {
+        Self(client)
+    }
+}
 
 #[async_trait::async_trait]
 impl CacheStorage for RedisCache {

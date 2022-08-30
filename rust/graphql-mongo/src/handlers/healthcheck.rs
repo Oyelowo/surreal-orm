@@ -1,3 +1,4 @@
+use anyhow::Context;
 use mongodb::Database;
 use poem::web::Data;
 use poem::{error::Result, handler};
@@ -5,7 +6,14 @@ use poem::{IntoResponse, Response};
 use reqwest::StatusCode;
 use wither::bson::doc;
 
-use super::oauth::get_redis_connection;
+pub async fn get_redis_connection(
+    redis: Data<&redis::Client>,
+) -> anyhow::Result<redis::aio::Connection> {
+    redis
+        .get_async_connection()
+        .await
+        .context("Failed to get redis connection")
+}
 
 #[handler]
 pub async fn healthz(

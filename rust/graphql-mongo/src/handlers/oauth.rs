@@ -1,76 +1,36 @@
 use std::fmt::Display;
 
+use anyhow::Context;
 use bson::oid::ObjectId;
 use common::authentication::TypedSession;
 
 use common::configurations::application::ApplicationConfigs;
+use common::oauth::account;
+use common::oauth::cache_storage::RedisCache;
 use mongodb::Database;
-use poem::error::{BadRequest, InternalServerError};
+use poem::error as poem_error;
 use poem::session::Session;
 use poem::web::Data;
 use poem::{error::Result, handler, http::Uri, web::Path};
 use poem::{IntoResponse, Response};
-use redis::RedisError;
 use reqwest::{header, StatusCode};
 use url::Url;
 
-use crate::oauth::cache_storage as cg;
-use crate::oauth::github::GithubConfig;
-use crate::oauth::google::GoogleConfig;
-use crate::oauth::utils::{
-    AuthUrlData, OauthConfigTrait, OauthError, OauthProviderTrait, RedirectUrlReturned,
-};
-use common::configurations::redis::RedisConfigError;
-
 use crate::app::user::{OauthProvider, User};
+use common::oauth::client::OauthClient;
 
-/// These are created to map internral error message that we
+/// These are created to map internal error message that we
 /// only want to expose as logs for debugging to messages we
 /// would want to show to the client/frontend.
 /// Otherwise, we could have mapped directly. We could also use poem's
 /// custom error but that feels a little verbose/overkill
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum HandlerError {
-    #[error("Server error. Please try again")]
-    StorageError(#[source] OauthError),
-
-    #[error("Server error. Unable to retrieve code. Please try again")]
-    MalformedState(#[source] OauthError),
-
-    // #[error("The state token provided is invalid.")]
-    // InvalidState(#[source] OauthError),
-    #[error("The auth code provided is invalid.")]
-    InvalidAuthCode(#[source] OauthError),
-
-    #[error("Problem fetching account")]
-    FetchAccountFailed(#[source] OauthError),
+    #[error(transparent)]
+    OauthError(#[from] common::oauth::error::OauthError),
 
     #[error("Problem retrieving account")]
     GetAccountFailed,
-
-    #[error("Server error. Failed to retrieve data. Please, try again laater")]
-    RedisError(#[source] RedisError),
-
-    #[error("Server error. Try again laater")]
-    RedisConfigError(#[from] RedisConfigError),
-
-    #[error("Malformed data. Try again laater")]
-    SerializationError(#[from] serde_json::Error),
-
-    #[error("Malformed url. Try again laater")]
-    ParseError(#[from] url::ParseError),
-}
-
-pub async fn get_redis_connection(
-    // redis: Data<&RedisConfigs>,
-    redis: Data<&redis::Client>,
-) -> Result<redis::aio::Connection, poem::Error> {
-    redis
-        .get_async_connection()
-        .await
-        // First transform message to client message. So we dont expose server error to client
-        .map_err(HandlerError::RedisError)
-        .map_err(InternalServerError)
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -97,33 +57,35 @@ impl IntoResponse for RedirectCustom {
     }
 }
 
+impl From<OauthProvider> for account::OauthProvider {
+    fn from(provider: OauthProvider) -> Self {
+        match provider {
+            OauthProvider::Github => Self::Github,
+            OauthProvider::Google => Self::Google,
+        }
+    }
+}
+
 #[handler]
-pub async fn oauth_login_initiator(
+pub async fn start_authentication(
     Path(oauth_provider): Path<OauthProvider>,
     session: &Session,
-    redis: Data<&redis::Client>,
+    oauth_client: Data<&OauthClient<RedisCache>>,
 ) -> Result<RedirectCustom> {
-    // let mut connection = get_redis_connection(redis).await?;
     let session = TypedSession(session.to_owned());
     let env = ApplicationConfigs::default();
 
+    // If session still valid, redirect to home page
     if let Ok(_s) = session.get_user_id::<ObjectId>() {
         session.renew();
         return Ok(RedirectCustom::found(env.external_base_url));
     };
 
-    let auth_url_data = match oauth_provider {
-        OauthProvider::Github => GithubConfig::new().basic_config().generate_auth_url(),
-        OauthProvider::Google => GoogleConfig::new().basic_config().generate_auth_url(),
-    };
-
-    let cache = cg::RedisCache(redis.clone());
-
-    auth_url_data
-        .save(cache)
+    let auth_url_data = oauth_client
+        .to_owned()
+        .generate_auth_url_data(oauth_provider.into())
         .await
-        .map_err(HandlerError::StorageError)
-        .map_err(InternalServerError)?;
+        .map_err(poem_error::BadGateway)?;
 
     Ok(RedirectCustom::found(
         auth_url_data.authorize_url.into_inner(),
@@ -131,14 +93,16 @@ pub async fn oauth_login_initiator(
 }
 
 #[handler]
-pub async fn oauth_login_authentication(
+pub async fn complete_authentication(
     uri: &Uri,
     session: &Session,
     db: Data<&Database>,
-    redis: Data<&redis::Client>,
+    oauth_client: Data<&OauthClient<RedisCache>>,
 ) -> Result<RedirectCustom> {
-    let user = authenticate_user(uri, redis, session, db).await;
     let base_url = ApplicationConfigs::default().external_base_url;
+
+    let user = authenticate_user(uri, session, db, oauth_client).await;
+
     match user {
         // Redirect to the frontend app which is served at base.
         Ok(_u) => Ok(RedirectCustom::found(base_url)),
@@ -148,54 +112,23 @@ pub async fn oauth_login_authentication(
 
 async fn authenticate_user(
     uri: &Uri,
-    redis: Data<&redis::Client>,
     session: &Session,
     db: Data<&Database>,
+    oauth_client: Data<&OauthClient<RedisCache>>,
 ) -> Result<User> {
-    // let mut connection = get_redis_connection(redis.clone()).await?;
     let base_url = ApplicationConfigs::default().external_base_url;
+    let redirect_url = Url::parse(&format!("{base_url}{uri}")).context("Problem parsing URL")?;
 
-    let redirect_url = Url::parse(&format!("{base_url}{uri}"))
-        .map(RedirectUrlReturned)
-        .map_err(HandlerError::ParseError)
-        .map_err(InternalServerError)?;
-
-    let code = redirect_url
-        .authorization_code()
-        .map_err(HandlerError::InvalidAuthCode)
-        .map_err(BadRequest)?;
-
-    // make .verify give me back both the csrf token and the provider
-    let csrf_token = redirect_url
-        .csrf_token()
-        .map_err(HandlerError::MalformedState)
-        .map_err(BadRequest)?;
-
-    let cache = cg::RedisCache(redis.clone());
-    let evidence = AuthUrlData::verify_csrf_token(csrf_token, cache)
+    let account_oauth = oauth_client
+        .clone()
+        .fetch_account(redirect_url)
         .await
-        .unwrap()
-        .evidence;
+        .context("Problem fetching Oauth account")?;
 
-    let account_oauth = match evidence.provider {
-        OauthProvider::Github => {
-            GithubConfig::new()
-                .fetch_oauth_account(code, evidence.pkce_code_verifier)
-                .await
-        }
-        OauthProvider::Google => {
-            GoogleConfig::new()
-                .fetch_oauth_account(code, evidence.pkce_code_verifier)
-                .await
-        }
-    }
-    .map_err(HandlerError::FetchAccountFailed)
-    .map_err(BadRequest)?;
-
-    let user = User::find_or_create_for_oauth(&db, account_oauth)
+    let user = User::find_or_create_for_oauth(&db, account_oauth.into())
         .await
         .map_err(|_e| HandlerError::GetAccountFailed)
-        .map_err(BadRequest)?;
+        .map_err(poem_error::BadRequest)?;
 
     let session = TypedSession(session.to_owned());
     session.insert_user_id(&user.id);

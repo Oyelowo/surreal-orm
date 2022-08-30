@@ -16,11 +16,6 @@ use super::{
     error::{OauthError, OauthResult},
 };
 
-pub(crate) fn get_redirect_url(base_url: &String) -> String {
-    // let base_url = ApplicationConfigs::default().external_base_url;
-    // Has to be defined in app router
-    format!("{base_url}/api/oauth/callback")
-}
 /// Tokens stored in redis for returned url oauth verification
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Evidence {
