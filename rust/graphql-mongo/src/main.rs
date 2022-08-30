@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use anyhow::Context;
 use backoff::ExponentialBackoff;
 use common::oauth::client::OauthClient;

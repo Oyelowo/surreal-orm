@@ -7,7 +7,6 @@ use reqwest::StatusCode;
 use wither::bson::doc;
 
 pub async fn get_redis_connection(
-    // redis: Data<&RedisConfigs>,
     redis: Data<&redis::Client>,
 ) -> anyhow::Result<redis::aio::Connection> {
     redis

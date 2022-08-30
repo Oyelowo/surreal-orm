@@ -58,8 +58,8 @@ impl IntoResponse for RedirectCustom {
 }
 
 impl From<OauthProvider> for account::OauthProvider {
-    fn from(o: OauthProvider) -> Self {
-        match o {
+    fn from(provider: OauthProvider) -> Self {
+        match provider {
             OauthProvider::Github => Self::Github,
             OauthProvider::Google => Self::Google,
         }

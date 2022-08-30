@@ -180,8 +180,8 @@ pub enum OauthProvider {
 }
 
 impl From<account::OauthProvider> for OauthProvider {
-    fn from(o: account::OauthProvider) -> Self {
-        match o {
+    fn from(provider: account::OauthProvider) -> Self {
+        match provider {
             account::OauthProvider::Github => Self::Github,
             account::OauthProvider::Google => Self::Google,
         }
@@ -195,8 +195,8 @@ pub enum TokenType {
 }
 
 impl From<account::TokenType> for TokenType {
-    fn from(o: account::TokenType) -> Self {
-        match o {
+    fn from(token_type: account::TokenType) -> Self {
+        match token_type {
             account::TokenType::Bearer => Self::Bearer,
         }
     }

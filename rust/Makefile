@@ -25,6 +25,9 @@ check:
 test:
 	SQLX_OFFLINE=true cargo test
 
+test-watch:
+	SQLX_OFFLINE=true cargo watch -x 'test --offline -- --color=always'
+
 build:
 	cargo build
 
