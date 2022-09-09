@@ -33,7 +33,7 @@ impl TypedSession {
         self.0.renew();
     }
 
-    pub fn insert_user_id<T: Serialize>(&self, user_id: &T) {
+    pub fn insert_user_id<T: Serialize + ?Sized>(&self, user_id: &T) {
         self.0.set(Self::USER_ID_KEY, user_id)
     }
 
