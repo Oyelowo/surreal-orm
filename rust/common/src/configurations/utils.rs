@@ -1,6 +1,7 @@
 use serde::de::DeserializeOwned;
 
-pub fn get_env_vars_by_prefix<T: DeserializeOwned>(config_prefix: &str) -> T {
+pub fn get_env_vars_by_prefix<T: DeserializeOwned>(config_prefix: impl AsRef<str>) -> T {
+    let config_prefix = config_prefix.as_ref();
     envy::prefixed(config_prefix)
         .from_env::<T>()
         .map_err(|e| match e {
