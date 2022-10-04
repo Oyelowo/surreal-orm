@@ -7,7 +7,7 @@ export const appEnvironmentsSchema = z.union([
     z.literal('local'),
     z.literal('development'),
     z.literal('staging'),
-    z.literal('production')
+    z.literal('production'),
 ]);
 
 export type Environment = z.infer<typeof appEnvironmentsSchema>;
@@ -25,7 +25,7 @@ export const ServiceNamesSchema = z.union([
     z.literal('graphql-mongo'),
     z.literal('graphql-postgres'),
     z.literal('grpc-mongo'),
-    z.literal('react-web')
+    z.literal('react-web'),
 ]);
 
 export type ServiceName = z.infer<typeof ServiceNamesSchema>;
@@ -36,7 +36,7 @@ const ServiceNames: ServiceName[] = [
     'graphql-mongo',
     'graphql-postgres',
     'grpc-mongo',
-    'react-web'
+    'react-web',
 ];
 
 const infrastructure = 'infrastructure';
@@ -48,7 +48,7 @@ export type TResourceCategory = TInfrastructure | TServices;
 export const ArgocdAppResourceNameSchema = z.union([
     z.literal(`argocd-applications-children-${infrastructure}`),
     z.literal(`argocd-applications-children-${services}`),
-    z.literal('argocd-applications-parents')
+    z.literal('argocd-applications-parents'),
 ]);
 
 export type ArgocdAppResourceName = z.infer<typeof ArgocdAppResourceNameSchema>;
@@ -65,7 +65,7 @@ export const InfrastructureNamesSchema = z.union([
     z.literal('seaweedfs'),
     z.literal('tidis'),
     z.literal('rook-ceph'),
-    z.literal('metalb')
+    z.literal('metalb'),
 ]);
 
 export type InfrastructureName = z.infer<typeof InfrastructureNamesSchema> | ArgocdAppResourceName;
@@ -161,7 +161,7 @@ export type CreateResourceEnvVars<
     N extends ServiceName,
     NS extends NamespaceOfApps,
     SelectedEnvKey extends keyof CommonEnvVariables<N, NS>
-    > = Simplify<UnionToIntersection<ValueOf<Pick<CommonEnvVariables<N, NS>, SelectedEnvKey>>>>;
+> = Simplify<UnionToIntersection<ValueOf<Pick<CommonEnvVariables<N, NS>, SelectedEnvKey>>>>;
 
 type GraphqlMongo = CreateResourceEnvVars<'graphql-mongo', 'applications', 'app' | 'mongodb' | 'oauth' | 'redis'> & {
     ADDITIONAL_IS_POSSIBLE: string;
@@ -194,12 +194,12 @@ type LinkerdViz = {
 // Creates Record<ResourceName, Record<EnvVarName, string>>
 type ServicesEnvVars = Simplify<
     ServiceEnvVars<'graphql-surrealdb', undefined> &
-    ServiceEnvVars<'graphql-tidb', undefined> &
-    ServiceEnvVars<'grpc-surrealdb', undefined> &
-    ServiceEnvVars<'graphql-mongo', GraphqlMongo> &
-    ServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
-    ServiceEnvVars<'grpc-mongo', GrpcMongo> &
-    ServiceEnvVars<'react-web', ReactWeb>
+        ServiceEnvVars<'graphql-tidb', undefined> &
+        ServiceEnvVars<'grpc-surrealdb', undefined> &
+        ServiceEnvVars<'graphql-mongo', GraphqlMongo> &
+        ServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
+        ServiceEnvVars<'grpc-mongo', GrpcMongo> &
+        ServiceEnvVars<'react-web', ReactWeb>
 >;
 type InfrastructureEnvVars = Simplify<InfraEnvVars<'argocd', ArgoCd> & InfraEnvVars<'linkerd-viz', LinkerdViz>>;
 

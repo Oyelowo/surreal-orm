@@ -8,6 +8,9 @@ import _ from 'lodash';
 import sh from 'shelljs';
 
 export const imageTagsDefault: Record<Uppercase<`${TServices}__${SnakeCase<ServiceName>}__IMAGE_TAG`>, 'latest'> = {
+    SERVICES__GRAPHQL_SURREALDB__IMAGE_TAG: 'latest',
+    SERVICES__GRAPHQL_TIDB__IMAGE_TAG: 'latest',
+    SERVICES__GRPC_SURREALDB__IMAGE_TAG: 'latest',
     SERVICES__GRAPHQL_MONGO__IMAGE_TAG: 'latest',
     SERVICES__GRPC_MONGO__IMAGE_TAG: 'latest',
     SERVICES__GRAPHQL_POSTGRES__IMAGE_TAG: 'latest',
