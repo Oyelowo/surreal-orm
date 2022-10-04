@@ -7,7 +7,7 @@ export const appEnvironmentsSchema = z.union([
     z.literal('local'),
     z.literal('development'),
     z.literal('staging'),
-    z.literal('production'),
+    z.literal('production')
 ]);
 
 export type Environment = z.infer<typeof appEnvironmentsSchema>;
@@ -21,14 +21,23 @@ export type CPU = `${number}${'m'}`;
 export const ServiceNamesSchema = z.union([
     z.literal('graphql-surrealdb'),
     z.literal('graphql-tidb'), // TIDB is basically MySQL but scalable
+    z.literal('grpc-surrealdb'),
     z.literal('graphql-mongo'),
     z.literal('graphql-postgres'),
     z.literal('grpc-mongo'),
-    z.literal('react-web'),
+    z.literal('react-web')
 ]);
 
 export type ServiceName = z.infer<typeof ServiceNamesSchema>;
-const ServiceNames: ServiceName[] = ['graphql-surrealdb', 'graphql-tidb', 'graphql-mongo', 'graphql-postgres', 'grpc-mongo', 'react-web'];
+const ServiceNames: ServiceName[] = [
+    'graphql-surrealdb',
+    'graphql-tidb',
+    'grpc-surrealdb',
+    'graphql-mongo',
+    'graphql-postgres',
+    'grpc-mongo',
+    'react-web'
+];
 
 const infrastructure = 'infrastructure';
 const services = 'services';
@@ -39,7 +48,7 @@ export type TResourceCategory = TInfrastructure | TServices;
 export const ArgocdAppResourceNameSchema = z.union([
     z.literal(`argocd-applications-children-${infrastructure}`),
     z.literal(`argocd-applications-children-${services}`),
-    z.literal('argocd-applications-parents'),
+    z.literal('argocd-applications-parents')
 ]);
 
 export type ArgocdAppResourceName = z.infer<typeof ArgocdAppResourceNameSchema>;
@@ -56,7 +65,7 @@ export const InfrastructureNamesSchema = z.union([
     z.literal('seaweedfs'),
     z.literal('tidis'),
     z.literal('rook-ceph'),
-    z.literal('metalb'),
+    z.literal('metalb')
 ]);
 
 export type InfrastructureName = z.infer<typeof InfrastructureNamesSchema> | ArgocdAppResourceName;
@@ -186,6 +195,7 @@ type LinkerdViz = {
 type ServicesEnvVars = Simplify<
     ServiceEnvVars<'graphql-surrealdb', undefined> &
     ServiceEnvVars<'graphql-tidb', undefined> &
+    ServiceEnvVars<'grpc-surrealdb', undefined> &
     ServiceEnvVars<'graphql-mongo', GraphqlMongo> &
     ServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
     ServiceEnvVars<'grpc-mongo', GrpcMongo> &
