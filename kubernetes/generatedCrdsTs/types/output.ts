@@ -11504,6 +11504,21200 @@ export namespace linkerd {
     }
 }
 
+export namespace pingcap {
+    export namespace v1alpha1 {
+        export interface BackupScheduleSpec {
+            backupTemplate: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplate;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.BackupScheduleSpecImagePullSecrets[];
+            maxBackups?: number;
+            maxReservedTime?: string;
+            pause?: boolean;
+            schedule: string;
+            storageClassName?: string;
+            storageSize?: string;
+        }
+        /**
+         * backupScheduleSpecProvideDefaults sets the appropriate defaults for BackupScheduleSpec
+         */
+        export function backupScheduleSpecProvideDefaults(val: BackupScheduleSpec): BackupScheduleSpec {
+            return {
+                ...val,
+                backupTemplate: outputs.pingcap.v1alpha1.backupScheduleSpecBackupTemplateProvideDefaults(val.backupTemplate),
+            };
+        }
+
+        export interface BackupScheduleSpecBackupTemplate {
+            affinity?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinity;
+            azblob?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAzblob;
+            backupType?: string;
+            br?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateBr;
+            cleanOption?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateCleanOption;
+            cleanPolicy?: string;
+            dumpling?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateDumpling;
+            env?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateEnv[];
+            from?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateFrom;
+            gcs?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateGcs;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateImagePullSecrets[];
+            local?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocal;
+            podSecurityContext?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplatePodSecurityContext;
+            priorityClassName?: string;
+            resources?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateResources;
+            s3?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateS3;
+            serviceAccount?: string;
+            storageClassName?: string;
+            storageSize?: string;
+            tableFilter?: string[];
+            tikvGCLifeTime?: string;
+            tolerations?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateTolerations[];
+            toolImage?: string;
+            useKMS?: boolean;
+        }
+        /**
+         * backupScheduleSpecBackupTemplateProvideDefaults sets the appropriate defaults for BackupScheduleSpecBackupTemplate
+         */
+        export function backupScheduleSpecBackupTemplateProvideDefaults(val: BackupScheduleSpecBackupTemplate): BackupScheduleSpecBackupTemplate {
+            return {
+                ...val,
+                cleanOption: (val.cleanOption ? outputs.pingcap.v1alpha1.backupScheduleSpecBackupTemplateCleanOptionProvideDefaults(val.cleanOption) : undefined),
+            };
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAntiAffinity;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateAzblob {
+            accessTier?: string;
+            container?: string;
+            path?: string;
+            prefix?: string;
+            secretName?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateBr {
+            checksum?: boolean;
+            cluster: string;
+            clusterNamespace?: string;
+            concurrency?: number;
+            db?: string;
+            logLevel?: string;
+            onLine?: boolean;
+            options?: string[];
+            rateLimit?: number;
+            sendCredToTikv?: boolean;
+            statusAddr?: string;
+            table?: string;
+            timeAgo?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateCleanOption {
+            backoffEnabled?: boolean;
+            batchConcurrency?: number;
+            disableBatchConcurrency?: boolean;
+            pageSize?: number;
+            retryCount?: number;
+            routineConcurrency?: number;
+        }
+        /**
+         * backupScheduleSpecBackupTemplateCleanOptionProvideDefaults sets the appropriate defaults for BackupScheduleSpecBackupTemplateCleanOption
+         */
+        export function backupScheduleSpecBackupTemplateCleanOptionProvideDefaults(val: BackupScheduleSpecBackupTemplateCleanOption): BackupScheduleSpecBackupTemplateCleanOption {
+            return {
+                ...val,
+                retryCount: (val.retryCount) ?? 5,
+            };
+        }
+
+        export interface BackupScheduleSpecBackupTemplateDumpling {
+            options?: string[];
+            tableFilter?: string[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateEnvValueFrom;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateEnvValueFromSecretKeyRef;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateFrom {
+            host: string;
+            port?: number;
+            secretName: string;
+            tlsClientSecretName?: string;
+            user?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateGcs {
+            bucket?: string;
+            bucketAcl?: string;
+            location?: string;
+            objectAcl?: string;
+            path?: string;
+            prefix?: string;
+            projectId: string;
+            secretName?: string;
+            storageClass?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateImagePullSecrets {
+            name?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocal {
+            prefix?: string;
+            volume: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolume;
+            volumeMount: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeMount;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolume {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeCephfs;
+            cinder?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeCinder;
+            configMap?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeConfigMap;
+            csi?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeEphemeral;
+            fc?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeFc;
+            flexVolume?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumePersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumePhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumePortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeProjected;
+            quobyte?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeScaleIO;
+            secret?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeSecret;
+            storageos?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeVsphereVolume;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeCinderSecretRef {
+            name?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeDownwardAPIItems[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeEphemeralVolumeClaimTemplate;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeFlexVolumeSecretRef;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeMount {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumePersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumePhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumePortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeProjectedSources[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesServiceAccountToken;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeRbdSecretRef;
+            user?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeRbdSecretRef {
+            name?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplateLocalVolumeStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateLocalVolumeVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplatePodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplatePodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplatePodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplatePodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.BackupScheduleSpecBackupTemplatePodSecurityContextWindowsOptions;
+        }
+
+        export interface BackupScheduleSpecBackupTemplatePodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplatePodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplatePodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplatePodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface BackupScheduleSpecBackupTemplateS3 {
+            acl?: string;
+            bucket?: string;
+            endpoint?: string;
+            options?: string[];
+            path?: string;
+            prefix?: string;
+            provider: string;
+            region?: string;
+            secretName?: string;
+            sse?: string;
+            storageClass?: string;
+        }
+
+        export interface BackupScheduleSpecBackupTemplateTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface BackupScheduleSpecImagePullSecrets {
+            name?: string;
+        }
+
+        export interface BackupScheduleStatus {
+            allBackupCleanTime?: string;
+            lastBackup?: string;
+            lastBackupTime?: string;
+        }
+
+        export interface BackupSpec {
+            affinity?: outputs.pingcap.v1alpha1.BackupSpecAffinity;
+            azblob?: outputs.pingcap.v1alpha1.BackupSpecAzblob;
+            backupType?: string;
+            br?: outputs.pingcap.v1alpha1.BackupSpecBr;
+            cleanOption?: outputs.pingcap.v1alpha1.BackupSpecCleanOption;
+            cleanPolicy?: string;
+            dumpling?: outputs.pingcap.v1alpha1.BackupSpecDumpling;
+            env?: outputs.pingcap.v1alpha1.BackupSpecEnv[];
+            from?: outputs.pingcap.v1alpha1.BackupSpecFrom;
+            gcs?: outputs.pingcap.v1alpha1.BackupSpecGcs;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.BackupSpecImagePullSecrets[];
+            local?: outputs.pingcap.v1alpha1.BackupSpecLocal;
+            podSecurityContext?: outputs.pingcap.v1alpha1.BackupSpecPodSecurityContext;
+            priorityClassName?: string;
+            resources?: outputs.pingcap.v1alpha1.BackupSpecResources;
+            s3?: outputs.pingcap.v1alpha1.BackupSpecS3;
+            serviceAccount?: string;
+            storageClassName?: string;
+            storageSize?: string;
+            tableFilter?: string[];
+            tikvGCLifeTime?: string;
+            tolerations?: outputs.pingcap.v1alpha1.BackupSpecTolerations[];
+            toolImage?: string;
+            useKMS?: boolean;
+        }
+        /**
+         * backupSpecProvideDefaults sets the appropriate defaults for BackupSpec
+         */
+        export function backupSpecProvideDefaults(val: BackupSpec): BackupSpec {
+            return {
+                ...val,
+                cleanOption: (val.cleanOption ? outputs.pingcap.v1alpha1.backupSpecCleanOptionProvideDefaults(val.cleanOption) : undefined),
+            };
+        }
+
+        export interface BackupSpecAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.BackupSpecAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAntiAffinity;
+        }
+
+        export interface BackupSpecAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.BackupSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.BackupSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface BackupSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.BackupSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface BackupSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.BackupSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface BackupSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.BackupSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface BackupSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.BackupSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface BackupSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupSpecAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface BackupSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface BackupSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface BackupSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface BackupSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface BackupSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface BackupSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupSpecAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface BackupSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface BackupSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface BackupSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface BackupSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface BackupSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface BackupSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupSpecAzblob {
+            accessTier?: string;
+            container?: string;
+            path?: string;
+            prefix?: string;
+            secretName?: string;
+        }
+
+        export interface BackupSpecBr {
+            checksum?: boolean;
+            cluster: string;
+            clusterNamespace?: string;
+            concurrency?: number;
+            db?: string;
+            logLevel?: string;
+            onLine?: boolean;
+            options?: string[];
+            rateLimit?: number;
+            sendCredToTikv?: boolean;
+            statusAddr?: string;
+            table?: string;
+            timeAgo?: string;
+        }
+
+        export interface BackupSpecCleanOption {
+            backoffEnabled?: boolean;
+            batchConcurrency?: number;
+            disableBatchConcurrency?: boolean;
+            pageSize?: number;
+            retryCount?: number;
+            routineConcurrency?: number;
+        }
+        /**
+         * backupSpecCleanOptionProvideDefaults sets the appropriate defaults for BackupSpecCleanOption
+         */
+        export function backupSpecCleanOptionProvideDefaults(val: BackupSpecCleanOption): BackupSpecCleanOption {
+            return {
+                ...val,
+                retryCount: (val.retryCount) ?? 5,
+            };
+        }
+
+        export interface BackupSpecDumpling {
+            options?: string[];
+            tableFilter?: string[];
+        }
+
+        export interface BackupSpecEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.BackupSpecEnvValueFrom;
+        }
+
+        export interface BackupSpecEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.BackupSpecEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.BackupSpecEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.BackupSpecEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.BackupSpecEnvValueFromSecretKeyRef;
+        }
+
+        export interface BackupSpecEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface BackupSpecEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface BackupSpecEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface BackupSpecEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface BackupSpecFrom {
+            host: string;
+            port?: number;
+            secretName: string;
+            tlsClientSecretName?: string;
+            user?: string;
+        }
+
+        export interface BackupSpecGcs {
+            bucket?: string;
+            bucketAcl?: string;
+            location?: string;
+            objectAcl?: string;
+            path?: string;
+            prefix?: string;
+            projectId: string;
+            secretName?: string;
+            storageClass?: string;
+        }
+
+        export interface BackupSpecImagePullSecrets {
+            name?: string;
+        }
+
+        export interface BackupSpecLocal {
+            prefix?: string;
+            volume: outputs.pingcap.v1alpha1.BackupSpecLocalVolume;
+            volumeMount: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeMount;
+        }
+
+        export interface BackupSpecLocalVolume {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeCephfs;
+            cinder?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeCinder;
+            configMap?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeConfigMap;
+            csi?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeEphemeral;
+            fc?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeFc;
+            flexVolume?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumePersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumePhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumePortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeProjected;
+            quobyte?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeScaleIO;
+            secret?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeSecret;
+            storageos?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeVsphereVolume;
+        }
+
+        export interface BackupSpecLocalVolumeAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface BackupSpecLocalVolumeAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface BackupSpecLocalVolumeAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface BackupSpecLocalVolumeCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface BackupSpecLocalVolumeCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface BackupSpecLocalVolumeCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface BackupSpecLocalVolumeCinderSecretRef {
+            name?: string;
+        }
+
+        export interface BackupSpecLocalVolumeConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface BackupSpecLocalVolumeConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface BackupSpecLocalVolumeCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface BackupSpecLocalVolumeCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface BackupSpecLocalVolumeDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeDownwardAPIItems[];
+        }
+
+        export interface BackupSpecLocalVolumeDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface BackupSpecLocalVolumeDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface BackupSpecLocalVolumeDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface BackupSpecLocalVolumeEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface BackupSpecLocalVolumeEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeEphemeralVolumeClaimTemplate;
+        }
+
+        export interface BackupSpecLocalVolumeEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface BackupSpecLocalVolumeEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface BackupSpecLocalVolumeEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface BackupSpecLocalVolumeEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface BackupSpecLocalVolumeEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface BackupSpecLocalVolumeEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface BackupSpecLocalVolumeFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface BackupSpecLocalVolumeFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeFlexVolumeSecretRef;
+        }
+
+        export interface BackupSpecLocalVolumeFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface BackupSpecLocalVolumeFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface BackupSpecLocalVolumeGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface BackupSpecLocalVolumeGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface BackupSpecLocalVolumeGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface BackupSpecLocalVolumeHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface BackupSpecLocalVolumeIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface BackupSpecLocalVolumeIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface BackupSpecLocalVolumeMount {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface BackupSpecLocalVolumeNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface BackupSpecLocalVolumePersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface BackupSpecLocalVolumePhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface BackupSpecLocalVolumePortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface BackupSpecLocalVolumeProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeProjectedSources[];
+        }
+
+        export interface BackupSpecLocalVolumeProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeProjectedSourcesServiceAccountToken;
+        }
+
+        export interface BackupSpecLocalVolumeProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface BackupSpecLocalVolumeProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface BackupSpecLocalVolumeProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface BackupSpecLocalVolumeProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface BackupSpecLocalVolumeProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface BackupSpecLocalVolumeProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface BackupSpecLocalVolumeProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface BackupSpecLocalVolumeProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface BackupSpecLocalVolumeProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface BackupSpecLocalVolumeQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface BackupSpecLocalVolumeRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeRbdSecretRef;
+            user?: string;
+        }
+
+        export interface BackupSpecLocalVolumeRbdSecretRef {
+            name?: string;
+        }
+
+        export interface BackupSpecLocalVolumeScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface BackupSpecLocalVolumeScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface BackupSpecLocalVolumeSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface BackupSpecLocalVolumeSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface BackupSpecLocalVolumeStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.BackupSpecLocalVolumeStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface BackupSpecLocalVolumeStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface BackupSpecLocalVolumeVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface BackupSpecPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.BackupSpecPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.BackupSpecPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.BackupSpecPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.BackupSpecPodSecurityContextWindowsOptions;
+        }
+
+        export interface BackupSpecPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface BackupSpecPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface BackupSpecPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface BackupSpecPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface BackupSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface BackupSpecS3 {
+            acl?: string;
+            bucket?: string;
+            endpoint?: string;
+            options?: string[];
+            path?: string;
+            prefix?: string;
+            provider: string;
+            region?: string;
+            secretName?: string;
+            sse?: string;
+            storageClass?: string;
+        }
+
+        export interface BackupSpecTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface BackupStatus {
+            backupPath?: string;
+            backupSize?: number;
+            backupSizeReadable?: string;
+            commitTs?: string;
+            conditions?: outputs.pingcap.v1alpha1.BackupStatusConditions[];
+            phase?: string;
+            timeCompleted?: string;
+            timeStarted?: string;
+        }
+
+        export interface BackupStatusConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface DMClusterSpec {
+            affinity?: outputs.pingcap.v1alpha1.DMClusterSpecAffinity;
+            annotations?: {[key: string]: string};
+            configUpdateStrategy?: string;
+            discovery?: outputs.pingcap.v1alpha1.DMClusterSpecDiscovery;
+            dnsConfig?: outputs.pingcap.v1alpha1.DMClusterSpecDnsConfig;
+            dnsPolicy?: string;
+            enablePVReclaim?: boolean;
+            hostNetwork?: boolean;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.DMClusterSpecImagePullSecrets[];
+            labels?: {[key: string]: string};
+            master?: outputs.pingcap.v1alpha1.DMClusterSpecMaster;
+            nodeSelector?: {[key: string]: string};
+            paused?: boolean;
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.DMClusterSpecPodSecurityContext;
+            priorityClassName?: string;
+            pvReclaimPolicy?: string;
+            schedulerName?: string;
+            statefulSetUpdateStrategy?: string;
+            suspendAction?: outputs.pingcap.v1alpha1.DMClusterSpecSuspendAction;
+            timezone?: string;
+            tlsClientSecretNames?: string[];
+            tlsCluster?: outputs.pingcap.v1alpha1.DMClusterSpecTlsCluster;
+            tolerations?: outputs.pingcap.v1alpha1.DMClusterSpecTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.DMClusterSpecTopologySpreadConstraints[];
+            version?: string;
+            worker?: outputs.pingcap.v1alpha1.DMClusterSpecWorker;
+        }
+        /**
+         * dmclusterSpecProvideDefaults sets the appropriate defaults for DMClusterSpec
+         */
+        export function dmclusterSpecProvideDefaults(val: DMClusterSpec): DMClusterSpec {
+            return {
+                ...val,
+                imagePullPolicy: (val.imagePullPolicy) ?? "IfNotPresent",
+                master: (val.master ? outputs.pingcap.v1alpha1.dmclusterSpecMasterProvideDefaults(val.master) : undefined),
+                pvReclaimPolicy: (val.pvReclaimPolicy) ?? "Retain",
+                worker: (val.worker ? outputs.pingcap.v1alpha1.dmclusterSpecWorkerProvideDefaults(val.worker) : undefined),
+            };
+        }
+
+        export interface DMClusterSpecAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAntiAffinity;
+        }
+
+        export interface DMClusterSpecAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface DMClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.DMClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface DMClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface DMClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.DMClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface DMClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface DMClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface DMClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface DMClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface DMClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface DMClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecDiscovery {
+            additionalContainers?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainers[];
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumeMounts[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumes[];
+            address?: string;
+            affinity?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinity;
+            annotations?: {[key: string]: string};
+            configUpdateStrategy?: string;
+            dnsConfig?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryDnsConfig;
+            dnsPolicy?: string;
+            env?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryEnvFrom[];
+            hostNetwork?: boolean;
+            image?: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryImagePullSecrets[];
+            initContainers?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainers[];
+            labels?: {[key: string]: string};
+            limits?: {[key: string]: number | string};
+            nodeSelector?: {[key: string]: string};
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryPodSecurityContext;
+            priorityClassName?: string;
+            requests?: {[key: string]: number | string};
+            schedulerName?: string;
+            statefulSetUpdateStrategy?: string;
+            suspendAction?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoverySuspendAction;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryTopologySpreadConstraints[];
+            version?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersEnvValueFrom;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * dmclusterSpecDiscoveryAdditionalContainersPortsProvideDefaults sets the appropriate defaults for DMClusterSpecDiscoveryAdditionalContainersPorts
+         */
+        export function dmclusterSpecDiscoveryAdditionalContainersPortsProvideDefaults(val: DMClusterSpecDiscoveryAdditionalContainersPorts): DMClusterSpecDiscoveryAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesVsphereVolume;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesProjectedSources[];
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAntiAffinity;
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecDiscoveryAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryEnvValueFrom;
+        }
+
+        export interface DMClusterSpecDiscoveryEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryEnvFromSecretRef;
+        }
+
+        export interface DMClusterSpecDiscoveryEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryEnvValueFromSecretKeyRef;
+        }
+
+        export interface DMClusterSpecDiscoveryEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecDiscoveryEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecDiscoveryEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryImagePullSecrets {
+            name?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersEnvValueFrom;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersEnvFromSecretRef;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLifecyclePreStop;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * dmclusterSpecDiscoveryInitContainersPortsProvideDefaults sets the appropriate defaults for DMClusterSpecDiscoveryInitContainersPorts
+         */
+        export function dmclusterSpecDiscoveryInitContainersPortsProvideDefaults(val: DMClusterSpecDiscoveryInitContainersPorts): DMClusterSpecDiscoveryInitContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersSecurityContextWindowsOptions;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryInitContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface DMClusterSpecDiscoveryInitContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.DMClusterSpecDiscoveryPodSecurityContextWindowsOptions;
+        }
+
+        export interface DMClusterSpecDiscoveryPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface DMClusterSpecDiscoveryPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecDiscoveryPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface DMClusterSpecDiscoverySuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface DMClusterSpecDiscoveryTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface DMClusterSpecDiscoveryTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.DMClusterSpecDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface DMClusterSpecDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface DMClusterSpecImagePullSecrets {
+            name?: string;
+        }
+
+        export interface DMClusterSpecMaster {
+            additionalContainers?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainers[];
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumeMounts[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumes[];
+            affinity?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinity;
+            annotations?: {[key: string]: string};
+            baseImage?: string;
+            config?: {[key: string]: any};
+            configUpdateStrategy?: string;
+            dataSubDir?: string;
+            dnsConfig?: outputs.pingcap.v1alpha1.DMClusterSpecMasterDnsConfig;
+            dnsPolicy?: string;
+            env?: outputs.pingcap.v1alpha1.DMClusterSpecMasterEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.DMClusterSpecMasterEnvFrom[];
+            hostNetwork?: boolean;
+            image?: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.DMClusterSpecMasterImagePullSecrets[];
+            initContainers?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainers[];
+            labels?: {[key: string]: string};
+            limits?: {[key: string]: number | string};
+            maxFailoverCount?: number;
+            nodeSelector?: {[key: string]: string};
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.DMClusterSpecMasterPodSecurityContext;
+            priorityClassName?: string;
+            replicas: number;
+            requests?: {[key: string]: number | string};
+            schedulerName?: string;
+            service?: outputs.pingcap.v1alpha1.DMClusterSpecMasterService;
+            statefulSetUpdateStrategy?: string;
+            storageClassName?: string;
+            storageSize?: string;
+            suspendAction?: outputs.pingcap.v1alpha1.DMClusterSpecMasterSuspendAction;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.pingcap.v1alpha1.DMClusterSpecMasterTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.DMClusterSpecMasterTopologySpreadConstraints[];
+            version?: string;
+        }
+        /**
+         * dmclusterSpecMasterProvideDefaults sets the appropriate defaults for DMClusterSpecMaster
+         */
+        export function dmclusterSpecMasterProvideDefaults(val: DMClusterSpecMaster): DMClusterSpecMaster {
+            return {
+                ...val,
+                baseImage: (val.baseImage) ?? "pingcap/dm",
+            };
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersEnvValueFrom;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * dmclusterSpecMasterAdditionalContainersPortsProvideDefaults sets the appropriate defaults for DMClusterSpecMasterAdditionalContainersPorts
+         */
+        export function dmclusterSpecMasterAdditionalContainersPortsProvideDefaults(val: DMClusterSpecMasterAdditionalContainersPorts): DMClusterSpecMasterAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesVsphereVolume;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesProjectedSources[];
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecMasterAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface DMClusterSpecMasterAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAntiAffinity;
+        }
+
+        export interface DMClusterSpecMasterAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface DMClusterSpecMasterAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface DMClusterSpecMasterAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface DMClusterSpecMasterAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecMasterAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecMasterAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface DMClusterSpecMasterAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface DMClusterSpecMasterAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecMasterAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecMasterAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecMasterDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.DMClusterSpecMasterDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface DMClusterSpecMasterDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface DMClusterSpecMasterEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.DMClusterSpecMasterEnvValueFrom;
+        }
+
+        export interface DMClusterSpecMasterEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterEnvFromSecretRef;
+        }
+
+        export interface DMClusterSpecMasterEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterEnvValueFromSecretKeyRef;
+        }
+
+        export interface DMClusterSpecMasterEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecMasterEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecMasterEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterImagePullSecrets {
+            name?: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersEnvValueFrom;
+        }
+
+        export interface DMClusterSpecMasterInitContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersEnvFromSecretRef;
+        }
+
+        export interface DMClusterSpecMasterInitContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterInitContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterInitContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface DMClusterSpecMasterInitContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterInitContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLifecyclePreStop;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecMasterInitContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecMasterInitContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecMasterInitContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * dmclusterSpecMasterInitContainersPortsProvideDefaults sets the appropriate defaults for DMClusterSpecMasterInitContainersPorts
+         */
+        export function dmclusterSpecMasterInitContainersPortsProvideDefaults(val: DMClusterSpecMasterInitContainersPorts): DMClusterSpecMasterInitContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface DMClusterSpecMasterInitContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecMasterInitContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecMasterInitContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface DMClusterSpecMasterInitContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersSecurityContextWindowsOptions;
+        }
+
+        export interface DMClusterSpecMasterInitContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface DMClusterSpecMasterInitContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecMasterInitContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecMasterInitContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecMasterInitContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface DMClusterSpecMasterInitContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface DMClusterSpecMasterPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.DMClusterSpecMasterPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.DMClusterSpecMasterPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.DMClusterSpecMasterPodSecurityContextWindowsOptions;
+        }
+
+        export interface DMClusterSpecMasterPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface DMClusterSpecMasterPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface DMClusterSpecMasterPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecMasterPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface DMClusterSpecMasterService {
+            annotations?: {[key: string]: string};
+            clusterIP?: string;
+            externalTrafficPolicy?: string;
+            labels?: {[key: string]: string};
+            loadBalancerIP?: string;
+            loadBalancerSourceRanges?: string[];
+            masterNodePort?: number;
+            port?: number;
+            portName?: string;
+            type?: string;
+        }
+
+        export interface DMClusterSpecMasterSuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface DMClusterSpecMasterTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface DMClusterSpecMasterTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.DMClusterSpecPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.DMClusterSpecPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.DMClusterSpecPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.DMClusterSpecPodSecurityContextWindowsOptions;
+        }
+
+        export interface DMClusterSpecPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface DMClusterSpecPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface DMClusterSpecPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface DMClusterSpecSuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface DMClusterSpecTlsCluster {
+            enabled?: boolean;
+        }
+
+        export interface DMClusterSpecTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface DMClusterSpecTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecWorker {
+            additionalContainers?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainers[];
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumeMounts[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumes[];
+            affinity?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinity;
+            annotations?: {[key: string]: string};
+            baseImage?: string;
+            config?: {[key: string]: any};
+            configUpdateStrategy?: string;
+            dataSubDir?: string;
+            dnsConfig?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerDnsConfig;
+            dnsPolicy?: string;
+            env?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerEnvFrom[];
+            failover?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerFailover;
+            hostNetwork?: boolean;
+            image?: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerImagePullSecrets[];
+            initContainers?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainers[];
+            labels?: {[key: string]: string};
+            limits?: {[key: string]: number | string};
+            maxFailoverCount?: number;
+            nodeSelector?: {[key: string]: string};
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerPodSecurityContext;
+            priorityClassName?: string;
+            recoverFailover?: boolean;
+            replicas: number;
+            requests?: {[key: string]: number | string};
+            schedulerName?: string;
+            statefulSetUpdateStrategy?: string;
+            storageClassName?: string;
+            storageSize?: string;
+            suspendAction?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerSuspendAction;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerTopologySpreadConstraints[];
+            version?: string;
+        }
+        /**
+         * dmclusterSpecWorkerProvideDefaults sets the appropriate defaults for DMClusterSpecWorker
+         */
+        export function dmclusterSpecWorkerProvideDefaults(val: DMClusterSpecWorker): DMClusterSpecWorker {
+            return {
+                ...val,
+                baseImage: (val.baseImage) ?? "pingcap/dm",
+            };
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersEnvValueFrom;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * dmclusterSpecWorkerAdditionalContainersPortsProvideDefaults sets the appropriate defaults for DMClusterSpecWorkerAdditionalContainersPorts
+         */
+        export function dmclusterSpecWorkerAdditionalContainersPortsProvideDefaults(val: DMClusterSpecWorkerAdditionalContainersPorts): DMClusterSpecWorkerAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesVsphereVolume;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesProjectedSources[];
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface DMClusterSpecWorkerAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface DMClusterSpecWorkerAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAntiAffinity;
+        }
+
+        export interface DMClusterSpecWorkerAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface DMClusterSpecWorkerAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface DMClusterSpecWorkerAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface DMClusterSpecWorkerAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface DMClusterSpecWorkerAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface DMClusterSpecWorkerAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface DMClusterSpecWorkerAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface DMClusterSpecWorkerDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface DMClusterSpecWorkerDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface DMClusterSpecWorkerEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerEnvValueFrom;
+        }
+
+        export interface DMClusterSpecWorkerEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerEnvFromSecretRef;
+        }
+
+        export interface DMClusterSpecWorkerEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerEnvValueFromSecretKeyRef;
+        }
+
+        export interface DMClusterSpecWorkerEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecWorkerEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecWorkerEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerFailover {
+            recoverByUID?: string;
+        }
+
+        export interface DMClusterSpecWorkerImagePullSecrets {
+            name?: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersEnvValueFrom;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersEnvFromSecretRef;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLifecyclePreStop;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * dmclusterSpecWorkerInitContainersPortsProvideDefaults sets the appropriate defaults for DMClusterSpecWorkerInitContainersPorts
+         */
+        export function dmclusterSpecWorkerInitContainersPortsProvideDefaults(val: DMClusterSpecWorkerInitContainersPorts): DMClusterSpecWorkerInitContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface DMClusterSpecWorkerInitContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecWorkerInitContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface DMClusterSpecWorkerInitContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersSecurityContextWindowsOptions;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface DMClusterSpecWorkerInitContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface DMClusterSpecWorkerInitContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerInitContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface DMClusterSpecWorkerInitContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface DMClusterSpecWorkerPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.DMClusterSpecWorkerPodSecurityContextWindowsOptions;
+        }
+
+        export interface DMClusterSpecWorkerPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface DMClusterSpecWorkerPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface DMClusterSpecWorkerPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface DMClusterSpecWorkerPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface DMClusterSpecWorkerSuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface DMClusterSpecWorkerTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface DMClusterSpecWorkerTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface DMClusterStatus {
+            conditions?: outputs.pingcap.v1alpha1.DMClusterStatusConditions[];
+            master?: outputs.pingcap.v1alpha1.DMClusterStatusMaster;
+            worker?: outputs.pingcap.v1alpha1.DMClusterStatusWorker;
+        }
+
+        export interface DMClusterStatusConditions {
+            lastTransitionTime?: string;
+            lastUpdateTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface DMClusterStatusMaster {
+            conditions?: outputs.pingcap.v1alpha1.DMClusterStatusMasterConditions[];
+            failureMembers?: {[key: string]: outputs.pingcap.v1alpha1.DMClusterStatusMasterFailureMembers};
+            image?: string;
+            leader?: outputs.pingcap.v1alpha1.DMClusterStatusMasterLeader;
+            members?: {[key: string]: outputs.pingcap.v1alpha1.DMClusterStatusMasterMembers};
+            phase?: string;
+            statefulSet?: outputs.pingcap.v1alpha1.DMClusterStatusMasterStatefulSet;
+            synced?: boolean;
+            unjoinedMembers?: {[key: string]: outputs.pingcap.v1alpha1.DMClusterStatusMasterUnjoinedMembers};
+            volumes?: {[key: string]: outputs.pingcap.v1alpha1.DMClusterStatusMasterVolumes};
+        }
+
+        export interface DMClusterStatusMasterConditions {
+            lastTransitionTime: string;
+            message: string;
+            observedGeneration?: number;
+            reason: string;
+            status: string;
+            type: string;
+        }
+
+        export interface DMClusterStatusMasterFailureMembers {
+            createdAt?: string;
+            memberDeleted?: boolean;
+            memberID?: string;
+            podName?: string;
+            pvcUID?: string;
+        }
+
+        export interface DMClusterStatusMasterLeader {
+            clientURL: string;
+            health: boolean;
+            id: string;
+            lastTransitionTime?: string;
+            name: string;
+        }
+
+        export interface DMClusterStatusMasterMembers {
+            clientURL: string;
+            health: boolean;
+            id: string;
+            lastTransitionTime?: string;
+            name: string;
+        }
+
+        export interface DMClusterStatusMasterStatefulSet {
+            collisionCount?: number;
+            conditions?: outputs.pingcap.v1alpha1.DMClusterStatusMasterStatefulSetConditions[];
+            currentReplicas?: number;
+            currentRevision?: string;
+            observedGeneration?: number;
+            readyReplicas?: number;
+            replicas: number;
+            updateRevision?: string;
+            updatedReplicas?: number;
+        }
+
+        export interface DMClusterStatusMasterStatefulSetConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface DMClusterStatusMasterUnjoinedMembers {
+            createdAt?: string;
+            podName?: string;
+            pvcUID?: string;
+            pvcUIDSet?: {[key: string]: {[key: string]: any}};
+        }
+
+        export interface DMClusterStatusMasterVolumes {
+            boundCount?: number;
+            currentCapacity: number | string;
+            currentCount?: number;
+            name: string;
+            resizedCapacity: number | string;
+            resizedCount?: number;
+        }
+
+        export interface DMClusterStatusWorker {
+            conditions?: outputs.pingcap.v1alpha1.DMClusterStatusWorkerConditions[];
+            failoverUID?: string;
+            failureMembers?: {[key: string]: outputs.pingcap.v1alpha1.DMClusterStatusWorkerFailureMembers};
+            image?: string;
+            members?: {[key: string]: outputs.pingcap.v1alpha1.DMClusterStatusWorkerMembers};
+            phase?: string;
+            statefulSet?: outputs.pingcap.v1alpha1.DMClusterStatusWorkerStatefulSet;
+            synced?: boolean;
+            volumes?: {[key: string]: outputs.pingcap.v1alpha1.DMClusterStatusWorkerVolumes};
+        }
+
+        export interface DMClusterStatusWorkerConditions {
+            lastTransitionTime: string;
+            message: string;
+            observedGeneration?: number;
+            reason: string;
+            status: string;
+            type: string;
+        }
+
+        export interface DMClusterStatusWorkerFailureMembers {
+            createdAt?: string;
+            podName?: string;
+        }
+
+        export interface DMClusterStatusWorkerMembers {
+            addr?: string;
+            lastTransitionTime?: string;
+            name?: string;
+            stage: string;
+        }
+
+        export interface DMClusterStatusWorkerStatefulSet {
+            collisionCount?: number;
+            conditions?: outputs.pingcap.v1alpha1.DMClusterStatusWorkerStatefulSetConditions[];
+            currentReplicas?: number;
+            currentRevision?: string;
+            observedGeneration?: number;
+            readyReplicas?: number;
+            replicas: number;
+            updateRevision?: string;
+            updatedReplicas?: number;
+        }
+
+        export interface DMClusterStatusWorkerStatefulSetConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface DMClusterStatusWorkerVolumes {
+            boundCount?: number;
+            currentCapacity: number | string;
+            currentCount?: number;
+            name: string;
+            resizedCapacity: number | string;
+            resizedCount?: number;
+        }
+
+        export interface RestoreSpec {
+            affinity?: outputs.pingcap.v1alpha1.RestoreSpecAffinity;
+            azblob?: outputs.pingcap.v1alpha1.RestoreSpecAzblob;
+            backupType?: string;
+            br?: outputs.pingcap.v1alpha1.RestoreSpecBr;
+            env?: outputs.pingcap.v1alpha1.RestoreSpecEnv[];
+            gcs?: outputs.pingcap.v1alpha1.RestoreSpecGcs;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.RestoreSpecImagePullSecrets[];
+            local?: outputs.pingcap.v1alpha1.RestoreSpecLocal;
+            podSecurityContext?: outputs.pingcap.v1alpha1.RestoreSpecPodSecurityContext;
+            priorityClassName?: string;
+            resources?: outputs.pingcap.v1alpha1.RestoreSpecResources;
+            s3?: outputs.pingcap.v1alpha1.RestoreSpecS3;
+            serviceAccount?: string;
+            storageClassName?: string;
+            storageSize?: string;
+            tableFilter?: string[];
+            tikvGCLifeTime?: string;
+            to?: outputs.pingcap.v1alpha1.RestoreSpecTo;
+            tolerations?: outputs.pingcap.v1alpha1.RestoreSpecTolerations[];
+            toolImage?: string;
+            useKMS?: boolean;
+        }
+
+        export interface RestoreSpecAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.RestoreSpecAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAntiAffinity;
+        }
+
+        export interface RestoreSpecAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.RestoreSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.RestoreSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface RestoreSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.RestoreSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface RestoreSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.RestoreSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.RestoreSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface RestoreSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RestoreSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RestoreSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.RestoreSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface RestoreSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.RestoreSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.RestoreSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface RestoreSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RestoreSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RestoreSpecAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface RestoreSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface RestoreSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface RestoreSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RestoreSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RestoreSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface RestoreSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RestoreSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RestoreSpecAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface RestoreSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface RestoreSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface RestoreSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RestoreSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RestoreSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface RestoreSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.RestoreSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RestoreSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RestoreSpecAzblob {
+            accessTier?: string;
+            container?: string;
+            path?: string;
+            prefix?: string;
+            secretName?: string;
+        }
+
+        export interface RestoreSpecBr {
+            checksum?: boolean;
+            cluster: string;
+            clusterNamespace?: string;
+            concurrency?: number;
+            db?: string;
+            logLevel?: string;
+            onLine?: boolean;
+            options?: string[];
+            rateLimit?: number;
+            sendCredToTikv?: boolean;
+            statusAddr?: string;
+            table?: string;
+            timeAgo?: string;
+        }
+
+        export interface RestoreSpecEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.RestoreSpecEnvValueFrom;
+        }
+
+        export interface RestoreSpecEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.RestoreSpecEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.RestoreSpecEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.RestoreSpecEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.RestoreSpecEnvValueFromSecretKeyRef;
+        }
+
+        export interface RestoreSpecEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RestoreSpecEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface RestoreSpecEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface RestoreSpecEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RestoreSpecGcs {
+            bucket?: string;
+            bucketAcl?: string;
+            location?: string;
+            objectAcl?: string;
+            path?: string;
+            prefix?: string;
+            projectId: string;
+            secretName?: string;
+            storageClass?: string;
+        }
+
+        export interface RestoreSpecImagePullSecrets {
+            name?: string;
+        }
+
+        export interface RestoreSpecLocal {
+            prefix?: string;
+            volume: outputs.pingcap.v1alpha1.RestoreSpecLocalVolume;
+            volumeMount: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeMount;
+        }
+
+        export interface RestoreSpecLocalVolume {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeCephfs;
+            cinder?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeCinder;
+            configMap?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeConfigMap;
+            csi?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeEphemeral;
+            fc?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeFc;
+            flexVolume?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumePersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumePhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumePortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeProjected;
+            quobyte?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeScaleIO;
+            secret?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeSecret;
+            storageos?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeVsphereVolume;
+        }
+
+        export interface RestoreSpecLocalVolumeAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface RestoreSpecLocalVolumeAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface RestoreSpecLocalVolumeAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface RestoreSpecLocalVolumeCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface RestoreSpecLocalVolumeCinderSecretRef {
+            name?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RestoreSpecLocalVolumeConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface RestoreSpecLocalVolumeCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface RestoreSpecLocalVolumeCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeDownwardAPIItems[];
+        }
+
+        export interface RestoreSpecLocalVolumeDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface RestoreSpecLocalVolumeDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface RestoreSpecLocalVolumeDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface RestoreSpecLocalVolumeEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface RestoreSpecLocalVolumeEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeEphemeralVolumeClaimTemplate;
+        }
+
+        export interface RestoreSpecLocalVolumeEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface RestoreSpecLocalVolumeEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface RestoreSpecLocalVolumeEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface RestoreSpecLocalVolumeEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RestoreSpecLocalVolumeEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RestoreSpecLocalVolumeFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface RestoreSpecLocalVolumeFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeFlexVolumeSecretRef;
+        }
+
+        export interface RestoreSpecLocalVolumeFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface RestoreSpecLocalVolumeGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface RestoreSpecLocalVolumeHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface RestoreSpecLocalVolumeIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeMount {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface RestoreSpecLocalVolumePersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface RestoreSpecLocalVolumePhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface RestoreSpecLocalVolumePortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface RestoreSpecLocalVolumeProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeProjectedSources[];
+        }
+
+        export interface RestoreSpecLocalVolumeProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeProjectedSourcesServiceAccountToken;
+        }
+
+        export interface RestoreSpecLocalVolumeProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RestoreSpecLocalVolumeProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface RestoreSpecLocalVolumeProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface RestoreSpecLocalVolumeProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface RestoreSpecLocalVolumeProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface RestoreSpecLocalVolumeProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface RestoreSpecLocalVolumeProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RestoreSpecLocalVolumeProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface RestoreSpecLocalVolumeProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface RestoreSpecLocalVolumeQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface RestoreSpecLocalVolumeRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeRbdSecretRef;
+            user?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeRbdSecretRef {
+            name?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface RestoreSpecLocalVolumeStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.RestoreSpecLocalVolumeStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface RestoreSpecLocalVolumeVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface RestoreSpecPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.RestoreSpecPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.RestoreSpecPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.RestoreSpecPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.RestoreSpecPodSecurityContextWindowsOptions;
+        }
+
+        export interface RestoreSpecPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface RestoreSpecPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface RestoreSpecPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface RestoreSpecPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface RestoreSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface RestoreSpecS3 {
+            acl?: string;
+            bucket?: string;
+            endpoint?: string;
+            options?: string[];
+            path?: string;
+            prefix?: string;
+            provider: string;
+            region?: string;
+            secretName?: string;
+            sse?: string;
+            storageClass?: string;
+        }
+
+        export interface RestoreSpecTo {
+            host: string;
+            port?: number;
+            secretName: string;
+            tlsClientSecretName?: string;
+            user?: string;
+        }
+
+        export interface RestoreSpecTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface RestoreStatus {
+            commitTs?: string;
+            conditions?: outputs.pingcap.v1alpha1.RestoreStatusConditions[];
+            phase?: string;
+            timeCompleted?: string;
+            timeStarted?: string;
+        }
+
+        export interface RestoreStatusConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterAutoScalerSpec {
+            cluster: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecCluster;
+            tidb?: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecTidb;
+            tikv?: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecTikv;
+        }
+
+        export interface TidbClusterAutoScalerSpecCluster {
+            clusterDomain?: string;
+            name: string;
+            namespace?: string;
+        }
+
+        export interface TidbClusterAutoScalerSpecTidb {
+            external?: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecTidbExternal;
+            resources?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecTidbResources};
+            rules?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecTidbRules};
+            scaleInIntervalSeconds?: number;
+            scaleOutIntervalSeconds?: number;
+        }
+
+        export interface TidbClusterAutoScalerSpecTidbExternal {
+            endpoint?: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecTidbExternalEndpoint;
+            maxReplicas: number;
+        }
+
+        export interface TidbClusterAutoScalerSpecTidbExternalEndpoint {
+            host: string;
+            path: string;
+            port: number;
+            tlsSecret?: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecTidbExternalEndpointTlsSecret;
+        }
+
+        export interface TidbClusterAutoScalerSpecTidbExternalEndpointTlsSecret {
+            name: string;
+            namespace: string;
+        }
+
+        export interface TidbClusterAutoScalerSpecTidbResources {
+            count?: number;
+            cpu: number | string;
+            memory: number | string;
+            storage?: number | string;
+        }
+
+        export interface TidbClusterAutoScalerSpecTidbRules {
+            max_threshold: number;
+            min_threshold?: number;
+            resource_types?: string[];
+        }
+
+        export interface TidbClusterAutoScalerSpecTikv {
+            external?: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecTikvExternal;
+            resources?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecTikvResources};
+            rules?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecTikvRules};
+            scaleInIntervalSeconds?: number;
+            scaleOutIntervalSeconds?: number;
+        }
+
+        export interface TidbClusterAutoScalerSpecTikvExternal {
+            endpoint?: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecTikvExternalEndpoint;
+            maxReplicas: number;
+        }
+
+        export interface TidbClusterAutoScalerSpecTikvExternalEndpoint {
+            host: string;
+            path: string;
+            port: number;
+            tlsSecret?: outputs.pingcap.v1alpha1.TidbClusterAutoScalerSpecTikvExternalEndpointTlsSecret;
+        }
+
+        export interface TidbClusterAutoScalerSpecTikvExternalEndpointTlsSecret {
+            name: string;
+            namespace: string;
+        }
+
+        export interface TidbClusterAutoScalerSpecTikvResources {
+            count?: number;
+            cpu: number | string;
+            memory: number | string;
+            storage?: number | string;
+        }
+
+        export interface TidbClusterAutoScalerSpecTikvRules {
+            max_threshold: number;
+            min_threshold?: number;
+            resource_types?: string[];
+        }
+
+        export interface TidbClusterAutoScalerStatus {
+            tidb?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterAutoScalerStatusTidb};
+            tikv?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterAutoScalerStatusTikv};
+        }
+
+        export interface TidbClusterAutoScalerStatusTidb {
+            lastAutoScalingTimestamp?: string;
+        }
+
+        export interface TidbClusterAutoScalerStatusTikv {
+            lastAutoScalingTimestamp?: string;
+        }
+
+        export interface TidbClusterSpec {
+            acrossK8s?: boolean;
+            affinity?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinity;
+            annotations?: {[key: string]: string};
+            cluster?: outputs.pingcap.v1alpha1.TidbClusterSpecCluster;
+            clusterDomain?: string;
+            configUpdateStrategy?: string;
+            discovery?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscovery;
+            dnsConfig?: outputs.pingcap.v1alpha1.TidbClusterSpecDnsConfig;
+            dnsPolicy?: string;
+            enableDynamicConfiguration?: boolean;
+            enablePVReclaim?: boolean;
+            helper?: outputs.pingcap.v1alpha1.TidbClusterSpecHelper;
+            hostNetwork?: boolean;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.TidbClusterSpecImagePullSecrets[];
+            labels?: {[key: string]: string};
+            nodeSelector?: {[key: string]: string};
+            paused?: boolean;
+            pd?: outputs.pingcap.v1alpha1.TidbClusterSpecPd;
+            pdAddresses?: string[];
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecPodSecurityContext;
+            priorityClassName?: string;
+            pump?: outputs.pingcap.v1alpha1.TidbClusterSpecPump;
+            pvReclaimPolicy?: string;
+            schedulerName?: string;
+            serviceAccount?: string;
+            services?: outputs.pingcap.v1alpha1.TidbClusterSpecServices[];
+            statefulSetUpdateStrategy?: string;
+            suspendAction?: outputs.pingcap.v1alpha1.TidbClusterSpecSuspendAction;
+            ticdc?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdc;
+            tidb?: outputs.pingcap.v1alpha1.TidbClusterSpecTidb;
+            tiflash?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflash;
+            tikv?: outputs.pingcap.v1alpha1.TidbClusterSpecTikv;
+            timezone?: string;
+            tlsCluster?: outputs.pingcap.v1alpha1.TidbClusterSpecTlsCluster;
+            tolerations?: outputs.pingcap.v1alpha1.TidbClusterSpecTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.TidbClusterSpecTopologySpreadConstraints[];
+            version?: string;
+        }
+        /**
+         * tidbClusterSpecProvideDefaults sets the appropriate defaults for TidbClusterSpec
+         */
+        export function tidbClusterSpecProvideDefaults(val: TidbClusterSpec): TidbClusterSpec {
+            return {
+                ...val,
+                imagePullPolicy: (val.imagePullPolicy) ?? "IfNotPresent",
+                pd: (val.pd ? outputs.pingcap.v1alpha1.tidbClusterSpecPdProvideDefaults(val.pd) : undefined),
+                pump: (val.pump ? outputs.pingcap.v1alpha1.tidbClusterSpecPumpProvideDefaults(val.pump) : undefined),
+                pvReclaimPolicy: (val.pvReclaimPolicy) ?? "Retain",
+                ticdc: (val.ticdc ? outputs.pingcap.v1alpha1.tidbClusterSpecTicdcProvideDefaults(val.ticdc) : undefined),
+                tidb: (val.tidb ? outputs.pingcap.v1alpha1.tidbClusterSpecTidbProvideDefaults(val.tidb) : undefined),
+                tiflash: (val.tiflash ? outputs.pingcap.v1alpha1.tidbClusterSpecTiflashProvideDefaults(val.tiflash) : undefined),
+                tikv: (val.tikv ? outputs.pingcap.v1alpha1.tidbClusterSpecTikvProvideDefaults(val.tikv) : undefined),
+            };
+        }
+
+        export interface TidbClusterSpecAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAntiAffinity;
+        }
+
+        export interface TidbClusterSpecAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface TidbClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface TidbClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface TidbClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface TidbClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecCluster {
+            clusterDomain?: string;
+            name: string;
+            namespace?: string;
+        }
+
+        export interface TidbClusterSpecDiscovery {
+            additionalContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainers[];
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumeMounts[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumes[];
+            affinity?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinity;
+            annotations?: {[key: string]: string};
+            configUpdateStrategy?: string;
+            dnsConfig?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryDnsConfig;
+            dnsPolicy?: string;
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryEnvFrom[];
+            hostNetwork?: boolean;
+            image?: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryImagePullSecrets[];
+            initContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainers[];
+            labels?: {[key: string]: string};
+            limits?: {[key: string]: number | string};
+            nodeSelector?: {[key: string]: string};
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryPodSecurityContext;
+            priorityClassName?: string;
+            requests?: {[key: string]: number | string};
+            schedulerName?: string;
+            statefulSetUpdateStrategy?: string;
+            suspendAction?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoverySuspendAction;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryTopologySpreadConstraints[];
+            version?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecDiscoveryAdditionalContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecDiscoveryAdditionalContainersPorts
+         */
+        export function tidbClusterSpecDiscoveryAdditionalContainersPortsProvideDefaults(val: TidbClusterSpecDiscoveryAdditionalContainersPorts): TidbClusterSpecDiscoveryAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesVsphereVolume;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesProjectedSources[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAntiAffinity;
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecDiscoveryAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecDiscoveryEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecDiscoveryEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecDiscoveryEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryImagePullSecrets {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecDiscoveryInitContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecDiscoveryInitContainersPorts
+         */
+        export function tidbClusterSpecDiscoveryInitContainersPortsProvideDefaults(val: TidbClusterSpecDiscoveryInitContainersPorts): TidbClusterSpecDiscoveryInitContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryInitContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryInitContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecDiscoveryPodSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecDiscoveryPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecDiscoverySuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface TidbClusterSpecDiscoveryTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecDiscoveryTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.TidbClusterSpecDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface TidbClusterSpecDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecHelper {
+            image?: string;
+            imagePullPolicy?: string;
+        }
+
+        export interface TidbClusterSpecImagePullSecrets {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPd {
+            additionalContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainers[];
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumeMounts[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumes[];
+            affinity?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinity;
+            annotations?: {[key: string]: string};
+            baseImage?: string;
+            config?: {[key: string]: any};
+            configUpdateStrategy?: string;
+            dataSubDir?: string;
+            dnsConfig?: outputs.pingcap.v1alpha1.TidbClusterSpecPdDnsConfig;
+            dnsPolicy?: string;
+            enableDashboardInternalProxy?: boolean;
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecPdEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecPdEnvFrom[];
+            hostNetwork?: boolean;
+            image?: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.TidbClusterSpecPdImagePullSecrets[];
+            initContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainers[];
+            labels?: {[key: string]: string};
+            limits?: {[key: string]: number | string};
+            maxFailoverCount?: number;
+            mountClusterClientSecret?: boolean;
+            nodeSelector?: {[key: string]: string};
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecPdPodSecurityContext;
+            priorityClassName?: string;
+            replicas: number;
+            requests?: {[key: string]: number | string};
+            schedulerName?: string;
+            service?: outputs.pingcap.v1alpha1.TidbClusterSpecPdService;
+            serviceAccount?: string;
+            startUpScriptVersion?: string;
+            statefulSetUpdateStrategy?: string;
+            storageClassName?: string;
+            storageVolumes?: outputs.pingcap.v1alpha1.TidbClusterSpecPdStorageVolumes[];
+            suspendAction?: outputs.pingcap.v1alpha1.TidbClusterSpecPdSuspendAction;
+            terminationGracePeriodSeconds?: number;
+            tlsClientSecretName?: string;
+            tolerations?: outputs.pingcap.v1alpha1.TidbClusterSpecPdTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.TidbClusterSpecPdTopologySpreadConstraints[];
+            version?: string;
+        }
+        /**
+         * tidbClusterSpecPdProvideDefaults sets the appropriate defaults for TidbClusterSpecPd
+         */
+        export function tidbClusterSpecPdProvideDefaults(val: TidbClusterSpecPd): TidbClusterSpecPd {
+            return {
+                ...val,
+                baseImage: (val.baseImage) ?? "pingcap/pd",
+            };
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecPdAdditionalContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecPdAdditionalContainersPorts
+         */
+        export function tidbClusterSpecPdAdditionalContainersPortsProvideDefaults(val: TidbClusterSpecPdAdditionalContainersPorts): TidbClusterSpecPdAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesVsphereVolume;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesProjectedSources[];
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPdAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface TidbClusterSpecPdAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAntiAffinity;
+        }
+
+        export interface TidbClusterSpecPdAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface TidbClusterSpecPdAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecPdAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface TidbClusterSpecPdAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPdAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPdAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface TidbClusterSpecPdAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface TidbClusterSpecPdAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPdAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecPdAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPdDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.TidbClusterSpecPdDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface TidbClusterSpecPdDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecPdEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecPdEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecPdEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecPdEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecPdEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecPdEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecPdEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdImagePullSecrets {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecPdInitContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecPdInitContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdInitContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdInitContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecPdInitContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdInitContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPdInitContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPdInitContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPdInitContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecPdInitContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecPdInitContainersPorts
+         */
+        export function tidbClusterSpecPdInitContainersPortsProvideDefaults(val: TidbClusterSpecPdInitContainersPorts): TidbClusterSpecPdInitContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecPdInitContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecPdInitContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPdInitContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecPdInitContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecPdInitContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecPdInitContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecPdInitContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPdInitContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPdInitContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecPdInitContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecPdPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecPdPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.TidbClusterSpecPdPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPdPodSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecPdPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecPdPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecPdPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPdPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecPdService {
+            annotations?: {[key: string]: string};
+            clusterIP?: string;
+            labels?: {[key: string]: string};
+            loadBalancerIP?: string;
+            loadBalancerSourceRanges?: string[];
+            port?: number;
+            portName?: string;
+            type?: string;
+        }
+
+        export interface TidbClusterSpecPdStorageVolumes {
+            mountPath?: string;
+            name: string;
+            storageClassName?: string;
+            storageSize: string;
+        }
+
+        export interface TidbClusterSpecPdSuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface TidbClusterSpecPdTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecPdTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.TidbClusterSpecPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPodSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecPump {
+            additionalContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainers[];
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumeMounts[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumes[];
+            affinity?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinity;
+            annotations?: {[key: string]: string};
+            baseImage?: string;
+            config?: {[key: string]: any};
+            configUpdateStrategy?: string;
+            dnsConfig?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpDnsConfig;
+            dnsPolicy?: string;
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpEnvFrom[];
+            hostNetwork?: boolean;
+            image?: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpImagePullSecrets[];
+            initContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainers[];
+            labels?: {[key: string]: string};
+            limits?: {[key: string]: number | string};
+            nodeSelector?: {[key: string]: string};
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpPodSecurityContext;
+            priorityClassName?: string;
+            replicas: number;
+            requests?: {[key: string]: number | string};
+            schedulerName?: string;
+            serviceAccount?: string;
+            setTimeZone?: boolean;
+            statefulSetUpdateStrategy?: string;
+            storageClassName?: string;
+            suspendAction?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpSuspendAction;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpTopologySpreadConstraints[];
+            version?: string;
+        }
+        /**
+         * tidbClusterSpecPumpProvideDefaults sets the appropriate defaults for TidbClusterSpecPump
+         */
+        export function tidbClusterSpecPumpProvideDefaults(val: TidbClusterSpecPump): TidbClusterSpecPump {
+            return {
+                ...val,
+                baseImage: (val.baseImage) ?? "pingcap/tidb-binlog",
+            };
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecPumpAdditionalContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecPumpAdditionalContainersPorts
+         */
+        export function tidbClusterSpecPumpAdditionalContainersPortsProvideDefaults(val: TidbClusterSpecPumpAdditionalContainersPorts): TidbClusterSpecPumpAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesVsphereVolume;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesProjectedSources[];
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPumpAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface TidbClusterSpecPumpAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAntiAffinity;
+        }
+
+        export interface TidbClusterSpecPumpAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface TidbClusterSpecPumpAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecPumpAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface TidbClusterSpecPumpAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface TidbClusterSpecPumpAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface TidbClusterSpecPumpAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecPumpAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecPumpDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface TidbClusterSpecPumpDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecPumpEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecPumpEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecPumpEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecPumpEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecPumpEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecPumpEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpImagePullSecrets {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecPumpInitContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecPumpInitContainersPorts
+         */
+        export function tidbClusterSpecPumpInitContainersPortsProvideDefaults(val: TidbClusterSpecPumpInitContainersPorts): TidbClusterSpecPumpInitContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecPumpInitContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPumpInitContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecPumpInitContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecPumpInitContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecPumpInitContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpInitContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecPumpInitContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecPumpPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecPumpPodSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecPumpPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecPumpPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecPumpPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecPumpPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecPumpSuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface TidbClusterSpecPumpTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecPumpTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecServices {
+            name?: string;
+            type?: string;
+        }
+
+        export interface TidbClusterSpecSuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdc {
+            additionalContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainers[];
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumeMounts[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumes[];
+            affinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinity;
+            annotations?: {[key: string]: string};
+            baseImage?: string;
+            config?: {[key: string]: any};
+            configUpdateStrategy?: string;
+            dnsConfig?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcDnsConfig;
+            dnsPolicy?: string;
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcEnvFrom[];
+            gracefulShutdownTimeout?: string;
+            hostNetwork?: boolean;
+            image?: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcImagePullSecrets[];
+            initContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainers[];
+            labels?: {[key: string]: string};
+            limits?: {[key: string]: number | string};
+            nodeSelector?: {[key: string]: string};
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcPodSecurityContext;
+            priorityClassName?: string;
+            replicas: number;
+            requests?: {[key: string]: number | string};
+            schedulerName?: string;
+            serviceAccount?: string;
+            statefulSetUpdateStrategy?: string;
+            storageClassName?: string;
+            storageVolumes?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcStorageVolumes[];
+            suspendAction?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcSuspendAction;
+            terminationGracePeriodSeconds?: number;
+            tlsClientSecretNames?: string[];
+            tolerations?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcTopologySpreadConstraints[];
+            version?: string;
+        }
+        /**
+         * tidbClusterSpecTicdcProvideDefaults sets the appropriate defaults for TidbClusterSpecTicdc
+         */
+        export function tidbClusterSpecTicdcProvideDefaults(val: TidbClusterSpecTicdc): TidbClusterSpecTicdc {
+            return {
+                ...val,
+                baseImage: (val.baseImage) ?? "pingcap/ticdc",
+            };
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecTicdcAdditionalContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecTicdcAdditionalContainersPorts
+         */
+        export function tidbClusterSpecTicdcAdditionalContainersPortsProvideDefaults(val: TidbClusterSpecTicdcAdditionalContainersPorts): TidbClusterSpecTicdcAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesVsphereVolume;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesProjectedSources[];
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTicdcAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface TidbClusterSpecTicdcAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAntiAffinity;
+        }
+
+        export interface TidbClusterSpecTicdcAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface TidbClusterSpecTicdcAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecTicdcAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface TidbClusterSpecTicdcAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface TidbClusterSpecTicdcAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface TidbClusterSpecTicdcAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTicdcAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecTicdcEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecTicdcEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecTicdcEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecTicdcEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTicdcEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTicdcEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcImagePullSecrets {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecTicdcInitContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecTicdcInitContainersPorts
+         */
+        export function tidbClusterSpecTicdcInitContainersPortsProvideDefaults(val: TidbClusterSpecTicdcInitContainersPorts): TidbClusterSpecTicdcInitContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcInitContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecTicdcInitContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecTicdcPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTicdcPodSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecTicdcPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTicdcPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecTicdcPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTicdcPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecTicdcStorageVolumes {
+            mountPath?: string;
+            name: string;
+            storageClassName?: string;
+            storageSize: string;
+        }
+
+        export interface TidbClusterSpecTicdcSuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface TidbClusterSpecTicdcTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecTicdcTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTidb {
+            additionalContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainers[];
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumeMounts[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumes[];
+            affinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinity;
+            annotations?: {[key: string]: string};
+            baseImage?: string;
+            binlogEnabled?: boolean;
+            config?: {[key: string]: any};
+            configUpdateStrategy?: string;
+            dnsConfig?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbDnsConfig;
+            dnsPolicy?: string;
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbEnvFrom[];
+            hostNetwork?: boolean;
+            image?: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbImagePullSecrets[];
+            initContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainers[];
+            initializer?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitializer;
+            labels?: {[key: string]: string};
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbLifecycle;
+            limits?: {[key: string]: number | string};
+            maxFailoverCount?: number;
+            nodeSelector?: {[key: string]: string};
+            plugins?: string[];
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbPodSecurityContext;
+            priorityClassName?: string;
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbReadinessProbe;
+            replicas: number;
+            requests?: {[key: string]: number | string};
+            schedulerName?: string;
+            separateSlowLog?: boolean;
+            service?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbService;
+            serviceAccount?: string;
+            slowLogTailer?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbSlowLogTailer;
+            slowLogVolumeName?: string;
+            statefulSetUpdateStrategy?: string;
+            storageClassName?: string;
+            storageVolumes?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbStorageVolumes[];
+            suspendAction?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbSuspendAction;
+            terminationGracePeriodSeconds?: number;
+            tlsClient?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbTlsClient;
+            tolerations?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbTopologySpreadConstraints[];
+            version?: string;
+        }
+        /**
+         * tidbClusterSpecTidbProvideDefaults sets the appropriate defaults for TidbClusterSpecTidb
+         */
+        export function tidbClusterSpecTidbProvideDefaults(val: TidbClusterSpecTidb): TidbClusterSpecTidb {
+            return {
+                ...val,
+                baseImage: (val.baseImage) ?? "pingcap/tidb",
+            };
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecTidbAdditionalContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecTidbAdditionalContainersPorts
+         */
+        export function tidbClusterSpecTidbAdditionalContainersPortsProvideDefaults(val: TidbClusterSpecTidbAdditionalContainersPorts): TidbClusterSpecTidbAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesVsphereVolume;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesProjectedSources[];
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTidbAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface TidbClusterSpecTidbAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAntiAffinity;
+        }
+
+        export interface TidbClusterSpecTidbAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface TidbClusterSpecTidbAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecTidbAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface TidbClusterSpecTidbAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface TidbClusterSpecTidbAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface TidbClusterSpecTidbAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTidbAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTidbDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface TidbClusterSpecTidbDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecTidbEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecTidbEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecTidbEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecTidbEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTidbEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTidbEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbImagePullSecrets {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecTidbInitContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecTidbInitContainersPorts
+         */
+        export function tidbClusterSpecTidbInitContainersPortsProvideDefaults(val: TidbClusterSpecTidbInitContainersPorts): TidbClusterSpecTidbInitContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecTidbInitContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTidbInitContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTidbInitContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecTidbInitContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTidbInitContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbInitContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecTidbInitContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecTidbInitializer {
+            createPassword?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecTidbLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecTidbLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTidbLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTidbLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTidbLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecTidbLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTidbLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTidbLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTidbPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbPodSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecTidbPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTidbPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecTidbPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTidbPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecTidbReadinessProbe {
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            type?: string;
+        }
+
+        export interface TidbClusterSpecTidbService {
+            additionalPorts?: outputs.pingcap.v1alpha1.TidbClusterSpecTidbServiceAdditionalPorts[];
+            annotations?: {[key: string]: string};
+            clusterIP?: string;
+            exposeStatus?: boolean;
+            externalTrafficPolicy?: string;
+            labels?: {[key: string]: string};
+            loadBalancerIP?: string;
+            loadBalancerSourceRanges?: string[];
+            mysqlNodePort?: number;
+            port?: number;
+            portName?: string;
+            statusNodePort?: number;
+            type?: string;
+        }
+
+        export interface TidbClusterSpecTidbServiceAdditionalPorts {
+            appProtocol?: string;
+            name?: string;
+            nodePort?: number;
+            port: number;
+            protocol?: string;
+            targetPort?: number | string;
+        }
+        /**
+         * tidbClusterSpecTidbServiceAdditionalPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecTidbServiceAdditionalPorts
+         */
+        export function tidbClusterSpecTidbServiceAdditionalPortsProvideDefaults(val: TidbClusterSpecTidbServiceAdditionalPorts): TidbClusterSpecTidbServiceAdditionalPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecTidbSlowLogTailer {
+            image?: string;
+            imagePullPolicy?: string;
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTidbStorageVolumes {
+            mountPath?: string;
+            name: string;
+            storageClassName?: string;
+            storageSize: string;
+        }
+
+        export interface TidbClusterSpecTidbSuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbTlsClient {
+            disableClientAuthn?: boolean;
+            enabled?: boolean;
+            skipInternalClientCA?: boolean;
+        }
+
+        export interface TidbClusterSpecTidbTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecTidbTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTiflash {
+            additionalContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainers[];
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumeMounts[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumes[];
+            affinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinity;
+            annotations?: {[key: string]: string};
+            baseImage?: string;
+            config?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashConfig;
+            configUpdateStrategy?: string;
+            dnsConfig?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashDnsConfig;
+            dnsPolicy?: string;
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashEnvFrom[];
+            failover?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashFailover;
+            hostNetwork?: boolean;
+            image?: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashImagePullSecrets[];
+            initContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainers[];
+            initializer?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitializer;
+            labels?: {[key: string]: string};
+            limits?: {[key: string]: number | string};
+            logTailer?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashLogTailer;
+            maxFailoverCount?: number;
+            nodeSelector?: {[key: string]: string};
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashPodSecurityContext;
+            priorityClassName?: string;
+            privileged?: boolean;
+            recoverFailover?: boolean;
+            replicas: number;
+            requests?: {[key: string]: number | string};
+            schedulerName?: string;
+            serviceAccount?: string;
+            statefulSetUpdateStrategy?: string;
+            storageClaims: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashStorageClaims[];
+            suspendAction?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashSuspendAction;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashTopologySpreadConstraints[];
+            version?: string;
+        }
+        /**
+         * tidbClusterSpecTiflashProvideDefaults sets the appropriate defaults for TidbClusterSpecTiflash
+         */
+        export function tidbClusterSpecTiflashProvideDefaults(val: TidbClusterSpecTiflash): TidbClusterSpecTiflash {
+            return {
+                ...val,
+                baseImage: (val.baseImage) ?? "pingcap/tiflash",
+            };
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecTiflashAdditionalContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecTiflashAdditionalContainersPorts
+         */
+        export function tidbClusterSpecTiflashAdditionalContainersPortsProvideDefaults(val: TidbClusterSpecTiflashAdditionalContainersPorts): TidbClusterSpecTiflashAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesVsphereVolume;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesProjectedSources[];
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTiflashAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface TidbClusterSpecTiflashAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAntiAffinity;
+        }
+
+        export interface TidbClusterSpecTiflashAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface TidbClusterSpecTiflashAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecTiflashAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface TidbClusterSpecTiflashAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface TidbClusterSpecTiflashAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface TidbClusterSpecTiflashAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTiflashAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashConfig {
+            config?: {[key: string]: any};
+            proxy?: {[key: string]: any};
+        }
+
+        export interface TidbClusterSpecTiflashDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecTiflashEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecTiflashEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecTiflashEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecTiflashEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTiflashEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTiflashEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashFailover {
+            recoverByUID?: string;
+        }
+
+        export interface TidbClusterSpecTiflashImagePullSecrets {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecTiflashInitContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecTiflashInitContainersPorts
+         */
+        export function tidbClusterSpecTiflashInitContainersPortsProvideDefaults(val: TidbClusterSpecTiflashInitContainersPorts): TidbClusterSpecTiflashInitContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashInitContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecTiflashInitializer {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTiflashLogTailer {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTiflashPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashPodSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecTiflashPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTiflashPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecTiflashPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTiflashPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecTiflashStorageClaims {
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTiflashStorageClaimsResources;
+            storageClassName?: string;
+        }
+
+        export interface TidbClusterSpecTiflashStorageClaimsResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTiflashSuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface TidbClusterSpecTiflashTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecTiflashTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTikv {
+            additionalContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainers[];
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumeMounts[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumes[];
+            affinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinity;
+            annotations?: {[key: string]: string};
+            baseImage?: string;
+            config?: {[key: string]: any};
+            configUpdateStrategy?: string;
+            dataSubDir?: string;
+            dnsConfig?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvDnsConfig;
+            dnsPolicy?: string;
+            enableNamedStatusPort?: boolean;
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvEnvFrom[];
+            evictLeaderTimeout?: string;
+            failover?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvFailover;
+            hostNetwork?: boolean;
+            image?: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvImagePullSecrets[];
+            initContainers?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainers[];
+            labels?: {[key: string]: string};
+            limits?: {[key: string]: number | string};
+            logTailer?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvLogTailer;
+            maxFailoverCount?: number;
+            mountClusterClientSecret?: boolean;
+            nodeSelector?: {[key: string]: string};
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvPodSecurityContext;
+            priorityClassName?: string;
+            privileged?: boolean;
+            raftLogVolumeName?: string;
+            recoverFailover?: boolean;
+            replicas: number;
+            requests?: {[key: string]: number | string};
+            rocksDBLogVolumeName?: string;
+            schedulerName?: string;
+            separateRaftLog?: boolean;
+            separateRocksDBLog?: boolean;
+            serviceAccount?: string;
+            statefulSetUpdateStrategy?: string;
+            storageClassName?: string;
+            storageVolumes?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvStorageVolumes[];
+            storeLabels?: string[];
+            suspendAction?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvSuspendAction;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvTopologySpreadConstraints[];
+            version?: string;
+        }
+        /**
+         * tidbClusterSpecTikvProvideDefaults sets the appropriate defaults for TidbClusterSpecTikv
+         */
+        export function tidbClusterSpecTikvProvideDefaults(val: TidbClusterSpecTikv): TidbClusterSpecTikv {
+            return {
+                ...val,
+                baseImage: (val.baseImage) ?? "pingcap/tikv",
+            };
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecTikvAdditionalContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecTikvAdditionalContainersPorts
+         */
+        export function tidbClusterSpecTikvAdditionalContainersPortsProvideDefaults(val: TidbClusterSpecTikvAdditionalContainersPorts): TidbClusterSpecTikvAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesVsphereVolume;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesProjectedSources[];
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTikvAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface TidbClusterSpecTikvAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAntiAffinity;
+        }
+
+        export interface TidbClusterSpecTikvAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface TidbClusterSpecTikvAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecTikvAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface TidbClusterSpecTikvAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface TidbClusterSpecTikvAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface TidbClusterSpecTikvAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbClusterSpecTikvAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbClusterSpecTikvDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface TidbClusterSpecTikvDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecTikvEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecTikvEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecTikvEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecTikvEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTikvEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTikvEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvFailover {
+            recoverByUID?: string;
+        }
+
+        export interface TidbClusterSpecTikvImagePullSecrets {
+            name?: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersEnvValueFrom;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersEnvFromSecretRef;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLifecyclePreStop;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbClusterSpecTikvInitContainersPortsProvideDefaults sets the appropriate defaults for TidbClusterSpecTikvInitContainersPorts
+         */
+        export function tidbClusterSpecTikvInitContainersPortsProvideDefaults(val: TidbClusterSpecTikvInitContainersPorts): TidbClusterSpecTikvInitContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbClusterSpecTikvInitContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTikvInitContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTikvInitContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbClusterSpecTikvInitContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbClusterSpecTikvInitContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvInitContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbClusterSpecTikvInitContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbClusterSpecTikvLogTailer {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbClusterSpecTikvPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbClusterSpecTikvPodSecurityContextWindowsOptions;
+        }
+
+        export interface TidbClusterSpecTikvPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbClusterSpecTikvPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbClusterSpecTikvPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbClusterSpecTikvPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbClusterSpecTikvStorageVolumes {
+            mountPath?: string;
+            name: string;
+            storageClassName?: string;
+            storageSize: string;
+        }
+
+        export interface TidbClusterSpecTikvSuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface TidbClusterSpecTikvTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecTikvTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface TidbClusterSpecTlsCluster {
+            enabled?: boolean;
+        }
+
+        export interface TidbClusterSpecTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface TidbClusterSpecTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface TidbClusterStatus {
+            auto-scaler?: outputs.pingcap.v1alpha1.TidbClusterStatusAuto-Scaler;
+            clusterID?: string;
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusConditions[];
+            pd?: outputs.pingcap.v1alpha1.TidbClusterStatusPd;
+            pump?: outputs.pingcap.v1alpha1.TidbClusterStatusPump;
+            ticdc?: outputs.pingcap.v1alpha1.TidbClusterStatusTicdc;
+            tidb?: outputs.pingcap.v1alpha1.TidbClusterStatusTidb;
+            tiflash?: outputs.pingcap.v1alpha1.TidbClusterStatusTiflash;
+            tikv?: outputs.pingcap.v1alpha1.TidbClusterStatusTikv;
+        }
+
+        export interface TidbClusterStatusAuto-Scaler {
+            name: string;
+            namespace: string;
+        }
+
+        export interface TidbClusterStatusConditions {
+            lastTransitionTime?: string;
+            lastUpdateTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusPd {
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusPdConditions[];
+            failureMembers?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusPdFailureMembers};
+            image?: string;
+            leader?: outputs.pingcap.v1alpha1.TidbClusterStatusPdLeader;
+            members?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusPdMembers};
+            peerMembers?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusPdPeerMembers};
+            phase?: string;
+            statefulSet?: outputs.pingcap.v1alpha1.TidbClusterStatusPdStatefulSet;
+            synced?: boolean;
+            unjoinedMembers?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusPdUnjoinedMembers};
+            volumes?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusPdVolumes};
+        }
+
+        export interface TidbClusterStatusPdConditions {
+            lastTransitionTime: string;
+            message: string;
+            observedGeneration?: number;
+            reason: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusPdFailureMembers {
+            createdAt?: string;
+            memberDeleted?: boolean;
+            memberID?: string;
+            podName?: string;
+            pvcUID?: string;
+            pvcUIDSet?: {[key: string]: {[key: string]: any}};
+        }
+
+        export interface TidbClusterStatusPdLeader {
+            clientURL: string;
+            health: boolean;
+            id: string;
+            lastTransitionTime?: string;
+            name: string;
+        }
+
+        export interface TidbClusterStatusPdMembers {
+            clientURL: string;
+            health: boolean;
+            id: string;
+            lastTransitionTime?: string;
+            name: string;
+        }
+
+        export interface TidbClusterStatusPdPeerMembers {
+            clientURL: string;
+            health: boolean;
+            id: string;
+            lastTransitionTime?: string;
+            name: string;
+        }
+
+        export interface TidbClusterStatusPdStatefulSet {
+            collisionCount?: number;
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusPdStatefulSetConditions[];
+            currentReplicas?: number;
+            currentRevision?: string;
+            observedGeneration?: number;
+            readyReplicas?: number;
+            replicas: number;
+            updateRevision?: string;
+            updatedReplicas?: number;
+        }
+
+        export interface TidbClusterStatusPdStatefulSetConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusPdUnjoinedMembers {
+            createdAt?: string;
+            podName?: string;
+            pvcUID?: string;
+            pvcUIDSet?: {[key: string]: {[key: string]: any}};
+        }
+
+        export interface TidbClusterStatusPdVolumes {
+            boundCount?: number;
+            currentCapacity: number | string;
+            currentCount?: number;
+            name: string;
+            resizedCapacity: number | string;
+            resizedCount?: number;
+        }
+
+        export interface TidbClusterStatusPump {
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusPumpConditions[];
+            members?: outputs.pingcap.v1alpha1.TidbClusterStatusPumpMembers[];
+            phase?: string;
+            statefulSet?: outputs.pingcap.v1alpha1.TidbClusterStatusPumpStatefulSet;
+            volumes?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusPumpVolumes};
+        }
+
+        export interface TidbClusterStatusPumpConditions {
+            lastTransitionTime: string;
+            message: string;
+            observedGeneration?: number;
+            reason: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusPumpMembers {
+            host: string;
+            nodeId: string;
+            state: string;
+        }
+
+        export interface TidbClusterStatusPumpStatefulSet {
+            collisionCount?: number;
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusPumpStatefulSetConditions[];
+            currentReplicas?: number;
+            currentRevision?: string;
+            observedGeneration?: number;
+            readyReplicas?: number;
+            replicas: number;
+            updateRevision?: string;
+            updatedReplicas?: number;
+        }
+
+        export interface TidbClusterStatusPumpStatefulSetConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusPumpVolumes {
+            boundCount?: number;
+            currentCapacity: number | string;
+            currentCount?: number;
+            name: string;
+            resizedCapacity: number | string;
+            resizedCount?: number;
+        }
+
+        export interface TidbClusterStatusTicdc {
+            captures?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTicdcCaptures};
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusTicdcConditions[];
+            phase?: string;
+            statefulSet?: outputs.pingcap.v1alpha1.TidbClusterStatusTicdcStatefulSet;
+            synced?: boolean;
+            volumes?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTicdcVolumes};
+        }
+
+        export interface TidbClusterStatusTicdcCaptures {
+            id?: string;
+            isOwner?: boolean;
+            podName?: string;
+            ready?: boolean;
+            version?: string;
+        }
+
+        export interface TidbClusterStatusTicdcConditions {
+            lastTransitionTime: string;
+            message: string;
+            observedGeneration?: number;
+            reason: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusTicdcStatefulSet {
+            collisionCount?: number;
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusTicdcStatefulSetConditions[];
+            currentReplicas?: number;
+            currentRevision?: string;
+            observedGeneration?: number;
+            readyReplicas?: number;
+            replicas: number;
+            updateRevision?: string;
+            updatedReplicas?: number;
+        }
+
+        export interface TidbClusterStatusTicdcStatefulSetConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusTicdcVolumes {
+            boundCount?: number;
+            currentCapacity: number | string;
+            currentCount?: number;
+            name: string;
+            resizedCapacity: number | string;
+            resizedCount?: number;
+        }
+
+        export interface TidbClusterStatusTidb {
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusTidbConditions[];
+            failureMembers?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTidbFailureMembers};
+            image?: string;
+            members?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTidbMembers};
+            passwordInitialized?: boolean;
+            phase?: string;
+            resignDDLOwnerRetryCount?: number;
+            statefulSet?: outputs.pingcap.v1alpha1.TidbClusterStatusTidbStatefulSet;
+            volumes?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTidbVolumes};
+        }
+
+        export interface TidbClusterStatusTidbConditions {
+            lastTransitionTime: string;
+            message: string;
+            observedGeneration?: number;
+            reason: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusTidbFailureMembers {
+            createdAt?: string;
+            podName?: string;
+        }
+
+        export interface TidbClusterStatusTidbMembers {
+            health: boolean;
+            lastTransitionTime?: string;
+            name: string;
+            node?: string;
+        }
+
+        export interface TidbClusterStatusTidbStatefulSet {
+            collisionCount?: number;
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusTidbStatefulSetConditions[];
+            currentReplicas?: number;
+            currentRevision?: string;
+            observedGeneration?: number;
+            readyReplicas?: number;
+            replicas: number;
+            updateRevision?: string;
+            updatedReplicas?: number;
+        }
+
+        export interface TidbClusterStatusTidbStatefulSetConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusTidbVolumes {
+            boundCount?: number;
+            currentCapacity: number | string;
+            currentCount?: number;
+            name: string;
+            resizedCapacity: number | string;
+            resizedCount?: number;
+        }
+
+        export interface TidbClusterStatusTiflash {
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusTiflashConditions[];
+            failoverUID?: string;
+            failureStores?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTiflashFailureStores};
+            image?: string;
+            peerStores?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTiflashPeerStores};
+            phase?: string;
+            statefulSet?: outputs.pingcap.v1alpha1.TidbClusterStatusTiflashStatefulSet;
+            stores?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTiflashStores};
+            synced?: boolean;
+            tombstoneStores?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTiflashTombstoneStores};
+            volumes?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTiflashVolumes};
+        }
+
+        export interface TidbClusterStatusTiflashConditions {
+            lastTransitionTime: string;
+            message: string;
+            observedGeneration?: number;
+            reason: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusTiflashFailureStores {
+            createdAt?: string;
+            podName?: string;
+            storeID?: string;
+        }
+
+        export interface TidbClusterStatusTiflashPeerStores {
+            id: string;
+            ip: string;
+            lastTransitionTime?: string;
+            leaderCount: number;
+            podName: string;
+            state: string;
+        }
+
+        export interface TidbClusterStatusTiflashStatefulSet {
+            collisionCount?: number;
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusTiflashStatefulSetConditions[];
+            currentReplicas?: number;
+            currentRevision?: string;
+            observedGeneration?: number;
+            readyReplicas?: number;
+            replicas: number;
+            updateRevision?: string;
+            updatedReplicas?: number;
+        }
+
+        export interface TidbClusterStatusTiflashStatefulSetConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusTiflashStores {
+            id: string;
+            ip: string;
+            lastTransitionTime?: string;
+            leaderCount: number;
+            podName: string;
+            state: string;
+        }
+
+        export interface TidbClusterStatusTiflashTombstoneStores {
+            id: string;
+            ip: string;
+            lastTransitionTime?: string;
+            leaderCount: number;
+            podName: string;
+            state: string;
+        }
+
+        export interface TidbClusterStatusTiflashVolumes {
+            boundCount?: number;
+            currentCapacity: number | string;
+            currentCount?: number;
+            name: string;
+            resizedCapacity: number | string;
+            resizedCount?: number;
+        }
+
+        export interface TidbClusterStatusTikv {
+            bootStrapped?: boolean;
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusTikvConditions[];
+            evictLeader?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTikvEvictLeader};
+            failoverUID?: string;
+            failureStores?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTikvFailureStores};
+            image?: string;
+            peerStores?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTikvPeerStores};
+            phase?: string;
+            statefulSet?: outputs.pingcap.v1alpha1.TidbClusterStatusTikvStatefulSet;
+            stores?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTikvStores};
+            synced?: boolean;
+            tombstoneStores?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTikvTombstoneStores};
+            volumes?: {[key: string]: outputs.pingcap.v1alpha1.TidbClusterStatusTikvVolumes};
+        }
+
+        export interface TidbClusterStatusTikvConditions {
+            lastTransitionTime: string;
+            message: string;
+            observedGeneration?: number;
+            reason: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusTikvEvictLeader {
+            beginTime?: string;
+            podCreateTime?: string;
+            value?: string;
+        }
+
+        export interface TidbClusterStatusTikvFailureStores {
+            createdAt?: string;
+            podName?: string;
+            storeID?: string;
+        }
+
+        export interface TidbClusterStatusTikvPeerStores {
+            id: string;
+            ip: string;
+            lastTransitionTime?: string;
+            leaderCount: number;
+            podName: string;
+            state: string;
+        }
+
+        export interface TidbClusterStatusTikvStatefulSet {
+            collisionCount?: number;
+            conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusTikvStatefulSetConditions[];
+            currentReplicas?: number;
+            currentRevision?: string;
+            observedGeneration?: number;
+            readyReplicas?: number;
+            replicas: number;
+            updateRevision?: string;
+            updatedReplicas?: number;
+        }
+
+        export interface TidbClusterStatusTikvStatefulSetConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbClusterStatusTikvStores {
+            id: string;
+            ip: string;
+            lastTransitionTime?: string;
+            leaderCount: number;
+            podName: string;
+            state: string;
+        }
+
+        export interface TidbClusterStatusTikvTombstoneStores {
+            id: string;
+            ip: string;
+            lastTransitionTime?: string;
+            leaderCount: number;
+            podName: string;
+            state: string;
+        }
+
+        export interface TidbClusterStatusTikvVolumes {
+            boundCount?: number;
+            currentCapacity: number | string;
+            currentCount?: number;
+            name: string;
+            resizedCapacity: number | string;
+            resizedCount?: number;
+        }
+
+        export interface TidbInitializerSpec {
+            cluster: outputs.pingcap.v1alpha1.TidbInitializerSpecCluster;
+            image: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.TidbInitializerSpecImagePullSecrets[];
+            initSql?: string;
+            initSqlConfigMap?: string;
+            passwordSecret?: string;
+            permitHost?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.TidbInitializerSpecPodSecurityContext;
+            resources?: outputs.pingcap.v1alpha1.TidbInitializerSpecResources;
+            timezone?: string;
+            tlsClientSecretName?: string;
+        }
+
+        export interface TidbInitializerSpecCluster {
+            clusterDomain?: string;
+            name: string;
+            namespace?: string;
+        }
+
+        export interface TidbInitializerSpecImagePullSecrets {
+            name?: string;
+        }
+
+        export interface TidbInitializerSpecPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbInitializerSpecPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbInitializerSpecPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.TidbInitializerSpecPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbInitializerSpecPodSecurityContextWindowsOptions;
+        }
+
+        export interface TidbInitializerSpecPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbInitializerSpecPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbInitializerSpecPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbInitializerSpecPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbInitializerSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbInitializerStatus {
+            active?: number;
+            completionTime?: string;
+            conditions?: outputs.pingcap.v1alpha1.TidbInitializerStatusConditions[];
+            failed?: number;
+            phase?: string;
+            startTime?: string;
+            succeeded?: number;
+        }
+
+        export interface TidbInitializerStatusConditions {
+            lastProbeTime?: string;
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbMonitorSpec {
+            additionalContainers?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainers[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumes[];
+            alertManagerRulesVersion?: string;
+            alertmanagerURL?: string;
+            annotations?: {[key: string]: string};
+            clusterScoped?: boolean;
+            clusters?: outputs.pingcap.v1alpha1.TidbMonitorSpecClusters[];
+            dm?: outputs.pingcap.v1alpha1.TidbMonitorSpecDm;
+            enableAlertRules?: boolean;
+            externalLabels?: {[key: string]: string};
+            grafana?: outputs.pingcap.v1alpha1.TidbMonitorSpecGrafana;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.TidbMonitorSpecImagePullSecrets[];
+            initializer: outputs.pingcap.v1alpha1.TidbMonitorSpecInitializer;
+            kubePrometheusURL?: string;
+            labels?: {[key: string]: string};
+            nodeSelector?: {[key: string]: string};
+            persistent?: boolean;
+            podSecurityContext?: outputs.pingcap.v1alpha1.TidbMonitorSpecPodSecurityContext;
+            prometheus: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheus;
+            prometheusReloader?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusReloader;
+            pvReclaimPolicy?: string;
+            reloader: outputs.pingcap.v1alpha1.TidbMonitorSpecReloader;
+            replicaExternalLabelName?: string;
+            replicas?: number;
+            shards?: number;
+            storage?: string;
+            storageClassName?: string;
+            thanos?: outputs.pingcap.v1alpha1.TidbMonitorSpecThanos;
+            timezone?: string;
+            tolerations?: outputs.pingcap.v1alpha1.TidbMonitorSpecTolerations[];
+        }
+        /**
+         * tidbMonitorSpecProvideDefaults sets the appropriate defaults for TidbMonitorSpec
+         */
+        export function tidbMonitorSpecProvideDefaults(val: TidbMonitorSpec): TidbMonitorSpec {
+            return {
+                ...val,
+                pvReclaimPolicy: (val.pvReclaimPolicy) ?? "Retain",
+            };
+        }
+
+        export interface TidbMonitorSpecAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersEnvValueFrom;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbMonitorSpecAdditionalContainersPortsProvideDefaults sets the appropriate defaults for TidbMonitorSpecAdditionalContainersPorts
+         */
+        export function tidbMonitorSpecAdditionalContainersPortsProvideDefaults(val: TidbMonitorSpecAdditionalContainersPorts): TidbMonitorSpecAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesVsphereVolume;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesProjectedSources[];
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface TidbMonitorSpecAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface TidbMonitorSpecClusters {
+            clusterDomain?: string;
+            name: string;
+            namespace?: string;
+        }
+
+        export interface TidbMonitorSpecDm {
+            clusters: outputs.pingcap.v1alpha1.TidbMonitorSpecDmClusters[];
+            initializer: outputs.pingcap.v1alpha1.TidbMonitorSpecDmInitializer;
+        }
+
+        export interface TidbMonitorSpecDmClusters {
+            clusterDomain?: string;
+            name: string;
+            namespace?: string;
+        }
+
+        export interface TidbMonitorSpecDmInitializer {
+            baseImage?: string;
+            envs?: {[key: string]: string};
+            imagePullPolicy?: string;
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+            version?: string;
+        }
+
+        export interface TidbMonitorSpecGrafana {
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.TidbMonitorSpecGrafanaAdditionalVolumeMounts[];
+            baseImage?: string;
+            envs?: {[key: string]: string};
+            imagePullPolicy?: string;
+            ingress?: outputs.pingcap.v1alpha1.TidbMonitorSpecGrafanaIngress;
+            limits?: {[key: string]: number | string};
+            logLevel?: string;
+            password?: string;
+            passwordSecret?: outputs.pingcap.v1alpha1.TidbMonitorSpecGrafanaPasswordSecret;
+            requests?: {[key: string]: number | string};
+            service?: outputs.pingcap.v1alpha1.TidbMonitorSpecGrafanaService;
+            username?: string;
+            usernameSecret?: outputs.pingcap.v1alpha1.TidbMonitorSpecGrafanaUsernameSecret;
+            version?: string;
+        }
+
+        export interface TidbMonitorSpecGrafanaAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbMonitorSpecGrafanaIngress {
+            annotations?: {[key: string]: string};
+            hosts: string[];
+            tls?: outputs.pingcap.v1alpha1.TidbMonitorSpecGrafanaIngressTls[];
+        }
+
+        export interface TidbMonitorSpecGrafanaIngressTls {
+            hosts?: string[];
+            secretName?: string;
+        }
+
+        export interface TidbMonitorSpecGrafanaPasswordSecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecGrafanaService {
+            annotations?: {[key: string]: string};
+            clusterIP?: string;
+            labels?: {[key: string]: string};
+            loadBalancerIP?: string;
+            loadBalancerSourceRanges?: string[];
+            port?: number;
+            portName?: string;
+            type?: string;
+        }
+
+        export interface TidbMonitorSpecGrafanaUsernameSecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecImagePullSecrets {
+            name?: string;
+        }
+
+        export interface TidbMonitorSpecInitializer {
+            baseImage?: string;
+            envs?: {[key: string]: string};
+            imagePullPolicy?: string;
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+            version?: string;
+        }
+
+        export interface TidbMonitorSpecPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbMonitorSpecPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbMonitorSpecPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.TidbMonitorSpecPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbMonitorSpecPodSecurityContextWindowsOptions;
+        }
+
+        export interface TidbMonitorSpecPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbMonitorSpecPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbMonitorSpecPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbMonitorSpecPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbMonitorSpecPrometheus {
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusAdditionalVolumeMounts[];
+            baseImage?: string;
+            config?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusConfig;
+            disableCompaction?: boolean;
+            imagePullPolicy?: string;
+            ingress?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusIngress;
+            limits?: {[key: string]: number | string};
+            logLevel?: string;
+            remoteWrite?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWrite[];
+            requests?: {[key: string]: number | string};
+            reserveDays?: number;
+            retentionTime?: string;
+            service?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusService;
+            version?: string;
+        }
+
+        export interface TidbMonitorSpecPrometheusAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbMonitorSpecPrometheusConfig {
+            commandOptions?: string[];
+            configMapRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusConfigConfigMapRef;
+            ruleConfigRef?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusConfigRuleConfigRef;
+        }
+
+        export interface TidbMonitorSpecPrometheusConfigConfigMapRef {
+            name?: string;
+            namespace?: string;
+        }
+
+        export interface TidbMonitorSpecPrometheusConfigRuleConfigRef {
+            name?: string;
+            namespace?: string;
+        }
+
+        export interface TidbMonitorSpecPrometheusIngress {
+            annotations?: {[key: string]: string};
+            hosts: string[];
+            tls?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusIngressTls[];
+        }
+
+        export interface TidbMonitorSpecPrometheusIngressTls {
+            hosts?: string[];
+            secretName?: string;
+        }
+
+        export interface TidbMonitorSpecPrometheusReloader {
+            baseImage?: string;
+            imagePullPolicy?: string;
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+            version?: string;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWrite {
+            basicAuth?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteBasicAuth;
+            bearerToken?: string;
+            bearerTokenFile?: string;
+            proxyUrl?: string;
+            queueConfig?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteQueueConfig;
+            remoteTimeout?: number;
+            tlsConfig?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteTlsConfig;
+            url: string;
+            writeRelabelConfigs?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteWriteRelabelConfigs[];
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteBasicAuth {
+            password?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteBasicAuthPassword;
+            username?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteBasicAuthUsername;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteBasicAuthPassword {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteBasicAuthUsername {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteQueueConfig {
+            batchSendDeadline?: number;
+            capacity?: number;
+            maxBackoff?: number;
+            maxRetries?: number;
+            maxSamplesPerSend?: number;
+            maxShards?: number;
+            minBackoff?: number;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteTlsConfig {
+            ca?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteTlsConfigCa;
+            caFile?: string;
+            cert?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteTlsConfigCert;
+            certFile?: string;
+            insecureSkipVerify?: boolean;
+            keyFile?: string;
+            keySecret?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteTlsConfigKeySecret;
+            serverName?: string;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteTlsConfigCa {
+            configMap?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteTlsConfigCaConfigMap;
+            secret?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteTlsConfigCaSecret;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteTlsConfigCaConfigMap {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteTlsConfigCaSecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteTlsConfigCert {
+            configMap?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteTlsConfigCertConfigMap;
+            secret?: outputs.pingcap.v1alpha1.TidbMonitorSpecPrometheusRemoteWriteTlsConfigCertSecret;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteTlsConfigCertConfigMap {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteTlsConfigCertSecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteTlsConfigKeySecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecPrometheusRemoteWriteWriteRelabelConfigs {
+            action?: string;
+            modulus?: number;
+            regex?: string;
+            replacement?: string;
+            separator?: string;
+            sourceLabels?: string[];
+            targetLabel?: string;
+        }
+
+        export interface TidbMonitorSpecPrometheusService {
+            annotations?: {[key: string]: string};
+            clusterIP?: string;
+            labels?: {[key: string]: string};
+            loadBalancerIP?: string;
+            loadBalancerSourceRanges?: string[];
+            port?: number;
+            portName?: string;
+            type?: string;
+        }
+
+        export interface TidbMonitorSpecReloader {
+            baseImage?: string;
+            imagePullPolicy?: string;
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+            service?: outputs.pingcap.v1alpha1.TidbMonitorSpecReloaderService;
+            version?: string;
+        }
+
+        export interface TidbMonitorSpecReloaderService {
+            annotations?: {[key: string]: string};
+            clusterIP?: string;
+            labels?: {[key: string]: string};
+            loadBalancerIP?: string;
+            loadBalancerSourceRanges?: string[];
+            port?: number;
+            portName?: string;
+            type?: string;
+        }
+
+        export interface TidbMonitorSpecThanos {
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.TidbMonitorSpecThanosAdditionalVolumeMounts[];
+            baseImage?: string;
+            grpcServerTlsConfig?: outputs.pingcap.v1alpha1.TidbMonitorSpecThanosGrpcServerTlsConfig;
+            imagePullPolicy?: string;
+            limits?: {[key: string]: number | string};
+            listenLocal?: boolean;
+            logFormat?: string;
+            logLevel?: string;
+            minTime?: string;
+            objectStorageConfig?: outputs.pingcap.v1alpha1.TidbMonitorSpecThanosObjectStorageConfig;
+            objectStorageConfigFile?: string;
+            requests?: {[key: string]: number | string};
+            routePrefix?: string;
+            tracingConfig?: outputs.pingcap.v1alpha1.TidbMonitorSpecThanosTracingConfig;
+            tracingConfigFile?: string;
+            version?: string;
+        }
+
+        export interface TidbMonitorSpecThanosAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbMonitorSpecThanosGrpcServerTlsConfig {
+            ca?: outputs.pingcap.v1alpha1.TidbMonitorSpecThanosGrpcServerTlsConfigCa;
+            caFile?: string;
+            cert?: outputs.pingcap.v1alpha1.TidbMonitorSpecThanosGrpcServerTlsConfigCert;
+            certFile?: string;
+            insecureSkipVerify?: boolean;
+            keyFile?: string;
+            keySecret?: outputs.pingcap.v1alpha1.TidbMonitorSpecThanosGrpcServerTlsConfigKeySecret;
+            serverName?: string;
+        }
+
+        export interface TidbMonitorSpecThanosGrpcServerTlsConfigCa {
+            configMap?: outputs.pingcap.v1alpha1.TidbMonitorSpecThanosGrpcServerTlsConfigCaConfigMap;
+            secret?: outputs.pingcap.v1alpha1.TidbMonitorSpecThanosGrpcServerTlsConfigCaSecret;
+        }
+
+        export interface TidbMonitorSpecThanosGrpcServerTlsConfigCaConfigMap {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecThanosGrpcServerTlsConfigCaSecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecThanosGrpcServerTlsConfigCert {
+            configMap?: outputs.pingcap.v1alpha1.TidbMonitorSpecThanosGrpcServerTlsConfigCertConfigMap;
+            secret?: outputs.pingcap.v1alpha1.TidbMonitorSpecThanosGrpcServerTlsConfigCertSecret;
+        }
+
+        export interface TidbMonitorSpecThanosGrpcServerTlsConfigCertConfigMap {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecThanosGrpcServerTlsConfigCertSecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecThanosGrpcServerTlsConfigKeySecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecThanosObjectStorageConfig {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecThanosTracingConfig {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbMonitorSpecTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface TidbMonitorStatus {
+            deploymentStorageStatus?: outputs.pingcap.v1alpha1.TidbMonitorStatusDeploymentStorageStatus;
+            statefulSet?: outputs.pingcap.v1alpha1.TidbMonitorStatusStatefulSet;
+        }
+
+        export interface TidbMonitorStatusDeploymentStorageStatus {
+            pvName?: string;
+        }
+
+        export interface TidbMonitorStatusStatefulSet {
+            collisionCount?: number;
+            conditions?: outputs.pingcap.v1alpha1.TidbMonitorStatusStatefulSetConditions[];
+            currentReplicas?: number;
+            currentRevision?: string;
+            observedGeneration?: number;
+            readyReplicas?: number;
+            replicas: number;
+            updateRevision?: string;
+            updatedReplicas?: number;
+        }
+
+        export interface TidbMonitorStatusStatefulSetConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+
+        export interface TidbNGMonitoringSpec {
+            additionalContainers?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainers[];
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumeMounts[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumes[];
+            affinity?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinity;
+            annotations?: {[key: string]: string};
+            clusterDomain?: string;
+            clusters: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecClusters[];
+            configUpdateStrategy?: string;
+            dnsConfig?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecDnsConfig;
+            dnsPolicy?: string;
+            env?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecEnvFrom[];
+            hostNetwork?: boolean;
+            image?: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecImagePullSecrets[];
+            initContainers?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainers[];
+            labels?: {[key: string]: string};
+            ngMonitoring: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoring;
+            nodeSelector?: {[key: string]: string};
+            paused?: boolean;
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecPodSecurityContext;
+            priorityClassName?: string;
+            pvReclaimPolicy?: string;
+            schedulerName?: string;
+            statefulSetUpdateStrategy?: string;
+            suspendAction?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecSuspendAction;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecTopologySpreadConstraints[];
+            version?: string;
+        }
+        /**
+         * tidbNGMonitoringSpecProvideDefaults sets the appropriate defaults for TidbNGMonitoringSpec
+         */
+        export function tidbNGMonitoringSpecProvideDefaults(val: TidbNGMonitoringSpec): TidbNGMonitoringSpec {
+            return {
+                ...val,
+                ngMonitoring: outputs.pingcap.v1alpha1.tidbNGMonitoringSpecNgMonitoringProvideDefaults(val.ngMonitoring),
+                pvReclaimPolicy: (val.pvReclaimPolicy) ?? "Retain",
+            };
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersEnvValueFrom;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbNGMonitoringSpecAdditionalContainersPortsProvideDefaults sets the appropriate defaults for TidbNGMonitoringSpecAdditionalContainersPorts
+         */
+        export function tidbNGMonitoringSpecAdditionalContainersPortsProvideDefaults(val: TidbNGMonitoringSpecAdditionalContainersPorts): TidbNGMonitoringSpecAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesVsphereVolume;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesProjectedSources[];
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface TidbNGMonitoringSpecAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAntiAffinity;
+        }
+
+        export interface TidbNGMonitoringSpecAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface TidbNGMonitoringSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface TidbNGMonitoringSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface TidbNGMonitoringSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface TidbNGMonitoringSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface TidbNGMonitoringSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbNGMonitoringSpecAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecClusters {
+            clusterDomain?: string;
+            name: string;
+            namespace?: string;
+        }
+
+        export interface TidbNGMonitoringSpecDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface TidbNGMonitoringSpecEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecEnvValueFrom;
+        }
+
+        export interface TidbNGMonitoringSpecEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecEnvFromSecretRef;
+        }
+
+        export interface TidbNGMonitoringSpecEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbNGMonitoringSpecEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbNGMonitoringSpecEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbNGMonitoringSpecEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecImagePullSecrets {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersEnvValueFrom;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersEnvFromSecretRef;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLifecyclePreStop;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbNGMonitoringSpecInitContainersPortsProvideDefaults sets the appropriate defaults for TidbNGMonitoringSpecInitContainersPorts
+         */
+        export function tidbNGMonitoringSpecInitContainersPortsProvideDefaults(val: TidbNGMonitoringSpecInitContainersPorts): TidbNGMonitoringSpecInitContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecInitContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbNGMonitoringSpecInitContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoring {
+            additionalContainers?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainers[];
+            additionalVolumeMounts?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumeMounts[];
+            additionalVolumes?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumes[];
+            affinity?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinity;
+            annotations?: {[key: string]: string};
+            baseImage?: string;
+            config?: {[key: string]: any};
+            configUpdateStrategy?: string;
+            dnsConfig?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringDnsConfig;
+            dnsPolicy?: string;
+            env?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringEnvFrom[];
+            hostNetwork?: boolean;
+            image?: string;
+            imagePullPolicy?: string;
+            imagePullSecrets?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringImagePullSecrets[];
+            initContainers?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainers[];
+            labels?: {[key: string]: string};
+            limits?: {[key: string]: number | string};
+            nodeSelector?: {[key: string]: string};
+            podManagementPolicy?: string;
+            podSecurityContext?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringPodSecurityContext;
+            priorityClassName?: string;
+            requests?: {[key: string]: number | string};
+            schedulerName?: string;
+            statefulSetUpdateStrategy?: string;
+            storageClassName?: string;
+            storageVolumes?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringStorageVolumes[];
+            suspendAction?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringSuspendAction;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringTolerations[];
+            topologySpreadConstraints?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringTopologySpreadConstraints[];
+            version?: string;
+        }
+        /**
+         * tidbNGMonitoringSpecNgMonitoringProvideDefaults sets the appropriate defaults for TidbNGMonitoringSpecNgMonitoring
+         */
+        export function tidbNGMonitoringSpecNgMonitoringProvideDefaults(val: TidbNGMonitoringSpecNgMonitoring): TidbNGMonitoringSpecNgMonitoring {
+            return {
+                ...val,
+                baseImage: (val.baseImage) ?? "pingcap/ng-monitoring",
+            };
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvValueFrom;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvFromSecretRef;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePreStop;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbNGMonitoringSpecNgMonitoringAdditionalContainersPortsProvideDefaults sets the appropriate defaults for TidbNGMonitoringSpecNgMonitoringAdditionalContainersPorts
+         */
+        export function tidbNGMonitoringSpecNgMonitoringAdditionalContainersPortsProvideDefaults(val: TidbNGMonitoringSpecNgMonitoringAdditionalContainersPorts): TidbNGMonitoringSpecNgMonitoringAdditionalContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumes {
+            awsElasticBlockStore?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesAwsElasticBlockStore;
+            azureDisk?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesAzureDisk;
+            azureFile?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesAzureFile;
+            cephfs?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesCephfs;
+            cinder?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesCinder;
+            configMap?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesConfigMap;
+            csi?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesCsi;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesDownwardAPI;
+            emptyDir?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEmptyDir;
+            ephemeral?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeral;
+            fc?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesFc;
+            flexVolume?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesFlexVolume;
+            flocker?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesFlocker;
+            gcePersistentDisk?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesGcePersistentDisk;
+            gitRepo?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesGitRepo;
+            glusterfs?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesGlusterfs;
+            hostPath?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesHostPath;
+            iscsi?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesIscsi;
+            name: string;
+            nfs?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesNfs;
+            persistentVolumeClaim?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesPersistentVolumeClaim;
+            photonPersistentDisk?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesPhotonPersistentDisk;
+            portworxVolume?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesPortworxVolume;
+            projected?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjected;
+            quobyte?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesQuobyte;
+            rbd?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesRbd;
+            scaleIO?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesScaleIO;
+            secret?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesSecret;
+            storageos?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesStorageos;
+            vsphereVolume?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesVsphereVolume;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesAwsElasticBlockStore {
+            fsType?: string;
+            partition?: number;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesAzureDisk {
+            cachingMode?: string;
+            diskName: string;
+            diskURI: string;
+            fsType?: string;
+            kind?: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesAzureFile {
+            readOnly?: boolean;
+            secretName: string;
+            shareName: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesCephfs {
+            monitors: string[];
+            path?: string;
+            readOnly?: boolean;
+            secretFile?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesCephfsSecretRef;
+            user?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesCephfsSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesCinder {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesCinderSecretRef;
+            volumeID: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesCinderSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesConfigMap {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesCsi {
+            driver: string;
+            fsType?: string;
+            nodePublishSecretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesCsiNodePublishSecretRef;
+            readOnly?: boolean;
+            volumeAttributes?: {[key: string]: string};
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesCsiNodePublishSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesDownwardAPI {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesDownwardAPIItems[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEmptyDir {
+            medium?: string;
+            sizeLimit?: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeral {
+            readOnly?: boolean;
+            volumeClaimTemplate?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeralVolumeClaimTemplate;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeralVolumeClaimTemplate {
+            metadata?: {[key: string]: any};
+            spec: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeralVolumeClaimTemplateSpec;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeralVolumeClaimTemplateSpec {
+            accessModes?: string[];
+            dataSource?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource;
+            resources?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources;
+            selector?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector;
+            storageClassName?: string;
+            volumeMode?: string;
+            volumeName?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeralVolumeClaimTemplateSpecDataSource {
+            apiGroup?: string;
+            kind: string;
+            name: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeralVolumeClaimTemplateSpecResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesEphemeralVolumeClaimTemplateSpecSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesFc {
+            fsType?: string;
+            lun?: number;
+            readOnly?: boolean;
+            targetWWNs?: string[];
+            wwids?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesFlexVolume {
+            driver: string;
+            fsType?: string;
+            options?: {[key: string]: string};
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesFlexVolumeSecretRef;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesFlexVolumeSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesFlocker {
+            datasetName?: string;
+            datasetUUID?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesGcePersistentDisk {
+            fsType?: string;
+            partition?: number;
+            pdName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesGitRepo {
+            directory?: string;
+            repository: string;
+            revision?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesGlusterfs {
+            endpoints: string;
+            path: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesHostPath {
+            path: string;
+            type?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesIscsi {
+            chapAuthDiscovery?: boolean;
+            chapAuthSession?: boolean;
+            fsType?: string;
+            initiatorName?: string;
+            iqn: string;
+            iscsiInterface?: string;
+            lun: number;
+            portals?: string[];
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesIscsiSecretRef;
+            targetPortal: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesIscsiSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesNfs {
+            path: string;
+            readOnly?: boolean;
+            server: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesPersistentVolumeClaim {
+            claimName: string;
+            readOnly?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesPhotonPersistentDisk {
+            fsType?: string;
+            pdID: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesPortworxVolume {
+            fsType?: string;
+            readOnly?: boolean;
+            volumeID: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjected {
+            defaultMode?: number;
+            sources: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSources[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSources {
+            configMap?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesConfigMap;
+            downwardAPI?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesDownwardAPI;
+            secret?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesSecret;
+            serviceAccountToken?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesServiceAccountToken;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesConfigMap {
+            items?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesConfigMapItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesConfigMapItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesDownwardAPI {
+            items?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesDownwardAPIItems[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesDownwardAPIItems {
+            fieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef;
+            mode?: number;
+            path: string;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesDownwardAPIItemsFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesDownwardAPIItemsResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesSecret {
+            items?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesSecretItems[];
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesProjectedSourcesServiceAccountToken {
+            audience?: string;
+            expirationSeconds?: number;
+            path: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesQuobyte {
+            group?: string;
+            readOnly?: boolean;
+            registry: string;
+            tenant?: string;
+            user?: string;
+            volume: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesRbd {
+            fsType?: string;
+            image: string;
+            keyring?: string;
+            monitors: string[];
+            pool?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesRbdSecretRef;
+            user?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesRbdSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesScaleIO {
+            fsType?: string;
+            gateway: string;
+            protectionDomain?: string;
+            readOnly?: boolean;
+            secretRef: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesScaleIOSecretRef;
+            sslEnabled?: boolean;
+            storageMode?: string;
+            storagePool?: string;
+            system: string;
+            volumeName?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesScaleIOSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesSecret {
+            defaultMode?: number;
+            items?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesSecretItems[];
+            optional?: boolean;
+            secretName?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesSecretItems {
+            key: string;
+            mode?: number;
+            path: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesStorageos {
+            fsType?: string;
+            readOnly?: boolean;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAdditionalVolumesStorageosSecretRef;
+            volumeName?: string;
+            volumeNamespace?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesStorageosSecretRef {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAdditionalVolumesVsphereVolume {
+            fsType?: string;
+            storagePolicyID?: string;
+            storagePolicyName?: string;
+            volumePath: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinity {
+            nodeAffinity?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinity;
+            podAffinity?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAffinity;
+            podAntiAffinity?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinity;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            preference: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference;
+            weight: number;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreference {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityPreferredDuringSchedulingIgnoredDuringExecutionPreferenceMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            nodeSelectorTerms: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerms {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions[];
+            matchFields?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityNodeAffinityRequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTermsMatchFields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
+            podAffinityTerm: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm;
+            weight: number;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
+            labelSelector?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
+            matchExpressions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelectorMatchExpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringDnsConfig {
+            nameservers?: string[];
+            options?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringDnsConfigOptions[];
+            searches?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringDnsConfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringEnvValueFrom;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringEnvFromSecretRef;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringImagePullSecrets {
+            name?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersEnv[];
+            envFrom?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersEnvFrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLifecycle;
+            livenessProbe?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLivenessProbe;
+            name: string;
+            ports?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersPorts[];
+            readinessProbe?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersReadinessProbe;
+            resources?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersResources;
+            securityContext?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersSecurityContext;
+            startupProbe?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersStartupProbe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersVolumeDevices[];
+            volumeMounts?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersVolumeMounts[];
+            workingDir?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersEnvValueFrom;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersEnvFrom {
+            configMapRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersEnvFromConfigMapRef;
+            prefix?: string;
+            secretRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersEnvFromSecretRef;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersEnvFromConfigMapRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersEnvFromSecretRef {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersEnvValueFrom {
+            configMapKeyRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersEnvValueFromConfigMapKeyRef;
+            fieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersEnvValueFromFieldRef;
+            resourceFieldRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersEnvValueFromResourceFieldRef;
+            secretKeyRef?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersEnvValueFromSecretKeyRef;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersEnvValueFromConfigMapKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersEnvValueFromFieldRef {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersEnvValueFromResourceFieldRef {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersEnvValueFromSecretKeyRef {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLifecycle {
+            postStart?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePostStart;
+            preStop?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePreStop;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePostStart {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePostStartExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePostStartHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePostStartTcpSocket;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePostStartExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePostStartHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePostStartHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePostStartHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePostStartTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePreStop {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePreStopExec;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePreStopHttpGet;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePreStopTcpSocket;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePreStopExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePreStopHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePreStopHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePreStopHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLifecyclePreStopTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLivenessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLivenessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLivenessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLivenessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLivenessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLivenessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersLivenessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLivenessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersLivenessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * tidbNGMonitoringSpecNgMonitoringInitContainersPortsProvideDefaults sets the appropriate defaults for TidbNGMonitoringSpecNgMonitoringInitContainersPorts
+         */
+        export function tidbNGMonitoringSpecNgMonitoringInitContainersPortsProvideDefaults(val: TidbNGMonitoringSpecNgMonitoringInitContainersPorts): TidbNGMonitoringSpecNgMonitoringInitContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersReadinessProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersReadinessProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersReadinessProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersReadinessProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersReadinessProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersReadinessProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersReadinessProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersReadinessProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersReadinessProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersResources {
+            limits?: {[key: string]: number | string};
+            requests?: {[key: string]: number | string};
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersSecurityContext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersSecurityContextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersSecurityContextSeccompProfile;
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersSecurityContextWindowsOptions;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersSecurityContextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersStartupProbe {
+            exec?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersStartupProbeExec;
+            failureThreshold?: number;
+            httpGet?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersStartupProbeHttpGet;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersStartupProbeTcpSocket;
+            timeoutSeconds?: number;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersStartupProbeExec {
+            command?: string[];
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersStartupProbeHttpGet {
+            host?: string;
+            httpHeaders?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringInitContainersStartupProbeHttpGetHttpHeaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersStartupProbeHttpGetHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersStartupProbeTcpSocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersVolumeDevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringInitContainersVolumeMounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecNgMonitoringPodSecurityContextWindowsOptions;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringStorageVolumes {
+            mountPath?: string;
+            name: string;
+            storageClassName?: string;
+            storageSize: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringSuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface TidbNGMonitoringSpecNgMonitoringTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface TidbNGMonitoringSpecPodSecurityContext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecPodSecurityContextSeLinuxOptions;
+            seccompProfile?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecPodSecurityContextSeccompProfile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecPodSecurityContextSysctls[];
+            windowsOptions?: outputs.pingcap.v1alpha1.TidbNGMonitoringSpecPodSecurityContextWindowsOptions;
+        }
+
+        export interface TidbNGMonitoringSpecPodSecurityContextSeLinuxOptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface TidbNGMonitoringSpecPodSecurityContextSeccompProfile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface TidbNGMonitoringSpecPodSecurityContextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface TidbNGMonitoringSpecPodSecurityContextWindowsOptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            runAsUserName?: string;
+        }
+
+        export interface TidbNGMonitoringSpecSuspendAction {
+            suspendStatefulSet?: boolean;
+        }
+
+        export interface TidbNGMonitoringSpecTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface TidbNGMonitoringSpecTopologySpreadConstraints {
+            topologyKey: string;
+        }
+
+        export interface TidbNGMonitoringStatus {
+            ngMonitoring?: outputs.pingcap.v1alpha1.TidbNGMonitoringStatusNgMonitoring;
+        }
+
+        export interface TidbNGMonitoringStatusNgMonitoring {
+            phase?: string;
+            statefulSet?: outputs.pingcap.v1alpha1.TidbNGMonitoringStatusNgMonitoringStatefulSet;
+            synced?: boolean;
+        }
+
+        export interface TidbNGMonitoringStatusNgMonitoringStatefulSet {
+            collisionCount?: number;
+            conditions?: outputs.pingcap.v1alpha1.TidbNGMonitoringStatusNgMonitoringStatefulSetConditions[];
+            currentReplicas?: number;
+            currentRevision?: string;
+            observedGeneration?: number;
+            readyReplicas?: number;
+            replicas: number;
+            updateRevision?: string;
+            updatedReplicas?: number;
+        }
+
+        export interface TidbNGMonitoringStatusNgMonitoringStatefulSetConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status: string;
+            type: string;
+        }
+    }
+}
+
 export namespace policy {
     export namespace v1alpha1 {
         /**

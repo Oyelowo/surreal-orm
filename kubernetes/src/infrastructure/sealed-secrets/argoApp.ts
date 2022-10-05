@@ -1,4 +1,3 @@
-import { namespaces } from '../namespaces/index.js';
 import { createArgocdApplication } from '../argocd/createArgoApplication.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
 
@@ -10,5 +9,5 @@ export const sealedSecretsControllerApplication = createArgocdApplication({
     sourceAppDirectory: 'infrastructure/sealed-secrets',
     outputDirectory: 'infrastructure/argocd-applications-children-infrastructure',
     environment: ENVIRONMENT,
-    namespace: namespaces.default,
+    namespace: 'default',
 });
