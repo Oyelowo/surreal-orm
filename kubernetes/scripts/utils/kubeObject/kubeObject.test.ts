@@ -27,15 +27,17 @@ function deleteSealedSecrets() {
 
 describe('KubeObject', () => {
     // Mock stdin so we can send messages to the CLI
-
     let io: MockSTDIN | undefined;
-    afterAll(() => io.restore());
+    afterAll(() => {
+        io.restore();
+        deleteSealedSecrets();
+    });
 
     beforeAll(() => {
         io = stdin();
-        deleteSealedSecrets();
     });
-    afterEach(() => {
+
+    beforeEach(() => {
         deleteSealedSecrets();
     });
 
@@ -166,9 +168,10 @@ describe('KubeObject', () => {
         ).toHaveLength(13);
 
         const sendKeystrokes = async () => {
+            // Select from the resources from which secrets will be selected
             // Selection 1
-            io.send(keys.down);
-            io.send(keys.space);
+            io.send(keys.down); // Bottom arrow
+            io.send(keys.space); // Select
 
             //  Selection 2
             io.send(keys.down);
@@ -188,11 +191,13 @@ describe('KubeObject', () => {
             io.send(keys.down);
             io.send(keys.down);
             io.send(keys.space);
+
+            //  Enter the secret selection phase
             io.send(keys.enter);
             await delay(10);
 
             // Subselection for Selection 1
-            io.send(keys.a);
+            io.send(keys.a); // Select all for first resource's secrets
             // io.send(keys.a, 'ascii')
             io.send(keys.enter);
             await delay(10);
@@ -205,11 +210,9 @@ describe('KubeObject', () => {
             // Subselection for Selection 3
             io.send(keys.down);
             io.send(keys.space);
-
             io.send(keys.down);
             io.send(keys.down);
             io.send(keys.space);
-
             io.send(keys.down);
             io.send(keys.space);
             io.send(keys.enter);
@@ -218,15 +221,13 @@ describe('KubeObject', () => {
             // Subselection for Selection 4
             io.send(keys.down);
             io.send(keys.space);
-
             io.send(keys.down);
             io.send(keys.space);
-
             io.send(keys.enter);
             await delay(10);
 
             // Subselection for Selection 5
-            io.send(keys.a);
+            io.send(keys.a); // Selects all secrets for the last resource
             io.send(keys.enter);
             await delay(10);
         };
