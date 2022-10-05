@@ -152,11 +152,11 @@ describe('KubeObject', () => {
         expect(sealedecrets).toHaveLength(5);
     });
 
-    test('Can update sealed secrets after initial', async () => {
+    test.only('Can update sealed secrets after initial', async () => {
         const kubeInstance = new KubeObject('test');
         jest.spyOn(kubeInstance, 'sealSecretValue').mockImplementation(() => 'inital-secrets');
-
         kubeInstance.syncSealedSecrets();
+
         const sealedSecrets = kubeInstance.getOfAKind('SealedSecret');
         const secrets = kubeInstance.getOfAKind('Secret');
 
@@ -219,9 +219,9 @@ describe('KubeObject', () => {
             await delay(10);
 
             // Subselection for Selection 4
-            io.send(keys.down);
-            io.send(keys.space);
-            io.send(keys.down);
+            // io.send(keys.down);
+            // io.send(keys.space);
+            // io.send(keys.down);
             io.send(keys.space);
             io.send(keys.enter);
             await delay(10);
@@ -233,10 +233,10 @@ describe('KubeObject', () => {
         };
         setTimeout(() => sendKeystrokes().then(), 5);
 
-        const kubeInstance2 = new KubeObject('test');
-        jest.spyOn(kubeInstance2, 'sealSecretValue').mockImplementation(() => 'updated-secrets');
-        await kubeInstance2.syncSealedSecretsWithPrompt();
-        const sealedSecrets2 = kubeInstance2.getOfAKind('SealedSecret');
+        // const kubeInstance = new KubeObject('test');
+        jest.spyOn(kubeInstance, 'sealSecretValue').mockImplementation(() => 'updated-secrets');
+        await kubeInstance.syncSealedSecretsWithPrompt();
+        const sealedSecrets2 = kubeInstance.getOfAKind('SealedSecret');
 
         info('Should update from 13 sealed secrets still, with specific secret data fields updated.');
         expect(sealedSecrets2).toHaveLength(13);
