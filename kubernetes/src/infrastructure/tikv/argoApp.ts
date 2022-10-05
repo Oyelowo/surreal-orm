@@ -6,9 +6,9 @@ const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
 // App that deploys tikvController resources themselves
 /* tikvOperator APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
-export const sealedSecretsControllerApplication = createArgocdApplication({
+export const tikvOperatorApplication = createArgocdApplication({
     sourceAppDirectory: 'infrastructure/tikv',
     outputDirectory: 'infrastructure/argocd-applications-children-infrastructure',
     environment: ENVIRONMENT,
-    namespace: namespaces.t,
+    namespace: namespaces.tikvAdmin,
 });

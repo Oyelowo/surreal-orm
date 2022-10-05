@@ -24,6 +24,10 @@ export const helmChartsInfo = checkConstType({
                 chart: 'tidb-operator',
                 version: 'v1.3.8',
             },
+            tikvCluster: {
+                chart: 'tidb-cluster',
+                version: 'v1.3.8',
+            },
         },
     },
     bitnami: {
