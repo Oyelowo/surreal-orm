@@ -4,8 +4,8 @@ import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesFor
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
-export const sealedSecretsResourceName: ResourceName = 'tikv';
-export const sealedSecretsProvider = getResourceProvider({
+export const tikvResourceName: ResourceName = 'tikv';
+export const tikvProvider = getResourceProvider({
     outputDirectory: `infrastructure/tikv`,
     environment: ENVIRONMENT,
 });
