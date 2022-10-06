@@ -1,8 +1,5 @@
 import * as z from 'zod';
 import { Namespace } from '../infrastructure/namespaces/util.js';
-import { GraphqlMongoEnvVars } from '../services/graphql-mongo/settings.js';
-import { GraphqlPostgresEnvVars } from '../services/graphql-postgres/settings.js';
-import { GrpcMongoEnvVars } from '../services/grpc-mongo/settings.js';
 export const appEnvironmentsSchema = z.union([
     z.literal('test'),
     z.literal('local'),
@@ -192,18 +189,6 @@ export type ArgoCdEnvVars = {
 
 export type LinkerdVizEnvVars = {
     PASSWORD: string;
-};
-
-export type TResourcesEnvVars = {
-    services: {
-        'graphql-mongo': Partial<GraphqlMongoEnvVars>;
-        'grpc-mongo': Partial<GrpcMongoEnvVars>;
-        'graphql-postgres': Partial<GraphqlPostgresEnvVars>;
-    };
-    infrastructure: {
-        argocd: Partial<ArgoCdEnvVars>;
-        'linkerd-viz': Partial<LinkerdVizEnvVars>;
-    };
 };
 
 //  Application configurations/Settings which is passed to deployment
