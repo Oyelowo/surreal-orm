@@ -1,7 +1,8 @@
-import type { ValueOf, Simplify, UnionToIntersection } from 'type-fest';
-
 import * as z from 'zod';
 import { Namespace } from '../infrastructure/namespaces/util.js';
+import { GraphqlMongoEnvVars } from '../services/graphql-mongo/settings.js';
+import { GraphqlPostgresEnvVars } from '../services/graphql-postgres/settings.js';
+import { GrpcMongoEnvVars } from '../services/grpc-mongo/settings.js';
 export const appEnvironmentsSchema = z.union([
     z.literal('test'),
     z.literal('local'),
@@ -19,7 +20,8 @@ export type Memory = `${number}${'E' | 'P' | 'T' | 'G' | 'M' | 'k' | 'm' | 'Ei' 
 export type CPU = `${number}${'m'}`;
 
 export const ServiceNamesSchema = z.union([
-    z.literal('graphql-surrealdb'),
+    z.literal('surrealdb'),  // This is a database layer relies on other persistent layers: SurrealDB is deployed standalone as a logic layer over TiKV. It can also use in-memory DB
+    z.literal('graphql-surrealdb'), // This is an application/server layer
     z.literal('graphql-tidb'), // TIDB is basically MySQL but scalable
     z.literal('grpc-surrealdb'),
     z.literal('graphql-mongo'),
@@ -31,6 +33,7 @@ export const ServiceNamesSchema = z.union([
 export type ServiceName = z.infer<typeof ServiceNamesSchema>;
 const ServiceNames: ServiceName[] = [
     'graphql-surrealdb',
+    'surrealdb',
     'graphql-tidb',
     'grpc-surrealdb',
     'graphql-mongo',
@@ -84,8 +87,10 @@ export interface Settings<N extends ServiceName> {
     limitCpu: CPU;
     replicaCount: number;
     host: string;
-    image: `ghcr.io/oyelowo/${N}:${string}`;
+    image: `ghcr.io/oyelowo/${N}:${string}` | 'surrealdb/surrealdb:1.0.0-beta.8';
     readinessProbePort?: number;
+    command?: string[]
+    commandArgs?: string[];
 }
 
 // make all properties optional recursively including nested objects.
@@ -94,6 +99,30 @@ export interface Settings<N extends ServiceName> {
 export type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
 
 export const STORAGE_CLASS = 'linode-block-storage-retain';
+export type SurrealDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
+    SURREALDB_NAME: DBN;
+    // SURREALDB_USERNAME: string;
+    // SURREALDB_PASSWORD: string;
+    SURREALDB_HOST: `${DBN}.${NS}`;
+    SURREALDB_PORT: '8000';
+    SURREALDB_SERVICE_NAME: DBN;
+    // SURREALDB_STORAGE_CLASS: typeof STORAGE_CLASS;
+    SURREALDB_ROOT_USERNAME: string;
+    SURREALDB_ROOT_PASSWORD: string;
+};
+
+export type TikVDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
+    TIKV_NAME: DBN;
+    // TIKV_USERNAME: string;
+    // TIKV_PASSWORD: string;
+    TIKV_HOST: `${DBN}.${NS}`;
+    TIKV_PORT: '8000';
+    TIKV_SERVICE_NAME: DBN;
+    // TIKV_STORAGE_CLASS: typeof STORAGE_CLASS;
+    // TIKV_ROOT_USERNAME: string;
+    // TIKV_ROOT_PASSWORD: string;
+};
+
 export type MongoDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
     MONGODB_NAME: DBN;
     MONGODB_USERNAME: string;
@@ -143,37 +172,7 @@ export type OauthEnvVars = {
     OAUTH_GOOGLE_CLIENT_SECRET: string;
 };
 
-type CommonEnvVariables<S extends ServiceName, NS extends NamespaceOfApps> = {
-    mongodb: MongoDbEnvVars<`${S}-database`, NS>;
-    postgresdb: PostgresDbEnvVars<`${S}-database`, NS>;
-    redis: RedisDbEnvVars<`${S}-redis`, NS>;
-    app: AppEnvVars;
-    oauth: OauthEnvVars;
-};
-
-/*  RESOURCES ENVIRONMENT VARIABLES */
-/**
- *  @example
- * @argument type Kamo = EnvironmentVariablesCommon<ServiceName, Namespace, [ListOfSelectedEnvVars]>
- * type Kamo = EnvironmentVariablesCommon<"graphql-mongo", "applications", ["app", "mongodb"]>
- */
-export type CreateResourceEnvVars<
-    N extends ServiceName,
-    NS extends NamespaceOfApps,
-    SelectedEnvKey extends keyof CommonEnvVariables<N, NS>
-> = Simplify<UnionToIntersection<ValueOf<Pick<CommonEnvVariables<N, NS>, SelectedEnvKey>>>>;
-
-type GraphqlMongo = CreateResourceEnvVars<'graphql-mongo', 'applications', 'app' | 'mongodb' | 'oauth' | 'redis'> & {
-    ADDITIONAL_IS_POSSIBLE: string;
-};
-type GraphqlPostgres = CreateResourceEnvVars<'graphql-postgres', 'applications', 'app' | 'postgresdb'>;
-type GrpcMongo = CreateResourceEnvVars<'grpc-mongo', 'applications', 'app' | 'mongodb'>;
-type ReactWeb = CreateResourceEnvVars<'grpc-mongo', 'applications', 'app'>;
-
-type ServiceEnvVars<N extends ServiceName, EnvVars> = Record<N, EnvVars>;
-type InfraEnvVars<N extends InfrastructureName, EnvVars> = Record<N, EnvVars>;
-
-type ArgoCd = {
+export type ArgoCdEnvVars = {
     ADMIN_PASSWORD: string;
     type: 'git';
     url: 'https://github.com/Oyelowo/modern-distributed-app-template';
@@ -187,28 +186,38 @@ type ArgoCd = {
     CONTAINER_REGISTRY_PASSWORD: string;
 };
 
-type LinkerdViz = {
+export type LinkerdVizEnvVars = {
     PASSWORD: string;
 };
 
-// Creates Record<ResourceName, Record<EnvVarName, string>>
-type ServicesEnvVars = Simplify<
-    ServiceEnvVars<'graphql-surrealdb', undefined> &
-        ServiceEnvVars<'graphql-tidb', undefined> &
-        ServiceEnvVars<'grpc-surrealdb', undefined> &
-        ServiceEnvVars<'graphql-mongo', GraphqlMongo> &
-        ServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
-        ServiceEnvVars<'grpc-mongo', GrpcMongo> &
-        ServiceEnvVars<'react-web', ReactWeb>
->;
-type InfrastructureEnvVars = Simplify<InfraEnvVars<'argocd', ArgoCd> & InfraEnvVars<'linkerd-viz', LinkerdViz>>;
+export type CommonEnvVariables<S extends ServiceName, NS extends NamespaceOfApps> = {
+    surrealdb: SurrealDbEnvVars<`${S}-database`, NS>;
+    mongodb: MongoDbEnvVars<`${S}-database`, NS>;
+    postgresdb: PostgresDbEnvVars<`${S}-database`, NS>;
+    redis: RedisDbEnvVars<`${S}-redis`, NS>;
+    app: AppEnvVars;
+    oauth: OauthEnvVars;
+    argocd: ArgoCdEnvVars;
+    linkerdViz: LinkerdVizEnvVars;
+};
 
-export type EnvVarsByCategories = Record<TInfrastructure, InfrastructureEnvVars> & Record<TServices, ServicesEnvVars>;
+export type TResourcesEnvVars = {
+    services: {
+        'graphql-mongo': Partial<GraphqlMongoEnvVars>,
+        'grpc-mongo': Partial<GrpcMongoEnvVars>,
+        'graphql-postgres': Partial<GraphqlPostgresEnvVars>,
+    };
+    infrastructure: {
+        'argocd': Partial<ArgoCdEnvVars>,
+        'linkerd-viz': Partial<LinkerdVizEnvVars>,
+    };
+};
+
 
 //  Application configurations/Settings which is passed to deployment
-export type AppConfigs<N extends ServiceName, NS extends NamespaceOfApps> = {
+export type AppConfigs<N extends ServiceName, NS extends NamespaceOfApps, EnvVars extends Record<string, string>> = {
     kubeConfig: Settings<N>;
-    envVars: EnvVarsByCategories['services'][N];
+    envVars: EnvVars;
     metadata: {
         name: N;
         namespace: NS;
