@@ -13,6 +13,7 @@ import * as argoproj from "./argoproj";
 import * as bitnami from "./bitnami";
 import * as certmanager from "./certmanager";
 import * as linkerd from "./linkerd";
+import * as pingcap from "./pingcap";
 import * as policy from "./policy";
 import * as split from "./split";
 import * as trust from "./trust";
@@ -24,6 +25,7 @@ export {
     bitnami,
     certmanager,
     linkerd,
+    pingcap,
     policy,
     split,
     trust,

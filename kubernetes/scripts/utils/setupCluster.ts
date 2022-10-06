@@ -7,7 +7,7 @@ import { ResourceName } from '../../src/types/ownTypes.js';
 import _ from 'lodash';
 import { KubeObject } from '../utils/kubeObject/kubeObject.js';
 import { ResourceOutputDirProps } from '../../src/shared/directoriesManager.js';
-import { PlainKubeBuildSecretsManager } from './plainKubeBuildSecretsManager';
+import { PlainSecretsManager } from './plainSecretsManager.js';
 
 export async function setupCluster(environment: Environment) {
     const { deletPlainJsonSecretsInput, deleteUnsealedSecretManifestsOutput } =
@@ -16,12 +16,12 @@ export async function setupCluster(environment: Environment) {
     const kubeObject = new KubeObject(environment);
     await kubeObject.generateManifests();
 
-    PlainKubeBuildSecretsManager.syncAll();
+    PlainSecretsManager.syncAll();
 
     applySetupManifests(kubeObject);
 
     if (deletPlainJsonSecretsInput) {
-        PlainKubeBuildSecretsManager.resetValues();
+        PlainSecretsManager.resetValues();
     }
 
     if (deleteUnsealedSecretManifestsOutput) {

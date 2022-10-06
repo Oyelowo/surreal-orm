@@ -1,6 +1,7 @@
 // INFRASTRUCTURE
 export * from './src/infrastructure/namespaces/index.js';
 export * from './src/infrastructure/argocd/index.js';
+export * from './src/infrastructure/tikv/index.js';
 export * from './src/infrastructure/cert-manager/index.js';
 export * from './src/infrastructure/ingress/index.js';
 export * from './src/infrastructure/linkerd/index.js';

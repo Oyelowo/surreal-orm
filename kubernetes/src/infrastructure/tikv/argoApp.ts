@@ -3,11 +3,11 @@ import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesFor
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
-// App that deploys sealedSecretsController resources themselves
-/* sealedSecretsController APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
-export const sealedSecretsControllerApplication = createArgocdApplication({
-    sourceAppDirectory: 'infrastructure/sealed-secrets',
+// App that deploys tikvController resources themselves
+/* tikvOperator APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
+export const tikvOperatorApplication = createArgocdApplication({
+    sourceAppDirectory: 'infrastructure/tikv',
     outputDirectory: 'infrastructure/argocd-applications-children-infrastructure',
     environment: ENVIRONMENT,
-    namespace: 'default',
+    namespace: 'tikv-admin',
 });

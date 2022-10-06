@@ -5,7 +5,7 @@ install:
 	npm install
 
 upgrade:
-	npm update
+	npm run update
 	make sync
 
 sync:

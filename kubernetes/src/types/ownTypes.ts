@@ -19,13 +19,25 @@ export type Memory = `${number}${'E' | 'P' | 'T' | 'G' | 'M' | 'k' | 'm' | 'Ei' 
 export type CPU = `${number}${'m'}`;
 
 export const ServiceNamesSchema = z.union([
+    z.literal('graphql-surrealdb'),
+    z.literal('graphql-tidb'), // TIDB is basically MySQL but scalable
+    z.literal('grpc-surrealdb'),
     z.literal('graphql-mongo'),
     z.literal('graphql-postgres'),
     z.literal('grpc-mongo'),
     z.literal('react-web'),
 ]);
-const ServiceNames = ['graphql-mongo', 'graphql-postgres', 'grpc-mongo', 'react-web'] as const;
-export type ServiceName = typeof ServiceNames[number];
+
+export type ServiceName = z.infer<typeof ServiceNamesSchema>;
+const ServiceNames: ServiceName[] = [
+    'graphql-surrealdb',
+    'graphql-tidb',
+    'grpc-surrealdb',
+    'graphql-mongo',
+    'graphql-postgres',
+    'grpc-mongo',
+    'react-web',
+];
 
 const infrastructure = 'infrastructure';
 const services = 'services';
@@ -49,6 +61,11 @@ export const InfrastructureNamesSchema = z.union([
     z.literal('linkerd'),
     z.literal('linkerd-viz'),
     z.literal('argocd'),
+    z.literal('tikv'),
+    z.literal('seaweedfs'),
+    z.literal('tidis'),
+    z.literal('rook-ceph'),
+    z.literal('metalb'),
 ]);
 
 export type InfrastructureName = z.infer<typeof InfrastructureNamesSchema> | ArgocdAppResourceName;
@@ -176,7 +193,10 @@ type LinkerdViz = {
 
 // Creates Record<ResourceName, Record<EnvVarName, string>>
 type ServicesEnvVars = Simplify<
-    ServiceEnvVars<'graphql-mongo', GraphqlMongo> &
+    ServiceEnvVars<'graphql-surrealdb', undefined> &
+        ServiceEnvVars<'graphql-tidb', undefined> &
+        ServiceEnvVars<'grpc-surrealdb', undefined> &
+        ServiceEnvVars<'graphql-mongo', GraphqlMongo> &
         ServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
         ServiceEnvVars<'grpc-mongo', GrpcMongo> &
         ServiceEnvVars<'react-web', ReactWeb>

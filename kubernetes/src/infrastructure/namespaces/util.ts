@@ -8,6 +8,7 @@ export const namespaceSchema = z.union([
     z.literal('linkerd-viz'),
     z.literal('default'),
     z.literal('kube-system'),
+    z.literal('tikv-admin'),
 ]);
 
 export type Namespace = z.infer<typeof namespaceSchema>;
@@ -21,5 +22,6 @@ export const namespaces: Record<CamelCase<Namespace>, Namespace> = {
     default: 'default',
     // Default namespace that comes with the deployment
     kubeSystem: 'kube-system',
+    tikvAdmin: 'tikv-admin',
     // infrastructure: "infrastructure",
 } as const;

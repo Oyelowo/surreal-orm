@@ -27,15 +27,17 @@ function deleteSealedSecrets() {
 
 describe('KubeObject', () => {
     // Mock stdin so we can send messages to the CLI
-
     let io: MockSTDIN | undefined;
-    afterAll(() => io.restore());
+    afterAll(() => {
+        io.restore();
+        deleteSealedSecrets();
+    });
 
     beforeAll(() => {
         io = stdin();
-        deleteSealedSecrets();
     });
-    afterEach(() => {
+
+    beforeEach(() => {
         deleteSealedSecrets();
     });
 
@@ -153,8 +155,8 @@ describe('KubeObject', () => {
     test('Can update sealed secrets after initial', async () => {
         const kubeInstance = new KubeObject('test');
         jest.spyOn(kubeInstance, 'sealSecretValue').mockImplementation(() => 'inital-secrets');
-
         kubeInstance.syncSealedSecrets();
+
         const sealedSecrets = kubeInstance.getOfAKind('SealedSecret');
         const secrets = kubeInstance.getOfAKind('Secret');
 
@@ -166,9 +168,13 @@ describe('KubeObject', () => {
         ).toHaveLength(13);
 
         const sendKeystrokes = async () => {
+            // Select from the resources from which secrets will be selected
+            /* Note: MAke sure space is odd number in case there is only one secret
+ if the selection is even number, then the secret will be deselected the 2nd time */
+
             // Selection 1
-            io.send(keys.down);
-            io.send(keys.space);
+            io.send(keys.down); // Bottom arrow
+            io.send(keys.space); // Select
 
             //  Selection 2
             io.send(keys.down);
@@ -188,11 +194,14 @@ describe('KubeObject', () => {
             io.send(keys.down);
             io.send(keys.down);
             io.send(keys.space);
+
+            //  Enter the secret selection phase
             io.send(keys.enter);
             await delay(10);
 
+            // SUB-SELECTIONS
             // Subselection for Selection 1
-            io.send(keys.a);
+            io.send(keys.a); // Select all for first resource's secrets
             // io.send(keys.a, 'ascii')
             io.send(keys.enter);
             await delay(10);
@@ -203,46 +212,44 @@ describe('KubeObject', () => {
             await delay(10);
 
             // Subselection for Selection 3
+            /* Note: MAke sure space is odd number in case there is only one secret
+             if the selection is even number, then the secret will be deselected the 2nd time */
             io.send(keys.down);
-            io.send(keys.space);
-
+            io.send(keys.space); // 1
             io.send(keys.down);
             io.send(keys.down);
-            io.send(keys.space);
-
+            io.send(keys.space); // 2
             io.send(keys.down);
-            io.send(keys.space);
+            io.send(keys.space); // 3
             io.send(keys.enter);
             await delay(10);
 
             // Subselection for Selection 4
-            io.send(keys.down);
-            io.send(keys.space);
-
-            io.send(keys.down);
-            io.send(keys.space);
-
+            io.send(keys.space); // Select the first item
             io.send(keys.enter);
             await delay(10);
 
             // Subselection for Selection 5
-            io.send(keys.a);
+            io.send(keys.a); // Selects all secrets for the last resource
             io.send(keys.enter);
             await delay(10);
         };
         setTimeout(() => sendKeystrokes().then(), 5);
 
-        const kubeInstance2 = new KubeObject('test');
-        jest.spyOn(kubeInstance2, 'sealSecretValue').mockImplementation(() => 'updated-secrets');
-        await kubeInstance2.syncSealedSecretsWithPrompt();
-        const sealedSecrets2 = kubeInstance2.getOfAKind('SealedSecret');
+        // ASSERT
+        jest.spyOn(kubeInstance, 'sealSecretValue').mockImplementation(() => 'updated-secrets');
+        // Prompt user for selection of secrets to update
+        await kubeInstance.syncSealedSecretsWithPrompt();
+        const sealedSecretsSomeUpdated = kubeInstance.getOfAKind('SealedSecret');
 
         info('Should update from 13 sealed secrets still, with specific secret data fields updated.');
-        expect(sealedSecrets2).toHaveLength(13);
+        expect(sealedSecretsSomeUpdated).toHaveLength(13);
         // 5 secrets have been updated
         expect(
             Object.values(
-                sealedSecrets2.filter((ss) => Object.values(ss.spec.encryptedData).includes('updated-secrets'))
+                sealedSecretsSomeUpdated.filter((ss) =>
+                    Object.values(ss.spec.encryptedData).includes('updated-secrets')
+                )
             )
         ).toHaveLength(5);
     });

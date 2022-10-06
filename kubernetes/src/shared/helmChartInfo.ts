@@ -1,4 +1,4 @@
-type Repo = 'bitnami' | 'jetstack' | 'linkerd' | 'sealedSecrets' | 'argo';
+type Repo = 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'sealedSecrets' | 'argo';
 
 type ChartInfo = {
     chart: string;
@@ -17,6 +17,19 @@ type ChartsInfo = Record<
 export const checkConstType = <T extends ChartsInfo>(o: T) => o;
 
 export const helmChartsInfo = checkConstType({
+    pingcap: {
+        repo: 'https://charts.pingcap.org/',
+        charts: {
+            tikvOperator: {
+                chart: 'tidb-operator',
+                version: 'v1.3.8',
+            },
+            tikvCluster: {
+                chart: 'tidb-cluster',
+                version: 'v1.3.8',
+            },
+        },
+    },
     bitnami: {
         repo: 'https://charts.bitnami.com/bitnami',
         charts: {
