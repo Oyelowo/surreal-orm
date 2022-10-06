@@ -1,4 +1,4 @@
-import { AppConfigs } from '../../types/ownTypes.js';
+import { AppConfigs, CommonEnvVariables } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentVariablesForManifests.js';
@@ -6,7 +6,14 @@ import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentV
 const env = getEnvVarsForKubeManifests();
 
 const secrets = new PlainSecretsManager('services', 'graphql-mongo', 'local').getSecrets();
-export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'applications'> = {
+
+export type GraphqlMongoEnvVars = CommonEnvVariables<'graphql-mongo', 'applications'>[
+    | 'app'
+    | 'oauth'
+    | 'mongodb'
+    | 'redis'] & { ADDITIONAL_IS_POSSIBLE: string };
+
+export const graphqlMongoSetting: AppConfigs<'graphql-mongo', 'applications', GraphqlMongoEnvVars> = {
     kubeConfig: {
         requestMemory: '70Mi',
         requestCpu: '100m',
@@ -17,10 +24,8 @@ export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'applications'> =
         host: '0.0.0.0',
         image: `ghcr.io/oyelowo/graphql-mongo:${imageTags.SERVICES__GRAPHQL_MONGO__IMAGE_TAG}`,
     },
-
     envVars: {
         ADDITIONAL_IS_POSSIBLE: '',
-        APP_ENVIRONMENT: env.ENVIRONMENT,
         APP_HOST: '0.0.0.0',
         APP_PORT: '8000',
         APP_EXTERNAL_BASE_URL: getIngressUrl({ environment: env.ENVIRONMENT }),
@@ -51,5 +56,3 @@ export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'applications'> =
         namespace: 'applications',
     },
 };
-
-// graphqlMongoSettings.envVars

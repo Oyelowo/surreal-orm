@@ -1,11 +1,18 @@
-import { AppConfigs } from '../../types/ownTypes.js';
+import { AppConfigs, CommonEnvVariables } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentVariablesForManifests.js';
 import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 
 const env = getEnvVarsForKubeManifests();
 const secrets = new PlainSecretsManager('services', 'graphql-postgres', env.ENVIRONMENT).getSecrets();
-export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'applications'> = {
+
+export type GraphqlPostgresEnvVars = CommonEnvVariables<'graphql-postgres', 'applications'>[
+    | 'app'
+    | 'oauth'
+    | 'postgresdb'
+    | 'redis'];
+
+export const graphqlPostgresSettings: AppConfigs<'graphql-postgres', 'applications', GraphqlPostgresEnvVars> = {
     kubeConfig: {
         requestMemory: '70Mi',
         requestCpu: '100m',

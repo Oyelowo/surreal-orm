@@ -1,4 +1,4 @@
-import { AppConfigs } from '../../types/ownTypes.js';
+import { AppConfigs, CommonEnvVariables } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentVariablesForManifests.js';
 import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
@@ -6,7 +6,9 @@ import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.
 const env = getEnvVarsForKubeManifests();
 const secrets = new PlainSecretsManager('services', 'grpc-mongo', env.ENVIRONMENT).getSecrets();
 
-export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'applications'> = {
+export type GrpcMongoEnvVars = CommonEnvVariables<'grpc-mongo', 'applications'>['app' | 'oauth' | 'mongodb' | 'redis'];
+
+export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'applications', GrpcMongoEnvVars> = {
     kubeConfig: {
         requestMemory: '70Mi',
         requestCpu: '100m',
