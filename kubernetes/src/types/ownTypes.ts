@@ -28,16 +28,6 @@ export const ServiceNamesSchema = z.union([
 ]);
 
 export type ServiceName = z.infer<typeof ServiceNamesSchema>;
-const ServiceNames: ServiceName[] = [
-    'graphql-surrealdb',
-    'surrealdb',
-    'graphql-tidb',
-    'grpc-surrealdb',
-    'graphql-mongo',
-    'graphql-postgres',
-    'grpc-mongo',
-    'react-web',
-];
 
 const infrastructure = 'infrastructure';
 const services = 'services';
@@ -114,12 +104,10 @@ export type TikVDbEnvVars<NS extends NamespaceOfApps> = {
     TIKV_NAME: TikvDbName;
     // TIKV_USERNAME: string;
     // TIKV_PASSWORD: string;
-    TIKV_HOST: `${TikvDbName}.${NS}`;
-    TIKV_PORT: '8000';
+    TIKV_HOST: `${TikvDbName}-pd.${NS}`;
+    TIKV_PORT: '2379';
     TIKV_SERVICE_NAME: TikvDbName;
-    // TIKV_STORAGE_CLASS: typeof STORAGE_CLASS;
-    // TIKV_ROOT_USERNAME: string;
-    // TIKV_ROOT_PASSWORD: string;
+    TIKV_STORAGE_CLASS: typeof STORAGE_CLASS;
 };
 
 type MongoDbName = 'mongodb';

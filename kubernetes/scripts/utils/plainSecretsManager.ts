@@ -8,10 +8,12 @@ import { getPlainSecretsConfigFilesBaseDir } from '../../src/shared/directoriesM
 import { GrpcMongoEnvVars } from '../../src/services/grpc-mongo/settings.js';
 import { GraphqlPostgresEnvVars } from '../../src/services/graphql-postgres/settings.js';
 import { GraphqlMongoEnvVars } from '../../src/services/graphql-mongo/settings.js';
+import { GraphqlSurrealdbEnvVars } from '../../src/services/graphql-surrealdb/settings.js';
 
 
 export type TResourcesEnvVars = {
     services: {
+        'graphql-surrealdb': Partial<GraphqlSurrealdbEnvVars>,
         'graphql-mongo': Partial<GraphqlMongoEnvVars>,
         'grpc-mongo': Partial<GrpcMongoEnvVars>,
         'graphql-postgres': Partial<GraphqlPostgresEnvVars>,
@@ -20,11 +22,20 @@ export type TResourcesEnvVars = {
         'argocd': Partial<ArgoCdEnvVars>,
         'linkerd-viz': Partial<LinkerdVizEnvVars>,
     };
-}; 
+};
 
 export const getSecretsSample = () => {
     return {
         services: {
+            'graphql-surrealdb': {
+                SURREALDB_ROOT_USERNAME: '',
+                SURREALDB_ROOT_PASSWORD: '',
+                OAUTH_GITHUB_CLIENT_ID: '',
+                OAUTH_GITHUB_CLIENT_SECRET: '',
+                OAUTH_GOOGLE_CLIENT_ID: '',
+                OAUTH_GOOGLE_CLIENT_SECRET: '',
+            }
+            ,
             'graphql-mongo': {
                 MONGODB_PASSWORD: '',
                 MONGODB_ROOT_PASSWORD: '',

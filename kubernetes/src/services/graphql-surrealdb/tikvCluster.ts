@@ -1,11 +1,12 @@
 import pc from '../../../generatedCrdsTs/index.js';
+import { surrealdbSettings } from './surrealdb.js';
 
 // TiKV acts as the persistent layer for surrealdb. Surrealdb also supports in-memory, file-based,
 // foundationdb, rocksdb etc
 const surrealDBTikvCluster = new pc.pingcap.v1alpha1.TidbCluster('tikv-cluster', {
     metadata: {
-        name: '',
-        namespace: '',
+        name: surrealdbSettings.envVars.TIKV_NAME,
+        namespace: surrealdbSettings.metadata.namespace,
         // clusterName: "",
     },
     spec: {
@@ -16,6 +17,9 @@ const surrealDBTikvCluster = new pc.pingcap.v1alpha1.TidbCluster('tikv-cluster',
         statefulSetUpdateStrategy: 'RollingUpdate',
         pd: {
             baseImage: 'pingcap/pd',
+            service: {
+                port: Number(surrealdbSettings.envVars.TIKV_PORT),
+            },
             maxFailoverCount: 0,
             replicas: 3,
             requests: {

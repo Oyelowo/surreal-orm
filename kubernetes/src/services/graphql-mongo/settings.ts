@@ -12,7 +12,7 @@ export type GraphqlMongoEnvVars = AppEnvVars &
     MongoDbEnvVars<'applications'> &
     RedisDbEnvVars<'applications'> & { ADDITIONAL_IS_POSSIBLE: string };
 
-export const graphqlMongoSetting: AppConfigs<'graphql-mongo', 'applications', GraphqlMongoEnvVars> = {
+export const graphqlMongoSettings: AppConfigs<'graphql-mongo', 'applications', GraphqlMongoEnvVars> = {
     kubeConfig: {
         requestMemory: '70Mi',
         requestCpu: '100m',
