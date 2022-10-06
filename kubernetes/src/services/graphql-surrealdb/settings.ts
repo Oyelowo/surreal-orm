@@ -1,4 +1,4 @@
-import { AppConfigs, CommonEnvVariables } from '../../types/ownTypes.js';
+import { AppConfigs, AppEnvVars, OauthEnvVars } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentVariablesForManifests.js';
@@ -6,7 +6,7 @@ import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentV
 const env = getEnvVarsForKubeManifests();
 
 const secrets = new PlainSecretsManager('services', 'graphql-mongo', 'local').getSecrets();
-type GraphqlSurrealdbEnvVars = CommonEnvVariables<'grpc-mongo', 'applications'>['app' | 'oauth' | 'surrealdb' | 'redis'];
+type GraphqlSurrealdbEnvVars = AppEnvVars & OauthEnvVars;
 
 export const graphqlSurrealdbSettings: AppConfigs<'graphql-surrealdb', 'applications', GraphqlSurrealdbEnvVars> = {
     kubeConfig: {
@@ -35,4 +35,3 @@ export const graphqlSurrealdbSettings: AppConfigs<'graphql-surrealdb', 'applicat
         namespace: 'applications',
     },
 };
-

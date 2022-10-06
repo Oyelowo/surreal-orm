@@ -1,12 +1,13 @@
-import { AppConfigs, CommonEnvVariables } from '../../types/ownTypes.js';
+import { AppConfigs, AppEnvVars, MongoDbEnvVars } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentVariablesForManifests.js';
 import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 
 const env = getEnvVarsForKubeManifests();
+
 const secrets = new PlainSecretsManager('services', 'grpc-mongo', env.ENVIRONMENT).getSecrets();
 
-export type GrpcMongoEnvVars = CommonEnvVariables<'grpc-mongo', 'applications'>['app' | 'oauth' | 'mongodb' | 'redis'];
+export type GrpcMongoEnvVars = AppEnvVars & MongoDbEnvVars<'applications'>;
 
 export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'applications', GrpcMongoEnvVars> = {
     kubeConfig: {
@@ -25,13 +26,13 @@ export const grpcMongoSettings: AppConfigs<'grpc-mongo', 'applications', GrpcMon
         APP_HOST: '0.0.0.0',
         APP_PORT: '50051',
         APP_EXTERNAL_BASE_URL: getIngressUrl({ environment: env.ENVIRONMENT }),
-        MONGODB_NAME: 'grpc-mongo-database',
+        MONGODB_NAME: 'mongodb',
         MONGODB_USERNAME: secrets.MONGODB_USERNAME,
         MONGODB_PASSWORD: secrets.MONGODB_PASSWORD,
         MONGODB_ROOT_USERNAME: secrets.MONGODB_ROOT_USERNAME,
         MONGODB_ROOT_PASSWORD: secrets.MONGODB_ROOT_PASSWORD,
-        MONGODB_HOST: 'grpc-mongo-database.applications',
-        MONGODB_SERVICE_NAME: 'grpc-mongo-database',
+        MONGODB_HOST: 'mongodb.applications',
+        MONGODB_SERVICE_NAME: 'mongodb',
         MONGODB_STORAGE_CLASS: 'linode-block-storage-retain',
         MONGODB_PORT: '27017',
     },

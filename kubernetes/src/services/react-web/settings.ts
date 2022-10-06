@@ -1,11 +1,13 @@
-import { AppConfigs } from '../../types/ownTypes.js';
+import { AppConfigs, AppEnvVars } from '../../types/ownTypes.js';
 import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentVariablesForManifests.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 
 const env = getEnvVarsForKubeManifests();
 
 const isLocal = env.ENVIRONMENT === 'local';
-export const reactWebSettings: AppConfigs<'react-web', 'applications'> = {
+
+type ReactEnvVars = AppEnvVars;
+export const reactWebSettings: AppConfigs<'react-web', 'applications', ReactEnvVars> = {
     kubeConfig: {
         requestMemory: isLocal ? '1.3Gi' : '300Mi',
         requestCpu: isLocal ? '500m' : '200m',

@@ -4,8 +4,8 @@ import pc from '../../../generatedCrdsTs/index.js';
 // foundationdb, rocksdb etc
 const surrealDBTikvCluster = new pc.pingcap.v1alpha1.TidbCluster('tikv-cluster', {
     metadata: {
-        name: "",
-        namespace: "",
+        name: '',
+        namespace: '',
         // clusterName: "",
     },
     spec: {

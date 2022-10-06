@@ -20,7 +20,7 @@ export type Memory = `${number}${'E' | 'P' | 'T' | 'G' | 'M' | 'k' | 'm' | 'Ei' 
 export type CPU = `${number}${'m'}`;
 
 export const ServiceNamesSchema = z.union([
-    z.literal('surrealdb'),  // This is a database layer relies on other persistent layers: SurrealDB is deployed standalone as a logic layer over TiKV. It can also use in-memory DB
+    z.literal('surrealdb'), // This is a database layer relies on other persistent layers: SurrealDB is deployed standalone as a logic layer over TiKV. It can also use in-memory DB
     z.literal('graphql-surrealdb'), // This is an application/server layer
     z.literal('graphql-tidb'), // TIDB is basically MySQL but scalable
     z.literal('grpc-surrealdb'),
@@ -89,7 +89,7 @@ export interface Settings<N extends ServiceName> {
     host: string;
     image: `ghcr.io/oyelowo/${N}:${string}` | 'surrealdb/surrealdb:1.0.0-beta.8';
     readinessProbePort?: number;
-    command?: string[]
+    command?: string[];
     commandArgs?: string[];
 }
 
@@ -99,61 +99,65 @@ export interface Settings<N extends ServiceName> {
 export type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
 
 export const STORAGE_CLASS = 'linode-block-storage-retain';
-export type SurrealDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
-    SURREALDB_NAME: DBN;
+type SurrealDbName = 'surrealdb';
+export type SurrealDbEnvVars<NS extends NamespaceOfApps> = {
+    SURREALDB_NAME: SurrealDbName;
     // SURREALDB_USERNAME: string;
     // SURREALDB_PASSWORD: string;
-    SURREALDB_HOST: `${DBN}.${NS}`;
+    SURREALDB_HOST: `${SurrealDbName}.${NS}`;
     SURREALDB_PORT: '8000';
-    SURREALDB_SERVICE_NAME: DBN;
+    SURREALDB_SERVICE_NAME: SurrealDbName;
     // SURREALDB_STORAGE_CLASS: typeof STORAGE_CLASS;
     SURREALDB_ROOT_USERNAME: string;
     SURREALDB_ROOT_PASSWORD: string;
 };
 
-export type TikVDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
-    TIKV_NAME: DBN;
+type TikvDbName = 'tikv';
+export type TikVDbEnvVars<NS extends NamespaceOfApps> = {
+    TIKV_NAME: TikvDbName;
     // TIKV_USERNAME: string;
     // TIKV_PASSWORD: string;
-    TIKV_HOST: `${DBN}.${NS}`;
+    TIKV_HOST: `${TikvDbName}.${NS}`;
     TIKV_PORT: '8000';
-    TIKV_SERVICE_NAME: DBN;
+    TIKV_SERVICE_NAME: TikvDbName;
     // TIKV_STORAGE_CLASS: typeof STORAGE_CLASS;
     // TIKV_ROOT_USERNAME: string;
     // TIKV_ROOT_PASSWORD: string;
 };
 
-export type MongoDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
-    MONGODB_NAME: DBN;
+type MongoDbName = 'mongodb';
+export type MongoDbEnvVars<NS extends NamespaceOfApps> = {
+    MONGODB_NAME: MongoDbName;
     MONGODB_USERNAME: string;
     MONGODB_PASSWORD: string;
-    MONGODB_HOST: `${DBN}.${NS}`;
+    MONGODB_HOST: `${MongoDbName}.${NS}`;
     MONGODB_PORT: '27017';
-    MONGODB_SERVICE_NAME: DBN;
+    MONGODB_SERVICE_NAME: MongoDbName;
     MONGODB_STORAGE_CLASS: typeof STORAGE_CLASS;
     MONGODB_ROOT_USERNAME: string;
     MONGODB_ROOT_PASSWORD: string;
 };
 
-export type PostgresDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
-    POSTGRES_NAME: DBN;
-    POSTGRES_DATABASE_NAME: DBN;
+type PostgresDbName = 'postgres';
+export type PostgresDbEnvVars<NS extends NamespaceOfApps> = {
+    POSTGRES_NAME: PostgresDbName;
+    POSTGRES_DATABASE_NAME: PostgresDbName;
     POSTGRES_USERNAME: string;
     POSTGRES_PASSWORD: string;
-    POSTGRES_HOST: `${DBN}.${NS}`;
+    POSTGRES_HOST: `${PostgresDbName}.${NS}`;
     POSTGRES_PORT: '5432';
-    POSTGRES_SERVICE_NAME: DBN;
+    POSTGRES_SERVICE_NAME: PostgresDbName;
     POSTGRES_STORAGE_CLASS: string;
 };
 
-type RedisServiceNameMaster<N extends `${ServiceName}-redis`> = `${N}-master`;
-
-export type RedisDbEnvVars<N extends `${ServiceName}-redis`, NS extends NamespaceOfApps> = {
+type RedisDbName = `redis`;
+type RedisServiceNameMaster = `${RedisDbName}-master`;
+export type RedisDbEnvVars<NS extends NamespaceOfApps> = {
     REDIS_USERNAME: string;
     REDIS_PASSWORD: string;
-    REDIS_HOST: `${RedisServiceNameMaster<N>}.${NS}`; // The application will also need this
-    REDIS_SERVICE_NAME: N; // THIS is used in redis helm chart config itself which adds a suffix(e.g master)
-    REDIS_SERVICE_NAME_MASTER: RedisServiceNameMaster<N>;
+    REDIS_HOST: `${RedisServiceNameMaster}.${NS}`; // The application will also need this
+    REDIS_SERVICE_NAME: RedisDbName; // THIS is used in redis helm chart config itself which adds a suffix(e.g master)
+    REDIS_SERVICE_NAME_MASTER: RedisServiceNameMaster;
     REDIS_PORT: '6379';
 };
 
@@ -190,29 +194,17 @@ export type LinkerdVizEnvVars = {
     PASSWORD: string;
 };
 
-export type CommonEnvVariables<S extends ServiceName, NS extends NamespaceOfApps> = {
-    surrealdb: SurrealDbEnvVars<`${S}-database`, NS>;
-    mongodb: MongoDbEnvVars<`${S}-database`, NS>;
-    postgresdb: PostgresDbEnvVars<`${S}-database`, NS>;
-    redis: RedisDbEnvVars<`${S}-redis`, NS>;
-    app: AppEnvVars;
-    oauth: OauthEnvVars;
-    argocd: ArgoCdEnvVars;
-    linkerdViz: LinkerdVizEnvVars;
-};
-
 export type TResourcesEnvVars = {
     services: {
-        'graphql-mongo': Partial<GraphqlMongoEnvVars>,
-        'grpc-mongo': Partial<GrpcMongoEnvVars>,
-        'graphql-postgres': Partial<GraphqlPostgresEnvVars>,
+        'graphql-mongo': Partial<GraphqlMongoEnvVars>;
+        'grpc-mongo': Partial<GrpcMongoEnvVars>;
+        'graphql-postgres': Partial<GraphqlPostgresEnvVars>;
     };
     infrastructure: {
-        'argocd': Partial<ArgoCdEnvVars>,
-        'linkerd-viz': Partial<LinkerdVizEnvVars>,
+        argocd: Partial<ArgoCdEnvVars>;
+        'linkerd-viz': Partial<LinkerdVizEnvVars>;
     };
 };
-
 
 //  Application configurations/Settings which is passed to deployment
 export type AppConfigs<N extends ServiceName, NS extends NamespaceOfApps, EnvVars extends Record<string, string>> = {
