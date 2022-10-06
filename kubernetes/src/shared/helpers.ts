@@ -1,11 +1,13 @@
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
+import z from 'zod';
 import { AppConfigs, NamespaceOfApps, ServiceName } from '../types/ownTypes.js';
 
-// export function getFQDNFromSettings(config: AppConfigs<any, any>) {
-export function getFQDNFromSettings<N extends ServiceName, NS extends NamespaceOfApps>(config: AppConfigs<N, NS>) {
+export function getFQDNFromSettings<N extends ServiceName, NS extends NamespaceOfApps>(
+    config: AppConfigs<N, NS, Record<string, string>>
+) {
     const { namespace, name } = config.metadata;
-    const host = config.envVars?.APP_PORT;
+    const host = z.string().parse(config.envVars?.APP_PORT);
     return `${name}.${namespace}:${host}`;
 }
 
