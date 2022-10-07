@@ -14,31 +14,31 @@ export const getHelmChartTypesDir = () => {
 
 export function syncHelmChartTypesDeclarations() {
     const helmChartsDir = getHelmChartTypesDir();
-    sh.exec(`rm -rf ${helmChartsDir}`, { silent: true });
-    sh.exec(`mkdir -p ${helmChartsDir}`, { silent: true });
+    sh.exec(`rm -rf ${helmChartsDir}`);
+    sh.exec(`mkdir -p ${helmChartsDir}`);
 
     Object.entries(helmChartsInfo).forEach(([repoName, repoValues]) => {
         const { repo: repoUrl, charts } = repoValues;
         sh.echo(chalk.blueBright(`Syncing helm chart - ${repoName} from ${repoUrl}`));
 
-        sh.exec(`helm repo add ${repoName} ${repoUrl}`);
-        sh.exec(`helm repo update ${repoName}`);
+        sh.exec(`helm repo add ${repoName} ${repoUrl}`, { silent: true });
+        sh.exec(`helm repo update ${repoName}`, { silent: true });
 
         Object.values(charts).forEach(({ chart, version }) => {
             const { stdout: valuesYaml, stderr } = sh.exec(
-                `helm show values ${repoName}/${chart} --version ${version}`, { silent: true }
+                `helm show values ${repoName}/${chart} --version ${version}`,
+                { silent: true }
             );
 
             if (stderr) throw new Error(chalk.redBright(`Problem happened. Error: ${stderr}`));
 
             const typeFileName = _.camelCase(`${chart}${_.capitalize(repoName)}`);
+            const valuesJson = yaml.parse(valuesYaml, { strict: false }) ?? {};
 
-            const tsDec = JsonToTS.default(yaml.parse(valuesYaml, { strict: false }), {
+            const tsDec = JsonToTS.default(valuesJson, {
                 rootName: `I${_.capitalize(typeFileName)}`,
             })
-                .map((typeInterface, i) => {
-                    return i == 0 ? `export ${typeInterface}` : typeInterface;
-                })
+                .map((typeInterface, i) => (i == 0 ? `export ${typeInterface}` : typeInterface))
                 .join('\n');
 
             sh.exec(
