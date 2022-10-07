@@ -14,87 +14,68 @@ import z from 'zod';
 //     sh.exec(`crd2pulumi --nodejsPath ${outDir} ${manifestsCrdsFiles.join(' ')} --force`);
 // }
 
+const chartSchema = z
+    .object({
+        chart: z.string(),
+        version: z.string(),
+        externalCrds: z.string().array().optional(),
+    })
+
 export function syncCrdsCode() {
-    // const helmChartsDir = getHelmChartTypesDir();
     const outDir = getGeneratedCrdsCodeDir();
     sh.rm("-rf", outDir);
-    sh.mkdir('-p', outDir);
+    sh.exec(`-p '${outDir}'`, { silent: true });
 
     Object.entries(helmChartsInfo).forEach(([repoName, repoValues]) => {
         const { repo: repoUrl, charts } = repoValues;
 
-        sh.exec(`helm repo add ${repoName} ${repoUrl}`);
-        sh.exec(`helm repo update ${repoName}`);
+        sh.exec(`helm repo add ${repoName} ${repoUrl}`, { silent: true });
+        sh.exec(`helm repo update ${repoName}`, { silent: true });
 
         Object.values(charts).forEach((ch) => {
-            const { chart, version, externalCrds } = z
-                .object({
-                    chart: z.string(),
-                    version: z.string(),
-                    externalCrds: z.string().array().optional(),
-                })
-                .parse(ch);
+            const { chart, version, externalCrds } = chartSchema.parse(ch);
 
             sh.echo(
                 chalk.blueBright(`Syncing Crds from helm chart ${repoName}/${chart} version=${version} from ${repoUrl}`)
             );
             // const chartInfo = `${repoName}/${chart} --version ${version}`
-            const renderTemplateResources = `helm template  --include-crds ${repoName}/${chart} --version ${version} --set installCRDs=true --set externalCA=true`;
-            const crd2pulumi = `crd2pulumi --nodejsPath ${outDir}  - --force`;
-            // if (!valuesYaml.includes("kind: CustomResourceDefinition")) {
-            //     return
-            // }
-            // console.log("ccxxxxxx", repoName)
+            const cmdRenderTemplateResources = `helm template  --include-crds ${repoName}/${chart} --version ${version} --set installCRDs=true --set externalCA=true`;
+            const cmdCrd2pulumi = `crd2pulumi --nodejsPath ${outDir}  - --force`;
 
-            // if (stderr) {
-            //     console.warn(
-            //         chalk.redBright(`Problem happened while rendering crds from helm file. Error: ${stderr}`)
-            //     );
-            // }
+            const renderedTemlate = sh.exec(cmdRenderTemplateResources, { silent: true });
 
-
-       
-
-            const template = sh.exec(`${renderTemplateResources} | ${crd2pulumi}`);
-
-            if (template.stderr) {
-            // linkerd-crds fail due to https://github.com/pulumi/crd2pulumi/issues/102
-            // Use this to retry to circumvent that
-            const temp = sh.exec(renderTemplateResources).stdout;
-            yaml.parseAllDocuments(temp).forEach((node) => {
-                sh.exec(`echo '${node}' | ${crd2pulumi}`);
-            });
+            if (renderedTemlate.stderr) {
+                throw new Error(chalk.redBright(`Problem rendering helm chart to kubernetes resources. Check that the chart name, repo and version are correct. Error: ${renderedTemlate.stderr}`));
             }
 
+            // Try 1 for best effort. This does not work for linkerd-crd due to crd2pulumi cli not being
+            // able to handle things like complex default values. So, Try 2 takes care of that.
+            sh.exec(`${cmdRenderTemplateResources} | ${cmdCrd2pulumi}`, { silent: true });
+
+            // Try 2. 
+            // Crd2pulumi is not yet able to handle some values e.g in linkerd-crds. This parser helps with transformation
+            // to make it possible for crd2pulumi to handle
+            // TODO: This can be removed when this issue is resolved: https://github.com/pulumi/crd2pulumi/issues/102
+            yaml.parseAllDocuments(renderedTemlate.stdout).forEach((parsedKubeResource) => {
+                sh.exec(`echo '${parsedKubeResource}' | ${cmdCrd2pulumi}`, { silent: true });
+            });
+
+
+
+            // Some helm chart e.g tikv/tidb don't include their crds into the chart.
             if (externalCrds) {
                 externalCrds.forEach((crdUrl) => {
-                    const template = sh.exec(`curl ${crdUrl} | ${crd2pulumi}`);
-                    if (template.stderr) {
-                        // linkerd-crds fail due to https://github.com/pulumi/crd2pulumi/issues/102
-                        // Use this to retry to circumvent that
-                        const ch = sh.exec(`curl ${crdUrl}`).stdout;
-                        yaml.parseAllDocuments(ch).forEach((node) => {
-                            sh.exec(`echo '${node}' | ${crd2pulumi}`);
-                        });
-                    }
+                    // Try1
+                    sh.exec(`curl ${crdUrl} | ${cmdCrd2pulumi}`, { silent: true });
+
+                    // Try2
+                    const remoteCrd = sh.exec(`curl ${crdUrl}`).stdout;
+                    yaml.parseAllDocuments(remoteCrd).forEach((parsedKubeResource) => {
+                        sh.exec(`echo '${parsedKubeResource}' | ${cmdCrd2pulumi}`, { silent: true });
+                    });
+
                 });
             }
         });
     });
-    // sh.exec(`npx prettier --write ${outDir}`);
 }
-
-// function removeTroublesomeKey(json: string): object {
-//     // TODO: This can be removed when this issue is resolved
-//     // https://github.com/pulumi/crd2pulumi/issues/102
-//     // See: https://github.com/pulumi/crd2pulumi/issues/68
-//     // https://github.com/pulumi/crd2pulumi/issues/68#issuecomment-1185164731
-//     const res = yaml.parse(json, (k, v) => {
-//         /* It appears to happen on fields where the default contains a nested value, like: status: default: observedGeneration: -1
-//          It specifically happens for linkerd-crds with complex default values e.g {default: {type: "something"}}*/
-//         return (typeof v === 'object' && k === "default")
-//             ? undefined : v // else return the value
-//     });
-
-//     return res
-// }
