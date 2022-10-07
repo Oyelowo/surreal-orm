@@ -1,27 +1,36 @@
-type Repo = 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'sealedSecrets' | 'argo';
+type Repo = 'oyelowo' | 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'sealedSecrets' | 'argo';
 
-type Chart = {
+type ChartInfo = {
     chart: string;
     version: string;
     externalCrds?: string[]
 };
 
-type AllChartsInfo = Record<
+type ChartsInfo = Record<
     Repo,
     {
         repo: string;
-        charts: Record<string, Chart>;
+        charts: Record<string, ChartInfo>;
     }
 >;
 
 export const helmChartsInfo = {
+    oyelowo: {
+        repo: 'https://oyelowo.github.io',
+        charts: {
+            fluvioSys: {
+                chart: 'fluvio-sys',
+                version: '0.9.10',
+            },
+        },
+    },
     pingcap: {
         repo: 'https://charts.pingcap.org/',
         charts: {
             tikvOperator: {
                 chart: 'tidb-operator',
                 version: 'v1.3.8',
-                externalCrds: [`https://raw.githubusercontent.com/pingcap/tidb-operator/v1.3.8/manifests/crd.yaml`]
+                externalCrds: ["https://raw.githubusercontent.com/pingcap/tidb-operator/v1.3.8/manifests/crd.yaml"]
             },
             tikvCluster: {
                 chart: 'tidb-cluster',
@@ -87,9 +96,13 @@ export const helmChartsInfo = {
     linkerd: {
         repo: 'https://helm.linkerd.io/stable',
         charts: {
-            linkerd2: {
-                chart: 'linkerd2',
-                version: '2.11.2',
+            linkerdCrds: {
+                chart: 'linkerd-crds',
+                version: '1.4.0',
+            },
+            linkerdControlPlane: {
+                chart: 'linkerd-control-plane',
+                version: '1.9.3',
             },
             linkerdViz: {
                 chart: 'linkerd-viz',
@@ -106,4 +119,4 @@ export const helmChartsInfo = {
             },
         },
     },
-} satisfies AllChartsInfo;
+}  satisfies ChartsInfo;

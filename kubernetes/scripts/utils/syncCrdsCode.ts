@@ -38,7 +38,7 @@ export function syncCrdsCode() {
                 chalk.blueBright(`Syncing Crds from helm chart ${repoName}/${chart} version=${version} from ${repoUrl}`)
             );
             // const chartInfo = `${repoName}/${chart} --version ${version}`
-            const helmTemplate = `helm template  --include-crds ${repoName}/${chart} --version ${version} --set installCRDs=true`;
+            const renderTemplateResources = `helm template  --include-crds ${repoName}/${chart} --version ${version} --set installCRDs=true --set externalCA=true`;
             const crd2pulumi = `crd2pulumi --nodejsPath ${outDir}  - --force`;
             // if (!valuesYaml.includes("kind: CustomResourceDefinition")) {
             //     return
@@ -51,7 +51,19 @@ export function syncCrdsCode() {
             //     );
             // }
 
-            const template = sh.exec(`${helmTemplate} | ${crd2pulumi}`);
+
+       
+
+            const template = sh.exec(`${renderTemplateResources} | ${crd2pulumi}`);
+
+            if (template.stderr) {
+            // linkerd-crds fail due to https://github.com/pulumi/crd2pulumi/issues/102
+            // Use this to retry to circumvent that
+            const temp = sh.exec(renderTemplateResources).stdout;
+            yaml.parseAllDocuments(temp).forEach((node) => {
+                sh.exec(`echo '${node}' | ${crd2pulumi}`);
+            });
+            }
 
             if (externalCrds) {
                 externalCrds.forEach((crdUrl) => {
@@ -64,15 +76,6 @@ export function syncCrdsCode() {
                             sh.exec(`echo '${node}' | ${crd2pulumi}`);
                         });
                     }
-                });
-            }
-
-            if (template.stderr) {
-                // linkerd-crds fail due to https://github.com/pulumi/crd2pulumi/issues/102
-                // Use this to retry to circumvent that
-                const ch = sh.exec(helmTemplate).stdout;
-                yaml.parseAllDocuments(ch).forEach((node) => {
-                    sh.exec(`echo '${node}' | ${crd2pulumi}`);
                 });
             }
         });
