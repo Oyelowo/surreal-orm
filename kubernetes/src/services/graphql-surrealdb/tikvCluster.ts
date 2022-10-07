@@ -1,4 +1,5 @@
 import pc from '../../../generatedCrdsTs/index.js';
+import { graphqlSurrealdb } from './app.js';
 import { surrealdbSettings } from './surrealdb.js';
 
 // TiKV acts as the persistent layer for surrealdb. Surrealdb also supports in-memory, file-based,
@@ -42,7 +43,7 @@ const surrealDBTikvCluster = new pc.pingcap.v1alpha1.TidbCluster('tikv-cluster',
             config: {},
         },
     },
-});
+}, { provider: graphqlSurrealdb.getProvider()});
 
 /* const tidbClusterAutoScaler = new pc.pingcap.v1alpha1.TidbClusterAutoScaler('er', {
     apiVersion: 'pingcap.com/v1alpha1',

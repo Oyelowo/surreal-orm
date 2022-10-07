@@ -28226,7 +28226,7 @@ export namespace pingcap {
         }
 
         export interface TidbClusterStatus {
-            auto-scaler?: outputs.pingcap.v1alpha1.TidbClusterStatusAuto-Scaler;
+            'auto-scaler'?: outputs.pingcap.v1alpha1.TidbClusterStatusAutoScaler;
             clusterID?: string;
             conditions?: outputs.pingcap.v1alpha1.TidbClusterStatusConditions[];
             pd?: outputs.pingcap.v1alpha1.TidbClusterStatusPd;
@@ -28237,7 +28237,7 @@ export namespace pingcap {
             tikv?: outputs.pingcap.v1alpha1.TidbClusterStatusTikv;
         }
 
-        export interface TidbClusterStatusAuto-Scaler {
+        export interface TidbClusterStatusAutoScaler {
             name: string;
             namespace: string;
         }
