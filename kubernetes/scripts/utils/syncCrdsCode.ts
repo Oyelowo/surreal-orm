@@ -17,6 +17,7 @@ import z from 'zod';
 export function syncCrdsCode() {
     // const helmChartsDir = getHelmChartTypesDir();
     const outDir = getGeneratedCrdsCodeDir();
+    sh.rm("-rf", outDir);
     sh.mkdir('-p', outDir);
 
     Object.entries(helmChartsInfo).forEach(([repoName, repoValues]) => {
