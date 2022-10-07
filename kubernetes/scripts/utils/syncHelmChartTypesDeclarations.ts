@@ -14,8 +14,8 @@ export const getHelmChartTypesDir = () => {
 
 export function syncHelmChartTypesDeclarations() {
     const helmChartsDir = getHelmChartTypesDir();
-    sh.exec(`rm -rf ${helmChartsDir}`);
-    sh.exec(`mkdir -p ${helmChartsDir}`);
+    sh.exec(`rm -rf ${helmChartsDir}`, { silent: true });
+    sh.exec(`mkdir -p ${helmChartsDir}`, { silent: true });
 
     Object.entries(helmChartsInfo).forEach(([repoName, repoValues]) => {
         const { repo: repoUrl, charts } = repoValues;
@@ -26,15 +26,10 @@ export function syncHelmChartTypesDeclarations() {
 
         Object.values(charts).forEach(({ chart, version }) => {
             const { stdout: valuesYaml, stderr } = sh.exec(
-                `helm show values ${repoName}/${chart} --version ${version}`,
-                {
-                    silent: true,
-                }
+                `helm show values ${repoName}/${chart} --version ${version}`, { silent: true }
             );
 
-            if (stderr) {
-                throw new Error(chalk.redBright(`Problem happened. Error: ${stderr}`));
-            }
+            if (stderr) throw new Error(chalk.redBright(`Problem happened. Error: ${stderr}`));
 
             const typeFileName = _.camelCase(`${chart}${_.capitalize(repoName)}`);
 
