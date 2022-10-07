@@ -3,7 +3,8 @@ type Repo = 'oyelowo' | 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'sealed
 type ChartInfo = {
     chart: string;
     version: string;
-    externalCrds?: string[]
+    externalCrds: string[]
+    skipCrdRender: boolean
 };
 
 type ChartsInfo = Record<
@@ -21,6 +22,8 @@ export const helmChartsInfo = {
             fluvioSys: {
                 chart: 'fluvio-sys',
                 version: '0.9.10',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
         },
     },
@@ -30,11 +33,14 @@ export const helmChartsInfo = {
             tikvOperator: {
                 chart: 'tidb-operator',
                 version: 'v1.3.8',
-                externalCrds: ["https://raw.githubusercontent.com/pingcap/tidb-operator/v1.3.8/manifests/crd.yaml"]
+                externalCrds: ["https://raw.githubusercontent.com/pingcap/tidb-operator/v1.3.8/manifests/crd.yaml"],
+                skipCrdRender: false,
             },
             tikvCluster: {
                 chart: 'tidb-cluster',
                 version: 'v1.3.8',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
         },
     },
@@ -44,30 +50,44 @@ export const helmChartsInfo = {
             redis: {
                 chart: 'redis',
                 version: '16.8.9',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
             mongodb: {
                 chart: 'mongodb',
                 version: '11.1.10',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
             certManager: {
                 chart: 'cert-manager',
                 version: '0.6.1',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
             nginxIngress: {
                 chart: 'nginx-ingress-controller',
                 version: '9.2.11',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
             argocd: {
                 chart: 'argo-cd',
                 version: '4.0.6',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
             postgresql: {
                 chart: 'postgresql',
                 version: '11.6.7',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
             postgresqlHA: {
                 chart: 'postgresql-ha',
                 version: '9.1.6',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
         },
     },
@@ -77,6 +97,8 @@ export const helmChartsInfo = {
             sealedSecrets: {
                 chart: 'sealed-secrets',
                 version: '2.1.7',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
         },
     },
@@ -86,10 +108,14 @@ export const helmChartsInfo = {
             certManager: {
                 chart: 'cert-manager',
                 version: 'v1.8.2',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
             certManagerTrust: {
                 chart: 'cert-manager-trust',
                 version: 'v0.1.1',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
         },
     },
@@ -99,14 +125,20 @@ export const helmChartsInfo = {
             linkerdCrds: {
                 chart: 'linkerd-crds',
                 version: '1.4.0',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
             linkerdControlPlane: {
                 chart: 'linkerd-control-plane',
                 version: '1.9.3',
+                externalCrds: [] as string[],
+                skipCrdRender: true
             },
             linkerdViz: {
                 chart: 'linkerd-viz',
                 version: '2.11.2',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
         },
     },
@@ -116,6 +148,8 @@ export const helmChartsInfo = {
             argoCD: {
                 chart: 'argo-cd',
                 version: '4.5.3',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
             },
         },
     },
