@@ -13,7 +13,7 @@ import type { ResourceOutputDirProps } from '../../../src/shared/directoriesMana
 import { getResourceAbsolutePath } from '../../../src/shared/directoriesManager.js';
 import type { Environment, ResourceName } from '../../../src/types/ownTypes.js';
 import { generateManifests } from './generateManifests.js';
-// import { syncCrdsCode } from './syncCrdsCode.js';
+import { syncCrdsCode } from './syncCrdsCode.js';
 import cliProgress from 'cli-progress';
 import { PlainSecretsManager } from '../plainSecretsManager.js';
 
@@ -109,7 +109,7 @@ export class KubeObject {
         PlainSecretsManager.syncAll();
         await generateManifests(this);
         this.syncAll();
-        // syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
+        syncCrdsCode(this.getOfAKind('CustomResourceDefinition'));
     };
 
     /** Extract information from all the manifests for an environment(local, staging etc)  */
