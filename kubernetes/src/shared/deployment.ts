@@ -28,11 +28,12 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
 
     constructor(
         private name: NoUnion<N>,
-        private args: AppConfigs<N, NS> // opts: pulumi.ComponentResourceOptions
+        private args: AppConfigs<N, NS, Record<string, string>> // opts: pulumi.ComponentResourceOptions
     ) {
         super('k8sjs:service:ServiceDeployment', name, {} /* opts */);
         this.appName = name;
         const { envVars, kubeConfig } = args;
+        const APP_PORT = z.string().parse(envVars.APP_PORT);
         const encodedSecrets = z.record(z.string()).parse(_.mapValues(envVars, toBase64));
         const metadata = {
             ...args.metadata,
@@ -94,8 +95,10 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
 */
                     env: _.mapKeys(encodedSecrets, (key) => [key, this.secret.asEnvValue(key)]),
                     image: kubeConfig.image,
-                    ports: { http: Number(envVars?.APP_PORT) },
+                    ports: { http: Number(APP_PORT) },
                     volumeMounts: [],
+                    command: kubeConfig.command,
+                    args: kubeConfig.commandArgs,
                     resources: {
                         limits: {
                             memory: kubeConfig.limitMemory,
@@ -172,10 +175,10 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
                 type: kx.types.ServiceType.ClusterIP,
                 ports: [
                     {
-                        port: Number(envVars?.APP_PORT),
+                        port: Number(APP_PORT),
                         protocol: 'TCP',
                         name: `${resourceName}-http`,
-                        targetPort: Number(envVars?.APP_PORT),
+                        targetPort: Number(APP_PORT),
                     },
                 ],
             },
@@ -184,10 +187,10 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
         //     type: kx.types.ServiceType.ClusterIP,
         //     ports: [
         //         {
-        //             port: Number(envVars.APP_PORT),
+        //             port: Number(APP_PORT),
         //             protocol: 'TCP',
         //             name: `${resourceName}-http`,
-        //             targetPort: Number(envVars.APP_PORT),
+        //             targetPort: Number(APP_PORT),
         //         },
         //     ],
         // });
@@ -204,9 +207,7 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
         this.ipAddress = useLoadBalancer ? this.service.status.loadBalancer.ingress[0].ip : this.service.spec.clusterIP;
     }
 
-    getProvider() {
-        return this.provider;
-    }
+    getProvider = () => this.provider;
     getServiceDir = (): string => {
         return getResourceAbsolutePath({
             outputDirectory: `services/${this.appName}`,

@@ -28229,7 +28229,7 @@ export namespace pingcap {
         }
 
         export interface TidbClusterStatusArgs {
-            auto-scaler?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
+            'auto-scaler'?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAutoScalerArgs>;
             clusterID?: pulumi.Input<string>;
             conditions?: pulumi.Input<pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusConditionsArgs>[]>;
             pd?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusPdArgs>;
@@ -28240,7 +28240,7 @@ export namespace pingcap {
             tikv?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusTikvArgs>;
         }
 
-        export interface TidbClusterStatusAuto-ScalerArgs {
+        export interface TidbClusterStatusAutoScalerArgs {
             name: pulumi.Input<string>;
             namespace: pulumi.Input<string>;
         }

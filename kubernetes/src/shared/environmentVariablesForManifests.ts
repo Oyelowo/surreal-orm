@@ -7,7 +7,11 @@ import { Simplify, SnakeCase } from 'type-fest';
 import _ from 'lodash';
 import sh from 'shelljs';
 
-export const imageTagsDefault: Record<Uppercase<`${TServices}__${SnakeCase<ServiceName>}__IMAGE_TAG`>, 'latest'> = {
+type ServicesWithImage = Exclude<ServiceName, 'surrealdb'>;
+export const imageTagsDefault: Record<
+    Uppercase<`${TServices}__${SnakeCase<ServicesWithImage>}__IMAGE_TAG`>,
+    'latest'
+> = {
     SERVICES__GRAPHQL_SURREALDB__IMAGE_TAG: 'latest',
     SERVICES__GRAPHQL_TIDB__IMAGE_TAG: 'latest',
     SERVICES__GRPC_SURREALDB__IMAGE_TAG: 'latest',
@@ -18,7 +22,7 @@ export const imageTagsDefault: Record<Uppercase<`${TServices}__${SnakeCase<Servi
 };
 
 const imageTagsSchema: Record<
-    Uppercase<`${TServices}__${SnakeCase<ServiceName>}__IMAGE_TAG`>,
+    Uppercase<`${TServices}__${SnakeCase<ServicesWithImage>}__IMAGE_TAG`>,
     z.ZodString
 > = _.mapValues(imageTagsDefault, (_v) => z.string().min(1));
 

@@ -1,5 +1,3 @@
-import type { ValueOf, Simplify, UnionToIntersection } from 'type-fest';
-
 import * as z from 'zod';
 import { Namespace } from '../infrastructure/namespaces/util.js';
 export const appEnvironmentsSchema = z.union([
@@ -19,7 +17,8 @@ export type Memory = `${number}${'E' | 'P' | 'T' | 'G' | 'M' | 'k' | 'm' | 'Ei' 
 export type CPU = `${number}${'m'}`;
 
 export const ServiceNamesSchema = z.union([
-    z.literal('graphql-surrealdb'),
+    z.literal('surrealdb'), // This is a database layer relies on other persistent layers: SurrealDB is deployed standalone as a logic layer over TiKV. It can also use in-memory DB
+    z.literal('graphql-surrealdb'), // This is an application/server layer
     z.literal('graphql-tidb'), // TIDB is basically MySQL but scalable
     z.literal('grpc-surrealdb'),
     z.literal('graphql-mongo'),
@@ -29,15 +28,6 @@ export const ServiceNamesSchema = z.union([
 ]);
 
 export type ServiceName = z.infer<typeof ServiceNamesSchema>;
-const ServiceNames: ServiceName[] = [
-    'graphql-surrealdb',
-    'graphql-tidb',
-    'grpc-surrealdb',
-    'graphql-mongo',
-    'graphql-postgres',
-    'grpc-mongo',
-    'react-web',
-];
 
 const infrastructure = 'infrastructure';
 const services = 'services';
@@ -84,8 +74,10 @@ export interface Settings<N extends ServiceName> {
     limitCpu: CPU;
     replicaCount: number;
     host: string;
-    image: `ghcr.io/oyelowo/${N}:${string}`;
+    image: `ghcr.io/oyelowo/${N}:${string}` | 'surrealdb/surrealdb:1.0.0-beta.8';
     readinessProbePort?: number;
+    command?: string[];
+    commandArgs?: string[];
 }
 
 // make all properties optional recursively including nested objects.
@@ -94,37 +86,63 @@ export interface Settings<N extends ServiceName> {
 export type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
 
 export const STORAGE_CLASS = 'linode-block-storage-retain';
-export type MongoDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
-    MONGODB_NAME: DBN;
+type SurrealDbName = 'surrealdb';
+export type SurrealDbEnvVars<NS extends NamespaceOfApps> = {
+    SURREALDB_NAME: SurrealDbName;
+    // SURREALDB_USERNAME: string;
+    // SURREALDB_PASSWORD: string;
+    SURREALDB_HOST: `${SurrealDbName}.${NS}`;
+    SURREALDB_PORT: '8000';
+    SURREALDB_SERVICE_NAME: SurrealDbName;
+    // SURREALDB_STORAGE_CLASS: typeof STORAGE_CLASS;
+    SURREALDB_ROOT_USERNAME: string;
+    SURREALDB_ROOT_PASSWORD: string;
+};
+
+type TikvDbName = 'tikv';
+export type TikVDbEnvVars<NS extends NamespaceOfApps> = {
+    TIKV_NAME: TikvDbName;
+    // TIKV_USERNAME: string;
+    // TIKV_PASSWORD: string;
+    TIKV_HOST: `${TikvDbName}-pd.${NS}`;
+    TIKV_PORT: '2379';
+    TIKV_SERVICE_NAME: TikvDbName;
+    TIKV_STORAGE_CLASS: typeof STORAGE_CLASS;
+};
+
+type MongoDbName = 'mongodb';
+export type MongoDbEnvVars<NS extends NamespaceOfApps> = {
+    MONGODB_NAME: MongoDbName;
     MONGODB_USERNAME: string;
     MONGODB_PASSWORD: string;
-    MONGODB_HOST: `${DBN}.${NS}`;
+    MONGODB_HOST: `${MongoDbName}.${NS}`;
     MONGODB_PORT: '27017';
-    MONGODB_SERVICE_NAME: DBN;
+    MONGODB_SERVICE_NAME: MongoDbName;
     MONGODB_STORAGE_CLASS: typeof STORAGE_CLASS;
     MONGODB_ROOT_USERNAME: string;
     MONGODB_ROOT_PASSWORD: string;
 };
 
-export type PostgresDbEnvVars<DBN extends `${ServiceName}-database`, NS extends NamespaceOfApps> = {
-    POSTGRES_NAME: DBN;
-    POSTGRES_DATABASE_NAME: DBN;
+type PostgresDbName = 'postgres';
+export type PostgresDbEnvVars<NS extends NamespaceOfApps> = {
+    POSTGRES_NAME: PostgresDbName;
+    POSTGRES_DATABASE_NAME: PostgresDbName;
     POSTGRES_USERNAME: string;
     POSTGRES_PASSWORD: string;
-    POSTGRES_HOST: `${DBN}.${NS}`;
+    POSTGRES_HOST: `${PostgresDbName}.${NS}`;
     POSTGRES_PORT: '5432';
-    POSTGRES_SERVICE_NAME: DBN;
+    POSTGRES_SERVICE_NAME: PostgresDbName;
     POSTGRES_STORAGE_CLASS: string;
 };
 
-type RedisServiceNameMaster<N extends `${ServiceName}-redis`> = `${N}-master`;
-
-export type RedisDbEnvVars<N extends `${ServiceName}-redis`, NS extends NamespaceOfApps> = {
+type RedisDbName = `redis`;
+type RedisServiceNameMaster = `${RedisDbName}-master`;
+export type RedisDbEnvVars<NS extends NamespaceOfApps> = {
     REDIS_USERNAME: string;
     REDIS_PASSWORD: string;
-    REDIS_HOST: `${RedisServiceNameMaster<N>}.${NS}`; // The application will also need this
-    REDIS_SERVICE_NAME: N; // THIS is used in redis helm chart config itself which adds a suffix(e.g master)
-    REDIS_SERVICE_NAME_MASTER: RedisServiceNameMaster<N>;
+    REDIS_HOST: `${RedisServiceNameMaster}.${NS}`; // The application will also need this
+    REDIS_SERVICE_NAME: RedisDbName; // THIS is used in redis helm chart config itself which adds a suffix(e.g master)
+    REDIS_SERVICE_NAME_MASTER: RedisServiceNameMaster;
     REDIS_PORT: '6379';
 };
 
@@ -143,37 +161,7 @@ export type OauthEnvVars = {
     OAUTH_GOOGLE_CLIENT_SECRET: string;
 };
 
-type CommonEnvVariables<S extends ServiceName, NS extends NamespaceOfApps> = {
-    mongodb: MongoDbEnvVars<`${S}-database`, NS>;
-    postgresdb: PostgresDbEnvVars<`${S}-database`, NS>;
-    redis: RedisDbEnvVars<`${S}-redis`, NS>;
-    app: AppEnvVars;
-    oauth: OauthEnvVars;
-};
-
-/*  RESOURCES ENVIRONMENT VARIABLES */
-/**
- *  @example
- * @argument type Kamo = EnvironmentVariablesCommon<ServiceName, Namespace, [ListOfSelectedEnvVars]>
- * type Kamo = EnvironmentVariablesCommon<"graphql-mongo", "applications", ["app", "mongodb"]>
- */
-export type CreateResourceEnvVars<
-    N extends ServiceName,
-    NS extends NamespaceOfApps,
-    SelectedEnvKey extends keyof CommonEnvVariables<N, NS>
-> = Simplify<UnionToIntersection<ValueOf<Pick<CommonEnvVariables<N, NS>, SelectedEnvKey>>>>;
-
-type GraphqlMongo = CreateResourceEnvVars<'graphql-mongo', 'applications', 'app' | 'mongodb' | 'oauth' | 'redis'> & {
-    ADDITIONAL_IS_POSSIBLE: string;
-};
-type GraphqlPostgres = CreateResourceEnvVars<'graphql-postgres', 'applications', 'app' | 'postgresdb'>;
-type GrpcMongo = CreateResourceEnvVars<'grpc-mongo', 'applications', 'app' | 'mongodb'>;
-type ReactWeb = CreateResourceEnvVars<'grpc-mongo', 'applications', 'app'>;
-
-type ServiceEnvVars<N extends ServiceName, EnvVars> = Record<N, EnvVars>;
-type InfraEnvVars<N extends InfrastructureName, EnvVars> = Record<N, EnvVars>;
-
-type ArgoCd = {
+export type ArgoCdEnvVars = {
     ADMIN_PASSWORD: string;
     type: 'git';
     url: 'https://github.com/Oyelowo/modern-distributed-app-template';
@@ -187,28 +175,14 @@ type ArgoCd = {
     CONTAINER_REGISTRY_PASSWORD: string;
 };
 
-type LinkerdViz = {
+export type LinkerdVizEnvVars = {
     PASSWORD: string;
 };
 
-// Creates Record<ResourceName, Record<EnvVarName, string>>
-type ServicesEnvVars = Simplify<
-    ServiceEnvVars<'graphql-surrealdb', undefined> &
-        ServiceEnvVars<'graphql-tidb', undefined> &
-        ServiceEnvVars<'grpc-surrealdb', undefined> &
-        ServiceEnvVars<'graphql-mongo', GraphqlMongo> &
-        ServiceEnvVars<'graphql-postgres', GraphqlPostgres> &
-        ServiceEnvVars<'grpc-mongo', GrpcMongo> &
-        ServiceEnvVars<'react-web', ReactWeb>
->;
-type InfrastructureEnvVars = Simplify<InfraEnvVars<'argocd', ArgoCd> & InfraEnvVars<'linkerd-viz', LinkerdViz>>;
-
-export type EnvVarsByCategories = Record<TInfrastructure, InfrastructureEnvVars> & Record<TServices, ServicesEnvVars>;
-
 //  Application configurations/Settings which is passed to deployment
-export type AppConfigs<N extends ServiceName, NS extends NamespaceOfApps> = {
+export type AppConfigs<N extends ServiceName, NS extends NamespaceOfApps, EnvVars extends Record<string, string>> = {
     kubeConfig: Settings<N>;
-    envVars: EnvVarsByCategories['services'][N];
+    envVars: EnvVars;
     metadata: {
         name: N;
         namespace: NS;

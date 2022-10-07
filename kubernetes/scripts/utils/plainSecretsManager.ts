@@ -1,57 +1,41 @@
-import { Environment, EnvVarsByCategories } from '../../src/types/ownTypes.js';
-import { Simplify } from 'type-fest';
+import { ArgoCdEnvVars, Environment, LinkerdVizEnvVars, ResourceName, TResourceCategory } from '../../src/types/ownTypes.js';
 import z from 'zod';
 import _ from 'lodash';
 import sh from 'shelljs';
 import path from 'node:path';
 import * as R from 'ramda';
 import { getPlainSecretsConfigFilesBaseDir } from '../../src/shared/directoriesManager.js';
-/* 
-Manages plain secrets which is used for generating kubernetes secrets data
-which is eventually sealed with bitnami sealed secrets
-*/
-type ResourceSecrets<
-    TCat extends keyof EnvVarsByCategories,
-    TResource extends keyof EnvVarsByCategories[TCat],
-    TEnvVars extends keyof EnvVarsByCategories[TCat][TResource]
-> = Simplify<Record<TCat, Simplify<Record<TResource, Simplify<Pick<EnvVarsByCategories[TCat][TResource], TEnvVars>>>>>>;
-// > = Record<TCat, Record<TResource, Pick<SecretsByCategories[TCat][TResource], TEnvVars>>>;
+import { GrpcMongoEnvVars } from '../../src/services/grpc-mongo/settings.js';
+import { GraphqlPostgresEnvVars } from '../../src/services/graphql-postgres/settings.js';
+import { GraphqlMongoEnvVars } from '../../src/services/graphql-mongo/settings.js';
+import { GraphqlSurrealdbEnvVars } from '../../src/services/graphql-surrealdb/settings.js';
 
-export type TSecretsKubeManifests = ResourceSecrets<
-    'services',
-    'graphql-mongo',
-    | 'MONGODB_ROOT_PASSWORD'
-    | 'MONGODB_PASSWORD'
-    | 'MONGODB_ROOT_USERNAME'
-    | 'MONGODB_USERNAME'
-    | 'REDIS_PASSWORD'
-    | 'REDIS_USERNAME'
-    | 'OAUTH_GITHUB_CLIENT_ID'
-    | 'OAUTH_GITHUB_CLIENT_SECRET'
-    | 'OAUTH_GOOGLE_CLIENT_ID'
-    | 'OAUTH_GOOGLE_CLIENT_SECRET'
-> &
-    ResourceSecrets<'services', 'graphql-postgres', 'POSTGRES_PASSWORD' | 'POSTGRES_USERNAME'> &
-    ResourceSecrets<
-        'services',
-        'grpc-mongo',
-        'MONGODB_ROOT_PASSWORD' | 'MONGODB_PASSWORD' | 'MONGODB_ROOT_USERNAME' | 'MONGODB_USERNAME'
-    > &
-    ResourceSecrets<
-        'infrastructure',
-        'argocd',
-        | 'ADMIN_PASSWORD'
-        | 'url'
-        | 'CONTAINER_REGISTRY_PASSWORD'
-        | 'CONTAINER_REGISTRY_USERNAME'
-        | 'GITHUB_PASSWORD'
-        | 'GITHUB_USERNAME'
-    > &
-    ResourceSecrets<'infrastructure', 'linkerd-viz', 'PASSWORD'>;
 
-export const getSecretsSample = (): TSecretsKubeManifests => {
+export type TResourcesEnvVars = {
+    services: {
+        'graphql-surrealdb': Partial<GraphqlSurrealdbEnvVars>,
+        'graphql-mongo': Partial<GraphqlMongoEnvVars>,
+        'grpc-mongo': Partial<GrpcMongoEnvVars>,
+        'graphql-postgres': Partial<GraphqlPostgresEnvVars>,
+    };
+    infrastructure: {
+        'argocd': Partial<ArgoCdEnvVars>,
+        'linkerd-viz': Partial<LinkerdVizEnvVars>,
+    };
+};
+
+export const getSecretsSample = () => {
     return {
         services: {
+            'graphql-surrealdb': {
+                SURREALDB_ROOT_USERNAME: '',
+                SURREALDB_ROOT_PASSWORD: '',
+                OAUTH_GITHUB_CLIENT_ID: '',
+                OAUTH_GITHUB_CLIENT_SECRET: '',
+                OAUTH_GOOGLE_CLIENT_ID: '',
+                OAUTH_GOOGLE_CLIENT_SECRET: '',
+            }
+            ,
             'graphql-mongo': {
                 MONGODB_PASSWORD: '',
                 MONGODB_ROOT_PASSWORD: '',
@@ -89,14 +73,17 @@ export const getSecretsSample = (): TSecretsKubeManifests => {
                 PASSWORD: '',
             },
         },
-    };
+    } satisfies TResourcesEnvVars satisfies Record<TResourceCategory, Partial<Record<ResourceName, any>>>;
 };
+
+
+export type TSecretsKubeManifests = ReturnType<typeof getSecretsSample>;
 
 type SchemaOption = {
     requireValues?: boolean;
 };
-const getSecretsSchema = (option?: SchemaOption) => {
-    const { requireValues = true } = option ?? {};
+const getSecretsSchema = (option: SchemaOption) => {
+    const { requireValues = true } = option;
     const string = z.string().min(requireValues ? 1 : 0);
 
     return z.object(
@@ -110,7 +97,7 @@ const getSecretsSchema = (option?: SchemaOption) => {
     );
 };
 
-function parseSecrets(obj: any, option?: SchemaOption): TSecretsKubeManifests {
+function parseSecrets(obj: any, option: SchemaOption): TSecretsKubeManifests {
     const secretsSchema = getSecretsSchema(option);
     return secretsSchema.strict().parse(obj) as TSecretsKubeManifests;
 }
@@ -122,7 +109,7 @@ export class PlainSecretsManager<
     TCat extends keyof TSecretsKubeManifests,
     TResource extends keyof TSecretsKubeManifests[TCat]
 > {
-    constructor(private resourceCat: TCat, private resourceName: TResource, private environment: Environment) {}
+    constructor(private resourceCat: TCat, private resourceName: TResource, private environment: Environment) { }
 
     getSecrets = (): TSecretsKubeManifests[TCat][TResource] => {
         const allSecretsJson = PlainSecretsManager.#getSecretJsonObject(this.environment);

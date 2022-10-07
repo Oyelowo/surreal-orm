@@ -10,6 +10,7 @@ export * from './src/infrastructure/sealed-secrets/index.js';
 // Rust server backend with support for graphql, mongodb and postgres
 // RUST WORKSPACE APPS
 export * from './src/services/graphql-mongo/index.js';
+export * from './src/services/graphql-surrealdb/index.js';
 // Uncomment these if you want to work with graphql and postgres or grpc with mongodb
 // export * from "./resources/applications/graphql-postgres/index.js";
 // export * from "./resources/applications/grpc-mongo/index.js";
