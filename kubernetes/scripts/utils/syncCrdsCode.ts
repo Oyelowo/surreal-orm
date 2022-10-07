@@ -4,6 +4,7 @@ import { getGeneratedCrdsCodeDir } from '../../src/shared/directoriesManager.js'
 // import { TKubeObject } from './kubeObject/kubeObject.js';
 import chalk from 'chalk';
 import yaml from 'yaml';
+import z from 'zod';
 
 // export function syncCrdsCode(crdKubeObjects: TKubeObject<'CustomResourceDefinition'>[]) {
 //     const manifestsCrdsFiles = crdKubeObjects.map(({ path }) => path);
@@ -24,10 +25,20 @@ export function syncCrdsCode() {
         sh.exec(`helm repo add ${repoName} ${repoUrl}`);
         sh.exec(`helm repo update ${repoName}`);
 
-        Object.values(charts).forEach(({ chart, version }) => {
-            sh.echo(chalk.blueBright(`Syncing Crds from helm chart ${repoName}/${chart} version=${version} from ${repoUrl}`));
+        Object.values(charts).forEach((ch) => {
+            const { chart, version, externalCrds } = z
+                .object({
+                    chart: z.string(),
+                    version: z.string(),
+                    externalCrds: z.string().array().optional(),
+                })
+                .parse(ch);
+
+            sh.echo(
+                chalk.blueBright(`Syncing Crds from helm chart ${repoName}/${chart} version=${version} from ${repoUrl}`)
+            );
             // const chartInfo = `${repoName}/${chart} --version ${version}`
-            const helmTemplate = `helm template  --include-crds ${repoName}/${chart} --version ${version} --set installCRDs=true`
+            const helmTemplate = `helm template  --include-crds ${repoName}/${chart} --version ${version} --set installCRDs=true`;
             const crd2pulumi = `crd2pulumi --nodejsPath ${outDir}  - --force`;
             // if (!valuesYaml.includes("kind: CustomResourceDefinition")) {
             //     return
@@ -40,21 +51,34 @@ export function syncCrdsCode() {
             //     );
             // }
 
-            const crds = sh.exec(`${helmTemplate} | ${crd2pulumi}`)
+            const template = sh.exec(`${helmTemplate} | ${crd2pulumi}`);
 
-            if (crds.stderr) {
+            if (externalCrds) {
+                externalCrds.forEach((crdUrl) => {
+                    const template = sh.exec(`curl ${crdUrl} | ${crd2pulumi}`);
+                    if (template.stderr) {
+                        // linkerd-crds fail due to https://github.com/pulumi/crd2pulumi/issues/102
+                        // Use this to retry to circumvent that
+                        const ch = sh.exec(`curl ${crdUrl}`).stdout;
+                        yaml.parseAllDocuments(ch).forEach((node) => {
+                            sh.exec(`echo '${node}' | ${crd2pulumi}`);
+                        });
+                    }
+                });
+            }
+
+            if (template.stderr) {
                 // linkerd-crds fail due to https://github.com/pulumi/crd2pulumi/issues/102
                 // Use this to retry to circumvent that
-                const ch = sh.exec(helmTemplate).stdout
-                yaml.parseAllDocuments(ch).forEach(node => {
-                    sh.exec(`echo '${node}' | ${crd2pulumi}`)
-                })
+                const ch = sh.exec(helmTemplate).stdout;
+                yaml.parseAllDocuments(ch).forEach((node) => {
+                    sh.exec(`echo '${node}' | ${crd2pulumi}`);
+                });
             }
         });
     });
     // sh.exec(`npx prettier --write ${outDir}`);
 }
-
 
 // function removeTroublesomeKey(json: string): object {
 //     // TODO: This can be removed when this issue is resolved

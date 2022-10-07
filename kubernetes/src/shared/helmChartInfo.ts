@@ -1,28 +1,27 @@
 type Repo = 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'sealedSecrets' | 'argo';
 
-type ChartInfo = {
+type Chart = {
     chart: string;
     version: string;
+    externalCrds?: string[]
 };
 
-type ChartsInfo = Record<
+type AllChartsInfo = Record<
     Repo,
     {
         repo: string;
-        charts: Record<string, ChartInfo>;
+        charts: Record<string, Chart>;
     }
 >;
 
-// This function does nothing. It just helps with typing
-export const checkConstType = <T extends ChartsInfo>(o: T) => o;
-
-export const helmChartsInfo = checkConstType({
+export const helmChartsInfo = {
     pingcap: {
         repo: 'https://charts.pingcap.org/',
         charts: {
             tikvOperator: {
                 chart: 'tidb-operator',
                 version: 'v1.3.8',
+                externalCrds: [`https://raw.githubusercontent.com/pingcap/tidb-operator/v1.3.8/manifests/crd.yaml`]
             },
             tikvCluster: {
                 chart: 'tidb-cluster',
@@ -107,4 +106,4 @@ export const helmChartsInfo = checkConstType({
             },
         },
     },
-} as const);
+} satisfies AllChartsInfo;
