@@ -10,8 +10,12 @@ import waitOn from 'wait-on';
 export async function syncCrdsCode() {
     const outDir = getGeneratedCrdsCodeDir();
     sh.rm('-rf', outDir);
-    const tempCrdDir = path.join(outDir, 'xxxxcrds');
+    const crdPathName = '@oyelowo-crds';
+    const tempCrdDir = path.join(outDir, crdPathName);
     sh.exec(`mkdir -p '${tempCrdDir}'`, { silent: true });
+
+    sh.exec(`echo '${crdPathName}' >> ${path.join(outDir, '.gitignore')}`);
+
     const crdFilesPaths: string[] = [];
 
     Object.entries(helmChartsInfo).forEach(([repoName, { repo, charts }]) => {
@@ -76,4 +80,5 @@ export async function syncCrdsCode() {
     } catch (error) {
         throw new Error(chalk.redBright`Problem generating crd codes. Error: ${error}`);
     }
+    sh.exec(`rm -rf ${tempCrdDir}`);
 }
