@@ -4,11 +4,15 @@ import { getGeneratedCrdsCodeDir } from '../../src/shared/directoriesManager.js'
 import chalk from 'chalk';
 import yaml from 'yaml';
 import fs from 'node:fs';
+import path from 'node:path';
+import waitOn from 'wait-on';
 
-export function syncCrdsCode() {
+export async function syncCrdsCode() {
     const outDir = getGeneratedCrdsCodeDir();
     sh.rm('-rf', outDir);
-    sh.exec(`mkdir -p '${outDir}'`, { silent: true });
+    const tempCrdDir = path.join(outDir, 'xxxxcrds');
+    sh.exec(`mkdir -p '${tempCrdDir}'`, { silent: true });
+    const crdFilesPaths: string[] = [];
 
     Object.entries(helmChartsInfo).forEach(([repoName, { repo, charts }]) => {
         sh.exec(`helm repo add ${repoName} ${repo}`, { silent: true });
@@ -52,15 +56,24 @@ export function syncCrdsCode() {
                     return typeof v === 'object' && k === 'default' ? undefined : v; // else return the value
                 });
 
-                fs.writeFile(`${outDir}/${repoName}${chart}${i}.yaml`, yaml.stringify(data), (err) => {
+                const path = `${tempCrdDir}/${repoName}${chart}${i}.yaml`;
+                crdFilesPaths.push(path);
+                fs.writeFile(path, yaml.stringify(data), (err) => {
                     if (err) throw err;
                 });
             });
         });
     });
 
-    // const paths = sh.exec(`grep --include=\*.{yaml,yml} -Rnwl '${outDir}' -e 'kind: CustomResourceDefinition'`, { silent: true }).stdout
-    // console.log("paths", paths)
-    // // sh.exec(`crd2pulumi --nodejsPath ./xxx  ${outDir}/* --force`);
-    // sh.exec(`crd2pulumi --nodejsPath ./xxx  ${paths.split("\n").join(" ")} --force`);
+    try {
+        await waitOn({
+            resources: crdFilesPaths,
+            delay: 1000, // initial delay in ms, default 0
+            interval: 100, // poll interval in ms, default 250ms
+        });
+        // once here, all resources are available
+        sh.exec(`crd2pulumi --nodejsPath ${outDir}  ${tempCrdDir}/* --force`);
+    } catch (error) {
+        throw new Error(chalk.redBright`Problem generating crd codes. Error: ${error}`);
+    }
 }
