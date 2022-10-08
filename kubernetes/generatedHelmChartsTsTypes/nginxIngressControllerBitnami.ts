@@ -293,6 +293,7 @@ interface Image {
     registry: string;
     repository: string;
     tag: string;
+    digest: string;
     pullPolicy: string;
     pullSecrets: any[];
 }

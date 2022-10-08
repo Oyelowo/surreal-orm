@@ -113,6 +113,7 @@ interface Image2 {
     registry: string;
     repository: string;
     tag: string;
+    digest: string;
     pullPolicy: string;
     pullSecrets: any[];
 }
@@ -142,7 +143,9 @@ interface Metrics {
     podSelector: CommonLabels;
 }
 interface ReadReplicas {
+    name: string;
     replicaCount: number;
+    extendedConfiguration: string;
     extraEnvVars: any[];
     extraEnvVarsCM: string;
     extraEnvVarsSecret: string;
@@ -182,20 +185,10 @@ interface ReadReplicas {
     initContainers: any[];
     extraPodSpec: CommonLabels;
     service: Service2;
-    persistence: Persistence2;
-}
-interface Persistence2 {
-    enabled: boolean;
-    mountPath: string;
-    subPath: string;
-    storageClass: string;
-    accessModes: string[];
-    size: string;
-    annotations: CommonLabels;
-    selector: CommonLabels;
-    dataSource: CommonLabels;
+    persistence: Persistence;
 }
 interface Primary {
+    name: string;
     configuration: string;
     pgHbaConfiguration: string;
     existingConfigmap: string;
@@ -253,6 +246,7 @@ interface Persistence {
     accessModes: string[];
     size: string;
     annotations: CommonLabels;
+    labels: CommonLabels;
     selector: CommonLabels;
     dataSource: CommonLabels;
 }
@@ -382,6 +376,7 @@ interface Image {
     registry: string;
     repository: string;
     tag: string;
+    digest: string;
     pullPolicy: string;
     pullSecrets: any[];
     debug: boolean;

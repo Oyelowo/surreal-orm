@@ -93,7 +93,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourcePluginArgs>;
@@ -147,17 +146,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceKustomizeArgs {
@@ -269,7 +257,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourcePluginArgs>;
@@ -323,17 +310,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKustomizeArgs {
@@ -446,7 +422,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourcePluginArgs>;
@@ -500,17 +475,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceKustomizeArgs {
@@ -610,7 +574,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourcePluginArgs>;
@@ -664,17 +627,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceKustomizeArgs {
@@ -805,7 +757,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourcePluginArgs>;
@@ -859,17 +810,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceKustomizeArgs {
@@ -981,7 +921,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcePluginArgs>;
@@ -1035,17 +974,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKustomizeArgs {
@@ -1158,7 +1086,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcePluginArgs>;
@@ -1212,17 +1139,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKustomizeArgs {
@@ -1322,7 +1238,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcePluginArgs>;
@@ -1378,17 +1293,6 @@ export namespace argoproj {
             value?: pulumi.Input<string>;
         }
 
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
-        }
-
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKustomizeArgs {
             commonAnnotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
             commonLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
@@ -1434,9 +1338,46 @@ export namespace argoproj {
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestArgs {
+            bitbucketServer?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestBitbucketserverArgs>;
+            filters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestFiltersArgs>[]>;
+            gitea?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestGiteaArgs>;
             github?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestGithubArgs>;
             requeueAfterSeconds?: pulumi.Input<number>;
             template?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateArgs>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestBitbucketserverArgs {
+            api: pulumi.Input<string>;
+            basicAuth?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestBitbucketserverBasicauthArgs>;
+            project: pulumi.Input<string>;
+            repo: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestBitbucketserverBasicauthArgs {
+            passwordRef: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestBitbucketserverBasicauthPasswordrefArgs>;
+            username: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestBitbucketserverBasicauthPasswordrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestFiltersArgs {
+            branchMatch?: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestGiteaArgs {
+            api: pulumi.Input<string>;
+            insecure?: pulumi.Input<boolean>;
+            owner: pulumi.Input<string>;
+            repo: pulumi.Input<string>;
+            tokenRef?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestGiteaTokenrefArgs>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestGiteaTokenrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestGithubArgs {
@@ -1500,7 +1441,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourcePluginArgs>;
@@ -1556,17 +1496,6 @@ export namespace argoproj {
             value?: pulumi.Input<string>;
         }
 
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
-        }
-
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceKustomizeArgs {
             commonAnnotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
             commonLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
@@ -1612,19 +1541,65 @@ export namespace argoproj {
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderArgs {
+            bitbucket?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketArgs>;
+            bitbucketServer?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketserverArgs>;
             cloneProtocol?: pulumi.Input<string>;
             filters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderFiltersArgs>[]>;
+            gitea?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGiteaArgs>;
             github?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGithubArgs>;
             gitlab?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGitlabArgs>;
             requeueAfterSeconds?: pulumi.Input<number>;
             template?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateArgs>;
         }
 
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketArgs {
+            allBranches?: pulumi.Input<boolean>;
+            appPasswordRef: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketApppasswordrefArgs>;
+            owner: pulumi.Input<string>;
+            user: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketApppasswordrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketserverArgs {
+            allBranches?: pulumi.Input<boolean>;
+            api: pulumi.Input<string>;
+            basicAuth?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketserverBasicauthArgs>;
+            project: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketserverBasicauthArgs {
+            passwordRef: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketserverBasicauthPasswordrefArgs>;
+            username: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketserverBasicauthPasswordrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
+        }
+
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderFiltersArgs {
             branchMatch?: pulumi.Input<string>;
             labelMatch?: pulumi.Input<string>;
+            pathsDoNotExist?: pulumi.Input<pulumi.Input<string>[]>;
             pathsExist?: pulumi.Input<pulumi.Input<string>[]>;
             repositoryMatch?: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGiteaArgs {
+            allBranches?: pulumi.Input<boolean>;
+            api: pulumi.Input<string>;
+            insecure?: pulumi.Input<boolean>;
+            owner: pulumi.Input<string>;
+            tokenRef?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGiteaTokenrefArgs>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGiteaTokenrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGithubArgs {
@@ -1700,7 +1675,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourcePluginArgs>;
@@ -1754,17 +1728,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceKustomizeArgs {
@@ -1859,7 +1822,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcePluginArgs>;
@@ -1913,17 +1875,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKustomizeArgs {
@@ -2055,7 +2006,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourcePluginArgs>;
@@ -2109,17 +2059,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceKustomizeArgs {
@@ -2231,7 +2170,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcePluginArgs>;
@@ -2285,17 +2223,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKustomizeArgs {
@@ -2408,7 +2335,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcePluginArgs>;
@@ -2462,17 +2388,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKustomizeArgs {
@@ -2572,7 +2487,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcePluginArgs>;
@@ -2628,17 +2542,6 @@ export namespace argoproj {
             value?: pulumi.Input<string>;
         }
 
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
-        }
-
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKustomizeArgs {
             commonAnnotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
             commonLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
@@ -2684,9 +2587,46 @@ export namespace argoproj {
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestArgs {
+            bitbucketServer?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestBitbucketserverArgs>;
+            filters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestFiltersArgs>[]>;
+            gitea?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestGiteaArgs>;
             github?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestGithubArgs>;
             requeueAfterSeconds?: pulumi.Input<number>;
             template?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateArgs>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestBitbucketserverArgs {
+            api: pulumi.Input<string>;
+            basicAuth?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestBitbucketserverBasicauthArgs>;
+            project: pulumi.Input<string>;
+            repo: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestBitbucketserverBasicauthArgs {
+            passwordRef: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestBitbucketserverBasicauthPasswordrefArgs>;
+            username: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestBitbucketserverBasicauthPasswordrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestFiltersArgs {
+            branchMatch?: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestGiteaArgs {
+            api: pulumi.Input<string>;
+            insecure?: pulumi.Input<boolean>;
+            owner: pulumi.Input<string>;
+            repo: pulumi.Input<string>;
+            tokenRef?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestGiteaTokenrefArgs>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestGiteaTokenrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestGithubArgs {
@@ -2750,7 +2690,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourcePluginArgs>;
@@ -2806,17 +2745,6 @@ export namespace argoproj {
             value?: pulumi.Input<string>;
         }
 
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
-        }
-
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceKustomizeArgs {
             commonAnnotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
             commonLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
@@ -2862,19 +2790,65 @@ export namespace argoproj {
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderArgs {
+            bitbucket?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketArgs>;
+            bitbucketServer?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketserverArgs>;
             cloneProtocol?: pulumi.Input<string>;
             filters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderFiltersArgs>[]>;
+            gitea?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGiteaArgs>;
             github?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGithubArgs>;
             gitlab?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGitlabArgs>;
             requeueAfterSeconds?: pulumi.Input<number>;
             template?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateArgs>;
         }
 
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketArgs {
+            allBranches?: pulumi.Input<boolean>;
+            appPasswordRef: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketApppasswordrefArgs>;
+            owner: pulumi.Input<string>;
+            user: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketApppasswordrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketserverArgs {
+            allBranches?: pulumi.Input<boolean>;
+            api: pulumi.Input<string>;
+            basicAuth?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketserverBasicauthArgs>;
+            project: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketserverBasicauthArgs {
+            passwordRef: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketserverBasicauthPasswordrefArgs>;
+            username: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketserverBasicauthPasswordrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
+        }
+
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderFiltersArgs {
             branchMatch?: pulumi.Input<string>;
             labelMatch?: pulumi.Input<string>;
+            pathsDoNotExist?: pulumi.Input<pulumi.Input<string>[]>;
             pathsExist?: pulumi.Input<pulumi.Input<string>[]>;
             repositoryMatch?: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGiteaArgs {
+            allBranches?: pulumi.Input<boolean>;
+            api: pulumi.Input<string>;
+            insecure?: pulumi.Input<boolean>;
+            owner: pulumi.Input<string>;
+            tokenRef?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGiteaTokenrefArgs>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGiteaTokenrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGithubArgs {
@@ -2950,7 +2924,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourcePluginArgs>;
@@ -3004,17 +2977,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceKustomizeArgs {
@@ -3109,7 +3071,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourcePluginArgs>;
@@ -3165,17 +3126,6 @@ export namespace argoproj {
             value?: pulumi.Input<string>;
         }
 
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
-        }
-
         export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKustomizeArgs {
             commonAnnotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
             commonLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
@@ -3221,9 +3171,46 @@ export namespace argoproj {
         }
 
         export interface ApplicationSetSpecGeneratorsPullrequestArgs {
+            bitbucketServer?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestBitbucketserverArgs>;
+            filters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestFiltersArgs>[]>;
+            gitea?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestGiteaArgs>;
             github?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestGithubArgs>;
             requeueAfterSeconds?: pulumi.Input<number>;
             template?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateArgs>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsPullrequestBitbucketserverArgs {
+            api: pulumi.Input<string>;
+            basicAuth?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestBitbucketserverBasicauthArgs>;
+            project: pulumi.Input<string>;
+            repo: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsPullrequestBitbucketserverBasicauthArgs {
+            passwordRef: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestBitbucketserverBasicauthPasswordrefArgs>;
+            username: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsPullrequestBitbucketserverBasicauthPasswordrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsPullrequestFiltersArgs {
+            branchMatch?: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsPullrequestGiteaArgs {
+            api: pulumi.Input<string>;
+            insecure?: pulumi.Input<boolean>;
+            owner: pulumi.Input<string>;
+            repo: pulumi.Input<string>;
+            tokenRef?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestGiteaTokenrefArgs>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsPullrequestGiteaTokenrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsPullrequestGithubArgs {
@@ -3287,7 +3274,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourcePluginArgs>;
@@ -3343,17 +3329,6 @@ export namespace argoproj {
             value?: pulumi.Input<string>;
         }
 
-        export interface ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
-        }
-
         export interface ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceKustomizeArgs {
             commonAnnotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
             commonLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
@@ -3399,19 +3374,65 @@ export namespace argoproj {
         }
 
         export interface ApplicationSetSpecGeneratorsScmproviderArgs {
+            bitbucket?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderBitbucketArgs>;
+            bitbucketServer?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderBitbucketserverArgs>;
             cloneProtocol?: pulumi.Input<string>;
             filters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderFiltersArgs>[]>;
+            gitea?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderGiteaArgs>;
             github?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderGithubArgs>;
             gitlab?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderGitlabArgs>;
             requeueAfterSeconds?: pulumi.Input<number>;
             template?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateArgs>;
         }
 
+        export interface ApplicationSetSpecGeneratorsScmproviderBitbucketArgs {
+            allBranches?: pulumi.Input<boolean>;
+            appPasswordRef: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderBitbucketApppasswordrefArgs>;
+            owner: pulumi.Input<string>;
+            user: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsScmproviderBitbucketApppasswordrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsScmproviderBitbucketserverArgs {
+            allBranches?: pulumi.Input<boolean>;
+            api: pulumi.Input<string>;
+            basicAuth?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderBitbucketserverBasicauthArgs>;
+            project: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsScmproviderBitbucketserverBasicauthArgs {
+            passwordRef: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderBitbucketserverBasicauthPasswordrefArgs>;
+            username: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsScmproviderBitbucketserverBasicauthPasswordrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
+        }
+
         export interface ApplicationSetSpecGeneratorsScmproviderFiltersArgs {
             branchMatch?: pulumi.Input<string>;
             labelMatch?: pulumi.Input<string>;
+            pathsDoNotExist?: pulumi.Input<pulumi.Input<string>[]>;
             pathsExist?: pulumi.Input<pulumi.Input<string>[]>;
             repositoryMatch?: pulumi.Input<string>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsScmproviderGiteaArgs {
+            allBranches?: pulumi.Input<boolean>;
+            api: pulumi.Input<string>;
+            insecure?: pulumi.Input<boolean>;
+            owner: pulumi.Input<string>;
+            tokenRef?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderGiteaTokenrefArgs>;
+        }
+
+        export interface ApplicationSetSpecGeneratorsScmproviderGiteaTokenrefArgs {
+            key: pulumi.Input<string>;
+            secretName: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsScmproviderGithubArgs {
@@ -3487,7 +3508,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourcePluginArgs>;
@@ -3541,17 +3561,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceKustomizeArgs {
@@ -3650,7 +3659,6 @@ export namespace argoproj {
             chart?: pulumi.Input<string>;
             directory?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceDirectoryArgs>;
             helm?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceHelmArgs>;
-            ksonnet?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceKsonnetArgs>;
             kustomize?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceKustomizeArgs>;
             path?: pulumi.Input<string>;
             plugin?: pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourcePluginArgs>;
@@ -3704,17 +3712,6 @@ export namespace argoproj {
             forceString?: pulumi.Input<boolean>;
             name?: pulumi.Input<string>;
             value?: pulumi.Input<string>;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceKsonnetArgs {
-            environment?: pulumi.Input<string>;
-            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceKsonnetParametersArgs>[]>;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceKsonnetParametersArgs {
-            component?: pulumi.Input<string>;
-            name: pulumi.Input<string>;
-            value: pulumi.Input<string>;
         }
 
         export interface ApplicationSetSpecTemplateSpecSourceKustomizeArgs {

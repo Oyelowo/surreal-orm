@@ -5,29 +5,38 @@ export interface ISealedsecretssealedsecrets {
     fullnameOverride: string;
     namespace: string;
     extraDeploy: any[];
+    commonAnnotations: CommonAnnotations;
     image: Image;
     createController: boolean;
     secretName: string;
     updateStatus: boolean;
     keyrenewperiod: string;
+    rateLimit: string;
+    rateLimitBurst: string;
+    additionalNamespaces: any[];
     command: any[];
     args: any[];
     livenessProbe: LivenessProbe;
     readinessProbe: LivenessProbe;
     startupProbe: LivenessProbe;
-    customLivenessProbe: CustomLivenessProbe;
-    customReadinessProbe: CustomLivenessProbe;
-    customStartupProbe: CustomLivenessProbe;
+    customLivenessProbe: CommonAnnotations;
+    customReadinessProbe: CommonAnnotations;
+    customStartupProbe: CommonAnnotations;
     resources: Resources;
     podSecurityContext: PodSecurityContext;
     containerSecurityContext: ContainerSecurityContext;
-    podLabels: CustomLivenessProbe;
-    podAnnotations: CustomLivenessProbe;
+    automountServiceAccountToken: string;
+    podLabels: CommonAnnotations;
+    podAnnotations: CommonAnnotations;
     priorityClassName: string;
     runtimeClassName: string;
-    affinity: CustomLivenessProbe;
-    nodeSelector: CustomLivenessProbe;
+    affinity: CommonAnnotations;
+    nodeSelector: CommonAnnotations;
     tolerations: any[];
+    additionalVolumes: any[];
+    additionalVolumeMounts: any[];
+    hostNetwork: boolean;
+    dnsPolicy: string;
     service: Service;
     ingress: Ingress;
     networkPolicy: NetworkPolicy;
@@ -41,28 +50,32 @@ interface Metrics {
 }
 interface Dashboards {
     create: boolean;
-    labels: CustomLivenessProbe;
+    labels: CommonAnnotations;
     namespace: string;
 }
 interface ServiceMonitor {
     enabled: boolean;
     namespace: string;
-    labels: CustomLivenessProbe;
-    annotations: CustomLivenessProbe;
+    labels: CommonAnnotations;
+    annotations: CommonAnnotations;
     interval: string;
     scrapeTimeout: string;
+    honorLabels: boolean;
     metricRelabelings: any[];
     relabelings: any[];
 }
 interface Rbac {
     create: boolean;
-    labels: CustomLivenessProbe;
+    clusterRole: boolean;
+    labels: CommonAnnotations;
     pspEnabled: boolean;
 }
 interface ServiceAccount {
+    annotations: CommonAnnotations;
     create: boolean;
-    labels: CustomLivenessProbe;
+    labels: CommonAnnotations;
     name: string;
+    automountServiceAccountToken: string;
 }
 interface NetworkPolicy {
     enabled: boolean;
@@ -86,7 +99,7 @@ interface Service {
     type: string;
     port: number;
     nodePort: string;
-    annotations: CustomLivenessProbe;
+    annotations: CommonAnnotations;
 }
 interface ContainerSecurityContext {
     enabled: boolean;
@@ -99,10 +112,9 @@ interface PodSecurityContext {
     fsGroup: number;
 }
 interface Resources {
-    limits: CustomLivenessProbe;
-    requests: CustomLivenessProbe;
+    limits: CommonAnnotations;
+    requests: CommonAnnotations;
 }
-interface CustomLivenessProbe {}
 interface LivenessProbe {
     enabled: boolean;
     initialDelaySeconds: number;
@@ -118,3 +130,4 @@ interface Image {
     pullPolicy: string;
     pullSecrets: any[];
 }
+interface CommonAnnotations {}

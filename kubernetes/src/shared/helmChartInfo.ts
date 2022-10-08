@@ -49,7 +49,7 @@ export const helmChartsInfo = {
         charts: {
             redis: {
                 chart: 'redis',
-                version: '16.8.9',
+                version: '17.3.2',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
@@ -61,31 +61,31 @@ export const helmChartsInfo = {
             },
             certManager: {
                 chart: 'cert-manager',
-                version: '0.6.1',
+                version: '0.8.4',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
             nginxIngress: {
                 chart: 'nginx-ingress-controller',
-                version: '9.2.11',
+                version: '9.3.18',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
             argocd: {
                 chart: 'argo-cd',
-                version: '4.0.6',
+                version: '4.2.3',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
             postgresql: {
                 chart: 'postgresql',
-                version: '11.6.7',
+                version: '11.9.8',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
             postgresqlHA: {
                 chart: 'postgresql-ha',
-                version: '9.1.6',
+                version: '9.4.6',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
@@ -96,7 +96,7 @@ export const helmChartsInfo = {
         charts: {
             sealedSecrets: {
                 chart: 'sealed-secrets',
-                version: '2.1.7',
+                version: '2.6.9',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
@@ -107,13 +107,13 @@ export const helmChartsInfo = {
         charts: {
             certManager: {
                 chart: 'cert-manager',
-                version: 'v1.8.2',
+                version: 'v1.9.1',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
             certManagerTrust: {
                 chart: 'cert-manager-trust',
-                version: 'v0.1.1',
+                version: 'v0.2.0',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
@@ -136,7 +136,7 @@ export const helmChartsInfo = {
             },
             linkerdViz: {
                 chart: 'linkerd-viz',
-                version: '2.11.2',
+                version: '30.3.3',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
@@ -147,7 +147,7 @@ export const helmChartsInfo = {
         charts: {
             argoCD: {
                 chart: 'argo-cd',
-                version: '4.5.3',
+                version: '5.5.12',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },

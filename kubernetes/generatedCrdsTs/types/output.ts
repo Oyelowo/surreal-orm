@@ -93,7 +93,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourcePlugin;
@@ -147,17 +146,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsClusterdecisionresourceTemplateSpecSourceKustomize {
@@ -269,7 +257,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourcePlugin;
@@ -323,17 +310,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsClustersTemplateSpecSourceKustomize {
@@ -446,7 +422,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourcePlugin;
@@ -500,17 +475,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsGitTemplateSpecSourceKustomize {
@@ -610,7 +574,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourcePlugin;
@@ -664,17 +627,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsListTemplateSpecSourceKustomize {
@@ -805,7 +757,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourcePlugin;
@@ -859,17 +810,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClusterdecisionresourceTemplateSpecSourceKustomize {
@@ -981,7 +921,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourcePlugin;
@@ -1035,17 +974,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsClustersTemplateSpecSourceKustomize {
@@ -1158,7 +1086,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourcePlugin;
@@ -1212,17 +1139,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsGitTemplateSpecSourceKustomize {
@@ -1322,7 +1238,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourcePlugin;
@@ -1378,17 +1293,6 @@ export namespace argoproj {
             value?: string;
         }
 
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsListTemplateSpecSourceKustomize {
             commonAnnotations?: {[key: string]: string};
             commonLabels?: {[key: string]: string};
@@ -1434,9 +1338,46 @@ export namespace argoproj {
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequest {
+            bitbucketServer?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestBitbucketserver;
+            filters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestFilters[];
+            gitea?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestGitea;
             github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestGithub;
             requeueAfterSeconds?: number;
             template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplate;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestBitbucketserver {
+            api: string;
+            basicAuth?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestBitbucketserverBasicauth;
+            project: string;
+            repo: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestBitbucketserverBasicauth {
+            passwordRef: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestBitbucketserverBasicauthPasswordref;
+            username: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestBitbucketserverBasicauthPasswordref {
+            key: string;
+            secretName: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestFilters {
+            branchMatch?: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestGitea {
+            api: string;
+            insecure?: boolean;
+            owner: string;
+            repo: string;
+            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestGiteaTokenref;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestGiteaTokenref {
+            key: string;
+            secretName: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestGithub {
@@ -1500,7 +1441,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourcePlugin;
@@ -1556,17 +1496,6 @@ export namespace argoproj {
             value?: string;
         }
 
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsPullrequestTemplateSpecSourceKustomize {
             commonAnnotations?: {[key: string]: string};
             commonLabels?: {[key: string]: string};
@@ -1612,19 +1541,65 @@ export namespace argoproj {
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmprovider {
+            bitbucket?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucket;
+            bitbucketServer?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketserver;
             cloneProtocol?: string;
             filters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderFilters[];
+            gitea?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGitea;
             github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGithub;
             gitlab?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGitlab;
             requeueAfterSeconds?: number;
             template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplate;
         }
 
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucket {
+            allBranches?: boolean;
+            appPasswordRef: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketApppasswordref;
+            owner: string;
+            user: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketApppasswordref {
+            key: string;
+            secretName: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketserver {
+            allBranches?: boolean;
+            api: string;
+            basicAuth?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketserverBasicauth;
+            project: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketserverBasicauth {
+            passwordRef: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketserverBasicauthPasswordref;
+            username: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderBitbucketserverBasicauthPasswordref {
+            key: string;
+            secretName: string;
+        }
+
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderFilters {
             branchMatch?: string;
             labelMatch?: string;
+            pathsDoNotExist?: string[];
             pathsExist?: string[];
             repositoryMatch?: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGitea {
+            allBranches?: boolean;
+            api: string;
+            insecure?: boolean;
+            owner: string;
+            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGiteaTokenref;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGiteaTokenref {
+            key: string;
+            secretName: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderGithub {
@@ -1700,7 +1675,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourcePlugin;
@@ -1754,17 +1728,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixGeneratorsScmproviderTemplateSpecSourceKustomize {
@@ -1859,7 +1822,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourcePlugin;
@@ -1913,17 +1875,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMatrixTemplateSpecSourceKustomize {
@@ -2055,7 +2006,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourcePlugin;
@@ -2109,17 +2059,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsClusterdecisionresourceTemplateSpecSourceKustomize {
@@ -2231,7 +2170,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourcePlugin;
@@ -2285,17 +2223,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsClustersTemplateSpecSourceKustomize {
@@ -2408,7 +2335,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourcePlugin;
@@ -2462,17 +2388,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsGitTemplateSpecSourceKustomize {
@@ -2572,7 +2487,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourcePlugin;
@@ -2628,17 +2542,6 @@ export namespace argoproj {
             value?: string;
         }
 
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsListTemplateSpecSourceKustomize {
             commonAnnotations?: {[key: string]: string};
             commonLabels?: {[key: string]: string};
@@ -2684,9 +2587,46 @@ export namespace argoproj {
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequest {
+            bitbucketServer?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestBitbucketserver;
+            filters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestFilters[];
+            gitea?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestGitea;
             github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestGithub;
             requeueAfterSeconds?: number;
             template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplate;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestBitbucketserver {
+            api: string;
+            basicAuth?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestBitbucketserverBasicauth;
+            project: string;
+            repo: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestBitbucketserverBasicauth {
+            passwordRef: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestBitbucketserverBasicauthPasswordref;
+            username: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestBitbucketserverBasicauthPasswordref {
+            key: string;
+            secretName: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestFilters {
+            branchMatch?: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestGitea {
+            api: string;
+            insecure?: boolean;
+            owner: string;
+            repo: string;
+            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestGiteaTokenref;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestGiteaTokenref {
+            key: string;
+            secretName: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestGithub {
@@ -2750,7 +2690,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourcePlugin;
@@ -2806,17 +2745,6 @@ export namespace argoproj {
             value?: string;
         }
 
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsPullrequestTemplateSpecSourceKustomize {
             commonAnnotations?: {[key: string]: string};
             commonLabels?: {[key: string]: string};
@@ -2862,19 +2790,65 @@ export namespace argoproj {
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmprovider {
+            bitbucket?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucket;
+            bitbucketServer?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketserver;
             cloneProtocol?: string;
             filters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderFilters[];
+            gitea?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGitea;
             github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGithub;
             gitlab?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGitlab;
             requeueAfterSeconds?: number;
             template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplate;
         }
 
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucket {
+            allBranches?: boolean;
+            appPasswordRef: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketApppasswordref;
+            owner: string;
+            user: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketApppasswordref {
+            key: string;
+            secretName: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketserver {
+            allBranches?: boolean;
+            api: string;
+            basicAuth?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketserverBasicauth;
+            project: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketserverBasicauth {
+            passwordRef: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketserverBasicauthPasswordref;
+            username: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderBitbucketserverBasicauthPasswordref {
+            key: string;
+            secretName: string;
+        }
+
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderFilters {
             branchMatch?: string;
             labelMatch?: string;
+            pathsDoNotExist?: string[];
             pathsExist?: string[];
             repositoryMatch?: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGitea {
+            allBranches?: boolean;
+            api: string;
+            insecure?: boolean;
+            owner: string;
+            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGiteaTokenref;
+        }
+
+        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGiteaTokenref {
+            key: string;
+            secretName: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderGithub {
@@ -2950,7 +2924,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourcePlugin;
@@ -3004,17 +2977,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsMergeGeneratorsScmproviderTemplateSpecSourceKustomize {
@@ -3109,7 +3071,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourcePlugin;
@@ -3165,17 +3126,6 @@ export namespace argoproj {
             value?: string;
         }
 
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
         export interface ApplicationSetSpecGeneratorsMergeTemplateSpecSourceKustomize {
             commonAnnotations?: {[key: string]: string};
             commonLabels?: {[key: string]: string};
@@ -3221,9 +3171,46 @@ export namespace argoproj {
         }
 
         export interface ApplicationSetSpecGeneratorsPullrequest {
+            bitbucketServer?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestBitbucketserver;
+            filters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestFilters[];
+            gitea?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestGitea;
             github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestGithub;
             requeueAfterSeconds?: number;
             template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplate;
+        }
+
+        export interface ApplicationSetSpecGeneratorsPullrequestBitbucketserver {
+            api: string;
+            basicAuth?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestBitbucketserverBasicauth;
+            project: string;
+            repo: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsPullrequestBitbucketserverBasicauth {
+            passwordRef: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestBitbucketserverBasicauthPasswordref;
+            username: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsPullrequestBitbucketserverBasicauthPasswordref {
+            key: string;
+            secretName: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsPullrequestFilters {
+            branchMatch?: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsPullrequestGitea {
+            api: string;
+            insecure?: boolean;
+            owner: string;
+            repo: string;
+            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestGiteaTokenref;
+        }
+
+        export interface ApplicationSetSpecGeneratorsPullrequestGiteaTokenref {
+            key: string;
+            secretName: string;
         }
 
         export interface ApplicationSetSpecGeneratorsPullrequestGithub {
@@ -3287,7 +3274,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourcePlugin;
@@ -3343,17 +3329,6 @@ export namespace argoproj {
             value?: string;
         }
 
-        export interface ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
-        }
-
         export interface ApplicationSetSpecGeneratorsPullrequestTemplateSpecSourceKustomize {
             commonAnnotations?: {[key: string]: string};
             commonLabels?: {[key: string]: string};
@@ -3399,19 +3374,65 @@ export namespace argoproj {
         }
 
         export interface ApplicationSetSpecGeneratorsScmprovider {
+            bitbucket?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderBitbucket;
+            bitbucketServer?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderBitbucketserver;
             cloneProtocol?: string;
             filters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderFilters[];
+            gitea?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderGitea;
             github?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderGithub;
             gitlab?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderGitlab;
             requeueAfterSeconds?: number;
             template?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplate;
         }
 
+        export interface ApplicationSetSpecGeneratorsScmproviderBitbucket {
+            allBranches?: boolean;
+            appPasswordRef: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderBitbucketApppasswordref;
+            owner: string;
+            user: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsScmproviderBitbucketApppasswordref {
+            key: string;
+            secretName: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsScmproviderBitbucketserver {
+            allBranches?: boolean;
+            api: string;
+            basicAuth?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderBitbucketserverBasicauth;
+            project: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsScmproviderBitbucketserverBasicauth {
+            passwordRef: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderBitbucketserverBasicauthPasswordref;
+            username: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsScmproviderBitbucketserverBasicauthPasswordref {
+            key: string;
+            secretName: string;
+        }
+
         export interface ApplicationSetSpecGeneratorsScmproviderFilters {
             branchMatch?: string;
             labelMatch?: string;
+            pathsDoNotExist?: string[];
             pathsExist?: string[];
             repositoryMatch?: string;
+        }
+
+        export interface ApplicationSetSpecGeneratorsScmproviderGitea {
+            allBranches?: boolean;
+            api: string;
+            insecure?: boolean;
+            owner: string;
+            tokenRef?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderGiteaTokenref;
+        }
+
+        export interface ApplicationSetSpecGeneratorsScmproviderGiteaTokenref {
+            key: string;
+            secretName: string;
         }
 
         export interface ApplicationSetSpecGeneratorsScmproviderGithub {
@@ -3487,7 +3508,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourcePlugin;
@@ -3541,17 +3561,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecGeneratorsScmproviderTemplateSpecSourceKustomize {
@@ -3650,7 +3659,6 @@ export namespace argoproj {
             chart?: string;
             directory?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceDirectory;
             helm?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceHelm;
-            ksonnet?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceKsonnet;
             kustomize?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceKustomize;
             path?: string;
             plugin?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourcePlugin;
@@ -3704,17 +3712,6 @@ export namespace argoproj {
             forceString?: boolean;
             name?: string;
             value?: string;
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceKsonnet {
-            environment?: string;
-            parameters?: outputs.argoproj.v1alpha1.ApplicationSetSpecTemplateSpecSourceKsonnetParameters[];
-        }
-
-        export interface ApplicationSetSpecTemplateSpecSourceKsonnetParameters {
-            component?: string;
-            name: string;
-            value: string;
         }
 
         export interface ApplicationSetSpecTemplateSpecSourceKustomize {
@@ -3772,6 +3769,5 @@ export namespace argoproj {
             status: string;
             type: string;
         }
-
     }
 }

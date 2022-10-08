@@ -18,6 +18,12 @@ export interface IArgocdbitnami {
     rbac: Rbac;
     redis: Redis;
     externalRedis: ExternalRedis;
+    redisWait: RedisWait;
+}
+interface RedisWait {
+    enabled: boolean;
+    extraArgs: string;
+    securityContext: CommonLabels;
 }
 interface ExternalRedis {
     host: string;
@@ -58,6 +64,7 @@ interface Image2 {
     registry: string;
     repository: string;
     tag: string;
+    digest: string;
     pullPolicy: string;
     pullSecrets: any[];
 }
@@ -119,6 +126,7 @@ interface Dex {
     nodeSelector: CommonLabels;
     tolerations: any[];
     schedulerName: string;
+    shareProcessNamespace: boolean;
     topologySpreadConstraints: any[];
     updateStrategy: UpdateStrategy;
     priorityClassName: string;
@@ -196,6 +204,7 @@ interface RepoServer {
     nodeSelector: CommonLabels;
     tolerations: any[];
     schedulerName: string;
+    shareProcessNamespace: boolean;
     topologySpreadConstraints: any[];
     updateStrategy: UpdateStrategy;
     priorityClassName: string;
@@ -249,6 +258,7 @@ interface Server {
     nodeSelector: CommonLabels;
     tolerations: any[];
     schedulerName: string;
+    shareProcessNamespace: boolean;
     topologySpreadConstraints: any[];
     updateStrategy: UpdateStrategy;
     priorityClassName: string;
@@ -355,6 +365,7 @@ interface Controller {
     nodeSelector: CommonLabels;
     tolerations: any[];
     schedulerName: string;
+    shareProcessNamespace: boolean;
     topologySpreadConstraints: any[];
     updateStrategy: UpdateStrategy;
     priorityClassName: string;
@@ -472,6 +483,7 @@ interface Image {
     registry: string;
     repository: string;
     tag: string;
+    digest: string;
     pullPolicy: string;
     pullSecrets: any[];
     debug: boolean;

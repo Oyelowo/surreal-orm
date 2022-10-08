@@ -9,15 +9,12 @@ export interface ILinkerdvizlinkerd {
     defaultLogFormat: string;
     defaultUID: number;
     linkerdNamespace: string;
-    installNamespace: boolean;
-    namespace: string;
     nodeSelector: NodeSelector;
     imagePullSecrets: any[];
     tolerations?: any;
     enablePodAntiAffinity: boolean;
     enablePSP: boolean;
     prometheusUrl: string;
-    grafanaUrl: string;
     jaegerUrl: string;
     metricsAPI: MetricsAPI;
     tap: Tap;
@@ -55,14 +52,9 @@ interface Args {
     'config.file': string;
 }
 interface Grafana {
-    enabled: boolean;
-    logLevel: string;
-    logFormat: string;
-    image: Image;
-    resources: Resources;
-    proxy?: any;
-    nodeSelector: NodeSelector;
-    tolerations?: any;
+    url?: any;
+    externalUrl?: any;
+    uidPrefix?: any;
 }
 interface Dashboard {
     replicas: number;
@@ -90,6 +82,8 @@ interface TapInjector {
     crtPEM: string;
     keyPEM: string;
     caBundle: string;
+    injectCaFrom: string;
+    injectCaFromSecret: string;
 }
 interface Tap {
     replicas: number;
@@ -100,6 +94,8 @@ interface Tap {
     crtPEM: string;
     keyPEM: string;
     caBundle: string;
+    injectCaFrom: string;
+    injectCaFromSecret: string;
     resources: Resources;
     proxy?: any;
     UID?: any;
@@ -118,6 +114,11 @@ interface MetricsAPI {
 interface Resources {
     cpu: Cpu;
     memory: Cpu;
+    'ephemeral-storage': Ephemeralstorage;
+}
+interface Ephemeralstorage {
+    limit: string;
+    request: string;
 }
 interface Cpu {
     limit?: any;

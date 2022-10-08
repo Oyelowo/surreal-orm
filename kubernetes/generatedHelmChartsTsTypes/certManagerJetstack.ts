@@ -7,6 +7,7 @@ export interface ICertmanagerjetstack {
     featureGates: string;
     image: Image;
     clusterResourceNamespace: string;
+    namespace: string;
     serviceAccount: ServiceAccount;
     extraArgs: any[];
     extraEnv: any[];
@@ -34,7 +35,7 @@ interface Startupapicheck {
     jobAnnotations: JobAnnotations;
     extraArgs: any[];
     resources: Strategy;
-    nodeSelector: Strategy;
+    nodeSelector: NodeSelector;
     affinity: Strategy;
     tolerations: any[];
     podLabels: Strategy;

@@ -57,6 +57,7 @@ interface Persistence {
     accessModes: string[];
     size: string;
     annotations: CommonLabels;
+    labels: CommonLabels;
     selector: CommonLabels;
 }
 interface VolumePermissions {
@@ -72,6 +73,7 @@ interface Image2 {
     registry: string;
     repository: string;
     tag: string;
+    digest: string;
     pullPolicy: string;
     pullSecrets: any[];
 }
@@ -335,7 +337,6 @@ interface Tls {
     certificatesSecret: string;
     certFilename: string;
     certKeyFilename: string;
-    certCAFilename: string;
 }
 interface Audit {
     logHostname: boolean;
@@ -389,6 +390,7 @@ interface Image {
     registry: string;
     repository: string;
     tag: string;
+    digest: string;
     pullPolicy: string;
     pullSecrets: any[];
     debug: boolean;
