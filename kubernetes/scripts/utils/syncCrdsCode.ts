@@ -7,7 +7,7 @@ import yaml from 'yaml';
 export function syncCrdsCode() {
     const outDir = getGeneratedCrdsCodeDir();
     sh.rm('-rf', outDir);
-    sh.exec(`-p '${outDir}'`, { silent: true });
+    sh.exec(`mkdir -p '${outDir}'`, { silent: true });
 
     Object.entries(helmChartsInfo).forEach(([repoName, { repo, charts }]) => {
         sh.exec(`helm repo add ${repoName} ${repo}`, { silent: true });
@@ -20,8 +20,8 @@ export function syncCrdsCode() {
                 chalk.blueBright(`Syncing Crds from helm chart ${repoName}/${chart} version=${version} from ${repo}`)
             );
 
-            const cmdRenderTemplateResources = `helm template  --include-crds ${repoName}/${chart} --version ${version} --set installCRDs=true --set externalCA=true`;
-            const cmdCrd2pulumi = `crd2pulumi --nodejsPath ${outDir}  - --force`;
+            const cmdRenderTemplateResources = `helm template ${chart}  --include-crds ${repoName}/${chart} --version ${version} --set installCRDs=true --set externalCA=true`;
+            const cmdCrd2pulumi = `crd2pulumi --nodejsPath ${outDir} - --force`;
 
             const renderedTemlate = sh.exec(cmdRenderTemplateResources, { silent: true });
             if (renderedTemlate.stderr) {
