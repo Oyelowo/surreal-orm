@@ -31,16 +31,17 @@ export function syncCrdsCode() {
 
             const renderedFromHelmChart = yaml.parseAllDocuments(renderedTemlate.stdout);
             // Some helm charts e.g tikv/tidb don't include their crds into the chart.
-            const renderedFromExternalCrds = externalCrds.flatMap(crdUrl => {
-                const rendered = sh.exec(`curl ${crdUrl} > ${outDir}/${chart}.yaml`, { silent: true })
+            const renderedFromExternalCrds = externalCrds.flatMap((crdUrl) => {
+                const rendered = sh.exec(`curl ${crdUrl}`, { silent: true });
 
-                if (rendered.stderr) throw new Error(chalk.redBright`Problem fetching crd. Error: ${rendered.stderr}`);
+                if (rendered.stderr) console.warn(chalk.yellowBright`${rendered.stderr}`);
 
                 return yaml.parseAllDocuments(rendered.stdout);
-
             });
 
-            const renderedCrds = [...renderedFromHelmChart, ...renderedFromExternalCrds].filter(t => t.toString().includes("kind: CustomResourceDefinition"));
+            const renderedCrds = [...renderedFromHelmChart, ...renderedFromExternalCrds].filter((t) =>
+                t.toString().includes('kind: CustomResourceDefinition')
+            );
 
             renderedCrds.forEach((parsedKubeResource, i) => {
                 const data = yaml.parse(parsedKubeResource.toString(), (k, v) => {
@@ -48,13 +49,12 @@ export function syncCrdsCode() {
                     // to make it possible for crd2pulumi to handle
                     /* It appears to happen on fields where the default contains a nested value, like: status: default: observedGeneration: -1*/
                     // TODO: This can be removed when this issue is resolved: https://github.com/pulumi/crd2pulumi/issues/102
-                    return (typeof v === 'object' && k === "default")
-                        ? undefined : v // else return the value
+                    return typeof v === 'object' && k === 'default' ? undefined : v; // else return the value
                 });
 
                 fs.writeFile(`${outDir}/${repoName}${chart}${i}.yaml`, yaml.stringify(data), (err) => {
                     if (err) throw err;
-                })
+                });
             });
         });
     });
