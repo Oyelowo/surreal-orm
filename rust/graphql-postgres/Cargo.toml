@@ -9,7 +9,7 @@ version = "0.1.0"
 [dependencies]
 # migration = { path = "./migration" }
 common = { path = "../common" }
-poem = { version = "1.3.37", features = [
+poem = { version = "1.3.45", features = [
   "redis-session",
   "session",
   "websocket",
@@ -26,8 +26,8 @@ poem = { version = "1.3.37", features = [
   "opentelemetry",
   "opentelemetry-http",
 ] }
-async-graphql-poem = "4.0.6"
-async-graphql = { version = "4.0.6", features = [
+async-graphql-poem = "4.0.15"
+async-graphql = { version = "4.0.15", features = [
   "apollo_tracing",
   "apollo_persisted_queries",
   "bson",
@@ -47,19 +47,19 @@ async-graphql = { version = "4.0.6", features = [
   "decimal",
   "smol_str",
 ] }
-tokio = { version = "1.20.1", features = ["full"] }
+tokio = { version = "1.21.2", features = ["full"] }
 
 bson = "2.4.0"
-chrono = { version = "0.4.20", features = ["serde"] }
+chrono = { version = "0.4.22", features = ["serde"] }
 chrono-tz = "0.6.3"
 rand = "0.8.5"
-sea-orm = { version = "0.9.1", features = [
+sea-orm = { version = "0.9.3", features = [
   "sqlx-postgres",
   "runtime-tokio-native-tls",
   "macros",
 ] }
-sea-orm-migration = "0.9.1"
-sqlx = { version = "0.6.1", features = [
+sea-orm-migration = "0.9.3"
+sqlx = { version = "0.6.2", features = [
   "runtime-tokio-native-tls",
   "postgres",
   "chrono",
@@ -69,22 +69,22 @@ sqlx = { version = "0.6.1", features = [
   "uuid",
   "migrate",
 ] }
-uuid = { version = "1.1.2", features = ["v4", "serde"] }
+uuid = { version = "1.2.1", features = ["v4", "serde"] }
 
-anyhow = "1.0.60"
+anyhow = "1.0.65"
 dotenv = "0.15.0"
 envy = "0.4.2"
-futures = "0.3.21"
+futures = "0.3.24"
 log = "0.4.17"
 secrecy = "0.8.0"
-serde = { version = "1.0.142", features = ["derive"] }
-serde_json = "1.0.83"
-simple_logger = "2.2.0"
+serde = { version = "1.0.145", features = ["derive"] }
+serde_json = "1.0.85"
+simple_logger = "2.3.0"
 slab = "0.4.7"
-thiserror = "1.0.32"
+thiserror = "1.0.37"
 typed-builder = "0.10.0"
-url = "2.2.2"
-urlencoding = "2.1.0"
+url = "2.3.1"
+urlencoding = "2.1.2"
 validator = { version = "0.16.0", features = ["derive"] }
 
 async-trait = "0.1.57"

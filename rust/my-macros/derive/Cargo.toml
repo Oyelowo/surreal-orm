@@ -8,14 +8,14 @@ edition = "2021"
 [dependencies]
 
 # syn = "1.0"
-proc-macro2 = "1.0.43"
-proc-macro-crate = "1.2.0"
-syn = { version = "1.0.99", features = ["full", "extra-traits", "visit-mut", "visit"] }
+proc-macro2 = "1.0.46"
+proc-macro-crate = "1.2.1"
+syn = { version = "1.0.102", features = ["full", "extra-traits", "visit-mut", "visit"] }
 quote = "1.0.21"
 # Inflector = "0.11.4"
 # proc-macro-crate = "1.1.0"
 darling = "0.14.1"
-thiserror = "1.0.32"
+thiserror = "1.0.37"
 proc-macro2-diagnostics = "0.9"
 convert_case = "0.5.0"
 strum = "0.24.1"
@@ -24,8 +24,8 @@ strum_macros = "0.24"
 # strum = { version = "0.24", features = ["derive"] }
 
 
-serde = { version = "1.0.142", features = ["derive"] }
-serde_json = "1.0.83"
+serde = { version = "1.0.145", features = ["derive"] }
+serde_json = "1.0.85"
 
 [lib]
 proc-macro = true
