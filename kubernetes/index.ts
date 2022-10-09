@@ -6,6 +6,7 @@ export * from './src/infrastructure/cert-manager/index.js';
 export * from './src/infrastructure/ingress/index.js';
 export * from './src/infrastructure/linkerd/index.js';
 export * from './src/infrastructure/sealed-secrets/index.js';
+export * from './src/infrastructure/seaweedfs/index.js';
 // SERVICES
 // Rust server backend with support for graphql, mongodb and postgres
 // RUST WORKSPACE APPS

@@ -5,7 +5,7 @@ import { DeepPartial } from '../../types/ownTypes.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { linkerdProvider } from './settings.js';
 
-const Linkerd2Values: DeepPartial<ILinkerdcontrolplanelinkerd> = {
+const LinkerdControlPlaneValues: DeepPartial<ILinkerdcontrolplanelinkerd> = {
     podAnnotations: {
         // 'sealedsecrets.bitnami.com/managed': 'true',
     },
@@ -20,7 +20,7 @@ const Linkerd2Values: DeepPartial<ILinkerdcontrolplanelinkerd> = {
 const {
     repo,
     charts: {
-        linkerdCrds: { chart, version },
+        linkerdControlPlane: { chart, version },
     },
 } = helmChartsInfo.linkerd;
 
@@ -32,7 +32,7 @@ export const linkerdControlPlane = new k8s.helm.v3.Chart(
             repo,
         },
         version,
-        values: Linkerd2Values,
+        values: LinkerdControlPlaneValues,
         namespace: namespaces.linkerd,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being

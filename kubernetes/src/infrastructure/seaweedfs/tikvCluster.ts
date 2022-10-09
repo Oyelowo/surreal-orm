@@ -1,15 +1,22 @@
 import pc from '../../../generatedCrdsTs/index.js';
-import { graphqlSurrealdb } from './app.js';
-import { surrealdbSettings } from './surrealdb.js';
+import { namespaces } from '../namespaces/util.js';
+import { seaweedFsProvider } from './settings.js';
 
-// TiKV acts as the persistent layer for surrealdb. Surrealdb also supports in-memory, file-based,
-// foundationdb, rocksdb etc
-export const surrealDBTikvCluster = new pc.pingcap.v1alpha1.TidbCluster(
-    'surrealdb-tikv-cluster',
+const name = 'seaweedfs-tikv';
+export const seaweedFsTikvSettings = {
+    name,
+    namespace: namespaces.seaweedfs,
+    pdPort: 2379,
+    pdHost: `${name}-pd`,
+    pdAddressFQDN: `${name}-pd:2379`,
+};
+
+export const seaweedFsTikvClusterFilerStore = new pc.pingcap.v1alpha1.TidbCluster(
+    name,
     {
         metadata: {
-            name: surrealdbSettings.envVars.TIKV_NAME,
-            namespace: surrealdbSettings.metadata.namespace,
+            name: seaweedFsTikvSettings.name,
+            namespace: namespaces.seaweedfs,
             // clusterName: "",
         },
         spec: {
@@ -21,7 +28,7 @@ export const surrealDBTikvCluster = new pc.pingcap.v1alpha1.TidbCluster(
             pd: {
                 baseImage: 'pingcap/pd',
                 service: {
-                    port: Number(surrealdbSettings.envVars.TIKV_PORT),
+                    port: Number(seaweedFsTikvSettings.pdPort),
                 },
                 maxFailoverCount: 0,
                 replicas: 3,
@@ -46,9 +53,10 @@ export const surrealDBTikvCluster = new pc.pingcap.v1alpha1.TidbCluster(
             },
         },
     },
-    { provider: graphqlSurrealdb.getProvider() }
+    { provider: seaweedFsProvider }
 );
 
+// Can also use TiDB as MySQL as filer store for Seaweedfs
 /* const tidbClusterAutoScaler = new pc.pingcap.v1alpha1.TidbClusterAutoScaler('er', {
     apiVersion: 'pingcap.com/v1alpha1',
     kind: "TidbClusterAutoScaler",
