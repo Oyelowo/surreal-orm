@@ -88,7 +88,11 @@ export async function syncCrdsCode() {
     sh.exec(`find ${typesPaths} -name "${fileMatcher}"`, { silent: true })
         .trim()
         .split('\n')
-        .forEach(path => sanitizePulumiTypeDefinitions({ path }))
+        .forEach(path => {
+            const data = fs.readFileSync(path, 'utf8');
+            const sanitized = sanitizePulumiTypeDefinitions({ data })
+            fs.writeFileSync(path, sanitized, 'utf8');
+        })
 
     sh.exec(`rm -rf ${tempCrdDir}`);
 
@@ -96,32 +100,22 @@ export async function syncCrdsCode() {
 }
 
 
-function sanitizePulumiTypeDefinitions({ path }: { path: string; }) {
-    fs.readFile(path, 'utf8', (err, data) => {
-        if (err) throw new Error(`Error: ${err}`);
+function sanitizePulumiTypeDefinitions({ data }: { data: string; }): string {
 
-        const result = data
-            // Wrap quote around the key with `?` coming after the quota
-            // auto-scaler?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
-            // to
-            // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
-            .replace(/([a-z]+-.*[a-z]-*)(\?)?:/g, '"$1"$2:')
-            // Remove the hyphen in the value here
-            // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
-            // to
-            // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAutoScalerArgs>;
-            .replace(/(:.*)(-)(.*;)/g, '$1$3')
-            // Removes hyphen from interface definition e.g
-            // export interface TidbClusterStatusAuto-ScalerArgs {
-            // to
-            // export interface TidbClusterStatusAutoScalerArgs {
-            .replace(/(interface.*)(-)(.*{)/g, '$1$3');
-
-
-
-        // fs.writeFile(someFile, result, 'utf8', function (err) {
-        fs.writeFile(path, result, 'utf8', (err) => {
-            if (err) throw new Error(`Error: ${err}`);
-        });
-    });
+    return data
+        // Wrap quote around the key with `?` coming after the quota
+        // auto-scaler?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
+        // to
+        // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
+        .replace(/([a-z]+-.*[a-z]-*)(\?)?:/g, '"$1"$2:')
+        // Remove the hyphen in the value here
+        // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
+        // to
+        // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAutoScalerArgs>;
+        .replace(/(:.*)(-)(.*;)/g, '$1$3')
+        // Removes hyphen from interface definition e.g
+        // export interface TidbClusterStatusAuto-ScalerArgs {
+        // to
+        // export interface TidbClusterStatusAutoScalerArgs {
+        .replace(/(interface.*)(-)(.*{)/g, '$1$3');
 }
