@@ -13,19 +13,9 @@ const tikvOperatValues: DeepPartial<ITidboperatorpingcap> = {
 const {
     repo,
     charts: {
-        tikvOperator: { chart, version, externalCrds },
+        fluvioSys: { chart, version },
     },
-} = helmChartsInfo.pingcap;
-
-// CRDs
-// Tikv/Tidb operator helm chart does not include the crds. That's why we're handling it separately
-export const tikvCrds = new k8s.yaml.ConfigGroup(
-    'tikv-operator-crd',
-    {
-        files: externalCrds,
-    },
-    { provider: tikvProvider }
-);
+} = helmChartsInfo.oyelowo;
 
 export const tikvOperator = new k8s.helm.v3.Chart(
     chart,
@@ -36,7 +26,7 @@ export const tikvOperator = new k8s.helm.v3.Chart(
         },
         version,
         values: tikvOperatValues,
-        namespace: namespaces.tikvAdmin,
+        namespace: namespaces.fluvioSys,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being
         // available.

@@ -10,10 +10,12 @@ export const namespaceSchema = z.union([
     z.literal('kube-system'),
     z.literal('tikv-admin'),
     z.literal('seaweedfs'),
+    z.literal('fluvio-sys'),
 ]);
 
 export type Namespace = z.infer<typeof namespaceSchema>;
 
+// TODO: Change to a function getNameSpace()
 export const namespaces: Record<CamelCase<Namespace>, Namespace> = {
     applications: 'applications',
     argocd: 'argocd',
@@ -25,5 +27,6 @@ export const namespaces: Record<CamelCase<Namespace>, Namespace> = {
     kubeSystem: 'kube-system',
     tikvAdmin: 'tikv-admin',
     seaweedfs: 'seaweedfs',
+    fluvioSys: 'fluvio-sys',
     // infrastructure: "infrastructure",
 } as const;
