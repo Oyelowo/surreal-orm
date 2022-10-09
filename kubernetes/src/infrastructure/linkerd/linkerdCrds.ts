@@ -5,7 +5,7 @@ import { DeepPartial } from '../../types/ownTypes.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { linkerdProvider } from './settings.js';
 
-const Linkerd2Values: DeepPartial<ILinkerdcrdslinkerd> = {};
+const LinkerdCrdsValues: DeepPartial<ILinkerdcrdslinkerd> = {};
 
 const {
     repo,
@@ -22,7 +22,7 @@ export const linkerdCrds = new k8s.helm.v3.Chart(
             repo,
         },
         version,
-        values: Linkerd2Values,
+        values: LinkerdCrdsValues,
         namespace: namespaces.linkerd,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being
