@@ -4,8 +4,8 @@ import { surrealdbSettings } from './surrealdb.js';
 
 // TiKV acts as the persistent layer for surrealdb. Surrealdb also supports in-memory, file-based,
 // foundationdb, rocksdb etc
-const surrealDBTikvCluster = new pc.pingcap.v1alpha1.TidbCluster(
-    'tikv-cluster',
+export const surrealDBTikvCluster = new pc.pingcap.v1alpha1.TidbCluster(
+    'surrealdb-tikv-cluster',
     {
         metadata: {
             name: surrealdbSettings.envVars.TIKV_NAME,

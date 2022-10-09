@@ -10,8 +10,9 @@ export const seaweedFsTikvSettings = {
     pdHost: `${name}-pd`,
     pdAddressFQDN: `${name}-pd:2379`,
 };
-const seaweedFsTikvClusterFilerStore = new pc.pingcap.v1alpha1.TidbCluster(
-    'tikv-cluster',
+
+export const seaweedFsTikvClusterFilerStore = new pc.pingcap.v1alpha1.TidbCluster(
+    name,
     {
         metadata: {
             name: seaweedFsTikvSettings.name,

@@ -6,7 +6,7 @@ import { DeepPartial } from '../../types/ownTypes.js';
 import { seaweedFsProvider } from './settings.js';
 import { seaweedFsTikvSettings } from './tikvCluster.js';
 
-const tikvOperatValues: DeepPartial<ISeaweedfsoyelowo> = {
+const seaweedFsValues: DeepPartial<ISeaweedfsoyelowo> = {
     global: {
         imageName: 'chrislusf/seaweedfs',
         imagePullPolicy: 'IfNotPresent',
@@ -93,10 +93,9 @@ const tikvOperatValues: DeepPartial<ISeaweedfsoyelowo> = {
     # formatted as a multi-line string. By default no direct resource request
     # is made.
         */
-        resources: {
-            requests: '',
-            limits: '',
-        },
+        // resources: `
+        //     requests: '',
+        //     limits: ''`,
         /* 
         updatePartition is used to control a careful rolling update of SeaweedFS
          masters.
@@ -320,7 +319,7 @@ export const seaweedfs = new k8s.helm.v3.Chart(
             repo,
         },
         version,
-        values: tikvOperatValues,
+        values: seaweedFsValues,
         namespace: namespaces.seaweedfs,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being
