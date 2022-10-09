@@ -80,5 +80,48 @@ export async function syncCrdsCode() {
     } catch (error) {
         throw new Error(chalk.redBright`Problem generating crd codes. Error: ${error}`);
     }
+
+    const typesPaths = path.join(outDir, 'types');
+    sh.echo(`Sanitizing generated pulumi types within the path - ${typesPaths}.`);
+    // TODO: Can remove after this resolved: https://github.com/pulumi/crd2pulumi/issues/101
+    const fileMatcher = '*ts';
+    sh.exec(`find ${typesPaths} -name "${fileMatcher}"`, { silent: true })
+        .trim()
+        .split('\n')
+        .forEach(path => sanitizePulumiTypeDefinitions({ path }))
+
     sh.exec(`rm -rf ${tempCrdDir}`);
+
+    sh.echo(chalk.blueBright`Crd code generation done`);
+}
+
+
+function sanitizePulumiTypeDefinitions({ path }: { path: string; }) {
+    fs.readFile(path, 'utf8', (err, data) => {
+        if (err) throw new Error(`Error: ${err}`);
+
+        const result = data
+            // Wrap quote around the key with `?` coming after the quota
+            // auto-scaler?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
+            // to
+            // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
+            .replace(/([a-z]+-.*[a-z]-*)(\?)?:/g, '"$1"$2:')
+            // Remove the hyphen in the value here
+            // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
+            // to
+            // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAutoScalerArgs>;
+            .replace(/(:.*)(-)(.*;)/g, '$1$3')
+            // Removes hyphen from interface definition e.g
+            // export interface TidbClusterStatusAuto-ScalerArgs {
+            // to
+            // export interface TidbClusterStatusAutoScalerArgs {
+            .replace(/(interface.*)(-)(.*{)/g, '$1$3');
+
+
+
+        // fs.writeFile(someFile, result, 'utf8', function (err) {
+        fs.writeFile(path, result, 'utf8', (err) => {
+            if (err) throw new Error(`Error: ${err}`);
+        });
+    });
 }
