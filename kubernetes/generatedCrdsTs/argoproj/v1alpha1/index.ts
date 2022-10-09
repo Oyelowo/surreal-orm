@@ -5,17 +5,29 @@ import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "../../utilities";
 
 // Export members:
+export * from "./appProject";
+export * from "./application";
 export * from "./applicationSet";
+export * from "./argoCDExtension";
 
 // Import resources to register:
+import { AppProject } from "./appProject";
+import { Application } from "./application";
 import { ApplicationSet } from "./applicationSet";
+import { ArgoCDExtension } from "./argoCDExtension";
 
 const _module = {
     version: utilities.getVersion(),
     construct: (name: string, type: string, urn: string): pulumi.Resource => {
         switch (type) {
+            case "kubernetes:argoproj.io/v1alpha1:AppProject":
+                return new AppProject(name, <any>undefined, { urn })
+            case "kubernetes:argoproj.io/v1alpha1:Application":
+                return new Application(name, <any>undefined, { urn })
             case "kubernetes:argoproj.io/v1alpha1:ApplicationSet":
                 return new ApplicationSet(name, <any>undefined, { urn })
+            case "kubernetes:argoproj.io/v1alpha1:ArgoCDExtension":
+                return new ArgoCDExtension(name, <any>undefined, { urn })
             default:
                 throw new Error(`unknown resource type ${type}`);
         }

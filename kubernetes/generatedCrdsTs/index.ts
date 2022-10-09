@@ -8,11 +8,27 @@ import * as utilities from "./utilities";
 export * from "./provider";
 
 // Export sub-modules:
+import * as acme from "./acme";
 import * as argoproj from "./argoproj";
+import * as bitnami from "./bitnami";
+import * as certmanager from "./certmanager";
+import * as fluvio from "./fluvio";
+import * as linkerd from "./linkerd";
+import * as pingcap from "./pingcap";
+import * as policy from "./policy";
+import * as trust from "./trust";
 import * as types from "./types";
 
 export {
+    acme,
     argoproj,
+    bitnami,
+    certmanager,
+    fluvio,
+    linkerd,
+    pingcap,
+    policy,
+    trust,
     types,
 };
 
