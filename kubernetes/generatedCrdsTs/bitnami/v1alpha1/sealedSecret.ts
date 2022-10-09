@@ -2,10 +2,14 @@
 // *** Do not edit by hand unless you're certain you know what you are doing! ***
 
 import * as pulumi from "@pulumi/pulumi";
+import { input as inputs, output as outputs } from "../../types";
 import * as utilities from "../../utilities";
 
 import {ObjectMeta} from "../../meta/v1";
 
+/**
+ * SealedSecret is the K8s representation of a "sealed Secret" - a regular k8s Secret that has been sealed (encrypted) using the controller's key.
+ */
 export class SealedSecret extends pulumi.CustomResource {
     /**
      * Get an existing SealedSecret resource's state with the given name, ID, and optional extra
@@ -36,8 +40,14 @@ export class SealedSecret extends pulumi.CustomResource {
     public readonly apiVersion!: pulumi.Output<"bitnami.com/v1alpha1" | undefined>;
     public readonly kind!: pulumi.Output<"SealedSecret" | undefined>;
     public readonly metadata!: pulumi.Output<ObjectMeta | undefined>;
-    public readonly spec!: pulumi.Output<{[key: string]: any} | undefined>;
-    public readonly status!: pulumi.Output<{[key: string]: any} | undefined>;
+    /**
+     * SealedSecretSpec is the specification of a SealedSecret
+     */
+    public readonly spec!: pulumi.Output<outputs.bitnami.v1alpha1.SealedSecretSpec>;
+    /**
+     * SealedSecretStatus is the most recently observed status of the SealedSecret.
+     */
+    public readonly status!: pulumi.Output<outputs.bitnami.v1alpha1.SealedSecretStatus | undefined>;
 
     /**
      * Create a SealedSecret resource with the given unique name, arguments, and options.
@@ -62,9 +72,7 @@ export class SealedSecret extends pulumi.CustomResource {
             resourceInputs["spec"] = undefined /*out*/;
             resourceInputs["status"] = undefined /*out*/;
         }
-        if (!opts.version) {
-            opts = pulumi.mergeOptions(opts, { version: utilities.getVersion()});
-        }
+        opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
         super(SealedSecret.__pulumiType, name, resourceInputs, opts);
     }
 }
@@ -76,6 +84,12 @@ export interface SealedSecretArgs {
     apiVersion?: pulumi.Input<"bitnami.com/v1alpha1">;
     kind?: pulumi.Input<"SealedSecret">;
     metadata?: pulumi.Input<ObjectMeta>;
-    spec?: pulumi.Input<{[key: string]: any}>;
-    status?: pulumi.Input<{[key: string]: any}>;
+    /**
+     * SealedSecretSpec is the specification of a SealedSecret
+     */
+    spec?: pulumi.Input<inputs.bitnami.v1alpha1.SealedSecretSpecArgs>;
+    /**
+     * SealedSecretStatus is the most recently observed status of the SealedSecret.
+     */
+    status?: pulumi.Input<inputs.bitnami.v1alpha1.SealedSecretStatusArgs>;
 }

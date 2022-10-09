@@ -3,7 +3,7 @@
         "strict": true,
         "outDir": "bin",
         "target": "ESNext",
-        "lib": ["ESNext"],
+        "lib": ["ESNext", "DOM"],
         "module": "NodeNext",
         "declaration": true,
         "moduleResolution": "NodeNext",

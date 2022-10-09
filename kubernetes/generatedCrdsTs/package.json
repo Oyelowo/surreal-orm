@@ -2,7 +2,8 @@
     "name": "@pulumi/crds",
     "version": "",
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "install": "node scripts/install-pulumi-plugin.js resource crds "
     },
     "devDependencies": {
         "typescript": "^4.3.5"
@@ -11,6 +12,7 @@
         "@pulumi/pulumi": "latest"
     },
     "pulumi": {
-        "resource": true
+        "resource": true,
+        "name": "crds"
     }
 }

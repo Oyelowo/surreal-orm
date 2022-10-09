@@ -8,11 +8,13 @@ import * as utilities from "../../utilities";
 export * from "./appProject";
 export * from "./application";
 export * from "./applicationSet";
+export * from "./argoCDExtension";
 
 // Import resources to register:
 import { AppProject } from "./appProject";
 import { Application } from "./application";
 import { ApplicationSet } from "./applicationSet";
+import { ArgoCDExtension } from "./argoCDExtension";
 
 const _module = {
     version: utilities.getVersion(),
@@ -24,6 +26,8 @@ const _module = {
                 return new Application(name, <any>undefined, { urn })
             case "kubernetes:argoproj.io/v1alpha1:ApplicationSet":
                 return new ApplicationSet(name, <any>undefined, { urn })
+            case "kubernetes:argoproj.io/v1alpha1:ArgoCDExtension":
+                return new ArgoCDExtension(name, <any>undefined, { urn })
             default:
                 throw new Error(`unknown resource type ${type}`);
         }

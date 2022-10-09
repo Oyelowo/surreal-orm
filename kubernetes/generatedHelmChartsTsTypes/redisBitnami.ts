@@ -83,6 +83,7 @@ interface ServiceMonitor {
     metricRelabelings: any[];
     honorLabels: boolean;
     additionalLabels: CommonLabels;
+    podTargetLabels: any[];
 }
 interface Service3 {
     type: string;
@@ -101,6 +102,7 @@ interface Image2 {
     registry: string;
     repository: string;
     tag: string;
+    digest: string;
     pullPolicy: string;
     pullSecrets: any[];
 }
@@ -119,12 +121,6 @@ interface Pdb {
     create: boolean;
     minAvailable: number;
     maxUnavailable: string;
-}
-interface ServiceAccount {
-    create: boolean;
-    name: string;
-    automountServiceAccountToken: boolean;
-    annotations: CommonLabels;
 }
 interface Rbac {
     create: boolean;
@@ -167,7 +163,7 @@ interface Sentinel {
     customStartupProbe: CommonLabels;
     customLivenessProbe: CommonLabels;
     customReadinessProbe: CommonLabels;
-    persistence: Persistence3;
+    persistence: Persistence2;
     resources: Resources;
     containerSecurityContext: ContainerSecurityContext;
     lifecycleHooks: CommonLabels;
@@ -186,6 +182,8 @@ interface Service2 {
     loadBalancerIP: string;
     loadBalancerSourceRanges: any[];
     annotations: CommonLabels;
+    sessionAffinity: string;
+    sessionAffinityConfig: CommonLabels;
 }
 interface NodePorts2 {
     redis: string;
@@ -195,7 +193,7 @@ interface Ports {
     redis: number;
     sentinel: number;
 }
-interface Persistence3 {
+interface Persistence2 {
     enabled: boolean;
     storageClass: string;
     accessModes: string[];
@@ -203,6 +201,7 @@ interface Persistence3 {
     annotations: CommonLabels;
     selector: CommonLabels;
     dataSource: CommonLabels;
+    medium: string;
 }
 interface ContainerPorts2 {
     sentinel: number;
@@ -251,10 +250,11 @@ interface Replica {
     extraVolumeMounts: any[];
     sidecars: any[];
     initContainers: any[];
-    persistence: Persistence2;
+    persistence: Persistence;
     service: Service;
     terminationGracePeriodSeconds: number;
     autoscaling: Autoscaling;
+    serviceAccount: ServiceAccount;
 }
 interface Autoscaling {
     enabled: boolean;
@@ -263,24 +263,13 @@ interface Autoscaling {
     targetCPU: string;
     targetMemory: string;
 }
-interface Persistence2 {
-    enabled: boolean;
-    medium: string;
-    path: string;
-    subPath: string;
-    storageClass: string;
-    accessModes: string[];
-    size: string;
-    annotations: CommonLabels;
-    selector: CommonLabels;
-    dataSource: CommonLabels;
-}
 interface ExternalMaster {
     enabled: boolean;
     host: string;
     port: number;
 }
 interface Master {
+    count: number;
     configuration: string;
     disableCommands: string[];
     command: any[];
@@ -325,18 +314,27 @@ interface Master {
     persistence: Persistence;
     service: Service;
     terminationGracePeriodSeconds: number;
+    serviceAccount: ServiceAccount;
+}
+interface ServiceAccount {
+    create: boolean;
+    name: string;
+    automountServiceAccountToken: boolean;
+    annotations: CommonLabels;
 }
 interface Service {
     type: string;
     ports: ContainerPorts;
     nodePorts: NodePorts;
     externalTrafficPolicy: string;
-    internalTrafficPolicy: string;
     extraPorts: any[];
+    internalTrafficPolicy: string;
     clusterIP: string;
     loadBalancerIP: string;
     loadBalancerSourceRanges: any[];
     annotations: CommonLabels;
+    sessionAffinity: string;
+    sessionAffinityConfig: CommonLabels;
 }
 interface NodePorts {
     redis: string;
@@ -399,6 +397,7 @@ interface Image {
     registry: string;
     repository: string;
     tag: string;
+    digest: string;
     pullPolicy: string;
     pullSecrets: any[];
     debug: boolean;

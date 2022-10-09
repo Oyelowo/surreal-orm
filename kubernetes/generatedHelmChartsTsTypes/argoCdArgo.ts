@@ -3,9 +3,12 @@ export interface IArgocdargo {
     nameOverride: string;
     fullnameOverride: string;
     kubeVersionOverride: string;
-    global: Global;
     apiVersionOverrides: ApiVersionOverrides;
     createAggregateRoles: boolean;
+    openshift: Openshift;
+    crds: Crds;
+    global: Global;
+    configs: Configs;
     extraObjects: any[];
     controller: Controller;
     dex: Dex;
@@ -14,40 +17,41 @@ export interface IArgocdargo {
     externalRedis: ExternalRedis;
     server: Server;
     repoServer: RepoServer;
-    configs: Configs;
-    openshift: ClusterAdminAccess;
     applicationSet: ApplicationSet;
     notifications: Notifications;
 }
 interface Notifications {
     enabled: boolean;
     name: string;
-    affinity: PodAnnotations;
+    affinity: Annotations;
     argocdUrl?: any;
     image: Image;
     imagePullSecrets: any[];
-    nodeSelector: PodAnnotations;
+    nodeSelector: Annotations;
     updateStrategy: UpdateStrategy;
-    context: PodAnnotations;
+    context: Annotations;
     secret: Secret2;
+    logFormat: string;
     logLevel: string;
     extraArgs: any[];
     extraEnv: any[];
+    extraEnvFrom: any[];
     extraVolumeMounts: any[];
     extraVolumes: any[];
     metrics: Metrics5;
-    notifiers: PodAnnotations;
-    podAnnotations: PodAnnotations;
-    podLabels: PodAnnotations;
+    notifiers: Annotations;
+    podAnnotations: Annotations;
+    podLabels: Annotations;
     securityContext: SecurityContext2;
-    containerSecurityContext: PodAnnotations;
-    resources: PodAnnotations;
-    serviceAccount: ServiceAccount2;
+    containerSecurityContext: Annotations;
+    priorityClassName: string;
+    resources: Annotations;
+    serviceAccount: ServiceAccount4;
     cm: Cm;
     subscriptions: any[];
-    templates: PodAnnotations;
+    templates: Annotations;
     tolerations: any[];
-    triggers: PodAnnotations;
+    triggers: Annotations;
     bots: Bots;
 }
 interface Bots {
@@ -58,23 +62,27 @@ interface Slack {
     updateStrategy: UpdateStrategy;
     image: Image;
     imagePullSecrets: any[];
-    service: Service6;
-    serviceAccount: ServiceAccount2;
+    service: Service7;
+    serviceAccount: ServiceAccount4;
     securityContext: SecurityContext2;
-    containerSecurityContext: PodAnnotations;
-    resources: PodAnnotations;
-    affinity: PodAnnotations;
+    containerSecurityContext: Annotations;
+    resources: Annotations;
+    affinity: Annotations;
     tolerations: any[];
-    nodeSelector: PodAnnotations;
+    nodeSelector: Annotations;
 }
-interface Service6 {
-    annotations: PodAnnotations;
+interface Service7 {
+    annotations: Annotations;
     port: number;
     type: string;
 }
 interface Cm {
     create: boolean;
+}
+interface ServiceAccount4 {
+    create: boolean;
     name: string;
+    annotations: Annotations;
 }
 interface SecurityContext2 {
     runAsNonRoot: boolean;
@@ -87,14 +95,15 @@ interface Metrics5 {
 }
 interface ServiceMonitor2 {
     enabled: boolean;
-    selector: PodAnnotations;
-    additionalLabels: PodAnnotations;
+    selector: Annotations;
+    additionalLabels: Annotations;
+    scheme: string;
+    tlsConfig: Annotations;
 }
 interface Secret2 {
     create: boolean;
-    annotations: PodAnnotations;
-    name: string;
-    items: PodAnnotations;
+    annotations: Annotations;
+    items: Annotations;
 }
 interface UpdateStrategy {
     type: string;
@@ -103,21 +112,23 @@ interface ApplicationSet {
     enabled: boolean;
     name: string;
     replicaCount: number;
-    image: Image3;
-    args: Args2;
+    image: Image;
+    args: Args;
+    logFormat: string;
+    logLevel: string;
     extraContainers: any[];
     metrics: Metrics4;
     imagePullSecrets: any[];
     service: Service;
-    serviceAccount: ServiceAccount2;
-    podAnnotations: PodAnnotations;
-    podLabels: PodAnnotations;
-    podSecurityContext: PodAnnotations;
-    securityContext: PodAnnotations;
-    resources: PodAnnotations;
-    nodeSelector: PodAnnotations;
+    serviceAccount: ServiceAccount3;
+    podAnnotations: Annotations;
+    podLabels: Annotations;
+    podSecurityContext: Annotations;
+    securityContext: Annotations;
+    resources: Annotations;
+    nodeSelector: Annotations;
     tolerations: any[];
-    affinity: PodAnnotations;
+    affinity: Annotations;
     priorityClassName: string;
     extraVolumeMounts: any[];
     extraVolumes: any[];
@@ -131,8 +142,8 @@ interface Webhook {
 }
 interface Ingress2 {
     enabled: boolean;
-    annotations: PodAnnotations;
-    labels: PodAnnotations;
+    annotations: Annotations;
+    labels: Annotations;
     ingressClassName: string;
     hosts: any[];
     paths: string[];
@@ -140,56 +151,19 @@ interface Ingress2 {
     extraPaths: any[];
     tls: any[];
 }
-interface ServiceAccount2 {
+interface ServiceAccount3 {
     create: boolean;
-    annotations: PodAnnotations;
+    annotations: Annotations;
+    labels: Annotations;
     name: string;
 }
-interface Args2 {
+interface Args {
     metricsAddr: string;
     probeBindAddr: string;
     enableLeaderElection: boolean;
     policy: string;
     debug: boolean;
     dryRun: boolean;
-}
-interface Image3 {
-    repository: string;
-    pullPolicy: string;
-    tag: string;
-}
-interface Configs {
-    clusterCredentials: any[];
-    gpgKeysAnnotations: PodAnnotations;
-    gpgKeys: PodAnnotations;
-    knownHostsAnnotations: PodAnnotations;
-    knownHosts: KnownHosts;
-    tlsCertsAnnotations: PodAnnotations;
-    tlsCerts: PodAnnotations;
-    repositoryCredentials: PodAnnotations;
-    credentialTemplates: PodAnnotations;
-    repositories: PodAnnotations;
-    secret: Secret;
-    styles: string;
-}
-interface Secret {
-    createSecret: boolean;
-    annotations: PodAnnotations;
-    githubSecret: string;
-    gitlabSecret: string;
-    bitbucketServerSecret: string;
-    bitbucketUUID: string;
-    gogsSecret: string;
-    extra: PodAnnotations;
-    argocdServerTlsConfig: PodAnnotations;
-    argocdServerAdminPassword: string;
-    argocdServerAdminPasswordMtime: string;
-}
-interface KnownHosts {
-    data: Data;
-}
-interface Data {
-    ssh_known_hosts: string;
 }
 interface RepoServer {
     name: string;
@@ -199,35 +173,34 @@ interface RepoServer {
     extraArgs: any[];
     env: any[];
     envFrom: any[];
-    logFormat: string;
-    logLevel: string;
-    podAnnotations: PodAnnotations;
-    podLabels: PodAnnotations;
+    podAnnotations: Annotations;
+    podLabels: Annotations;
     containerPort: number;
     readinessProbe: ReadinessProbe;
     livenessProbe: ReadinessProbe;
     volumeMounts: any[];
     volumes: any[];
-    nodeSelector: PodAnnotations;
+    nodeSelector: Annotations;
     tolerations: any[];
-    affinity: PodAnnotations;
+    affinity: Annotations;
     topologySpreadConstraints: any[];
     priorityClassName: string;
-    containerSecurityContext: PodAnnotations;
-    resources: PodAnnotations;
+    containerSecurityContext: Annotations;
+    resources: Annotations;
     service: Service;
     metrics: Metrics4;
-    clusterAdminAccess: ClusterAdminAccess;
+    clusterAdminAccess: Openshift;
     clusterRoleRules: ClusterRoleRules;
-    serviceAccount: ServiceAccount;
+    serviceAccount: ServiceAccount2;
     extraContainers: any[];
     rbac: any[];
     copyutil: Copyutil;
     initContainers: any[];
     pdb: Pdb;
+    imagePullSecrets: any[];
 }
 interface Copyutil {
-    resources: PodAnnotations;
+    resources: Annotations;
 }
 interface Server {
     name: string;
@@ -235,28 +208,25 @@ interface Server {
     autoscaling: Autoscaling;
     image: Image;
     extraArgs: any[];
-    staticAssets: ClusterAdminAccess;
     env: any[];
     envFrom: any[];
-    lifecycle: PodAnnotations;
-    logFormat: string;
-    logLevel: string;
-    podAnnotations: PodAnnotations;
-    podLabels: PodAnnotations;
+    lifecycle: Annotations;
+    podAnnotations: Annotations;
+    podLabels: Annotations;
     containerPort: number;
     readinessProbe: ReadinessProbe;
     livenessProbe: ReadinessProbe;
     volumeMounts: any[];
     volumes: any[];
-    nodeSelector: PodAnnotations;
+    nodeSelector: Annotations;
     tolerations: any[];
-    affinity: PodAnnotations;
+    affinity: Annotations;
     topologySpreadConstraints: any[];
     priorityClassName: string;
-    containerSecurityContext: PodAnnotations;
-    resources: PodAnnotations;
+    containerSecurityContext: Annotations;
+    resources: Annotations;
     certificate: Certificate;
-    service: Service5;
+    service: Service6;
     metrics: Metrics4;
     serviceAccount: ServiceAccount;
     ingress: Ingress;
@@ -264,13 +234,11 @@ interface Server {
     route: Route;
     configEnabled: boolean;
     config: Config2;
-    configAnnotations: PodAnnotations;
-    rbacConfig: PodAnnotations;
-    rbacConfigAnnotations: PodAnnotations;
+    configAnnotations: Annotations;
+    rbacConfig: Annotations;
+    rbacConfigAnnotations: Annotations;
     rbacConfigCreate: boolean;
-    additionalApplications: any[];
-    additionalProjects: any[];
-    clusterAdminAccess: ClusterAdminAccess;
+    clusterAdminAccess: Openshift;
     GKEbackendConfig: GKEbackendConfig;
     GKEmanagedCertificate: GKEmanagedCertificate;
     GKEfrontendConfig: GKEbackendConfig;
@@ -278,11 +246,12 @@ interface Server {
     initContainers: any[];
     extensions: Extensions;
     pdb: Pdb;
+    imagePullSecrets: any[];
 }
 interface Extensions {
     enabled: boolean;
     image: Image;
-    resources: PodAnnotations;
+    resources: Annotations;
     contents: any[];
 }
 interface GKEmanagedCertificate {
@@ -291,15 +260,18 @@ interface GKEmanagedCertificate {
 }
 interface GKEbackendConfig {
     enabled: boolean;
-    spec: PodAnnotations;
+    spec: Annotations;
 }
 interface Config2 {
     url: string;
     'application.instanceLabelKey': string;
+    'server.rbac.log.enforce.enable': string;
+    'exec.enabled': string;
+    'admin.enabled': string;
 }
 interface Route {
     enabled: boolean;
-    annotations: PodAnnotations;
+    annotations: Annotations;
     hostname: string;
     termination_type: string;
     termination_policy: string;
@@ -307,8 +279,8 @@ interface Route {
 interface IngressGrpc {
     enabled: boolean;
     isAWSALB: boolean;
-    annotations: PodAnnotations;
-    labels: PodAnnotations;
+    annotations: Annotations;
+    labels: Annotations;
     ingressClassName: string;
     awsALB: AwsALB;
     hosts: any[];
@@ -324,8 +296,8 @@ interface AwsALB {
 }
 interface Ingress {
     enabled: boolean;
-    annotations: PodAnnotations;
-    labels: PodAnnotations;
+    annotations: Annotations;
+    labels: Annotations;
     ingressClassName: string;
     hosts: any[];
     paths: string[];
@@ -339,9 +311,9 @@ interface Metrics4 {
     service: Service2;
     serviceMonitor: ServiceMonitor;
 }
-interface Service5 {
-    annotations: PodAnnotations;
-    labels: PodAnnotations;
+interface Service6 {
+    annotations: Annotations;
+    labels: Annotations;
     type: string;
     nodePortHttp: number;
     nodePortHttps: number;
@@ -361,13 +333,21 @@ interface Certificate {
     domain: string;
     duration: string;
     renewBefore: string;
+    privateKey: PrivateKey;
     issuer: Issuer;
     additionalHosts: any[];
     secretName: string;
 }
 interface Issuer {
+    group: string;
     kind: string;
     name: string;
+}
+interface PrivateKey {
+    rotationPolicy: string;
+    encoding: string;
+    algorithm: string;
+    size: number;
 }
 interface Autoscaling {
     enabled: boolean;
@@ -375,27 +355,37 @@ interface Autoscaling {
     maxReplicas: number;
     targetCPUUtilizationPercentage: number;
     targetMemoryUtilizationPercentage: number;
+    behavior: Annotations;
 }
 interface ExternalRedis {
     host: string;
+    username: string;
     password: string;
     port: number;
     existingSecret: string;
+    secretAnnotations: Annotations;
 }
 interface Redisha {
     enabled: boolean;
-    exporter: ClusterAdminAccess;
-    persistentVolume: ClusterAdminAccess;
+    exporter: Openshift;
+    persistentVolume: Openshift;
     redis: Redis2;
     haproxy: Haproxy;
     image: Image2;
+    topologySpreadConstraints: TopologySpreadConstraints;
+}
+interface TopologySpreadConstraints {
+    enabled: boolean;
+    maxSkew: string;
+    topologyKey: string;
+    whenUnsatisfiable: string;
 }
 interface Image2 {
     tag: string;
 }
 interface Haproxy {
     enabled: boolean;
-    metrics: ClusterAdminAccess;
+    metrics: Openshift;
 }
 interface Redis2 {
     masterGroupName: string;
@@ -413,40 +403,45 @@ interface Redis {
     servicePort: number;
     env: any[];
     envFrom: any[];
-    podAnnotations: PodAnnotations;
-    podLabels: PodAnnotations;
-    nodeSelector: PodAnnotations;
+    podAnnotations: Annotations;
+    podLabels: Annotations;
+    nodeSelector: Annotations;
     tolerations: any[];
-    affinity: PodAnnotations;
+    affinity: Annotations;
     topologySpreadConstraints: any[];
     priorityClassName: string;
-    containerSecurityContext: PodAnnotations;
+    containerSecurityContext: Annotations;
     securityContext: SecurityContext;
-    serviceAccount: ServiceAccount;
-    resources: PodAnnotations;
+    serviceAccount: ServiceAccount2;
+    resources: Annotations;
     volumeMounts: any[];
     volumes: any[];
     extraContainers: any[];
     initContainers: any[];
-    service: Service3;
+    service: Service4;
     metrics: Metrics3;
     pdb: Pdb;
+    imagePullSecrets: any[];
 }
 interface Metrics3 {
     enabled: boolean;
     image: Image;
     containerPort: number;
-    resources: PodAnnotations;
-    service: Service4;
+    resources: Annotations;
+    service: Service5;
     serviceMonitor: ServiceMonitor;
 }
-interface Service4 {
+interface Service5 {
     type: string;
     clusterIP: string;
-    annotations: PodAnnotations;
-    labels: PodAnnotations;
+    annotations: Annotations;
+    labels: Annotations;
     servicePort: number;
     portName: string;
+}
+interface Service4 {
+    annotations: Annotations;
+    labels: Annotations;
 }
 interface SecurityContext {
     runAsNonRoot: boolean;
@@ -461,15 +456,13 @@ interface Dex {
     initImage: Image;
     env: any[];
     envFrom: any[];
-    podAnnotations: PodAnnotations;
-    podLabels: PodAnnotations;
+    podAnnotations: Annotations;
+    podLabels: Annotations;
     livenessProbe: LivenessProbe;
     readinessProbe: LivenessProbe;
-    serviceAccount: ServiceAccount;
-    volumeMounts: VolumeMount[];
-    volumes: Volume[];
-    extraVolumes: any[];
-    extraVolumeMounts: any[];
+    serviceAccount: ServiceAccount2;
+    volumeMounts: any[];
+    volumes: any[];
     containerPortHttp: number;
     servicePortHttp: number;
     servicePortHttpName: string;
@@ -478,24 +471,23 @@ interface Dex {
     servicePortGrpcName: string;
     containerPortMetrics: number;
     servicePortMetrics: number;
-    nodeSelector: PodAnnotations;
+    nodeSelector: Annotations;
     tolerations: any[];
-    affinity: PodAnnotations;
+    affinity: Annotations;
     topologySpreadConstraints: any[];
     priorityClassName: string;
-    containerSecurityContext: PodAnnotations;
-    resources: PodAnnotations;
+    containerSecurityContext: Annotations;
+    resources: Annotations;
     extraContainers: any[];
     initContainers: any[];
     pdb: Pdb;
+    imagePullSecrets: any[];
 }
-interface Volume {
+interface ServiceAccount2 {
+    create: boolean;
     name: string;
-    emptyDir: PodAnnotations;
-}
-interface VolumeMount {
-    name: string;
-    mountPath: string;
+    annotations: Annotations;
+    automountServiceAccountToken: boolean;
 }
 interface LivenessProbe {
     enabled: boolean;
@@ -511,54 +503,50 @@ interface Metrics2 {
     serviceMonitor: ServiceMonitor;
 }
 interface Service3 {
-    annotations: PodAnnotations;
-    labels: PodAnnotations;
+    annotations: Annotations;
+    labels: Annotations;
+    portName: string;
 }
 interface Controller {
     name: string;
     image: Image;
     replicas: number;
-    enableStatefulSet: boolean;
-    args: Args;
-    logFormat: string;
-    logLevel: string;
+    args: Annotations;
     extraArgs: any[];
     env: any[];
     envFrom: any[];
-    podAnnotations: PodAnnotations;
-    podLabels: PodAnnotations;
-    containerSecurityContext: PodAnnotations;
+    podAnnotations: Annotations;
+    podLabels: Annotations;
+    containerSecurityContext: Annotations;
     containerPort: number;
     readinessProbe: ReadinessProbe;
     livenessProbe: ReadinessProbe;
     volumeMounts: any[];
     volumes: any[];
     service: Service;
-    nodeSelector: PodAnnotations;
+    nodeSelector: Annotations;
     tolerations: any[];
-    affinity: PodAnnotations;
+    affinity: Annotations;
     topologySpreadConstraints: any[];
     priorityClassName: string;
-    resources: PodAnnotations;
+    resources: Annotations;
     serviceAccount: ServiceAccount;
     metrics: Metrics;
-    clusterAdminAccess: ClusterAdminAccess;
+    clusterAdminAccess: Openshift;
     clusterRoleRules: ClusterRoleRules;
     extraContainers: any[];
     initContainers: any[];
     pdb: Pdb;
+    imagePullSecrets: any[];
 }
 interface Pdb {
-    labels: PodAnnotations;
-    annotations: PodAnnotations;
+    labels: Annotations;
+    annotations: Annotations;
     enabled: boolean;
 }
 interface ClusterRoleRules {
     enabled: boolean;
     rules: any[];
-}
-interface ClusterAdminAccess {
-    enabled: boolean;
 }
 interface Metrics {
     enabled: boolean;
@@ -576,14 +564,17 @@ interface ServiceMonitor {
     interval: string;
     relabelings: any[];
     metricRelabelings: any[];
-    selector: PodAnnotations;
+    selector: Annotations;
+    scheme: string;
+    tlsConfig: Annotations;
     namespace: string;
-    additionalLabels: PodAnnotations;
+    additionalLabels: Annotations;
 }
 interface Service2 {
-    annotations: PodAnnotations;
-    labels: PodAnnotations;
+    annotations: Annotations;
+    labels: Annotations;
     servicePort: number;
+    portName: string;
 }
 interface ApplicationLabels {
     enabled: boolean;
@@ -592,12 +583,13 @@ interface ApplicationLabels {
 interface ServiceAccount {
     create: boolean;
     name: string;
-    annotations: PodAnnotations;
+    annotations: Annotations;
+    labels: Annotations;
     automountServiceAccountToken: boolean;
 }
 interface Service {
-    annotations: PodAnnotations;
-    labels: PodAnnotations;
+    annotations: Annotations;
+    labels: Annotations;
     port: number;
     portName: string;
 }
@@ -608,34 +600,94 @@ interface ReadinessProbe {
     successThreshold: number;
     timeoutSeconds: number;
 }
-interface Args {
-    statusProcessors: string;
-    operationProcessors: string;
-    appResyncPeriod: string;
-    selfHealTimeout: string;
-    repoServerTimeoutSeconds: string;
+interface Configs {
+    clusterCredentials: any[];
+    gpgKeysAnnotations: Annotations;
+    gpgKeys: Annotations;
+    knownHostsAnnotations: Annotations;
+    knownHosts: KnownHosts;
+    tlsCertsAnnotations: Annotations;
+    tlsCerts: Annotations;
+    credentialTemplates: Annotations;
+    credentialTemplatesAnnotations: Annotations;
+    repositories: Annotations;
+    repositoriesAnnotations: Annotations;
+    secret: Secret;
+    styles: string;
+    params: Params;
 }
-interface ApiVersionOverrides {
-    certmanager: string;
-    ingress: string;
+interface Params {
+    annotations: Annotations;
+    'otlp.address': string;
+    'timeout.reconciliation': number;
+    'timeout.hard.reconciliation': number;
+    'controller.status.processors': number;
+    'controller.operation.processors': number;
+    'controller.self.heal.timeout.seconds': number;
+    'controller.repo.server.timeout.seconds': number;
+    'server.insecure': boolean;
+    'server.basehref': string;
+    'server.rootpath': string;
+    'server.staticassets': string;
+    'server.disable.auth': boolean;
+    'server.enable.gzip': boolean;
+    'server.x.frame.options': string;
+    'reposerver.parallelism.limit': number;
+}
+interface Secret {
+    createSecret: boolean;
+    annotations: Annotations;
+    githubSecret: string;
+    gitlabSecret: string;
+    bitbucketServerSecret: string;
+    bitbucketUUID: string;
+    gogsSecret: string;
+    extra: Annotations;
+    argocdServerTlsConfig: Annotations;
+    argocdServerAdminPassword: string;
+    argocdServerAdminPasswordMtime: string;
+}
+interface KnownHosts {
+    data: Data;
+}
+interface Data {
+    ssh_known_hosts: string;
 }
 interface Global {
     image: Image;
-    podAnnotations: PodAnnotations;
-    podLabels: PodAnnotations;
-    securityContext: PodAnnotations;
+    logging: Logging;
+    podAnnotations: Annotations;
+    podLabels: Annotations;
+    securityContext: Annotations;
     imagePullSecrets: any[];
     hostAliases: any[];
-    additionalLabels: PodAnnotations;
+    additionalLabels: Annotations;
     networkPolicy: NetworkPolicy;
 }
 interface NetworkPolicy {
     create: boolean;
     defaultDenyIngress: boolean;
 }
-interface PodAnnotations {}
+interface Logging {
+    format: string;
+    level: string;
+}
 interface Image {
     repository: string;
     tag: string;
     imagePullPolicy: string;
+}
+interface Crds {
+    install: boolean;
+    keep: boolean;
+    annotations: Annotations;
+}
+interface Annotations {}
+interface Openshift {
+    enabled: boolean;
+}
+interface ApiVersionOverrides {
+    certmanager: string;
+    ingress: string;
+    autoscaling: string;
 }

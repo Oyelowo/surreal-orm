@@ -1,11 +1,11 @@
-import { ILinkerd2linkerd } from '../../../generatedHelmChartsTsTypes/linkerd2Linkerd.js';
+import { ILinkerdcontrolplanelinkerd } from '../../../generatedHelmChartsTsTypes/linkerdControlPlaneLinkerd.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { linkerdProvider } from './settings.js';
 
-const Linkerd2Values: DeepPartial<ILinkerd2linkerd> = {
+const Linkerd2Values: DeepPartial<ILinkerdcontrolplanelinkerd> = {
     podAnnotations: {
         // 'sealedsecrets.bitnami.com/managed': 'true',
     },
@@ -20,11 +20,11 @@ const Linkerd2Values: DeepPartial<ILinkerd2linkerd> = {
 const {
     repo,
     charts: {
-        linkerd2: { chart, version },
+        linkerdCrds: { chart, version },
     },
 } = helmChartsInfo.linkerd;
 
-export const linkerd = new k8s.helm.v3.Chart(
+export const linkerdControlPlane = new k8s.helm.v3.Chart(
     chart,
     {
         chart,

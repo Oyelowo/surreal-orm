@@ -69,6 +69,7 @@ interface Cainjector {
     podAnnotations: CommonLabels;
     lifecycleHooks: CommonLabels;
     updateStrategy: UpdateStrategy;
+    extraArgs: any[];
     extraEnvVars: any[];
     extraEnvVarsCM: string;
     extraEnvVarsSecret: string;
@@ -108,6 +109,7 @@ interface Webhook {
     podAnnotations: CommonLabels;
     lifecycleHooks: CommonLabels;
     updateStrategy: UpdateStrategy;
+    extraArgs: any[];
     extraEnvVars: any[];
     extraEnvVarsCM: string;
     extraEnvVarsSecret: string;
@@ -153,6 +155,7 @@ interface Controller {
     dnsConfig: CommonLabels;
     lifecycleHooks: CommonLabels;
     updateStrategy: UpdateStrategy;
+    extraArgs: any[];
     extraEnvVars: any[];
     extraEnvVarsCM: string;
     extraEnvVarsSecret: string;
@@ -197,6 +200,7 @@ interface Image {
     registry: string;
     repository: string;
     tag: string;
+    digest: string;
     pullPolicy: string;
     pullSecrets: any[];
     debug: boolean;

@@ -5,10 +5,12 @@ import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "../../utilities";
 
 // Export members:
+export * from "./httproute";
 export * from "./server";
 export * from "./serverAuthorization";
 
 // Import resources to register:
+import { HTTPRoute } from "./httproute";
 import { Server } from "./server";
 import { ServerAuthorization } from "./serverAuthorization";
 
@@ -16,6 +18,8 @@ const _module = {
     version: utilities.getVersion(),
     construct: (name: string, type: string, urn: string): pulumi.Resource => {
         switch (type) {
+            case "kubernetes:policy.linkerd.io/v1beta1:HTTPRoute":
+                return new HTTPRoute(name, <any>undefined, { urn })
             case "kubernetes:policy.linkerd.io/v1beta1:Server":
                 return new Server(name, <any>undefined, { urn })
             case "kubernetes:policy.linkerd.io/v1beta1:ServerAuthorization":

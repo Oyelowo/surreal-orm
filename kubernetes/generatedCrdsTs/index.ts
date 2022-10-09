@@ -12,10 +12,10 @@ import * as acme from "./acme";
 import * as argoproj from "./argoproj";
 import * as bitnami from "./bitnami";
 import * as certmanager from "./certmanager";
+import * as fluvio from "./fluvio";
 import * as linkerd from "./linkerd";
 import * as pingcap from "./pingcap";
 import * as policy from "./policy";
-import * as split from "./split";
 import * as trust from "./trust";
 import * as types from "./types";
 
@@ -24,10 +24,10 @@ export {
     argoproj,
     bitnami,
     certmanager,
+    fluvio,
     linkerd,
     pingcap,
     policy,
-    split,
     trust,
     types,
 };
