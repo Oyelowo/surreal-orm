@@ -12,6 +12,7 @@ export const namespaceSchema = z.union([
     z.literal('seaweedfs'),
     z.literal('fluvio-sys'),
     z.literal('rook-ceph'),
+    z.literal('metalb'),
 ]);
 
 export type Namespace = z.infer<typeof namespaceSchema>;
@@ -30,5 +31,6 @@ export const namespaces: Record<CamelCase<Namespace>, Namespace> = {
     seaweedfs: 'seaweedfs',
     fluvioSys: 'fluvio-sys',
     rookCeph: 'rook-ceph',
+    metalb: 'metalb',
     // infrastructure: "infrastructure",
 } as const;

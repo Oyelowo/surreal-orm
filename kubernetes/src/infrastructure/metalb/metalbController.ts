@@ -1,21 +1,21 @@
-import { ITidboperatorpingcap } from '../../../generatedHelmChartsTsTypes/tidbOperatorPingcap.js';
+import { IMetallbbitnami } from '../../../generatedHelmChartsTsTypes/metallbBitnami.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
-import { fluvioSysProvider } from './settings.js';
+import { metalbProvider } from './settings.js';
 
-const fluvioSysValues: DeepPartial<ITidboperatorpingcap> = {};
+const metalbOperatValues: DeepPartial<IMetallbbitnami> = {};
 
 // `http://${name}.${namespace}:${port}`;
 const {
     repo,
     charts: {
-        fluvioSys: { chart, version },
+        metalb: { chart, version },
     },
-} = helmChartsInfo.oyelowo;
+} = helmChartsInfo.bitnami;
 
-export const fluvioSys = new k8s.helm.v3.Chart(
+export const metalbController = new k8s.helm.v3.Chart(
     chart,
     {
         chart,
@@ -23,12 +23,12 @@ export const fluvioSys = new k8s.helm.v3.Chart(
             repo,
         },
         version,
-        values: fluvioSysValues,
-        namespace: namespaces.fluvioSys,
+        values: metalbOperatValues,
+        namespace: namespaces.metalb,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being
         // available.
         skipAwait: false,
     },
-    { provider: fluvioSysProvider }
+    { provider: metalbProvider }
 );
