@@ -1,4 +1,4 @@
-type Repo = 'oyelowo' | 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'sealedSecrets' | 'argo';
+type Repo = 'oyelowo' | 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'sealedSecrets' | 'argo' | 'rookCeph';
 
 type ChartInfo = {
     chart: string;
@@ -153,6 +153,24 @@ export const helmChartsInfo = {
                 skipCrdRender: false,
             },
         },
+    },
+    rookCeph: {
+        repo: 'https://charts.rook.io/release',
+        charts: {
+            rookCephOperator: {
+                chart: 'rook-ceph',
+                version: 'v1.10.3',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
+            rookCephCluster: {
+                chart: 'rook-ceph-cluster',
+                version: 'v1.10.3',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
+
+        }
     },
     argo: {
         repo: 'https://argoproj.github.io/argo-helm',
