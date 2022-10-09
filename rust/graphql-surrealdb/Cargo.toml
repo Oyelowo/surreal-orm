@@ -1,0 +1,119 @@
+[package]
+edition = "2021"
+name = "graphql-surrealdb"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+common = { path = "../common" }
+my-macros = { path = "../my-macros" }
+surrealdb = "1.0.0-beta.8"
+poem = { version = "1.3.45", features = [
+  "redis-session",
+  "session",
+  "websocket",
+  "prometheus",
+  "multipart",
+  "cookie",
+  "compression",
+  "sse",
+  "i18n",
+  "test",
+  "anyhow",
+  # "eyre",
+  "tokio-metrics",
+  "opentelemetry",
+  "opentelemetry-http",
+] }
+poem-openapi = { version = "2.0", features = ["swagger-ui"] }
+
+async-graphql = { version = "4.0.15", features = [
+  "apollo_tracing",
+  "apollo_persisted_queries",
+  "bson",
+  "dataloader",
+  "chrono",
+  "chrono-tz",
+  "log",
+  "dataloader",
+  "tracing",
+  "opentelemetry",
+  "unblock",
+  "url",
+  "uuid",
+  "string_number",
+  "secrecy",
+  "decimal",
+  "smol_str",
+] }
+
+async-graphql-poem = "4.0.15"
+futures = "0.3.24"
+futures-util = "0.3.24"
+tokio = { version = "1.21.2", features = ["full"] }
+redis = { version = "0.21.6", features = [
+  "tokio-comp",
+  "tokio-native-tls-comp",
+] }
+oauth2 = "4.2.3"
+reqwest = { version = "0.11.12", default-features = false, features = [
+  "rustls-tls",
+] }
+
+bson = "2.4.0"
+# chrono = "0.4.19"
+chrono = { version = "0.4.22", features = ["serde"] }
+chrono-tz = "0.6.3"
+serde = { version = "1.0.145", features = ["derive"] }
+serde_json = "1.0.85"
+slab = "0.4.7"
+typed-builder = "0.10.0"
+url = "2.3.1"
+uuid = "1.2.1"
+validator = { version = "0.16.0", features = ["derive"] }
+wither = { git = "https://github.com/Oyelowo/wither", branch = "master" }
+# Observability
+tracing = "0.1.37"
+tracing-subscriber = "0.3.16"
+
+lru = { version = "0.7.8" }
+# lru = { version = "0.7.8", optional = true }
+multimap = "0.8.3"
+
+anyhow = "1.0.65"
+argon2 = { version = "0.4.1", features = ["std"] }
+convert_case = "0.5.0"
+env_logger = "0.9.1"
+envy = "0.4.2"
+# hmac = "0.12.1"
+# sha2 = "0.10.2"
+log = "0.4.17"
+rand = "0.8.5"
+secrecy = "0.8.0"
+thiserror = "1.0.37"
+urlencoding = "2.1.2"
+lazy_static = "1.4.0"
+
+async-trait = "0.1.57"
+config = "0.13.2"
+crossbeam = "0.8.2"
+derive_more = "0.99.17"
+parking_lot = "0.12.1"
+rayon = "1.5.3"
+ron = "0.7.1"
+serde-aux = "3.1.0"
+# ts-rs = "6.1"
+ts-rs = { version = "6.2.0", features = [
+  "uuid-impl",
+  "chrono-impl",
+  "serde-compat",
+] }
+
+backoff = { version = "0.4.0", features = ["futures", "tokio"] }
+
+[dev-dependencies]
+strum = "0.24.1"
+strum_macros = "0.24"
+# You can also use the "derive" feature, and import the macros directly from "strum"
+# strum = { version = "0.24", features = ["derive"] }

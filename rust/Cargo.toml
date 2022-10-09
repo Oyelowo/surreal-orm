@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "graphql-surrealdb",
     "graphql-mongo",
     "graphql-postgres",
     "grpc-mongo",
