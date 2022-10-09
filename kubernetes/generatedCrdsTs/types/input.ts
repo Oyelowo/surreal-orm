@@ -22366,6 +22366,586 @@ export namespace linkerd {
     }
 }
 
+export namespace metallb {
+    export namespace v1alpha1 {
+        /**
+         * AddressPoolSpec defines the desired state of AddressPool.
+         */
+        export interface AddressPoolSpecArgs {
+            /**
+             * A list of IP address ranges over which MetalLB has authority. You can list multiple ranges in a single pool, they will all share the same settings. Each range can be either a CIDR prefix, or an explicit start-end range of IPs.
+             */
+            addresses: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * AutoAssign flag used to prevent MetallB from automatic allocation for a pool.
+             */
+            autoAssign?: pulumi.Input<boolean>;
+            /**
+             * When an IP is allocated from this pool, how should it be translated into BGP announcements?
+             */
+            bgpAdvertisements?: pulumi.Input<pulumi.Input<inputs.metallb.v1alpha1.AddressPoolSpecBgpadvertisementsArgs>[]>;
+            /**
+             * Protocol can be used to select how the announcement is done.
+             */
+            protocol: pulumi.Input<string>;
+        }
+        /**
+         * addressPoolSpecArgsProvideDefaults sets the appropriate defaults for AddressPoolSpecArgs
+         */
+        export function addressPoolSpecArgsProvideDefaults(val: AddressPoolSpecArgs): AddressPoolSpecArgs {
+            return {
+                ...val,
+                autoAssign: (val.autoAssign) ?? true,
+            };
+        }
+
+        export interface AddressPoolSpecBgpadvertisementsArgs {
+            /**
+             * The aggregation-length advertisement option lets you “roll up” the /32s into a larger prefix.
+             */
+            aggregationLength?: pulumi.Input<number>;
+            /**
+             * Optional, defaults to 128 (i.e. no aggregation) if not specified.
+             */
+            aggregationLengthV6?: pulumi.Input<number>;
+            /**
+             * BGP communities
+             */
+            communities?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * BGP LOCAL_PREF attribute which is used by BGP best path algorithm, Path with higher localpref is preferred over one with lower localpref.
+             */
+            localPref?: pulumi.Input<number>;
+        }
+        /**
+         * addressPoolSpecBgpadvertisementsArgsProvideDefaults sets the appropriate defaults for AddressPoolSpecBgpadvertisementsArgs
+         */
+        export function addressPoolSpecBgpadvertisementsArgsProvideDefaults(val: AddressPoolSpecBgpadvertisementsArgs): AddressPoolSpecBgpadvertisementsArgs {
+            return {
+                ...val,
+                aggregationLength: (val.aggregationLength) ?? 32,
+                aggregationLengthV6: (val.aggregationLengthV6) ?? 128,
+            };
+        }
+
+    }
+
+    export namespace v1beta1 {
+        /**
+         * AddressPoolSpec defines the desired state of AddressPool.
+         */
+        export interface AddressPoolSpecArgs {
+            /**
+             * A list of IP address ranges over which MetalLB has authority. You can list multiple ranges in a single pool, they will all share the same settings. Each range can be either a CIDR prefix, or an explicit start-end range of IPs.
+             */
+            addresses: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * AutoAssign flag used to prevent MetallB from automatic allocation for a pool.
+             */
+            autoAssign?: pulumi.Input<boolean>;
+            /**
+             * Drives how an IP allocated from this pool should translated into BGP announcements.
+             */
+            bgpAdvertisements?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta1.AddressPoolSpecBgpadvertisementsArgs>[]>;
+            /**
+             * Protocol can be used to select how the announcement is done.
+             */
+            protocol: pulumi.Input<string>;
+        }
+        /**
+         * addressPoolSpecArgsProvideDefaults sets the appropriate defaults for AddressPoolSpecArgs
+         */
+        export function addressPoolSpecArgsProvideDefaults(val: AddressPoolSpecArgs): AddressPoolSpecArgs {
+            return {
+                ...val,
+                autoAssign: (val.autoAssign) ?? true,
+            };
+        }
+
+        export interface AddressPoolSpecBgpadvertisementsArgs {
+            /**
+             * The aggregation-length advertisement option lets you “roll up” the /32s into a larger prefix.
+             */
+            aggregationLength?: pulumi.Input<number>;
+            /**
+             * Optional, defaults to 128 (i.e. no aggregation) if not specified.
+             */
+            aggregationLengthV6?: pulumi.Input<number>;
+            /**
+             * BGP communities to be associated with the given advertisement.
+             */
+            communities?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * BGP LOCAL_PREF attribute which is used by BGP best path algorithm, Path with higher localpref is preferred over one with lower localpref.
+             */
+            localPref?: pulumi.Input<number>;
+        }
+        /**
+         * addressPoolSpecBgpadvertisementsArgsProvideDefaults sets the appropriate defaults for AddressPoolSpecBgpadvertisementsArgs
+         */
+        export function addressPoolSpecBgpadvertisementsArgsProvideDefaults(val: AddressPoolSpecBgpadvertisementsArgs): AddressPoolSpecBgpadvertisementsArgs {
+            return {
+                ...val,
+                aggregationLength: (val.aggregationLength) ?? 32,
+                aggregationLengthV6: (val.aggregationLengthV6) ?? 128,
+            };
+        }
+
+        /**
+         * BFDProfileSpec defines the desired state of BFDProfile.
+         */
+        export interface BFDProfileSpecArgs {
+            /**
+             * Configures the detection multiplier to determine packet loss. The remote transmission interval will be multiplied by this value to determine the connection loss detection timer.
+             */
+            detectMultiplier?: pulumi.Input<number>;
+            /**
+             * Configures the minimal echo receive transmission interval that this system is capable of handling in milliseconds. Defaults to 50ms
+             */
+            echoInterval?: pulumi.Input<number>;
+            /**
+             * Enables or disables the echo transmission mode. This mode is disabled by default, and not supported on multi hops setups.
+             */
+            echoMode?: pulumi.Input<boolean>;
+            /**
+             * For multi hop sessions only: configure the minimum expected TTL for an incoming BFD control packet.
+             */
+            minimumTtl?: pulumi.Input<number>;
+            /**
+             * Mark session as passive: a passive session will not attempt to start the connection and will wait for control packets from peer before it begins replying.
+             */
+            passiveMode?: pulumi.Input<boolean>;
+            /**
+             * The minimum interval that this system is capable of receiving control packets in milliseconds. Defaults to 300ms.
+             */
+            receiveInterval?: pulumi.Input<number>;
+            /**
+             * The minimum transmission interval (less jitter) that this system wants to use to send BFD control packets in milliseconds. Defaults to 300ms
+             */
+            transmitInterval?: pulumi.Input<number>;
+        }
+
+        /**
+         * BGPAdvertisementSpec defines the desired state of BGPAdvertisement.
+         */
+        export interface BGPAdvertisementSpecArgs {
+            /**
+             * The aggregation-length advertisement option lets you “roll up” the /32s into a larger prefix. Defaults to 32. Works for IPv4 addresses.
+             */
+            aggregationLength?: pulumi.Input<number>;
+            /**
+             * The aggregation-length advertisement option lets you “roll up” the /128s into a larger prefix. Defaults to 128. Works for IPv6 addresses.
+             */
+            aggregationLengthV6?: pulumi.Input<number>;
+            /**
+             * The BGP communities to be associated with the announcement. Each item can be a community of the form 1234:1234 or the name of an alias defined in the Community CRD.
+             */
+            communities?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * A selector for the IPAddressPools which would get advertised via this advertisement. If no IPAddressPool is selected by this or by the list, the advertisement is applied to all the IPAddressPools.
+             */
+            ipAddressPoolSelectors?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta1.BGPAdvertisementSpecIpaddresspoolselectorsArgs>[]>;
+            /**
+             * The list of IPAddressPools to advertise via this advertisement, selected by name.
+             */
+            ipAddressPools?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * The BGP LOCAL_PREF attribute which is used by BGP best path algorithm, Path with higher localpref is preferred over one with lower localpref.
+             */
+            localPref?: pulumi.Input<number>;
+            /**
+             * NodeSelectors allows to limit the nodes to announce as next hops for the LoadBalancer IP. When empty, all the nodes having  are announced as next hops.
+             */
+            nodeSelectors?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta1.BGPAdvertisementSpecNodeselectorsArgs>[]>;
+            /**
+             * Peers limits the bgppeer to advertise the ips of the selected pools to. When empty, the loadbalancer IP is announced to all the BGPPeers configured.
+             */
+            peers?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+        /**
+         * bgpadvertisementSpecArgsProvideDefaults sets the appropriate defaults for BGPAdvertisementSpecArgs
+         */
+        export function bgpadvertisementSpecArgsProvideDefaults(val: BGPAdvertisementSpecArgs): BGPAdvertisementSpecArgs {
+            return {
+                ...val,
+                aggregationLength: (val.aggregationLength) ?? 32,
+                aggregationLengthV6: (val.aggregationLengthV6) ?? 128,
+            };
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface BGPAdvertisementSpecIpaddresspoolselectorsArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta1.BGPAdvertisementSpecIpaddresspoolselectorsMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface BGPAdvertisementSpecIpaddresspoolselectorsMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface BGPAdvertisementSpecNodeselectorsArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta1.BGPAdvertisementSpecNodeselectorsMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface BGPAdvertisementSpecNodeselectorsMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * BGPPeerSpec defines the desired state of Peer.
+         */
+        export interface BGPPeerSpecArgs {
+            bfdProfile?: pulumi.Input<string>;
+            /**
+             * EBGP peer is multi-hops away
+             */
+            ebgpMultiHop?: pulumi.Input<boolean>;
+            /**
+             * Requested BGP hold time, per RFC4271.
+             */
+            holdTime?: pulumi.Input<string>;
+            /**
+             * Requested BGP keepalive time, per RFC4271.
+             */
+            keepaliveTime?: pulumi.Input<string>;
+            /**
+             * AS number to use for the local end of the session.
+             */
+            myASN: pulumi.Input<number>;
+            /**
+             * Only connect to this peer on nodes that match one of these selectors.
+             */
+            nodeSelectors?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta1.BGPPeerSpecNodeselectorsArgs>[]>;
+            /**
+             * Authentication password for routers enforcing TCP MD5 authenticated sessions
+             */
+            password?: pulumi.Input<string>;
+            /**
+             * AS number to expect from the remote end of the session.
+             */
+            peerASN: pulumi.Input<number>;
+            /**
+             * Address to dial when establishing the session.
+             */
+            peerAddress: pulumi.Input<string>;
+            /**
+             * Port to dial when establishing the session.
+             */
+            peerPort?: pulumi.Input<number>;
+            /**
+             * BGP router ID to advertise to the peer
+             */
+            routerID?: pulumi.Input<string>;
+            /**
+             * Source address to use when establishing the session.
+             */
+            sourceAddress?: pulumi.Input<string>;
+        }
+
+        export interface BGPPeerSpecNodeselectorsArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta1.BGPPeerSpecNodeselectorsMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface BGPPeerSpecNodeselectorsMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * CommunitySpec defines the desired state of Community.
+         */
+        export interface CommunitySpecArgs {
+            communities?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta1.CommunitySpecCommunitiesArgs>[]>;
+        }
+
+        export interface CommunitySpecCommunitiesArgs {
+            /**
+             * The name of the alias for the community.
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * The BGP community value corresponding to the given name.
+             */
+            value?: pulumi.Input<string>;
+        }
+
+        /**
+         * IPAddressPoolSpec defines the desired state of IPAddressPool.
+         */
+        export interface IPAddressPoolSpecArgs {
+            /**
+             * A list of IP address ranges over which MetalLB has authority. You can list multiple ranges in a single pool, they will all share the same settings. Each range can be either a CIDR prefix, or an explicit start-end range of IPs.
+             */
+            addresses: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * AutoAssign flag used to prevent MetallB from automatic allocation for a pool.
+             */
+            autoAssign?: pulumi.Input<boolean>;
+            /**
+             * AvoidBuggyIPs prevents addresses ending with .0 and .255 to be used by a pool.
+             */
+            avoidBuggyIPs?: pulumi.Input<boolean>;
+        }
+        /**
+         * ipaddressPoolSpecArgsProvideDefaults sets the appropriate defaults for IPAddressPoolSpecArgs
+         */
+        export function ipaddressPoolSpecArgsProvideDefaults(val: IPAddressPoolSpecArgs): IPAddressPoolSpecArgs {
+            return {
+                ...val,
+                autoAssign: (val.autoAssign) ?? true,
+                avoidBuggyIPs: (val.avoidBuggyIPs) ?? false,
+            };
+        }
+
+        /**
+         * L2AdvertisementSpec defines the desired state of L2Advertisement.
+         */
+        export interface L2AdvertisementSpecArgs {
+            /**
+             * A selector for the IPAddressPools which would get advertised via this advertisement. If no IPAddressPool is selected by this or by the list, the advertisement is applied to all the IPAddressPools.
+             */
+            ipAddressPoolSelectors?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta1.L2AdvertisementSpecIpaddresspoolselectorsArgs>[]>;
+            /**
+             * The list of IPAddressPools to advertise via this advertisement, selected by name.
+             */
+            ipAddressPools?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * NodeSelectors allows to limit the nodes to announce as next hops for the LoadBalancer IP. When empty, all the nodes having  are announced as next hops.
+             */
+            nodeSelectors?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta1.L2AdvertisementSpecNodeselectorsArgs>[]>;
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface L2AdvertisementSpecIpaddresspoolselectorsArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta1.L2AdvertisementSpecIpaddresspoolselectorsMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface L2AdvertisementSpecIpaddresspoolselectorsMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface L2AdvertisementSpecNodeselectorsArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta1.L2AdvertisementSpecNodeselectorsMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface L2AdvertisementSpecNodeselectorsMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+    }
+
+    export namespace v1beta2 {
+        /**
+         * BGPPeerSpec defines the desired state of Peer.
+         */
+        export interface BGPPeerSpecArgs {
+            /**
+             * The name of the BFD Profile to be used for the BFD session associated to the BGP session. If not set, the BFD session won't be set up.
+             */
+            bfdProfile?: pulumi.Input<string>;
+            /**
+             * To set if the BGPPeer is multi-hops away. Needed for FRR mode only.
+             */
+            ebgpMultiHop?: pulumi.Input<boolean>;
+            /**
+             * Requested BGP hold time, per RFC4271.
+             */
+            holdTime?: pulumi.Input<string>;
+            /**
+             * Requested BGP keepalive time, per RFC4271.
+             */
+            keepaliveTime?: pulumi.Input<string>;
+            /**
+             * AS number to use for the local end of the session.
+             */
+            myASN: pulumi.Input<number>;
+            /**
+             * Only connect to this peer on nodes that match one of these selectors.
+             */
+            nodeSelectors?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta2.BGPPeerSpecNodeselectorsArgs>[]>;
+            /**
+             * Authentication password for routers enforcing TCP MD5 authenticated sessions
+             */
+            password?: pulumi.Input<string>;
+            /**
+             * passwordSecret is name of the authentication secret for BGP Peer. the secret must be of type "kubernetes.io/basic-auth", and created in the same namespace as the MetalLB deployment. The password is stored in the secret as the key "password".
+             */
+            passwordSecret?: pulumi.Input<inputs.metallb.v1beta2.BGPPeerSpecPasswordsecretArgs>;
+            /**
+             * AS number to expect from the remote end of the session.
+             */
+            peerASN: pulumi.Input<number>;
+            /**
+             * Address to dial when establishing the session.
+             */
+            peerAddress: pulumi.Input<string>;
+            /**
+             * Port to dial when establishing the session.
+             */
+            peerPort?: pulumi.Input<number>;
+            /**
+             * BGP router ID to advertise to the peer
+             */
+            routerID?: pulumi.Input<string>;
+            /**
+             * Source address to use when establishing the session.
+             */
+            sourceAddress?: pulumi.Input<string>;
+        }
+        /**
+         * bgppeerSpecArgsProvideDefaults sets the appropriate defaults for BGPPeerSpecArgs
+         */
+        export function bgppeerSpecArgsProvideDefaults(val: BGPPeerSpecArgs): BGPPeerSpecArgs {
+            return {
+                ...val,
+                peerPort: (val.peerPort) ?? 179,
+            };
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface BGPPeerSpecNodeselectorsArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.metallb.v1beta2.BGPPeerSpecNodeselectorsMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface BGPPeerSpecNodeselectorsMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * passwordSecret is name of the authentication secret for BGP Peer. the secret must be of type "kubernetes.io/basic-auth", and created in the same namespace as the MetalLB deployment. The password is stored in the secret as the key "password".
+         */
+        export interface BGPPeerSpecPasswordsecretArgs {
+            /**
+             * Name is unique within a namespace to reference a secret resource.
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * Namespace defines the space within which the secret name must be unique.
+             */
+            namespace?: pulumi.Input<string>;
+        }
+
+    }
+}
+
 export namespace objectbucket {
     export namespace v1alpha1 {
         export interface ObjectBucketClaimSpecArgs {

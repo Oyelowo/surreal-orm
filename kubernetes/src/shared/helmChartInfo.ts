@@ -59,18 +59,6 @@ export const helmChartsInfo = {
     bitnami: {
         repo: 'https://charts.bitnami.com/bitnami',
         charts: {
-            redis: {
-                chart: 'redis',
-                version: '17.3.2',
-                externalCrds: [] as string[],
-                skipCrdRender: false,
-            },
-            mongodb: {
-                chart: 'mongodb',
-                version: '11.1.10',
-                externalCrds: [] as string[],
-                skipCrdRender: false,
-            },
             certManager: {
                 chart: 'cert-manager',
                 version: '0.8.4',
@@ -86,6 +74,24 @@ export const helmChartsInfo = {
             argocd: {
                 chart: 'argo-cd',
                 version: '4.2.3',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
+            metalb: {
+                chart: 'metallb',
+                version: '4.1.5',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
+            redis: {
+                chart: 'redis',
+                version: '17.3.2',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
+            mongodb: {
+                chart: 'mongodb',
+                version: '11.1.10',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
@@ -182,5 +188,5 @@ export const helmChartsInfo = {
                 skipCrdRender: false,
             },
         },
-    },
+    }
 }  satisfies ChartsInfo;

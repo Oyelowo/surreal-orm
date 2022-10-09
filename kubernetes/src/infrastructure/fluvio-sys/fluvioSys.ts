@@ -5,9 +5,7 @@ import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { fluvioSysProvider } from './settings.js';
 
-const fluvioSysValues: DeepPartial<ITidboperatorpingcap> = {
-    // advancedStatefulset : {}
-};
+const fluvioSysValues: DeepPartial<ITidboperatorpingcap> = {};
 
 // `http://${name}.${namespace}:${port}`;
 const {

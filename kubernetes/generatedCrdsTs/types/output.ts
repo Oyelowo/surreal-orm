@@ -22367,6 +22367,586 @@ export namespace linkerd {
     }
 }
 
+export namespace metallb {
+    export namespace v1alpha1 {
+        /**
+         * AddressPoolSpec defines the desired state of AddressPool.
+         */
+        export interface AddressPoolSpec {
+            /**
+             * A list of IP address ranges over which MetalLB has authority. You can list multiple ranges in a single pool, they will all share the same settings. Each range can be either a CIDR prefix, or an explicit start-end range of IPs.
+             */
+            addresses: string[];
+            /**
+             * AutoAssign flag used to prevent MetallB from automatic allocation for a pool.
+             */
+            autoAssign?: boolean;
+            /**
+             * When an IP is allocated from this pool, how should it be translated into BGP announcements?
+             */
+            bgpAdvertisements?: outputs.metallb.v1alpha1.AddressPoolSpecBgpadvertisements[];
+            /**
+             * Protocol can be used to select how the announcement is done.
+             */
+            protocol: string;
+        }
+        /**
+         * addressPoolSpecProvideDefaults sets the appropriate defaults for AddressPoolSpec
+         */
+        export function addressPoolSpecProvideDefaults(val: AddressPoolSpec): AddressPoolSpec {
+            return {
+                ...val,
+                autoAssign: (val.autoAssign) ?? true,
+            };
+        }
+
+        export interface AddressPoolSpecBgpadvertisements {
+            /**
+             * The aggregation-length advertisement option lets you “roll up” the /32s into a larger prefix.
+             */
+            aggregationLength?: number;
+            /**
+             * Optional, defaults to 128 (i.e. no aggregation) if not specified.
+             */
+            aggregationLengthV6?: number;
+            /**
+             * BGP communities
+             */
+            communities?: string[];
+            /**
+             * BGP LOCAL_PREF attribute which is used by BGP best path algorithm, Path with higher localpref is preferred over one with lower localpref.
+             */
+            localPref?: number;
+        }
+        /**
+         * addressPoolSpecBgpadvertisementsProvideDefaults sets the appropriate defaults for AddressPoolSpecBgpadvertisements
+         */
+        export function addressPoolSpecBgpadvertisementsProvideDefaults(val: AddressPoolSpecBgpadvertisements): AddressPoolSpecBgpadvertisements {
+            return {
+                ...val,
+                aggregationLength: (val.aggregationLength) ?? 32,
+                aggregationLengthV6: (val.aggregationLengthV6) ?? 128,
+            };
+        }
+
+    }
+
+    export namespace v1beta1 {
+        /**
+         * AddressPoolSpec defines the desired state of AddressPool.
+         */
+        export interface AddressPoolSpec {
+            /**
+             * A list of IP address ranges over which MetalLB has authority. You can list multiple ranges in a single pool, they will all share the same settings. Each range can be either a CIDR prefix, or an explicit start-end range of IPs.
+             */
+            addresses: string[];
+            /**
+             * AutoAssign flag used to prevent MetallB from automatic allocation for a pool.
+             */
+            autoAssign?: boolean;
+            /**
+             * Drives how an IP allocated from this pool should translated into BGP announcements.
+             */
+            bgpAdvertisements?: outputs.metallb.v1beta1.AddressPoolSpecBgpadvertisements[];
+            /**
+             * Protocol can be used to select how the announcement is done.
+             */
+            protocol: string;
+        }
+        /**
+         * addressPoolSpecProvideDefaults sets the appropriate defaults for AddressPoolSpec
+         */
+        export function addressPoolSpecProvideDefaults(val: AddressPoolSpec): AddressPoolSpec {
+            return {
+                ...val,
+                autoAssign: (val.autoAssign) ?? true,
+            };
+        }
+
+        export interface AddressPoolSpecBgpadvertisements {
+            /**
+             * The aggregation-length advertisement option lets you “roll up” the /32s into a larger prefix.
+             */
+            aggregationLength?: number;
+            /**
+             * Optional, defaults to 128 (i.e. no aggregation) if not specified.
+             */
+            aggregationLengthV6?: number;
+            /**
+             * BGP communities to be associated with the given advertisement.
+             */
+            communities?: string[];
+            /**
+             * BGP LOCAL_PREF attribute which is used by BGP best path algorithm, Path with higher localpref is preferred over one with lower localpref.
+             */
+            localPref?: number;
+        }
+        /**
+         * addressPoolSpecBgpadvertisementsProvideDefaults sets the appropriate defaults for AddressPoolSpecBgpadvertisements
+         */
+        export function addressPoolSpecBgpadvertisementsProvideDefaults(val: AddressPoolSpecBgpadvertisements): AddressPoolSpecBgpadvertisements {
+            return {
+                ...val,
+                aggregationLength: (val.aggregationLength) ?? 32,
+                aggregationLengthV6: (val.aggregationLengthV6) ?? 128,
+            };
+        }
+
+        /**
+         * BFDProfileSpec defines the desired state of BFDProfile.
+         */
+        export interface BFDProfileSpec {
+            /**
+             * Configures the detection multiplier to determine packet loss. The remote transmission interval will be multiplied by this value to determine the connection loss detection timer.
+             */
+            detectMultiplier?: number;
+            /**
+             * Configures the minimal echo receive transmission interval that this system is capable of handling in milliseconds. Defaults to 50ms
+             */
+            echoInterval?: number;
+            /**
+             * Enables or disables the echo transmission mode. This mode is disabled by default, and not supported on multi hops setups.
+             */
+            echoMode?: boolean;
+            /**
+             * For multi hop sessions only: configure the minimum expected TTL for an incoming BFD control packet.
+             */
+            minimumTtl?: number;
+            /**
+             * Mark session as passive: a passive session will not attempt to start the connection and will wait for control packets from peer before it begins replying.
+             */
+            passiveMode?: boolean;
+            /**
+             * The minimum interval that this system is capable of receiving control packets in milliseconds. Defaults to 300ms.
+             */
+            receiveInterval?: number;
+            /**
+             * The minimum transmission interval (less jitter) that this system wants to use to send BFD control packets in milliseconds. Defaults to 300ms
+             */
+            transmitInterval?: number;
+        }
+
+        /**
+         * BGPAdvertisementSpec defines the desired state of BGPAdvertisement.
+         */
+        export interface BGPAdvertisementSpec {
+            /**
+             * The aggregation-length advertisement option lets you “roll up” the /32s into a larger prefix. Defaults to 32. Works for IPv4 addresses.
+             */
+            aggregationLength?: number;
+            /**
+             * The aggregation-length advertisement option lets you “roll up” the /128s into a larger prefix. Defaults to 128. Works for IPv6 addresses.
+             */
+            aggregationLengthV6?: number;
+            /**
+             * The BGP communities to be associated with the announcement. Each item can be a community of the form 1234:1234 or the name of an alias defined in the Community CRD.
+             */
+            communities?: string[];
+            /**
+             * A selector for the IPAddressPools which would get advertised via this advertisement. If no IPAddressPool is selected by this or by the list, the advertisement is applied to all the IPAddressPools.
+             */
+            ipAddressPoolSelectors?: outputs.metallb.v1beta1.BGPAdvertisementSpecIpaddresspoolselectors[];
+            /**
+             * The list of IPAddressPools to advertise via this advertisement, selected by name.
+             */
+            ipAddressPools?: string[];
+            /**
+             * The BGP LOCAL_PREF attribute which is used by BGP best path algorithm, Path with higher localpref is preferred over one with lower localpref.
+             */
+            localPref?: number;
+            /**
+             * NodeSelectors allows to limit the nodes to announce as next hops for the LoadBalancer IP. When empty, all the nodes having  are announced as next hops.
+             */
+            nodeSelectors?: outputs.metallb.v1beta1.BGPAdvertisementSpecNodeselectors[];
+            /**
+             * Peers limits the bgppeer to advertise the ips of the selected pools to. When empty, the loadbalancer IP is announced to all the BGPPeers configured.
+             */
+            peers?: string[];
+        }
+        /**
+         * bgpadvertisementSpecProvideDefaults sets the appropriate defaults for BGPAdvertisementSpec
+         */
+        export function bgpadvertisementSpecProvideDefaults(val: BGPAdvertisementSpec): BGPAdvertisementSpec {
+            return {
+                ...val,
+                aggregationLength: (val.aggregationLength) ?? 32,
+                aggregationLengthV6: (val.aggregationLengthV6) ?? 128,
+            };
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface BGPAdvertisementSpecIpaddresspoolselectors {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.metallb.v1beta1.BGPAdvertisementSpecIpaddresspoolselectorsMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface BGPAdvertisementSpecIpaddresspoolselectorsMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface BGPAdvertisementSpecNodeselectors {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.metallb.v1beta1.BGPAdvertisementSpecNodeselectorsMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface BGPAdvertisementSpecNodeselectorsMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        /**
+         * BGPPeerSpec defines the desired state of Peer.
+         */
+        export interface BGPPeerSpec {
+            bfdProfile?: string;
+            /**
+             * EBGP peer is multi-hops away
+             */
+            ebgpMultiHop?: boolean;
+            /**
+             * Requested BGP hold time, per RFC4271.
+             */
+            holdTime?: string;
+            /**
+             * Requested BGP keepalive time, per RFC4271.
+             */
+            keepaliveTime?: string;
+            /**
+             * AS number to use for the local end of the session.
+             */
+            myASN: number;
+            /**
+             * Only connect to this peer on nodes that match one of these selectors.
+             */
+            nodeSelectors?: outputs.metallb.v1beta1.BGPPeerSpecNodeselectors[];
+            /**
+             * Authentication password for routers enforcing TCP MD5 authenticated sessions
+             */
+            password?: string;
+            /**
+             * AS number to expect from the remote end of the session.
+             */
+            peerASN: number;
+            /**
+             * Address to dial when establishing the session.
+             */
+            peerAddress: string;
+            /**
+             * Port to dial when establishing the session.
+             */
+            peerPort?: number;
+            /**
+             * BGP router ID to advertise to the peer
+             */
+            routerID?: string;
+            /**
+             * Source address to use when establishing the session.
+             */
+            sourceAddress?: string;
+        }
+
+        export interface BGPPeerSpecNodeselectors {
+            matchExpressions?: outputs.metallb.v1beta1.BGPPeerSpecNodeselectorsMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface BGPPeerSpecNodeselectorsMatchexpressions {
+            key: string;
+            operator: string;
+            values: string[];
+        }
+
+        /**
+         * CommunitySpec defines the desired state of Community.
+         */
+        export interface CommunitySpec {
+            communities?: outputs.metallb.v1beta1.CommunitySpecCommunities[];
+        }
+
+        export interface CommunitySpecCommunities {
+            /**
+             * The name of the alias for the community.
+             */
+            name?: string;
+            /**
+             * The BGP community value corresponding to the given name.
+             */
+            value?: string;
+        }
+
+        /**
+         * IPAddressPoolSpec defines the desired state of IPAddressPool.
+         */
+        export interface IPAddressPoolSpec {
+            /**
+             * A list of IP address ranges over which MetalLB has authority. You can list multiple ranges in a single pool, they will all share the same settings. Each range can be either a CIDR prefix, or an explicit start-end range of IPs.
+             */
+            addresses: string[];
+            /**
+             * AutoAssign flag used to prevent MetallB from automatic allocation for a pool.
+             */
+            autoAssign?: boolean;
+            /**
+             * AvoidBuggyIPs prevents addresses ending with .0 and .255 to be used by a pool.
+             */
+            avoidBuggyIPs?: boolean;
+        }
+        /**
+         * ipaddressPoolSpecProvideDefaults sets the appropriate defaults for IPAddressPoolSpec
+         */
+        export function ipaddressPoolSpecProvideDefaults(val: IPAddressPoolSpec): IPAddressPoolSpec {
+            return {
+                ...val,
+                autoAssign: (val.autoAssign) ?? true,
+                avoidBuggyIPs: (val.avoidBuggyIPs) ?? false,
+            };
+        }
+
+        /**
+         * L2AdvertisementSpec defines the desired state of L2Advertisement.
+         */
+        export interface L2AdvertisementSpec {
+            /**
+             * A selector for the IPAddressPools which would get advertised via this advertisement. If no IPAddressPool is selected by this or by the list, the advertisement is applied to all the IPAddressPools.
+             */
+            ipAddressPoolSelectors?: outputs.metallb.v1beta1.L2AdvertisementSpecIpaddresspoolselectors[];
+            /**
+             * The list of IPAddressPools to advertise via this advertisement, selected by name.
+             */
+            ipAddressPools?: string[];
+            /**
+             * NodeSelectors allows to limit the nodes to announce as next hops for the LoadBalancer IP. When empty, all the nodes having  are announced as next hops.
+             */
+            nodeSelectors?: outputs.metallb.v1beta1.L2AdvertisementSpecNodeselectors[];
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface L2AdvertisementSpecIpaddresspoolselectors {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.metallb.v1beta1.L2AdvertisementSpecIpaddresspoolselectorsMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface L2AdvertisementSpecIpaddresspoolselectorsMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface L2AdvertisementSpecNodeselectors {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.metallb.v1beta1.L2AdvertisementSpecNodeselectorsMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface L2AdvertisementSpecNodeselectorsMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+    }
+
+    export namespace v1beta2 {
+        /**
+         * BGPPeerSpec defines the desired state of Peer.
+         */
+        export interface BGPPeerSpec {
+            /**
+             * The name of the BFD Profile to be used for the BFD session associated to the BGP session. If not set, the BFD session won't be set up.
+             */
+            bfdProfile?: string;
+            /**
+             * To set if the BGPPeer is multi-hops away. Needed for FRR mode only.
+             */
+            ebgpMultiHop?: boolean;
+            /**
+             * Requested BGP hold time, per RFC4271.
+             */
+            holdTime?: string;
+            /**
+             * Requested BGP keepalive time, per RFC4271.
+             */
+            keepaliveTime?: string;
+            /**
+             * AS number to use for the local end of the session.
+             */
+            myASN: number;
+            /**
+             * Only connect to this peer on nodes that match one of these selectors.
+             */
+            nodeSelectors?: outputs.metallb.v1beta2.BGPPeerSpecNodeselectors[];
+            /**
+             * Authentication password for routers enforcing TCP MD5 authenticated sessions
+             */
+            password?: string;
+            /**
+             * passwordSecret is name of the authentication secret for BGP Peer. the secret must be of type "kubernetes.io/basic-auth", and created in the same namespace as the MetalLB deployment. The password is stored in the secret as the key "password".
+             */
+            passwordSecret?: outputs.metallb.v1beta2.BGPPeerSpecPasswordsecret;
+            /**
+             * AS number to expect from the remote end of the session.
+             */
+            peerASN: number;
+            /**
+             * Address to dial when establishing the session.
+             */
+            peerAddress: string;
+            /**
+             * Port to dial when establishing the session.
+             */
+            peerPort?: number;
+            /**
+             * BGP router ID to advertise to the peer
+             */
+            routerID?: string;
+            /**
+             * Source address to use when establishing the session.
+             */
+            sourceAddress?: string;
+        }
+        /**
+         * bgppeerSpecProvideDefaults sets the appropriate defaults for BGPPeerSpec
+         */
+        export function bgppeerSpecProvideDefaults(val: BGPPeerSpec): BGPPeerSpec {
+            return {
+                ...val,
+                peerPort: (val.peerPort) ?? 179,
+            };
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface BGPPeerSpecNodeselectors {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.metallb.v1beta2.BGPPeerSpecNodeselectorsMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface BGPPeerSpecNodeselectorsMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        /**
+         * passwordSecret is name of the authentication secret for BGP Peer. the secret must be of type "kubernetes.io/basic-auth", and created in the same namespace as the MetalLB deployment. The password is stored in the secret as the key "password".
+         */
+        export interface BGPPeerSpecPasswordsecret {
+            /**
+             * Name is unique within a namespace to reference a secret resource.
+             */
+            name?: string;
+            /**
+             * Namespace defines the space within which the secret name must be unique.
+             */
+            namespace?: string;
+        }
+
+    }
+}
+
 export namespace objectbucket {
     export namespace v1alpha1 {
         export interface ObjectBucketClaimSpec {
