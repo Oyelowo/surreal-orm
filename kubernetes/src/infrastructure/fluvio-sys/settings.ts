@@ -4,8 +4,8 @@ import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesFor
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
-export const tikvResourceName: ResourceName = 'tikv';
-export const tikvProvider = getResourceProvider({
+export const fluvioSysResourceName: ResourceName = 'fluvio-sys';
+export const fluvioSysProvider = getResourceProvider({
     outputDirectory: `infrastructure/fluvio-sys`,
     environment: ENVIRONMENT,
 });
