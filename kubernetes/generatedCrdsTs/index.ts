@@ -11,9 +11,11 @@ export * from "./provider";
 import * as acme from "./acme";
 import * as argoproj from "./argoproj";
 import * as bitnami from "./bitnami";
+import * as ceph from "./ceph";
 import * as certmanager from "./certmanager";
 import * as fluvio from "./fluvio";
 import * as linkerd from "./linkerd";
+import * as objectbucket from "./objectbucket";
 import * as pingcap from "./pingcap";
 import * as policy from "./policy";
 import * as trust from "./trust";
@@ -23,9 +25,11 @@ export {
     acme,
     argoproj,
     bitnami,
+    ceph,
     certmanager,
     fluvio,
     linkerd,
+    objectbucket,
     pingcap,
     policy,
     trust,
