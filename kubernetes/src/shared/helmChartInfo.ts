@@ -21,7 +21,7 @@ export const helmChartsInfo = {
         charts: {
             seaweedfs: {
                 chart: 'seaweedfs',
-                version: '3.29',
+                version: '3.30',
                 externalCrds: [] as string[],
                 skipCrdRender: false
             },
@@ -30,6 +30,12 @@ export const helmChartsInfo = {
                 version: '0.9.10',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
+            },
+            fluvioApp: {
+                chart: 'fluvio-app',
+                version: '0.9.2',
+                externalCrds: [] as string[],
+                skipCrdRender: true,
             },
         },
     },

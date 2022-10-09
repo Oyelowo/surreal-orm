@@ -11722,6 +11722,58 @@ export namespace fluvio {
     }
 
     export namespace v2 {
+        export interface SmartModuleSpecArgs {
+            meta?: pulumi.Input<inputs.fluvio.v2.SmartModuleSpecMetaArgs>;
+            wasm: pulumi.Input<inputs.fluvio.v2.SmartModuleSpecWasmArgs>;
+        }
+
+        export interface SmartModuleSpecMetaArgs {
+            package: pulumi.Input<inputs.fluvio.v2.SmartModuleSpecMetaPackageArgs>;
+            params?: pulumi.Input<pulumi.Input<inputs.fluvio.v2.SmartModuleSpecMetaParamsArgs>[]>;
+        }
+
+        export interface SmartModuleSpecMetaPackageArgs {
+            /**
+             * The version of the package.
+             */
+            apiVersion: pulumi.Input<string>;
+            /**
+             * The description of the package.
+             */
+            description?: pulumi.Input<string>;
+            /**
+             * The group of the package.
+             */
+            group: pulumi.Input<string>;
+            /**
+             * The license of the package.
+             */
+            license?: pulumi.Input<string>;
+            /**
+             * The name of the package.
+             */
+            name: pulumi.Input<string>;
+            /**
+             * The repository of the package.
+             */
+            repository?: pulumi.Input<string>;
+            /**
+             * The version of the package.
+             */
+            version: pulumi.Input<string>;
+        }
+
+        export interface SmartModuleSpecMetaParamsArgs {
+            description?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface SmartModuleSpecWasmArgs {
+            format: pulumi.Input<string>;
+            payload: pulumi.Input<string>;
+        }
+
         export interface TopicSpecArgs {
             cleanupPolicy?: pulumi.Input<inputs.fluvio.v2.TopicSpecCleanuppolicyArgs>;
             compressionType?: pulumi.Input<string>;

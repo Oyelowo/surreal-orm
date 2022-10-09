@@ -11724,6 +11724,58 @@ export namespace fluvio {
     }
 
     export namespace v2 {
+        export interface SmartModuleSpec {
+            meta?: outputs.fluvio.v2.SmartModuleSpecMeta;
+            wasm: outputs.fluvio.v2.SmartModuleSpecWasm;
+        }
+
+        export interface SmartModuleSpecMeta {
+            package: outputs.fluvio.v2.SmartModuleSpecMetaPackage;
+            params?: outputs.fluvio.v2.SmartModuleSpecMetaParams[];
+        }
+
+        export interface SmartModuleSpecMetaPackage {
+            /**
+             * The version of the package.
+             */
+            apiVersion: string;
+            /**
+             * The description of the package.
+             */
+            description?: string;
+            /**
+             * The group of the package.
+             */
+            group: string;
+            /**
+             * The license of the package.
+             */
+            license?: string;
+            /**
+             * The name of the package.
+             */
+            name: string;
+            /**
+             * The repository of the package.
+             */
+            repository?: string;
+            /**
+             * The version of the package.
+             */
+            version: string;
+        }
+
+        export interface SmartModuleSpecMetaParams {
+            description?: string;
+            name: string;
+            optional?: boolean;
+        }
+
+        export interface SmartModuleSpecWasm {
+            format: string;
+            payload: string;
+        }
+
         export interface TopicSpec {
             cleanupPolicy?: outputs.fluvio.v2.TopicSpecCleanuppolicy;
             compressionType?: string;

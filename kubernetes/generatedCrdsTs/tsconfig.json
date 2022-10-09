@@ -43,6 +43,7 @@
         "fluvio/v1/tableFormat.ts",
         "fluvio/v1/topic.ts",
         "fluvio/v2/index.ts",
+        "fluvio/v2/smartModule.ts",
         "fluvio/v2/topic.ts",
         "index.ts",
         "linkerd/index.ts",
