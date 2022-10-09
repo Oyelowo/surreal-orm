@@ -19,6 +19,12 @@ export const helmChartsInfo = {
     oyelowo: {
         repo: 'https://oyelowo.github.io',
         charts: {
+            seaweedfs: {
+                chart: 'seaweedfs',
+                version: '3.29',
+                externalCrds: [] as string[],
+                skipCrdRender: false
+            },
             fluvioSys: {
                 chart: 'fluvio-sys',
                 version: '0.9.10',
