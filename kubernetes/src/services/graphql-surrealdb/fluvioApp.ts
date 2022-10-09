@@ -2,11 +2,11 @@ import crds from '../../../generatedCrdsTs/index.js';
 import { surrealdbSettings } from './surrealdb.js';
 crds.fluvio.v2.Topic;
 
-export const userLocationTopic = new crds.fluvio.v2.Topic('', {
+export const userLocationTopic = new crds.fluvio.v2.Topic('test-user-location-topic', {
     apiVersion: 'fluvio.infinyon.com/v2',
     kind: 'Topic',
     metadata: {
-        name: 'user-location',
+        name: 'test-user-location',
         namespace: surrealdbSettings.metadata.namespace,
     },
     spec: {
