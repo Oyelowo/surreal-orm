@@ -62,9 +62,7 @@ export async function syncCrdsCode() {
 
                 const path = `${tempCrdDir}/${repoName}${chart}${i}.yaml`;
                 crdFilesPaths.push(path);
-                fs.writeFile(path, yaml.stringify(data), (err) => {
-                    if (err) throw err;
-                });
+                fs.writeFileSync(path, yaml.stringify(data));
             });
         });
     });
