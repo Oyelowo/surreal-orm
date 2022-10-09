@@ -3,9 +3,9 @@ import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
-import { tikvProvider } from './settings.js';
+import { fluvioSysProvider } from './settings.js';
 
-const tikvOperatValues: DeepPartial<ITidboperatorpingcap> = {
+const fluvioSysValues: DeepPartial<ITidboperatorpingcap> = {
     // advancedStatefulset : {}
 };
 
@@ -13,21 +13,11 @@ const tikvOperatValues: DeepPartial<ITidboperatorpingcap> = {
 const {
     repo,
     charts: {
-        tikvOperator: { chart, version, externalCrds },
+        fluvioSys: { chart, version },
     },
-} = helmChartsInfo.pingcap;
+} = helmChartsInfo.oyelowo;
 
-// CRDs
-// Tikv/Tidb operator helm chart does not include the crds. That's why we're handling it separately
-export const tikvCrds = new k8s.yaml.ConfigGroup(
-    'tikv-operator-crd',
-    {
-        files: externalCrds,
-    },
-    { provider: tikvProvider }
-);
-
-export const tikvOperator = new k8s.helm.v3.Chart(
+export const fluvioSys = new k8s.helm.v3.Chart(
     chart,
     {
         chart,
@@ -35,12 +25,12 @@ export const tikvOperator = new k8s.helm.v3.Chart(
             repo,
         },
         version,
-        values: tikvOperatValues,
-        namespace: namespaces.tikvAdmin,
+        values: fluvioSysValues,
+        namespace: namespaces.fluvioSys,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being
         // available.
         skipAwait: false,
     },
-    { provider: tikvProvider }
+    { provider: fluvioSysProvider }
 );

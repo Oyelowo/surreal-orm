@@ -56,6 +56,7 @@ export const InfrastructureNamesSchema = z.union([
     z.literal('tidis'),
     z.literal('rook-ceph'),
     z.literal('metalb'),
+    z.literal('fluvio-sys'),
 ]);
 
 export type InfrastructureName = z.infer<typeof InfrastructureNamesSchema> | ArgocdAppResourceName;

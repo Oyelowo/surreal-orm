@@ -5,15 +5,19 @@ import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "../../utilities";
 
 // Export members:
+export * from "./smartModule";
 export * from "./topic";
 
 // Import resources to register:
+import { SmartModule } from "./smartModule";
 import { Topic } from "./topic";
 
 const _module = {
     version: utilities.getVersion(),
     construct: (name: string, type: string, urn: string): pulumi.Resource => {
         switch (type) {
+            case "kubernetes:fluvio.infinyon.com/v2:SmartModule":
+                return new SmartModule(name, <any>undefined, { urn })
             case "kubernetes:fluvio.infinyon.com/v2:Topic":
                 return new Topic(name, <any>undefined, { urn })
             default:
