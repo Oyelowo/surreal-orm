@@ -88,34 +88,35 @@ export async function syncCrdsCode() {
     sh.exec(`find ${typesPaths} -name "${fileMatcher}"`, { silent: true })
         .trim()
         .split('\n')
-        .forEach(path => {
+        .forEach((path) => {
             const data = fs.readFileSync(path, 'utf8');
-            const sanitized = sanitizePulumiTypeDefinitions({ data })
+            const sanitized = sanitizePulumiTypeDefinitions({ data });
             fs.writeFileSync(path, sanitized, 'utf8');
-        })
+        });
 
     sh.exec(`rm -rf ${tempCrdDir}`);
 
     sh.echo(chalk.blueBright`Crd code generation done`);
 }
 
-
-function sanitizePulumiTypeDefinitions({ data }: { data: string; }): string {
-
-    return data
-        // Wrap quote around the key with `?` coming after the quota
-        // auto-scaler?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
-        // to
-        // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
-        .replace(/([a-z]+-.*[a-z]-*)(\?)?:/g, '"$1"$2:')
-        // Remove the hyphen in the value here
-        // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
-        // to
-        // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAutoScalerArgs>;
-        .replace(/(:.*)(-)(.*;)/g, '$1$3')
-        // Removes hyphen from interface definition e.g
-        // export interface TidbClusterStatusAuto-ScalerArgs {
-        // to
-        // export interface TidbClusterStatusAutoScalerArgs {
-        .replace(/(interface.*)(-)(.*{)/g, '$1$3');
+export function sanitizePulumiTypeDefinitions({ data }: { data: string }): string {
+    const replacer = (origChar: string) => origChar.split('-').join('');
+    return (
+        data
+            // Wrap quote around the key with `?` coming after the quota
+            // auto-scaler?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
+            // to
+            // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
+            .replace(/([a-z]+-.*[a-z]-*)(\?)?:/g, '"$1"$2:')
+            // Remove the hyphen in the value here
+            // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
+            // to
+            // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAutoScalerArgs>;
+            .replace(/(:.*)(-)(.*;)/g, replacer)
+            // Removes hyphen from interface definition e.g
+            // export interface TidbClusterStatusAuto-ScalerArgs {
+            // to
+            // export interface TidbClusterStatusAutoScalerArgs {
+            .replace(/(interface.*)(-)(.*{)/g, replacer)
+    );
 }
