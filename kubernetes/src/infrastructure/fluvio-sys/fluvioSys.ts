@@ -5,7 +5,7 @@ import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { fluvioSysProvider } from './settings.js';
 
-const tikvOperatValues: DeepPartial<ITidboperatorpingcap> = {
+const fluvioSysValues: DeepPartial<ITidboperatorpingcap> = {
     // advancedStatefulset : {}
 };
 
@@ -17,7 +17,7 @@ const {
     },
 } = helmChartsInfo.oyelowo;
 
-export const tikvOperator = new k8s.helm.v3.Chart(
+export const fluvioSys = new k8s.helm.v3.Chart(
     chart,
     {
         chart,
@@ -25,7 +25,7 @@ export const tikvOperator = new k8s.helm.v3.Chart(
             repo,
         },
         version,
-        values: tikvOperatValues,
+        values: fluvioSysValues,
         namespace: namespaces.fluvioSys,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being

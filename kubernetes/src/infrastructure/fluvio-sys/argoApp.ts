@@ -3,8 +3,8 @@ import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesFor
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
-// App that deploys tikvController resources themselves
-/* tikvOperator APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
+// App that deploys FluvioSys resources themselves
+/* fluvioSys operator APPLICATION ITSELF RESPONSIBLE FOR DECLARATIVELY DEPLOYING ARGO CONTROLLER RESOURCES */
 export const fluvioSysApplication = createArgocdApplication({
     sourceAppDirectory: 'infrastructure/fluvio-sys',
     outputDirectory: 'infrastructure/argocd-applications-children-infrastructure',
