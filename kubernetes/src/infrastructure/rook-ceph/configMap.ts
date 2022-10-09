@@ -1,5 +1,5 @@
-import k8s from "@pulumi/kubernetes";
-import { namespaces } from "../namespaces/util.js";
+import k8s from '@pulumi/kubernetes';
+import { namespaces } from '../namespaces/util.js';
 
 export const rookCephConfigMap = new k8s.core.v1.ConfigMap('rook-ceph-override', {
     metadata: {
@@ -14,6 +14,6 @@ export const rookCephConfigMap = new k8s.core.v1.ConfigMap('rook-ceph-override',
         bdev_flock_retry = 20
         bluefs_buffered_io = false
         mon_data_avail_warn = 500M
-        `
-    }
-})
+        `,
+    },
+});

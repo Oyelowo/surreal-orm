@@ -5,9 +5,7 @@ import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { rookCephProvider } from './settings.js';
 
-const rookCephOperatValues: DeepPartial<IRookcephrookceph> = {
-
-};
+const rookCephOperatValues: DeepPartial<IRookcephrookceph> = {};
 
 // `http://${name}.${namespace}:${port}`;
 const {
@@ -16,7 +14,6 @@ const {
         rookCephOperator: { chart, version },
     },
 } = helmChartsInfo.rookCeph;
-
 
 export const rookCephOperator = new k8s.helm.v3.Chart(
     chart,

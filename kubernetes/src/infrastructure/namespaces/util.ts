@@ -29,6 +29,6 @@ export const namespaces: Record<CamelCase<Namespace>, Namespace> = {
     tikvAdmin: 'tikv-admin',
     seaweedfs: 'seaweedfs',
     fluvioSys: 'fluvio-sys',
-    rookCeph: 'rook-ceph'
+    rookCeph: 'rook-ceph',
     // infrastructure: "infrastructure",
 } as const;
