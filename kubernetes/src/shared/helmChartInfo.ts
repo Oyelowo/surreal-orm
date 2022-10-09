@@ -1,4 +1,4 @@
-type Repo = 'oyelowo' | 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'sealedSecrets' | 'argo' | 'rookCeph';
+type Repo = 'oyelowo' | 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'sealedSecrets' | 'argo' | 'rookCeph' | 'meilisearch';
 
 type ChartInfo = {
     chart: string;
@@ -176,6 +176,17 @@ export const helmChartsInfo = {
                 skipCrdRender: false,
             },
 
+        }
+    },
+    meilisearch: {
+        repo: 'https://meilisearch.github.io/meilisearch-kubernetes',
+        charts: {
+            meilisearch: {
+                chart: 'meilisearch',
+                version: '0.1.41',
+                externalCrds: [] as string[],
+                skipCrdRender: false
+            }
         }
     },
     argo: {
