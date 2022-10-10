@@ -1,3 +1,5 @@
+use std::path::Display;
+
 use async_graphql::*;
 
 // use common::error_handling::ApiHttpStatus;
@@ -41,9 +43,22 @@ pub struct Post {
 
 #[ComplexObject]
 impl Post {
-    async fn poster(&self, ctx: &Context<'_>) -> Result<User> {
+    async fn poster(&self, _ctx: &Context<'_>) -> Result<User> {
         // let db = get_db_from_ctx(ctx)?;
-        let post_keys = Post::get_fields_serialized();
+        // let PostFields {
+        //     id,
+        //     posterId,
+        //     title,
+        //     content,
+        // } = Post::get_fields_serialized();
+        // let id = "lowo";
+        // let Post = stringify!(Post);
+        // let Select = "Select";
+        // let From = "From";
+        // let Where = "where";
+        // // use Op::Select;
+
+        // quote::quote!(#Select * #From #Post #Where #posterId=#id;);
         todo!()
     }
 }

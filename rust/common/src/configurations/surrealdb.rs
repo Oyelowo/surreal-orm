@@ -1,5 +1,4 @@
 use super::utils::get_env_vars_by_prefix;
-use anyhow::Context;
 use serde::Deserialize;
 use serde_aux::prelude::deserialize_number_from_string;
 use surrealdb::Datastore;

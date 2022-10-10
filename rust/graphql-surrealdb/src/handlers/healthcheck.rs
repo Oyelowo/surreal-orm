@@ -15,11 +15,8 @@ pub async fn get_redis_connection(
 }
 
 #[handler]
-pub async fn healthz(
-    db: Data<&Datastore>,
-    redis: Data<&redis::Client>,
-) -> Result<String> {
-// ) -> Result<impl IntoResponse> {
+pub async fn healthz(db: Data<&Datastore>, redis: Data<&redis::Client>) -> Result<String> {
+    // ) -> Result<impl IntoResponse> {
     // let mut connection = get_redis_connection(redis).await?;
     // let redis = redis::cmd("PING")
     //     .query_async::<_, ()>(&mut connection)
