@@ -1,0 +1,42 @@
+{
+  user(id: 6) {
+    name
+    id
+  }
+  users {
+    id
+    name
+    age
+  }
+  droid(id: "2000") {
+    id
+    friends {
+      name
+    }
+  }
+
+  droids {
+    edges {
+      node {
+        id
+        name
+        friends {
+          id
+        }
+        appearsIn
+        primaryFunction
+      }
+      cursor
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+  }
+  hero(episode: "EMPIRE") {
+    id
+    name
+  }
+}
