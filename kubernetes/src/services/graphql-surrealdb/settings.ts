@@ -1,4 +1,4 @@
-import { AppConfigs, AppEnvVars, OauthEnvVars, SurrealDbEnvVars } from '../../types/ownTypes.js';
+import { AppConfigs, AppEnvVars, OauthEnvVars, RedisDbEnvVars, SurrealDbEnvVars } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentVariablesForManifests.js';
@@ -6,7 +6,11 @@ import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentV
 const env = getEnvVarsForKubeManifests();
 
 const secrets = new PlainSecretsManager('services', 'graphql-surrealdb', 'local').getSecrets();
-export type GraphqlSurrealDbEnvVars = AppEnvVars & OauthEnvVars & SurrealDbEnvVars<'applications'>;
+export type GraphqlSurrealDbEnvVars = AppEnvVars &
+    OauthEnvVars &
+    SurrealDbEnvVars<'applications'> &
+    RedisDbEnvVars<'applications'>;
+;
 
 export const graphqlSurrealdbSettings: AppConfigs<'graphql-surrealdb', 'applications', GraphqlSurrealDbEnvVars> = {
     kubeConfig: {
@@ -35,6 +39,12 @@ export const graphqlSurrealdbSettings: AppConfigs<'graphql-surrealdb', 'applicat
         SURREALDB_PORT: '8000',
         SURREALDB_ROOT_USERNAME: secrets.SURREALDB_ROOT_USERNAME,
         SURREALDB_ROOT_PASSWORD: secrets.SURREALDB_ROOT_PASSWORD,
+        REDIS_USERNAME: secrets.REDIS_USERNAME,
+        REDIS_PASSWORD: secrets.REDIS_PASSWORD,
+        REDIS_HOST: 'redis-master.applications',
+        REDIS_PORT: '6379',
+        REDIS_SERVICE_NAME: 'redis',
+        REDIS_SERVICE_NAME_MASTER: 'redis-master'
     },
     metadata: {
         name: 'graphql-surrealdb',

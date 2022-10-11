@@ -30,6 +30,9 @@ export const getSecretsSample = () => {
                 OAUTH_GITHUB_CLIENT_SECRET: '',
                 OAUTH_GOOGLE_CLIENT_ID: '',
                 OAUTH_GOOGLE_CLIENT_SECRET: '',
+                REDIS_USERNAME: '',
+                REDIS_PASSWORD: '',
+                
             }
             ,
             'grpc-surrealdb': {
