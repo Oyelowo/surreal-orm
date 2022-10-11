@@ -51,8 +51,8 @@ describe('KubeObject', () => {
         expect(inst2).toHaveLength(21);
 
         info('Can get kube objects for a resource');
-        const graphqlMongo = kubeInstance.getForApp('services/graphql-mongo');
-        expect(graphqlMongo).toHaveLength(19);
+        const graphqlSurrealdb = kubeInstance.getForApp('services/graphql-surrealdb');
+        expect(graphqlSurrealdb).toMatchSnapshot();
 
         const reactWeb = kubeInstance.getForApp('services/react-web');
         expect(reactWeb).toHaveLength(4);

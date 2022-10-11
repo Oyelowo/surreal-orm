@@ -19,11 +19,7 @@ export type CPU = `${number}${'m'}`;
 export const ServiceNamesSchema = z.union([
     z.literal('surrealdb'), // This is a database layer relies on other persistent layers: SurrealDB is deployed standalone as a logic layer over TiKV. It can also use in-memory DB
     z.literal('graphql-surrealdb'), // This is an application/server layer
-    z.literal('graphql-tidb'), // TIDB is basically MySQL but scalable
     z.literal('grpc-surrealdb'),
-    z.literal('graphql-mongo'),
-    z.literal('graphql-postgres'),
-    z.literal('grpc-mongo'),
     z.literal('react-web'),
 ]);
 
@@ -109,31 +105,6 @@ export type TikVDbEnvVars<NS extends NamespaceOfApps> = {
     TIKV_PORT: '2379';
     TIKV_SERVICE_NAME: TikvDbName;
     TIKV_STORAGE_CLASS: typeof STORAGE_CLASS;
-};
-
-type MongoDbName = 'mongodb';
-export type MongoDbEnvVars<NS extends NamespaceOfApps> = {
-    MONGODB_NAME: MongoDbName;
-    MONGODB_USERNAME: string;
-    MONGODB_PASSWORD: string;
-    MONGODB_HOST: `${MongoDbName}.${NS}`;
-    MONGODB_PORT: '27017';
-    MONGODB_SERVICE_NAME: MongoDbName;
-    MONGODB_STORAGE_CLASS: typeof STORAGE_CLASS;
-    MONGODB_ROOT_USERNAME: string;
-    MONGODB_ROOT_PASSWORD: string;
-};
-
-type PostgresDbName = 'postgres';
-export type PostgresDbEnvVars<NS extends NamespaceOfApps> = {
-    POSTGRES_NAME: PostgresDbName;
-    POSTGRES_DATABASE_NAME: PostgresDbName;
-    POSTGRES_USERNAME: string;
-    POSTGRES_PASSWORD: string;
-    POSTGRES_HOST: `${PostgresDbName}.${NS}`;
-    POSTGRES_PORT: '5432';
-    POSTGRES_SERVICE_NAME: PostgresDbName;
-    POSTGRES_STORAGE_CLASS: string;
 };
 
 type RedisDbName = `redis`;

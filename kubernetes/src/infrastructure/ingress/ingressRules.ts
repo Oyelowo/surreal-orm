@@ -1,12 +1,12 @@
 import { getIngressUrlHost } from './hosts.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
-import { graphqlMongoSettings } from '../../services/graphql-mongo/settings.js';
 import { reactWebSettings } from '../../services/react-web/settings.js';
 import { INGRESS_CLASSNAME_NGINX, NginxConfiguration } from '../../types/nginxConfigurations.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
 import { CLUSTER_ISSUER_NAME } from '../cert-manager/index.js';
 import { nginxIngressProvider } from './settings.js';
+import { graphqlSurrealdbSettings } from '../../services/graphql-surrealdb/settings.js';
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
@@ -63,8 +63,8 @@ export const appIngress = new k8s.networking.v1.Ingress(
                                 path: '/api',
                                 backend: {
                                     service: {
-                                        name: graphqlMongoSettings.metadata.name,
-                                        port: { number: Number(graphqlMongoSettings.envVars.APP_PORT) },
+                                        name: graphqlSurrealdbSettings.metadata.name,
+                                        port: { number: Number(graphqlSurrealdbSettings.envVars.APP_PORT) },
                                     },
                                 },
                             },

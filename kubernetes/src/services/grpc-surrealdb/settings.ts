@@ -5,10 +5,10 @@ import { getEnvVarsForKubeManifests, imageTags } from '../../shared/environmentV
 
 const env = getEnvVarsForKubeManifests();
 
-const secrets = new PlainSecretsManager('services', 'graphql-surrealdb', 'local').getSecrets();
-export type GraphqlSurrealDbEnvVars = AppEnvVars & OauthEnvVars & SurrealDbEnvVars<'applications'>;
+const secrets = new PlainSecretsManager('services', 'grpc-surrealdb', 'local').getSecrets();
+export type GrpcSurrealDbEnvVars = AppEnvVars & OauthEnvVars & SurrealDbEnvVars<'applications'>;
 
-export const graphqlSurrealdbSettings: AppConfigs<'graphql-surrealdb', 'applications', GraphqlSurrealDbEnvVars> = {
+export const grpcSurrealdbSettings: AppConfigs<'grpc-surrealdb', 'applications', GrpcSurrealDbEnvVars> = {
     kubeConfig: {
         requestMemory: '70Mi',
         requestCpu: '100m',
@@ -17,13 +17,13 @@ export const graphqlSurrealdbSettings: AppConfigs<'graphql-surrealdb', 'applicat
         replicaCount: 2,
         readinessProbePort: 8000,
         host: '0.0.0.0',
-        image: `ghcr.io/oyelowo/graphql-surrealdb:${imageTags.SERVICES__GRAPHQL_SURREALDB__IMAGE_TAG}`,
+        image: `ghcr.io/oyelowo/grpc-surrealdb:${imageTags.SERVICES__GRPC_SURREALDB__IMAGE_TAG}`,
     },
 
     envVars: {
         APP_ENVIRONMENT: env.ENVIRONMENT,
         APP_HOST: '0.0.0.0',
-        APP_PORT: '8000',
+        APP_PORT: '50051',
         APP_EXTERNAL_BASE_URL: getIngressUrl({ environment: env.ENVIRONMENT }),
         OAUTH_GITHUB_CLIENT_ID: secrets.OAUTH_GITHUB_CLIENT_ID,
         OAUTH_GITHUB_CLIENT_SECRET: secrets.OAUTH_GITHUB_CLIENT_SECRET,
@@ -37,7 +37,7 @@ export const graphqlSurrealdbSettings: AppConfigs<'graphql-surrealdb', 'applicat
         SURREALDB_ROOT_PASSWORD: secrets.SURREALDB_ROOT_PASSWORD,
     },
     metadata: {
-        name: 'graphql-surrealdb',
+        name: 'grpc-surrealdb',
         namespace: 'applications',
     },
 };

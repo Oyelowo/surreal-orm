@@ -8,7 +8,7 @@ import { graphqlSurrealdbSettings } from './settings.js';
 
 const { envVars } = graphqlSurrealdbSettings;
 
-const mongoValues: DeepPartial<IMeilisearchMeilisearch> = {
+const meilisearchValues: DeepPartial<IMeilisearchMeilisearch> = {
     auth: {
         /* 
         For production deployment, the environment.MEILI_MASTER_KEY is required. 
@@ -38,7 +38,7 @@ const {
         meilisearch: { chart, version },
     },
 } = helmChartsInfo.meilisearch;
-export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
+export const graphqlSurrealdbMeilisearch = new k8s.helm.v3.Chart(
     chart,
     {
         chart,
@@ -46,7 +46,7 @@ export const graphqlMongoMongodb = new k8s.helm.v3.Chart(
             repo,
         },
         version,
-        values: mongoValues,
+        values: meilisearchValues,
         namespace: namespaces.applications,
         // By default Release resource will wait till all created resources
         // are available. Set this to true to skip waiting on resources being

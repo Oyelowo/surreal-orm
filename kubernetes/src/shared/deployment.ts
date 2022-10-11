@@ -81,13 +81,13 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
  Maps custom secret object to what kx can understand to produce secretRef automagically
  * @example
  {
-    MONGODB_USERNAME: "xxxx",
-    MONGODB_PASSWORD: "xxxx",
+    SURREALDB_USERNAME: "xxxx",
+    SURREALDB_PASSWORD: "xxxx",
  }
  
  to
  {
-    MONGODB_USERNAME:
+    SURREALDB_USERNAME:
         secretRef:
           ...
   ...
