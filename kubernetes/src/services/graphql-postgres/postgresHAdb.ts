@@ -1,4 +1,4 @@
-import { IPostgresqlhabitnami } from '../../../generatedHelmChartsTsTypes/postgresqlHaBitnami.js';
+import { IPostgresqlHaBitnami } from '../../../generatedHelmChartsTsTypes/postgresqlHaBitnami.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../../infrastructure/namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
@@ -8,7 +8,7 @@ import { graphqlPostgresSettings } from './settings.js';
 
 const { envVars } = graphqlPostgresSettings;
 
-const postgresValues: DeepPartial<IPostgresqlhabitnami> = {
+const postgresValues: DeepPartial<IPostgresqlHaBitnami> = {
     fullnameOverride: envVars.POSTGRES_SERVICE_NAME,
     postgresql: {
         username: envVars.POSTGRES_USERNAME,

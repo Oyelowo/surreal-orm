@@ -1,11 +1,11 @@
-import { ITidboperatorpingcap } from '../../../generatedHelmChartsTsTypes/tidbOperatorPingcap.js';
+import { ITidbOperatorPingcap } from '../../../generatedHelmChartsTsTypes/tidbOperatorPingcap.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { fluvioSysProvider } from './settings.js';
 
-const fluvioSysValues: DeepPartial<ITidboperatorpingcap> = {};
+const fluvioSysValues: DeepPartial<ITidbOperatorPingcap> = {};
 
 // `http://${name}.${namespace}:${port}`;
 const {

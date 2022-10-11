@@ -1,11 +1,11 @@
-import { ICertmanagerbitnami } from '../../../generatedHelmChartsTsTypes/certManagerBitnami.js';
+import { ICertManagerBitnami } from '../../../generatedHelmChartsTsTypes/certManagerBitnami.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { certManagerProvider } from './settings.js';
 
-const certManagerValues: DeepPartial<ICertmanagerbitnami> = {
+const certManagerValues: DeepPartial<ICertManagerBitnami> = {
     installCRDs: true,
 };
 

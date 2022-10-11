@@ -1,4 +1,4 @@
-type Repo = 'oyelowo' | 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'sealedSecrets' | 'argo' | 'rookCeph' | 'meilisearch';
+type Repo = 'oyelowo' | 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'argo' | 'rookCeph' | 'meilisearch';
 
 type ChartInfo = {
     chart: string;
@@ -59,6 +59,12 @@ export const helmChartsInfo = {
     bitnami: {
         repo: 'https://charts.bitnami.com/bitnami',
         charts: {
+            sealedSecrets: {
+                chart: 'sealed-secrets',
+                version: '1.1.5',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
             certManager: {
                 chart: 'cert-manager',
                 version: '0.8.4',
@@ -104,17 +110,6 @@ export const helmChartsInfo = {
             postgresqlHA: {
                 chart: 'postgresql-ha',
                 version: '9.4.6',
-                externalCrds: [] as string[],
-                skipCrdRender: false,
-            },
-        },
-    },
-    sealedSecrets: {
-        repo: 'https://bitnami-labs.github.io/sealed-secrets',
-        charts: {
-            sealedSecrets: {
-                chart: 'sealed-secrets',
-                version: '2.6.9',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },

@@ -1,4 +1,4 @@
-import { IArgocdbitnami } from '../../../generatedHelmChartsTsTypes/argoCdBitnami.js';
+import { IArgoCdBitnami } from '../../../generatedHelmChartsTsTypes/argoCdBitnami.js';
 import { annotations } from '../ingress/ingressRules.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
@@ -12,7 +12,7 @@ import { INGRESS_CLASSNAME_NGINX } from '../../types/nginxConfigurations.js';
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 const secrets = new PlainSecretsManager('infrastructure', 'argocd', ENVIRONMENT).getSecrets();
-const argocdValuesOld: DeepPartial<IArgocdbitnami> = {
+const argocdValuesOld: DeepPartial<IArgoCdBitnami> = {
     config: {
         secret: {
             create: true,

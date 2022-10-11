@@ -1,5 +1,5 @@
 // import { IArgocdargo } from '../../../types/helm-charts/argoCdArgo.js';
-import { IArgocdargo } from '../../../generatedHelmChartsTsTypes/argoCdArgo.js';
+import { IArgoCdArgo } from '../../../generatedHelmChartsTsTypes/argoCdArgo.js';
 import { annotations } from '../ingress/ingressRules.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
@@ -21,7 +21,7 @@ const saltRounds = 10;
 const myPlaintextPassword = secrets.ADMIN_PASSWORD;
 const hash = bcrypt.hashSync(myPlaintextPassword, saltRounds);
 
-const argocdValues: DeepPartial<IArgocdargo> = {
+const argocdValues: DeepPartial<IArgoCdArgo> = {
     fullnameOverride: 'argocd',
     server: {
         ingress: {

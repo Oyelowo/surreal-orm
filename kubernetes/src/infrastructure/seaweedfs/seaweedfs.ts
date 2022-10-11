@@ -1,4 +1,4 @@
-import { ISeaweedfsoyelowo } from '../../../generatedHelmChartsTsTypes/seaweedfsOyelowo.js';
+import { ISeaweedfsOyelowo } from '../../../generatedHelmChartsTsTypes/seaweedfsOyelowo.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
@@ -6,7 +6,7 @@ import { DeepPartial } from '../../types/ownTypes.js';
 import { seaweedFsProvider } from './settings.js';
 import { seaweedFsTikvSettings } from './tikvCluster.js';
 
-const seaweedFsValues: DeepPartial<ISeaweedfsoyelowo> = {
+const seaweedFsValues: DeepPartial<ISeaweedfsOyelowo> = {
     global: {
         imageName: 'chrislusf/seaweedfs',
         imagePullPolicy: 'IfNotPresent',
@@ -266,7 +266,7 @@ const seaweedFsValues: DeepPartial<ISeaweedfsoyelowo> = {
             WEED_FILER_OPTIONS_RECURSIVE_DELETE: 'false',
             //   # directories under this folder will be automatically creating a separate bucket
             WEED_FILER_BUCKETS_FOLDER: '/buckets',
-        } as ISeaweedfsoyelowo['filer']['extraEnvironmentVars'] &
+        } as ISeaweedfsOyelowo['filer']['extraEnvironmentVars'] &
             Record<'WEED_TIKV_ENABLED' | 'WEED_TIKV_PDADDRS', string>,
         s3: {
             // enableAuth: true,

@@ -1,4 +1,4 @@
-import { ILinkerdvizlinkerd } from '../../../generatedHelmChartsTsTypes/linkerdVizLinkerd.js';
+import { ILinkerdVizLinkerd } from '../../../generatedHelmChartsTsTypes/linkerdVizLinkerd.js';
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as bcrypt from 'bcrypt';
@@ -13,7 +13,7 @@ import { getIngressUrlHost } from '../ingress/hosts.js';
 import { toBase64 } from '../../shared/helpers.js';
 import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 
-const values: DeepPartial<ILinkerdvizlinkerd> = {};
+const values: DeepPartial<ILinkerdVizLinkerd> = {};
 const resourceName: ResourceName = 'linkerd-viz';
 const {
     repo,

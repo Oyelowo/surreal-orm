@@ -1,11 +1,11 @@
-import { IRookcephrookceph } from '../../../generatedHelmChartsTsTypes/rookCephRookceph.js';
+import { IRookCephRookCeph } from '../../../generatedHelmChartsTsTypes/rookCephRookceph.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { rookCephProvider } from './settings.js';
 
-const rookCephOperatValues: DeepPartial<IRookcephrookceph> = {};
+const rookCephOperatValues: DeepPartial<IRookCephRookCeph> = {};
 
 // `http://${name}.${namespace}:${port}`;
 const {

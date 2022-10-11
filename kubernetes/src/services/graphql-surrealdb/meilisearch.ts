@@ -1,4 +1,4 @@
-import { IMeilisearchmeilisearch } from '../../../generatedHelmChartsTsTypes/meilisearchMeilisearch.js';
+import { IMeilisearchMeilisearch } from '../../../generatedHelmChartsTsTypes/meilisearchMeilisearch.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../../infrastructure/namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
@@ -8,7 +8,7 @@ import { graphqlSurrealdbSettings } from './settings.js';
 
 const { envVars } = graphqlSurrealdbSettings;
 
-const mongoValues: DeepPartial<IMeilisearchmeilisearch> = {
+const mongoValues: DeepPartial<IMeilisearchMeilisearch> = {
     auth: {
         /* 
         For production deployment, the environment.MEILI_MASTER_KEY is required. 
