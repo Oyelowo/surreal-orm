@@ -1,4 +1,4 @@
-import { IMongodbbitnami } from '../../../generatedHelmChartsTsTypes/mongodbBitnami.js';
+import { IMongodbBitnami } from '../../../generatedHelmChartsTsTypes/mongodbBitnami.js';
 import { grpcMongo } from './app.js';
 import { namespaces } from '../../infrastructure/namespaces/util.js';
 import * as k8s from '@pulumi/kubernetes';
@@ -56,7 +56,7 @@ for (const val of credentials) {
     mappedCredentials.databases.push(val.database);
 }
 
-const mongoValues: DeepPartial<IMongodbbitnami> = {
+const mongoValues: DeepPartial<IMongodbBitnami> = {
     useStatefulSet: true,
     architecture: 'replicaset',
     replicaCount: 3,

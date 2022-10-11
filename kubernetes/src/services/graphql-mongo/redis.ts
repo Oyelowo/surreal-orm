@@ -1,4 +1,4 @@
-import { IRedisbitnami } from '../../../generatedHelmChartsTsTypes/redisBitnami.js';
+import { IRedisBitnami } from '../../../generatedHelmChartsTsTypes/redisBitnami.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../../infrastructure/namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
@@ -10,7 +10,7 @@ import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesFor
 const { envVars } = graphqlMongoSettings;
 const env = getEnvVarsForKubeManifests();
 
-export const redisValues: DeepPartial<IRedisbitnami> = {
+export const redisValues: DeepPartial<IRedisBitnami> = {
     architecture: 'standalone',
     fullnameOverride: envVars.REDIS_SERVICE_NAME,
     replica: {

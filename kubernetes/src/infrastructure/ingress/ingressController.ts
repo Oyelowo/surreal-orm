@@ -1,6 +1,6 @@
 import { DeepPartial } from '../../types/ownTypes.js';
 import { ingressControllerPorts } from './hosts.js';
-import { INginxingresscontrollerbitnami } from '../../../generatedHelmChartsTsTypes/nginxIngressControllerBitnami.js';
+import { INginxIngressControllerBitnami } from '../../../generatedHelmChartsTsTypes/nginxIngressControllerBitnami.js';
 import * as k8s from '@pulumi/kubernetes';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { nginxIngressProvider } from './settings.js';
@@ -12,7 +12,7 @@ const {
     },
 } = helmChartsInfo.bitnami;
 
-const ingressControllerValues: DeepPartial<INginxingresscontrollerbitnami> = {
+const ingressControllerValues: DeepPartial<INginxIngressControllerBitnami> = {
     service: {
         ports: ingressControllerPorts,
     },

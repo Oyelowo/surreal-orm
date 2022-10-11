@@ -32,11 +32,12 @@ export function syncHelmChartTypesDeclarations() {
 
             if (stderr) throw new Error(chalk.redBright(`Problem happened. Error: ${stderr}`));
 
-            const typeFileName = _.camelCase(`${chart}${_.capitalize(repoName)}`);
+            // Make them camel case in case their is hyphen which would be an invalid type
+            const typeFileName = _.camelCase(`${chart}${_.upperFirst(_.camelCase(repoName))}`);
             const valuesJson = yaml.parse(valuesYaml, { strict: false }) ?? {};
 
             const tsDec = JsonToTS.default(valuesJson, {
-                rootName: `I${_.capitalize(typeFileName)}`,
+                rootName: `I${_.upperFirst(typeFileName)}`,
             })
                 .map((typeInterface, i) => (i == 0 ? `export ${typeInterface}` : typeInterface))
                 .join('\n');

@@ -1,11 +1,11 @@
-import { ISealedsecretsbitnami } from '../../../generatedHelmChartsTsTypes/sealedSecretsBitnami.js';
+import { ISealedSecretsBitnami } from '../../../generatedHelmChartsTsTypes/sealedSecretsBitnami.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { sealedSecretsResourceName, sealedSecretsProvider } from './settings.js';
 
-const sealedSecretsValues: DeepPartial<ISealedsecretsbitnami> = {
+const sealedSecretsValues: DeepPartial<ISealedSecretsBitnami> = {
     /*
   NOTE: the helm chart by default installs the controller with the name sealed-secrets, while the kubeseal command line interface (CLI) tries to access the controller with the name sealed-secrets-controller. You can explicitly pass --controller-name to the CLI:
 kubeseal --controller-name sealed-secrets <args>
