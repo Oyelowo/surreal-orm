@@ -1,10 +1,10 @@
-ARG BASE_IMAGE=rust:1.62.0
+ARG BASE_IMAGE=rust:1.64.0
 
 FROM $BASE_IMAGE as planner
 WORKDIR /app
 # We only pay the installation cost once,
 # it will be cached from the second build onwards
-RUN cargo install cargo-chef --version 0.1.35
+RUN cargo install cargo-chef --version 0.1.45
 
 COPY . .
 RUN cargo chef prepare  --recipe-path recipe.json
@@ -13,7 +13,7 @@ RUN cargo chef prepare  --recipe-path recipe.json
 FROM $BASE_IMAGE as  cacher
 WORKDIR /app
 
-RUN cargo install cargo-chef --version 0.1.35
+RUN cargo install cargo-chef --version 0.1.45
 COPY --from=planner /app/recipe.json recipe.json
 
 # Install cmake which is now necessary for tonic
@@ -32,65 +32,40 @@ COPY --from=cacher $CARGO_HOME $CARGO_HOME
 COPY . .
 
 
-######### START GRAPHQL-MONGO BACKEND SERVICE  #################
+######### START GRAPHQL-surrealdb BACKEND SERVICE  #################
 ################################################################
-FROM builder-base as builder-graphql-mongo
-RUN cargo build --bin graphql-mongo
+FROM builder-base as builder-graphql-surrealdb
+RUN cargo build --bin graphql-surrealdb
 # Run as non-privileged user after installations and builds which require privileged access
 RUN useradd --uid 10000 runner
 USER 10000
 
-FROM gcr.io/distroless/cc AS graphql-mongo
+FROM gcr.io/distroless/cc AS graphql-surrealdb
 WORKDIR /app
 EXPOSE 8000
-COPY --from=builder-graphql-mongo /app/target/debug/graphql-mongo /usr/local/bin/graphql-mongo
-ENTRYPOINT ["/usr/local/bin/graphql-mongo"]
-######### END GRAPHQL-MONGO BACKEND SERVICE  #################
+COPY --from=builder-graphql-surrealdb /app/target/debug/graphql-surrealdb /usr/local/bin/graphql-surrealdb
+ENTRYPOINT ["/usr/local/bin/graphql-surrealdb"]
+######### END GRAPHQL-surrealdb BACKEND SERVICE  #################
 ##############################################################
 
 
-
 ##############################################################
-######### START GRAPHQL-POSTGRES BACKEND SERVICE  #############
+######### START GRPC-SURREALDB BACKEND SERVICE  #################
 ################################################################
-FROM builder-base as builder-graphql-postgres
-# This is necessary to for sqlx to build the app in offline mode without being connected to DB.
-ENV SQLX_OFFLINE=true
-RUN cargo build --bin graphql-postgres
-# Run as non-privileged user after installations and builds which require privileged access
-RUN useradd --uid 10000 runner
-USER 10000
-
-
-FROM gcr.io/distroless/cc AS graphql-postgres
-WORKDIR /app
-EXPOSE 8000
-# We are building in release mode
-COPY --from=builder-graphql-postgres /app/target/debug/graphql-postgres /usr/local/bin/graphql-postgres
-ENTRYPOINT ["/usr/local/bin/graphql-postgres"]
-######### END GRAPHQL-POSTGRES BACKEND SERVICE  ##############
-##############################################################
-
-
-
-
-##############################################################
-######### START GRPC-MONGO BACKEND SERVICE  #################
-################################################################
-FROM builder-base as builder-grpc-mongo
+FROM builder-base as builder-grpc-surrealdb
 # Necessary for tonic when building grpc protobuf
 RUN rustup component add rustfmt
-RUN cargo build --bin grpc-mongo
+RUN cargo build --bin grpc-surrealdb
 # Run as non-privileged user after installations and builds which require privileged access
 RUN useradd --uid 10000 runner
 USER 10000
 
-FROM gcr.io/distroless/cc AS grpc-mongo
+FROM gcr.io/distroless/cc AS grpc-surrealdb
 WORKDIR /app
 EXPOSE 8000
-COPY --from=builder-grpc-mongo /app/target/debug/grpc-mongo /usr/local/bin/grpc-mongo
-ENTRYPOINT ["/usr/local/bin/grpc-mongo"]
-######### END GRPC-MONGO BACKEND SERVICE  #################
+COPY --from=builder-grpc-surrealdb /app/target/debug/grpc-surrealdb /usr/local/bin/grpc-surrealdb
+ENTRYPOINT ["/usr/local/bin/grpc-surrealdb"]
+######### END GRPC-SURREALDB BACKEND SERVICE  #################
 ##############################################################
 
 
