@@ -6,7 +6,7 @@ use common::{
     middleware,
 };
 
-use graphql_tidb::utils::graphql::{
+use graphql_mysql::utils::graphql::{
     graphql_handler, graphql_handler_ws, graphql_playground, setup_graphql,
 };
 use log::info;
