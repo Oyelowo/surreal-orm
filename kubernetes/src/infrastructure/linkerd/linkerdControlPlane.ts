@@ -1,11 +1,11 @@
-import { ILinkerdcontrolplanelinkerd } from '../../../generatedHelmChartsTsTypes/linkerdControlPlaneLinkerd.js';
+import { ILinkerdControlPlaneLinkerd } from '../../../generatedHelmChartsTsTypes/linkerdControlPlaneLinkerd.js';
 import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { linkerdProvider } from './settings.js';
 
-const LinkerdControlPlaneValues: DeepPartial<ILinkerdcontrolplanelinkerd> = {
+const LinkerdControlPlaneValues: DeepPartial<ILinkerdControlPlaneLinkerd> = {
     podAnnotations: {
         // 'sealedsecrets.bitnami.com/managed': 'true',
     },
