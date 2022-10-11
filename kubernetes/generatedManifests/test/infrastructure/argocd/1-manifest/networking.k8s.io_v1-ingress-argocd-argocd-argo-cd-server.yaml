@@ -2,8 +2,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"nginx.ingress.kubernetes.io/ssl-redirect":"false","nginx.ingress.kubernetes.io/use-regex":"true"},"labels":{"app.kubernetes.io/component":"server","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argo-cd","helm.sh/chart":"argo-cd-3.1.16"},"name":"argocd-argo-cd-server","namespace":"argocd"},"spec":{"ingressClassName":"nginx","rules":[{"host":"argocd.localhost:8080","http":{"paths":[{"backend":{"service":{"name":"argocd-argo-cd-server","port":{"name":"https"}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["argocd.localhost:8080"],"secretName":"argocd.localhost:8080-tls"}]}}
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-cluster-issuer","nginx.ingress.kubernetes.io/ssl-redirect":"false","nginx.ingress.kubernetes.io/use-regex":"true"},"labels":{"app.kubernetes.io/component":"server","app.kubernetes.io/instance":"argocd","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"argo-cd","helm.sh/chart":"argo-cd-4.2.3"},"name":"argocd-argo-cd-server","namespace":"argocd"},"spec":{"ingressClassName":"nginx","rules":[{"host":"argocd.localhost:8080","http":{"paths":[{"backend":{"service":{"name":"argocd-argo-cd-server","port":{"name":"https"}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["argocd.localhost:8080"],"secretName":"argocd.localhost:8080-tls"}]}}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/use-regex: "true"
   labels:
@@ -11,7 +12,7 @@ metadata:
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/name: argo-cd
-    helm.sh/chart: argo-cd-3.1.16
+    helm.sh/chart: argo-cd-4.2.3
   name: argocd-argo-cd-server
   namespace: argocd
 spec:

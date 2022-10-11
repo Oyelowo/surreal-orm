@@ -1,0 +1,35 @@
+apiVersion: ceph.rook.io/v1
+kind: CephObjectStore
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"ceph.rook.io/v1","kind":"CephObjectStore","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"ceph-objectstore","namespace":"rook-ceph"},"spec":{"dataPool":{"erasureCoded":{"codingChunks":1,"dataChunks":2},"failureDomain":"host"},"gateway":{"instances":1,"port":80,"priorityClassName":"system-cluster-critical","resources":{"limits":{"cpu":"2000m","memory":"2Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}},"healthCheck":{"bucket":{"interval":"60s"}},"metadataPool":{"failureDomain":"host","replicated":{"size":3}},"preservePoolsOnDelete":true}}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: ceph-objectstore
+  namespace: rook-ceph
+spec:
+  dataPool:
+    erasureCoded:
+      codingChunks: 1
+      dataChunks: 2
+    failureDomain: host
+  gateway:
+    instances: 1
+    port: 80
+    priorityClassName: system-cluster-critical
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 2Gi
+      requests:
+        cpu: 1000m
+        memory: 1Gi
+  healthCheck:
+    bucket:
+      interval: 60s
+  metadataPool:
+    failureDomain: host
+    replicated:
+      size: 3
+  preservePoolsOnDelete: true

@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/instance: cert-manager
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/name: cert-manager
-    helm.sh/chart: cert-manager-0.6.1
+    helm.sh/chart: cert-manager-0.8.4
   name: challenges.acme.cert-manager.io
 spec:
   group: acme.cert-manager.io

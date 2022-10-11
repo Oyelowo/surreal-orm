@@ -3,8 +3,8 @@ kind: Server
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"policy.linkerd.io/v1beta1","kind":"Server","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.11.2"},"labels":{"app.kubernetes.io/managed-by":"pulumi","linkerd.io/extension":"viz"},"name":"proxy-admin","namespace":"linkerd-viz"},"spec":{"podSelector":{"matchLabels":{"linkerd.io/extension":"viz"}},"port":"linkerd-admin","proxyProtocol":"HTTP/1"}}
-    linkerd.io/created-by: linkerd/helm stable-2.11.2
+      {"apiVersion":"policy.linkerd.io/v1beta1","kind":"Server","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.12.1"},"labels":{"app.kubernetes.io/managed-by":"pulumi","linkerd.io/extension":"viz"},"name":"proxy-admin","namespace":"linkerd-viz"},"spec":{"podSelector":{"matchLabels":{"linkerd.io/extension":"viz"}},"port":"linkerd-admin","proxyProtocol":"HTTP/1"}}
+    linkerd.io/created-by: linkerd/helm stable-2.12.1
   labels:
     app.kubernetes.io/managed-by: pulumi
     linkerd.io/extension: viz

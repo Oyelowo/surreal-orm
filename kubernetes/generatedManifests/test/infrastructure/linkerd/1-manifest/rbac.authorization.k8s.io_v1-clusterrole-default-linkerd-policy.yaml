@@ -3,7 +3,7 @@ kind: ClusterRole
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRole","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/part-of":"Linkerd","linkerd.io/control-plane-component":"destination","linkerd.io/control-plane-ns":"linkerd"},"name":"linkerd-policy"},"rules":[{"apiGroups":[""],"resources":["pods"],"verbs":["get","list","watch"]},{"apiGroups":["policy.linkerd.io"],"resources":["servers","serverauthorizations"],"verbs":["get","list","watch"]}]}
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRole","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/part-of":"Linkerd","linkerd.io/control-plane-component":"destination","linkerd.io/control-plane-ns":"linkerd"},"name":"linkerd-policy"},"rules":[{"apiGroups":[""],"resources":["pods"],"verbs":["get","list","watch"]},{"apiGroups":["policy.linkerd.io"],"resources":["authorizationpolicies","httproutes","meshtlsauthentications","networkauthentications","servers","serverauthorizations"],"verbs":["get","list","watch"]}]}
   labels:
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/part-of: Linkerd
@@ -22,6 +22,10 @@ rules:
 - apiGroups:
   - policy.linkerd.io
   resources:
+  - authorizationpolicies
+  - httproutes
+  - meshtlsauthentications
+  - networkauthentications
   - servers
   - serverauthorizations
   verbs:

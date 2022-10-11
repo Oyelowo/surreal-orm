@@ -3,13 +3,13 @@ kind: ClusterRole
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRole","metadata":{"annotations":{"linkerd.io/inject":"enabled"},"labels":{"app.kubernetes.io/instance":"nginx-ingress-controller","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"nginx-ingress-controller","helm.sh/chart":"nginx-ingress-controller-9.2.11"},"name":"nginx-ingress-controller","namespace":"default"},"rules":[{"apiGroups":[""],"resources":["configmaps","endpoints","nodes","pods","secrets"],"verbs":["list","watch"]},{"apiGroups":[""],"resources":["nodes"],"verbs":["get"]},{"apiGroups":[""],"resources":["services"],"verbs":["get","list","update","watch"]},{"apiGroups":["networking.k8s.io"],"resources":["ingresses"],"verbs":["get","list","watch"]},{"apiGroups":[""],"resources":["events"],"verbs":["create","patch"]},{"apiGroups":["networking.k8s.io"],"resources":["ingresses/status"],"verbs":["update"]},{"apiGroups":["networking.k8s.io"],"resources":["ingressclasses"],"verbs":["get","list","watch"]}]}
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRole","metadata":{"annotations":{"linkerd.io/inject":"enabled"},"labels":{"app.kubernetes.io/instance":"nginx-ingress-controller","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"nginx-ingress-controller","helm.sh/chart":"nginx-ingress-controller-9.3.18"},"name":"nginx-ingress-controller","namespace":"default"},"rules":[{"apiGroups":[""],"resources":["configmaps","endpoints","nodes","pods","secrets","namespaces"],"verbs":["list","watch"]},{"apiGroups":["coordination.k8s.io"],"resources":["leases"],"verbs":["list","watch"]},{"apiGroups":[""],"resources":["nodes"],"verbs":["get"]},{"apiGroups":[""],"resources":["services"],"verbs":["get","list","update","watch"]},{"apiGroups":["networking.k8s.io"],"resources":["ingresses"],"verbs":["get","list","watch"]},{"apiGroups":[""],"resources":["events"],"verbs":["create","patch"]},{"apiGroups":["networking.k8s.io"],"resources":["ingresses/status"],"verbs":["update"]},{"apiGroups":["networking.k8s.io"],"resources":["ingressclasses"],"verbs":["get","list","watch"]},{"apiGroups":["discovery.k8s.io"],"resources":["endpointslices"],"verbs":["list","watch","get"]}]}
     linkerd.io/inject: enabled
   labels:
     app.kubernetes.io/instance: nginx-ingress-controller
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/name: nginx-ingress-controller
-    helm.sh/chart: nginx-ingress-controller-9.2.11
+    helm.sh/chart: nginx-ingress-controller-9.3.18
   name: nginx-ingress-controller
   namespace: default
 rules:
@@ -21,6 +21,14 @@ rules:
   - nodes
   - pods
   - secrets
+  - namespaces
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
   verbs:
   - list
   - watch
@@ -68,3 +76,11 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - list
+  - watch
+  - get

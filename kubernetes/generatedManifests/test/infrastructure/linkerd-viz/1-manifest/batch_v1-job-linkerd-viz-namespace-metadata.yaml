@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-weight: "0"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"batch/v1","kind":"Job","metadata":{"annotations":{"helm.sh/hook":"post-install","helm.sh/hook-delete-policy":"before-hook-creation,hook-succeeded","helm.sh/hook-weight":"0","linkerd.io/created-by":"linkerd/helm stable-2.12.1"},"labels":{"app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"namespace-metadata","app.kubernetes.io/part-of":"Linkerd","app.kubernetes.io/version":"stable-2.12.1"},"name":"namespace-metadata","namespace":"linkerd-viz"},"spec":{"template":{"metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.12.1","linkerd.io/inject":"disabled"},"labels":{"app.kubernetes.io/name":"namespace-metadata","app.kubernetes.io/part-of":"Linkerd","app.kubernetes.io/version":"stable-2.12.1"}},"spec":{"containers":[{"args":["-c","ops=''\ntoken=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\nns=$(curl -kfv -H \"Authorization: Bearer $token\" \\\n  \"https://kubernetes.default.svc/api/v1/namespaces/linkerd-viz\")\n\nif ! echo \"$ns\" | grep -q 'labels'; then\n  ops=\"$ops{\\\"op\\\": \\\"add\\\",\\\"path\\\": \\\"/metadata/labels\\\",\\\"value\\\": {}},\"\nfi\nif ! echo \"$ns\" | grep -q 'annotations'; then\n  ops=\"$ops{\\\"op\\\": \\\"add\\\", \\\"path\\\": \\\"/metadata/annotations\\\", \\\"value\\\": {}},\"\nfi\nops=\"$ops{\\\"op\\\": \\\"add\\\", \\\"path\\\": \\\"/metadata/labels/linkerd.io~1extension\\\", \\\"value\\\": \\\"viz\\\"}\"\n\ncurl -kfv -XPATCH -H \"Content-Type: application/json-patch+json\" -H \"Authorization: Bearer $token\" \\\n  -d \"[$ops]\" \\\n  \"https://kubernetes.default.svc/api/v1/namespaces/linkerd-viz?fieldManager=kubectl-label\"\n"],"command":["/bin/sh"],"image":"curlimages/curl:7.78.0","imagePullPolicy":"IfNotPresent","name":"namespace-metadata","securityContext":{"runAsUser":2103}}],"restartPolicy":"Never","serviceAccountName":"namespace-metadata"}}}}
+    linkerd.io/created-by: linkerd/helm stable-2.12.1
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: namespace-metadata
+    app.kubernetes.io/part-of: Linkerd
+    app.kubernetes.io/version: stable-2.12.1
+  name: namespace-metadata
+  namespace: linkerd-viz
+spec:
+  template:
+    metadata:
+      annotations:
+        linkerd.io/created-by: linkerd/helm stable-2.12.1
+        linkerd.io/inject: disabled
+      labels:
+        app.kubernetes.io/name: namespace-metadata
+        app.kubernetes.io/part-of: Linkerd
+        app.kubernetes.io/version: stable-2.12.1
+    spec:
+      containers:
+      - args:
+        - -c
+        - |
+          ops=''
+          token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+          ns=$(curl -kfv -H "Authorization: Bearer $token" \
+            "https://kubernetes.default.svc/api/v1/namespaces/linkerd-viz")
+
+          if ! echo "$ns" | grep -q 'labels'; then
+            ops="$ops{\"op\": \"add\",\"path\": \"/metadata/labels\",\"value\": {}},"
+          fi
+          if ! echo "$ns" | grep -q 'annotations'; then
+            ops="$ops{\"op\": \"add\", \"path\": \"/metadata/annotations\", \"value\": {}},"
+          fi
+          ops="$ops{\"op\": \"add\", \"path\": \"/metadata/labels/linkerd.io~1extension\", \"value\": \"viz\"}"
+
+          curl -kfv -XPATCH -H "Content-Type: application/json-patch+json" -H "Authorization: Bearer $token" \
+            -d "[$ops]" \
+            "https://kubernetes.default.svc/api/v1/namespaces/linkerd-viz?fieldManager=kubectl-label"
+        command:
+        - /bin/sh
+        image: curlimages/curl:7.78.0
+        imagePullPolicy: IfNotPresent
+        name: namespace-metadata
+        securityContext:
+          runAsUser: 2103
+      restartPolicy: Never
+      serviceAccountName: namespace-metadata

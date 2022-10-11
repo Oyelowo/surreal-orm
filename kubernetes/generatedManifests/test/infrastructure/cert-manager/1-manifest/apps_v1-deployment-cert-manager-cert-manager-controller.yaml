@@ -3,13 +3,13 @@ kind: Deployment
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"cert-manager","helm.sh/chart":"cert-manager-0.6.1"},"name":"cert-manager-controller","namespace":"cert-manager"},"spec":{"replicas":1,"selector":{"matchLabels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/name":"cert-manager"}},"strategy":{"rollingUpdate":{},"type":"RollingUpdate"},"template":{"metadata":{"annotations":{"prometheus.io/path":"/metrics","prometheus.io/port":"9402","prometheus.io/scrape":"true"},"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"cert-manager","helm.sh/chart":"cert-manager-0.6.1"}},"spec":{"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"podAffinityTerm":{"labelSelector":{"matchLabels":{"app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/name":"cert-manager"}},"namespaces":["cert-manager"],"topologyKey":"kubernetes.io/hostname"},"weight":1}]}},"containers":[{"args":["--v=2","--cluster-resource-namespace=$(POD_NAMESPACE)","--leader-election-namespace=kube-system","--acme-http01-solver-image=docker.io/bitnami/acmesolver:1.8.1-debian-11-r0"],"env":[{"name":"BITNAMI_DEBUG","value":"false"},{"name":"POD_NAMESPACE","valueFrom":{"fieldRef":{"fieldPath":"metadata.namespace"}}}],"image":"docker.io/bitnami/cert-manager:1.8.1-debian-11-r0","imagePullPolicy":"IfNotPresent","name":"cert-manager","ports":[{"containerPort":9402,"protocol":"TCP"}],"resources":{"limits":{},"requests":{}},"securityContext":{"runAsNonRoot":true,"runAsUser":1001}}],"securityContext":{"fsGroup":1001},"serviceAccountName":"cert-manager-controller"}}}}
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"cert-manager","helm.sh/chart":"cert-manager-0.8.4"},"name":"cert-manager-controller","namespace":"cert-manager"},"spec":{"replicas":1,"selector":{"matchLabels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/name":"cert-manager"}},"strategy":{"rollingUpdate":{},"type":"RollingUpdate"},"template":{"metadata":{"annotations":{"prometheus.io/path":"/metrics","prometheus.io/port":"9402","prometheus.io/scrape":"true"},"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"cert-manager","helm.sh/chart":"cert-manager-0.8.4"}},"spec":{"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"podAffinityTerm":{"labelSelector":{"matchLabels":{"app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/name":"cert-manager"}},"namespaces":["cert-manager"],"topologyKey":"kubernetes.io/hostname"},"weight":1}]}},"containers":[{"args":["--v=2","--cluster-resource-namespace=$(POD_NAMESPACE)","--leader-election-namespace=kube-system","--acme-http01-solver-image=docker.io/bitnami/acmesolver:1.9.1-debian-11-r16"],"env":[{"name":"BITNAMI_DEBUG","value":"false"},{"name":"POD_NAMESPACE","valueFrom":{"fieldRef":{"fieldPath":"metadata.namespace"}}}],"image":"docker.io/bitnami/cert-manager:1.9.1-debian-11-r15","imagePullPolicy":"IfNotPresent","name":"cert-manager","ports":[{"containerPort":9402,"protocol":"TCP"}],"resources":{"limits":{},"requests":{}},"securityContext":{"runAsNonRoot":true,"runAsUser":1001}}],"securityContext":{"fsGroup":1001},"serviceAccountName":"cert-manager-controller"}}}}
   labels:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: cert-manager
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/name: cert-manager
-    helm.sh/chart: cert-manager-0.6.1
+    helm.sh/chart: cert-manager-0.8.4
   name: cert-manager-controller
   namespace: cert-manager
 spec:
@@ -33,7 +33,7 @@ spec:
         app.kubernetes.io/instance: cert-manager
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: cert-manager
-        helm.sh/chart: cert-manager-0.6.1
+        helm.sh/chart: cert-manager-0.8.4
     spec:
       affinity:
         podAntiAffinity:
@@ -52,7 +52,7 @@ spec:
         - --v=2
         - --cluster-resource-namespace=$(POD_NAMESPACE)
         - --leader-election-namespace=kube-system
-        - --acme-http01-solver-image=docker.io/bitnami/acmesolver:1.8.1-debian-11-r0
+        - --acme-http01-solver-image=docker.io/bitnami/acmesolver:1.9.1-debian-11-r16
         env:
         - name: BITNAMI_DEBUG
           value: "false"
@@ -60,7 +60,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: docker.io/bitnami/cert-manager:1.8.1-debian-11-r0
+        image: docker.io/bitnami/cert-manager:1.9.1-debian-11-r15
         imagePullPolicy: IfNotPresent
         name: cert-manager
         ports:

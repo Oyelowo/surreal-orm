@@ -1,0 +1,38 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRole","metadata":{"labels":{"app.kubernetes.io/created-by":"helm","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/part-of":"rook-ceph-operator","helm.sh/chart":"rook-ceph-v1.10.3","operator":"rook","storage-backend":"ceph"},"name":"rook-ceph-system"},"rules":[{"apiGroups":[""],"resources":["pods","pods/log"],"verbs":["get","list"]},{"apiGroups":[""],"resources":["pods/exec"],"verbs":["create"]},{"apiGroups":["admissionregistration.k8s.io"],"resources":["validatingwebhookconfigurations"],"verbs":["create","get","delete","update"]}]}
+  labels:
+    app.kubernetes.io/created-by: helm
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/part-of: rook-ceph-operator
+    helm.sh/chart: rook-ceph-v1.10.3
+    operator: rook
+    storage-backend: ceph
+  name: rook-ceph-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/log
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  verbs:
+  - create
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - validatingwebhookconfigurations
+  verbs:
+  - create
+  - get
+  - delete
+  - update

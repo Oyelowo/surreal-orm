@@ -1,0 +1,77 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations: {}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: tableformats.fluvio.infinyon.com
+spec:
+  group: fluvio.infinyon.com
+  names:
+    kind: TableFormat
+    plural: tableformats
+    singular: tableformat
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        properties:
+          spec:
+            properties:
+              columns:
+                items:
+                  properties:
+                    alignment:
+                      enum:
+                      - LEFT
+                      - CENTER
+                      - RIGHT
+                      type: string
+                    display:
+                      type: boolean
+                    format:
+                      type: string
+                    headerBgColor:
+                      enum:
+                      - BLUE
+                      type: string
+                    headerFgColor:
+                      enum:
+                      - YELLOW
+                      type: string
+                    headerLabel:
+                      type: string
+                    keyPath:
+                      type: string
+                    primaryKey:
+                      type: boolean
+                    width:
+                      type: integer
+                  type: object
+                type: array
+              inputFormat:
+                enum:
+                - JSON
+                - YAML
+                - TOML
+                type: string
+              name:
+                maximum: 100
+                minimum: 1
+                type: string
+              smartmodule:
+                type: string
+            required:
+            - name
+            type: object
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

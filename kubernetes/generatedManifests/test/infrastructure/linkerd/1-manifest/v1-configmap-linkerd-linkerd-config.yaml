@@ -1,5 +1,6 @@
 apiVersion: v1
 data:
+  linkerd-crds-chart-version: linkerd-crds-1.0.0-edge
   values: |
     clusterDomain: cluster.local
     clusterNetworks: 10.0.0.0/8,100.64.0.0/10,172.16.0.0/12,192.168.0.0/16
@@ -16,10 +17,16 @@ data:
         name: cr.l5d.io/linkerd/debug
         pullPolicy: ""
         version: ""
+    deploymentStrategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
     disableHeartBeat: false
-    enableEndpointSlices: false
+    enableEndpointSlices: true
     enableH2Upgrade: true
     enablePSP: false
+    enablePodAntiAffinity: false
+    enablePodDisruptionBudget: false
     enablePprof: false
     identity:
       externalCA: true
@@ -29,26 +36,29 @@ data:
         scheme: kubernetes.io/tls
         tls:
           crtPEM: ""
+      serviceAccountTokenProjection: true
     identityTrustAnchorsPEM: ""
     identityTrustDomain: cluster.local
     imagePullPolicy: IfNotPresent
     imagePullSecrets: []
-    installNamespace: true
-    linkerdVersion: stable-2.11.2
-    namespace: linkerd
+    linkerdVersion: stable-2.12.1
     nodeSelector:
       kubernetes.io/os: linux
     podAnnotations: {}
     podLabels: {}
     policyController:
-      defaultAllowPolicy: all-unauthenticated
       image:
         name: cr.l5d.io/linkerd/policy-controller
         pullPolicy: ""
         version: ""
-      logLevel: linkerd=info,warn
+      logLevel: info
+      probeNetworks:
+      - 0.0.0.0/0
       resources:
         cpu:
+          limit: ""
+          request: ""
+        ephemeral-storage:
           limit: ""
           request: ""
         memory:
@@ -58,17 +68,21 @@ data:
       caBundle: ""
       crtPEM: ""
       externalSecret: false
-      keyPEM: ""
+      injectCaFrom: ""
+      injectCaFromSecret: ""
       namespaceSelector:
         matchExpressions:
         - key: config.linkerd.io/admission-webhooks
           operator: NotIn
           values:
           - disabled
+    priorityClassName: ""
     profileValidator:
       caBundle: ""
       crtPEM: ""
       externalSecret: false
+      injectCaFrom: ""
+      injectCaFromSecret: ""
       namespaceSelector:
         matchExpressions:
         - key: config.linkerd.io/admission-webhooks
@@ -78,6 +92,7 @@ data:
     proxy:
       await: true
       cores: 0
+      defaultInboundPolicy: all-unauthenticated
       enableExternalProfiles: false
       image:
         name: cr.l5d.io/linkerd/proxy
@@ -98,9 +113,13 @@ data:
         cpu:
           limit: ""
           request: ""
+        ephemeral-storage:
+          limit: ""
+          request: ""
         memory:
           limit: ""
           request: ""
+      shutdownGracePeriod: ""
       uid: 2102
       waitBeforeExitSeconds: 0
     proxyInit:
@@ -110,17 +129,22 @@ data:
       image:
         name: cr.l5d.io/linkerd/proxy-init
         pullPolicy: ""
-        version: v1.5.3
+        version: v2.0.0
+      iptablesMode: legacy
       logFormat: ""
       logLevel: ""
       resources:
         cpu:
           limit: 100m
-          request: 10m
+          request: 100m
+        ephemeral-storage:
+          limit: ""
+          request: ""
         memory:
-          limit: 50Mi
-          request: 10Mi
-      runAsRoot: true
+          limit: 20Mi
+          request: 20Mi
+      runAsRoot: false
+      runAsUser: 65534
       skipSubnets: ""
       xtMountPath:
         mountPath: /run
@@ -129,19 +153,33 @@ data:
       caBundle: ""
       crtPEM: ""
       externalSecret: false
+      injectCaFrom: ""
+      injectCaFromSecret: ""
       namespaceSelector:
         matchExpressions:
         - key: config.linkerd.io/admission-webhooks
           operator: NotIn
           values:
           - disabled
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values:
+          - kube-system
+          - cert-manager
+      objectSelector:
+        matchExpressions:
+        - key: linkerd.io/control-plane-component
+          operator: DoesNotExist
+        - key: linkerd.io/cni-resource
+          operator: DoesNotExist
+    runtimeClassName: ""
     webhookFailurePolicy: Ignore
 kind: ConfigMap
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","data":{"values":"clusterDomain: cluster.local\nclusterNetworks: 10.0.0.0/8,100.64.0.0/10,172.16.0.0/12,192.168.0.0/16\ncniEnabled: false\ncontrolPlaneTracing: false\ncontrolPlaneTracingNamespace: linkerd-jaeger\ncontrollerImage: cr.l5d.io/linkerd/controller\ncontrollerLogFormat: plain\ncontrollerLogLevel: info\ncontrollerReplicas: 1\ncontrollerUID: 2103\ndebugContainer:\n  image:\n    name: cr.l5d.io/linkerd/debug\n    pullPolicy: \"\"\n    version: \"\"\ndisableHeartBeat: false\nenableEndpointSlices: false\nenableH2Upgrade: true\nenablePSP: false\nenablePprof: false\nidentity:\n  externalCA: true\n  issuer:\n    clockSkewAllowance: 20s\n    issuanceLifetime: 24h0m0s\n    scheme: kubernetes.io/tls\n    tls:\n      crtPEM: \"\"\nidentityTrustAnchorsPEM: \"\"\nidentityTrustDomain: cluster.local\nimagePullPolicy: IfNotPresent\nimagePullSecrets: []\ninstallNamespace: true\nlinkerdVersion: stable-2.11.2\nnamespace: linkerd\nnodeSelector:\n  kubernetes.io/os: linux\npodAnnotations: {}\npodLabels: {}\npolicyController:\n  defaultAllowPolicy: all-unauthenticated\n  image:\n    name: cr.l5d.io/linkerd/policy-controller\n    pullPolicy: \"\"\n    version: \"\"\n  logLevel: linkerd=info,warn\n  resources:\n    cpu:\n      limit: \"\"\n      request: \"\"\n    memory:\n      limit: \"\"\n      request: \"\"\npolicyValidator:\n  caBundle: \"\"\n  crtPEM: \"\"\n  externalSecret: false\n  keyPEM: \"\"\n  namespaceSelector:\n    matchExpressions:\n    - key: config.linkerd.io/admission-webhooks\n      operator: NotIn\n      values:\n      - disabled\nprofileValidator:\n  caBundle: \"\"\n  crtPEM: \"\"\n  externalSecret: false\n  namespaceSelector:\n    matchExpressions:\n    - key: config.linkerd.io/admission-webhooks\n      operator: NotIn\n      values:\n      - disabled\nproxy:\n  await: true\n  cores: 0\n  enableExternalProfiles: false\n  image:\n    name: cr.l5d.io/linkerd/proxy\n    pullPolicy: \"\"\n    version: \"\"\n  inboundConnectTimeout: 100ms\n  logFormat: plain\n  logLevel: warn,linkerd=info\n  opaquePorts: 25,587,3306,4444,5432,6379,9300,11211\n  outboundConnectTimeout: 1000ms\n  ports:\n    admin: 4191\n    control: 4190\n    inbound: 4143\n    outbound: 4140\n  requireIdentityOnInboundPorts: \"\"\n  resources:\n    cpu:\n      limit: \"\"\n      request: \"\"\n    memory:\n      limit: \"\"\n      request: \"\"\n  uid: 2102\n  waitBeforeExitSeconds: 0\nproxyInit:\n  closeWaitTimeoutSecs: 0\n  ignoreInboundPorts: 4567,4568\n  ignoreOutboundPorts: 4567,4568\n  image:\n    name: cr.l5d.io/linkerd/proxy-init\n    pullPolicy: \"\"\n    version: v1.5.3\n  logFormat: \"\"\n  logLevel: \"\"\n  resources:\n    cpu:\n      limit: 100m\n      request: 10m\n    memory:\n      limit: 50Mi\n      request: 10Mi\n  runAsRoot: true\n  skipSubnets: \"\"\n  xtMountPath:\n    mountPath: /run\n    name: linkerd-proxy-init-xtables-lock\nproxyInjector:\n  caBundle: \"\"\n  crtPEM: \"\"\n  externalSecret: false\n  namespaceSelector:\n    matchExpressions:\n    - key: config.linkerd.io/admission-webhooks\n      operator: NotIn\n      values:\n      - disabled\nwebhookFailurePolicy: Ignore\n"},"kind":"ConfigMap","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.11.2"},"labels":{"app.kubernetes.io/managed-by":"pulumi","linkerd.io/control-plane-component":"controller","linkerd.io/control-plane-ns":"linkerd"},"name":"linkerd-config","namespace":"linkerd"}}
-    linkerd.io/created-by: linkerd/helm stable-2.11.2
+      {"apiVersion":"v1","data":{"linkerd-crds-chart-version":"linkerd-crds-1.0.0-edge","values":"clusterDomain: cluster.local\nclusterNetworks: 10.0.0.0/8,100.64.0.0/10,172.16.0.0/12,192.168.0.0/16\ncniEnabled: false\ncontrolPlaneTracing: false\ncontrolPlaneTracingNamespace: linkerd-jaeger\ncontrollerImage: cr.l5d.io/linkerd/controller\ncontrollerLogFormat: plain\ncontrollerLogLevel: info\ncontrollerReplicas: 1\ncontrollerUID: 2103\ndebugContainer:\n  image:\n    name: cr.l5d.io/linkerd/debug\n    pullPolicy: \"\"\n    version: \"\"\ndeploymentStrategy:\n  rollingUpdate:\n    maxSurge: 25%\n    maxUnavailable: 25%\ndisableHeartBeat: false\nenableEndpointSlices: true\nenableH2Upgrade: true\nenablePSP: false\nenablePodAntiAffinity: false\nenablePodDisruptionBudget: false\nenablePprof: false\nidentity:\n  externalCA: true\n  issuer:\n    clockSkewAllowance: 20s\n    issuanceLifetime: 24h0m0s\n    scheme: kubernetes.io/tls\n    tls:\n      crtPEM: \"\"\n  serviceAccountTokenProjection: true\nidentityTrustAnchorsPEM: \"\"\nidentityTrustDomain: cluster.local\nimagePullPolicy: IfNotPresent\nimagePullSecrets: []\nlinkerdVersion: stable-2.12.1\nnodeSelector:\n  kubernetes.io/os: linux\npodAnnotations: {}\npodLabels: {}\npolicyController:\n  image:\n    name: cr.l5d.io/linkerd/policy-controller\n    pullPolicy: \"\"\n    version: \"\"\n  logLevel: info\n  probeNetworks:\n  - 0.0.0.0/0\n  resources:\n    cpu:\n      limit: \"\"\n      request: \"\"\n    ephemeral-storage:\n      limit: \"\"\n      request: \"\"\n    memory:\n      limit: \"\"\n      request: \"\"\npolicyValidator:\n  caBundle: \"\"\n  crtPEM: \"\"\n  externalSecret: false\n  injectCaFrom: \"\"\n  injectCaFromSecret: \"\"\n  namespaceSelector:\n    matchExpressions:\n    - key: config.linkerd.io/admission-webhooks\n      operator: NotIn\n      values:\n      - disabled\npriorityClassName: \"\"\nprofileValidator:\n  caBundle: \"\"\n  crtPEM: \"\"\n  externalSecret: false\n  injectCaFrom: \"\"\n  injectCaFromSecret: \"\"\n  namespaceSelector:\n    matchExpressions:\n    - key: config.linkerd.io/admission-webhooks\n      operator: NotIn\n      values:\n      - disabled\nproxy:\n  await: true\n  cores: 0\n  defaultInboundPolicy: all-unauthenticated\n  enableExternalProfiles: false\n  image:\n    name: cr.l5d.io/linkerd/proxy\n    pullPolicy: \"\"\n    version: \"\"\n  inboundConnectTimeout: 100ms\n  logFormat: plain\n  logLevel: warn,linkerd=info\n  opaquePorts: 25,587,3306,4444,5432,6379,9300,11211\n  outboundConnectTimeout: 1000ms\n  ports:\n    admin: 4191\n    control: 4190\n    inbound: 4143\n    outbound: 4140\n  requireIdentityOnInboundPorts: \"\"\n  resources:\n    cpu:\n      limit: \"\"\n      request: \"\"\n    ephemeral-storage:\n      limit: \"\"\n      request: \"\"\n    memory:\n      limit: \"\"\n      request: \"\"\n  shutdownGracePeriod: \"\"\n  uid: 2102\n  waitBeforeExitSeconds: 0\nproxyInit:\n  closeWaitTimeoutSecs: 0\n  ignoreInboundPorts: 4567,4568\n  ignoreOutboundPorts: 4567,4568\n  image:\n    name: cr.l5d.io/linkerd/proxy-init\n    pullPolicy: \"\"\n    version: v2.0.0\n  iptablesMode: legacy\n  logFormat: \"\"\n  logLevel: \"\"\n  resources:\n    cpu:\n      limit: 100m\n      request: 100m\n    ephemeral-storage:\n      limit: \"\"\n      request: \"\"\n    memory:\n      limit: 20Mi\n      request: 20Mi\n  runAsRoot: false\n  runAsUser: 65534\n  skipSubnets: \"\"\n  xtMountPath:\n    mountPath: /run\n    name: linkerd-proxy-init-xtables-lock\nproxyInjector:\n  caBundle: \"\"\n  crtPEM: \"\"\n  externalSecret: false\n  injectCaFrom: \"\"\n  injectCaFromSecret: \"\"\n  namespaceSelector:\n    matchExpressions:\n    - key: config.linkerd.io/admission-webhooks\n      operator: NotIn\n      values:\n      - disabled\n    - key: kubernetes.io/metadata.name\n      operator: NotIn\n      values:\n      - kube-system\n      - cert-manager\n  objectSelector:\n    matchExpressions:\n    - key: linkerd.io/control-plane-component\n      operator: DoesNotExist\n    - key: linkerd.io/cni-resource\n      operator: DoesNotExist\nruntimeClassName: \"\"\nwebhookFailurePolicy: Ignore\n"},"kind":"ConfigMap","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.12.1"},"labels":{"app.kubernetes.io/managed-by":"pulumi","linkerd.io/control-plane-component":"controller","linkerd.io/control-plane-ns":"linkerd"},"name":"linkerd-config","namespace":"linkerd"}}
+    linkerd.io/created-by: linkerd/helm stable-2.12.1
   labels:
     app.kubernetes.io/managed-by: pulumi
     linkerd.io/control-plane-component: controller

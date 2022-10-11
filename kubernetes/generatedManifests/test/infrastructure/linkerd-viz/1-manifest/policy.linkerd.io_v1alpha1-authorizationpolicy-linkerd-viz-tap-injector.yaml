@@ -1,0 +1,22 @@
+apiVersion: policy.linkerd.io/v1alpha1
+kind: AuthorizationPolicy
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"policy.linkerd.io/v1alpha1","kind":"AuthorizationPolicy","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.12.1"},"labels":{"app.kubernetes.io/managed-by":"pulumi","component":"tap-injector","linkerd.io/extension":"viz"},"name":"tap-injector","namespace":"linkerd-viz"},"spec":{"requiredAuthenticationRefs":[{"group":"policy.linkerd.io","kind":"NetworkAuthentication","name":"kube-api-server"}],"targetRef":{"group":"policy.linkerd.io","kind":"Server","name":"tap-injector-webhook"}}}
+    linkerd.io/created-by: linkerd/helm stable-2.12.1
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+    component: tap-injector
+    linkerd.io/extension: viz
+  name: tap-injector
+  namespace: linkerd-viz
+spec:
+  requiredAuthenticationRefs:
+  - group: policy.linkerd.io
+    kind: NetworkAuthentication
+    name: kube-api-server
+  targetRef:
+    group: policy.linkerd.io
+    kind: Server
+    name: tap-injector-webhook

@@ -1,0 +1,170 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRole","metadata":{"labels":{"app.kubernetes.io/component":"controller-manager","app.kubernetes.io/instance":"tidb-operator","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"tidb-operator","helm.sh/chart":"tidb-operator-v1.3.8"},"name":"tidb-operator:tidb-controller-manager"},"rules":[{"apiGroups":[""],"resources":["services","events"],"verbs":["*"]},{"apiGroups":[""],"resources":["endpoints","configmaps"],"verbs":["create","get","list","watch","update","delete"]},{"apiGroups":[""],"resources":["serviceaccounts"],"verbs":["create","get","update","delete"]},{"apiGroups":["batch"],"resources":["jobs"],"verbs":["get","list","watch","create","update","delete"]},{"apiGroups":[""],"resources":["secrets"],"verbs":["create","update","get","list","watch","delete"]},{"apiGroups":[""],"resources":["persistentvolumeclaims"],"verbs":["get","list","watch","create","update","delete","patch"]},{"apiGroups":[""],"resources":["pods"],"verbs":["get","list","watch","update","delete"]},{"apiGroups":["apps"],"resources":["statefulsets","deployments","controllerrevisions"],"verbs":["*"]},{"apiGroups":["extensions"],"resources":["ingresses"],"verbs":["*"]},{"apiGroups":["networking.k8s.io"],"resources":["ingresses"],"verbs":["*"]},{"apiGroups":["apps.pingcap.com"],"resources":["statefulsets","statefulsets/status"],"verbs":["*"]},{"apiGroups":["pingcap.com"],"resources":["*"],"verbs":["*"]},{"nonResourceURLs":["/metrics"],"verbs":["get"]},{"apiGroups":[""],"resources":["nodes"],"verbs":["get","list","watch"]},{"apiGroups":[""],"resources":["persistentvolumes"],"verbs":["get","list","watch","patch","update"]},{"apiGroups":["storage.k8s.io"],"resources":["storageclasses"],"verbs":["get","list","watch"]},{"apiGroups":["rbac.authorization.k8s.io"],"resources":["clusterroles","roles"],"verbs":["escalate","create","get","update","delete"]},{"apiGroups":["rbac.authorization.k8s.io"],"resources":["rolebindings","clusterrolebindings"],"verbs":["create","get","update","delete"]}]}
+  labels:
+    app.kubernetes.io/component: controller-manager
+    app.kubernetes.io/instance: tidb-operator
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: tidb-operator
+    helm.sh/chart: tidb-operator-v1.3.8
+  name: tidb-operator:tidb-controller-manager
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - events
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  - configmaps
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - get
+  - update
+  - delete
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - update
+  - get
+  - list
+  - watch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - delete
+- apiGroups:
+  - apps
+  resources:
+  - statefulsets
+  - deployments
+  - controllerrevisions
+  verbs:
+  - '*'
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - '*'
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - '*'
+- apiGroups:
+  - apps.pingcap.com
+  resources:
+  - statefulsets
+  - statefulsets/status
+  verbs:
+  - '*'
+- apiGroups:
+  - pingcap.com
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+  - update
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterroles
+  - roles
+  verbs:
+  - escalate
+  - create
+  - get
+  - update
+  - delete
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - rolebindings
+  - clusterrolebindings
+  verbs:
+  - create
+  - get
+  - update
+  - delete

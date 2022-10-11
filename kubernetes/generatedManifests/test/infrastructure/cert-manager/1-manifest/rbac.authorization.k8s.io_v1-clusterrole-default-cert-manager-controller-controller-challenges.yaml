@@ -3,13 +3,13 @@ kind: ClusterRole
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRole","metadata":{"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"cert-manager","helm.sh/chart":"cert-manager-0.6.1"},"name":"cert-manager-controller-controller-challenges"},"rules":[{"apiGroups":["acme.cert-manager.io"],"resources":["challenges","challenges/status"],"verbs":["update"]},{"apiGroups":["acme.cert-manager.io"],"resources":["challenges"],"verbs":["get","list","watch"]},{"apiGroups":["cert-manager.io"],"resources":["issuers","clusterissuers"],"verbs":["get","list","watch"]},{"apiGroups":[""],"resources":["secrets"],"verbs":["get","list","watch"]},{"apiGroups":[""],"resources":["events"],"verbs":["create","patch"]},{"apiGroups":[""],"resources":["pods","services"],"verbs":["get","list","watch","create","delete"]},{"apiGroups":["networking.k8s.io"],"resources":["ingresses"],"verbs":["get","list","watch","create","delete","update"]},{"apiGroups":["route.openshift.io"],"resources":["routes/custom-host"],"verbs":["create"]},{"apiGroups":["acme.cert-manager.io"],"resources":["challenges/finalizers"],"verbs":["update"]},{"apiGroups":[""],"resources":["secrets"],"verbs":["get","list","watch"]}]}
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRole","metadata":{"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"cert-manager","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"cert-manager","helm.sh/chart":"cert-manager-0.8.4"},"name":"cert-manager-controller-controller-challenges"},"rules":[{"apiGroups":["acme.cert-manager.io"],"resources":["challenges","challenges/status"],"verbs":["update"]},{"apiGroups":["acme.cert-manager.io"],"resources":["challenges"],"verbs":["get","list","watch"]},{"apiGroups":["cert-manager.io"],"resources":["issuers","clusterissuers"],"verbs":["get","list","watch"]},{"apiGroups":[""],"resources":["secrets"],"verbs":["get","list","watch"]},{"apiGroups":[""],"resources":["events"],"verbs":["create","patch"]},{"apiGroups":[""],"resources":["pods","services"],"verbs":["get","list","watch","create","delete"]},{"apiGroups":["networking.k8s.io"],"resources":["ingresses"],"verbs":["get","list","watch","create","delete","update"]},{"apiGroups":["route.openshift.io"],"resources":["routes/custom-host"],"verbs":["create"]},{"apiGroups":["acme.cert-manager.io"],"resources":["challenges/finalizers"],"verbs":["update"]},{"apiGroups":[""],"resources":["secrets"],"verbs":["get","list","watch"]}]}
   labels:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: cert-manager
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/name: cert-manager
-    helm.sh/chart: cert-manager-0.6.1
+    helm.sh/chart: cert-manager-0.8.4
   name: cert-manager-controller-controller-challenges
 rules:
 - apiGroups:

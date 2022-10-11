@@ -1,0 +1,226 @@
+apiVersion: v1
+data:
+  CSI_CEPHFS_FSGROUPPOLICY: File
+  CSI_CEPHFS_PLUGIN_RESOURCE: |
+    - name : driver-registrar
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 50m
+        limits:
+          memory: 256Mi
+          cpu: 100m
+    - name : csi-cephfsplugin
+      resource:
+        requests:
+          memory: 512Mi
+          cpu: 250m
+        limits:
+          memory: 1Gi
+          cpu: 500m
+    - name : liveness-prometheus
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 50m
+        limits:
+          memory: 256Mi
+          cpu: 100m
+  CSI_CEPHFS_PROVISIONER_RESOURCE: |
+    - name : csi-provisioner
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 200m
+    - name : csi-resizer
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 200m
+    - name : csi-attacher
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 200m
+    - name : csi-snapshotter
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 200m
+    - name : csi-cephfsplugin
+      resource:
+        requests:
+          memory: 512Mi
+          cpu: 250m
+        limits:
+          memory: 1Gi
+          cpu: 500m
+    - name : liveness-prometheus
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 50m
+        limits:
+          memory: 256Mi
+          cpu: 100m
+  CSI_ENABLE_CEPHFS_SNAPSHOTTER: "true"
+  CSI_ENABLE_CSIADDONS: "false"
+  CSI_ENABLE_ENCRYPTION: "false"
+  CSI_ENABLE_HOST_NETWORK: "true"
+  CSI_ENABLE_METADATA: "false"
+  CSI_ENABLE_NFS_SNAPSHOTTER: "true"
+  CSI_ENABLE_OMAP_GENERATOR: "false"
+  CSI_ENABLE_RBD_SNAPSHOTTER: "true"
+  CSI_ENABLE_TOPOLOGY: "false"
+  CSI_FORCE_CEPHFS_KERNEL_CLIENT: "true"
+  CSI_GRPC_TIMEOUT_SECONDS: "150"
+  CSI_NFS_FSGROUPPOLICY: File
+  CSI_NFS_PLUGIN_RESOURCE: |
+    - name : driver-registrar
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 50m
+        limits:
+          memory: 256Mi
+          cpu: 100m
+    - name : csi-nfsplugin
+      resource:
+        requests:
+          memory: 512Mi
+          cpu: 250m
+        limits:
+          memory: 1Gi
+          cpu: 500m
+  CSI_NFS_PROVISIONER_RESOURCE: |
+    - name : csi-provisioner
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 200m
+    - name : csi-nfsplugin
+      resource:
+        requests:
+          memory: 512Mi
+          cpu: 250m
+        limits:
+          memory: 1Gi
+          cpu: 500m
+  CSI_PLUGIN_ENABLE_SELINUX_HOST_MOUNT: "false"
+  CSI_PLUGIN_PRIORITY_CLASSNAME: system-node-critical
+  CSI_PROVISIONER_PRIORITY_CLASSNAME: system-cluster-critical
+  CSI_PROVISIONER_REPLICAS: "2"
+  CSI_RBD_FSGROUPPOLICY: File
+  CSI_RBD_PLUGIN_RESOURCE: |
+    - name : driver-registrar
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 50m
+        limits:
+          memory: 256Mi
+          cpu: 100m
+    - name : csi-rbdplugin
+      resource:
+        requests:
+          memory: 512Mi
+          cpu: 250m
+        limits:
+          memory: 1Gi
+          cpu: 500m
+    - name : liveness-prometheus
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 50m
+        limits:
+          memory: 256Mi
+          cpu: 100m
+  CSI_RBD_PROVISIONER_RESOURCE: |
+    - name : csi-provisioner
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 200m
+    - name : csi-resizer
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 200m
+    - name : csi-attacher
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 200m
+    - name : csi-snapshotter
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 200m
+    - name : csi-rbdplugin
+      resource:
+        requests:
+          memory: 512Mi
+          cpu: 250m
+        limits:
+          memory: 1Gi
+          cpu: 500m
+    - name : csi-omap-generator
+      resource:
+        requests:
+          memory: 512Mi
+          cpu: 250m
+        limits:
+          memory: 1Gi
+          cpu: 500m
+    - name : liveness-prometheus
+      resource:
+        requests:
+          memory: 128Mi
+          cpu: 50m
+        limits:
+          memory: 256Mi
+          cpu: 100m
+  ROOK_CEPH_COMMANDS_TIMEOUT_SECONDS: "15"
+  ROOK_CSI_ENABLE_CEPHFS: "true"
+  ROOK_CSI_ENABLE_GRPC_METRICS: "false"
+  ROOK_CSI_ENABLE_NFS: "false"
+  ROOK_CSI_ENABLE_RBD: "true"
+  ROOK_LOG_LEVEL: INFO
+  ROOK_OBC_WATCH_OPERATOR_NAMESPACE: "true"
+kind: ConfigMap
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"CSI_CEPHFS_FSGROUPPOLICY":"File","CSI_CEPHFS_PLUGIN_RESOURCE":"- name : driver-registrar\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 50m\n    limits:\n      memory: 256Mi\n      cpu: 100m\n- name : csi-cephfsplugin\n  resource:\n    requests:\n      memory: 512Mi\n      cpu: 250m\n    limits:\n      memory: 1Gi\n      cpu: 500m\n- name : liveness-prometheus\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 50m\n    limits:\n      memory: 256Mi\n      cpu: 100m\n","CSI_CEPHFS_PROVISIONER_RESOURCE":"- name : csi-provisioner\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 100m\n    limits:\n      memory: 256Mi\n      cpu: 200m\n- name : csi-resizer\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 100m\n    limits:\n      memory: 256Mi\n      cpu: 200m\n- name : csi-attacher\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 100m\n    limits:\n      memory: 256Mi\n      cpu: 200m\n- name : csi-snapshotter\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 100m\n    limits:\n      memory: 256Mi\n      cpu: 200m\n- name : csi-cephfsplugin\n  resource:\n    requests:\n      memory: 512Mi\n      cpu: 250m\n    limits:\n      memory: 1Gi\n      cpu: 500m\n- name : liveness-prometheus\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 50m\n    limits:\n      memory: 256Mi\n      cpu: 100m\n","CSI_ENABLE_CEPHFS_SNAPSHOTTER":"true","CSI_ENABLE_CSIADDONS":"false","CSI_ENABLE_ENCRYPTION":"false","CSI_ENABLE_HOST_NETWORK":"true","CSI_ENABLE_METADATA":"false","CSI_ENABLE_NFS_SNAPSHOTTER":"true","CSI_ENABLE_OMAP_GENERATOR":"false","CSI_ENABLE_RBD_SNAPSHOTTER":"true","CSI_ENABLE_TOPOLOGY":"false","CSI_FORCE_CEPHFS_KERNEL_CLIENT":"true","CSI_GRPC_TIMEOUT_SECONDS":"150","CSI_NFS_FSGROUPPOLICY":"File","CSI_NFS_PLUGIN_RESOURCE":"- name : driver-registrar\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 50m\n    limits:\n      memory: 256Mi\n      cpu: 100m\n- name : csi-nfsplugin\n  resource:\n    requests:\n      memory: 512Mi\n      cpu: 250m\n    limits:\n      memory: 1Gi\n      cpu: 500m\n","CSI_NFS_PROVISIONER_RESOURCE":"- name : csi-provisioner\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 100m\n    limits:\n      memory: 256Mi\n      cpu: 200m\n- name : csi-nfsplugin\n  resource:\n    requests:\n      memory: 512Mi\n      cpu: 250m\n    limits:\n      memory: 1Gi\n      cpu: 500m\n","CSI_PLUGIN_ENABLE_SELINUX_HOST_MOUNT":"false","CSI_PLUGIN_PRIORITY_CLASSNAME":"system-node-critical","CSI_PROVISIONER_PRIORITY_CLASSNAME":"system-cluster-critical","CSI_PROVISIONER_REPLICAS":"2","CSI_RBD_FSGROUPPOLICY":"File","CSI_RBD_PLUGIN_RESOURCE":"- name : driver-registrar\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 50m\n    limits:\n      memory: 256Mi\n      cpu: 100m\n- name : csi-rbdplugin\n  resource:\n    requests:\n      memory: 512Mi\n      cpu: 250m\n    limits:\n      memory: 1Gi\n      cpu: 500m\n- name : liveness-prometheus\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 50m\n    limits:\n      memory: 256Mi\n      cpu: 100m\n","CSI_RBD_PROVISIONER_RESOURCE":"- name : csi-provisioner\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 100m\n    limits:\n      memory: 256Mi\n      cpu: 200m\n- name : csi-resizer\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 100m\n    limits:\n      memory: 256Mi\n      cpu: 200m\n- name : csi-attacher\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 100m\n    limits:\n      memory: 256Mi\n      cpu: 200m\n- name : csi-snapshotter\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 100m\n    limits:\n      memory: 256Mi\n      cpu: 200m\n- name : csi-rbdplugin\n  resource:\n    requests:\n      memory: 512Mi\n      cpu: 250m\n    limits:\n      memory: 1Gi\n      cpu: 500m\n- name : csi-omap-generator\n  resource:\n    requests:\n      memory: 512Mi\n      cpu: 250m\n    limits:\n      memory: 1Gi\n      cpu: 500m\n- name : liveness-prometheus\n  resource:\n    requests:\n      memory: 128Mi\n      cpu: 50m\n    limits:\n      memory: 256Mi\n      cpu: 100m\n","ROOK_CEPH_COMMANDS_TIMEOUT_SECONDS":"15","ROOK_CSI_ENABLE_CEPHFS":"true","ROOK_CSI_ENABLE_GRPC_METRICS":"false","ROOK_CSI_ENABLE_NFS":"false","ROOK_CSI_ENABLE_RBD":"true","ROOK_LOG_LEVEL":"INFO","ROOK_OBC_WATCH_OPERATOR_NAMESPACE":"true"},"kind":"ConfigMap","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"rook-ceph-operator-config","namespace":"rook-ceph"}}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: rook-ceph-operator-config
+  namespace: rook-ceph
