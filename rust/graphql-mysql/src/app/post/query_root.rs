@@ -1,4 +1,4 @@
-use crate::utils::tidb::{get_pg_connection_from_ctx, get_tidb_pool_from_ctx};
+use crate::utils::mysql::{get_mysql_connection_from_ctx, get_mysql_pool_from_ctx};
 
 use super::model::{Post, PostEntity};
 
@@ -15,7 +15,7 @@ impl PostQueryRoot {
         ctx: &async_graphql::Context<'_>,
         id: Uuid,
     ) -> async_graphql::Result<Post> {
-        let db = get_pg_connection_from_ctx(ctx)?;
+        let db = get_mysql_connection_from_ctx(ctx)?;
         let post = PostEntity::find_by_id(id)
             .one(db)
             .await?
@@ -24,8 +24,11 @@ impl PostQueryRoot {
     }
 
     async fn posts(&self, ctx: &async_graphql::Context<'_>) -> async_graphql::Result<Vec<Post>> {
-        let db = get_tidb_pool_from_ctx(ctx)?;
-        let posts = query_as!(Post, "SELECT * FROM posts").fetch_all(db).await?;
-        Ok(posts)
+        let db = get_mysql_pool_from_ctx(ctx)?;
+        // let posts = query_as::<_, Post>("SELECT * FROM posts")
+        //     .fetch_all(db)
+        //     .await?;
+        // Ok(posts)
+        todo!()
     }
 }

@@ -9,7 +9,7 @@ use sqlx::types::{
 };
 use validator::Validate;
 
-use crate::{app::user::user, utils::tidb::get_tidb_connection_from_ctx};
+use crate::{app::user::user, utils::mysql::get_mysql_connection_from_ctx};
 
 #[derive(
     Clone,
@@ -103,7 +103,7 @@ pub type PostActiveModel = ActiveModel;
 #[ComplexObject]
 impl Post {
     async fn poster(&self, ctx: &Context<'_>) -> Result<user::Model> {
-        let db = get_pg_connection_from_ctx(ctx)?;
+        let db = get_mysql_connection_from_ctx(ctx)?;
         user::Entity::find_by_id(self.user_id)
             .one(db)
             .await?

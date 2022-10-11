@@ -13,7 +13,7 @@ use validator::Validate;
 
 use crate::{
     app::post::{self, Post},
-    utils::tidb::get_pg_connection_from_ctx,
+    utils::mysql::get_mysql_connection_from_ctx,
 };
 
 #[derive(
@@ -98,7 +98,7 @@ impl Entity {
 #[ComplexObject]
 impl Model {
     async fn posts(&self, ctx: &async_graphql::Context<'_>) -> async_graphql::Result<Vec<Post>> {
-        let db = get_pg_connection_from_ctx(ctx)?;
+        let db = get_mysql_connection_from_ctx(ctx)?;
         let posts = post::Entity::find_by_user_id(self.id).all(db).await?;
         Ok(posts)
     }

@@ -1,6 +1,6 @@
 
 
-pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
+pub async fn configure_database(config: &DatabaseSettings) ->MySqlPool {
     // Create database
     let mut connection = MySqlConnection::connect_with(&config.without_db())
         .await

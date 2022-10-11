@@ -1,5 +1,5 @@
 {
-  "db": "MysqlSQL",
+  "db": "MySQL",
   "25089b3ea32f19a5c40cab9eaa7646d8fe86b87e31a3ef430dc9e6aa13011158": {
     "query": "INSERT INTO posts (user_id, title, content) VALUES ($1, $2, $3) RETURNING id, created_at, updated_at, deleted_at",
     "describe": {

@@ -29,7 +29,7 @@ begin
     NEW.updated_at = timezone('utc', now());
     return NEW;
 end;
-$$ language plpgsql;
+$$ language plmysql;
 
 create or replace function trigger_updated_at(tablename regclass)
     returns void as
@@ -42,7 +42,7 @@ begin
         WHEN (OLD is distinct from NEW)
     EXECUTE FUNCTION set_updated_at();', tablename);
 end;
-$$ language plpgsql;
+$$ language plmysql;
 
 create collation case_insensitive (provider = icu, locale = 'und-u-ks-level2', deterministic = false);"#;
         let stmt = Statement::from_string(manager.get_database_backend(), sql.to_owned());

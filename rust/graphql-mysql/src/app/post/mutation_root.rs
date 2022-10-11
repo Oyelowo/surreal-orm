@@ -1,4 +1,4 @@
-use crate::utils::tidb::get_pg_connection_from_ctx;
+use crate::utils::mysql::get_mysql_connection_from_ctx;
 
 use super::{model::PostActiveModel, Post, PostEntity};
 use async_graphql::*;
@@ -18,7 +18,7 @@ impl PostMutationRoot {
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "post input")] post_input: Post,
     ) -> async_graphql::Result<Post> {
-        let db = get_pg_connection_from_ctx(ctx)?;
+        let db = get_mysql_connection_from_ctx(ctx)?;
         // NOTE: Normally, user id will be retrieved from session or jwt or oauth.
         // but hard code as a parameter for now.
         post_input.validate()?;
@@ -41,7 +41,7 @@ impl PostMutationRoot {
         post_input: Post,
     ) -> async_graphql::Result<Post> {
         post_input.validate()?;
-        let db = get_pg_connection_from_ctx(ctx)?;
+        let db = get_mysql_connection_from_ctx(ctx)?;
         // // CONSIDER: validate using async-graphql guard that the updater is the authenticated user i.e post.user_id === session/jwt.user_id
         // let mut post = Post::by_id(db, &id).await?;
 

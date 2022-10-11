@@ -1,4 +1,4 @@
-use crate::utils::tidb::get_pg_connection_from_ctx;
+use crate::utils::mysql::get_mysql_connection_from_ctx;
 
 use super::user;
 
@@ -23,7 +23,7 @@ impl UserMutationRoot {
     ) -> async_graphql::Result<user::Model> {
         user_input.validate()?;
 
-        let db = get_pg_connection_from_ctx(ctx)?;
+        let db = get_mysql_connection_from_ctx(ctx)?;
         let p = serde_json::to_value(user_input)?;
         let user = user::ActiveModel::from_json(p)?.insert(db).await?;
 
@@ -37,7 +37,7 @@ impl UserMutationRoot {
         user_input: user::Model,
     ) -> async_graphql::Result<user::Model> {
         user_input.validate()?;
-        let db = get_pg_connection_from_ctx(ctx)?;
+        let db = get_mysql_connection_from_ctx(ctx)?;
 
         user_input.validate()?;
 

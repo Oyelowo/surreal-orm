@@ -1,4 +1,4 @@
-use crate::utils::tidb::{get_pg_connection_from_ctx, get_tidb_pool_from_ctx};
+use crate::utils::mysql::{get_mysql_connection_from_ctx, get_mysql_pool_from_ctx};
 
 use super::user;
 
@@ -16,7 +16,7 @@ impl UserQueryRoot {
         ctx: &async_graphql::Context<'_>,
         #[graphql(desc = "id of the User")] id: Uuid,
     ) -> async_graphql::Result<user::Model> {
-        let db = get_pg_connection_from_ctx(ctx)?;
+        let db = get_mysql_connection_from_ctx(ctx)?;
 
         let user = user::Entity::find_by_id(id).one(db).await?.expect("msg");
 
@@ -27,10 +27,9 @@ impl UserQueryRoot {
         &self,
         ctx: &async_graphql::Context<'_>,
     ) -> async_graphql::Result<Vec<user::Model>> {
-        let db = get_tidb_pool_from_ctx(ctx)?;
+        let db = get_mysql_pool_from_ctx(ctx)?;
         // let users = query_as::<_, User>("SELECT * FROM users").fetch_all(db).await?;
-        let users = query_as!(
-            user::Model,
+        let users = query_as::<_, user::Model>(
             r#"SELECT first_name, id, created_at, updated_at, deleted_at, username, last_name, email, age, disabled, last_login, role as "role: _" FROM users"#
         )
         .fetch_all(db)
