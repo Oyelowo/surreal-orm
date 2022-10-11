@@ -2,6 +2,7 @@
 
 members = [
     "graphql-surrealdb",
+    "grpc-surrealdb",
     "graphql-mongo",
     "graphql-postgres",
     "grpc-mongo",

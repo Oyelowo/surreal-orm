@@ -1,0 +1,45 @@
+syntax = "proto3";
+package app_analytics;
+
+
+service app_analytics {
+    // Request message contains the name to be greeted
+    rpc GetUserAppEvent (GetUserAppEventRequest) returns (UserAppEventResponse);
+
+    rpc GetAllUserAppEvents (GetAllUserAppEventsRequest) returns (GetAllUserAppEventsResponse);
+
+    rpc CreateUserAppEvent (CreateUserAppEventRequest) returns (UserAppEventResponse);
+}
+
+message GetAllUserAppEventsRequest {
+    string user_id = 1;
+}
+
+message GetUserAppEventRequest {
+    string event_id = 1;
+    string user_id = 2;
+}
+
+message GetAllUserAppEventsResponse {
+    repeated  UserAppEventResponse user_app_event = 1;
+}
+
+message CreateUserAppEventRequest {
+    string user_id = 1;
+    string page = 2;
+    string event_name = 3;
+    string description = 4;
+}
+
+
+message UserAppEventResponse {
+    string id = 1;
+    string user_id = 2;
+    string page = 3;
+    string event_name = 4;
+    string description = 5;
+    // string location = 5;
+    // string device = 6;
+    // string user_agent = 7;
+    // repeated string keywords = 8;
+}
