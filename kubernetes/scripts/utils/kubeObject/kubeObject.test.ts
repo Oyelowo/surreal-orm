@@ -45,43 +45,43 @@ describe('KubeObject', () => {
         const kubeInstance = new KubeObject('test');
 
         const inst = kubeInstance.getAll();
-        expect(inst).toHaveLength(255);
+        expect(inst).toMatchSnapshot();
 
         const inst2 = kubeInstance.getOfAKind('Deployment');
-        expect(inst2).toHaveLength(21);
+        expect(inst2).toMatchSnapshot();
 
         info('Can get kube objects for a resource');
         const graphqlSurrealdb = kubeInstance.getForApp('services/graphql-surrealdb');
         expect(graphqlSurrealdb).toMatchSnapshot();
 
         const reactWeb = kubeInstance.getForApp('services/react-web');
-        expect(reactWeb).toHaveLength(4);
+        expect(reactWeb).toMatchSnapshot();
 
         const argocd = kubeInstance.getForApp('infrastructure/argocd');
-        expect(argocd).toHaveLength(34);
+        expect(argocd).toMatchSnapshot();
 
         const linkerd = kubeInstance.getForApp('infrastructure/linkerd');
-        expect(linkerd).toHaveLength(41);
+        expect(linkerd).toMatchSnapshot();
 
         const certManager = kubeInstance.getForApp('infrastructure/cert-manager');
-        expect(certManager).toHaveLength(57);
+        expect(certManager).toMatchSnapshot();
 
         const nginxIngress = kubeInstance.getForApp('infrastructure/nginx-ingress');
-        expect(nginxIngress).toHaveLength(12);
+        expect(nginxIngress).toMatchSnapshot();
 
         const namespaces = kubeInstance.getForApp('infrastructure/namespaces');
-        expect(namespaces).toHaveLength(7);
+        expect(namespaces).toMatchSnapshot();
     });
 
     test('Can update sealed secrets', () => {
         const kubeInstance = new KubeObject('test');
         const sealedSecrets = kubeInstance.getOfAKind('SealedSecret');
-        expect(sealedSecrets).toHaveLength(0);
+        expect(sealedSecrets).toMatchSnapshot();
 
         kubeInstance.syncSealedSecrets();
 
         const sealedSecretsUpdated = kubeInstance.getOfAKind('SealedSecret');
-        expect(sealedSecretsUpdated).toHaveLength(13);
+        expect(sealedSecretsUpdated).toMatchSnapshot();
     });
 
     test('Can create sealed secrets from selected secrets', async () => {
@@ -149,7 +149,7 @@ describe('KubeObject', () => {
         const sealedecrets = kubeInstance.getOfAKind('SealedSecret');
 
         info('Should have five selections cos we have updated only 5 sealed secrets');
-        expect(sealedecrets).toHaveLength(5);
+        expect(sealedecrets).toMatchSnapshot();
     });
 
     test('Can update sealed secrets after initial', async () => {
@@ -161,11 +161,11 @@ describe('KubeObject', () => {
         const secrets = kubeInstance.getOfAKind('Secret');
 
         info('Should have 13 sealed secrets initially generated from 13 secrets');
-        expect(secrets).toHaveLength(13);
-        expect(sealedSecrets).toHaveLength(13);
+        expect(secrets).toMatchSnapshot();
+        expect(sealedSecrets).toMatchSnapshot();
         expect(
             Object.values(sealedSecrets.filter((ss) => Object.values(ss.spec.encryptedData).includes('inital-secrets')))
-        ).toHaveLength(13);
+        ).toMatchSnapshot();
 
         const sendKeystrokes = async () => {
             // Select from the resources from which secrets will be selected
@@ -243,7 +243,7 @@ describe('KubeObject', () => {
         const sealedSecretsSomeUpdated = kubeInstance.getOfAKind('SealedSecret');
 
         info('Should update from 13 sealed secrets still, with specific secret data fields updated.');
-        expect(sealedSecretsSomeUpdated).toHaveLength(13);
+        expect(sealedSecretsSomeUpdated).toMatchSnapshot();
         // 5 secrets have been updated
         expect(
             Object.values(
@@ -251,6 +251,6 @@ describe('KubeObject', () => {
                     Object.values(ss.spec.encryptedData).includes('updated-secrets')
                 )
             )
-        ).toHaveLength(5);
+        ).toMatchSnapshot();
     });
 });
