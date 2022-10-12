@@ -4,7 +4,6 @@ use common::error_handling::ApiHttpStatus;
 use log::warn;
 use surrealdb::Datastore;
 use validator::Validate;
-use wither::Model;
 
 #[derive(Default)]
 pub struct PostMutationRoot;

@@ -1,0 +1,18 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"RoleBinding","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"rook-ceph-purge-osd-psp","namespace":"rook-ceph"},"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"ClusterRole","name":"psp:rook"},"subjects":[{"kind":"ServiceAccount","name":"rook-ceph-purge-osd","namespace":"rook-ceph"}]}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: rook-ceph-purge-osd-psp
+  namespace: rook-ceph
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: psp:rook
+subjects:
+- kind: ServiceAccount
+  name: rook-ceph-purge-osd
+  namespace: rook-ceph

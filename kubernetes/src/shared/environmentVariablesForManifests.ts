@@ -13,11 +13,7 @@ export const imageTagsDefault: Record<
     'latest'
 > = {
     SERVICES__GRAPHQL_SURREALDB__IMAGE_TAG: 'latest',
-    SERVICES__GRAPHQL_TIDB__IMAGE_TAG: 'latest',
     SERVICES__GRPC_SURREALDB__IMAGE_TAG: 'latest',
-    SERVICES__GRAPHQL_MONGO__IMAGE_TAG: 'latest',
-    SERVICES__GRPC_MONGO__IMAGE_TAG: 'latest',
-    SERVICES__GRAPHQL_POSTGRES__IMAGE_TAG: 'latest',
     SERVICES__REACT_WEB__IMAGE_TAG: 'latest',
 };
 

@@ -1,0 +1,16 @@
+apiVersion: policy.linkerd.io/v1alpha1
+kind: NetworkAuthentication
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"policy.linkerd.io/v1alpha1","kind":"NetworkAuthentication","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.12.1"},"labels":{"app.kubernetes.io/managed-by":"pulumi","linkerd.io/extension":"viz"},"name":"kube-api-server","namespace":"linkerd-viz"},"spec":{"networks":[{"cidr":"0.0.0.0/0"},{"cidr":"::/0"}]}}
+    linkerd.io/created-by: linkerd/helm stable-2.12.1
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+    linkerd.io/extension: viz
+  name: kube-api-server
+  namespace: linkerd-viz
+spec:
+  networks:
+  - cidr: 0.0.0.0/0
+  - cidr: ::/0

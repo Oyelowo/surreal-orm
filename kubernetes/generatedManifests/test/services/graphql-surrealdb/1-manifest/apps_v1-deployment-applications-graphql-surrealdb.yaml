@@ -1,0 +1,164 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"linkerd.io/inject":"enabled"},"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"graphql-surrealdb","namespace":"applications"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"graphql"}},"template":{"metadata":{"labels":{"app":"graphql"}},"spec":{"containers":[{"env":[{"name":"bG9jYWw=,Calling [toString] on an [Output\u003cT\u003e] is not supported.\n\nTo get the value of an Output\u003cT\u003e as an Output\u003cstring\u003e consider either:\n1: o.apply(v =\u003e `prefix${v}suffix`)\n2: pulumi.interpolate `prefix${v}suffix`\n\nSee https://pulumi.io/help/outputs for more details.\nThis function may throw in a future version of @pulumi/pulumi.","value":"bG9jYWw="},{"name":"MC4wLjAuMA==,Calling [toString] on an [Output\u003cT\u003e] is not supported.\n\nTo get the value of an Output\u003cT\u003e as an Output\u003cstring\u003e consider either:\n1: o.apply(v =\u003e `prefix${v}suffix`)\n2: pulumi.interpolate `prefix${v}suffix`\n\nSee https://pulumi.io/help/outputs for more details.\nThis function may throw in a future version of @pulumi/pulumi.","value":"MC4wLjAuMA=="},{"name":"ODAwMA==,Calling [toString] on an [Output\u003cT\u003e] is not supported.\n\nTo get the value of an Output\u003cT\u003e as an Output\u003cstring\u003e consider either:\n1: o.apply(v =\u003e `prefix${v}suffix`)\n2: pulumi.interpolate `prefix${v}suffix`\n\nSee https://pulumi.io/help/outputs for more details.\nThis function may throw in a future version of @pulumi/pulumi.","value":"ODAwMA=="},{"name":"aHR0cDovL2xvY2FsaG9zdDo4MDgw,Calling [toString] on an [Output\u003cT\u003e] is not supported.\n\nTo get the value of an Output\u003cT\u003e as an Output\u003cstring\u003e consider either:\n1: o.apply(v =\u003e `prefix${v}suffix`)\n2: pulumi.interpolate `prefix${v}suffix`\n\nSee https://pulumi.io/help/outputs for more details.\nThis function may throw in a future version of @pulumi/pulumi.","value":"aHR0cDovL2xvY2FsaG9zdDo4MDgw"},{"name":"dGVzdA==,Calling [toString] on an [Output\u003cT\u003e] is not supported.\n\nTo get the value of an Output\u003cT\u003e as an Output\u003cstring\u003e consider either:\n1: o.apply(v =\u003e `prefix${v}suffix`)\n2: pulumi.interpolate `prefix${v}suffix`\n\nSee https://pulumi.io/help/outputs for more details.\nThis function may throw in a future version of @pulumi/pulumi.","value":"dGVzdA=="},{"name":"c3VycmVhbGRiLmFwcGxpY2F0aW9ucw==,Calling [toString] on an [Output\u003cT\u003e] is not supported.\n\nTo get the value of an Output\u003cT\u003e as an Output\u003cstring\u003e consider either:\n1: o.apply(v =\u003e `prefix${v}suffix`)\n2: pulumi.interpolate `prefix${v}suffix`\n\nSee https://pulumi.io/help/outputs for more details.\nThis function may throw in a future version of @pulumi/pulumi.","value":"c3VycmVhbGRiLmFwcGxpY2F0aW9ucw=="},{"name":"c3VycmVhbGRi,Calling [toString] on an [Output\u003cT\u003e] is not supported.\n\nTo get the value of an Output\u003cT\u003e as an Output\u003cstring\u003e consider either:\n1: o.apply(v =\u003e `prefix${v}suffix`)\n2: pulumi.interpolate `prefix${v}suffix`\n\nSee https://pulumi.io/help/outputs for more details.\nThis function may throw in a future version of @pulumi/pulumi.","value":"c3VycmVhbGRi"},{"name":"cmVkaXMtbWFzdGVyLmFwcGxpY2F0aW9ucw==,Calling [toString] on an [Output\u003cT\u003e] is not supported.\n\nTo get the value of an Output\u003cT\u003e as an Output\u003cstring\u003e consider either:\n1: o.apply(v =\u003e `prefix${v}suffix`)\n2: pulumi.interpolate `prefix${v}suffix`\n\nSee https://pulumi.io/help/outputs for more details.\nThis function may throw in a future version of @pulumi/pulumi.","value":"cmVkaXMtbWFzdGVyLmFwcGxpY2F0aW9ucw=="},{"name":"NjM3OQ==,Calling [toString] on an [Output\u003cT\u003e] is not supported.\n\nTo get the value of an Output\u003cT\u003e as an Output\u003cstring\u003e consider either:\n1: o.apply(v =\u003e `prefix${v}suffix`)\n2: pulumi.interpolate `prefix${v}suffix`\n\nSee https://pulumi.io/help/outputs for more details.\nThis function may throw in a future version of @pulumi/pulumi.","value":"NjM3OQ=="},{"name":"cmVkaXM=,Calling [toString] on an [Output\u003cT\u003e] is not supported.\n\nTo get the value of an Output\u003cT\u003e as an Output\u003cstring\u003e consider either:\n1: o.apply(v =\u003e `prefix${v}suffix`)\n2: pulumi.interpolate `prefix${v}suffix`\n\nSee https://pulumi.io/help/outputs for more details.\nThis function may throw in a future version of @pulumi/pulumi.","value":"cmVkaXM="},{"name":"cmVkaXMtbWFzdGVy,Calling [toString] on an [Output\u003cT\u003e] is not supported.\n\nTo get the value of an Output\u003cT\u003e as an Output\u003cstring\u003e consider either:\n1: o.apply(v =\u003e `prefix${v}suffix`)\n2: pulumi.interpolate `prefix${v}suffix`\n\nSee https://pulumi.io/help/outputs for more details.\nThis function may throw in a future version of @pulumi/pulumi.","value":"cmVkaXMtbWFzdGVy"}],"image":"ghcr.io/oyelowo/graphql-surrealdb:latest","livenessProbe":{"failureThreshold":7,"httpGet":{"path":"/api/liveness","port":8000},"initialDelaySeconds":300,"periodSeconds":10},"name":"graphql","ports":[{"containerPort":8000,"name":"http"}],"readinessProbe":{"failureThreshold":7,"httpGet":{"path":"/api/healthz","port":8000},"initialDelaySeconds":60,"periodSeconds":10},"resources":{"limits":{"cpu":"100m","memory":"200Mi"},"requests":{"cpu":"100m","memory":"70Mi"}},"volumeMounts":[]}],"imagePullSecrets":[{"name":"bXktcmVnaXN0cnkta2V5"}],"initContainers":[],"volumes":[]}}}}
+    linkerd.io/inject: enabled
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: graphql-surrealdb
+  namespace: applications
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: graphql
+  template:
+    metadata:
+      labels:
+        app: graphql
+    spec:
+      containers:
+      - env:
+        - name: |-
+            bG9jYWw=,Calling [toString] on an [Output<T>] is not supported.
+
+            To get the value of an Output<T> as an Output<string> consider either:
+            1: o.apply(v => `prefix${v}suffix`)
+            2: pulumi.interpolate `prefix${v}suffix`
+
+            See https://pulumi.io/help/outputs for more details.
+            This function may throw in a future version of @pulumi/pulumi.
+          value: bG9jYWw=
+        - name: |-
+            MC4wLjAuMA==,Calling [toString] on an [Output<T>] is not supported.
+
+            To get the value of an Output<T> as an Output<string> consider either:
+            1: o.apply(v => `prefix${v}suffix`)
+            2: pulumi.interpolate `prefix${v}suffix`
+
+            See https://pulumi.io/help/outputs for more details.
+            This function may throw in a future version of @pulumi/pulumi.
+          value: MC4wLjAuMA==
+        - name: |-
+            ODAwMA==,Calling [toString] on an [Output<T>] is not supported.
+
+            To get the value of an Output<T> as an Output<string> consider either:
+            1: o.apply(v => `prefix${v}suffix`)
+            2: pulumi.interpolate `prefix${v}suffix`
+
+            See https://pulumi.io/help/outputs for more details.
+            This function may throw in a future version of @pulumi/pulumi.
+          value: ODAwMA==
+        - name: |-
+            aHR0cDovL2xvY2FsaG9zdDo4MDgw,Calling [toString] on an [Output<T>] is not supported.
+
+            To get the value of an Output<T> as an Output<string> consider either:
+            1: o.apply(v => `prefix${v}suffix`)
+            2: pulumi.interpolate `prefix${v}suffix`
+
+            See https://pulumi.io/help/outputs for more details.
+            This function may throw in a future version of @pulumi/pulumi.
+          value: aHR0cDovL2xvY2FsaG9zdDo4MDgw
+        - name: |-
+            dGVzdA==,Calling [toString] on an [Output<T>] is not supported.
+
+            To get the value of an Output<T> as an Output<string> consider either:
+            1: o.apply(v => `prefix${v}suffix`)
+            2: pulumi.interpolate `prefix${v}suffix`
+
+            See https://pulumi.io/help/outputs for more details.
+            This function may throw in a future version of @pulumi/pulumi.
+          value: dGVzdA==
+        - name: |-
+            c3VycmVhbGRiLmFwcGxpY2F0aW9ucw==,Calling [toString] on an [Output<T>] is not supported.
+
+            To get the value of an Output<T> as an Output<string> consider either:
+            1: o.apply(v => `prefix${v}suffix`)
+            2: pulumi.interpolate `prefix${v}suffix`
+
+            See https://pulumi.io/help/outputs for more details.
+            This function may throw in a future version of @pulumi/pulumi.
+          value: c3VycmVhbGRiLmFwcGxpY2F0aW9ucw==
+        - name: |-
+            c3VycmVhbGRi,Calling [toString] on an [Output<T>] is not supported.
+
+            To get the value of an Output<T> as an Output<string> consider either:
+            1: o.apply(v => `prefix${v}suffix`)
+            2: pulumi.interpolate `prefix${v}suffix`
+
+            See https://pulumi.io/help/outputs for more details.
+            This function may throw in a future version of @pulumi/pulumi.
+          value: c3VycmVhbGRi
+        - name: |-
+            cmVkaXMtbWFzdGVyLmFwcGxpY2F0aW9ucw==,Calling [toString] on an [Output<T>] is not supported.
+
+            To get the value of an Output<T> as an Output<string> consider either:
+            1: o.apply(v => `prefix${v}suffix`)
+            2: pulumi.interpolate `prefix${v}suffix`
+
+            See https://pulumi.io/help/outputs for more details.
+            This function may throw in a future version of @pulumi/pulumi.
+          value: cmVkaXMtbWFzdGVyLmFwcGxpY2F0aW9ucw==
+        - name: |-
+            NjM3OQ==,Calling [toString] on an [Output<T>] is not supported.
+
+            To get the value of an Output<T> as an Output<string> consider either:
+            1: o.apply(v => `prefix${v}suffix`)
+            2: pulumi.interpolate `prefix${v}suffix`
+
+            See https://pulumi.io/help/outputs for more details.
+            This function may throw in a future version of @pulumi/pulumi.
+          value: NjM3OQ==
+        - name: |-
+            cmVkaXM=,Calling [toString] on an [Output<T>] is not supported.
+
+            To get the value of an Output<T> as an Output<string> consider either:
+            1: o.apply(v => `prefix${v}suffix`)
+            2: pulumi.interpolate `prefix${v}suffix`
+
+            See https://pulumi.io/help/outputs for more details.
+            This function may throw in a future version of @pulumi/pulumi.
+          value: cmVkaXM=
+        - name: |-
+            cmVkaXMtbWFzdGVy,Calling [toString] on an [Output<T>] is not supported.
+
+            To get the value of an Output<T> as an Output<string> consider either:
+            1: o.apply(v => `prefix${v}suffix`)
+            2: pulumi.interpolate `prefix${v}suffix`
+
+            See https://pulumi.io/help/outputs for more details.
+            This function may throw in a future version of @pulumi/pulumi.
+          value: cmVkaXMtbWFzdGVy
+        image: ghcr.io/oyelowo/graphql-surrealdb:latest
+        livenessProbe:
+          failureThreshold: 7
+          httpGet:
+            path: /api/liveness
+            port: 8000
+          initialDelaySeconds: 300
+          periodSeconds: 10
+        name: graphql
+        ports:
+        - containerPort: 8000
+          name: http
+        readinessProbe:
+          failureThreshold: 7
+          httpGet:
+            path: /api/healthz
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 70Mi
+        volumeMounts: []
+      imagePullSecrets:
+      - name: bXktcmVnaXN0cnkta2V5
+      initContainers: []
+      volumes: []

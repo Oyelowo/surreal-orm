@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"StatefulSet","metadata":{"labels":{"app.kubernetes.io/component":"search-engine","app.kubernetes.io/instance":"meilisearch","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"meilisearch","app.kubernetes.io/part-of":"meilisearch","app.kubernetes.io/version":"v0.29.0","helm.sh/chart":"meilisearch-0.1.41"},"name":"meilisearch","namespace":"applications"},"spec":{"replicas":1,"selector":{"matchLabels":{"app.kubernetes.io/instance":"meilisearch","app.kubernetes.io/name":"meilisearch"}},"serviceName":"meilisearch","template":{"metadata":{"labels":{"app.kubernetes.io/component":"search-engine","app.kubernetes.io/instance":"meilisearch","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"meilisearch","app.kubernetes.io/part-of":"meilisearch","app.kubernetes.io/version":"v0.29.0","helm.sh/chart":"meilisearch-0.1.41"}},"spec":{"containers":[{"envFrom":[{"configMapRef":{"name":"meilisearch-environment"}},{"secretRef":{"name":"meilisearch-master-key"}}],"image":"getmeili/meilisearch:v0.29.0","imagePullPolicy":"IfNotPresent","livenessProbe":{"httpGet":{"path":"/health","port":"http"},"initialDelaySeconds":60,"periodSeconds":60},"name":"meilisearch","ports":[{"containerPort":7700,"name":"http","protocol":"TCP"}],"readinessProbe":{"httpGet":{"path":"/health","port":"http"},"initialDelaySeconds":60,"periodSeconds":60},"resources":{}}],"serviceAccountName":"meilisearch"}}}}
+  labels:
+    app.kubernetes.io/component: search-engine
+    app.kubernetes.io/instance: meilisearch
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: meilisearch
+    app.kubernetes.io/part-of: meilisearch
+    app.kubernetes.io/version: v0.29.0
+    helm.sh/chart: meilisearch-0.1.41
+  name: meilisearch
+  namespace: applications
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: meilisearch
+      app.kubernetes.io/name: meilisearch
+  serviceName: meilisearch
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: search-engine
+        app.kubernetes.io/instance: meilisearch
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: meilisearch
+        app.kubernetes.io/part-of: meilisearch
+        app.kubernetes.io/version: v0.29.0
+        helm.sh/chart: meilisearch-0.1.41
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: meilisearch-environment
+        - secretRef:
+            name: meilisearch-master-key
+        image: getmeili/meilisearch:v0.29.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 60
+        name: meilisearch
+        ports:
+        - containerPort: 7700
+          name: http
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 60
+        resources: {}
+      serviceAccountName: meilisearch

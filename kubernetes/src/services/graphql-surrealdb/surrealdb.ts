@@ -3,12 +3,13 @@ import { AppConfigs, AppEnvVars, TikVDbEnvVars } from '../../types/ownTypes.js';
 import { getIngressUrl } from '../../infrastructure/ingress/hosts.js';
 import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
+import { graphqlSurrealdb } from './app.js';
 
 const env = getEnvVarsForKubeManifests();
 
 const secrets = new PlainSecretsManager('services', 'graphql-surrealdb', 'local').getSecrets();
 
-type SurrealDbEnvVars = AppEnvVars & TikVDbEnvVars<'applications'> /* & SurrealDbEnvVars<'applications'> */;
+type SurrealDbEnvVars = AppEnvVars & TikVDbEnvVars<'applications'>;
 
 const surrealDbEnvVars: SurrealDbEnvVars = {
     APP_ENVIRONMENT: env.ENVIRONMENT,
@@ -55,3 +56,4 @@ export const surrealdbSettings: AppConfigs<'surrealdb', 'applications', SurrealD
 };
 
 export const surrealDbDeployment = new ServiceDeployment('surrealdb', surrealdbSettings);
+surrealDbDeployment.setProvider(graphqlSurrealdb.getProvider());

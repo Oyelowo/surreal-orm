@@ -22,7 +22,7 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
     public readonly service: kx.Service;
     public readonly argocdApplication: crds.argoproj.v1alpha1.Application;
     public readonly ipAddress?: pulumi.Output<string>;
-    public readonly provider?: pulumi.ProviderResource;
+    public provider: pulumi.ProviderResource;
     public readonly secretProvider?: pulumi.ProviderResource;
     public readonly appName: N;
 
@@ -81,13 +81,13 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
  Maps custom secret object to what kx can understand to produce secretRef automagically
  * @example
  {
-    MONGODB_USERNAME: "xxxx",
-    MONGODB_PASSWORD: "xxxx",
+    SURREALDB_USERNAME: "xxxx",
+    SURREALDB_PASSWORD: "xxxx",
  }
  
  to
  {
-    MONGODB_USERNAME:
+    SURREALDB_USERNAME:
         secretRef:
           ...
   ...
@@ -208,6 +208,7 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
     }
 
     getProvider = () => this.provider;
+    setProvider = (provider: NonNullable<typeof this.provider>) => (this.provider = provider);
     getServiceDir = (): string => {
         return getResourceAbsolutePath({
             outputDirectory: `services/${this.appName}`,

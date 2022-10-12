@@ -1,0 +1,15 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"storage.k8s.io/v1","kind":"StorageClass","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"ceph-bucket"},"parameters":{"objectStoreName":"ceph-objectstore","objectStoreNamespace":"rook-ceph","region":"us-east-1"},"provisioner":"rook-ceph.ceph.rook.io/bucket","reclaimPolicy":"Delete"}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: ceph-bucket
+parameters:
+  objectStoreName: ceph-objectstore
+  objectStoreNamespace: rook-ceph
+  region: us-east-1
+provisioner: rook-ceph.ceph.rook.io/bucket
+reclaimPolicy: Delete

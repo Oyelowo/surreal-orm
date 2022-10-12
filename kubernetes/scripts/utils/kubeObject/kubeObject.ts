@@ -15,6 +15,7 @@ import type { Environment, ResourceName } from '../../../src/types/ownTypes.js';
 import { generateManifests } from './generateManifests.js';
 import cliProgress from 'cli-progress';
 import { PlainSecretsManager } from '../plainSecretsManager.js';
+import chalk from 'chalk';
 
 type ResourceKind =
     | 'Secret'
@@ -116,14 +117,15 @@ export class KubeObject {
         const manifestsPaths = this.getManifestsPathWithinDir(envDir);
         const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
-        console.log('Extracting kubeobject from manifest');
+        console.log(chalk.blueBright`Extracting kubeobject from manifest`);
         bar1.start(manifestsPaths.length, 0);
 
         const kubeObjects: TKubeObject[] = [];
         manifestsPaths.forEach((manifestPath, i) => {
             if (!manifestPath) return;
             const kubeObject = yaml.parse(fs.readFileSync(manifestPath, 'utf8')) as TKubeObject;
-            if (_.isEmpty(kubeObject)) throw new Error('Manifest is empty. Check the directory that all is well');
+            if (_.isEmpty(kubeObject))
+                throw new Error(chalk.redBright`Manifest is empty. Check the directory that all is well`);
 
             // let's mutate to make it a bit faster and should be okay since we only do it here
             kubeObject.path = manifestPath;

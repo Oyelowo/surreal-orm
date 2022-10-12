@@ -9,77 +9,30 @@ upgrade:
 
 sync:
 # Update graphql schemas which is then consumed by the frontend graphql build script
-	cargo run -p graphql-mongo --bin graphql_generator_graphql_mongo
-	# cargo run -p graphql-postgres --bin graphql_generator_graphql_postgres
+	cargo run -p graphql-surrealdb --bin graphql_generator_graphql_surrealdb
 
 dev:
-	cargo run -p graphql-mongo --bin graphql-mongo
+	cargo run -p graphql-surrealdb --bin graphql-surrealdb
 
 format:
-	SQLX_OFFLINE=true cargo fmt --all -- --check
-	SQLX_OFFLINE=true cargo clippy --fix
+	cargo fmt --all -- --check
+	cargo clippy --fix
 	
 check:
-	SQLX_OFFLINE=true cargo clippy -- -D  warnings
+	cargo clippy -- -D  warnings
 
 test:
-	SQLX_OFFLINE=true cargo test
+	cargo test
 
 test-watch:
-	SQLX_OFFLINE=true cargo watch -x 'test --offline -- --color=always'
+	cargo watch -x 'test --offline -- --color=always'
 
 build:
 	cargo build
 
 run:
-	cargo run -p graphql-mongo --bin graphql-mongo
+	cargo run -p graphql-surrealdb --bin graphql-surrealdb
 
-
-
-##############
-## Others
-##############
-# 1. graphql-mongo
-run-graphql-mongo:
-	cargo run -p graphql-mongo --bin graphql-mongo
-
-build-graphql-mongo:
-	docker build . --target graphql-mongo  -t oyelowo/graphql-mongo
-
-deploy-graphql-mongo:
-	# docker build -f Dockerfile.development --target graphql-mongo  -t oyelowo/graphql-mongo .
-	docker run -e APP_PORT=8000 -e APP_HOST=0.0.0.0 \
-	 -e APP_ENVIRONMENT=local -e REDIS_USERNAME="" \
-	 -e REDIS_PASSWORD="password" \
-	 -e REDIS_HOST="localhost" \
-	 -e REDIS_PORT=6379 \
-	 -e MONGODB_NAME="mydb" \
-	 -e MONGODB_USERNAME="mydb" \
-	 -e MONGODB_PASSWORD="passoword" \
-	 -e MONGODB_HOST="localhost" \
-	 -e MONGODB_PORT=27017 \
-	 -p 8000:8000 oyelowo/graphql-mongo
-
-deploy-graphql-mongo-slim:
-	docker build -f Dockerfile.development --target graphql-mongo  -t oyelowo/graphql-mongo .
-	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  oyelowo/graphql-mongo --tag oyelowo/graphql-mongo.slim
-	docker run -p 3000:3000 oyelowo/graphql-mongo.slim
-
-
-# 2. grpc-mongo
-run-grpc-mongo:
-	cargo run -p grpc-mongo --bin grpc-mongo
-
-build-grpc-mongo:
-	docker build . --target grpc-mongo  -t oyelowo/grpc-mongo
-
-deploy-grpc-mongo:
-	docker build -f Dockerfile.development --tar-grpc-mongoget grpc-mongo  -t oyelowo/grpc-mongo .
-	docker run -p 3000:3000 oyelowo/grpc-mongo 
-
-deploy-grpc-mongo-slim:
-	docker build -f Dockerfile.development --target grpc-mongo  -t oyelowo/grpc-mongo .
-	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  oyelowo/grpc-mongo --tag oyelowo/grpc-mongo.slim
-	docker run -p 3000:3000 oyelowo/grpc-mongo.slim
-
-
+run-surrealdb:
+	# docker run --rm -p 8000:8000 surrealdb/surrealdb:latest start
+	docker run --rm --name surrealdb -p 127.0.0.1:8000:8000 surrealdb/surrealdb:latest start --log trace --user root --pass root memory

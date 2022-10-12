@@ -95,24 +95,6 @@ export const helmChartsInfo = {
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
-            mongodb: {
-                chart: 'mongodb',
-                version: '11.1.10',
-                externalCrds: [] as string[],
-                skipCrdRender: false,
-            },
-            postgresql: {
-                chart: 'postgresql',
-                version: '11.9.8',
-                externalCrds: [] as string[],
-                skipCrdRender: false,
-            },
-            postgresqlHA: {
-                chart: 'postgresql-ha',
-                version: '9.4.6',
-                externalCrds: [] as string[],
-                skipCrdRender: false,
-            },
         },
     },
     jetstack: {

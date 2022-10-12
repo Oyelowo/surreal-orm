@@ -6,7 +6,6 @@ use common::error_handling::ApiHttpStatus;
 use futures_util::TryStreamExt;
 use log::warn;
 use my_macros::FieldsGetter;
-use wither::prelude::Model;
 
 #[derive(Default)]
 pub struct PostQueryRoot;

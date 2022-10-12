@@ -23,9 +23,6 @@ export const reactWebSettings: AppConfigs<'react-web', 'applications', ReactEnvV
         APP_HOST: '0.0.0.0',
         APP_PORT: '3000',
         APP_EXTERNAL_BASE_URL: getIngressUrl({ environment: env.ENVIRONMENT }),
-        // Not really used as all backend functionality has been moved to rust backend.
-        // So, not using typescript for any backend work. Keeping for reference purpose
-        // GRAPHQL_MONGO_URL: getFQDNFromSettings(graphqlMongoSettings), // Get Url mongoFQDN
     },
     metadata: {
         name: 'react-web',

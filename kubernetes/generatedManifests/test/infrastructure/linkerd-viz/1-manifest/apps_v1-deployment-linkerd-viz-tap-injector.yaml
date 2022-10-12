@@ -2,9 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
+    config.linkerd.io/proxy-await: enabled
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"linkerd.io/created-by":"linkerd/helm stable-2.11.2"},"labels":{"app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"tap-injector","app.kubernetes.io/part-of":"Linkerd","component":"tap-injector","linkerd.io/extension":"viz"},"name":"tap-injector","namespace":"linkerd-viz"},"spec":{"replicas":1,"selector":{"matchLabels":{"component":"tap-injector"}},"template":{"metadata":{"annotations":{"checksum/config":"179c1704366eac5276a9192f0692c7931db1e7e881d22eb572fe4336b98f4e7e","linkerd.io/created-by":"linkerd/helm stable-2.11.2"},"labels":{"component":"tap-injector","linkerd.io/extension":"viz"}},"spec":{"containers":[{"args":["injector","-tap-service-name=tap.linkerd-viz.serviceaccount.identity.linkerd.cluster.local","-log-level=info","-log-format=plain","-enable-pprof=false"],"image":"cr.l5d.io/linkerd/tap:stable-2.11.2","imagePullPolicy":"IfNotPresent","livenessProbe":{"httpGet":{"path":"/ping","port":9995},"initialDelaySeconds":10},"name":"tap-injector","ports":[{"containerPort":8443,"name":"tap-injector"},{"containerPort":9995,"name":"admin-http"}],"readinessProbe":{"failureThreshold":7,"httpGet":{"path":"/ready","port":9995}},"securityContext":{"runAsUser":2103},"volumeMounts":[{"mountPath":"/var/run/linkerd/tls","name":"tls","readOnly":true}]}],"nodeSelector":{"kubernetes.io/os":"linux"},"serviceAccountName":"tap-injector","volumes":[{"name":"tls","secret":{"secretName":"tap-injector-k8s-tls"}}]}}}}
-    linkerd.io/created-by: linkerd/helm stable-2.11.2
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"config.linkerd.io/proxy-await":"enabled","linkerd.io/created-by":"linkerd/helm stable-2.12.1","linkerd.io/inject":"enabled"},"labels":{"app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"tap-injector","app.kubernetes.io/part-of":"Linkerd","component":"tap-injector","linkerd.io/extension":"viz"},"name":"tap-injector","namespace":"linkerd-viz"},"spec":{"replicas":1,"selector":{"matchLabels":{"component":"tap-injector"}},"template":{"metadata":{"annotations":{"checksum/config":"cfd04d1231612586e990320c0bc6e1548f0d255b13326754efa28d3c216c1612","cluster-autoscaler.kubernetes.io/safe-to-evict":"true","linkerd.io/created-by":"linkerd/helm stable-2.12.1","linkerd.io/inject":"enabled"},"labels":{"component":"tap-injector","linkerd.io/extension":"viz"}},"spec":{"containers":[{"args":["injector","-tap-service-name=tap.linkerd-viz.serviceaccount.identity.linkerd.cluster.local","-log-level=info","-log-format=plain","-enable-pprof=false"],"image":"cr.l5d.io/linkerd/tap:stable-2.12.1","imagePullPolicy":"IfNotPresent","livenessProbe":{"httpGet":{"path":"/ping","port":9995},"initialDelaySeconds":10},"name":"tap-injector","ports":[{"containerPort":8443,"name":"tap-injector"},{"containerPort":9995,"name":"admin-http"}],"readinessProbe":{"failureThreshold":7,"httpGet":{"path":"/ready","port":9995}},"securityContext":{"runAsUser":2103},"volumeMounts":[{"mountPath":"/var/run/linkerd/tls","name":"tls","readOnly":true}]}],"nodeSelector":{"kubernetes.io/os":"linux"},"serviceAccountName":"tap-injector","volumes":[{"name":"tls","secret":{"secretName":"tap-injector-k8s-tls"}}]}}}}
+    linkerd.io/created-by: linkerd/helm stable-2.12.1
+    linkerd.io/inject: enabled
   labels:
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/name: tap-injector
@@ -21,8 +23,10 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 179c1704366eac5276a9192f0692c7931db1e7e881d22eb572fe4336b98f4e7e
-        linkerd.io/created-by: linkerd/helm stable-2.11.2
+        checksum/config: cfd04d1231612586e990320c0bc6e1548f0d255b13326754efa28d3c216c1612
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        linkerd.io/created-by: linkerd/helm stable-2.12.1
+        linkerd.io/inject: enabled
       labels:
         component: tap-injector
         linkerd.io/extension: viz
@@ -34,7 +38,7 @@ spec:
         - -log-level=info
         - -log-format=plain
         - -enable-pprof=false
-        image: cr.l5d.io/linkerd/tap:stable-2.11.2
+        image: cr.l5d.io/linkerd/tap:stable-2.12.1
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:

@@ -1,0 +1,23 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"Role","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"rook-ceph-cmd-reporter","namespace":"rook-ceph"},"rules":[{"apiGroups":[""],"resources":["pods","configmaps"],"verbs":["get","list","watch","create","update","delete"]}]}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: rook-ceph-cmd-reporter
+  namespace: rook-ceph
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete

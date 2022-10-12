@@ -19,7 +19,6 @@ mod fields_getter;
 ///  
 #[proc_macro_derive(FieldsGetter, attributes(field_getter))]
 pub fn fields_getter_trait_derive(input: TokenStream) -> TokenStream {
-    // let p = mongo_orm::mongo_field_names::MyTraitOpts::from(input);
     fields_getter::generate_fields_getter_trait(input)
 }
 

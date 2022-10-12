@@ -5,18 +5,14 @@ import sh from 'shelljs';
 import path from 'node:path';
 import * as R from 'ramda';
 import { getPlainSecretsConfigFilesBaseDir } from '../../src/shared/directoriesManager.js';
-import { GrpcMongoEnvVars } from '../../src/services/grpc-mongo/settings.js';
-import { GraphqlPostgresEnvVars } from '../../src/services/graphql-postgres/settings.js';
-import { GraphqlMongoEnvVars } from '../../src/services/graphql-mongo/settings.js';
-import { GraphqlSurrealdbEnvVars } from '../../src/services/graphql-surrealdb/settings.js';
+import { GraphqlSurrealDbEnvVars } from '../../src/services/graphql-surrealdb/settings.js';
+import { GrpcSurrealDbEnvVars } from '../../src/services/grpc-surrealdb/settings.js';
 
 
 export type TResourcesEnvVars = {
     services: {
-        'graphql-surrealdb': Partial<GraphqlSurrealdbEnvVars>,
-        'graphql-mongo': Partial<GraphqlMongoEnvVars>,
-        'grpc-mongo': Partial<GrpcMongoEnvVars>,
-        'graphql-postgres': Partial<GraphqlPostgresEnvVars>,
+        'graphql-surrealdb': Partial<GraphqlSurrealDbEnvVars>,
+        'grpc-surrealdb': Partial<GrpcSurrealDbEnvVars>,
     };
     infrastructure: {
         'argocd': Partial<ArgoCdEnvVars>,
@@ -34,29 +30,18 @@ export const getSecretsSample = () => {
                 OAUTH_GITHUB_CLIENT_SECRET: '',
                 OAUTH_GOOGLE_CLIENT_ID: '',
                 OAUTH_GOOGLE_CLIENT_SECRET: '',
+                REDIS_USERNAME: '',
+                REDIS_PASSWORD: '',
+                
             }
             ,
-            'graphql-mongo': {
-                MONGODB_PASSWORD: '',
-                MONGODB_ROOT_PASSWORD: '',
-                MONGODB_ROOT_USERNAME: '',
-                MONGODB_USERNAME: '',
+            'grpc-surrealdb': {
+                SURREALDB_ROOT_USERNAME: '',
+                SURREALDB_ROOT_PASSWORD: '',
                 OAUTH_GITHUB_CLIENT_ID: '',
                 OAUTH_GITHUB_CLIENT_SECRET: '',
                 OAUTH_GOOGLE_CLIENT_ID: '',
                 OAUTH_GOOGLE_CLIENT_SECRET: '',
-                REDIS_PASSWORD: '',
-                REDIS_USERNAME: '',
-            },
-            'grpc-mongo': {
-                MONGODB_PASSWORD: '',
-                MONGODB_ROOT_PASSWORD: '',
-                MONGODB_ROOT_USERNAME: '',
-                MONGODB_USERNAME: '',
-            },
-            'graphql-postgres': {
-                POSTGRES_USERNAME: '',
-                POSTGRES_PASSWORD: '',
             },
         },
         infrastructure: {

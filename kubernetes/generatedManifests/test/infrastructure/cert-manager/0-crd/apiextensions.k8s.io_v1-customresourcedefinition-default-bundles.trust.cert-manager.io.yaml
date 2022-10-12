@@ -2,7 +2,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.6.1
+    controller-gen.kubebuilder.io/version: v0.8.0
   labels:
     app.kubernetes.io/managed-by: pulumi
   name: bundles.trust.cert-manager.io
@@ -101,8 +101,8 @@ spec:
                   source data to.
                 properties:
                   configMap:
-                    description: ConfigMap is the target ConfigMap in all Namespaces
-                      that all Bundle source data will be synced to.
+                    description: ConfigMap is the target ConfigMap in Namespaces that
+                      all Bundle source data will be synced to.
                     properties:
                       key:
                         description: Key is the key of the entry in the object's `data`
@@ -110,6 +110,18 @@ spec:
                         type: string
                     required:
                     - key
+                    type: object
+                  namespaceSelector:
+                    description: NamespaceSelector will, if set, only sync the target
+                      resource in Namespaces which match the selector.
+                    properties:
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels matches on the set of labels that
+                          must be present on a Namespace for the Bundle target to
+                          be synced there.
+                        type: object
                     type: object
                 type: object
             required:
@@ -164,8 +176,8 @@ spec:
                   or has completed syncing the source data to.
                 properties:
                   configMap:
-                    description: ConfigMap is the target ConfigMap in all Namespaces
-                      that all Bundle source data will be synced to.
+                    description: ConfigMap is the target ConfigMap in Namespaces that
+                      all Bundle source data will be synced to.
                     properties:
                       key:
                         description: Key is the key of the entry in the object's `data`
@@ -173,6 +185,18 @@ spec:
                         type: string
                     required:
                     - key
+                    type: object
+                  namespaceSelector:
+                    description: NamespaceSelector will, if set, only sync the target
+                      resource in Namespaces which match the selector.
+                    properties:
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels matches on the set of labels that
+                          must be present on a Namespace for the Bundle target to
+                          be synced there.
+                        type: object
                     type: object
                 type: object
             type: object

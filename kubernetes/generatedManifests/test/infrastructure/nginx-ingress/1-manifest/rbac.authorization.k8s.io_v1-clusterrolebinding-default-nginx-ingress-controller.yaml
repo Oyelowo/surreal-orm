@@ -3,13 +3,13 @@ kind: ClusterRoleBinding
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRoleBinding","metadata":{"annotations":{"linkerd.io/inject":"enabled"},"labels":{"app.kubernetes.io/instance":"nginx-ingress-controller","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"nginx-ingress-controller","helm.sh/chart":"nginx-ingress-controller-9.2.11"},"name":"nginx-ingress-controller","namespace":"default"},"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"ClusterRole","name":"nginx-ingress-controller"},"subjects":[{"kind":"ServiceAccount","name":"nginx-ingress-controller","namespace":"default"}]}
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"ClusterRoleBinding","metadata":{"annotations":{"linkerd.io/inject":"enabled"},"labels":{"app.kubernetes.io/instance":"nginx-ingress-controller","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"nginx-ingress-controller","helm.sh/chart":"nginx-ingress-controller-9.3.18"},"name":"nginx-ingress-controller","namespace":"default"},"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"ClusterRole","name":"nginx-ingress-controller"},"subjects":[{"kind":"ServiceAccount","name":"nginx-ingress-controller","namespace":"default"}]}
     linkerd.io/inject: enabled
   labels:
     app.kubernetes.io/instance: nginx-ingress-controller
     app.kubernetes.io/managed-by: pulumi
     app.kubernetes.io/name: nginx-ingress-controller
-    helm.sh/chart: nginx-ingress-controller-9.2.11
+    helm.sh/chart: nginx-ingress-controller-9.3.18
   name: nginx-ingress-controller
   namespace: default
 roleRef:

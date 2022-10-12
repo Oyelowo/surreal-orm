@@ -1,0 +1,22 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"Role","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"rbd-external-provisioner-cfg","namespace":"rook-ceph"},"rules":[{"apiGroups":["coordination.k8s.io"],"resources":["leases"],"verbs":["get","watch","list","delete","update","create"]}]}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: rbd-external-provisioner-cfg
+  namespace: rook-ceph
+rules:
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - watch
+  - list
+  - delete
+  - update
+  - create

@@ -1,0 +1,14 @@
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"ceph.rook.io/v1","kind":"CephBlockPool","metadata":{"labels":{"app.kubernetes.io/managed-by":"pulumi"},"name":"ceph-blockpool","namespace":"rook-ceph"},"spec":{"failureDomain":"host","replicated":{"size":3}}}
+  labels:
+    app.kubernetes.io/managed-by: pulumi
+  name: ceph-blockpool
+  namespace: rook-ceph
+spec:
+  failureDomain: host
+  replicated:
+    size: 3

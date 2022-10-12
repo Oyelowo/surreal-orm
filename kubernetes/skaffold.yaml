@@ -46,31 +46,25 @@ build:
           #       # NEXT_PUBLIC_API_URL: localhost:8080
           #     target: web
 
-        - image: ghcr.io/oyelowo/graphql-mongo
+        - image: ghcr.io/oyelowo/graphql-surrealdb
           context: ../rust
           docker:
               dockerfile: Dockerfile.development
-              target: graphql-mongo
+              target: graphql-surrealdb
 
           # requires:
           #   - image: builder-base
           #     alias: BASE
 
-        # - image: ghcr.io/oyelowo/graphql-postgres
-        #   context: ../rust
-        #   docker:
-        #       dockerfile: Dockerfile.development
-        #       target: graphql-postgres
-
     #   requires:
     #     - image: builder-base
     #       alias: BASE
 
-    # - image: ghcr.io/oyelowo/grpc-mongo
+    # - image: ghcr.io/oyelowo/grpc-surrealdb
     #   context: ../rust
     #   docker:
     #     dockerfile: Dockerfile.development
-    #     target: grpc-mongo
+    #     target: grpc-surrealdb
     #     noCache: false
     #     squash: false
     #   requires:
@@ -101,7 +95,7 @@ deploy:
 
 portForward:
     # - resourceType: service
-    #   resourceName: graphql-mongo
+    #   resourceName: graphql-surrealdb
     #   namespace: applications
     #   port: 8000
     #   localPort: 8000 # *Optional*
@@ -113,25 +107,20 @@ portForward:
       localPort: 3000 # *Optional*
 
     - resourceType: service
-      resourceName: graphql-mongo-database
+      resourceName: surrealdb
       namespace: applications
       port: 27017
       localPort: 27017 # *Optional*
 
     - resourceType: service
-      resourceName: graphql-mongo-redis-master
+      resourceName: redis-master
       namespace: applications
       port: 6379
       localPort: 6379 # *Optional*
 
 
     # - resourceType: service
-    #   resourceName: graphql-postgres
-    #   port: 8000
-    #   localPort: 8000
-
-    # - resourceType: service
-    #   resourceName: grpc-mongo
+    #   resourceName: grpc-surrealdb
     #   port: 50051
     #   localPort: 50051
 
