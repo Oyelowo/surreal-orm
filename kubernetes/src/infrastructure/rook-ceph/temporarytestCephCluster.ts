@@ -1,11 +1,12 @@
 import crds from '../../../generatedCrdsTs/index.js';
 import { namespaces } from '../namespaces/util.js';
 import k8s from '@pulumi/kubernetes';
+import { rookCephProvider } from './settings.js';
 
 // Export if you want to test
-const rookCephConfigMap = new k8s.core.v1.ConfigMap('rook-ceph-override', {
+export const rookCephConfigMap = new k8s.core.v1.ConfigMap('rook-config-override', {
     metadata: {
-        name: 'rook-ceph-override',
+        name: 'rook-config-override',
         namespace: namespaces.rookCeph,
     },
     data: {
@@ -18,7 +19,7 @@ const rookCephConfigMap = new k8s.core.v1.ConfigMap('rook-ceph-override', {
         mon_data_avail_warn = 500M
         `,
     },
-});
+}, { provider: rookCephProvider });
 
 export const testCluster = new crds.ceph.v1.CephCluster('test-cluster', {
     metadata: {
@@ -66,4 +67,4 @@ export const testCluster = new crds.ceph.v1.CephCluster('test-cluster', {
             managePodBudgets: true,
         },
     },
-});
+}, { provider: rookCephProvider });
