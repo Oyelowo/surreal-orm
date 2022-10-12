@@ -208,7 +208,7 @@ export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps
     }
 
     getProvider = () => this.provider;
-    setProvider = (provider: NonNullable<typeof this.provider>) => this.provider = provider;
+    setProvider = (provider: NonNullable<typeof this.provider>) => (this.provider = provider);
     getServiceDir = (): string => {
         return getResourceAbsolutePath({
             outputDirectory: `services/${this.appName}`,

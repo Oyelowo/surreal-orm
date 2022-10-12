@@ -47,7 +47,7 @@ export const InfrastructureNamesSchema = z.union([
     z.literal('linkerd'),
     z.literal('linkerd-viz'),
     z.literal('argocd'),
-    z.literal('tikv'),
+    z.literal('tikv-operator'),
     z.literal('seaweedfs'),
     z.literal('tidis'),
     z.literal('rook-ceph'),

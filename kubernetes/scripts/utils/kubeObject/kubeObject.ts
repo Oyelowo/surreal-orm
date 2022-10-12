@@ -67,8 +67,8 @@ export type TKubeObjectBaseCommonProps<K extends ResourceKind> = KubeObjectSchem
 // have to add as above
 type KubeObjectCustom =
     | (TKubeObjectBaseCommonProps<'Secret'> & {
-        selectedSecretsForUpdate?: string[] | null;
-    })
+          selectedSecretsForUpdate?: string[] | null;
+      })
     | TKubeObjectBaseCommonProps<'SealedSecret'>
     | TKubeObjectBaseCommonProps<'CustomResourceDefinition'>
     | TKubeObjectBaseCommonProps<'Deployment'>
@@ -124,7 +124,8 @@ export class KubeObject {
         manifestsPaths.forEach((manifestPath, i) => {
             if (!manifestPath) return;
             const kubeObject = yaml.parse(fs.readFileSync(manifestPath, 'utf8')) as TKubeObject;
-            if (_.isEmpty(kubeObject)) throw new Error(chalk.redBright`Manifest is empty. Check the directory that all is well`);
+            if (_.isEmpty(kubeObject))
+                throw new Error(chalk.redBright`Manifest is empty. Check the directory that all is well`);
 
             // let's mutate to make it a bit faster and should be okay since we only do it here
             kubeObject.path = manifestPath;

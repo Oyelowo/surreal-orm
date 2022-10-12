@@ -21,7 +21,7 @@ const surrealDbEnvVars: SurrealDbEnvVars = {
     TIKV_PORT: '2379',
     TIKV_SERVICE_NAME: 'tikv',
     TIKV_STORAGE_CLASS: 'linode-block-storage-retain',
-}
+};
 
 // Surrealdb is a compute/logic protocol layer using TiKV as persistent layer
 // so, we can also deploy it as a kubernetes deployment or statefulset

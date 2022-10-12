@@ -10,8 +10,6 @@ export type GraphqlSurrealDbEnvVars = AppEnvVars &
     OauthEnvVars &
     SurrealDbEnvVars<'applications'> &
     RedisDbEnvVars<'applications'>;
-;
-
 export const graphqlSurrealdbSettings: AppConfigs<'graphql-surrealdb', 'applications', GraphqlSurrealDbEnvVars> = {
     kubeConfig: {
         requestMemory: '70Mi',
@@ -44,7 +42,7 @@ export const graphqlSurrealdbSettings: AppConfigs<'graphql-surrealdb', 'applicat
         REDIS_HOST: 'redis-master.applications',
         REDIS_PORT: '6379',
         REDIS_SERVICE_NAME: 'redis',
-        REDIS_SERVICE_NAME_MASTER: 'redis-master'
+        REDIS_SERVICE_NAME_MASTER: 'redis-master',
     },
     metadata: {
         name: 'graphql-surrealdb',

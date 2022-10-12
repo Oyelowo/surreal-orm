@@ -3,17 +3,21 @@ import crds from '../../../generatedCrdsTs/index.js';
 import { namespaces } from '../namespaces/util.js';
 import { rookCephProvider } from './settings.js';
 
-export const rookCephBlockPool = new crds.ceph.v1.CephBlockPool('rook-ceph-pool', {
-    apiVersion: 'ceph.rook.io/v1',
-    metadata: {
-        name: 'replicapool',
-        namespace: namespaces.rookCeph,
+export const rookCephBlockPool = new crds.ceph.v1.CephBlockPool(
+    'rook-ceph-pool',
+    {
+        apiVersion: 'ceph.rook.io/v1',
+        metadata: {
+            name: 'replicapool',
+            namespace: namespaces.rookCeph,
+        },
+        spec: {
+            failureDomain: 'host',
+            replicated: { size: 3, requireSafeReplicaSize: true },
+        },
     },
-    spec: {
-        failureDomain: 'host',
-        replicated: { size: 3, requireSafeReplicaSize: true },
-    },
-}, { provider: rookCephProvider });
+    { provider: rookCephProvider }
+);
 
 const rookStorageClassParameters = {
     // clusterID is the namespace where the rook cluster is running
@@ -57,18 +61,22 @@ const rookStorageClassParameters = {
 // // Change "rook-ceph" provisioner prefix to match the operator namespace if needed
 const rookCephProvisioner = `${namespaces.rookCeph}.rbd.csi.ceph.com`;
 // const rookCephProvisioner = 'rook-ceph.rbd.csi.ceph.com'
-export const rookCephBlockStorage = new k8s.storage.v1.StorageClass('rook-ceph', {
-    apiVersion: 'storage.k8s.io/v1',
-    metadata: {
-        name: 'replicapool',
-        // namespace: namespaces.rookCeph
-    },
-    provisioner: rookCephProvisioner,
-    parameters: rookStorageClassParameters,
-    reclaimPolicy: 'Retain',
-    /* 
+export const rookCephBlockStorage = new k8s.storage.v1.StorageClass(
+    'rook-ceph',
+    {
+        apiVersion: 'storage.k8s.io/v1',
+        metadata: {
+            name: 'replicapool',
+            // namespace: namespaces.rookCeph
+        },
+        provisioner: rookCephProvisioner,
+        parameters: rookStorageClassParameters,
+        reclaimPolicy: 'Retain',
+        /* 
     # Optional, if you want to add dynamic resize for PVC.
 # For now only ext3, ext4, xfs resize support provided, like in Kubernetes itself.
     */
-    allowVolumeExpansion: true,
-}, { provider: rookCephProvider });
+        allowVolumeExpansion: true,
+    },
+    { provider: rookCephProvider }
+);

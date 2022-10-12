@@ -3,7 +3,7 @@ import * as k8s from '@pulumi/kubernetes';
 import { namespaces } from '../namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
-import { tikvProvider } from './settings.js';
+import { tikvOperatorProvider } from './settings.js';
 
 const tikvOperatValues: DeepPartial<ITidbOperatorPingcap> = {
     // advancedStatefulset : {}
@@ -24,7 +24,7 @@ export const tikvCrds = new k8s.yaml.ConfigGroup(
     {
         files: externalCrds,
     },
-    { provider: tikvProvider }
+    { provider: tikvOperatorProvider }
 );
 
 export const tikvOperator = new k8s.helm.v3.Chart(
@@ -42,5 +42,5 @@ export const tikvOperator = new k8s.helm.v3.Chart(
         // available.
         skipAwait: false,
     },
-    { provider: tikvProvider }
+    { provider: tikvOperatorProvider }
 );

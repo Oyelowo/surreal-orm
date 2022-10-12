@@ -4,8 +4,8 @@ import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesFor
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
-export const tikvResourceName: ResourceName = 'tikv';
-export const tikvProvider = getResourceProvider({
-    outputDirectory: `infrastructure/tikv`,
+export const tikvOperatorResourceName: ResourceName = 'tikv-operator';
+export const tikvOperatorProvider = getResourceProvider({
+    outputDirectory: `infrastructure/tikv-operator`,
     environment: ENVIRONMENT,
 });
