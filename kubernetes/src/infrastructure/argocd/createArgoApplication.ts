@@ -10,6 +10,8 @@ import {
 } from '../../shared/directoriesManager.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
 import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
+import { toBase64 } from '../../shared/helpers.js';
+import _ from 'lodash';
 
 type ArgocdApplicationProps = {
     namespace: Namespace;
@@ -89,17 +91,20 @@ const metadata = {
 const env = getEnvVarsForKubeManifests();
 const secrets = new PlainSecretsManager('infrastructure', 'argocd', env.ENVIRONMENT).getSecrets();
 
+const secretsData = {
+    ADMIN_PASSWORD: secrets.ADMIN_PASSWORD,
+    type: 'git',
+    url: secrets.url,
+    // url: 'https://github.com/Oyelowo/modern-distributed-app-template',
+    username: secrets.GITHUB_USERNAME,
+    password: secrets.GITHUB_PASSWORD,
+};
+const encodedSecretsData = _.mapValues(secretsData, toBase64);
+
 export const argoCDApplicationsSecret = new kx.Secret(
     'argocd-secret',
     {
-        data: {
-            ADMIN_PASSWORD: secrets.ADMIN_PASSWORD,
-            type: 'git',
-            url: secrets.url,
-            // url: 'https://github.com/Oyelowo/modern-distributed-app-template',
-            username: secrets.GITHUB_USERNAME,
-            password: secrets.GITHUB_PASSWORD,
-        },
+        data: encodedSecretsData,
         metadata: {
             ...metadata,
             annotations: {},
