@@ -243,7 +243,7 @@ describe('KubeObject', () => {
         const sealedSecretsSomeUpdated = kubeInstance.getOfAKind('SealedSecret');
 
         info('Should update from 13 sealed secrets still, with specific secret data fields updated.');
-        expect(sealedSecretsSomeUpdated).toMatchSnapshot();
+        expect(sealedSecretsSomeUpdated).toHaveLength(16);
         // 5 secrets have been updated
         expect(
             Object.values(
@@ -251,6 +251,6 @@ describe('KubeObject', () => {
                     Object.values(ss.spec.encryptedData).includes('updated-secrets')
                 )
             )
-        ).toMatchSnapshot();
+        ).toHaveLength(5);
     });
 });
