@@ -50,6 +50,11 @@ jobs:
         uses: pulumi/setup-pulumi@v2
         with:
           pulumi-version: 3.40.2
+      - uses: AbsaOSS/k3d-action@v2
+        name: "Create Single Cluster"
+        with:
+          cluster-name: "ci-cluster-1"
+          args: --agents 1
       - run: |
           # make generate_manifests_ci environment=development
           # make generate_manifests_ci environment=staging
