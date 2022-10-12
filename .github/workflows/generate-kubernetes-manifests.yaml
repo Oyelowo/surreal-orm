@@ -26,7 +26,7 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
-    needs: [check_and_test_rust_monorepo, format, clippy]
+    # needs: [check_and_test_rust_monorepo, format, clippy]
     defaults:
       run:
         working-directory: kubernetes
