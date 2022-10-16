@@ -53,7 +53,6 @@ export const InfrastructureNamesSchema = z.union([
     z.literal('tidis'),
     z.literal('rook-ceph'),
     z.literal('metalb'),
-    z.literal('fluvio-sys'),
     z.literal('nats-operator'),
 ]);
 
@@ -72,12 +71,10 @@ export const namespaceSchema = z.union([
     z.literal('kube-system'),
     z.literal('tikv-admin'),
     z.literal('seaweedfs'),
-    z.literal('fluvio-sys'),
     z.literal('rook-ceph'),
     z.literal('metalb'),
     z.literal('nats-operator'),
 ]);
-
 
 export type Namespace = z.infer<typeof namespaceSchema>;
 
@@ -93,7 +90,6 @@ export const namespaces: Record<CamelCase<Namespace>, Namespace> = {
     kubeSystem: 'kube-system',
     tikvAdmin: 'tikv-admin',
     seaweedfs: 'seaweedfs',
-    fluvioSys: 'fluvio-sys',
     rookCeph: 'rook-ceph',
     metalb: 'metalb',
     natsOperator: 'nats-operator',

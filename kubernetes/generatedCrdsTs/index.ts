@@ -13,7 +13,6 @@ import * as argoproj from "./argoproj";
 import * as bitnami from "./bitnami";
 import * as ceph from "./ceph";
 import * as certmanager from "./certmanager";
-import * as fluvio from "./fluvio";
 import * as jetstream from "./jetstream";
 import * as linkerd from "./linkerd";
 import * as metallb from "./metallb";
@@ -30,7 +29,6 @@ export {
     bitnami,
     ceph,
     certmanager,
-    fluvio,
     jetstream,
     linkerd,
     metallb,

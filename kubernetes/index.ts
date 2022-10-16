@@ -9,7 +9,6 @@ export * from './src/infrastructure/sealed-secrets/index.js';
 export * from './src/infrastructure/seaweedfs/index.js';
 export * from './src/infrastructure/rook-ceph/index.js';
 // export * from './src/infrastructure/metalb/index.js';
-export * from './src/infrastructure/fluvio-sys/index.js';
 
 // SERVICES
 // Rust server backend with support for graphql, surrealdb and redis
