@@ -4,9 +4,7 @@ import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial, namespaces } from '../../types/ownTypes.js';
 import { natsOperatorProvider } from './settings.js';
 
-const natsOperatorValues: DeepPartial<INatsOperatorNats> = {
-
-};
+const natsOperatorValues: DeepPartial<INatsOperatorNats> = {};
 
 // `http://${name}.${namespace}:${port}`;
 const {

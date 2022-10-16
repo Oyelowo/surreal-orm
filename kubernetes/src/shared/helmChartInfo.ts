@@ -25,18 +25,6 @@ export const helmChartsInfo = {
                 externalCrds: [] as string[],
                 skipCrdRender: false
             },
-            fluvioSys: {
-                chart: 'fluvio-sys',
-                version: '0.9.10',
-                externalCrds: [] as string[],
-                skipCrdRender: false,
-            },
-            fluvioApp: {
-                chart: 'fluvio-app',
-                version: '0.9.2',
-                externalCrds: [] as string[],
-                skipCrdRender: true,
-            },
         },
     },
     nats: {
@@ -61,19 +49,19 @@ export const helmChartsInfo = {
                 externalCrds: [],
                 skipCrdRender: false
             },
-            natsAccountServer : {
+            natsAccountServer: {
                 chart: 'nats-account-server',
                 version: '0.8.0',
                 externalCrds: [],
                 skipCrdRender: false
             },
-            natsKafka : {
+            natsKafka: {
                 chart: 'nats-kafka',
                 version: '0.13.1',
                 externalCrds: [],
                 skipCrdRender: false
             },
-            surveyor : {
+            surveyor: {
                 chart: 'surveyor',
                 version: '0.14.1',
                 externalCrds: [],

@@ -7,7 +7,7 @@ import { natsOperatorProvider } from './settings.js';
 const natsJetStreamControllerValues: DeepPartial<INackNats> = {
     jetstream: {
         enabled: true,
-    }
+    },
 };
 
 // `http://${name}.${namespace}:${port}`;

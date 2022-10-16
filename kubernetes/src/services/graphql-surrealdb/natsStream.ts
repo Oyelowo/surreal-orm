@@ -1,7 +1,7 @@
-import crds from "../../../generatedCrdsTs/index.js";
-import { graphqlSurrealdbSettings } from "./settings.js";
+import crds from '../../../generatedCrdsTs/index.js';
+import { graphqlSurrealdbSettings } from './settings.js';
 
-export const graphqlSurrealDbUserLocationStream = new crds.jetstream.v1beta2.Stream("", {
+export const graphqlSurrealDbUserLocationStream = new crds.jetstream.v1beta2.Stream('', {
     metadata: graphqlSurrealdbSettings.metadata,
     spec: {
         name: 'user-locations',
@@ -9,6 +9,6 @@ export const graphqlSurrealDbUserLocationStream = new crds.jetstream.v1beta2.Str
         account: '',
         maxConsumers: 1000,
         maxAge: '',
-        // maxMsgsPerSubject: 
-    }
-})
+        // maxMsgsPerSubject:
+    },
+});

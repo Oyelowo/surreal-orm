@@ -11,24 +11,21 @@ const natsValues: DeepPartial<INatsNats> = {
             enabled: true,
             fileStorage: {
                 enabled: true,
-                // existingClaim: 
-
+                // existingClaim:
             },
         },
         // externalAccess: false
     },
     exporter: {
-        enabled: true
+        enabled: true,
     },
-    mqtt: {
-
-    },
+    mqtt: {},
     websocket: {
-        enabled: true
+        enabled: true,
     },
     cluster: {
-        enabled: true
-    }
+        enabled: true,
+    },
 };
 
 // `http://${name}.${namespace}:${port}`;
@@ -38,7 +35,6 @@ const {
         nats: { chart, version, externalCrds },
     },
 } = helmChartsInfo.nats;
-
 
 export const nats = new k8s.helm.v3.Chart(
     chart,
