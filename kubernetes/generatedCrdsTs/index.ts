@@ -14,8 +14,10 @@ import * as bitnami from "./bitnami";
 import * as ceph from "./ceph";
 import * as certmanager from "./certmanager";
 import * as fluvio from "./fluvio";
+import * as jetstream from "./jetstream";
 import * as linkerd from "./linkerd";
 import * as metallb from "./metallb";
+import * as nats from "./nats";
 import * as objectbucket from "./objectbucket";
 import * as pingcap from "./pingcap";
 import * as policy from "./policy";
@@ -29,8 +31,10 @@ export {
     ceph,
     certmanager,
     fluvio,
+    jetstream,
     linkerd,
     metallb,
+    nats,
     objectbucket,
     pingcap,
     policy,
