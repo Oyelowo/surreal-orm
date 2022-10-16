@@ -1,6 +1,6 @@
 import * as pulumi from '@pulumi/kubernetes';
+import { namespaces } from '../../types/ownTypes.js';
 import { namespacesNamesProvider } from './settings.js';
-import { namespaces } from './util.js';
 
 export const resourceNamespaces = Object.values(namespaces).map((namespace) => {
     const resourceNamespace = new pulumi.core.v1.Namespace(

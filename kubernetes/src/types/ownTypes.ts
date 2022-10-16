@@ -1,5 +1,6 @@
 import * as z from 'zod';
-import { Namespace } from '../infrastructure/namespaces/util.js';
+import { CamelCase } from 'type-fest';
+
 export const appEnvironmentsSchema = z.union([
     z.literal('test'),
     z.literal('local'),
@@ -53,11 +54,51 @@ export const InfrastructureNamesSchema = z.union([
     z.literal('rook-ceph'),
     z.literal('metalb'),
     z.literal('fluvio-sys'),
+    z.literal('nats-operator'),
 ]);
 
 export type InfrastructureName = z.infer<typeof InfrastructureNamesSchema> | ArgocdAppResourceName;
 
 export const ResourceNameSchema = z.union([ServiceNamesSchema, InfrastructureNamesSchema, ArgocdAppResourceNameSchema]);
+
+// Sometimes, the namespace may match with the serviceName or infrastructName above
+export const namespaceSchema = z.union([
+    z.literal('applications'),
+    z.literal('argocd'),
+    z.literal('cert-manager'),
+    z.literal('linkerd'),
+    z.literal('linkerd-viz'),
+    z.literal('default'),
+    z.literal('kube-system'),
+    z.literal('tikv-admin'),
+    z.literal('seaweedfs'),
+    z.literal('fluvio-sys'),
+    z.literal('rook-ceph'),
+    z.literal('metalb'),
+    z.literal('nats-operator'),
+]);
+
+
+export type Namespace = z.infer<typeof namespaceSchema>;
+
+// TODO: Change to a function getNameSpace()
+export const namespaces: Record<CamelCase<Namespace>, Namespace> = {
+    applications: 'applications',
+    argocd: 'argocd',
+    certManager: 'cert-manager',
+    linkerd: 'linkerd',
+    linkerdViz: 'linkerd-viz',
+    default: 'default',
+    // Default namespace that comes with the deployment
+    kubeSystem: 'kube-system',
+    tikvAdmin: 'tikv-admin',
+    seaweedfs: 'seaweedfs',
+    fluvioSys: 'fluvio-sys',
+    rookCeph: 'rook-ceph',
+    metalb: 'metalb',
+    natsOperator: 'nats-operator',
+    // infrastructure: "infrastructure",
+} as const;
 
 // A resource can have multiple kubernetes objects/resources e.g linkerd
 // e.g linkerd can have different
