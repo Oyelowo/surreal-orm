@@ -22108,6 +22108,714 @@ export namespace fluvio {
     }
 }
 
+export namespace jetstream {
+    export namespace v1beta1 {
+        export interface ConsumerSpecArgs {
+            /**
+             * How messages should be acknowledged.
+             */
+            ackPolicy?: pulumi.Input<string>;
+            /**
+             * How long to allow messages to remain un-acknowledged before attempting redelivery.
+             */
+            ackWait?: pulumi.Input<string>;
+            /**
+             * The name of a queue group.
+             */
+            deliverGroup?: pulumi.Input<string>;
+            deliverPolicy?: pulumi.Input<string>;
+            /**
+             * The subject to deliver observed messages, when not set, a pull-based Consumer is created.
+             */
+            deliverSubject?: pulumi.Input<string>;
+            /**
+             * The description of the consumer.
+             */
+            description?: pulumi.Input<string>;
+            /**
+             * The name of the Consumer.
+             */
+            durableName?: pulumi.Input<string>;
+            /**
+             * Select only a specific incoming subjects, supports wildcards.
+             */
+            filterSubject?: pulumi.Input<string>;
+            /**
+             * Enables flow control.
+             */
+            flowControl?: pulumi.Input<boolean>;
+            /**
+             * The interval used to deliver idle heartbeats for push-based consumers, in Go's time.Duration format.
+             */
+            heartbeatInterval?: pulumi.Input<string>;
+            /**
+             * Maximum pending Acks before consumers are paused
+             */
+            maxAckPending?: pulumi.Input<number>;
+            maxDeliver?: pulumi.Input<number>;
+            optStartSeq?: pulumi.Input<number>;
+            /**
+             * Time format must be RFC3339.
+             */
+            optStartTime?: pulumi.Input<string>;
+            /**
+             * rate at which messages will be delivered to clients, expressed in bit per second.
+             */
+            rateLimitBps?: pulumi.Input<number>;
+            /**
+             * How messages are sent.
+             */
+            replayPolicy?: pulumi.Input<string>;
+            /**
+             * What percentage of acknowledgements should be samples for observability.
+             */
+            sampleFreq?: pulumi.Input<string>;
+            /**
+             * The name of the Stream to create the Consumer in.
+             */
+            streamName?: pulumi.Input<string>;
+        }
+        /**
+         * consumerSpecArgsProvideDefaults sets the appropriate defaults for ConsumerSpecArgs
+         */
+        export function consumerSpecArgsProvideDefaults(val: ConsumerSpecArgs): ConsumerSpecArgs {
+            return {
+                ...val,
+                ackPolicy: (val.ackPolicy) ?? "none",
+                ackWait: (val.ackWait) ?? "1ns",
+                deliverPolicy: (val.deliverPolicy) ?? "all",
+                flowControl: (val.flowControl) ?? false,
+                replayPolicy: (val.replayPolicy) ?? "instant",
+            };
+        }
+
+        export interface ConsumerStatusArgs {
+            conditions?: pulumi.Input<pulumi.Input<inputs.jetstream.v1beta1.ConsumerStatusConditionsArgs>[]>;
+            observedGeneration?: pulumi.Input<number>;
+        }
+
+        export interface ConsumerStatusConditionsArgs {
+            lastTransitionTime?: pulumi.Input<string>;
+            message?: pulumi.Input<string>;
+            reason?: pulumi.Input<string>;
+            status?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+        }
+
+        export interface StreamSpecArgs {
+            /**
+             * The description of the stream.
+             */
+            description?: pulumi.Input<string>;
+            /**
+             * When a Stream reach it's limits either old messages are deleted or new ones are denied.
+             */
+            discard?: pulumi.Input<string>;
+            /**
+             * The duration window to track duplicate messages for.
+             */
+            duplicateWindow?: pulumi.Input<string>;
+            /**
+             * Maximum age of any message in the stream, expressed in Go's time.Duration format. Empty for unlimited.
+             */
+            maxAge?: pulumi.Input<string>;
+            /**
+             * How big the Stream may be, when the combined stream size exceeds this old messages are removed. -1 for unlimited.
+             */
+            maxBytes?: pulumi.Input<number>;
+            /**
+             * How many Consumers can be defined for a given Stream. -1 for unlimited.
+             */
+            maxConsumers?: pulumi.Input<number>;
+            /**
+             * The largest message that will be accepted by the Stream. -1 for unlimited.
+             */
+            maxMsgSize?: pulumi.Input<number>;
+            /**
+             * How many messages may be in a Stream, oldest messages will be removed if the Stream exceeds this size. -1 for unlimited.
+             */
+            maxMsgs?: pulumi.Input<number>;
+            /**
+             * The maximum of messages per subject.
+             */
+            maxMsgsPerSubject?: pulumi.Input<number>;
+            /**
+             * A stream mirror.
+             */
+            mirror?: pulumi.Input<inputs.jetstream.v1beta1.StreamSpecMirrorArgs>;
+            /**
+             * A unique name for the Stream.
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * Disables acknowledging messages that are received by the Stream.
+             */
+            noAck?: pulumi.Input<boolean>;
+            /**
+             * A stream's placement.
+             */
+            placement?: pulumi.Input<inputs.jetstream.v1beta1.StreamSpecPlacementArgs>;
+            /**
+             * How many replicas to keep for each message.
+             */
+            replicas?: pulumi.Input<number>;
+            /**
+             * How messages are retained in the Stream, once this is exceeded old messages are removed.
+             */
+            retention?: pulumi.Input<string>;
+            /**
+             * A stream's sources.
+             */
+            sources?: pulumi.Input<pulumi.Input<inputs.jetstream.v1beta1.StreamSpecSourcesArgs>[]>;
+            /**
+             * The storage backend to use for the Stream.
+             */
+            storage?: pulumi.Input<string>;
+            /**
+             * A list of subjects to consume, supports wildcards.
+             */
+            subjects?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+        /**
+         * streamSpecArgsProvideDefaults sets the appropriate defaults for StreamSpecArgs
+         */
+        export function streamSpecArgsProvideDefaults(val: StreamSpecArgs): StreamSpecArgs {
+            return {
+                ...val,
+                discard: (val.discard) ?? "old",
+                maxAge: (val.maxAge) ?? "",
+                maxBytes: (val.maxBytes) ?? -1,
+                maxConsumers: (val.maxConsumers) ?? -1,
+                maxMsgSize: (val.maxMsgSize) ?? -1,
+                maxMsgs: (val.maxMsgs) ?? -1,
+                maxMsgsPerSubject: (val.maxMsgsPerSubject) ?? 0,
+                noAck: (val.noAck) ?? false,
+                replicas: (val.replicas) ?? 1,
+                retention: (val.retention) ?? "limits",
+                storage: (val.storage) ?? "memory",
+            };
+        }
+
+        /**
+         * A stream mirror.
+         */
+        export interface StreamSpecMirrorArgs {
+            externalApiPrefix?: pulumi.Input<string>;
+            externalDeliverPrefix?: pulumi.Input<string>;
+            filterSubject?: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optStartSeq?: pulumi.Input<number>;
+            /**
+             * Time format must be RFC3339.
+             */
+            optStartTime?: pulumi.Input<string>;
+        }
+
+        /**
+         * A stream's placement.
+         */
+        export interface StreamSpecPlacementArgs {
+            cluster?: pulumi.Input<string>;
+            tags?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface StreamSpecSourcesArgs {
+            externalApiPrefix?: pulumi.Input<string>;
+            externalDeliverPrefix?: pulumi.Input<string>;
+            filterSubject?: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optStartSeq?: pulumi.Input<number>;
+            /**
+             * Time format must be RFC3339.
+             */
+            optStartTime?: pulumi.Input<string>;
+        }
+
+        export interface StreamStatusArgs {
+            conditions?: pulumi.Input<pulumi.Input<inputs.jetstream.v1beta1.StreamStatusConditionsArgs>[]>;
+            observedGeneration?: pulumi.Input<number>;
+        }
+
+        export interface StreamStatusConditionsArgs {
+            lastTransitionTime?: pulumi.Input<string>;
+            message?: pulumi.Input<string>;
+            reason?: pulumi.Input<string>;
+            status?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+        }
+
+        export interface StreamTemplateSpecArgs {
+            /**
+             * When a Stream reach it's limits either old messages are deleted or new ones are denied.
+             */
+            discard?: pulumi.Input<string>;
+            /**
+             * The duration window to track duplicate messages for.
+             */
+            duplicateWindow?: pulumi.Input<string>;
+            /**
+             * Maximum age of any message in the stream, expressed in Go's time.Duration format. Empty for unlimited.
+             */
+            maxAge?: pulumi.Input<string>;
+            /**
+             * How big the Stream may be, when the combined stream size exceeds this old messages are removed. -1 for unlimited.
+             */
+            maxBytes?: pulumi.Input<number>;
+            /**
+             * How many Consumers can be defined for a given Stream. -1 for unlimited.
+             */
+            maxConsumers?: pulumi.Input<number>;
+            /**
+             * The largest message that will be accepted by the Stream. -1 for unlimited.
+             */
+            maxMsgSize?: pulumi.Input<number>;
+            /**
+             * How many messages may be in a Stream, oldest messages will be removed if the Stream exceeds this size. -1 for unlimited.
+             */
+            maxMsgs?: pulumi.Input<number>;
+            /**
+             * The maximum number of Streams this Template can create, -1 for unlimited.
+             */
+            maxStreams?: pulumi.Input<number>;
+            /**
+             * A unique name for the Stream Template.
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * Disables acknowledging messages that are received by the Stream.
+             */
+            noAck?: pulumi.Input<boolean>;
+            /**
+             * How many replicas to keep for each message.
+             */
+            replicas?: pulumi.Input<number>;
+            /**
+             * How messages are retained in the Stream, once this is exceeded old messages are removed.
+             */
+            retention?: pulumi.Input<string>;
+            /**
+             * The storage backend to use for the Stream.
+             */
+            storage?: pulumi.Input<string>;
+            /**
+             * A list of subjects to consume, supports wildcards.
+             */
+            subjects?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+        /**
+         * streamTemplateSpecArgsProvideDefaults sets the appropriate defaults for StreamTemplateSpecArgs
+         */
+        export function streamTemplateSpecArgsProvideDefaults(val: StreamTemplateSpecArgs): StreamTemplateSpecArgs {
+            return {
+                ...val,
+                discard: (val.discard) ?? "old",
+                maxAge: (val.maxAge) ?? "",
+                maxBytes: (val.maxBytes) ?? -1,
+                maxConsumers: (val.maxConsumers) ?? -1,
+                maxMsgSize: (val.maxMsgSize) ?? -1,
+                maxMsgs: (val.maxMsgs) ?? -1,
+                maxStreams: (val.maxStreams) ?? -1,
+                noAck: (val.noAck) ?? false,
+                replicas: (val.replicas) ?? 1,
+                retention: (val.retention) ?? "limits",
+                storage: (val.storage) ?? "memory",
+            };
+        }
+
+        export interface StreamTemplateStatusArgs {
+            conditions?: pulumi.Input<pulumi.Input<inputs.jetstream.v1beta1.StreamTemplateStatusConditionsArgs>[]>;
+            observedGeneration?: pulumi.Input<number>;
+        }
+
+        export interface StreamTemplateStatusConditionsArgs {
+            lastTransitionTime?: pulumi.Input<string>;
+            message?: pulumi.Input<string>;
+            reason?: pulumi.Input<string>;
+            status?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+        }
+    }
+
+    export namespace v1beta2 {
+        export interface AccountSpecArgs {
+            /**
+             * The creds to be used to connect to the NATS Service.
+             */
+            creds?: pulumi.Input<inputs.jetstream.v1beta2.AccountSpecCredsArgs>;
+            /**
+             * A unique name for the Account.
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * A list of servers to connect.
+             */
+            servers?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * The TLS certs to be used to connect to the NATS Service.
+             */
+            tls?: pulumi.Input<inputs.jetstream.v1beta2.AccountSpecTlsArgs>;
+        }
+
+        /**
+         * The creds to be used to connect to the NATS Service.
+         */
+        export interface AccountSpecCredsArgs {
+            /**
+             * Credentials file.
+             */
+            file?: pulumi.Input<string>;
+            secret?: pulumi.Input<inputs.jetstream.v1beta2.AccountSpecCredsSecretArgs>;
+        }
+
+        export interface AccountSpecCredsSecretArgs {
+            /**
+             * Name of the secret with the creds.
+             */
+            name?: pulumi.Input<string>;
+        }
+
+        /**
+         * The TLS certs to be used to connect to the NATS Service.
+         */
+        export interface AccountSpecTlsArgs {
+            /**
+             * Filename of the Root CA of the TLS cert.
+             */
+            ca?: pulumi.Input<string>;
+            /**
+             * Filename of the TLS cert.
+             */
+            cert?: pulumi.Input<string>;
+            /**
+             * Filename of the TLS cert key.
+             */
+            key?: pulumi.Input<string>;
+            secret?: pulumi.Input<inputs.jetstream.v1beta2.AccountSpecTlsSecretArgs>;
+        }
+
+        export interface AccountSpecTlsSecretArgs {
+            /**
+             * Name of the TLS secret with the certs.
+             */
+            name?: pulumi.Input<string>;
+        }
+
+        export interface ConsumerSpecArgs {
+            /**
+             * Name of the account to which the Consumer belongs.
+             */
+            account?: pulumi.Input<string>;
+            /**
+             * How messages should be acknowledged.
+             */
+            ackPolicy?: pulumi.Input<string>;
+            /**
+             * How long to allow messages to remain un-acknowledged before attempting redelivery.
+             */
+            ackWait?: pulumi.Input<string>;
+            /**
+             * NATS user credentials for connecting to servers. Please make sure your controller has mounted the cerds on its path.
+             */
+            creds?: pulumi.Input<string>;
+            /**
+             * The name of a queue group.
+             */
+            deliverGroup?: pulumi.Input<string>;
+            deliverPolicy?: pulumi.Input<string>;
+            /**
+             * The subject to deliver observed messages, when not set, a pull-based Consumer is created.
+             */
+            deliverSubject?: pulumi.Input<string>;
+            /**
+             * The description of the consumer.
+             */
+            description?: pulumi.Input<string>;
+            /**
+             * The name of the Consumer.
+             */
+            durableName?: pulumi.Input<string>;
+            /**
+             * Select only a specific incoming subjects, supports wildcards.
+             */
+            filterSubject?: pulumi.Input<string>;
+            /**
+             * Enables flow control.
+             */
+            flowControl?: pulumi.Input<boolean>;
+            /**
+             * The interval used to deliver idle heartbeats for push-based consumers, in Go's time.Duration format.
+             */
+            heartbeatInterval?: pulumi.Input<string>;
+            /**
+             * Maximum pending Acks before consumers are paused
+             */
+            maxAckPending?: pulumi.Input<number>;
+            maxDeliver?: pulumi.Input<number>;
+            /**
+             * NATS user NKey for connecting to servers.
+             */
+            nkey?: pulumi.Input<string>;
+            optStartSeq?: pulumi.Input<number>;
+            /**
+             * Time format must be RFC3339.
+             */
+            optStartTime?: pulumi.Input<string>;
+            /**
+             * rate at which messages will be delivered to clients, expressed in bit per second.
+             */
+            rateLimitBps?: pulumi.Input<number>;
+            /**
+             * How messages are sent.
+             */
+            replayPolicy?: pulumi.Input<string>;
+            /**
+             * What percentage of acknowledgements should be samples for observability.
+             */
+            sampleFreq?: pulumi.Input<string>;
+            /**
+             * A list of servers for creating consumer
+             */
+            servers?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * The name of the Stream to create the Consumer in.
+             */
+            streamName?: pulumi.Input<string>;
+            /**
+             * A client's TLS certs and keys.
+             */
+            tls?: pulumi.Input<inputs.jetstream.v1beta2.ConsumerSpecTlsArgs>;
+        }
+        /**
+         * consumerSpecArgsProvideDefaults sets the appropriate defaults for ConsumerSpecArgs
+         */
+        export function consumerSpecArgsProvideDefaults(val: ConsumerSpecArgs): ConsumerSpecArgs {
+            return {
+                ...val,
+                ackPolicy: (val.ackPolicy) ?? "none",
+                ackWait: (val.ackWait) ?? "1ns",
+                creds: (val.creds) ?? "",
+                deliverPolicy: (val.deliverPolicy) ?? "all",
+                flowControl: (val.flowControl) ?? false,
+                nkey: (val.nkey) ?? "",
+                replayPolicy: (val.replayPolicy) ?? "instant",
+            };
+        }
+
+        /**
+         * A client's TLS certs and keys.
+         */
+        export interface ConsumerSpecTlsArgs {
+            /**
+             * A client's cert filepath. Should be mounted.
+             */
+            clientCert?: pulumi.Input<string>;
+            /**
+             * A client's key filepath. Should be mounted.
+             */
+            clientKey?: pulumi.Input<string>;
+            /**
+             * A list of filepaths to CAs. Should be mounted.
+             */
+            rootCas?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ConsumerStatusArgs {
+            conditions?: pulumi.Input<pulumi.Input<inputs.jetstream.v1beta2.ConsumerStatusConditionsArgs>[]>;
+            observedGeneration?: pulumi.Input<number>;
+        }
+
+        export interface ConsumerStatusConditionsArgs {
+            lastTransitionTime?: pulumi.Input<string>;
+            message?: pulumi.Input<string>;
+            reason?: pulumi.Input<string>;
+            status?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+        }
+
+        export interface StreamSpecArgs {
+            /**
+             * Name of the account to which the Stream belongs.
+             */
+            account?: pulumi.Input<string>;
+            /**
+             * NATS user credentials for connecting to servers. Please make sure your controller has mounted the cerds on its path.
+             */
+            creds?: pulumi.Input<string>;
+            /**
+             * The description of the stream.
+             */
+            description?: pulumi.Input<string>;
+            /**
+             * When a Stream reach it's limits either old messages are deleted or new ones are denied.
+             */
+            discard?: pulumi.Input<string>;
+            /**
+             * The duration window to track duplicate messages for.
+             */
+            duplicateWindow?: pulumi.Input<string>;
+            /**
+             * Maximum age of any message in the stream, expressed in Go's time.Duration format. Empty for unlimited.
+             */
+            maxAge?: pulumi.Input<string>;
+            /**
+             * How big the Stream may be, when the combined stream size exceeds this old messages are removed. -1 for unlimited.
+             */
+            maxBytes?: pulumi.Input<number>;
+            /**
+             * How many Consumers can be defined for a given Stream. -1 for unlimited.
+             */
+            maxConsumers?: pulumi.Input<number>;
+            /**
+             * The largest message that will be accepted by the Stream. -1 for unlimited.
+             */
+            maxMsgSize?: pulumi.Input<number>;
+            /**
+             * How many messages may be in a Stream, oldest messages will be removed if the Stream exceeds this size. -1 for unlimited.
+             */
+            maxMsgs?: pulumi.Input<number>;
+            /**
+             * The maximum of messages per subject.
+             */
+            maxMsgsPerSubject?: pulumi.Input<number>;
+            /**
+             * A stream mirror.
+             */
+            mirror?: pulumi.Input<inputs.jetstream.v1beta2.StreamSpecMirrorArgs>;
+            /**
+             * A unique name for the Stream.
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * NATS user NKey for connecting to servers.
+             */
+            nkey?: pulumi.Input<string>;
+            /**
+             * Disables acknowledging messages that are received by the Stream.
+             */
+            noAck?: pulumi.Input<boolean>;
+            /**
+             * A stream's placement.
+             */
+            placement?: pulumi.Input<inputs.jetstream.v1beta2.StreamSpecPlacementArgs>;
+            /**
+             * How many replicas to keep for each message.
+             */
+            replicas?: pulumi.Input<number>;
+            /**
+             * How messages are retained in the Stream, once this is exceeded old messages are removed.
+             */
+            retention?: pulumi.Input<string>;
+            /**
+             * A list of servers for creating stream
+             */
+            servers?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * A stream's sources.
+             */
+            sources?: pulumi.Input<pulumi.Input<inputs.jetstream.v1beta2.StreamSpecSourcesArgs>[]>;
+            /**
+             * The storage backend to use for the Stream.
+             */
+            storage?: pulumi.Input<string>;
+            /**
+             * A list of subjects to consume, supports wildcards.
+             */
+            subjects?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * A client's TLS certs and keys.
+             */
+            tls?: pulumi.Input<inputs.jetstream.v1beta2.StreamSpecTlsArgs>;
+        }
+        /**
+         * streamSpecArgsProvideDefaults sets the appropriate defaults for StreamSpecArgs
+         */
+        export function streamSpecArgsProvideDefaults(val: StreamSpecArgs): StreamSpecArgs {
+            return {
+                ...val,
+                creds: (val.creds) ?? "",
+                discard: (val.discard) ?? "old",
+                maxAge: (val.maxAge) ?? "",
+                maxBytes: (val.maxBytes) ?? -1,
+                maxConsumers: (val.maxConsumers) ?? -1,
+                maxMsgSize: (val.maxMsgSize) ?? -1,
+                maxMsgs: (val.maxMsgs) ?? -1,
+                maxMsgsPerSubject: (val.maxMsgsPerSubject) ?? 0,
+                nkey: (val.nkey) ?? "",
+                noAck: (val.noAck) ?? false,
+                replicas: (val.replicas) ?? 1,
+                retention: (val.retention) ?? "limits",
+                storage: (val.storage) ?? "memory",
+            };
+        }
+
+        /**
+         * A stream mirror.
+         */
+        export interface StreamSpecMirrorArgs {
+            externalApiPrefix?: pulumi.Input<string>;
+            externalDeliverPrefix?: pulumi.Input<string>;
+            filterSubject?: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optStartSeq?: pulumi.Input<number>;
+            /**
+             * Time format must be RFC3339.
+             */
+            optStartTime?: pulumi.Input<string>;
+        }
+
+        /**
+         * A stream's placement.
+         */
+        export interface StreamSpecPlacementArgs {
+            cluster?: pulumi.Input<string>;
+            tags?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface StreamSpecSourcesArgs {
+            externalApiPrefix?: pulumi.Input<string>;
+            externalDeliverPrefix?: pulumi.Input<string>;
+            filterSubject?: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optStartSeq?: pulumi.Input<number>;
+            /**
+             * Time format must be RFC3339.
+             */
+            optStartTime?: pulumi.Input<string>;
+        }
+
+        /**
+         * A client's TLS certs and keys.
+         */
+        export interface StreamSpecTlsArgs {
+            /**
+             * A client's cert filepath. Should be mounted.
+             */
+            clientCert?: pulumi.Input<string>;
+            /**
+             * A client's key filepath. Should be mounted.
+             */
+            clientKey?: pulumi.Input<string>;
+            /**
+             * A list of filepaths to CAs. Should be mounted.
+             */
+            rootCas?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface StreamStatusArgs {
+            conditions?: pulumi.Input<pulumi.Input<inputs.jetstream.v1beta2.StreamStatusConditionsArgs>[]>;
+            observedGeneration?: pulumi.Input<number>;
+        }
+
+        export interface StreamStatusConditionsArgs {
+            lastTransitionTime?: pulumi.Input<string>;
+            message?: pulumi.Input<string>;
+            reason?: pulumi.Input<string>;
+            status?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+        }
+    }
+}
+
 export namespace linkerd {
     export namespace v1alpha1 {
         /**
@@ -22867,6 +23575,155 @@ export namespace metallb {
             namespace?: pulumi.Input<string>;
         }
 
+    }
+}
+
+export namespace nats {
+    export namespace v1alpha2 {
+        export interface NatsClusterSpecArgs {
+            auth?: pulumi.Input<inputs.nats.v1alpha2.NatsClusterSpecAuthArgs>;
+            extraRoutes?: pulumi.Input<pulumi.Input<inputs.nats.v1alpha2.NatsClusterSpecExtraroutesArgs>[]>;
+            gatewayConfig?: pulumi.Input<inputs.nats.v1alpha2.NatsClusterSpecGatewayconfigArgs>;
+            lameDuckDurationSeconds?: pulumi.Input<number>;
+            leafnodeConfig?: pulumi.Input<inputs.nats.v1alpha2.NatsClusterSpecLeafnodeconfigArgs>;
+            natsConfig?: pulumi.Input<inputs.nats.v1alpha2.NatsClusterSpecNatsconfigArgs>;
+            noAdvertise?: pulumi.Input<boolean>;
+            operatorConfig?: pulumi.Input<inputs.nats.v1alpha2.NatsClusterSpecOperatorconfigArgs>;
+            paused?: pulumi.Input<boolean>;
+            pod?: pulumi.Input<inputs.nats.v1alpha2.NatsClusterSpecPodArgs>;
+            serverImage?: pulumi.Input<string>;
+            size?: pulumi.Input<number>;
+            template?: pulumi.Input<{[key: string]: any}>;
+            tls?: pulumi.Input<inputs.nats.v1alpha2.NatsClusterSpecTlsArgs>;
+            useServerName?: pulumi.Input<boolean>;
+            version?: pulumi.Input<string>;
+            websocketConfig?: pulumi.Input<inputs.nats.v1alpha2.NatsClusterSpecWebsocketconfigArgs>;
+        }
+
+        export interface NatsClusterSpecAuthArgs {
+            clientsAuthFile?: pulumi.Input<string>;
+            clientsAuthSecret?: pulumi.Input<string>;
+            clientsAuthTimeout?: pulumi.Input<number>;
+            enableServiceAccounts?: pulumi.Input<boolean>;
+            tlsVerifyAndMap?: pulumi.Input<boolean>;
+        }
+
+        export interface NatsClusterSpecExtraroutesArgs {
+            cluster?: pulumi.Input<string>;
+            route?: pulumi.Input<string>;
+        }
+
+        export interface NatsClusterSpecGatewayconfigArgs {
+            gateways?: pulumi.Input<pulumi.Input<inputs.nats.v1alpha2.NatsClusterSpecGatewayconfigGatewaysArgs>[]>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            rejectUnknown?: pulumi.Input<boolean>;
+        }
+
+        export interface NatsClusterSpecGatewayconfigGatewaysArgs {
+            name?: pulumi.Input<string>;
+            url?: pulumi.Input<string>;
+        }
+
+        export interface NatsClusterSpecLeafnodeconfigArgs {
+            port?: pulumi.Input<number>;
+            remotes?: pulumi.Input<pulumi.Input<inputs.nats.v1alpha2.NatsClusterSpecLeafnodeconfigRemotesArgs>[]>;
+        }
+
+        export interface NatsClusterSpecLeafnodeconfigRemotesArgs {
+            credentials?: pulumi.Input<string>;
+            url?: pulumi.Input<string>;
+            urls?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface NatsClusterSpecNatsconfigArgs {
+            debug?: pulumi.Input<boolean>;
+            disableLogtime?: pulumi.Input<boolean>;
+            maxConnections?: pulumi.Input<number>;
+            maxControlLine?: pulumi.Input<number>;
+            maxPayload?: pulumi.Input<number>;
+            maxPending?: pulumi.Input<number>;
+            maxSubscriptions?: pulumi.Input<number>;
+            trace?: pulumi.Input<boolean>;
+            write_deadline?: pulumi.Input<string>;
+        }
+
+        export interface NatsClusterSpecOperatorconfigArgs {
+            resolver?: pulumi.Input<string>;
+            secret?: pulumi.Input<string>;
+            systemAccount?: pulumi.Input<string>;
+        }
+
+        export interface NatsClusterSpecPodArgs {
+            advertiseExternalIP?: pulumi.Input<boolean>;
+            annotations?: pulumi.Input<{[key: string]: any}>;
+            antiAffinity?: pulumi.Input<boolean>;
+            bootconfigImage?: pulumi.Input<string>;
+            bootconfigImageTag?: pulumi.Input<string>;
+            enableClientsHostPort?: pulumi.Input<boolean>;
+            enableConfigReload?: pulumi.Input<boolean>;
+            enableMetrics?: pulumi.Input<boolean>;
+            labels?: pulumi.Input<{[key: string]: any}>;
+            metricsImage?: pulumi.Input<string>;
+            metricsImagePullPolicy?: pulumi.Input<string>;
+            metricsImageTag?: pulumi.Input<string>;
+            natsEnv?: pulumi.Input<pulumi.Input<{[key: string]: any}>[]>;
+            nodeSelector?: pulumi.Input<{[key: string]: any}>;
+            reloaderImage?: pulumi.Input<string>;
+            reloaderImagePullPolicy?: pulumi.Input<string>;
+            reloaderImageTag?: pulumi.Input<string>;
+            reloaderResources?: pulumi.Input<{[key: string]: any}>;
+            resources?: pulumi.Input<{[key: string]: any}>;
+            tolerations?: pulumi.Input<pulumi.Input<{[key: string]: any}>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<{[key: string]: any}>[]>;
+        }
+
+        export interface NatsClusterSpecTlsArgs {
+            cipherSuites?: pulumi.Input<pulumi.Input<string>[]>;
+            clientsTLSTimeout?: pulumi.Input<number>;
+            curvePreferences?: pulumi.Input<pulumi.Input<string>[]>;
+            enableHttps?: pulumi.Input<boolean>;
+            gatewaySecret?: pulumi.Input<string>;
+            gatewaySecretCAFileName?: pulumi.Input<string>;
+            gatewaySecretCertFileName?: pulumi.Input<string>;
+            gatewaySecretKeyFileName?: pulumi.Input<string>;
+            gatewaysTLSTimeout?: pulumi.Input<number>;
+            leafnodeSecret?: pulumi.Input<string>;
+            leafnodeSecretCAFileName?: pulumi.Input<string>;
+            leafnodeSecretCertFileName?: pulumi.Input<string>;
+            leafnodeSecretKeyFileName?: pulumi.Input<string>;
+            leafnodesTLSTimeout?: pulumi.Input<number>;
+            routesSecret?: pulumi.Input<string>;
+            routesSecretCAFileName?: pulumi.Input<string>;
+            routesSecretCertFileName?: pulumi.Input<string>;
+            routesSecretKeyFileName?: pulumi.Input<string>;
+            routesTLSTimeout?: pulumi.Input<number>;
+            serverSecret?: pulumi.Input<string>;
+            serverSecretCAFileName?: pulumi.Input<string>;
+            serverSecretCertFileName?: pulumi.Input<string>;
+            serverSecretKeyFileName?: pulumi.Input<string>;
+            verify?: pulumi.Input<boolean>;
+            websocketSecret?: pulumi.Input<string>;
+            websocketSecretCAFileName?: pulumi.Input<string>;
+            websocketSecretCertFileName?: pulumi.Input<string>;
+            websocketSecretKeyFileName?: pulumi.Input<string>;
+            websocketTLSTimeout?: pulumi.Input<number>;
+        }
+
+        export interface NatsClusterSpecWebsocketconfigArgs {
+            compression?: pulumi.Input<boolean>;
+            handshakeTimeout?: pulumi.Input<number>;
+            port?: pulumi.Input<number>;
+        }
+
+        export interface NatsServiceRoleSpecArgs {
+            permissions?: pulumi.Input<inputs.nats.v1alpha2.NatsServiceRoleSpecPermissionsArgs>;
+        }
+
+        export interface NatsServiceRoleSpecPermissionsArgs {
+            publish?: pulumi.Input<pulumi.Input<string>[]>;
+            subscribe?: pulumi.Input<pulumi.Input<string>[]>;
+        }
     }
 }
 

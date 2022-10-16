@@ -22110,6 +22110,716 @@ export namespace fluvio {
     }
 }
 
+export namespace jetstream {
+    export namespace v1beta1 {
+        export interface ConsumerSpec {
+            /**
+             * How messages should be acknowledged.
+             */
+            ackPolicy?: string;
+            /**
+             * How long to allow messages to remain un-acknowledged before attempting redelivery.
+             */
+            ackWait?: string;
+            /**
+             * The name of a queue group.
+             */
+            deliverGroup?: string;
+            deliverPolicy?: string;
+            /**
+             * The subject to deliver observed messages, when not set, a pull-based Consumer is created.
+             */
+            deliverSubject?: string;
+            /**
+             * The description of the consumer.
+             */
+            description?: string;
+            /**
+             * The name of the Consumer.
+             */
+            durableName?: string;
+            /**
+             * Select only a specific incoming subjects, supports wildcards.
+             */
+            filterSubject?: string;
+            /**
+             * Enables flow control.
+             */
+            flowControl?: boolean;
+            /**
+             * The interval used to deliver idle heartbeats for push-based consumers, in Go's time.Duration format.
+             */
+            heartbeatInterval?: string;
+            /**
+             * Maximum pending Acks before consumers are paused
+             */
+            maxAckPending?: number;
+            maxDeliver?: number;
+            optStartSeq?: number;
+            /**
+             * Time format must be RFC3339.
+             */
+            optStartTime?: string;
+            /**
+             * rate at which messages will be delivered to clients, expressed in bit per second.
+             */
+            rateLimitBps?: number;
+            /**
+             * How messages are sent.
+             */
+            replayPolicy?: string;
+            /**
+             * What percentage of acknowledgements should be samples for observability.
+             */
+            sampleFreq?: string;
+            /**
+             * The name of the Stream to create the Consumer in.
+             */
+            streamName?: string;
+        }
+        /**
+         * consumerSpecProvideDefaults sets the appropriate defaults for ConsumerSpec
+         */
+        export function consumerSpecProvideDefaults(val: ConsumerSpec): ConsumerSpec {
+            return {
+                ...val,
+                ackPolicy: (val.ackPolicy) ?? "none",
+                ackWait: (val.ackWait) ?? "1ns",
+                deliverPolicy: (val.deliverPolicy) ?? "all",
+                flowControl: (val.flowControl) ?? false,
+                replayPolicy: (val.replayPolicy) ?? "instant",
+            };
+        }
+
+        export interface ConsumerStatus {
+            conditions?: outputs.jetstream.v1beta1.ConsumerStatusConditions[];
+            observedGeneration?: number;
+        }
+
+        export interface ConsumerStatusConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status?: string;
+            type?: string;
+        }
+
+        export interface StreamSpec {
+            /**
+             * The description of the stream.
+             */
+            description?: string;
+            /**
+             * When a Stream reach it's limits either old messages are deleted or new ones are denied.
+             */
+            discard?: string;
+            /**
+             * The duration window to track duplicate messages for.
+             */
+            duplicateWindow?: string;
+            /**
+             * Maximum age of any message in the stream, expressed in Go's time.Duration format. Empty for unlimited.
+             */
+            maxAge?: string;
+            /**
+             * How big the Stream may be, when the combined stream size exceeds this old messages are removed. -1 for unlimited.
+             */
+            maxBytes?: number;
+            /**
+             * How many Consumers can be defined for a given Stream. -1 for unlimited.
+             */
+            maxConsumers?: number;
+            /**
+             * The largest message that will be accepted by the Stream. -1 for unlimited.
+             */
+            maxMsgSize?: number;
+            /**
+             * How many messages may be in a Stream, oldest messages will be removed if the Stream exceeds this size. -1 for unlimited.
+             */
+            maxMsgs?: number;
+            /**
+             * The maximum of messages per subject.
+             */
+            maxMsgsPerSubject?: number;
+            /**
+             * A stream mirror.
+             */
+            mirror?: outputs.jetstream.v1beta1.StreamSpecMirror;
+            /**
+             * A unique name for the Stream.
+             */
+            name?: string;
+            /**
+             * Disables acknowledging messages that are received by the Stream.
+             */
+            noAck?: boolean;
+            /**
+             * A stream's placement.
+             */
+            placement?: outputs.jetstream.v1beta1.StreamSpecPlacement;
+            /**
+             * How many replicas to keep for each message.
+             */
+            replicas?: number;
+            /**
+             * How messages are retained in the Stream, once this is exceeded old messages are removed.
+             */
+            retention?: string;
+            /**
+             * A stream's sources.
+             */
+            sources?: outputs.jetstream.v1beta1.StreamSpecSources[];
+            /**
+             * The storage backend to use for the Stream.
+             */
+            storage?: string;
+            /**
+             * A list of subjects to consume, supports wildcards.
+             */
+            subjects?: string[];
+        }
+        /**
+         * streamSpecProvideDefaults sets the appropriate defaults for StreamSpec
+         */
+        export function streamSpecProvideDefaults(val: StreamSpec): StreamSpec {
+            return {
+                ...val,
+                discard: (val.discard) ?? "old",
+                maxAge: (val.maxAge) ?? "",
+                maxBytes: (val.maxBytes) ?? -1,
+                maxConsumers: (val.maxConsumers) ?? -1,
+                maxMsgSize: (val.maxMsgSize) ?? -1,
+                maxMsgs: (val.maxMsgs) ?? -1,
+                maxMsgsPerSubject: (val.maxMsgsPerSubject) ?? 0,
+                noAck: (val.noAck) ?? false,
+                replicas: (val.replicas) ?? 1,
+                retention: (val.retention) ?? "limits",
+                storage: (val.storage) ?? "memory",
+            };
+        }
+
+        /**
+         * A stream mirror.
+         */
+        export interface StreamSpecMirror {
+            externalApiPrefix?: string;
+            externalDeliverPrefix?: string;
+            filterSubject?: string;
+            name?: string;
+            optStartSeq?: number;
+            /**
+             * Time format must be RFC3339.
+             */
+            optStartTime?: string;
+        }
+
+        /**
+         * A stream's placement.
+         */
+        export interface StreamSpecPlacement {
+            cluster?: string;
+            tags?: string[];
+        }
+
+        export interface StreamSpecSources {
+            externalApiPrefix?: string;
+            externalDeliverPrefix?: string;
+            filterSubject?: string;
+            name?: string;
+            optStartSeq?: number;
+            /**
+             * Time format must be RFC3339.
+             */
+            optStartTime?: string;
+        }
+
+        export interface StreamStatus {
+            conditions?: outputs.jetstream.v1beta1.StreamStatusConditions[];
+            observedGeneration?: number;
+        }
+
+        export interface StreamStatusConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status?: string;
+            type?: string;
+        }
+
+        export interface StreamTemplateSpec {
+            /**
+             * When a Stream reach it's limits either old messages are deleted or new ones are denied.
+             */
+            discard?: string;
+            /**
+             * The duration window to track duplicate messages for.
+             */
+            duplicateWindow?: string;
+            /**
+             * Maximum age of any message in the stream, expressed in Go's time.Duration format. Empty for unlimited.
+             */
+            maxAge?: string;
+            /**
+             * How big the Stream may be, when the combined stream size exceeds this old messages are removed. -1 for unlimited.
+             */
+            maxBytes?: number;
+            /**
+             * How many Consumers can be defined for a given Stream. -1 for unlimited.
+             */
+            maxConsumers?: number;
+            /**
+             * The largest message that will be accepted by the Stream. -1 for unlimited.
+             */
+            maxMsgSize?: number;
+            /**
+             * How many messages may be in a Stream, oldest messages will be removed if the Stream exceeds this size. -1 for unlimited.
+             */
+            maxMsgs?: number;
+            /**
+             * The maximum number of Streams this Template can create, -1 for unlimited.
+             */
+            maxStreams?: number;
+            /**
+             * A unique name for the Stream Template.
+             */
+            name?: string;
+            /**
+             * Disables acknowledging messages that are received by the Stream.
+             */
+            noAck?: boolean;
+            /**
+             * How many replicas to keep for each message.
+             */
+            replicas?: number;
+            /**
+             * How messages are retained in the Stream, once this is exceeded old messages are removed.
+             */
+            retention?: string;
+            /**
+             * The storage backend to use for the Stream.
+             */
+            storage?: string;
+            /**
+             * A list of subjects to consume, supports wildcards.
+             */
+            subjects?: string[];
+        }
+        /**
+         * streamTemplateSpecProvideDefaults sets the appropriate defaults for StreamTemplateSpec
+         */
+        export function streamTemplateSpecProvideDefaults(val: StreamTemplateSpec): StreamTemplateSpec {
+            return {
+                ...val,
+                discard: (val.discard) ?? "old",
+                maxAge: (val.maxAge) ?? "",
+                maxBytes: (val.maxBytes) ?? -1,
+                maxConsumers: (val.maxConsumers) ?? -1,
+                maxMsgSize: (val.maxMsgSize) ?? -1,
+                maxMsgs: (val.maxMsgs) ?? -1,
+                maxStreams: (val.maxStreams) ?? -1,
+                noAck: (val.noAck) ?? false,
+                replicas: (val.replicas) ?? 1,
+                retention: (val.retention) ?? "limits",
+                storage: (val.storage) ?? "memory",
+            };
+        }
+
+        export interface StreamTemplateStatus {
+            conditions?: outputs.jetstream.v1beta1.StreamTemplateStatusConditions[];
+            observedGeneration?: number;
+        }
+
+        export interface StreamTemplateStatusConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status?: string;
+            type?: string;
+        }
+
+    }
+
+    export namespace v1beta2 {
+        export interface AccountSpec {
+            /**
+             * The creds to be used to connect to the NATS Service.
+             */
+            creds?: outputs.jetstream.v1beta2.AccountSpecCreds;
+            /**
+             * A unique name for the Account.
+             */
+            name?: string;
+            /**
+             * A list of servers to connect.
+             */
+            servers?: string[];
+            /**
+             * The TLS certs to be used to connect to the NATS Service.
+             */
+            tls?: outputs.jetstream.v1beta2.AccountSpecTls;
+        }
+
+        /**
+         * The creds to be used to connect to the NATS Service.
+         */
+        export interface AccountSpecCreds {
+            /**
+             * Credentials file.
+             */
+            file?: string;
+            secret?: outputs.jetstream.v1beta2.AccountSpecCredsSecret;
+        }
+
+        export interface AccountSpecCredsSecret {
+            /**
+             * Name of the secret with the creds.
+             */
+            name?: string;
+        }
+
+        /**
+         * The TLS certs to be used to connect to the NATS Service.
+         */
+        export interface AccountSpecTls {
+            /**
+             * Filename of the Root CA of the TLS cert.
+             */
+            ca?: string;
+            /**
+             * Filename of the TLS cert.
+             */
+            cert?: string;
+            /**
+             * Filename of the TLS cert key.
+             */
+            key?: string;
+            secret?: outputs.jetstream.v1beta2.AccountSpecTlsSecret;
+        }
+
+        export interface AccountSpecTlsSecret {
+            /**
+             * Name of the TLS secret with the certs.
+             */
+            name?: string;
+        }
+
+        export interface ConsumerSpec {
+            /**
+             * Name of the account to which the Consumer belongs.
+             */
+            account?: string;
+            /**
+             * How messages should be acknowledged.
+             */
+            ackPolicy?: string;
+            /**
+             * How long to allow messages to remain un-acknowledged before attempting redelivery.
+             */
+            ackWait?: string;
+            /**
+             * NATS user credentials for connecting to servers. Please make sure your controller has mounted the cerds on its path.
+             */
+            creds?: string;
+            /**
+             * The name of a queue group.
+             */
+            deliverGroup?: string;
+            deliverPolicy?: string;
+            /**
+             * The subject to deliver observed messages, when not set, a pull-based Consumer is created.
+             */
+            deliverSubject?: string;
+            /**
+             * The description of the consumer.
+             */
+            description?: string;
+            /**
+             * The name of the Consumer.
+             */
+            durableName?: string;
+            /**
+             * Select only a specific incoming subjects, supports wildcards.
+             */
+            filterSubject?: string;
+            /**
+             * Enables flow control.
+             */
+            flowControl?: boolean;
+            /**
+             * The interval used to deliver idle heartbeats for push-based consumers, in Go's time.Duration format.
+             */
+            heartbeatInterval?: string;
+            /**
+             * Maximum pending Acks before consumers are paused
+             */
+            maxAckPending?: number;
+            maxDeliver?: number;
+            /**
+             * NATS user NKey for connecting to servers.
+             */
+            nkey?: string;
+            optStartSeq?: number;
+            /**
+             * Time format must be RFC3339.
+             */
+            optStartTime?: string;
+            /**
+             * rate at which messages will be delivered to clients, expressed in bit per second.
+             */
+            rateLimitBps?: number;
+            /**
+             * How messages are sent.
+             */
+            replayPolicy?: string;
+            /**
+             * What percentage of acknowledgements should be samples for observability.
+             */
+            sampleFreq?: string;
+            /**
+             * A list of servers for creating consumer
+             */
+            servers?: string[];
+            /**
+             * The name of the Stream to create the Consumer in.
+             */
+            streamName?: string;
+            /**
+             * A client's TLS certs and keys.
+             */
+            tls?: outputs.jetstream.v1beta2.ConsumerSpecTls;
+        }
+        /**
+         * consumerSpecProvideDefaults sets the appropriate defaults for ConsumerSpec
+         */
+        export function consumerSpecProvideDefaults(val: ConsumerSpec): ConsumerSpec {
+            return {
+                ...val,
+                ackPolicy: (val.ackPolicy) ?? "none",
+                ackWait: (val.ackWait) ?? "1ns",
+                creds: (val.creds) ?? "",
+                deliverPolicy: (val.deliverPolicy) ?? "all",
+                flowControl: (val.flowControl) ?? false,
+                nkey: (val.nkey) ?? "",
+                replayPolicy: (val.replayPolicy) ?? "instant",
+            };
+        }
+
+        /**
+         * A client's TLS certs and keys.
+         */
+        export interface ConsumerSpecTls {
+            /**
+             * A client's cert filepath. Should be mounted.
+             */
+            clientCert?: string;
+            /**
+             * A client's key filepath. Should be mounted.
+             */
+            clientKey?: string;
+            /**
+             * A list of filepaths to CAs. Should be mounted.
+             */
+            rootCas?: string[];
+        }
+
+        export interface ConsumerStatus {
+            conditions?: outputs.jetstream.v1beta2.ConsumerStatusConditions[];
+            observedGeneration?: number;
+        }
+
+        export interface ConsumerStatusConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status?: string;
+            type?: string;
+        }
+
+        export interface StreamSpec {
+            /**
+             * Name of the account to which the Stream belongs.
+             */
+            account?: string;
+            /**
+             * NATS user credentials for connecting to servers. Please make sure your controller has mounted the cerds on its path.
+             */
+            creds?: string;
+            /**
+             * The description of the stream.
+             */
+            description?: string;
+            /**
+             * When a Stream reach it's limits either old messages are deleted or new ones are denied.
+             */
+            discard?: string;
+            /**
+             * The duration window to track duplicate messages for.
+             */
+            duplicateWindow?: string;
+            /**
+             * Maximum age of any message in the stream, expressed in Go's time.Duration format. Empty for unlimited.
+             */
+            maxAge?: string;
+            /**
+             * How big the Stream may be, when the combined stream size exceeds this old messages are removed. -1 for unlimited.
+             */
+            maxBytes?: number;
+            /**
+             * How many Consumers can be defined for a given Stream. -1 for unlimited.
+             */
+            maxConsumers?: number;
+            /**
+             * The largest message that will be accepted by the Stream. -1 for unlimited.
+             */
+            maxMsgSize?: number;
+            /**
+             * How many messages may be in a Stream, oldest messages will be removed if the Stream exceeds this size. -1 for unlimited.
+             */
+            maxMsgs?: number;
+            /**
+             * The maximum of messages per subject.
+             */
+            maxMsgsPerSubject?: number;
+            /**
+             * A stream mirror.
+             */
+            mirror?: outputs.jetstream.v1beta2.StreamSpecMirror;
+            /**
+             * A unique name for the Stream.
+             */
+            name?: string;
+            /**
+             * NATS user NKey for connecting to servers.
+             */
+            nkey?: string;
+            /**
+             * Disables acknowledging messages that are received by the Stream.
+             */
+            noAck?: boolean;
+            /**
+             * A stream's placement.
+             */
+            placement?: outputs.jetstream.v1beta2.StreamSpecPlacement;
+            /**
+             * How many replicas to keep for each message.
+             */
+            replicas?: number;
+            /**
+             * How messages are retained in the Stream, once this is exceeded old messages are removed.
+             */
+            retention?: string;
+            /**
+             * A list of servers for creating stream
+             */
+            servers?: string[];
+            /**
+             * A stream's sources.
+             */
+            sources?: outputs.jetstream.v1beta2.StreamSpecSources[];
+            /**
+             * The storage backend to use for the Stream.
+             */
+            storage?: string;
+            /**
+             * A list of subjects to consume, supports wildcards.
+             */
+            subjects?: string[];
+            /**
+             * A client's TLS certs and keys.
+             */
+            tls?: outputs.jetstream.v1beta2.StreamSpecTls;
+        }
+        /**
+         * streamSpecProvideDefaults sets the appropriate defaults for StreamSpec
+         */
+        export function streamSpecProvideDefaults(val: StreamSpec): StreamSpec {
+            return {
+                ...val,
+                creds: (val.creds) ?? "",
+                discard: (val.discard) ?? "old",
+                maxAge: (val.maxAge) ?? "",
+                maxBytes: (val.maxBytes) ?? -1,
+                maxConsumers: (val.maxConsumers) ?? -1,
+                maxMsgSize: (val.maxMsgSize) ?? -1,
+                maxMsgs: (val.maxMsgs) ?? -1,
+                maxMsgsPerSubject: (val.maxMsgsPerSubject) ?? 0,
+                nkey: (val.nkey) ?? "",
+                noAck: (val.noAck) ?? false,
+                replicas: (val.replicas) ?? 1,
+                retention: (val.retention) ?? "limits",
+                storage: (val.storage) ?? "memory",
+            };
+        }
+
+        /**
+         * A stream mirror.
+         */
+        export interface StreamSpecMirror {
+            externalApiPrefix?: string;
+            externalDeliverPrefix?: string;
+            filterSubject?: string;
+            name?: string;
+            optStartSeq?: number;
+            /**
+             * Time format must be RFC3339.
+             */
+            optStartTime?: string;
+        }
+
+        /**
+         * A stream's placement.
+         */
+        export interface StreamSpecPlacement {
+            cluster?: string;
+            tags?: string[];
+        }
+
+        export interface StreamSpecSources {
+            externalApiPrefix?: string;
+            externalDeliverPrefix?: string;
+            filterSubject?: string;
+            name?: string;
+            optStartSeq?: number;
+            /**
+             * Time format must be RFC3339.
+             */
+            optStartTime?: string;
+        }
+
+        /**
+         * A client's TLS certs and keys.
+         */
+        export interface StreamSpecTls {
+            /**
+             * A client's cert filepath. Should be mounted.
+             */
+            clientCert?: string;
+            /**
+             * A client's key filepath. Should be mounted.
+             */
+            clientKey?: string;
+            /**
+             * A list of filepaths to CAs. Should be mounted.
+             */
+            rootCas?: string[];
+        }
+
+        export interface StreamStatus {
+            conditions?: outputs.jetstream.v1beta2.StreamStatusConditions[];
+            observedGeneration?: number;
+        }
+
+        export interface StreamStatusConditions {
+            lastTransitionTime?: string;
+            message?: string;
+            reason?: string;
+            status?: string;
+            type?: string;
+        }
+
+    }
+}
+
 export namespace linkerd {
     export namespace v1alpha1 {
         /**
@@ -22865,6 +23575,156 @@ export namespace metallb {
              * Namespace defines the space within which the secret name must be unique.
              */
             namespace?: string;
+        }
+
+    }
+}
+
+export namespace nats {
+    export namespace v1alpha2 {
+        export interface NatsClusterSpec {
+            auth?: outputs.nats.v1alpha2.NatsClusterSpecAuth;
+            extraRoutes?: outputs.nats.v1alpha2.NatsClusterSpecExtraroutes[];
+            gatewayConfig?: outputs.nats.v1alpha2.NatsClusterSpecGatewayconfig;
+            lameDuckDurationSeconds?: number;
+            leafnodeConfig?: outputs.nats.v1alpha2.NatsClusterSpecLeafnodeconfig;
+            natsConfig?: outputs.nats.v1alpha2.NatsClusterSpecNatsconfig;
+            noAdvertise?: boolean;
+            operatorConfig?: outputs.nats.v1alpha2.NatsClusterSpecOperatorconfig;
+            paused?: boolean;
+            pod?: outputs.nats.v1alpha2.NatsClusterSpecPod;
+            serverImage?: string;
+            size?: number;
+            template?: {[key: string]: any};
+            tls?: outputs.nats.v1alpha2.NatsClusterSpecTls;
+            useServerName?: boolean;
+            version?: string;
+            websocketConfig?: outputs.nats.v1alpha2.NatsClusterSpecWebsocketconfig;
+        }
+
+        export interface NatsClusterSpecAuth {
+            clientsAuthFile?: string;
+            clientsAuthSecret?: string;
+            clientsAuthTimeout?: number;
+            enableServiceAccounts?: boolean;
+            tlsVerifyAndMap?: boolean;
+        }
+
+        export interface NatsClusterSpecExtraroutes {
+            cluster?: string;
+            route?: string;
+        }
+
+        export interface NatsClusterSpecGatewayconfig {
+            gateways?: outputs.nats.v1alpha2.NatsClusterSpecGatewayconfigGateways[];
+            hostPort?: number;
+            name?: string;
+            rejectUnknown?: boolean;
+        }
+
+        export interface NatsClusterSpecGatewayconfigGateways {
+            name?: string;
+            url?: string;
+        }
+
+        export interface NatsClusterSpecLeafnodeconfig {
+            port?: number;
+            remotes?: outputs.nats.v1alpha2.NatsClusterSpecLeafnodeconfigRemotes[];
+        }
+
+        export interface NatsClusterSpecLeafnodeconfigRemotes {
+            credentials?: string;
+            url?: string;
+            urls?: string[];
+        }
+
+        export interface NatsClusterSpecNatsconfig {
+            debug?: boolean;
+            disableLogtime?: boolean;
+            maxConnections?: number;
+            maxControlLine?: number;
+            maxPayload?: number;
+            maxPending?: number;
+            maxSubscriptions?: number;
+            trace?: boolean;
+            write_deadline?: string;
+        }
+
+        export interface NatsClusterSpecOperatorconfig {
+            resolver?: string;
+            secret?: string;
+            systemAccount?: string;
+        }
+
+        export interface NatsClusterSpecPod {
+            advertiseExternalIP?: boolean;
+            annotations?: {[key: string]: any};
+            antiAffinity?: boolean;
+            bootconfigImage?: string;
+            bootconfigImageTag?: string;
+            enableClientsHostPort?: boolean;
+            enableConfigReload?: boolean;
+            enableMetrics?: boolean;
+            labels?: {[key: string]: any};
+            metricsImage?: string;
+            metricsImagePullPolicy?: string;
+            metricsImageTag?: string;
+            natsEnv?: {[key: string]: any}[];
+            nodeSelector?: {[key: string]: any};
+            reloaderImage?: string;
+            reloaderImagePullPolicy?: string;
+            reloaderImageTag?: string;
+            reloaderResources?: {[key: string]: any};
+            resources?: {[key: string]: any};
+            tolerations?: {[key: string]: any}[];
+            volumeMounts?: {[key: string]: any}[];
+        }
+
+        export interface NatsClusterSpecTls {
+            cipherSuites?: string[];
+            clientsTLSTimeout?: number;
+            curvePreferences?: string[];
+            enableHttps?: boolean;
+            gatewaySecret?: string;
+            gatewaySecretCAFileName?: string;
+            gatewaySecretCertFileName?: string;
+            gatewaySecretKeyFileName?: string;
+            gatewaysTLSTimeout?: number;
+            leafnodeSecret?: string;
+            leafnodeSecretCAFileName?: string;
+            leafnodeSecretCertFileName?: string;
+            leafnodeSecretKeyFileName?: string;
+            leafnodesTLSTimeout?: number;
+            routesSecret?: string;
+            routesSecretCAFileName?: string;
+            routesSecretCertFileName?: string;
+            routesSecretKeyFileName?: string;
+            routesTLSTimeout?: number;
+            serverSecret?: string;
+            serverSecretCAFileName?: string;
+            serverSecretCertFileName?: string;
+            serverSecretKeyFileName?: string;
+            verify?: boolean;
+            websocketSecret?: string;
+            websocketSecretCAFileName?: string;
+            websocketSecretCertFileName?: string;
+            websocketSecretKeyFileName?: string;
+            websocketTLSTimeout?: number;
+        }
+
+        export interface NatsClusterSpecWebsocketconfig {
+            compression?: boolean;
+            handshakeTimeout?: number;
+            port?: number;
+        }
+
+        export interface NatsServiceRoleSpec {
+            permissions?: outputs.nats.v1alpha2.NatsServiceRoleSpecPermissions;
+        }
+
+        export interface NatsServiceRoleSpecPermissions {
+            publish?: string[];
+            subscribe?: string[];
         }
 
     }

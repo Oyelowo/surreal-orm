@@ -1,4 +1,4 @@
-type Repo = 'oyelowo' | 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'argo' | 'rookCeph' | 'meilisearch';
+type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'argo' | 'rookCeph' | 'meilisearch';
 
 type ChartInfo = {
     chart: string;
@@ -39,6 +39,48 @@ export const helmChartsInfo = {
             },
         },
     },
+    nats: {
+        repo: 'https://nats-io.github.io/k8s/helm/charts',
+        charts: {
+            nats: {
+                chart: 'nats',
+                version: '0.18.1',
+                externalCrds: [],
+                skipCrdRender: false
+            },
+            // natsJetstream:
+            nack: {
+                chart: 'nack',
+                version: '0.17.4',
+                externalCrds: ['https://raw.githubusercontent.com/nats-io/nack/v0.6.0/deploy/crds.yml'],
+                skipCrdRender: false
+            },
+            natsOperator: {
+                chart: 'nats-operator',
+                version: '0.7.4',
+                externalCrds: [],
+                skipCrdRender: false
+            },
+            natsAccountServer : {
+                chart: 'nats-account-server',
+                version: '0.8.0',
+                externalCrds: [],
+                skipCrdRender: false
+            },
+            natsKafka : {
+                chart: 'nats-kafka',
+                version: '0.13.1',
+                externalCrds: [],
+                skipCrdRender: false
+            },
+            surveyor : {
+                chart: 'surveyor',
+                version: '0.14.1',
+                externalCrds: [],
+                skipCrdRender: false
+            },
+        }
+    },
     pingcap: {
         repo: 'https://charts.pingcap.org/',
         charts: {
@@ -61,7 +103,7 @@ export const helmChartsInfo = {
         charts: {
             sealedSecrets: {
                 chart: 'sealed-secrets',
-                version: '1.1.5',
+                version: '1.1.6',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
