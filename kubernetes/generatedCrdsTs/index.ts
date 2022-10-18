@@ -11,14 +11,12 @@ export * from "./provider";
 import * as acme from "./acme";
 import * as argoproj from "./argoproj";
 import * as bitnami from "./bitnami";
-import * as ceph from "./ceph";
 import * as certmanager from "./certmanager";
 import * as jetstream from "./jetstream";
 import * as linkerd from "./linkerd";
 import * as longhorn from "./longhorn";
 import * as metallb from "./metallb";
 import * as nats from "./nats";
-import * as objectbucket from "./objectbucket";
 import * as pingcap from "./pingcap";
 import * as policy from "./policy";
 import * as trust from "./trust";
@@ -28,14 +26,12 @@ export {
     acme,
     argoproj,
     bitnami,
-    ceph,
     certmanager,
     jetstream,
     linkerd,
     longhorn,
     metallb,
     nats,
-    objectbucket,
     pingcap,
     policy,
     trust,

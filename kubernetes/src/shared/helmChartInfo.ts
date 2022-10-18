@@ -1,4 +1,4 @@
-type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'rookCeph' | 'meilisearch';
+type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'meilisearch';
 
 type ChartInfo = {
     chart: string;
@@ -177,24 +177,6 @@ export const helmChartsInfo = {
                 skipCrdRender: false,
             },
         },
-    },
-    rookCeph: {
-        repo: 'https://charts.rook.io/release',
-        charts: {
-            rookCephOperator: {
-                chart: 'rook-ceph',
-                version: 'v1.10.3',
-                externalCrds: [] as string[],
-                skipCrdRender: false,
-            },
-            rookCephCluster: {
-                chart: 'rook-ceph-cluster',
-                version: 'v1.10.3',
-                externalCrds: [] as string[],
-                skipCrdRender: false,
-            },
-
-        }
     },
     meilisearch: {
         repo: 'https://meilisearch.github.io/meilisearch-kubernetes',
