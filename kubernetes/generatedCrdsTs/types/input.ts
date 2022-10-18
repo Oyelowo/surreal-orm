@@ -22730,6 +22730,990 @@ export namespace linkerd {
     }
 }
 
+export namespace longhorn {
+    export namespace v1beta1 {
+    }
+
+    export namespace v1beta2 {
+        /**
+         * BackingImageDataSourceSpec defines the desired state of the Longhorn backing image data source
+         */
+        export interface BackingImageDataSourceSpecArgs {
+            checksum?: pulumi.Input<string>;
+            diskPath?: pulumi.Input<string>;
+            diskUUID?: pulumi.Input<string>;
+            fileTransferred?: pulumi.Input<boolean>;
+            nodeID?: pulumi.Input<string>;
+            parameters?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            sourceType?: pulumi.Input<string>;
+            uuid?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackingImageDataSourceStatus defines the observed state of the Longhorn backing image data source
+         */
+        export interface BackingImageDataSourceStatusArgs {
+            checksum?: pulumi.Input<string>;
+            currentState?: pulumi.Input<string>;
+            ip?: pulumi.Input<string>;
+            message?: pulumi.Input<string>;
+            ownerID?: pulumi.Input<string>;
+            progress?: pulumi.Input<number>;
+            runningParameters?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            size?: pulumi.Input<number>;
+            storageIP?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackingImageManagerSpec defines the desired state of the Longhorn backing image manager
+         */
+        export interface BackingImageManagerSpecArgs {
+            backingImages?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            diskPath?: pulumi.Input<string>;
+            diskUUID?: pulumi.Input<string>;
+            image?: pulumi.Input<string>;
+            nodeID?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackingImageManagerStatus defines the observed state of the Longhorn backing image manager
+         */
+        export interface BackingImageManagerStatusArgs {
+            apiMinVersion?: pulumi.Input<number>;
+            apiVersion?: pulumi.Input<number>;
+            backingImageFileMap?: pulumi.Input<{[key: string]: pulumi.Input<inputs.longhorn.v1beta2.BackingImageManagerStatusBackingimagefilemapArgs>}>;
+            currentState?: pulumi.Input<string>;
+            ip?: pulumi.Input<string>;
+            ownerID?: pulumi.Input<string>;
+            storageIP?: pulumi.Input<string>;
+        }
+
+        export interface BackingImageManagerStatusBackingimagefilemapArgs {
+            currentChecksum?: pulumi.Input<string>;
+            /**
+             * Deprecated: This field is useless.
+             */
+            directory?: pulumi.Input<string>;
+            /**
+             * Deprecated: This field is renamed to `Progress`.
+             */
+            downloadProgress?: pulumi.Input<number>;
+            message?: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            progress?: pulumi.Input<number>;
+            senderManagerAddress?: pulumi.Input<string>;
+            sendingReference?: pulumi.Input<number>;
+            size?: pulumi.Input<number>;
+            state?: pulumi.Input<string>;
+            /**
+             * Deprecated: This field is useless now. The manager of backing image files doesn't care if a file is downloaded and how.
+             */
+            url?: pulumi.Input<string>;
+            uuid?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackingImageSpec defines the desired state of the Longhorn backing image
+         */
+        export interface BackingImageSpecArgs {
+            checksum?: pulumi.Input<string>;
+            disks?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * Deprecated: This kind of info will be included in the related BackingImageDataSource.
+             */
+            imageURL?: pulumi.Input<string>;
+            sourceParameters?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            sourceType?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackingImageStatus defines the observed state of the Longhorn backing image status
+         */
+        export interface BackingImageStatusArgs {
+            checksum?: pulumi.Input<string>;
+            /**
+             * Deprecated: Replaced by field `Progress` in `DiskFileStatusMap`.
+             */
+            diskDownloadProgressMap?: pulumi.Input<{[key: string]: pulumi.Input<number>}>;
+            /**
+             * Deprecated: Replaced by field `State` in `DiskFileStatusMap`.
+             */
+            diskDownloadStateMap?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            diskFileStatusMap?: pulumi.Input<{[key: string]: pulumi.Input<inputs.longhorn.v1beta2.BackingImageStatusDiskfilestatusmapArgs>}>;
+            diskLastRefAtMap?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            ownerID?: pulumi.Input<string>;
+            size?: pulumi.Input<number>;
+            uuid?: pulumi.Input<string>;
+        }
+
+        export interface BackingImageStatusDiskfilestatusmapArgs {
+            lastStateTransitionTime?: pulumi.Input<string>;
+            message?: pulumi.Input<string>;
+            progress?: pulumi.Input<number>;
+            state?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackupSpec defines the desired state of the Longhorn backup
+         */
+        export interface BackupSpecArgs {
+            /**
+             * The labels of snapshot backup.
+             */
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * The snapshot name.
+             */
+            snapshotName?: pulumi.Input<string>;
+            /**
+             * The time to request run sync the remote backup.
+             */
+            syncRequestedAt?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackupStatus defines the observed state of the Longhorn backup
+         */
+        export interface BackupStatusArgs {
+            /**
+             * The snapshot backup upload finished time.
+             */
+            backupCreatedAt?: pulumi.Input<string>;
+            /**
+             * The error message when taking the snapshot backup.
+             */
+            error?: pulumi.Input<string>;
+            /**
+             * The labels of snapshot backup.
+             */
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * The last time that the backup was synced with the remote backup target.
+             */
+            lastSyncedAt?: pulumi.Input<string>;
+            /**
+             * The error messages when calling longhorn engine on listing or inspecting backups.
+             */
+            messages?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * The node ID on which the controller is responsible to reconcile this backup CR.
+             */
+            ownerID?: pulumi.Input<string>;
+            /**
+             * The snapshot backup progress.
+             */
+            progress?: pulumi.Input<number>;
+            /**
+             * The address of the replica that runs snapshot backup.
+             */
+            replicaAddress?: pulumi.Input<string>;
+            /**
+             * The snapshot size.
+             */
+            size?: pulumi.Input<string>;
+            /**
+             * The snapshot creation time.
+             */
+            snapshotCreatedAt?: pulumi.Input<string>;
+            /**
+             * The snapshot name.
+             */
+            snapshotName?: pulumi.Input<string>;
+            /**
+             * The backup creation state. Can be "", "InProgress", "Completed", "Error", "Unknown".
+             */
+            state?: pulumi.Input<string>;
+            /**
+             * The snapshot backup URL.
+             */
+            url?: pulumi.Input<string>;
+            /**
+             * The volume's backing image name.
+             */
+            volumeBackingImageName?: pulumi.Input<string>;
+            /**
+             * The volume creation time.
+             */
+            volumeCreated?: pulumi.Input<string>;
+            /**
+             * The volume name.
+             */
+            volumeName?: pulumi.Input<string>;
+            /**
+             * The volume size.
+             */
+            volumeSize?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackupTargetSpec defines the desired state of the Longhorn backup target
+         */
+        export interface BackupTargetSpecArgs {
+            /**
+             * The backup target URL.
+             */
+            backupTargetURL?: pulumi.Input<string>;
+            /**
+             * The backup target credential secret.
+             */
+            credentialSecret?: pulumi.Input<string>;
+            /**
+             * The interval that the cluster needs to run sync with the backup target.
+             */
+            pollInterval?: pulumi.Input<string>;
+            /**
+             * The time to request run sync the remote backup target.
+             */
+            syncRequestedAt?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackupTargetStatus defines the observed state of the Longhorn backup target
+         */
+        export interface BackupTargetStatusArgs {
+            /**
+             * Available indicates if the remote backup target is available or not.
+             */
+            available?: pulumi.Input<boolean>;
+            /**
+             * Records the reason on why the backup target is unavailable.
+             */
+            conditions?: pulumi.Input<pulumi.Input<inputs.longhorn.v1beta2.BackupTargetStatusConditionsArgs>[]>;
+            /**
+             * The last time that the controller synced with the remote backup target.
+             */
+            lastSyncedAt?: pulumi.Input<string>;
+            /**
+             * The node ID on which the controller is responsible to reconcile this backup target CR.
+             */
+            ownerID?: pulumi.Input<string>;
+        }
+
+        export interface BackupTargetStatusConditionsArgs {
+            /**
+             * Last time we probed the condition.
+             */
+            lastProbeTime?: pulumi.Input<string>;
+            /**
+             * Last time the condition transitioned from one status to another.
+             */
+            lastTransitionTime?: pulumi.Input<string>;
+            /**
+             * Human-readable message indicating details about last transition.
+             */
+            message?: pulumi.Input<string>;
+            /**
+             * Unique, one-word, CamelCase reason for the condition's last transition.
+             */
+            reason?: pulumi.Input<string>;
+            /**
+             * Status is the status of the condition. Can be True, False, Unknown.
+             */
+            status?: pulumi.Input<string>;
+            /**
+             * Type is the type of the condition.
+             */
+            type?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackupVolumeSpec defines the desired state of the Longhorn backup volume
+         */
+        export interface BackupVolumeSpecArgs {
+            /**
+             * The time to request run sync the remote backup volume.
+             */
+            syncRequestedAt?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackupVolumeStatus defines the observed state of the Longhorn backup volume
+         */
+        export interface BackupVolumeStatusArgs {
+            /**
+             * the backing image checksum.
+             */
+            backingImageChecksum?: pulumi.Input<string>;
+            /**
+             * The backing image name.
+             */
+            backingImageName?: pulumi.Input<string>;
+            /**
+             * The backup volume creation time.
+             */
+            createdAt?: pulumi.Input<string>;
+            /**
+             * The backup volume block count.
+             */
+            dataStored?: pulumi.Input<string>;
+            /**
+             * The backup volume labels.
+             */
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * The latest volume backup time.
+             */
+            lastBackupAt?: pulumi.Input<string>;
+            /**
+             * The latest volume backup name.
+             */
+            lastBackupName?: pulumi.Input<string>;
+            /**
+             * The backup volume config last modification time.
+             */
+            lastModificationTime?: pulumi.Input<string>;
+            /**
+             * The last time that the backup volume was synced into the cluster.
+             */
+            lastSyncedAt?: pulumi.Input<string>;
+            /**
+             * The error messages when call longhorn engine on list or inspect backup volumes.
+             */
+            messages?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * The node ID on which the controller is responsible to reconcile this backup volume CR.
+             */
+            ownerID?: pulumi.Input<string>;
+            /**
+             * The backup volume size.
+             */
+            size?: pulumi.Input<string>;
+        }
+
+        /**
+         * EngineImageSpec defines the desired state of the Longhorn engine image
+         */
+        export interface EngineImageSpecArgs {
+            image: pulumi.Input<string>;
+        }
+
+        /**
+         * EngineImageStatus defines the observed state of the Longhorn engine image
+         */
+        export interface EngineImageStatusArgs {
+            buildDate?: pulumi.Input<string>;
+            cliAPIMinVersion?: pulumi.Input<number>;
+            cliAPIVersion?: pulumi.Input<number>;
+            conditions?: pulumi.Input<pulumi.Input<inputs.longhorn.v1beta2.EngineImageStatusConditionsArgs>[]>;
+            controllerAPIMinVersion?: pulumi.Input<number>;
+            controllerAPIVersion?: pulumi.Input<number>;
+            dataFormatMinVersion?: pulumi.Input<number>;
+            dataFormatVersion?: pulumi.Input<number>;
+            gitCommit?: pulumi.Input<string>;
+            noRefSince?: pulumi.Input<string>;
+            nodeDeploymentMap?: pulumi.Input<{[key: string]: pulumi.Input<boolean>}>;
+            ownerID?: pulumi.Input<string>;
+            refCount?: pulumi.Input<number>;
+            state?: pulumi.Input<string>;
+            version?: pulumi.Input<string>;
+        }
+
+        export interface EngineImageStatusConditionsArgs {
+            /**
+             * Last time we probed the condition.
+             */
+            lastProbeTime?: pulumi.Input<string>;
+            /**
+             * Last time the condition transitioned from one status to another.
+             */
+            lastTransitionTime?: pulumi.Input<string>;
+            /**
+             * Human-readable message indicating details about last transition.
+             */
+            message?: pulumi.Input<string>;
+            /**
+             * Unique, one-word, CamelCase reason for the condition's last transition.
+             */
+            reason?: pulumi.Input<string>;
+            /**
+             * Status is the status of the condition. Can be True, False, Unknown.
+             */
+            status?: pulumi.Input<string>;
+            /**
+             * Type is the type of the condition.
+             */
+            type?: pulumi.Input<string>;
+        }
+
+        /**
+         * EngineSpec defines the desired state of the Longhorn engine
+         */
+        export interface EngineSpecArgs {
+            active?: pulumi.Input<boolean>;
+            backupVolume?: pulumi.Input<string>;
+            desireState?: pulumi.Input<string>;
+            disableFrontend?: pulumi.Input<boolean>;
+            engineImage?: pulumi.Input<string>;
+            frontend?: pulumi.Input<string>;
+            logRequested?: pulumi.Input<boolean>;
+            nodeID?: pulumi.Input<string>;
+            replicaAddressMap?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            requestedBackupRestore?: pulumi.Input<string>;
+            requestedDataSource?: pulumi.Input<string>;
+            revisionCounterDisabled?: pulumi.Input<boolean>;
+            salvageRequested?: pulumi.Input<boolean>;
+            upgradedReplicaAddressMap?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            volumeName?: pulumi.Input<string>;
+            volumeSize?: pulumi.Input<string>;
+        }
+
+        /**
+         * EngineStatus defines the observed state of the Longhorn engine
+         */
+        export interface EngineStatusArgs {
+            backupStatus?: pulumi.Input<{[key: string]: pulumi.Input<inputs.longhorn.v1beta2.EngineStatusBackupstatusArgs>}>;
+            cloneStatus?: pulumi.Input<{[key: string]: pulumi.Input<inputs.longhorn.v1beta2.EngineStatusClonestatusArgs>}>;
+            currentImage?: pulumi.Input<string>;
+            currentReplicaAddressMap?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            currentSize?: pulumi.Input<string>;
+            currentState?: pulumi.Input<string>;
+            endpoint?: pulumi.Input<string>;
+            instanceManagerName?: pulumi.Input<string>;
+            ip?: pulumi.Input<string>;
+            isExpanding?: pulumi.Input<boolean>;
+            lastExpansionError?: pulumi.Input<string>;
+            lastExpansionFailedAt?: pulumi.Input<string>;
+            lastRestoredBackup?: pulumi.Input<string>;
+            logFetched?: pulumi.Input<boolean>;
+            ownerID?: pulumi.Input<string>;
+            port?: pulumi.Input<number>;
+            purgeStatus?: pulumi.Input<{[key: string]: pulumi.Input<inputs.longhorn.v1beta2.EngineStatusPurgestatusArgs>}>;
+            rebuildStatus?: pulumi.Input<{[key: string]: pulumi.Input<inputs.longhorn.v1beta2.EngineStatusRebuildstatusArgs>}>;
+            replicaModeMap?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            restoreStatus?: pulumi.Input<{[key: string]: pulumi.Input<inputs.longhorn.v1beta2.EngineStatusRestorestatusArgs>}>;
+            salvageExecuted?: pulumi.Input<boolean>;
+            snapshots?: pulumi.Input<{[key: string]: pulumi.Input<inputs.longhorn.v1beta2.EngineStatusSnapshotsArgs>}>;
+            snapshotsError?: pulumi.Input<string>;
+            started?: pulumi.Input<boolean>;
+            storageIP?: pulumi.Input<string>;
+        }
+
+        export interface EngineStatusBackupstatusArgs {
+            backupURL?: pulumi.Input<string>;
+            error?: pulumi.Input<string>;
+            progress?: pulumi.Input<number>;
+            replicaAddress?: pulumi.Input<string>;
+            snapshotName?: pulumi.Input<string>;
+            state?: pulumi.Input<string>;
+        }
+
+        export interface EngineStatusClonestatusArgs {
+            error?: pulumi.Input<string>;
+            fromReplicaAddress?: pulumi.Input<string>;
+            isCloning?: pulumi.Input<boolean>;
+            progress?: pulumi.Input<number>;
+            snapshotName?: pulumi.Input<string>;
+            state?: pulumi.Input<string>;
+        }
+
+        export interface EngineStatusPurgestatusArgs {
+            error?: pulumi.Input<string>;
+            isPurging?: pulumi.Input<boolean>;
+            progress?: pulumi.Input<number>;
+            state?: pulumi.Input<string>;
+        }
+
+        export interface EngineStatusRebuildstatusArgs {
+            error?: pulumi.Input<string>;
+            fromReplicaAddress?: pulumi.Input<string>;
+            isRebuilding?: pulumi.Input<boolean>;
+            progress?: pulumi.Input<number>;
+            state?: pulumi.Input<string>;
+        }
+
+        export interface EngineStatusRestorestatusArgs {
+            backupURL?: pulumi.Input<string>;
+            currentRestoringBackup?: pulumi.Input<string>;
+            error?: pulumi.Input<string>;
+            filename?: pulumi.Input<string>;
+            isRestoring?: pulumi.Input<boolean>;
+            lastRestored?: pulumi.Input<string>;
+            progress?: pulumi.Input<number>;
+            state?: pulumi.Input<string>;
+        }
+
+        export interface EngineStatusSnapshotsArgs {
+            children?: pulumi.Input<{[key: string]: pulumi.Input<boolean>}>;
+            created?: pulumi.Input<string>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            name?: pulumi.Input<string>;
+            parent?: pulumi.Input<string>;
+            removed?: pulumi.Input<boolean>;
+            size?: pulumi.Input<string>;
+            usercreated?: pulumi.Input<boolean>;
+        }
+
+        /**
+         * InstanceManagerSpec defines the desired state of the Longhorn instancer manager
+         */
+        export interface InstanceManagerSpecArgs {
+            /**
+             * TODO: deprecate this field
+             */
+            engineImage?: pulumi.Input<string>;
+            image?: pulumi.Input<string>;
+            nodeID?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+        }
+
+        /**
+         * InstanceManagerStatus defines the observed state of the Longhorn instance manager
+         */
+        export interface InstanceManagerStatusArgs {
+            apiMinVersion?: pulumi.Input<number>;
+            apiVersion?: pulumi.Input<number>;
+            currentState?: pulumi.Input<string>;
+            instances?: pulumi.Input<{[key: string]: pulumi.Input<inputs.longhorn.v1beta2.InstanceManagerStatusInstancesArgs>}>;
+            ip?: pulumi.Input<string>;
+            ownerID?: pulumi.Input<string>;
+            proxyApiMinVersion?: pulumi.Input<number>;
+            proxyApiVersion?: pulumi.Input<number>;
+        }
+
+        export interface InstanceManagerStatusInstancesArgs {
+            spec?: pulumi.Input<inputs.longhorn.v1beta2.InstanceManagerStatusInstancesSpecArgs>;
+            status?: pulumi.Input<inputs.longhorn.v1beta2.InstanceManagerStatusInstancesStatusArgs>;
+        }
+
+        export interface InstanceManagerStatusInstancesSpecArgs {
+            name?: pulumi.Input<string>;
+        }
+
+        export interface InstanceManagerStatusInstancesStatusArgs {
+            endpoint?: pulumi.Input<string>;
+            errorMsg?: pulumi.Input<string>;
+            listen?: pulumi.Input<string>;
+            portEnd?: pulumi.Input<number>;
+            portStart?: pulumi.Input<number>;
+            resourceVersion?: pulumi.Input<number>;
+            state?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+        }
+
+        /**
+         * NodeSpec defines the desired state of the Longhorn node
+         */
+        export interface NodeSpecArgs {
+            allowScheduling?: pulumi.Input<boolean>;
+            disks?: pulumi.Input<{[key: string]: pulumi.Input<inputs.longhorn.v1beta2.NodeSpecDisksArgs>}>;
+            engineManagerCPURequest?: pulumi.Input<number>;
+            evictionRequested?: pulumi.Input<boolean>;
+            name?: pulumi.Input<string>;
+            replicaManagerCPURequest?: pulumi.Input<number>;
+            tags?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface NodeSpecDisksArgs {
+            allowScheduling?: pulumi.Input<boolean>;
+            evictionRequested?: pulumi.Input<boolean>;
+            path?: pulumi.Input<string>;
+            storageReserved?: pulumi.Input<number>;
+            tags?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * NodeStatus defines the observed state of the Longhorn node
+         */
+        export interface NodeStatusArgs {
+            conditions?: pulumi.Input<pulumi.Input<inputs.longhorn.v1beta2.NodeStatusConditionsArgs>[]>;
+            diskStatus?: pulumi.Input<{[key: string]: pulumi.Input<inputs.longhorn.v1beta2.NodeStatusDiskstatusArgs>}>;
+            region?: pulumi.Input<string>;
+            zone?: pulumi.Input<string>;
+        }
+
+        export interface NodeStatusConditionsArgs {
+            /**
+             * Last time we probed the condition.
+             */
+            lastProbeTime?: pulumi.Input<string>;
+            /**
+             * Last time the condition transitioned from one status to another.
+             */
+            lastTransitionTime?: pulumi.Input<string>;
+            /**
+             * Human-readable message indicating details about last transition.
+             */
+            message?: pulumi.Input<string>;
+            /**
+             * Unique, one-word, CamelCase reason for the condition's last transition.
+             */
+            reason?: pulumi.Input<string>;
+            /**
+             * Status is the status of the condition. Can be True, False, Unknown.
+             */
+            status?: pulumi.Input<string>;
+            /**
+             * Type is the type of the condition.
+             */
+            type?: pulumi.Input<string>;
+        }
+
+        export interface NodeStatusDiskstatusArgs {
+            conditions?: pulumi.Input<pulumi.Input<inputs.longhorn.v1beta2.NodeStatusDiskstatusConditionsArgs>[]>;
+            diskUUID?: pulumi.Input<string>;
+            scheduledReplica?: pulumi.Input<{[key: string]: pulumi.Input<number>}>;
+            storageAvailable?: pulumi.Input<number>;
+            storageMaximum?: pulumi.Input<number>;
+            storageScheduled?: pulumi.Input<number>;
+        }
+
+        export interface NodeStatusDiskstatusConditionsArgs {
+            /**
+             * Last time we probed the condition.
+             */
+            lastProbeTime?: pulumi.Input<string>;
+            /**
+             * Last time the condition transitioned from one status to another.
+             */
+            lastTransitionTime?: pulumi.Input<string>;
+            /**
+             * Human-readable message indicating details about last transition.
+             */
+            message?: pulumi.Input<string>;
+            /**
+             * Unique, one-word, CamelCase reason for the condition's last transition.
+             */
+            reason?: pulumi.Input<string>;
+            /**
+             * Status is the status of the condition. Can be True, False, Unknown.
+             */
+            status?: pulumi.Input<string>;
+            /**
+             * Type is the type of the condition.
+             */
+            type?: pulumi.Input<string>;
+        }
+
+        /**
+         * OrphanSpec defines the desired state of the Longhorn orphaned data
+         */
+        export interface OrphanSpecArgs {
+            /**
+             * The node ID on which the controller is responsible to reconcile this orphan CR.
+             */
+            nodeID?: pulumi.Input<string>;
+            /**
+             * The type of the orphaned data. Can be "replica".
+             */
+            orphanType?: pulumi.Input<string>;
+            /**
+             * The parameters of the orphaned data
+             */
+            parameters?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * OrphanStatus defines the observed state of the Longhorn orphaned data
+         */
+        export interface OrphanStatusArgs {
+            conditions?: pulumi.Input<pulumi.Input<inputs.longhorn.v1beta2.OrphanStatusConditionsArgs>[]>;
+            ownerID?: pulumi.Input<string>;
+        }
+
+        export interface OrphanStatusConditionsArgs {
+            /**
+             * Last time we probed the condition.
+             */
+            lastProbeTime?: pulumi.Input<string>;
+            /**
+             * Last time the condition transitioned from one status to another.
+             */
+            lastTransitionTime?: pulumi.Input<string>;
+            /**
+             * Human-readable message indicating details about last transition.
+             */
+            message?: pulumi.Input<string>;
+            /**
+             * Unique, one-word, CamelCase reason for the condition's last transition.
+             */
+            reason?: pulumi.Input<string>;
+            /**
+             * Status is the status of the condition. Can be True, False, Unknown.
+             */
+            status?: pulumi.Input<string>;
+            /**
+             * Type is the type of the condition.
+             */
+            type?: pulumi.Input<string>;
+        }
+
+        /**
+         * RecurringJobSpec defines the desired state of the Longhorn recurring job
+         */
+        export interface RecurringJobSpecArgs {
+            /**
+             * The concurrency of taking the snapshot/backup.
+             */
+            concurrency?: pulumi.Input<number>;
+            /**
+             * The cron setting.
+             */
+            cron?: pulumi.Input<string>;
+            /**
+             * The recurring job group.
+             */
+            groups?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * The label of the snapshot/backup.
+             */
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * The recurring job name.
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * The retain count of the snapshot/backup.
+             */
+            retain?: pulumi.Input<number>;
+            /**
+             * The recurring job type. Can be "snapshot" or "backup".
+             */
+            task?: pulumi.Input<string>;
+        }
+
+        /**
+         * RecurringJobStatus defines the observed state of the Longhorn recurring job
+         */
+        export interface RecurringJobStatusArgs {
+            /**
+             * The owner ID which is responsible to reconcile this recurring job CR.
+             */
+            ownerID?: pulumi.Input<string>;
+        }
+
+        /**
+         * ReplicaSpec defines the desired state of the Longhorn replica
+         */
+        export interface ReplicaSpecArgs {
+            active?: pulumi.Input<boolean>;
+            backingImage?: pulumi.Input<string>;
+            /**
+             * Deprecated. Rename to BackingImage
+             */
+            baseImage?: pulumi.Input<string>;
+            dataDirectoryName?: pulumi.Input<string>;
+            /**
+             * Deprecated
+             */
+            dataPath?: pulumi.Input<string>;
+            desireState?: pulumi.Input<string>;
+            diskID?: pulumi.Input<string>;
+            diskPath?: pulumi.Input<string>;
+            engineImage?: pulumi.Input<string>;
+            engineName?: pulumi.Input<string>;
+            failedAt?: pulumi.Input<string>;
+            hardNodeAffinity?: pulumi.Input<string>;
+            healthyAt?: pulumi.Input<string>;
+            logRequested?: pulumi.Input<boolean>;
+            nodeID?: pulumi.Input<string>;
+            rebuildRetryCount?: pulumi.Input<number>;
+            revisionCounterDisabled?: pulumi.Input<boolean>;
+            salvageRequested?: pulumi.Input<boolean>;
+            volumeName?: pulumi.Input<string>;
+            volumeSize?: pulumi.Input<string>;
+        }
+
+        /**
+         * ReplicaStatus defines the observed state of the Longhorn replica
+         */
+        export interface ReplicaStatusArgs {
+            currentImage?: pulumi.Input<string>;
+            currentState?: pulumi.Input<string>;
+            evictionRequested?: pulumi.Input<boolean>;
+            instanceManagerName?: pulumi.Input<string>;
+            ip?: pulumi.Input<string>;
+            logFetched?: pulumi.Input<boolean>;
+            ownerID?: pulumi.Input<string>;
+            port?: pulumi.Input<number>;
+            salvageExecuted?: pulumi.Input<boolean>;
+            started?: pulumi.Input<boolean>;
+            storageIP?: pulumi.Input<string>;
+        }
+
+        /**
+         * ShareManagerSpec defines the desired state of the Longhorn share manager
+         */
+        export interface ShareManagerSpecArgs {
+            image?: pulumi.Input<string>;
+        }
+
+        /**
+         * ShareManagerStatus defines the observed state of the Longhorn share manager
+         */
+        export interface ShareManagerStatusArgs {
+            endpoint?: pulumi.Input<string>;
+            ownerID?: pulumi.Input<string>;
+            state?: pulumi.Input<string>;
+        }
+
+        /**
+         * SnapshotSpec defines the desired state of Longhorn Snapshot
+         */
+        export interface SnapshotSpecArgs {
+            /**
+             * require creating a new snapshot
+             */
+            createSnapshot?: pulumi.Input<boolean>;
+            /**
+             * The labels of snapshot
+             */
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * the volume that this snapshot belongs to. This field is immutable after creation. Required
+             */
+            volume: pulumi.Input<string>;
+        }
+
+        /**
+         * SnapshotStatus defines the observed state of Longhorn Snapshot
+         */
+        export interface SnapshotStatusArgs {
+            children?: pulumi.Input<{[key: string]: pulumi.Input<boolean>}>;
+            creationTime?: pulumi.Input<string>;
+            error?: pulumi.Input<string>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            markRemoved?: pulumi.Input<boolean>;
+            ownerID?: pulumi.Input<string>;
+            parent?: pulumi.Input<string>;
+            readyToUse?: pulumi.Input<boolean>;
+            restoreSize?: pulumi.Input<number>;
+            size?: pulumi.Input<number>;
+            userCreated?: pulumi.Input<boolean>;
+        }
+
+        /**
+         * VolumeSpec defines the desired state of the Longhorn volume
+         */
+        export interface VolumeSpecArgs {
+            Standby?: pulumi.Input<boolean>;
+            accessMode?: pulumi.Input<string>;
+            backingImage?: pulumi.Input<string>;
+            /**
+             * Deprecated. Rename to BackingImage
+             */
+            baseImage?: pulumi.Input<string>;
+            dataLocality?: pulumi.Input<string>;
+            dataSource?: pulumi.Input<string>;
+            disableFrontend?: pulumi.Input<boolean>;
+            diskSelector?: pulumi.Input<pulumi.Input<string>[]>;
+            encrypted?: pulumi.Input<boolean>;
+            engineImage?: pulumi.Input<string>;
+            fromBackup?: pulumi.Input<string>;
+            frontend?: pulumi.Input<string>;
+            lastAttachedBy?: pulumi.Input<string>;
+            migratable?: pulumi.Input<boolean>;
+            migrationNodeID?: pulumi.Input<string>;
+            nodeID?: pulumi.Input<string>;
+            nodeSelector?: pulumi.Input<pulumi.Input<string>[]>;
+            numberOfReplicas?: pulumi.Input<number>;
+            /**
+             * Deprecated. Replaced by a separate resource named "RecurringJob"
+             */
+            recurringJobs?: pulumi.Input<pulumi.Input<inputs.longhorn.v1beta2.VolumeSpecRecurringjobsArgs>[]>;
+            replicaAutoBalance?: pulumi.Input<string>;
+            revisionCounterDisabled?: pulumi.Input<boolean>;
+            size?: pulumi.Input<string>;
+            staleReplicaTimeout?: pulumi.Input<number>;
+        }
+
+        /**
+         * VolumeRecurringJobSpec is a deprecated struct. TODO: Should be removed when recurringJobs gets removed from the volume       spec.
+         */
+        export interface VolumeSpecRecurringjobsArgs {
+            concurrency?: pulumi.Input<number>;
+            cron?: pulumi.Input<string>;
+            groups?: pulumi.Input<pulumi.Input<string>[]>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            name?: pulumi.Input<string>;
+            retain?: pulumi.Input<number>;
+            task?: pulumi.Input<string>;
+        }
+
+        /**
+         * VolumeStatus defines the observed state of the Longhorn volume
+         */
+        export interface VolumeStatusArgs {
+            actualSize?: pulumi.Input<number>;
+            cloneStatus?: pulumi.Input<inputs.longhorn.v1beta2.VolumeStatusClonestatusArgs>;
+            conditions?: pulumi.Input<pulumi.Input<inputs.longhorn.v1beta2.VolumeStatusConditionsArgs>[]>;
+            currentImage?: pulumi.Input<string>;
+            currentNodeID?: pulumi.Input<string>;
+            expansionRequired?: pulumi.Input<boolean>;
+            frontendDisabled?: pulumi.Input<boolean>;
+            isStandby?: pulumi.Input<boolean>;
+            kubernetesStatus?: pulumi.Input<inputs.longhorn.v1beta2.VolumeStatusKubernetesstatusArgs>;
+            lastBackup?: pulumi.Input<string>;
+            lastBackupAt?: pulumi.Input<string>;
+            lastDegradedAt?: pulumi.Input<string>;
+            ownerID?: pulumi.Input<string>;
+            pendingNodeID?: pulumi.Input<string>;
+            remountRequestedAt?: pulumi.Input<string>;
+            restoreInitiated?: pulumi.Input<boolean>;
+            restoreRequired?: pulumi.Input<boolean>;
+            robustness?: pulumi.Input<string>;
+            shareEndpoint?: pulumi.Input<string>;
+            shareState?: pulumi.Input<string>;
+            state?: pulumi.Input<string>;
+        }
+
+        export interface VolumeStatusClonestatusArgs {
+            snapshot?: pulumi.Input<string>;
+            sourceVolume?: pulumi.Input<string>;
+            state?: pulumi.Input<string>;
+        }
+
+        export interface VolumeStatusConditionsArgs {
+            /**
+             * Last time we probed the condition.
+             */
+            lastProbeTime?: pulumi.Input<string>;
+            /**
+             * Last time the condition transitioned from one status to another.
+             */
+            lastTransitionTime?: pulumi.Input<string>;
+            /**
+             * Human-readable message indicating details about last transition.
+             */
+            message?: pulumi.Input<string>;
+            /**
+             * Unique, one-word, CamelCase reason for the condition's last transition.
+             */
+            reason?: pulumi.Input<string>;
+            /**
+             * Status is the status of the condition. Can be True, False, Unknown.
+             */
+            status?: pulumi.Input<string>;
+            /**
+             * Type is the type of the condition.
+             */
+            type?: pulumi.Input<string>;
+        }
+
+        export interface VolumeStatusKubernetesstatusArgs {
+            lastPVCRefAt?: pulumi.Input<string>;
+            lastPodRefAt?: pulumi.Input<string>;
+            /**
+             * determine if PVC/Namespace is history or not
+             */
+            namespace?: pulumi.Input<string>;
+            pvName?: pulumi.Input<string>;
+            pvStatus?: pulumi.Input<string>;
+            pvcName?: pulumi.Input<string>;
+            /**
+             * determine if Pod/Workload is history or not
+             */
+            workloadsStatus?: pulumi.Input<pulumi.Input<inputs.longhorn.v1beta2.VolumeStatusKubernetesstatusWorkloadsstatusArgs>[]>;
+        }
+
+        export interface VolumeStatusKubernetesstatusWorkloadsstatusArgs {
+            podName?: pulumi.Input<string>;
+            podStatus?: pulumi.Input<string>;
+            workloadName?: pulumi.Input<string>;
+            workloadType?: pulumi.Input<string>;
+        }
+    }
+}
+
 export namespace metallb {
     export namespace v1alpha1 {
         /**

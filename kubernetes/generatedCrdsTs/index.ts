@@ -15,6 +15,7 @@ import * as ceph from "./ceph";
 import * as certmanager from "./certmanager";
 import * as jetstream from "./jetstream";
 import * as linkerd from "./linkerd";
+import * as longhorn from "./longhorn";
 import * as metallb from "./metallb";
 import * as nats from "./nats";
 import * as objectbucket from "./objectbucket";
@@ -31,6 +32,7 @@ export {
     certmanager,
     jetstream,
     linkerd,
+    longhorn,
     metallb,
     nats,
     objectbucket,

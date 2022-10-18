@@ -22731,6 +22731,991 @@ export namespace linkerd {
     }
 }
 
+export namespace longhorn {
+    export namespace v1beta1 {
+    }
+
+    export namespace v1beta2 {
+        /**
+         * BackingImageDataSourceSpec defines the desired state of the Longhorn backing image data source
+         */
+        export interface BackingImageDataSourceSpec {
+            checksum?: string;
+            diskPath?: string;
+            diskUUID?: string;
+            fileTransferred?: boolean;
+            nodeID?: string;
+            parameters?: {[key: string]: string};
+            sourceType?: string;
+            uuid?: string;
+        }
+
+        /**
+         * BackingImageDataSourceStatus defines the observed state of the Longhorn backing image data source
+         */
+        export interface BackingImageDataSourceStatus {
+            checksum?: string;
+            currentState?: string;
+            ip?: string;
+            message?: string;
+            ownerID?: string;
+            progress?: number;
+            runningParameters?: {[key: string]: string};
+            size?: number;
+            storageIP?: string;
+        }
+
+        /**
+         * BackingImageManagerSpec defines the desired state of the Longhorn backing image manager
+         */
+        export interface BackingImageManagerSpec {
+            backingImages?: {[key: string]: string};
+            diskPath?: string;
+            diskUUID?: string;
+            image?: string;
+            nodeID?: string;
+        }
+
+        /**
+         * BackingImageManagerStatus defines the observed state of the Longhorn backing image manager
+         */
+        export interface BackingImageManagerStatus {
+            apiMinVersion?: number;
+            apiVersion?: number;
+            backingImageFileMap?: {[key: string]: outputs.longhorn.v1beta2.BackingImageManagerStatusBackingimagefilemap};
+            currentState?: string;
+            ip?: string;
+            ownerID?: string;
+            storageIP?: string;
+        }
+
+        export interface BackingImageManagerStatusBackingimagefilemap {
+            currentChecksum?: string;
+            /**
+             * Deprecated: This field is useless.
+             */
+            directory?: string;
+            /**
+             * Deprecated: This field is renamed to `Progress`.
+             */
+            downloadProgress?: number;
+            message?: string;
+            name?: string;
+            progress?: number;
+            senderManagerAddress?: string;
+            sendingReference?: number;
+            size?: number;
+            state?: string;
+            /**
+             * Deprecated: This field is useless now. The manager of backing image files doesn't care if a file is downloaded and how.
+             */
+            url?: string;
+            uuid?: string;
+        }
+
+        /**
+         * BackingImageSpec defines the desired state of the Longhorn backing image
+         */
+        export interface BackingImageSpec {
+            checksum?: string;
+            disks?: {[key: string]: string};
+            /**
+             * Deprecated: This kind of info will be included in the related BackingImageDataSource.
+             */
+            imageURL?: string;
+            sourceParameters?: {[key: string]: string};
+            sourceType?: string;
+        }
+
+        /**
+         * BackingImageStatus defines the observed state of the Longhorn backing image status
+         */
+        export interface BackingImageStatus {
+            checksum?: string;
+            /**
+             * Deprecated: Replaced by field `Progress` in `DiskFileStatusMap`.
+             */
+            diskDownloadProgressMap?: {[key: string]: number};
+            /**
+             * Deprecated: Replaced by field `State` in `DiskFileStatusMap`.
+             */
+            diskDownloadStateMap?: {[key: string]: string};
+            diskFileStatusMap?: {[key: string]: outputs.longhorn.v1beta2.BackingImageStatusDiskfilestatusmap};
+            diskLastRefAtMap?: {[key: string]: string};
+            ownerID?: string;
+            size?: number;
+            uuid?: string;
+        }
+
+        export interface BackingImageStatusDiskfilestatusmap {
+            lastStateTransitionTime?: string;
+            message?: string;
+            progress?: number;
+            state?: string;
+        }
+
+        /**
+         * BackupSpec defines the desired state of the Longhorn backup
+         */
+        export interface BackupSpec {
+            /**
+             * The labels of snapshot backup.
+             */
+            labels?: {[key: string]: string};
+            /**
+             * The snapshot name.
+             */
+            snapshotName?: string;
+            /**
+             * The time to request run sync the remote backup.
+             */
+            syncRequestedAt?: string;
+        }
+
+        /**
+         * BackupStatus defines the observed state of the Longhorn backup
+         */
+        export interface BackupStatus {
+            /**
+             * The snapshot backup upload finished time.
+             */
+            backupCreatedAt?: string;
+            /**
+             * The error message when taking the snapshot backup.
+             */
+            error?: string;
+            /**
+             * The labels of snapshot backup.
+             */
+            labels?: {[key: string]: string};
+            /**
+             * The last time that the backup was synced with the remote backup target.
+             */
+            lastSyncedAt?: string;
+            /**
+             * The error messages when calling longhorn engine on listing or inspecting backups.
+             */
+            messages?: {[key: string]: string};
+            /**
+             * The node ID on which the controller is responsible to reconcile this backup CR.
+             */
+            ownerID?: string;
+            /**
+             * The snapshot backup progress.
+             */
+            progress?: number;
+            /**
+             * The address of the replica that runs snapshot backup.
+             */
+            replicaAddress?: string;
+            /**
+             * The snapshot size.
+             */
+            size?: string;
+            /**
+             * The snapshot creation time.
+             */
+            snapshotCreatedAt?: string;
+            /**
+             * The snapshot name.
+             */
+            snapshotName?: string;
+            /**
+             * The backup creation state. Can be "", "InProgress", "Completed", "Error", "Unknown".
+             */
+            state?: string;
+            /**
+             * The snapshot backup URL.
+             */
+            url?: string;
+            /**
+             * The volume's backing image name.
+             */
+            volumeBackingImageName?: string;
+            /**
+             * The volume creation time.
+             */
+            volumeCreated?: string;
+            /**
+             * The volume name.
+             */
+            volumeName?: string;
+            /**
+             * The volume size.
+             */
+            volumeSize?: string;
+        }
+
+        /**
+         * BackupTargetSpec defines the desired state of the Longhorn backup target
+         */
+        export interface BackupTargetSpec {
+            /**
+             * The backup target URL.
+             */
+            backupTargetURL?: string;
+            /**
+             * The backup target credential secret.
+             */
+            credentialSecret?: string;
+            /**
+             * The interval that the cluster needs to run sync with the backup target.
+             */
+            pollInterval?: string;
+            /**
+             * The time to request run sync the remote backup target.
+             */
+            syncRequestedAt?: string;
+        }
+
+        /**
+         * BackupTargetStatus defines the observed state of the Longhorn backup target
+         */
+        export interface BackupTargetStatus {
+            /**
+             * Available indicates if the remote backup target is available or not.
+             */
+            available?: boolean;
+            /**
+             * Records the reason on why the backup target is unavailable.
+             */
+            conditions?: outputs.longhorn.v1beta2.BackupTargetStatusConditions[];
+            /**
+             * The last time that the controller synced with the remote backup target.
+             */
+            lastSyncedAt?: string;
+            /**
+             * The node ID on which the controller is responsible to reconcile this backup target CR.
+             */
+            ownerID?: string;
+        }
+
+        export interface BackupTargetStatusConditions {
+            /**
+             * Last time we probed the condition.
+             */
+            lastProbeTime?: string;
+            /**
+             * Last time the condition transitioned from one status to another.
+             */
+            lastTransitionTime?: string;
+            /**
+             * Human-readable message indicating details about last transition.
+             */
+            message?: string;
+            /**
+             * Unique, one-word, CamelCase reason for the condition's last transition.
+             */
+            reason?: string;
+            /**
+             * Status is the status of the condition. Can be True, False, Unknown.
+             */
+            status?: string;
+            /**
+             * Type is the type of the condition.
+             */
+            type?: string;
+        }
+
+        /**
+         * BackupVolumeSpec defines the desired state of the Longhorn backup volume
+         */
+        export interface BackupVolumeSpec {
+            /**
+             * The time to request run sync the remote backup volume.
+             */
+            syncRequestedAt?: string;
+        }
+
+        /**
+         * BackupVolumeStatus defines the observed state of the Longhorn backup volume
+         */
+        export interface BackupVolumeStatus {
+            /**
+             * the backing image checksum.
+             */
+            backingImageChecksum?: string;
+            /**
+             * The backing image name.
+             */
+            backingImageName?: string;
+            /**
+             * The backup volume creation time.
+             */
+            createdAt?: string;
+            /**
+             * The backup volume block count.
+             */
+            dataStored?: string;
+            /**
+             * The backup volume labels.
+             */
+            labels?: {[key: string]: string};
+            /**
+             * The latest volume backup time.
+             */
+            lastBackupAt?: string;
+            /**
+             * The latest volume backup name.
+             */
+            lastBackupName?: string;
+            /**
+             * The backup volume config last modification time.
+             */
+            lastModificationTime?: string;
+            /**
+             * The last time that the backup volume was synced into the cluster.
+             */
+            lastSyncedAt?: string;
+            /**
+             * The error messages when call longhorn engine on list or inspect backup volumes.
+             */
+            messages?: {[key: string]: string};
+            /**
+             * The node ID on which the controller is responsible to reconcile this backup volume CR.
+             */
+            ownerID?: string;
+            /**
+             * The backup volume size.
+             */
+            size?: string;
+        }
+
+        /**
+         * EngineImageSpec defines the desired state of the Longhorn engine image
+         */
+        export interface EngineImageSpec {
+            image: string;
+        }
+
+        /**
+         * EngineImageStatus defines the observed state of the Longhorn engine image
+         */
+        export interface EngineImageStatus {
+            buildDate?: string;
+            cliAPIMinVersion?: number;
+            cliAPIVersion?: number;
+            conditions?: outputs.longhorn.v1beta2.EngineImageStatusConditions[];
+            controllerAPIMinVersion?: number;
+            controllerAPIVersion?: number;
+            dataFormatMinVersion?: number;
+            dataFormatVersion?: number;
+            gitCommit?: string;
+            noRefSince?: string;
+            nodeDeploymentMap?: {[key: string]: boolean};
+            ownerID?: string;
+            refCount?: number;
+            state?: string;
+            version?: string;
+        }
+
+        export interface EngineImageStatusConditions {
+            /**
+             * Last time we probed the condition.
+             */
+            lastProbeTime?: string;
+            /**
+             * Last time the condition transitioned from one status to another.
+             */
+            lastTransitionTime?: string;
+            /**
+             * Human-readable message indicating details about last transition.
+             */
+            message?: string;
+            /**
+             * Unique, one-word, CamelCase reason for the condition's last transition.
+             */
+            reason?: string;
+            /**
+             * Status is the status of the condition. Can be True, False, Unknown.
+             */
+            status?: string;
+            /**
+             * Type is the type of the condition.
+             */
+            type?: string;
+        }
+
+        /**
+         * EngineSpec defines the desired state of the Longhorn engine
+         */
+        export interface EngineSpec {
+            active?: boolean;
+            backupVolume?: string;
+            desireState?: string;
+            disableFrontend?: boolean;
+            engineImage?: string;
+            frontend?: string;
+            logRequested?: boolean;
+            nodeID?: string;
+            replicaAddressMap?: {[key: string]: string};
+            requestedBackupRestore?: string;
+            requestedDataSource?: string;
+            revisionCounterDisabled?: boolean;
+            salvageRequested?: boolean;
+            upgradedReplicaAddressMap?: {[key: string]: string};
+            volumeName?: string;
+            volumeSize?: string;
+        }
+
+        /**
+         * EngineStatus defines the observed state of the Longhorn engine
+         */
+        export interface EngineStatus {
+            backupStatus?: {[key: string]: outputs.longhorn.v1beta2.EngineStatusBackupstatus};
+            cloneStatus?: {[key: string]: outputs.longhorn.v1beta2.EngineStatusClonestatus};
+            currentImage?: string;
+            currentReplicaAddressMap?: {[key: string]: string};
+            currentSize?: string;
+            currentState?: string;
+            endpoint?: string;
+            instanceManagerName?: string;
+            ip?: string;
+            isExpanding?: boolean;
+            lastExpansionError?: string;
+            lastExpansionFailedAt?: string;
+            lastRestoredBackup?: string;
+            logFetched?: boolean;
+            ownerID?: string;
+            port?: number;
+            purgeStatus?: {[key: string]: outputs.longhorn.v1beta2.EngineStatusPurgestatus};
+            rebuildStatus?: {[key: string]: outputs.longhorn.v1beta2.EngineStatusRebuildstatus};
+            replicaModeMap?: {[key: string]: string};
+            restoreStatus?: {[key: string]: outputs.longhorn.v1beta2.EngineStatusRestorestatus};
+            salvageExecuted?: boolean;
+            snapshots?: {[key: string]: outputs.longhorn.v1beta2.EngineStatusSnapshots};
+            snapshotsError?: string;
+            started?: boolean;
+            storageIP?: string;
+        }
+
+        export interface EngineStatusBackupstatus {
+            backupURL?: string;
+            error?: string;
+            progress?: number;
+            replicaAddress?: string;
+            snapshotName?: string;
+            state?: string;
+        }
+
+        export interface EngineStatusClonestatus {
+            error?: string;
+            fromReplicaAddress?: string;
+            isCloning?: boolean;
+            progress?: number;
+            snapshotName?: string;
+            state?: string;
+        }
+
+        export interface EngineStatusPurgestatus {
+            error?: string;
+            isPurging?: boolean;
+            progress?: number;
+            state?: string;
+        }
+
+        export interface EngineStatusRebuildstatus {
+            error?: string;
+            fromReplicaAddress?: string;
+            isRebuilding?: boolean;
+            progress?: number;
+            state?: string;
+        }
+
+        export interface EngineStatusRestorestatus {
+            backupURL?: string;
+            currentRestoringBackup?: string;
+            error?: string;
+            filename?: string;
+            isRestoring?: boolean;
+            lastRestored?: string;
+            progress?: number;
+            state?: string;
+        }
+
+        export interface EngineStatusSnapshots {
+            children?: {[key: string]: boolean};
+            created?: string;
+            labels?: {[key: string]: string};
+            name?: string;
+            parent?: string;
+            removed?: boolean;
+            size?: string;
+            usercreated?: boolean;
+        }
+
+        /**
+         * InstanceManagerSpec defines the desired state of the Longhorn instancer manager
+         */
+        export interface InstanceManagerSpec {
+            /**
+             * TODO: deprecate this field
+             */
+            engineImage?: string;
+            image?: string;
+            nodeID?: string;
+            type?: string;
+        }
+
+        /**
+         * InstanceManagerStatus defines the observed state of the Longhorn instance manager
+         */
+        export interface InstanceManagerStatus {
+            apiMinVersion?: number;
+            apiVersion?: number;
+            currentState?: string;
+            instances?: {[key: string]: outputs.longhorn.v1beta2.InstanceManagerStatusInstances};
+            ip?: string;
+            ownerID?: string;
+            proxyApiMinVersion?: number;
+            proxyApiVersion?: number;
+        }
+
+        export interface InstanceManagerStatusInstances {
+            spec?: outputs.longhorn.v1beta2.InstanceManagerStatusInstancesSpec;
+            status?: outputs.longhorn.v1beta2.InstanceManagerStatusInstancesStatus;
+        }
+
+        export interface InstanceManagerStatusInstancesSpec {
+            name?: string;
+        }
+
+        export interface InstanceManagerStatusInstancesStatus {
+            endpoint?: string;
+            errorMsg?: string;
+            listen?: string;
+            portEnd?: number;
+            portStart?: number;
+            resourceVersion?: number;
+            state?: string;
+            type?: string;
+        }
+
+        /**
+         * NodeSpec defines the desired state of the Longhorn node
+         */
+        export interface NodeSpec {
+            allowScheduling?: boolean;
+            disks?: {[key: string]: outputs.longhorn.v1beta2.NodeSpecDisks};
+            engineManagerCPURequest?: number;
+            evictionRequested?: boolean;
+            name?: string;
+            replicaManagerCPURequest?: number;
+            tags?: string[];
+        }
+
+        export interface NodeSpecDisks {
+            allowScheduling?: boolean;
+            evictionRequested?: boolean;
+            path?: string;
+            storageReserved?: number;
+            tags?: string[];
+        }
+
+        /**
+         * NodeStatus defines the observed state of the Longhorn node
+         */
+        export interface NodeStatus {
+            conditions?: outputs.longhorn.v1beta2.NodeStatusConditions[];
+            diskStatus?: {[key: string]: outputs.longhorn.v1beta2.NodeStatusDiskstatus};
+            region?: string;
+            zone?: string;
+        }
+
+        export interface NodeStatusConditions {
+            /**
+             * Last time we probed the condition.
+             */
+            lastProbeTime?: string;
+            /**
+             * Last time the condition transitioned from one status to another.
+             */
+            lastTransitionTime?: string;
+            /**
+             * Human-readable message indicating details about last transition.
+             */
+            message?: string;
+            /**
+             * Unique, one-word, CamelCase reason for the condition's last transition.
+             */
+            reason?: string;
+            /**
+             * Status is the status of the condition. Can be True, False, Unknown.
+             */
+            status?: string;
+            /**
+             * Type is the type of the condition.
+             */
+            type?: string;
+        }
+
+        export interface NodeStatusDiskstatus {
+            conditions?: outputs.longhorn.v1beta2.NodeStatusDiskstatusConditions[];
+            diskUUID?: string;
+            scheduledReplica?: {[key: string]: number};
+            storageAvailable?: number;
+            storageMaximum?: number;
+            storageScheduled?: number;
+        }
+
+        export interface NodeStatusDiskstatusConditions {
+            /**
+             * Last time we probed the condition.
+             */
+            lastProbeTime?: string;
+            /**
+             * Last time the condition transitioned from one status to another.
+             */
+            lastTransitionTime?: string;
+            /**
+             * Human-readable message indicating details about last transition.
+             */
+            message?: string;
+            /**
+             * Unique, one-word, CamelCase reason for the condition's last transition.
+             */
+            reason?: string;
+            /**
+             * Status is the status of the condition. Can be True, False, Unknown.
+             */
+            status?: string;
+            /**
+             * Type is the type of the condition.
+             */
+            type?: string;
+        }
+
+        /**
+         * OrphanSpec defines the desired state of the Longhorn orphaned data
+         */
+        export interface OrphanSpec {
+            /**
+             * The node ID on which the controller is responsible to reconcile this orphan CR.
+             */
+            nodeID?: string;
+            /**
+             * The type of the orphaned data. Can be "replica".
+             */
+            orphanType?: string;
+            /**
+             * The parameters of the orphaned data
+             */
+            parameters?: {[key: string]: string};
+        }
+
+        /**
+         * OrphanStatus defines the observed state of the Longhorn orphaned data
+         */
+        export interface OrphanStatus {
+            conditions?: outputs.longhorn.v1beta2.OrphanStatusConditions[];
+            ownerID?: string;
+        }
+
+        export interface OrphanStatusConditions {
+            /**
+             * Last time we probed the condition.
+             */
+            lastProbeTime?: string;
+            /**
+             * Last time the condition transitioned from one status to another.
+             */
+            lastTransitionTime?: string;
+            /**
+             * Human-readable message indicating details about last transition.
+             */
+            message?: string;
+            /**
+             * Unique, one-word, CamelCase reason for the condition's last transition.
+             */
+            reason?: string;
+            /**
+             * Status is the status of the condition. Can be True, False, Unknown.
+             */
+            status?: string;
+            /**
+             * Type is the type of the condition.
+             */
+            type?: string;
+        }
+
+        /**
+         * RecurringJobSpec defines the desired state of the Longhorn recurring job
+         */
+        export interface RecurringJobSpec {
+            /**
+             * The concurrency of taking the snapshot/backup.
+             */
+            concurrency?: number;
+            /**
+             * The cron setting.
+             */
+            cron?: string;
+            /**
+             * The recurring job group.
+             */
+            groups?: string[];
+            /**
+             * The label of the snapshot/backup.
+             */
+            labels?: {[key: string]: string};
+            /**
+             * The recurring job name.
+             */
+            name?: string;
+            /**
+             * The retain count of the snapshot/backup.
+             */
+            retain?: number;
+            /**
+             * The recurring job type. Can be "snapshot" or "backup".
+             */
+            task?: string;
+        }
+
+        /**
+         * RecurringJobStatus defines the observed state of the Longhorn recurring job
+         */
+        export interface RecurringJobStatus {
+            /**
+             * The owner ID which is responsible to reconcile this recurring job CR.
+             */
+            ownerID?: string;
+        }
+
+        /**
+         * ReplicaSpec defines the desired state of the Longhorn replica
+         */
+        export interface ReplicaSpec {
+            active?: boolean;
+            backingImage?: string;
+            /**
+             * Deprecated. Rename to BackingImage
+             */
+            baseImage?: string;
+            dataDirectoryName?: string;
+            /**
+             * Deprecated
+             */
+            dataPath?: string;
+            desireState?: string;
+            diskID?: string;
+            diskPath?: string;
+            engineImage?: string;
+            engineName?: string;
+            failedAt?: string;
+            hardNodeAffinity?: string;
+            healthyAt?: string;
+            logRequested?: boolean;
+            nodeID?: string;
+            rebuildRetryCount?: number;
+            revisionCounterDisabled?: boolean;
+            salvageRequested?: boolean;
+            volumeName?: string;
+            volumeSize?: string;
+        }
+
+        /**
+         * ReplicaStatus defines the observed state of the Longhorn replica
+         */
+        export interface ReplicaStatus {
+            currentImage?: string;
+            currentState?: string;
+            evictionRequested?: boolean;
+            instanceManagerName?: string;
+            ip?: string;
+            logFetched?: boolean;
+            ownerID?: string;
+            port?: number;
+            salvageExecuted?: boolean;
+            started?: boolean;
+            storageIP?: string;
+        }
+
+        /**
+         * ShareManagerSpec defines the desired state of the Longhorn share manager
+         */
+        export interface ShareManagerSpec {
+            image?: string;
+        }
+
+        /**
+         * ShareManagerStatus defines the observed state of the Longhorn share manager
+         */
+        export interface ShareManagerStatus {
+            endpoint?: string;
+            ownerID?: string;
+            state?: string;
+        }
+
+        /**
+         * SnapshotSpec defines the desired state of Longhorn Snapshot
+         */
+        export interface SnapshotSpec {
+            /**
+             * require creating a new snapshot
+             */
+            createSnapshot?: boolean;
+            /**
+             * The labels of snapshot
+             */
+            labels?: {[key: string]: string};
+            /**
+             * the volume that this snapshot belongs to. This field is immutable after creation. Required
+             */
+            volume: string;
+        }
+
+        /**
+         * SnapshotStatus defines the observed state of Longhorn Snapshot
+         */
+        export interface SnapshotStatus {
+            children?: {[key: string]: boolean};
+            creationTime?: string;
+            error?: string;
+            labels?: {[key: string]: string};
+            markRemoved?: boolean;
+            ownerID?: string;
+            parent?: string;
+            readyToUse?: boolean;
+            restoreSize?: number;
+            size?: number;
+            userCreated?: boolean;
+        }
+
+        /**
+         * VolumeSpec defines the desired state of the Longhorn volume
+         */
+        export interface VolumeSpec {
+            Standby?: boolean;
+            accessMode?: string;
+            backingImage?: string;
+            /**
+             * Deprecated. Rename to BackingImage
+             */
+            baseImage?: string;
+            dataLocality?: string;
+            dataSource?: string;
+            disableFrontend?: boolean;
+            diskSelector?: string[];
+            encrypted?: boolean;
+            engineImage?: string;
+            fromBackup?: string;
+            frontend?: string;
+            lastAttachedBy?: string;
+            migratable?: boolean;
+            migrationNodeID?: string;
+            nodeID?: string;
+            nodeSelector?: string[];
+            numberOfReplicas?: number;
+            /**
+             * Deprecated. Replaced by a separate resource named "RecurringJob"
+             */
+            recurringJobs?: outputs.longhorn.v1beta2.VolumeSpecRecurringjobs[];
+            replicaAutoBalance?: string;
+            revisionCounterDisabled?: boolean;
+            size?: string;
+            staleReplicaTimeout?: number;
+        }
+
+        /**
+         * VolumeRecurringJobSpec is a deprecated struct. TODO: Should be removed when recurringJobs gets removed from the volume       spec.
+         */
+        export interface VolumeSpecRecurringjobs {
+            concurrency?: number;
+            cron?: string;
+            groups?: string[];
+            labels?: {[key: string]: string};
+            name?: string;
+            retain?: number;
+            task?: string;
+        }
+
+        /**
+         * VolumeStatus defines the observed state of the Longhorn volume
+         */
+        export interface VolumeStatus {
+            actualSize?: number;
+            cloneStatus?: outputs.longhorn.v1beta2.VolumeStatusClonestatus;
+            conditions?: outputs.longhorn.v1beta2.VolumeStatusConditions[];
+            currentImage?: string;
+            currentNodeID?: string;
+            expansionRequired?: boolean;
+            frontendDisabled?: boolean;
+            isStandby?: boolean;
+            kubernetesStatus?: outputs.longhorn.v1beta2.VolumeStatusKubernetesstatus;
+            lastBackup?: string;
+            lastBackupAt?: string;
+            lastDegradedAt?: string;
+            ownerID?: string;
+            pendingNodeID?: string;
+            remountRequestedAt?: string;
+            restoreInitiated?: boolean;
+            restoreRequired?: boolean;
+            robustness?: string;
+            shareEndpoint?: string;
+            shareState?: string;
+            state?: string;
+        }
+
+        export interface VolumeStatusClonestatus {
+            snapshot?: string;
+            sourceVolume?: string;
+            state?: string;
+        }
+
+        export interface VolumeStatusConditions {
+            /**
+             * Last time we probed the condition.
+             */
+            lastProbeTime?: string;
+            /**
+             * Last time the condition transitioned from one status to another.
+             */
+            lastTransitionTime?: string;
+            /**
+             * Human-readable message indicating details about last transition.
+             */
+            message?: string;
+            /**
+             * Unique, one-word, CamelCase reason for the condition's last transition.
+             */
+            reason?: string;
+            /**
+             * Status is the status of the condition. Can be True, False, Unknown.
+             */
+            status?: string;
+            /**
+             * Type is the type of the condition.
+             */
+            type?: string;
+        }
+
+        export interface VolumeStatusKubernetesstatus {
+            lastPVCRefAt?: string;
+            lastPodRefAt?: string;
+            /**
+             * determine if PVC/Namespace is history or not
+             */
+            namespace?: string;
+            pvName?: string;
+            pvStatus?: string;
+            pvcName?: string;
+            /**
+             * determine if Pod/Workload is history or not
+             */
+            workloadsStatus?: outputs.longhorn.v1beta2.VolumeStatusKubernetesstatusWorkloadsstatus[];
+        }
+
+        export interface VolumeStatusKubernetesstatusWorkloadsstatus {
+            podName?: string;
+            podStatus?: string;
+            workloadName?: string;
+            workloadType?: string;
+        }
+
+    }
+}
+
 export namespace metallb {
     export namespace v1alpha1 {
         /**

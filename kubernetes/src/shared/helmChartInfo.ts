@@ -1,4 +1,4 @@
-type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'jetstack' | 'linkerd' | 'argo' | 'rookCeph' | 'meilisearch';
+type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'rookCeph' | 'meilisearch';
 
 type ChartInfo = {
     chart: string;
@@ -85,6 +85,17 @@ export const helmChartsInfo = {
                 skipCrdRender: false,
             },
         },
+    },
+    longhorn: {
+        repo: 'https://charts.longhorn.io',
+        charts: {
+            longhorn: {
+                chart: 'longhorn',
+                version: 'v1.3.2',
+                externalCrds: [],
+                skipCrdRender: false
+            }
+        }
     },
     bitnami: {
         repo: 'https://charts.bitnami.com/bitnami',
