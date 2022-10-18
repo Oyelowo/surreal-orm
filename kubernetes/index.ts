@@ -7,7 +7,6 @@ export * from './src/infrastructure/ingress/index.js';
 export * from './src/infrastructure/linkerd/index.js';
 export * from './src/infrastructure/sealed-secrets/index.js';
 export * from './src/infrastructure/seaweedfs/index.js';
-export * from './src/infrastructure/rook-ceph/index.js';
 export * from './src/infrastructure/longhorn/index.js';
 export * from './src/infrastructure/metalb/index.js';
 
