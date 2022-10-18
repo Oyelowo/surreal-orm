@@ -8,7 +8,8 @@ export * from './src/infrastructure/linkerd/index.js';
 export * from './src/infrastructure/sealed-secrets/index.js';
 export * from './src/infrastructure/seaweedfs/index.js';
 export * from './src/infrastructure/rook-ceph/index.js';
-// export * from './src/infrastructure/metalb/index.js';
+export * from './src/infrastructure/longhorn/index.js';
+export * from './src/infrastructure/metalb/index.js';
 
 // SERVICES
 // Rust server backend with support for graphql, surrealdb and redis
