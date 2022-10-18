@@ -1,0 +1,38 @@
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"policy/v1beta1","kind":"PodSecurityPolicy","metadata":{"labels":{"app.kubernetes.io/instance":"longhorn","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"longhorn","app.kubernetes.io/version":"v1.3.2","helm.sh/chart":"longhorn-1.3.2"},"name":"longhorn-psp"},"spec":{"allowPrivilegeEscalation":true,"allowedCapabilities":["SYS_ADMIN"],"fsGroup":{"rule":"RunAsAny"},"hostIPC":false,"hostNetwork":false,"hostPID":true,"privileged":true,"requiredDropCapabilities":["NET_RAW"],"runAsUser":{"rule":"RunAsAny"},"seLinux":{"rule":"RunAsAny"},"supplementalGroups":{"rule":"RunAsAny"},"volumes":["configMap","downwardAPI","emptyDir","secret","projected","hostPath"]}}
+  labels:
+    app.kubernetes.io/instance: longhorn
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: longhorn
+    app.kubernetes.io/version: v1.3.2
+    helm.sh/chart: longhorn-1.3.2
+  name: longhorn-psp
+spec:
+  allowPrivilegeEscalation: true
+  allowedCapabilities:
+  - SYS_ADMIN
+  fsGroup:
+    rule: RunAsAny
+  hostIPC: false
+  hostNetwork: false
+  hostPID: true
+  privileged: true
+  requiredDropCapabilities:
+  - NET_RAW
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - secret
+  - projected
+  - hostPath

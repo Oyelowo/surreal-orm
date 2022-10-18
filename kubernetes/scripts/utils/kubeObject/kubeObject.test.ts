@@ -152,7 +152,7 @@ describe('KubeObject', () => {
         expect(sealedecrets).toMatchSnapshot();
     });
 
-    test('Can update sealed secrets after initial', async () => {
+    test.only('Can update sealed secrets after initial', async () => {
         const kubeInstance = new KubeObject('test');
         jest.spyOn(kubeInstance, 'sealSecretValue').mockImplementation(() => 'inital-secrets');
         kubeInstance.syncSealedSecrets();
@@ -160,9 +160,12 @@ describe('KubeObject', () => {
         const sealedSecrets = kubeInstance.getOfAKind('SealedSecret');
         const secrets = kubeInstance.getOfAKind('Secret');
 
-        info('Should have 13 sealed secrets initially generated from 13 secrets');
+        info('Should have 18 sealed secrets initially generated from 18 secrets');
         expect(secrets).toMatchSnapshot();
+        expect(secrets).toHaveLength(18);
+
         expect(sealedSecrets).toMatchSnapshot();
+        expect(sealedSecrets).toHaveLength(18);
         expect(
             Object.values(sealedSecrets.filter((ss) => Object.values(ss.spec.encryptedData).includes('inital-secrets')))
         ).toMatchSnapshot();
@@ -173,26 +176,25 @@ describe('KubeObject', () => {
  if the selection is even number, then the secret will be deselected the 2nd time */
 
             // Selection 1
-            io.send(keys.down); // Bottom arrow
             io.send(keys.space); // Select
+            io.send(keys.down); // Bottom arrow
 
             //  Selection 2
-            io.send(keys.down);
             io.send(keys.space);
+            io.send(keys.down);
 
             //  Selection 3
-            io.send(keys.down);
             io.send(keys.space);
+            io.send(keys.down);
+            io.send(keys.down);
 
             //  Selection 4
-            io.send(keys.down);
-            io.send(keys.down);
             io.send(keys.space);
+            io.send(keys.down);
+            io.send(keys.down);
+            io.send(keys.down);
 
             //  Selection 5
-            io.send(keys.down);
-            io.send(keys.down);
-            io.send(keys.down);
             io.send(keys.space);
 
             //  Enter the secret selection phase
@@ -243,7 +245,7 @@ describe('KubeObject', () => {
         const sealedSecretsSomeUpdated = kubeInstance.getOfAKind('SealedSecret');
 
         info('Should update from 13 sealed secrets still, with specific secret data fields updated.');
-        expect(sealedSecretsSomeUpdated).toHaveLength(16);
+        expect(sealedSecretsSomeUpdated).toHaveLength(18);
         // 5 secrets have been updated
         expect(
             Object.values(

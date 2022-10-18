@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"DaemonSet","metadata":{"labels":{"app.kubernetes.io/component":"speaker","app.kubernetes.io/instance":"metallb","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"metallb","helm.sh/chart":"metallb-4.1.5"},"name":"metallb-speaker","namespace":"metalb"},"spec":{"selector":{"matchLabels":{"app.kubernetes.io/component":"speaker","app.kubernetes.io/instance":"metallb","app.kubernetes.io/name":"metallb"}},"template":{"metadata":{"labels":{"app.kubernetes.io/component":"speaker","app.kubernetes.io/instance":"metallb","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"metallb","helm.sh/chart":"metallb-4.1.5"}},"spec":{"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"podAffinityTerm":{"labelSelector":{"matchLabels":{"app.kubernetes.io/component":"speaker","app.kubernetes.io/instance":"metallb","app.kubernetes.io/name":"metallb"}},"namespaces":["metalb"],"topologyKey":"kubernetes.io/hostname"},"weight":1}]}},"containers":[{"args":["--port=7472"],"env":[{"name":"METALLB_NODE_NAME","valueFrom":{"fieldRef":{"fieldPath":"spec.nodeName"}}},{"name":"METALLB_HOST","valueFrom":{"fieldRef":{"fieldPath":"status.hostIP"}}},{"name":"METALLB_ML_BIND_ADDR","valueFrom":{"fieldRef":{"fieldPath":"status.podIP"}}},{"name":"METALLB_ML_LABELS","value":"app.kubernetes.io/name=metallb,app.kubernetes.io/instance=metallb,app.kubernetes.io/component=speaker"},{"name":"METALLB_ML_NAMESPACE","valueFrom":{"fieldRef":{"fieldPath":"metadata.namespace"}}},{"name":"METALLB_ML_SECRET_KEY","valueFrom":{"secretKeyRef":{"key":"secretkey","name":"metallb-memberlist"}}}],"image":"docker.io/bitnami/metallb-speaker:0.13.5-debian-11-r10","imagePullPolicy":"IfNotPresent","livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics"},"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":1},"name":"metallb-speaker","ports":[{"containerPort":7472,"name":"metrics"}],"readinessProbe":{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics"},"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":1},"resources":{"limits":{},"requests":{}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"add":["NET_ADMIN","NET_RAW","SYS_ADMIN"],"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsUser":0}}],"hostNetwork":true,"nodeSelector":{"kubernetes.io/os":"linux"},"securityContext":{"fsGroup":0},"serviceAccountName":"metallb-speaker","terminationGracePeriodSeconds":2}},"updateStrategy":{"type":"RollingUpdate"}}}
+  labels:
+    app.kubernetes.io/component: speaker
+    app.kubernetes.io/instance: metallb
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: metallb
+    helm.sh/chart: metallb-4.1.5
+  name: metallb-speaker
+  namespace: metalb
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: speaker
+      app.kubernetes.io/instance: metallb
+      app.kubernetes.io/name: metallb
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: speaker
+        app.kubernetes.io/instance: metallb
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: metallb
+        helm.sh/chart: metallb-4.1.5
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: speaker
+                  app.kubernetes.io/instance: metallb
+                  app.kubernetes.io/name: metallb
+              namespaces:
+              - metalb
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+      containers:
+      - args:
+        - --port=7472
+        env:
+        - name: METALLB_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: METALLB_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: METALLB_ML_BIND_ADDR
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: METALLB_ML_LABELS
+          value: app.kubernetes.io/name=metallb,app.kubernetes.io/instance=metallb,app.kubernetes.io/component=speaker
+        - name: METALLB_ML_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: METALLB_ML_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              key: secretkey
+              name: metallb-memberlist
+        image: docker.io/bitnami/metallb-speaker:0.13.5-debian-11-r10
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /metrics
+            port: metrics
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: metallb-speaker
+        ports:
+        - containerPort: 7472
+          name: metrics
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /metrics
+            port: metrics
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits: {}
+          requests: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - NET_ADMIN
+            - NET_RAW
+            - SYS_ADMIN
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsUser: 0
+      hostNetwork: true
+      nodeSelector:
+        kubernetes.io/os: linux
+      securityContext:
+        fsGroup: 0
+      serviceAccountName: metallb-speaker
+      terminationGracePeriodSeconds: 2
+  updateStrategy:
+    type: RollingUpdate
