@@ -1,0 +1,22 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"Role","metadata":{"labels":{"app.kubernetes.io/instance":"metallb","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"metallb","helm.sh/chart":"metallb-4.1.5"},"name":"metallb-config-watcher","namespace":"metalb"},"rules":[{"apiGroups":[""],"resources":["configmaps"],"verbs":["get","list","watch"]}]}
+  labels:
+    app.kubernetes.io/instance: metallb
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: metallb
+    helm.sh/chart: metallb-4.1.5
+  name: metallb-config-watcher
+  namespace: metalb
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch

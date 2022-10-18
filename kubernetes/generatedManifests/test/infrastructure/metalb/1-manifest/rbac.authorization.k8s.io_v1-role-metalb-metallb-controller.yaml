@@ -1,0 +1,105 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"Role","metadata":{"labels":{"app.kubernetes.io/component":"controller","app.kubernetes.io/instance":"metallb","app.kubernetes.io/managed-by":"pulumi","app.kubernetes.io/name":"metallb","helm.sh/chart":"metallb-4.1.5"},"name":"metallb-controller","namespace":"metalb"},"rules":[{"apiGroups":[""],"resources":["secrets"],"verbs":["create","get","list","watch"]},{"apiGroups":[""],"resourceNames":["metallb-memberlist"],"resources":["secrets"],"verbs":["list"]},{"apiGroups":["apps"],"resourceNames":["metallb-controller"],"resources":["deployments"],"verbs":["get"]},{"apiGroups":[""],"resources":["secrets"],"verbs":["create","delete","get","list","patch","update","watch"]},{"apiGroups":["metallb.io"],"resources":["addresspools"],"verbs":["get","list","watch"]},{"apiGroups":["metallb.io"],"resources":["ipaddresspools"],"verbs":["get","list","watch"]},{"apiGroups":["metallb.io"],"resources":["bgppeers"],"verbs":["get","list"]},{"apiGroups":["metallb.io"],"resources":["bgpadvertisements"],"verbs":["get","list"]},{"apiGroups":["metallb.io"],"resources":["l2advertisements"],"verbs":["get","list"]},{"apiGroups":["metallb.io"],"resources":["communities"],"verbs":["get","list","watch"]},{"apiGroups":["metallb.io"],"resources":["bfdprofiles"],"verbs":["get","list","watch"]}]}
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: metallb
+    app.kubernetes.io/managed-by: pulumi
+    app.kubernetes.io/name: metallb
+    helm.sh/chart: metallb-4.1.5
+  name: metallb-controller
+  namespace: metalb
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resourceNames:
+  - metallb-memberlist
+  resources:
+  - secrets
+  verbs:
+  - list
+- apiGroups:
+  - apps
+  resourceNames:
+  - metallb-controller
+  resources:
+  - deployments
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - metallb.io
+  resources:
+  - addresspools
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - metallb.io
+  resources:
+  - ipaddresspools
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - metallb.io
+  resources:
+  - bgppeers
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - metallb.io
+  resources:
+  - bgpadvertisements
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - metallb.io
+  resources:
+  - l2advertisements
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - metallb.io
+  resources:
+  - communities
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - metallb.io
+  resources:
+  - bfdprofiles
+  verbs:
+  - get
+  - list
+  - watch
