@@ -152,7 +152,7 @@ describe('KubeObject', () => {
         expect(sealedecrets.length).toMatchSnapshot();
     });
 
-    test.only('Can update sealed secrets after initial', async () => {
+    test('Can update sealed secrets after initial', async () => {
         const kubeInstance = new KubeObject('test');
         jest.spyOn(kubeInstance, 'sealSecretValue').mockImplementation(() => 'inital-secrets');
         kubeInstance.syncSealedSecrets();
