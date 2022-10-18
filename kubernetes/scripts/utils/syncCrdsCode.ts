@@ -98,7 +98,7 @@ export async function syncCrdsCode() {
 }
 
 export function sanitizePulumiTypeDefinitions({ data }: { data: string }): string {
-    const replacer = (origChar: string) => origChar.split('-').join('');
+    const removeHyphen = (origChar: string) => origChar.split('-').join('');
     return (
         data
             // Wrap quote around the key with `?` coming after the quota
@@ -110,11 +110,11 @@ export function sanitizePulumiTypeDefinitions({ data }: { data: string }): strin
             // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
             // to
             // "auto-scaler"?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAutoScalerArgs>;
-            .replace(/(:.*)(-)(.*;)/g, replacer)
+            .replace(/(:.*)(-)(.*;)/g, removeHyphen)
             // Removes hyphen from interface definition e.g
             // export interface TidbClusterStatusAuto-ScalerArgs {
             // to
             // export interface TidbClusterStatusAutoScalerArgs {
-            .replace(/(interface.*)(-)(.*{)/g, replacer)
+            .replace(/(interface.*)(-)(.*{)/g, removeHyphen)
     );
 }
