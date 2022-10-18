@@ -2,6 +2,7 @@ import { sanitizePulumiTypeDefinitions } from './syncCrdsCode';
 
 describe('syncCrdsCode', () => {
     test('Can sanitize badly formatted Pulumi typescript definition', () => {
+        // Removes hyphen from interface and fielf type identifiers and puts keys with hyphen in quote
         const data = `export interface TidbClu-sterStatusArgs {
             auto-scaler?: pulumi.Input<inputs.pingcap.v1alpha1.TidbClusterStatusAuto-ScalerArgs>;
             cluste?: pulumi.Input<string>;

@@ -1,7 +1,6 @@
-import { Environment } from '../../src/types/ownTypes.js';
+import { Environment, namespaces } from '../../src/types/ownTypes.js';
 import sh from 'shelljs';
 import { promptSecretsDeletionConfirmations } from '../utils/promptSecretsDeletionConfirmations.js';
-import { namespaces } from '../../src/infrastructure/namespaces/util.js';
 import { helmChartsInfo } from '../../src/shared/helmChartInfo.js';
 import { ResourceName } from '../../src/types/ownTypes.js';
 import _ from 'lodash';
