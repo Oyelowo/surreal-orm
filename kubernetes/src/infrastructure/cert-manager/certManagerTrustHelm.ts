@@ -2,7 +2,7 @@ import { ICertManagerTrustJetstack } from '../../../generatedHelmChartsTsTypes/c
 import { certManagerProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util.js';
+import { namespaces } from '../../types/ownTypes.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 
 const values: DeepPartial<ICertManagerTrustJetstack> = {};

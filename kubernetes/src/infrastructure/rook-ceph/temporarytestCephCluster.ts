@@ -1,5 +1,5 @@
 import crds from '../../../generatedCrdsTs/index.js';
-import { namespaces } from '../namespaces/util.js';
+import { namespaces } from '../../types/ownTypes.js';
 import k8s from '@pulumi/kubernetes';
 import { rookCephProvider } from './settings.js';
 

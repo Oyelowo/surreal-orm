@@ -2,7 +2,7 @@ import { ILinkerdVizLinkerd } from '../../../generatedHelmChartsTsTypes/linkerdV
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as bcrypt from 'bcrypt';
-import { namespaces } from '../namespaces/util.js';
+import { namespaces } from '../../types/ownTypes.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { INGRESS_CLASSNAME_NGINX, NginxConfiguration } from '../../types/nginxConfigurations.js';
 import { DeepPartial, ResourceName } from '../../types/ownTypes.js';

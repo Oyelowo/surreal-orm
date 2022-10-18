@@ -1,8 +1,7 @@
 import { IRedisBitnami } from '../../../generatedHelmChartsTsTypes/redisBitnami.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../../infrastructure/namespaces/util.js';
+import { DeepPartial, namespaces } from '../../types/ownTypes.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
-import { DeepPartial } from '../../types/ownTypes.js';
 import { graphqlSurrealdb } from './index.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
 import { graphqlSurrealdbSettings } from './settings.js';

@@ -1,8 +1,7 @@
 import { IMeilisearchMeilisearch } from '../../../generatedHelmChartsTsTypes/meilisearchMeilisearch.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../../infrastructure/namespaces/util.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
-import { DeepPartial } from '../../types/ownTypes.js';
+import { DeepPartial, namespaces } from '../../types/ownTypes.js';
 import { graphqlSurrealdb } from './app.js';
 import { graphqlSurrealdbSettings } from './settings.js';
 

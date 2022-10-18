@@ -2,9 +2,8 @@
 import { IArgoCdArgo } from '../../../generatedHelmChartsTsTypes/argoCdArgo.js';
 import { annotations } from '../ingress/ingressRules.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util.js';
 
-import { DeepPartial } from '../../types/ownTypes.js';
+import { DeepPartial, namespaces } from '../../types/ownTypes.js';
 import bcrypt from 'bcrypt';
 import { argocdProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';

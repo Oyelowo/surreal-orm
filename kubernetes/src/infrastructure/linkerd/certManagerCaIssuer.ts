@@ -1,5 +1,5 @@
 import crds from '../../../generatedCrdsTs/index.js';
-import { namespaces } from '../namespaces/util.js';
+import { namespaces } from '../../types/ownTypes.js';
 import { certManagerProvider } from '../cert-manager/settings.js';
 
 // ROOT TRUST ANCHOR CERTIFICATES AND CLUSTER ISSUE

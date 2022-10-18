@@ -1,6 +1,6 @@
 import { getIngressUrlHost } from './hosts.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util.js';
+import { namespaces } from '../../types/ownTypes.js';
 import { reactWebSettings } from '../../services/react-web/settings.js';
 import { INGRESS_CLASSNAME_NGINX, NginxConfiguration } from '../../types/nginxConfigurations.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';

@@ -1,8 +1,7 @@
 import { IArgoCdBitnami } from '../../../generatedHelmChartsTsTypes/argoCdBitnami.js';
 import { annotations } from '../ingress/ingressRules.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util.js';
-import { DeepPartial, STORAGE_CLASS } from '../../types/ownTypes.js';
+import { DeepPartial, namespaces, STORAGE_CLASS } from '../../types/ownTypes.js';
 import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
 import { argocdProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';

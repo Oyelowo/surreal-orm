@@ -1,6 +1,6 @@
 import k8s from '@pulumi/kubernetes';
 import crds from '../../../generatedCrdsTs/index.js';
-import { namespaces } from '../namespaces/util.js';
+import { namespaces } from '../../types/ownTypes.js';
 import { rookCephProvider } from './settings.js';
 
 export const rookCephBlockPool = new crds.ceph.v1.CephBlockPool(

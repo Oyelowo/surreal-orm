@@ -1,6 +1,6 @@
 import { ITidbOperatorPingcap } from '../../../generatedHelmChartsTsTypes/tidbOperatorPingcap.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util.js';
+import { namespaces } from '../../types/ownTypes.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { tikvOperatorProvider } from './settings.js';

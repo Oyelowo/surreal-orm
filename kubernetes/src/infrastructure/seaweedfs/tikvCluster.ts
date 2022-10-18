@@ -1,5 +1,5 @@
 import pc from '../../../generatedCrdsTs/index.js';
-import { namespaces } from '../namespaces/util.js';
+import { namespaces } from '../../types/ownTypes.js';
 import { seaweedFsProvider } from './settings.js';
 
 const name = 'seaweedfs-tikv';

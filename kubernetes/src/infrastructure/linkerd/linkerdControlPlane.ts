@@ -1,6 +1,6 @@
 import { ILinkerdControlPlaneLinkerd } from '../../../generatedHelmChartsTsTypes/linkerdControlPlaneLinkerd.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util.js';
+import { namespaces } from '../../types/ownTypes.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { linkerdProvider } from './settings.js';

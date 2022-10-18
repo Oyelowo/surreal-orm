@@ -1,6 +1,6 @@
 import { IRookCephRookCeph } from '../../../generatedHelmChartsTsTypes/rookCephRookceph.js';
 import * as k8s from '@pulumi/kubernetes';
-import { namespaces } from '../namespaces/util.js';
+import { namespaces } from '../../types/ownTypes.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 import { DeepPartial } from '../../types/ownTypes.js';
 import { rookCephProvider } from './settings.js';
