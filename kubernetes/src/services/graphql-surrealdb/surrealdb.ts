@@ -55,5 +55,6 @@ export const surrealdbSettings: AppConfigs<'surrealdb', 'applications', SurrealD
     },
 };
 
-export const surrealDbDeployment = new ServiceDeployment('surrealdb', surrealdbSettings);
-surrealDbDeployment.setProvider(graphqlSurrealdb.getProvider());
+export const surrealDbDeployment = new ServiceDeployment('surrealdb', surrealdbSettings).setProvider(
+    graphqlSurrealdb.getProvider()
+);
