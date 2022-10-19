@@ -54,6 +54,7 @@ export const InfrastructureNamesSchema = z.union([
     z.literal('metalb'),
     z.literal('nats-operator'),
     z.literal('longhorn'),
+    z.literal('cilium'),
 ]);
 
 export type InfrastructureName = z.infer<typeof InfrastructureNamesSchema> | ArgocdAppResourceName;
