@@ -1,4 +1,4 @@
-type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'meilisearch' | 'cilium';
+type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'meilisearch' | 'cilium' | 'grafana';
 
 type ChartInfo = {
     chart: string;
@@ -136,6 +136,18 @@ export const helmChartsInfo = {
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
+            prometheus: {
+                chart: 'kube-prometheus',
+                version: '8.1.11',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
+            thanos: {
+                chart: 'thanos',
+                version: '11.5.5',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
         },
     },
     jetstack: {
@@ -233,6 +245,35 @@ export const helmChartsInfo = {
                 externalCrds: [] as string[],
                 skipCrdRender: false
             }
+        }
+    },
+    grafana: {
+        repo: 'https://grafana.github.io/helm-charts',
+        charts: {
+            grafana: {
+                chart: 'grafana',
+                version: '6.42.2',
+                externalCrds: [] as string[],
+                skipCrdRender: false
+            },
+            loki: {
+                chart: 'loki-distributed',
+                version: '0.63.1',
+                externalCrds: [] as string[],
+                skipCrdRender: false
+            },
+            tempo: {
+                chart: 'tempo-distributed',
+                version: '0.26.7',
+                externalCrds: [] as string[],
+                skipCrdRender: false
+            },
+            promtail: {
+                chart: 'promtail',
+                version: '6.5.1',
+                externalCrds: [] as string[],
+                skipCrdRender: false
+            },
         }
     }
 }  satisfies ChartsInfo;

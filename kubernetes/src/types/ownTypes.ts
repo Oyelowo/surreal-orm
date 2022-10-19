@@ -59,6 +59,7 @@ export const InfrastructureNamesSchema = z.union([
     z.literal('nats-operator'),
     z.literal('longhorn'),
     z.literal('cilium'),
+    z.literal('monitoring'),
 ]);
 
 export type InfrastructureName = z.infer<typeof InfrastructureNamesSchema> | ArgocdAppResourceName;
@@ -82,6 +83,7 @@ export const namespaceSchema = z.union([
     z.literal('metalb'),
     z.literal('nats-operator'),
     z.literal('longhorn-system'),
+    z.literal('monitoring'),
 ]);
 
 export type Namespace = z.infer<typeof namespaceSchema>;
@@ -104,6 +106,7 @@ export const namespaces: Record<CamelCase<Namespace>, Namespace> = {
     metalb: 'metalb',
     natsOperator: 'nats-operator',
     longhornSystem: 'longhorn-system',
+    monitoring: 'monitoring',
     // infrastructure: "infrastructure",
 } as const;
 

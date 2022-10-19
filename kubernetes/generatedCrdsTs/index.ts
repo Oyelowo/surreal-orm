@@ -16,6 +16,7 @@ import * as jetstream from "./jetstream";
 import * as linkerd from "./linkerd";
 import * as longhorn from "./longhorn";
 import * as metallb from "./metallb";
+import * as monitoring from "./monitoring";
 import * as nats from "./nats";
 import * as pingcap from "./pingcap";
 import * as policy from "./policy";
@@ -31,6 +32,7 @@ export {
     linkerd,
     longhorn,
     metallb,
+    monitoring,
     nats,
     pingcap,
     policy,
