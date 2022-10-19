@@ -1,4 +1,4 @@
-type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'meilisearch';
+type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'meilisearch' | 'cilium';
 
 type ChartInfo = {
     chart: string;
@@ -199,5 +199,16 @@ export const helmChartsInfo = {
                 skipCrdRender: false,
             },
         },
+    },
+    cilium: {
+        repo: 'https://helm.cilium.io/',
+        charts: {
+            cilium: {
+                chart: 'cilium',
+                version: '1.12.3',
+                externalCrds: [] as string[],
+                skipCrdRender: false
+            }
+        }
     }
 }  satisfies ChartsInfo;
