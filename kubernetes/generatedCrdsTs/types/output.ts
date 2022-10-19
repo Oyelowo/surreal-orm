@@ -1419,6 +1419,3135 @@ export namespace acme {
 
 export namespace argoproj {
     export namespace v1alpha1 {
+        export interface AnalysisRunSpec {
+            args?: outputs.argoproj.v1alpha1.AnalysisRunSpecArgs[];
+            dryRun?: outputs.argoproj.v1alpha1.AnalysisRunSpecDryrun[];
+            measurementRetention?: outputs.argoproj.v1alpha1.AnalysisRunSpecMeasurementretention[];
+            metrics: outputs.argoproj.v1alpha1.AnalysisRunSpecMetrics[];
+            terminate?: boolean;
+        }
+
+        export interface AnalysisRunSpecArgs {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.AnalysisRunSpecArgsValuefrom;
+        }
+
+        export interface AnalysisRunSpecArgsValuefrom {
+            fieldRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecArgsValuefromFieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecArgsValuefromSecretkeyref;
+        }
+
+        export interface AnalysisRunSpecArgsValuefromFieldref {
+            fieldPath: string;
+        }
+
+        export interface AnalysisRunSpecArgsValuefromSecretkeyref {
+            key: string;
+            name: string;
+        }
+
+        export interface AnalysisRunSpecDryrun {
+            metricName: string;
+        }
+
+        export interface AnalysisRunSpecMeasurementretention {
+            limit: number;
+            metricName: string;
+        }
+
+        export interface AnalysisRunSpecMetrics {
+            consecutiveErrorLimit?: number | string;
+            count?: number | string;
+            failureCondition?: string;
+            failureLimit?: number | string;
+            inconclusiveLimit?: number | string;
+            initialDelay?: string;
+            interval?: string;
+            name: string;
+            provider: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProvider;
+            successCondition?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProvider {
+            cloudWatch?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderCloudwatch;
+            datadog?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderDatadog;
+            graphite?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderGraphite;
+            influxdb?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderInfluxdb;
+            job?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJob;
+            kayenta?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderKayenta;
+            newRelic?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderNewrelic;
+            prometheus?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderPrometheus;
+            wavefront?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderWavefront;
+            web?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderWeb;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderCloudwatch {
+            interval?: string;
+            metricDataQueries: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueries[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueries {
+            expression?: string;
+            id?: string;
+            label?: string;
+            metricStat?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesMetricstat;
+            period?: number | string;
+            returnData?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesMetricstat {
+            metric?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetric;
+            period?: number | string;
+            stat?: string;
+            unit?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetric {
+            dimensions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricDimensions[];
+            metricName?: string;
+            namespace?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricDimensions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderDatadog {
+            interval?: string;
+            query: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderGraphite {
+            address?: string;
+            query?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderInfluxdb {
+            profile?: string;
+            query?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJob {
+            metadata?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobMetadata;
+            spec: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpec;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobMetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpec {
+            activeDeadlineSeconds?: number;
+            backoffLimit?: number;
+            completionMode?: string;
+            completions?: number;
+            manualSelector?: boolean;
+            parallelism?: number;
+            selector?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecSelector;
+            suspend?: boolean;
+            template: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplate;
+            ttlSecondsAfterFinished?: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecSelector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecSelectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecSelectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplate {
+            metadata?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateMetadata;
+            spec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpec;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateMetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpec {
+            activeDeadlineSeconds?: number;
+            affinity?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinity;
+            automountServiceAccountToken?: boolean;
+            containers: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainers[];
+            dnsConfig?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecDnsconfig;
+            dnsPolicy?: string;
+            enableServiceLinks?: boolean;
+            ephemeralContainers?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainers[];
+            hostAliases?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecHostaliases[];
+            hostIPC?: boolean;
+            hostNetwork?: boolean;
+            hostPID?: boolean;
+            hostname?: string;
+            imagePullSecrets?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecImagepullsecrets[];
+            initContainers?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainers[];
+            nodeName?: string;
+            nodeSelector?: {[key: string]: string};
+            os?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecOs;
+            overhead?: {[key: string]: number | string};
+            preemptionPolicy?: string;
+            priority?: number;
+            priorityClassName?: string;
+            readinessGates?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecReadinessgates[];
+            restartPolicy?: string;
+            runtimeClassName?: string;
+            schedulerName?: string;
+            securityContext?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontext;
+            serviceAccount?: string;
+            serviceAccountName?: string;
+            setHostnameAsFQDN?: boolean;
+            shareProcessNamespace?: boolean;
+            subdomain?: string;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTolerations[];
+            topologySpreadConstraints?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraints[];
+            volumes?: {[key: string]: any};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinity {
+            nodeAffinity?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinity;
+            podAffinity?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinity;
+            podAntiAffinity?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinity;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecution;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecution {
+            preference: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreference;
+            weight: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreference {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressions[];
+            matchFields?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfields[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecution {
+            nodeSelectorTerms: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectorterms[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectorterms {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressions[];
+            matchFields?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfields[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecution[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecution {
+            podAffinityTerm: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm;
+            weight: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm {
+            labelSelector?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecution {
+            labelSelector?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecution[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecution {
+            podAffinityTerm: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm;
+            weight: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm {
+            labelSelector?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecution {
+            labelSelector?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefrom;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromSecretkeyref;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromSecretref;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestop;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * analysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPortsProvideDefaults sets the appropriate defaults for AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPorts
+         */
+        export function analysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPortsProvideDefaults(val: AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPorts): AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextWindowsoptions;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecDnsconfig {
+            nameservers?: string[];
+            options?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecDnsconfigOptions[];
+            searches?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecDnsconfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            targetContainerName?: string;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefrom;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyref;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromSecretref;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestop;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * analysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsProvideDefaults sets the appropriate defaults for AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts
+         */
+        export function analysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsProvideDefaults(val: AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts): AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptions;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecHostaliases {
+            hostnames?: string[];
+            ip?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecImagepullsecrets {
+            name?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefrom;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromSecretkeyref;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromSecretref;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestop;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * analysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsProvideDefaults sets the appropriate defaults for AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts
+         */
+        export function analysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsProvideDefaults(val: AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts): AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextWindowsoptions;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecOs {
+            name: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecReadinessgates {
+            conditionType: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSeccompprofile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSysctls[];
+            windowsOptions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextWindowsoptions;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraints {
+            labelSelector?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselector;
+            maxSkew: number;
+            minDomains?: number;
+            topologyKey: string;
+            whenUnsatisfiable: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisRunSpecMetricsProviderKayenta {
+            address: string;
+            application: string;
+            canaryConfigName: string;
+            configurationAccountName: string;
+            metricsAccountName: string;
+            scopes: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderKayentaScopes[];
+            storageAccountName: string;
+            threshold: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderKayentaThreshold;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderKayentaScopes {
+            controlScope: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderKayentaScopesControlscope;
+            experimentScope: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderKayentaScopesExperimentscope;
+            name: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderKayentaScopesControlscope {
+            end: string;
+            region: string;
+            scope: string;
+            start: string;
+            step: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderKayentaScopesExperimentscope {
+            end: string;
+            region: string;
+            scope: string;
+            start: string;
+            step: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderKayentaThreshold {
+            marginal: number;
+            pass: number;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderNewrelic {
+            profile?: string;
+            query: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderPrometheus {
+            address?: string;
+            query?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderWavefront {
+            address?: string;
+            query?: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderWeb {
+            body?: string;
+            headers?: outputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderWebHeaders[];
+            insecure?: boolean;
+            jsonPath?: string;
+            method?: string;
+            timeoutSeconds?: number;
+            url: string;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderWebHeaders {
+            key: string;
+            value: string;
+        }
+
+        export interface AnalysisRunStatus {
+            dryRunSummary?: outputs.argoproj.v1alpha1.AnalysisRunStatusDryrunsummary;
+            message?: string;
+            metricResults?: outputs.argoproj.v1alpha1.AnalysisRunStatusMetricresults[];
+            phase: string;
+            runSummary?: outputs.argoproj.v1alpha1.AnalysisRunStatusRunsummary;
+            startedAt?: string;
+        }
+
+        export interface AnalysisRunStatusDryrunsummary {
+            count?: number;
+            error?: number;
+            failed?: number;
+            inconclusive?: number;
+            successful?: number;
+        }
+
+        export interface AnalysisRunStatusMetricresults {
+            consecutiveError?: number;
+            count?: number;
+            dryRun?: boolean;
+            error?: number;
+            failed?: number;
+            inconclusive?: number;
+            measurements?: outputs.argoproj.v1alpha1.AnalysisRunStatusMetricresultsMeasurements[];
+            message?: string;
+            metadata?: {[key: string]: string};
+            name: string;
+            phase: string;
+            successful?: number;
+        }
+
+        export interface AnalysisRunStatusMetricresultsMeasurements {
+            finishedAt?: string;
+            message?: string;
+            metadata?: {[key: string]: string};
+            phase: string;
+            resumeAt?: string;
+            startedAt?: string;
+            value?: string;
+        }
+
+        export interface AnalysisRunStatusRunsummary {
+            count?: number;
+            error?: number;
+            failed?: number;
+            inconclusive?: number;
+            successful?: number;
+        }
+
+        export interface AnalysisTemplateSpec {
+            args?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecArgs[];
+            dryRun?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecDryrun[];
+            measurementRetention?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMeasurementretention[];
+            metrics: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetrics[];
+        }
+
+        export interface AnalysisTemplateSpecArgs {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecArgsValuefrom;
+        }
+
+        export interface AnalysisTemplateSpecArgsValuefrom {
+            fieldRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecArgsValuefromFieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecArgsValuefromSecretkeyref;
+        }
+
+        export interface AnalysisTemplateSpecArgsValuefromFieldref {
+            fieldPath: string;
+        }
+
+        export interface AnalysisTemplateSpecArgsValuefromSecretkeyref {
+            key: string;
+            name: string;
+        }
+
+        export interface AnalysisTemplateSpecDryrun {
+            metricName: string;
+        }
+
+        export interface AnalysisTemplateSpecMeasurementretention {
+            limit: number;
+            metricName: string;
+        }
+
+        export interface AnalysisTemplateSpecMetrics {
+            consecutiveErrorLimit?: number | string;
+            count?: number | string;
+            failureCondition?: string;
+            failureLimit?: number | string;
+            inconclusiveLimit?: number | string;
+            initialDelay?: string;
+            interval?: string;
+            name: string;
+            provider: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProvider;
+            successCondition?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProvider {
+            cloudWatch?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderCloudwatch;
+            datadog?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderDatadog;
+            graphite?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderGraphite;
+            influxdb?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderInfluxdb;
+            job?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJob;
+            kayenta?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderKayenta;
+            newRelic?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderNewrelic;
+            prometheus?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderPrometheus;
+            wavefront?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderWavefront;
+            web?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderWeb;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderCloudwatch {
+            interval?: string;
+            metricDataQueries: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueries[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueries {
+            expression?: string;
+            id?: string;
+            label?: string;
+            metricStat?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstat;
+            period?: number | string;
+            returnData?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstat {
+            metric?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetric;
+            period?: number | string;
+            stat?: string;
+            unit?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetric {
+            dimensions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricDimensions[];
+            metricName?: string;
+            namespace?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricDimensions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderDatadog {
+            interval?: string;
+            query: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderGraphite {
+            address?: string;
+            query?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderInfluxdb {
+            profile?: string;
+            query?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJob {
+            metadata?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobMetadata;
+            spec: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpec;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobMetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpec {
+            activeDeadlineSeconds?: number;
+            backoffLimit?: number;
+            completionMode?: string;
+            completions?: number;
+            manualSelector?: boolean;
+            parallelism?: number;
+            selector?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecSelector;
+            suspend?: boolean;
+            template: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplate;
+            ttlSecondsAfterFinished?: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecSelector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecSelectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecSelectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplate {
+            metadata?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateMetadata;
+            spec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpec;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateMetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpec {
+            activeDeadlineSeconds?: number;
+            affinity?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinity;
+            automountServiceAccountToken?: boolean;
+            containers: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainers[];
+            dnsConfig?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfig;
+            dnsPolicy?: string;
+            enableServiceLinks?: boolean;
+            ephemeralContainers?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainers[];
+            hostAliases?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecHostaliases[];
+            hostIPC?: boolean;
+            hostNetwork?: boolean;
+            hostPID?: boolean;
+            hostname?: string;
+            imagePullSecrets?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecImagepullsecrets[];
+            initContainers?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainers[];
+            nodeName?: string;
+            nodeSelector?: {[key: string]: string};
+            os?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecOs;
+            overhead?: {[key: string]: number | string};
+            preemptionPolicy?: string;
+            priority?: number;
+            priorityClassName?: string;
+            readinessGates?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecReadinessgates[];
+            restartPolicy?: string;
+            runtimeClassName?: string;
+            schedulerName?: string;
+            securityContext?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontext;
+            serviceAccount?: string;
+            serviceAccountName?: string;
+            setHostnameAsFQDN?: boolean;
+            shareProcessNamespace?: boolean;
+            subdomain?: string;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTolerations[];
+            topologySpreadConstraints?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraints[];
+            volumes?: {[key: string]: any};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinity {
+            nodeAffinity?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinity;
+            podAffinity?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinity;
+            podAntiAffinity?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinity;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecution;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecution {
+            preference: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreference;
+            weight: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreference {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressions[];
+            matchFields?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfields[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecution {
+            nodeSelectorTerms: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectorterms[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectorterms {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressions[];
+            matchFields?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfields[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecution[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecution {
+            podAffinityTerm: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm;
+            weight: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm {
+            labelSelector?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecution {
+            labelSelector?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecution[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecution {
+            podAffinityTerm: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm;
+            weight: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm {
+            labelSelector?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecution {
+            labelSelector?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefrom;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromSecretkeyref;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromSecretref;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestop;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * analysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsProvideDefaults sets the appropriate defaults for AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPorts
+         */
+        export function analysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsProvideDefaults(val: AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPorts): AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextWindowsoptions;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfig {
+            nameservers?: string[];
+            options?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfigOptions[];
+            searches?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            targetContainerName?: string;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefrom;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyref;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromSecretref;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestop;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * analysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsProvideDefaults sets the appropriate defaults for AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts
+         */
+        export function analysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsProvideDefaults(val: AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts): AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptions;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecHostaliases {
+            hostnames?: string[];
+            ip?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecImagepullsecrets {
+            name?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefrom;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromSecretkeyref;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromSecretref;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestop;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * analysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsProvideDefaults sets the appropriate defaults for AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts
+         */
+        export function analysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsProvideDefaults(val: AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts): AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextWindowsoptions;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecOs {
+            name: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecReadinessgates {
+            conditionType: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSeccompprofile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSysctls[];
+            windowsOptions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextWindowsoptions;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraints {
+            labelSelector?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselector;
+            maxSkew: number;
+            minDomains?: number;
+            topologyKey: string;
+            whenUnsatisfiable: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderKayenta {
+            address: string;
+            application: string;
+            canaryConfigName: string;
+            configurationAccountName: string;
+            metricsAccountName: string;
+            scopes: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderKayentaScopes[];
+            storageAccountName: string;
+            threshold: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderKayentaThreshold;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderKayentaScopes {
+            controlScope: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderKayentaScopesControlscope;
+            experimentScope: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderKayentaScopesExperimentscope;
+            name: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderKayentaScopesControlscope {
+            end: string;
+            region: string;
+            scope: string;
+            start: string;
+            step: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderKayentaScopesExperimentscope {
+            end: string;
+            region: string;
+            scope: string;
+            start: string;
+            step: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderKayentaThreshold {
+            marginal: number;
+            pass: number;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderNewrelic {
+            profile?: string;
+            query: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderPrometheus {
+            address?: string;
+            query?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderWavefront {
+            address?: string;
+            query?: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderWeb {
+            body?: string;
+            headers?: outputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderWebHeaders[];
+            insecure?: boolean;
+            jsonPath?: string;
+            method?: string;
+            timeoutSeconds?: number;
+            url: string;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderWebHeaders {
+            key: string;
+            value: string;
+        }
+
         /**
          * AppProjectSpec is the specification of an AppProject
          */
@@ -7796,6 +10925,5268 @@ export namespace argoproj {
              * Type is an ArgoCDExtension condition type
              */
             type: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpec {
+            args?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecArgs[];
+            dryRun?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecDryrun[];
+            measurementRetention?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMeasurementretention[];
+            metrics: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetrics[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecArgs {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecArgsValuefrom;
+        }
+
+        export interface ClusterAnalysisTemplateSpecArgsValuefrom {
+            fieldRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecArgsValuefromFieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecArgsValuefromSecretkeyref;
+        }
+
+        export interface ClusterAnalysisTemplateSpecArgsValuefromFieldref {
+            fieldPath: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecArgsValuefromSecretkeyref {
+            key: string;
+            name: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecDryrun {
+            metricName: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMeasurementretention {
+            limit: number;
+            metricName: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetrics {
+            consecutiveErrorLimit?: number | string;
+            count?: number | string;
+            failureCondition?: string;
+            failureLimit?: number | string;
+            inconclusiveLimit?: number | string;
+            initialDelay?: string;
+            interval?: string;
+            name: string;
+            provider: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProvider;
+            successCondition?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProvider {
+            cloudWatch?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderCloudwatch;
+            datadog?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderDatadog;
+            graphite?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderGraphite;
+            influxdb?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderInfluxdb;
+            job?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJob;
+            kayenta?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderKayenta;
+            newRelic?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderNewrelic;
+            prometheus?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderPrometheus;
+            wavefront?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderWavefront;
+            web?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderWeb;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderCloudwatch {
+            interval?: string;
+            metricDataQueries: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueries[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueries {
+            expression?: string;
+            id?: string;
+            label?: string;
+            metricStat?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstat;
+            period?: number | string;
+            returnData?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstat {
+            metric?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetric;
+            period?: number | string;
+            stat?: string;
+            unit?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetric {
+            dimensions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricDimensions[];
+            metricName?: string;
+            namespace?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricDimensions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderDatadog {
+            interval?: string;
+            query: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderGraphite {
+            address?: string;
+            query?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderInfluxdb {
+            profile?: string;
+            query?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJob {
+            metadata?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobMetadata;
+            spec: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpec;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobMetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpec {
+            activeDeadlineSeconds?: number;
+            backoffLimit?: number;
+            completionMode?: string;
+            completions?: number;
+            manualSelector?: boolean;
+            parallelism?: number;
+            selector?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecSelector;
+            suspend?: boolean;
+            template: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplate;
+            ttlSecondsAfterFinished?: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecSelector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecSelectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecSelectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplate {
+            metadata?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateMetadata;
+            spec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpec;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateMetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpec {
+            activeDeadlineSeconds?: number;
+            affinity?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinity;
+            automountServiceAccountToken?: boolean;
+            containers: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainers[];
+            dnsConfig?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfig;
+            dnsPolicy?: string;
+            enableServiceLinks?: boolean;
+            ephemeralContainers?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainers[];
+            hostAliases?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecHostaliases[];
+            hostIPC?: boolean;
+            hostNetwork?: boolean;
+            hostPID?: boolean;
+            hostname?: string;
+            imagePullSecrets?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecImagepullsecrets[];
+            initContainers?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainers[];
+            nodeName?: string;
+            nodeSelector?: {[key: string]: string};
+            os?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecOs;
+            overhead?: {[key: string]: number | string};
+            preemptionPolicy?: string;
+            priority?: number;
+            priorityClassName?: string;
+            readinessGates?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecReadinessgates[];
+            restartPolicy?: string;
+            runtimeClassName?: string;
+            schedulerName?: string;
+            securityContext?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontext;
+            serviceAccount?: string;
+            serviceAccountName?: string;
+            setHostnameAsFQDN?: boolean;
+            shareProcessNamespace?: boolean;
+            subdomain?: string;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTolerations[];
+            topologySpreadConstraints?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraints[];
+            volumes?: {[key: string]: any};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinity {
+            nodeAffinity?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinity;
+            podAffinity?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinity;
+            podAntiAffinity?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinity;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecution;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecution {
+            preference: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreference;
+            weight: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreference {
+            matchExpressions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressions[];
+            matchFields?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfields[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecution {
+            nodeSelectorTerms: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectorterms[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectorterms {
+            matchExpressions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressions[];
+            matchFields?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfields[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecution[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecution {
+            podAffinityTerm: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm;
+            weight: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm {
+            labelSelector?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecution {
+            labelSelector?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecution[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecution {
+            podAffinityTerm: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm;
+            weight: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm {
+            labelSelector?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecution {
+            labelSelector?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefrom;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromSecretkeyref;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromSecretref;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestop;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * clusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsProvideDefaults sets the appropriate defaults for ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPorts
+         */
+        export function clusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsProvideDefaults(val: ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPorts): ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextWindowsoptions;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfig {
+            nameservers?: string[];
+            options?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfigOptions[];
+            searches?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            targetContainerName?: string;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefrom;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyref;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromSecretref;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestop;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * clusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsProvideDefaults sets the appropriate defaults for ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts
+         */
+        export function clusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsProvideDefaults(val: ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts): ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptions;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecHostaliases {
+            hostnames?: string[];
+            ip?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecImagepullsecrets {
+            name?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefrom;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromSecretkeyref;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromSecretref;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestop;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * clusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsProvideDefaults sets the appropriate defaults for ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts
+         */
+        export function clusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsProvideDefaults(val: ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts): ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextWindowsoptions;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecOs {
+            name: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecReadinessgates {
+            conditionType: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSeccompprofile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSysctls[];
+            windowsOptions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextWindowsoptions;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraints {
+            labelSelector?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselector;
+            maxSkew: number;
+            minDomains?: number;
+            topologyKey: string;
+            whenUnsatisfiable: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderKayenta {
+            address: string;
+            application: string;
+            canaryConfigName: string;
+            configurationAccountName: string;
+            metricsAccountName: string;
+            scopes: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderKayentaScopes[];
+            storageAccountName: string;
+            threshold: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderKayentaThreshold;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderKayentaScopes {
+            controlScope: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderKayentaScopesControlscope;
+            experimentScope: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderKayentaScopesExperimentscope;
+            name: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderKayentaScopesControlscope {
+            end: string;
+            region: string;
+            scope: string;
+            start: string;
+            step: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderKayentaScopesExperimentscope {
+            end: string;
+            region: string;
+            scope: string;
+            start: string;
+            step: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderKayentaThreshold {
+            marginal: number;
+            pass: number;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderNewrelic {
+            profile?: string;
+            query: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderPrometheus {
+            address?: string;
+            query?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderWavefront {
+            address?: string;
+            query?: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderWeb {
+            body?: string;
+            headers?: outputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderWebHeaders[];
+            insecure?: boolean;
+            jsonPath?: string;
+            method?: string;
+            timeoutSeconds?: number;
+            url: string;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderWebHeaders {
+            key: string;
+            value: string;
+        }
+
+        export interface ExperimentSpec {
+            analyses?: outputs.argoproj.v1alpha1.ExperimentSpecAnalyses[];
+            dryRun?: outputs.argoproj.v1alpha1.ExperimentSpecDryrun[];
+            duration?: string;
+            measurementRetention?: outputs.argoproj.v1alpha1.ExperimentSpecMeasurementretention[];
+            progressDeadlineSeconds?: number;
+            scaleDownDelaySeconds?: number;
+            templates: outputs.argoproj.v1alpha1.ExperimentSpecTemplates[];
+            terminate?: boolean;
+        }
+
+        export interface ExperimentSpecAnalyses {
+            args?: outputs.argoproj.v1alpha1.ExperimentSpecAnalysesArgs[];
+            clusterScope?: boolean;
+            name: string;
+            requiredForCompletion?: boolean;
+            templateName: string;
+        }
+
+        export interface ExperimentSpecAnalysesArgs {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.ExperimentSpecAnalysesArgsValuefrom;
+        }
+
+        export interface ExperimentSpecAnalysesArgsValuefrom {
+            fieldRef?: outputs.argoproj.v1alpha1.ExperimentSpecAnalysesArgsValuefromFieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.ExperimentSpecAnalysesArgsValuefromSecretkeyref;
+        }
+
+        export interface ExperimentSpecAnalysesArgsValuefromFieldref {
+            fieldPath: string;
+        }
+
+        export interface ExperimentSpecAnalysesArgsValuefromSecretkeyref {
+            key: string;
+            name: string;
+        }
+
+        export interface ExperimentSpecDryrun {
+            metricName: string;
+        }
+
+        export interface ExperimentSpecMeasurementretention {
+            limit: number;
+            metricName: string;
+        }
+
+        export interface ExperimentSpecTemplates {
+            minReadySeconds?: number;
+            name: string;
+            replicas?: number;
+            selector: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesSelector;
+            service?: {[key: string]: any};
+            template: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplate;
+        }
+
+        export interface ExperimentSpecTemplatesSelector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesSelectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ExperimentSpecTemplatesSelectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplate {
+            metadata?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateMetadata;
+            spec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpec;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateMetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpec {
+            activeDeadlineSeconds?: number;
+            affinity?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinity;
+            automountServiceAccountToken?: boolean;
+            containers: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainers[];
+            dnsConfig?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecDnsconfig;
+            dnsPolicy?: string;
+            enableServiceLinks?: boolean;
+            ephemeralContainers?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainers[];
+            hostAliases?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecHostaliases[];
+            hostIPC?: boolean;
+            hostNetwork?: boolean;
+            hostPID?: boolean;
+            hostname?: string;
+            imagePullSecrets?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecImagepullsecrets[];
+            initContainers?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainers[];
+            nodeName?: string;
+            nodeSelector?: {[key: string]: string};
+            os?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecOs;
+            overhead?: {[key: string]: number | string};
+            preemptionPolicy?: string;
+            priority?: number;
+            priorityClassName?: string;
+            readinessGates?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecReadinessgates[];
+            restartPolicy?: string;
+            runtimeClassName?: string;
+            schedulerName?: string;
+            securityContext?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecSecuritycontext;
+            serviceAccount?: string;
+            serviceAccountName?: string;
+            setHostnameAsFQDN?: boolean;
+            shareProcessNamespace?: boolean;
+            subdomain?: string;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecTolerations[];
+            topologySpreadConstraints?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecTopologyspreadconstraints[];
+            volumes?: {[key: string]: any};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinity {
+            nodeAffinity?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinity;
+            podAffinity?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinity;
+            podAntiAffinity?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinity;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecution;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecution {
+            preference: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreference;
+            weight: number;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreference {
+            matchExpressions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressions[];
+            matchFields?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfields[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecution {
+            nodeSelectorTerms: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectorterms[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectorterms {
+            matchExpressions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressions[];
+            matchFields?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfields[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecution[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecution {
+            podAffinityTerm: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm;
+            weight: number;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm {
+            labelSelector?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecution {
+            labelSelector?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecution[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecution {
+            podAffinityTerm: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm;
+            weight: number;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm {
+            labelSelector?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecution {
+            labelSelector?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvValuefrom;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromSecretkeyref;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvfromSecretref;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestop;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * experimentSpecTemplatesTemplateSpecContainersPortsProvideDefaults sets the appropriate defaults for ExperimentSpecTemplatesTemplateSpecContainersPorts
+         */
+        export function experimentSpecTemplatesTemplateSpecContainersPortsProvideDefaults(val: ExperimentSpecTemplatesTemplateSpecContainersPorts): ExperimentSpecTemplatesTemplateSpecContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextWindowsoptions;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecDnsconfig {
+            nameservers?: string[];
+            options?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecDnsconfigOptions[];
+            searches?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecDnsconfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            targetContainerName?: string;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefrom;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromSecretkeyref;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvfromSecretref;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestop;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * experimentSpecTemplatesTemplateSpecEphemeralcontainersPortsProvideDefaults sets the appropriate defaults for ExperimentSpecTemplatesTemplateSpecEphemeralcontainersPorts
+         */
+        export function experimentSpecTemplatesTemplateSpecEphemeralcontainersPortsProvideDefaults(val: ExperimentSpecTemplatesTemplateSpecEphemeralcontainersPorts): ExperimentSpecTemplatesTemplateSpecEphemeralcontainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextWindowsoptions;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecHostaliases {
+            hostnames?: string[];
+            ip?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecImagepullsecrets {
+            name?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefrom;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromSecretkeyref;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvfromSecretref;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestop;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * experimentSpecTemplatesTemplateSpecInitcontainersPortsProvideDefaults sets the appropriate defaults for ExperimentSpecTemplatesTemplateSpecInitcontainersPorts
+         */
+        export function experimentSpecTemplatesTemplateSpecInitcontainersPortsProvideDefaults(val: ExperimentSpecTemplatesTemplateSpecInitcontainersPorts): ExperimentSpecTemplatesTemplateSpecInitcontainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextWindowsoptions;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecOs {
+            name: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecReadinessgates {
+            conditionType: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecSecuritycontext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecSecuritycontextSeccompprofile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecSecuritycontextSysctls[];
+            windowsOptions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecSecuritycontextWindowsoptions;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecSecuritycontextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecTopologyspreadconstraints {
+            labelSelector?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecTopologyspreadconstraintsLabelselector;
+            maxSkew: number;
+            minDomains?: number;
+            topologyKey: string;
+            whenUnsatisfiable: string;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecTopologyspreadconstraintsLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface ExperimentStatus {
+            analysisRuns?: outputs.argoproj.v1alpha1.ExperimentStatusAnalysisruns[];
+            availableAt?: string;
+            conditions?: outputs.argoproj.v1alpha1.ExperimentStatusConditions[];
+            message?: string;
+            phase?: string;
+            templateStatuses?: outputs.argoproj.v1alpha1.ExperimentStatusTemplatestatuses[];
+        }
+
+        export interface ExperimentStatusAnalysisruns {
+            analysisRun: string;
+            message?: string;
+            name: string;
+            phase: string;
+        }
+
+        export interface ExperimentStatusConditions {
+            lastTransitionTime: string;
+            lastUpdateTime: string;
+            message: string;
+            reason: string;
+            status: string;
+            type: string;
+        }
+
+        export interface ExperimentStatusTemplatestatuses {
+            availableReplicas: number;
+            collisionCount?: number;
+            lastTransitionTime?: string;
+            message?: string;
+            name: string;
+            podTemplateHash?: string;
+            readyReplicas: number;
+            replicas: number;
+            serviceName?: string;
+            status?: string;
+            updatedReplicas: number;
+        }
+
+        export interface RolloutSpec {
+            analysis?: outputs.argoproj.v1alpha1.RolloutSpecAnalysis;
+            minReadySeconds?: number;
+            paused?: boolean;
+            progressDeadlineAbort?: boolean;
+            progressDeadlineSeconds?: number;
+            replicas?: number;
+            restartAt?: string;
+            revisionHistoryLimit?: number;
+            selector?: outputs.argoproj.v1alpha1.RolloutSpecSelector;
+            strategy?: outputs.argoproj.v1alpha1.RolloutSpecStrategy;
+            template?: outputs.argoproj.v1alpha1.RolloutSpecTemplate;
+            workloadRef?: outputs.argoproj.v1alpha1.RolloutSpecWorkloadref;
+        }
+
+        export interface RolloutSpecAnalysis {
+            successfulRunHistoryLimit?: number;
+            unsuccessfulRunHistoryLimit?: number;
+        }
+
+        export interface RolloutSpecSelector {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecSelectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecSelectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecStrategy {
+            blueGreen?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreen;
+            canary?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanary;
+        }
+
+        export interface RolloutSpecStrategyBluegreen {
+            abortScaleDownDelaySeconds?: number;
+            activeMetadata?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenActivemetadata;
+            activeService: string;
+            antiAffinity?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenAntiaffinity;
+            autoPromotionEnabled?: boolean;
+            autoPromotionSeconds?: number;
+            maxUnavailable?: number | string;
+            postPromotionAnalysis?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysis;
+            prePromotionAnalysis?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysis;
+            previewMetadata?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPreviewmetadata;
+            previewReplicaCount?: number;
+            previewService?: string;
+            scaleDownDelayRevisionLimit?: number;
+            scaleDownDelaySeconds?: number;
+        }
+
+        export interface RolloutSpecStrategyBluegreenActivemetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecStrategyBluegreenAntiaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenAntiaffinityPreferredduringschedulingignoredduringexecution;
+            requiredDuringSchedulingIgnoredDuringExecution?: {[key: string]: any};
+        }
+
+        export interface RolloutSpecStrategyBluegreenAntiaffinityPreferredduringschedulingignoredduringexecution {
+            weight: number;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysis {
+            args?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisArgs[];
+            dryRun?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisDryrun[];
+            measurementRetention?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisMeasurementretention[];
+            templates?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisTemplates[];
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisArgs {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisArgsValuefrom;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisArgsValuefrom {
+            fieldRef?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisArgsValuefromFieldref;
+            podTemplateHashValue?: string;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisArgsValuefromFieldref {
+            fieldPath: string;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisDryrun {
+            metricName: string;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisMeasurementretention {
+            limit: number;
+            metricName: string;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisTemplates {
+            clusterScope?: boolean;
+            templateName?: string;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysis {
+            args?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisArgs[];
+            dryRun?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisDryrun[];
+            measurementRetention?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisMeasurementretention[];
+            templates?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisTemplates[];
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisArgs {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisArgsValuefrom;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisArgsValuefrom {
+            fieldRef?: outputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisArgsValuefromFieldref;
+            podTemplateHashValue?: string;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisArgsValuefromFieldref {
+            fieldPath: string;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisDryrun {
+            metricName: string;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisMeasurementretention {
+            limit: number;
+            metricName: string;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisTemplates {
+            clusterScope?: boolean;
+            templateName?: string;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPreviewmetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecStrategyCanary {
+            abortScaleDownDelaySeconds?: number;
+            analysis?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysis;
+            antiAffinity?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAntiaffinity;
+            canaryMetadata?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryCanarymetadata;
+            canaryService?: string;
+            dynamicStableScale?: boolean;
+            maxSurge?: number | string;
+            maxUnavailable?: number | string;
+            pingPong?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryPingpong;
+            scaleDownDelayRevisionLimit?: number;
+            scaleDownDelaySeconds?: number;
+            stableMetadata?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStablemetadata;
+            stableService?: string;
+            steps?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanarySteps[];
+            trafficRouting?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficrouting;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysis {
+            args?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisArgs[];
+            dryRun?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisDryrun[];
+            measurementRetention?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisMeasurementretention[];
+            startingStep?: number;
+            templates?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisTemplates[];
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisArgs {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisArgsValuefrom;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisArgsValuefrom {
+            fieldRef?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisArgsValuefromFieldref;
+            podTemplateHashValue?: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisArgsValuefromFieldref {
+            fieldPath: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisDryrun {
+            metricName: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisMeasurementretention {
+            limit: number;
+            metricName: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisTemplates {
+            clusterScope?: boolean;
+            templateName?: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryAntiaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAntiaffinityPreferredduringschedulingignoredduringexecution;
+            requiredDuringSchedulingIgnoredDuringExecution?: {[key: string]: any};
+        }
+
+        export interface RolloutSpecStrategyCanaryAntiaffinityPreferredduringschedulingignoredduringexecution {
+            weight: number;
+        }
+
+        export interface RolloutSpecStrategyCanaryCanarymetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecStrategyCanaryPingpong {
+            pingService: string;
+            pongService: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStablemetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecStrategyCanarySteps {
+            analysis?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysis;
+            experiment?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperiment;
+            pause?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsPause;
+            setCanaryScale?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetcanaryscale;
+            setHeaderRoute?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetheaderroute;
+            setMirrorRoute?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetmirrorroute;
+            setWeight?: number;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysis {
+            args?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisArgs[];
+            dryRun?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisDryrun[];
+            measurementRetention?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisMeasurementretention[];
+            templates?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisTemplates[];
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisArgs {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisArgsValuefrom;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisArgsValuefrom {
+            fieldRef?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisArgsValuefromFieldref;
+            podTemplateHashValue?: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisArgsValuefromFieldref {
+            fieldPath: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisDryrun {
+            metricName: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisMeasurementretention {
+            limit: number;
+            metricName: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisTemplates {
+            clusterScope?: boolean;
+            templateName?: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperiment {
+            analyses?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentAnalyses[];
+            duration?: string;
+            templates: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentTemplates[];
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentAnalyses {
+            args?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentAnalysesArgs[];
+            clusterScope?: boolean;
+            name: string;
+            requiredForCompletion?: boolean;
+            templateName: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentAnalysesArgs {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentAnalysesArgsValuefrom;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentAnalysesArgsValuefrom {
+            fieldRef?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentAnalysesArgsValuefromFieldref;
+            podTemplateHashValue?: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentAnalysesArgsValuefromFieldref {
+            fieldPath: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentTemplates {
+            metadata?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentTemplatesMetadata;
+            name: string;
+            replicas?: number;
+            selector?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentTemplatesSelector;
+            specRef: string;
+            weight?: number;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentTemplatesMetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentTemplatesSelector {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentTemplatesSelectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentTemplatesSelectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsPause {
+            duration?: number | string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetcanaryscale {
+            matchTrafficWeight?: boolean;
+            replicas?: number;
+            weight?: number;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetheaderroute {
+            match?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetheaderrouteMatch[];
+            name?: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetheaderrouteMatch {
+            headerName: string;
+            headerValue: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetheaderrouteMatchHeadervalue;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetheaderrouteMatchHeadervalue {
+            exact?: string;
+            prefix?: string;
+            regex?: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetmirrorroute {
+            match?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetmirrorrouteMatch[];
+            name: string;
+            percentage?: number;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetmirrorrouteMatch {
+            headers?: {[key: string]: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchHeaders};
+            method?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchMethod;
+            path?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchPath;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchHeaders {
+            exact?: string;
+            prefix?: string;
+            regex?: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchMethod {
+            exact?: string;
+            prefix?: string;
+            regex?: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchPath {
+            exact?: string;
+            prefix?: string;
+            regex?: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficrouting {
+            alb?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAlb;
+            ambassador?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAmbassador;
+            appMesh?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAppmesh;
+            istio?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingIstio;
+            managedRoutes?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingManagedroutes[];
+            nginx?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingNginx;
+            smi?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingSmi;
+            traefik?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingTraefik;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAlb {
+            annotationPrefix?: string;
+            ingress: string;
+            rootService?: string;
+            servicePort: number;
+            stickinessConfig?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAlbStickinessconfig;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAlbStickinessconfig {
+            durationSeconds: number;
+            enabled: boolean;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAmbassador {
+            mappings: string[];
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAppmesh {
+            virtualNodeGroup?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualnodegroup;
+            virtualService?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualservice;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualnodegroup {
+            canaryVirtualNodeRef: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualnodegroupCanaryvirtualnoderef;
+            stableVirtualNodeRef: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualnodegroupStablevirtualnoderef;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualnodegroupCanaryvirtualnoderef {
+            name: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualnodegroupStablevirtualnoderef {
+            name: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualservice {
+            name: string;
+            routes?: string[];
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingIstio {
+            destinationRule?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingIstioDestinationrule;
+            virtualService?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingIstioVirtualservice;
+            virtualServices?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingIstioVirtualservices[];
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingIstioDestinationrule {
+            canarySubsetName: string;
+            name: string;
+            stableSubsetName: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingIstioVirtualservice {
+            name: string;
+            routes?: string[];
+            tlsRoutes?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingIstioVirtualserviceTlsroutes[];
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingIstioVirtualserviceTlsroutes {
+            port?: number;
+            sniHosts?: string[];
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingIstioVirtualservices {
+            name: string;
+            routes?: string[];
+            tlsRoutes?: outputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingIstioVirtualservicesTlsroutes[];
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingIstioVirtualservicesTlsroutes {
+            port?: number;
+            sniHosts?: string[];
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingManagedroutes {
+            name: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingNginx {
+            additionalIngressAnnotations?: {[key: string]: string};
+            annotationPrefix?: string;
+            stableIngress: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingSmi {
+            rootService?: string;
+            trafficSplitName?: string;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingTraefik {
+            weightedTraefikServiceName: string;
+        }
+
+        export interface RolloutSpecTemplate {
+            metadata?: outputs.argoproj.v1alpha1.RolloutSpecTemplateMetadata;
+            spec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpec;
+        }
+
+        export interface RolloutSpecTemplateMetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecTemplateSpec {
+            activeDeadlineSeconds?: number;
+            affinity?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinity;
+            automountServiceAccountToken?: boolean;
+            containers: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainers[];
+            dnsConfig?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecDnsconfig;
+            dnsPolicy?: string;
+            enableServiceLinks?: boolean;
+            ephemeralContainers?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainers[];
+            hostAliases?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecHostaliases[];
+            hostIPC?: boolean;
+            hostNetwork?: boolean;
+            hostPID?: boolean;
+            hostname?: string;
+            imagePullSecrets?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecImagepullsecrets[];
+            initContainers?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainers[];
+            nodeName?: string;
+            nodeSelector?: {[key: string]: string};
+            os?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecOs;
+            overhead?: {[key: string]: number | string};
+            preemptionPolicy?: string;
+            priority?: number;
+            priorityClassName?: string;
+            readinessGates?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecReadinessgates[];
+            restartPolicy?: string;
+            runtimeClassName?: string;
+            schedulerName?: string;
+            securityContext?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecSecuritycontext;
+            serviceAccount?: string;
+            serviceAccountName?: string;
+            setHostnameAsFQDN?: boolean;
+            shareProcessNamespace?: boolean;
+            subdomain?: string;
+            terminationGracePeriodSeconds?: number;
+            tolerations?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecTolerations[];
+            topologySpreadConstraints?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecTopologyspreadconstraints[];
+            volumes?: {[key: string]: any}[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinity {
+            nodeAffinity?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinity;
+            podAffinity?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinity;
+            podAntiAffinity?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinity;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecution;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecution {
+            preference: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreference;
+            weight: number;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreference {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressions[];
+            matchFields?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfields[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecution {
+            nodeSelectorTerms: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectorterms[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectorterms {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressions[];
+            matchFields?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfields[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfields {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecution[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecution {
+            podAffinityTerm: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm;
+            weight: number;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm {
+            labelSelector?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecution {
+            labelSelector?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinity {
+            preferredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecution[];
+            requiredDuringSchedulingIgnoredDuringExecution?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecution[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecution {
+            podAffinityTerm: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm;
+            weight: number;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinityterm {
+            labelSelector?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecution {
+            labelSelector?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselector;
+            namespaceSelector?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector;
+            namespaces?: string[];
+            topologyKey: string;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecContainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvValuefrom;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvValuefromSecretkeyref;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvfromSecretref;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePrestop;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * rolloutSpecTemplateSpecContainersPortsProvideDefaults sets the appropriate defaults for RolloutSpecTemplateSpecContainersPorts
+         */
+        export function rolloutSpecTemplateSpecContainersPortsProvideDefaults(val: RolloutSpecTemplateSpecContainersPorts): RolloutSpecTemplateSpecContainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface RolloutSpecTemplateSpecContainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecContainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface RolloutSpecTemplateSpecContainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersSecuritycontextWindowsoptions;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecContainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecContainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecDnsconfig {
+            nameservers?: string[];
+            options?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecDnsconfigOptions[];
+            searches?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecDnsconfigOptions {
+            name?: string;
+            value?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            targetContainerName?: string;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvValuefrom;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyref;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvfromSecretref;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestop;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * rolloutSpecTemplateSpecEphemeralcontainersPortsProvideDefaults sets the appropriate defaults for RolloutSpecTemplateSpecEphemeralcontainersPorts
+         */
+        export function rolloutSpecTemplateSpecEphemeralcontainersPortsProvideDefaults(val: RolloutSpecTemplateSpecEphemeralcontainersPorts): RolloutSpecTemplateSpecEphemeralcontainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptions;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecHostaliases {
+            hostnames?: string[];
+            ip?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecImagepullsecrets {
+            name?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainers {
+            args?: string[];
+            command?: string[];
+            env?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnv[];
+            envFrom?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvfrom[];
+            image?: string;
+            imagePullPolicy?: string;
+            lifecycle?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecycle;
+            livenessProbe?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLivenessprobe;
+            name: string;
+            ports?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersPorts[];
+            readinessProbe?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersReadinessprobe;
+            resources?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersResources;
+            securityContext?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersSecuritycontext;
+            startupProbe?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersStartupprobe;
+            stdin?: boolean;
+            stdinOnce?: boolean;
+            terminationMessagePath?: string;
+            terminationMessagePolicy?: string;
+            tty?: boolean;
+            volumeDevices?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersVolumedevices[];
+            volumeMounts?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersVolumemounts[];
+            workingDir?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnv {
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvValuefrom;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyref;
+            fieldRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvValuefromFieldref;
+            resourceFieldRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvValuefromResourcefieldref;
+            secretKeyRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvValuefromSecretkeyref;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvValuefromFieldref {
+            apiVersion?: string;
+            fieldPath: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvValuefromResourcefieldref {
+            containerName?: string;
+            divisor?: number | string;
+            resource: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvValuefromSecretkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvfrom {
+            configMapRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvfromConfigmapref;
+            prefix?: string;
+            secretRef?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvfromSecretref;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvfromConfigmapref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvfromSecretref {
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecycle {
+            postStart?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePoststart;
+            preStop?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePrestop;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePoststart {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePoststartExec;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePoststartHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocket;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePoststartExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePoststartHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePrestop {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePrestopExec;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePrestopHttpget;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocket;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePrestopExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePrestopHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLivenessprobe {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLivenessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLivenessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLivenessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLivenessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLivenessprobeExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLivenessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLivenessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLivenessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersPorts {
+            containerPort: number;
+            hostIP?: string;
+            hostPort?: number;
+            name?: string;
+            protocol?: string;
+        }
+        /**
+         * rolloutSpecTemplateSpecInitcontainersPortsProvideDefaults sets the appropriate defaults for RolloutSpecTemplateSpecInitcontainersPorts
+         */
+        export function rolloutSpecTemplateSpecInitcontainersPortsProvideDefaults(val: RolloutSpecTemplateSpecInitcontainersPorts): RolloutSpecTemplateSpecInitcontainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersReadinessprobe {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersReadinessprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersReadinessprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersReadinessprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersReadinessprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersReadinessprobeExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersReadinessprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersReadinessprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersReadinessprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersResources {
+            limits?: {[key: string]: any};
+            requests?: {[key: string]: any};
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersSecuritycontext {
+            allowPrivilegeEscalation?: boolean;
+            capabilities?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersSecuritycontextCapabilities;
+            privileged?: boolean;
+            procMount?: string;
+            readOnlyRootFilesystem?: boolean;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersSecuritycontextSeccompprofile;
+            windowsOptions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersSecuritycontextWindowsoptions;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersSecuritycontextCapabilities {
+            add?: string[];
+            drop?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersStartupprobe {
+            exec?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersStartupprobeExec;
+            failureThreshold?: number;
+            grpc?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersStartupprobeGrpc;
+            httpGet?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersStartupprobeHttpget;
+            initialDelaySeconds?: number;
+            periodSeconds?: number;
+            successThreshold?: number;
+            tcpSocket?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersStartupprobeTcpsocket;
+            terminationGracePeriodSeconds?: number;
+            timeoutSeconds?: number;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersStartupprobeExec {
+            command?: string[];
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersStartupprobeGrpc {
+            port: number;
+            service?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersStartupprobeHttpget {
+            host?: string;
+            httpHeaders?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheaders[];
+            path?: string;
+            port: number | string;
+            scheme?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheaders {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersStartupprobeTcpsocket {
+            host?: string;
+            port: number | string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersVolumedevices {
+            devicePath: string;
+            name: string;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersVolumemounts {
+            mountPath: string;
+            mountPropagation?: string;
+            name: string;
+            readOnly?: boolean;
+            subPath?: string;
+            subPathExpr?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecOs {
+            name: string;
+        }
+
+        export interface RolloutSpecTemplateSpecReadinessgates {
+            conditionType: string;
+        }
+
+        export interface RolloutSpecTemplateSpecSecuritycontext {
+            fsGroup?: number;
+            fsGroupChangePolicy?: string;
+            runAsGroup?: number;
+            runAsNonRoot?: boolean;
+            runAsUser?: number;
+            seLinuxOptions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecSecuritycontextSelinuxoptions;
+            seccompProfile?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecSecuritycontextSeccompprofile;
+            supplementalGroups?: number[];
+            sysctls?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecSecuritycontextSysctls[];
+            windowsOptions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecSecuritycontextWindowsoptions;
+        }
+
+        export interface RolloutSpecTemplateSpecSecuritycontextSeccompprofile {
+            localhostProfile?: string;
+            type: string;
+        }
+
+        export interface RolloutSpecTemplateSpecSecuritycontextSelinuxoptions {
+            level?: string;
+            role?: string;
+            type?: string;
+            user?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecSecuritycontextSysctls {
+            name: string;
+            value: string;
+        }
+
+        export interface RolloutSpecTemplateSpecSecuritycontextWindowsoptions {
+            gmsaCredentialSpec?: string;
+            gmsaCredentialSpecName?: string;
+            hostProcess?: boolean;
+            runAsUserName?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecTolerations {
+            effect?: string;
+            key?: string;
+            operator?: string;
+            tolerationSeconds?: number;
+            value?: string;
+        }
+
+        export interface RolloutSpecTemplateSpecTopologyspreadconstraints {
+            labelSelector?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecTopologyspreadconstraintsLabelselector;
+            maxSkew: number;
+            minDomains?: number;
+            topologyKey: string;
+            whenUnsatisfiable: string;
+        }
+
+        export interface RolloutSpecTemplateSpecTopologyspreadconstraintsLabelselector {
+            matchExpressions?: outputs.argoproj.v1alpha1.RolloutSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressions[];
+            matchLabels?: {[key: string]: string};
+        }
+
+        export interface RolloutSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressions {
+            key: string;
+            operator: string;
+            values?: string[];
+        }
+
+        export interface RolloutSpecWorkloadref {
+            apiVersion?: string;
+            kind?: string;
+            name?: string;
+        }
+
+        export interface RolloutStatus {
+            HPAReplicas?: number;
+            abort?: boolean;
+            abortedAt?: string;
+            alb?: outputs.argoproj.v1alpha1.RolloutStatusAlb;
+            availableReplicas?: number;
+            blueGreen?: outputs.argoproj.v1alpha1.RolloutStatusBluegreen;
+            canary?: outputs.argoproj.v1alpha1.RolloutStatusCanary;
+            collisionCount?: number;
+            conditions?: outputs.argoproj.v1alpha1.RolloutStatusConditions[];
+            controllerPause?: boolean;
+            currentPodHash?: string;
+            currentStepHash?: string;
+            currentStepIndex?: number;
+            message?: string;
+            observedGeneration?: string;
+            pauseConditions?: outputs.argoproj.v1alpha1.RolloutStatusPauseconditions[];
+            phase?: string;
+            promoteFull?: boolean;
+            readyReplicas?: number;
+            replicas?: number;
+            restartedAt?: string;
+            selector?: string;
+            stableRS?: string;
+            updatedReplicas?: number;
+            workloadObservedGeneration?: string;
+        }
+
+        export interface RolloutStatusAlb {
+            canaryTargetGroup?: outputs.argoproj.v1alpha1.RolloutStatusAlbCanarytargetgroup;
+            loadBalancer?: outputs.argoproj.v1alpha1.RolloutStatusAlbLoadbalancer;
+            stableTargetGroup?: outputs.argoproj.v1alpha1.RolloutStatusAlbStabletargetgroup;
+        }
+
+        export interface RolloutStatusAlbCanarytargetgroup {
+            arn: string;
+            name: string;
+        }
+
+        export interface RolloutStatusAlbLoadbalancer {
+            arn: string;
+            name: string;
+        }
+
+        export interface RolloutStatusAlbStabletargetgroup {
+            arn: string;
+            name: string;
+        }
+
+        export interface RolloutStatusBluegreen {
+            activeSelector?: string;
+            postPromotionAnalysisRunStatus?: outputs.argoproj.v1alpha1.RolloutStatusBluegreenPostpromotionanalysisrunstatus;
+            prePromotionAnalysisRunStatus?: outputs.argoproj.v1alpha1.RolloutStatusBluegreenPrepromotionanalysisrunstatus;
+            previewSelector?: string;
+            scaleUpPreviewCheckPoint?: boolean;
+        }
+
+        export interface RolloutStatusBluegreenPostpromotionanalysisrunstatus {
+            message?: string;
+            name: string;
+            status: string;
+        }
+
+        export interface RolloutStatusBluegreenPrepromotionanalysisrunstatus {
+            message?: string;
+            name: string;
+            status: string;
+        }
+
+        export interface RolloutStatusCanary {
+            currentBackgroundAnalysisRunStatus?: outputs.argoproj.v1alpha1.RolloutStatusCanaryCurrentbackgroundanalysisrunstatus;
+            currentExperiment?: string;
+            currentStepAnalysisRunStatus?: outputs.argoproj.v1alpha1.RolloutStatusCanaryCurrentstepanalysisrunstatus;
+            stablePingPong?: string;
+            weights?: outputs.argoproj.v1alpha1.RolloutStatusCanaryWeights;
+        }
+
+        export interface RolloutStatusCanaryCurrentbackgroundanalysisrunstatus {
+            message?: string;
+            name: string;
+            status: string;
+        }
+
+        export interface RolloutStatusCanaryCurrentstepanalysisrunstatus {
+            message?: string;
+            name: string;
+            status: string;
+        }
+
+        export interface RolloutStatusCanaryWeights {
+            additional?: outputs.argoproj.v1alpha1.RolloutStatusCanaryWeightsAdditional[];
+            canary: outputs.argoproj.v1alpha1.RolloutStatusCanaryWeightsCanary;
+            stable: outputs.argoproj.v1alpha1.RolloutStatusCanaryWeightsStable;
+            verified?: boolean;
+        }
+
+        export interface RolloutStatusCanaryWeightsAdditional {
+            podTemplateHash?: string;
+            serviceName?: string;
+            weight: number;
+        }
+
+        export interface RolloutStatusCanaryWeightsCanary {
+            podTemplateHash?: string;
+            serviceName?: string;
+            weight: number;
+        }
+
+        export interface RolloutStatusCanaryWeightsStable {
+            podTemplateHash?: string;
+            serviceName?: string;
+            weight: number;
+        }
+
+        export interface RolloutStatusConditions {
+            lastTransitionTime: string;
+            lastUpdateTime: string;
+            message: string;
+            reason: string;
+            status: string;
+            type: string;
+        }
+
+        export interface RolloutStatusPauseconditions {
+            reason: string;
+            startTime: string;
+        }
+
+        export interface WorkflowTaskResultOutputs {
+            artifacts?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifacts[];
+            exitCode?: string;
+            parameters?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsParameters[];
+            result?: string;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifacts {
+            archive?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArchive;
+            archiveLogs?: boolean;
+            artifactGC?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArtifactgc;
+            artifactory?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArtifactory;
+            azure?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsAzure;
+            deleted?: boolean;
+            from?: string;
+            fromExpression?: string;
+            gcs?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsGcs;
+            git?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsGit;
+            globalName?: string;
+            hdfs?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHdfs;
+            http?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttp;
+            mode?: number;
+            name: string;
+            optional?: boolean;
+            oss?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsOss;
+            path?: string;
+            raw?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsRaw;
+            recurseMode?: boolean;
+            s3?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsS3;
+            subPath?: string;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArchive {
+            none?: {[key: string]: any};
+            tar?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArchiveTar;
+            zip?: {[key: string]: any};
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArchiveTar {
+            compressionLevel?: number;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArtifactgc {
+            podMetadata?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArtifactgcPodmetadata;
+            serviceAccountName?: string;
+            strategy?: string;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArtifactgcPodmetadata {
+            annotations?: {[key: string]: string};
+            labels?: {[key: string]: string};
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArtifactory {
+            passwordSecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArtifactoryPasswordsecret;
+            url: string;
+            usernameSecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArtifactoryUsernamesecret;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArtifactoryPasswordsecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArtifactoryUsernamesecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsAzure {
+            accountKeySecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsAzureAccountkeysecret;
+            blob: string;
+            container: string;
+            endpoint: string;
+            useSDKCreds?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsAzureAccountkeysecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsGcs {
+            bucket?: string;
+            key: string;
+            serviceAccountKeySecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsGcsServiceaccountkeysecret;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsGcsServiceaccountkeysecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsGit {
+            branch?: string;
+            depth?: number;
+            disableSubmodules?: boolean;
+            fetch?: string[];
+            insecureIgnoreHostKey?: boolean;
+            passwordSecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsGitPasswordsecret;
+            repo: string;
+            revision?: string;
+            singleBranch?: boolean;
+            sshPrivateKeySecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsGitSshprivatekeysecret;
+            usernameSecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsGitUsernamesecret;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsGitPasswordsecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsGitSshprivatekeysecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsGitUsernamesecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHdfs {
+            addresses?: string[];
+            force?: boolean;
+            hdfsUser?: string;
+            krbCCacheSecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHdfsKrbccachesecret;
+            krbConfigConfigMap?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHdfsKrbconfigconfigmap;
+            krbKeytabSecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHdfsKrbkeytabsecret;
+            krbRealm?: string;
+            krbServicePrincipalName?: string;
+            krbUsername?: string;
+            path: string;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHdfsKrbccachesecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHdfsKrbconfigconfigmap {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHdfsKrbkeytabsecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttp {
+            auth?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuth;
+            headers?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpHeaders[];
+            url: string;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuth {
+            basicAuth?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthBasicauth;
+            clientCert?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthClientcert;
+            oauth2?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthOauth2;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthBasicauth {
+            passwordSecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthBasicauthPasswordsecret;
+            usernameSecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthBasicauthUsernamesecret;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthBasicauthPasswordsecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthBasicauthUsernamesecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthClientcert {
+            clientCertSecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthClientcertClientcertsecret;
+            clientKeySecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthClientcertClientkeysecret;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthClientcertClientcertsecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthClientcertClientkeysecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthOauth2 {
+            clientIDSecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthOauth2Clientidsecret;
+            clientSecretSecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthOauth2Clientsecretsecret;
+            endpointParams?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthOauth2Endpointparams[];
+            scopes?: string[];
+            tokenURLSecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthOauth2Tokenurlsecret;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthOauth2Clientidsecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthOauth2Clientsecretsecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthOauth2Endpointparams {
+            key: string;
+            value?: string;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthOauth2Tokenurlsecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpHeaders {
+            name: string;
+            value: string;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsOss {
+            accessKeySecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsOssAccesskeysecret;
+            bucket?: string;
+            createBucketIfNotPresent?: boolean;
+            endpoint?: string;
+            key: string;
+            lifecycleRule?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsOssLifecyclerule;
+            secretKeySecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsOssSecretkeysecret;
+            securityToken?: string;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsOssAccesskeysecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsOssLifecyclerule {
+            markDeletionAfterDays?: number;
+            markInfrequentAccessAfterDays?: number;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsOssSecretkeysecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsRaw {
+            data: string;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsS3 {
+            accessKeySecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsS3Accesskeysecret;
+            bucket?: string;
+            createBucketIfNotPresent?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsS3Createbucketifnotpresent;
+            encryptionOptions?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsS3Encryptionoptions;
+            endpoint?: string;
+            insecure?: boolean;
+            key?: string;
+            region?: string;
+            roleARN?: string;
+            secretKeySecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsS3Secretkeysecret;
+            useSDKCreds?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsS3Accesskeysecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsS3Createbucketifnotpresent {
+            objectLocking?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsS3Encryptionoptions {
+            enableEncryption?: boolean;
+            kmsEncryptionContext?: string;
+            kmsKeyId?: string;
+            serverSideCustomerKeySecret?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsS3EncryptionoptionsServersidecustomerkeysecret;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsS3EncryptionoptionsServersidecustomerkeysecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsS3Secretkeysecret {
+            key: string;
+            name?: string;
+            optional?: boolean;
+        }
+
+        export interface WorkflowTaskResultOutputsParameters {
+            description?: string;
+            enum?: string[];
+            globalName?: string;
+            name: string;
+            value?: string;
+            valueFrom?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsParametersValuefrom;
+        }
+
+        export interface WorkflowTaskResultOutputsParametersValuefrom {
+            configMapKeyRef?: outputs.argoproj.v1alpha1.WorkflowTaskResultOutputsParametersValuefromConfigmapkeyref;
+            event?: string;
+            expression?: string;
+            jqFilter?: string;
+            jsonPath?: string;
+            parameter?: string;
+            path?: string;
+            supplied?: {[key: string]: any};
+        }
+
+        export interface WorkflowTaskResultOutputsParametersValuefromConfigmapkeyref {
+            key: string;
+            name?: string;
+            optional?: boolean;
         }
 
     }

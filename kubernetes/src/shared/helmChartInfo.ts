@@ -194,7 +194,31 @@ export const helmChartsInfo = {
         charts: {
             argoCD: {
                 chart: 'argo-cd',
-                version: '5.5.12',
+                version: '5.6.0',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
+            argoWorkflows: {
+                chart: 'argo-workflows',
+                version: '0.20.1',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
+            argoEvent: {
+                chart: 'argo-events',
+                version: '2.0.6',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
+            argoRollout: {
+                chart: 'argo-rollouts',
+                version: '2.21.1',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
+            argoImageUpdater: {
+                chart: 'argocd-image-updater',
+                version: '0.8.1',
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
