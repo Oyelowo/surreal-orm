@@ -5,7 +5,6 @@ node_modules
 crd2pulumi
 generatedCrdsTs
 generatedManifests
-k3d.yaml
 
 # TODO: Temporarily disable checking this file till https://github.com/typescript-eslint/typescript-eslint/pull/5716 is merged
 scripts/utils/plainSecretsManager.ts 

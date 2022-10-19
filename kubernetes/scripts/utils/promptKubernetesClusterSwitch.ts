@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import _ from 'lodash';
 import sh from 'shelljs';
-import { ingressControllerPorts, INGRESS_EXTERNAL_PORT_LOCAL } from '../../src/infrastructure/ingress/hosts.js';
+import { ingressControllerPorts } from '../../src/infrastructure/ingress/hosts.js';
 import { Environment } from '../../src/types/ownTypes.js';
 
 const switchToCluster = (name: string) => {
@@ -34,14 +34,12 @@ async function createCluster(clusterChoices: string[], likelyLocalCluster: (s: s
     ]);
 
     const { http, https } = ingressControllerPorts;
-    sh.exec(
-        `k3d cluster create ${answerNewCluster.newClusterName} --port ${INGRESS_EXTERNAL_PORT_LOCAL}:${http}@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"`
-    );
-    // Uncomment if you also want secure port at 8443
-    // sh.exec(
-    //     `k3d cluster create ${clusterName} --port ${INGRESS_EXTERNAL_PORT_LOCAL}:${http}@loadbalancer --port 8443:${https}@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"`
-    // );
-    switchToCluster(`k3d-${answerNewCluster.newClusterName}`);
+    // TODO: Remove kubernetes version when longhorn updates helm chart
+    //  to remove or fix pod security policies which is now dropped in
+    // kubernets 1.25
+    // `minikube start -p  ${answerNewCluster.newClusterName} --kubernetes-version=v1.24.0 --port ${INGRESS_EXTERNAL_PORT_LOCAL}:${http}@loadbalancer --k3s-arg "--no-deploy=traefik@server:*"`
+    sh.exec(`minikube start -p  ${answerNewCluster.newClusterName} --kubernetes-version=v1.24.0`);
+    switchToCluster(`${answerNewCluster.newClusterName}`);
 }
 
 const LOCAL_CLUSTER_REGEX = /local|k3d|k3d-local|minikube/g;
