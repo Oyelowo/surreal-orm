@@ -25,10 +25,10 @@ interface Notifications {
     name: string;
     affinity: Annotations;
     argocdUrl?: any;
+    pdb: Pdb;
     image: Image;
     imagePullSecrets: any[];
     nodeSelector: Annotations;
-    updateStrategy: UpdateStrategy;
     context: Annotations;
     secret: Secret2;
     logFormat: string;
@@ -42,11 +42,10 @@ interface Notifications {
     notifiers: Annotations;
     podAnnotations: Annotations;
     podLabels: Annotations;
-    securityContext: SecurityContext2;
     containerSecurityContext: Annotations;
     priorityClassName: string;
     resources: Annotations;
-    serviceAccount: ServiceAccount4;
+    serviceAccount: ServiceAccount3;
     cm: Cm;
     subscriptions: any[];
     templates: Annotations;
@@ -60,6 +59,7 @@ interface Bots {
 interface Slack {
     enabled: boolean;
     updateStrategy: UpdateStrategy;
+    pdb: Pdb;
     image: Image;
     imagePullSecrets: any[];
     service: Service7;
@@ -71,21 +71,24 @@ interface Slack {
     tolerations: any[];
     nodeSelector: Annotations;
 }
-interface Service7 {
-    annotations: Annotations;
-    port: number;
-    type: string;
-}
-interface Cm {
-    create: boolean;
+interface SecurityContext2 {
+    runAsNonRoot: boolean;
 }
 interface ServiceAccount4 {
     create: boolean;
     name: string;
     annotations: Annotations;
 }
-interface SecurityContext2 {
-    runAsNonRoot: boolean;
+interface Service7 {
+    annotations: Annotations;
+    port: number;
+    type: string;
+}
+interface UpdateStrategy {
+    type: string;
+}
+interface Cm {
+    create: boolean;
 }
 interface Metrics5 {
     enabled: boolean;
@@ -105,20 +108,18 @@ interface Secret2 {
     annotations: Annotations;
     items: Annotations;
 }
-interface UpdateStrategy {
-    type: string;
-}
 interface ApplicationSet {
     enabled: boolean;
     name: string;
     replicaCount: number;
+    pdb: Pdb;
     image: Image;
+    imagePullSecrets: any[];
     args: Args;
     logFormat: string;
     logLevel: string;
     extraContainers: any[];
     metrics: Metrics4;
-    imagePullSecrets: any[];
     service: Service;
     serviceAccount: ServiceAccount3;
     podAnnotations: Annotations;
@@ -169,7 +170,9 @@ interface RepoServer {
     name: string;
     replicas: number;
     autoscaling: Autoscaling;
+    pdb: Pdb;
     image: Image;
+    imagePullSecrets: any[];
     extraArgs: any[];
     env: any[];
     envFrom: any[];
@@ -191,22 +194,18 @@ interface RepoServer {
     metrics: Metrics4;
     clusterAdminAccess: Openshift;
     clusterRoleRules: ClusterRoleRules;
-    serviceAccount: ServiceAccount2;
+    serviceAccount: ServiceAccount;
     extraContainers: any[];
     rbac: any[];
-    copyutil: Copyutil;
     initContainers: any[];
-    pdb: Pdb;
-    imagePullSecrets: any[];
-}
-interface Copyutil {
-    resources: Annotations;
 }
 interface Server {
     name: string;
     replicas: number;
     autoscaling: Autoscaling;
+    pdb: Pdb;
     image: Image;
+    imagePullSecrets: any[];
     extraArgs: any[];
     env: any[];
     envFrom: any[];
@@ -245,14 +244,11 @@ interface Server {
     extraContainers: any[];
     initContainers: any[];
     extensions: Extensions;
-    pdb: Pdb;
-    imagePullSecrets: any[];
 }
 interface Extensions {
     enabled: boolean;
     image: Image;
     resources: Annotations;
-    contents: any[];
 }
 interface GKEmanagedCertificate {
     enabled: boolean;
@@ -268,6 +264,8 @@ interface Config2 {
     'server.rbac.log.enforce.enable': string;
     'exec.enabled': string;
     'admin.enabled': string;
+    'timeout.reconciliation': string;
+    'timeout.hard.reconciliation': string;
 }
 interface Route {
     enabled: boolean;
@@ -397,7 +395,9 @@ interface Config {
 interface Redis {
     enabled: boolean;
     name: string;
+    pdb: Pdb;
     image: Image;
+    imagePullSecrets: any[];
     extraArgs: any[];
     containerPort: number;
     servicePort: number;
@@ -420,8 +420,6 @@ interface Redis {
     initContainers: any[];
     service: Service4;
     metrics: Metrics3;
-    pdb: Pdb;
-    imagePullSecrets: any[];
 }
 interface Metrics3 {
     enabled: boolean;
@@ -452,7 +450,9 @@ interface Dex {
     name: string;
     extraArgs: any[];
     metrics: Metrics2;
+    pdb: Pdb;
     image: Image;
+    imagePullSecrets: any[];
     initImage: Image;
     env: any[];
     envFrom: any[];
@@ -480,8 +480,6 @@ interface Dex {
     resources: Annotations;
     extraContainers: any[];
     initContainers: any[];
-    pdb: Pdb;
-    imagePullSecrets: any[];
 }
 interface ServiceAccount2 {
     create: boolean;
@@ -509,8 +507,10 @@ interface Service3 {
 }
 interface Controller {
     name: string;
-    image: Image;
     replicas: number;
+    pdb: Pdb;
+    image: Image;
+    imagePullSecrets: any[];
     args: Annotations;
     extraArgs: any[];
     env: any[];
@@ -536,13 +536,6 @@ interface Controller {
     clusterRoleRules: ClusterRoleRules;
     extraContainers: any[];
     initContainers: any[];
-    pdb: Pdb;
-    imagePullSecrets: any[];
-}
-interface Pdb {
-    labels: Annotations;
-    annotations: Annotations;
-    enabled: boolean;
 }
 interface ClusterRoleRules {
     enabled: boolean;
@@ -600,6 +593,13 @@ interface ReadinessProbe {
     successThreshold: number;
     timeoutSeconds: number;
 }
+interface Pdb {
+    enabled: boolean;
+    labels: Annotations;
+    annotations: Annotations;
+    minAvailable: string;
+    maxUnavailable: string;
+}
 interface Configs {
     clusterCredentials: any[];
     gpgKeysAnnotations: Annotations;
@@ -619,8 +619,6 @@ interface Configs {
 interface Params {
     annotations: Annotations;
     'otlp.address': string;
-    'timeout.reconciliation': number;
-    'timeout.hard.reconciliation': number;
     'controller.status.processors': number;
     'controller.operation.processors': number;
     'controller.self.heal.timeout.seconds': number;
@@ -655,11 +653,11 @@ interface Data {
 }
 interface Global {
     image: Image;
+    imagePullSecrets: any[];
     logging: Logging;
     podAnnotations: Annotations;
     podLabels: Annotations;
     securityContext: Annotations;
-    imagePullSecrets: any[];
     hostAliases: any[];
     additionalLabels: Annotations;
     networkPolicy: NetworkPolicy;
@@ -688,6 +686,8 @@ interface Openshift {
 }
 interface ApiVersionOverrides {
     certmanager: string;
-    ingress: string;
+    cloudgoogle: string;
     autoscaling: string;
+    ingress: string;
+    pdb: string;
 }

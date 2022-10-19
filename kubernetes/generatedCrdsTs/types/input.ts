@@ -1419,6 +1419,3135 @@ export namespace acme {
 
 export namespace argoproj {
     export namespace v1alpha1 {
+        export interface AnalysisRunSpecArgs {
+            args?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecArgsArgs>[]>;
+            dryRun?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecDryrunArgs>[]>;
+            measurementRetention?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMeasurementretentionArgs>[]>;
+            metrics: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsArgs>[]>;
+            terminate?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecArgsArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecArgsValuefromArgs>;
+        }
+
+        export interface AnalysisRunSpecArgsValuefromArgs {
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecArgsValuefromFieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecArgsValuefromSecretkeyrefArgs>;
+        }
+
+        export interface AnalysisRunSpecArgsValuefromFieldrefArgs {
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecArgsValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecDryrunArgs {
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMeasurementretentionArgs {
+            limit: pulumi.Input<number>;
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsArgs {
+            consecutiveErrorLimit?: pulumi.Input<number | string>;
+            count?: pulumi.Input<number | string>;
+            failureCondition?: pulumi.Input<string>;
+            failureLimit?: pulumi.Input<number | string>;
+            inconclusiveLimit?: pulumi.Input<number | string>;
+            initialDelay?: pulumi.Input<string>;
+            interval?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            provider: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderArgs>;
+            successCondition?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderArgs {
+            cloudWatch?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderCloudwatchArgs>;
+            datadog?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderDatadogArgs>;
+            graphite?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderGraphiteArgs>;
+            influxdb?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderInfluxdbArgs>;
+            job?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobArgs>;
+            kayenta?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderKayentaArgs>;
+            newRelic?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderNewrelicArgs>;
+            prometheus?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderPrometheusArgs>;
+            wavefront?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderWavefrontArgs>;
+            web?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderWebArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderCloudwatchArgs {
+            interval?: pulumi.Input<string>;
+            metricDataQueries: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesArgs>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesArgs {
+            expression?: pulumi.Input<string>;
+            id?: pulumi.Input<string>;
+            label?: pulumi.Input<string>;
+            metricStat?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatArgs>;
+            period?: pulumi.Input<number | string>;
+            returnData?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatArgs {
+            metric?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricArgs>;
+            period?: pulumi.Input<number | string>;
+            stat?: pulumi.Input<string>;
+            unit?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricArgs {
+            dimensions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricDimensionsArgs>[]>;
+            metricName?: pulumi.Input<string>;
+            namespace?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricDimensionsArgs {
+            name?: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderDatadogArgs {
+            interval?: pulumi.Input<string>;
+            query: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderGraphiteArgs {
+            address?: pulumi.Input<string>;
+            query?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderInfluxdbArgs {
+            profile?: pulumi.Input<string>;
+            query?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobArgs {
+            metadata?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobMetadataArgs>;
+            spec: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobMetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecArgs {
+            activeDeadlineSeconds?: pulumi.Input<number>;
+            backoffLimit?: pulumi.Input<number>;
+            completionMode?: pulumi.Input<string>;
+            completions?: pulumi.Input<number>;
+            manualSelector?: pulumi.Input<boolean>;
+            parallelism?: pulumi.Input<number>;
+            selector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecSelectorArgs>;
+            suspend?: pulumi.Input<boolean>;
+            template: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateArgs>;
+            ttlSecondsAfterFinished?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecSelectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecSelectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecSelectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateArgs {
+            metadata?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateMetadataArgs>;
+            spec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateMetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecArgs {
+            activeDeadlineSeconds?: pulumi.Input<number>;
+            affinity?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityArgs>;
+            automountServiceAccountToken?: pulumi.Input<boolean>;
+            containers: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersArgs>[]>;
+            dnsConfig?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecDnsconfigArgs>;
+            dnsPolicy?: pulumi.Input<string>;
+            enableServiceLinks?: pulumi.Input<boolean>;
+            ephemeralContainers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersArgs>[]>;
+            hostAliases?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecHostaliasesArgs>[]>;
+            hostIPC?: pulumi.Input<boolean>;
+            hostNetwork?: pulumi.Input<boolean>;
+            hostPID?: pulumi.Input<boolean>;
+            hostname?: pulumi.Input<string>;
+            imagePullSecrets?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecImagepullsecretsArgs>[]>;
+            initContainers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersArgs>[]>;
+            nodeName?: pulumi.Input<string>;
+            nodeSelector?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            os?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecOsArgs>;
+            overhead?: pulumi.Input<{[key: string]: pulumi.Input<number | string>}>;
+            preemptionPolicy?: pulumi.Input<string>;
+            priority?: pulumi.Input<number>;
+            priorityClassName?: pulumi.Input<string>;
+            readinessGates?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecReadinessgatesArgs>[]>;
+            restartPolicy?: pulumi.Input<string>;
+            runtimeClassName?: pulumi.Input<string>;
+            schedulerName?: pulumi.Input<string>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextArgs>;
+            serviceAccount?: pulumi.Input<string>;
+            serviceAccountName?: pulumi.Input<string>;
+            setHostnameAsFQDN?: pulumi.Input<boolean>;
+            shareProcessNamespace?: pulumi.Input<boolean>;
+            subdomain?: pulumi.Input<string>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            tolerations?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTolerationsArgs>[]>;
+            topologySpreadConstraints?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsArgs>[]>;
+            volumes?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityArgs {
+            nodeAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityArgs>;
+            podAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityArgs>;
+            podAntiAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            preference: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressionsArgs>[]>;
+            matchFields?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfieldsArgs>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfieldsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            nodeSelectorTerms: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsArgs>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressionsArgs>[]>;
+            matchFields?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfieldsArgs>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfieldsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionArgs>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            podAffinityTerm: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionArgs>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            podAffinityTerm: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromSecretrefArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * analysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgsProvideDefaults sets the appropriate defaults for AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs
+         */
+        export function analysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgsProvideDefaults(val: AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs): AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecContainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecDnsconfigArgs {
+            nameservers?: pulumi.Input<pulumi.Input<string>[]>;
+            options?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecDnsconfigOptionsArgs>[]>;
+            searches?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecDnsconfigOptionsArgs {
+            name?: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            targetContainerName?: pulumi.Input<string>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromSecretrefArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * analysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgsProvideDefaults sets the appropriate defaults for AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs
+         */
+        export function analysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgsProvideDefaults(val: AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs): AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecHostaliasesArgs {
+            hostnames?: pulumi.Input<pulumi.Input<string>[]>;
+            ip?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecImagepullsecretsArgs {
+            name?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromSecretrefArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * analysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgsProvideDefaults sets the appropriate defaults for AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs
+         */
+        export function analysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgsProvideDefaults(val: AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs): AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecOsArgs {
+            name: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecReadinessgatesArgs {
+            conditionType: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextArgs {
+            fsGroup?: pulumi.Input<number>;
+            fsGroupChangePolicy?: pulumi.Input<string>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSeccompprofileArgs>;
+            supplementalGroups?: pulumi.Input<pulumi.Input<number>[]>;
+            sysctls?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSysctlsArgs>[]>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSysctlsArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTolerationsArgs {
+            effect?: pulumi.Input<string>;
+            key?: pulumi.Input<string>;
+            operator?: pulumi.Input<string>;
+            tolerationSeconds?: pulumi.Input<number>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorArgs>;
+            maxSkew: pulumi.Input<number>;
+            minDomains?: pulumi.Input<number>;
+            topologyKey: pulumi.Input<string>;
+            whenUnsatisfiable: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderKayentaArgs {
+            address: pulumi.Input<string>;
+            application: pulumi.Input<string>;
+            canaryConfigName: pulumi.Input<string>;
+            configurationAccountName: pulumi.Input<string>;
+            metricsAccountName: pulumi.Input<string>;
+            scopes: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderKayentaScopesArgs>[]>;
+            storageAccountName: pulumi.Input<string>;
+            threshold: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderKayentaThresholdArgs>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderKayentaScopesArgs {
+            controlScope: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderKayentaScopesControlscopeArgs>;
+            experimentScope: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderKayentaScopesExperimentscopeArgs>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderKayentaScopesControlscopeArgs {
+            end: pulumi.Input<string>;
+            region: pulumi.Input<string>;
+            scope: pulumi.Input<string>;
+            start: pulumi.Input<string>;
+            step: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderKayentaScopesExperimentscopeArgs {
+            end: pulumi.Input<string>;
+            region: pulumi.Input<string>;
+            scope: pulumi.Input<string>;
+            start: pulumi.Input<string>;
+            step: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderKayentaThresholdArgs {
+            marginal: pulumi.Input<number>;
+            pass: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderNewrelicArgs {
+            profile?: pulumi.Input<string>;
+            query: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderPrometheusArgs {
+            address?: pulumi.Input<string>;
+            query?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderWavefrontArgs {
+            address?: pulumi.Input<string>;
+            query?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderWebArgs {
+            body?: pulumi.Input<string>;
+            headers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunSpecMetricsProviderWebHeadersArgs>[]>;
+            insecure?: pulumi.Input<boolean>;
+            jsonPath?: pulumi.Input<string>;
+            method?: pulumi.Input<string>;
+            timeoutSeconds?: pulumi.Input<number>;
+            url: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunSpecMetricsProviderWebHeadersArgs {
+            key: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunStatusArgs {
+            dryRunSummary?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunStatusDryrunsummaryArgs>;
+            message?: pulumi.Input<string>;
+            metricResults?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunStatusMetricresultsArgs>[]>;
+            phase: pulumi.Input<string>;
+            runSummary?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunStatusRunsummaryArgs>;
+            startedAt?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunStatusDryrunsummaryArgs {
+            count?: pulumi.Input<number>;
+            error?: pulumi.Input<number>;
+            failed?: pulumi.Input<number>;
+            inconclusive?: pulumi.Input<number>;
+            successful?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunStatusMetricresultsArgs {
+            consecutiveError?: pulumi.Input<number>;
+            count?: pulumi.Input<number>;
+            dryRun?: pulumi.Input<boolean>;
+            error?: pulumi.Input<number>;
+            failed?: pulumi.Input<number>;
+            inconclusive?: pulumi.Input<number>;
+            measurements?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisRunStatusMetricresultsMeasurementsArgs>[]>;
+            message?: pulumi.Input<string>;
+            metadata?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            name: pulumi.Input<string>;
+            phase: pulumi.Input<string>;
+            successful?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisRunStatusMetricresultsMeasurementsArgs {
+            finishedAt?: pulumi.Input<string>;
+            message?: pulumi.Input<string>;
+            metadata?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            phase: pulumi.Input<string>;
+            resumeAt?: pulumi.Input<string>;
+            startedAt?: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisRunStatusRunsummaryArgs {
+            count?: pulumi.Input<number>;
+            error?: pulumi.Input<number>;
+            failed?: pulumi.Input<number>;
+            inconclusive?: pulumi.Input<number>;
+            successful?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecArgs {
+            args?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecArgsArgs>[]>;
+            dryRun?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecDryrunArgs>[]>;
+            measurementRetention?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMeasurementretentionArgs>[]>;
+            metrics: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsArgs>[]>;
+        }
+
+        export interface AnalysisTemplateSpecArgsArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecArgsValuefromArgs>;
+        }
+
+        export interface AnalysisTemplateSpecArgsValuefromArgs {
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecArgsValuefromFieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecArgsValuefromSecretkeyrefArgs>;
+        }
+
+        export interface AnalysisTemplateSpecArgsValuefromFieldrefArgs {
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecArgsValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecDryrunArgs {
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMeasurementretentionArgs {
+            limit: pulumi.Input<number>;
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsArgs {
+            consecutiveErrorLimit?: pulumi.Input<number | string>;
+            count?: pulumi.Input<number | string>;
+            failureCondition?: pulumi.Input<string>;
+            failureLimit?: pulumi.Input<number | string>;
+            inconclusiveLimit?: pulumi.Input<number | string>;
+            initialDelay?: pulumi.Input<string>;
+            interval?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            provider: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderArgs>;
+            successCondition?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderArgs {
+            cloudWatch?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderCloudwatchArgs>;
+            datadog?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderDatadogArgs>;
+            graphite?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderGraphiteArgs>;
+            influxdb?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderInfluxdbArgs>;
+            job?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobArgs>;
+            kayenta?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderKayentaArgs>;
+            newRelic?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderNewrelicArgs>;
+            prometheus?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderPrometheusArgs>;
+            wavefront?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderWavefrontArgs>;
+            web?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderWebArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderCloudwatchArgs {
+            interval?: pulumi.Input<string>;
+            metricDataQueries: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesArgs>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesArgs {
+            expression?: pulumi.Input<string>;
+            id?: pulumi.Input<string>;
+            label?: pulumi.Input<string>;
+            metricStat?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatArgs>;
+            period?: pulumi.Input<number | string>;
+            returnData?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatArgs {
+            metric?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricArgs>;
+            period?: pulumi.Input<number | string>;
+            stat?: pulumi.Input<string>;
+            unit?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricArgs {
+            dimensions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricDimensionsArgs>[]>;
+            metricName?: pulumi.Input<string>;
+            namespace?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricDimensionsArgs {
+            name?: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderDatadogArgs {
+            interval?: pulumi.Input<string>;
+            query: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderGraphiteArgs {
+            address?: pulumi.Input<string>;
+            query?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderInfluxdbArgs {
+            profile?: pulumi.Input<string>;
+            query?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobArgs {
+            metadata?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobMetadataArgs>;
+            spec: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobMetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecArgs {
+            activeDeadlineSeconds?: pulumi.Input<number>;
+            backoffLimit?: pulumi.Input<number>;
+            completionMode?: pulumi.Input<string>;
+            completions?: pulumi.Input<number>;
+            manualSelector?: pulumi.Input<boolean>;
+            parallelism?: pulumi.Input<number>;
+            selector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecSelectorArgs>;
+            suspend?: pulumi.Input<boolean>;
+            template: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateArgs>;
+            ttlSecondsAfterFinished?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecSelectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecSelectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecSelectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateArgs {
+            metadata?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateMetadataArgs>;
+            spec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateMetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecArgs {
+            activeDeadlineSeconds?: pulumi.Input<number>;
+            affinity?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityArgs>;
+            automountServiceAccountToken?: pulumi.Input<boolean>;
+            containers: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersArgs>[]>;
+            dnsConfig?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfigArgs>;
+            dnsPolicy?: pulumi.Input<string>;
+            enableServiceLinks?: pulumi.Input<boolean>;
+            ephemeralContainers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersArgs>[]>;
+            hostAliases?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecHostaliasesArgs>[]>;
+            hostIPC?: pulumi.Input<boolean>;
+            hostNetwork?: pulumi.Input<boolean>;
+            hostPID?: pulumi.Input<boolean>;
+            hostname?: pulumi.Input<string>;
+            imagePullSecrets?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecImagepullsecretsArgs>[]>;
+            initContainers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersArgs>[]>;
+            nodeName?: pulumi.Input<string>;
+            nodeSelector?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            os?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecOsArgs>;
+            overhead?: pulumi.Input<{[key: string]: pulumi.Input<number | string>}>;
+            preemptionPolicy?: pulumi.Input<string>;
+            priority?: pulumi.Input<number>;
+            priorityClassName?: pulumi.Input<string>;
+            readinessGates?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecReadinessgatesArgs>[]>;
+            restartPolicy?: pulumi.Input<string>;
+            runtimeClassName?: pulumi.Input<string>;
+            schedulerName?: pulumi.Input<string>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextArgs>;
+            serviceAccount?: pulumi.Input<string>;
+            serviceAccountName?: pulumi.Input<string>;
+            setHostnameAsFQDN?: pulumi.Input<boolean>;
+            shareProcessNamespace?: pulumi.Input<boolean>;
+            subdomain?: pulumi.Input<string>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            tolerations?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTolerationsArgs>[]>;
+            topologySpreadConstraints?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsArgs>[]>;
+            volumes?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityArgs {
+            nodeAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityArgs>;
+            podAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityArgs>;
+            podAntiAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            preference: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressionsArgs>[]>;
+            matchFields?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfieldsArgs>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfieldsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            nodeSelectorTerms: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsArgs>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressionsArgs>[]>;
+            matchFields?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfieldsArgs>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfieldsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionArgs>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            podAffinityTerm: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionArgs>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            podAffinityTerm: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromSecretrefArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * analysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgsProvideDefaults sets the appropriate defaults for AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs
+         */
+        export function analysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgsProvideDefaults(val: AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs): AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfigArgs {
+            nameservers?: pulumi.Input<pulumi.Input<string>[]>;
+            options?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfigOptionsArgs>[]>;
+            searches?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfigOptionsArgs {
+            name?: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            targetContainerName?: pulumi.Input<string>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromSecretrefArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * analysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgsProvideDefaults sets the appropriate defaults for AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs
+         */
+        export function analysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgsProvideDefaults(val: AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs): AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecHostaliasesArgs {
+            hostnames?: pulumi.Input<pulumi.Input<string>[]>;
+            ip?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecImagepullsecretsArgs {
+            name?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromSecretrefArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * analysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgsProvideDefaults sets the appropriate defaults for AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs
+         */
+        export function analysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgsProvideDefaults(val: AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs): AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecOsArgs {
+            name: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecReadinessgatesArgs {
+            conditionType: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextArgs {
+            fsGroup?: pulumi.Input<number>;
+            fsGroupChangePolicy?: pulumi.Input<string>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSeccompprofileArgs>;
+            supplementalGroups?: pulumi.Input<pulumi.Input<number>[]>;
+            sysctls?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSysctlsArgs>[]>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSysctlsArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTolerationsArgs {
+            effect?: pulumi.Input<string>;
+            key?: pulumi.Input<string>;
+            operator?: pulumi.Input<string>;
+            tolerationSeconds?: pulumi.Input<number>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorArgs>;
+            maxSkew: pulumi.Input<number>;
+            minDomains?: pulumi.Input<number>;
+            topologyKey: pulumi.Input<string>;
+            whenUnsatisfiable: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderKayentaArgs {
+            address: pulumi.Input<string>;
+            application: pulumi.Input<string>;
+            canaryConfigName: pulumi.Input<string>;
+            configurationAccountName: pulumi.Input<string>;
+            metricsAccountName: pulumi.Input<string>;
+            scopes: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderKayentaScopesArgs>[]>;
+            storageAccountName: pulumi.Input<string>;
+            threshold: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderKayentaThresholdArgs>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderKayentaScopesArgs {
+            controlScope: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderKayentaScopesControlscopeArgs>;
+            experimentScope: pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderKayentaScopesExperimentscopeArgs>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderKayentaScopesControlscopeArgs {
+            end: pulumi.Input<string>;
+            region: pulumi.Input<string>;
+            scope: pulumi.Input<string>;
+            start: pulumi.Input<string>;
+            step: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderKayentaScopesExperimentscopeArgs {
+            end: pulumi.Input<string>;
+            region: pulumi.Input<string>;
+            scope: pulumi.Input<string>;
+            start: pulumi.Input<string>;
+            step: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderKayentaThresholdArgs {
+            marginal: pulumi.Input<number>;
+            pass: pulumi.Input<number>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderNewrelicArgs {
+            profile?: pulumi.Input<string>;
+            query: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderPrometheusArgs {
+            address?: pulumi.Input<string>;
+            query?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderWavefrontArgs {
+            address?: pulumi.Input<string>;
+            query?: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderWebArgs {
+            body?: pulumi.Input<string>;
+            headers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.AnalysisTemplateSpecMetricsProviderWebHeadersArgs>[]>;
+            insecure?: pulumi.Input<boolean>;
+            jsonPath?: pulumi.Input<string>;
+            method?: pulumi.Input<string>;
+            timeoutSeconds?: pulumi.Input<number>;
+            url: pulumi.Input<string>;
+        }
+
+        export interface AnalysisTemplateSpecMetricsProviderWebHeadersArgs {
+            key: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
         /**
          * AppProjectSpec is the specification of an AppProject
          */
@@ -7797,6 +10926,5269 @@ export namespace argoproj {
              */
             type: pulumi.Input<string>;
         }
+
+        export interface ClusterAnalysisTemplateSpecArgs {
+            args?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecArgsArgs>[]>;
+            dryRun?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecDryrunArgs>[]>;
+            measurementRetention?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMeasurementretentionArgs>[]>;
+            metrics: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsArgs>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecArgsArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecArgsValuefromArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecArgsValuefromArgs {
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecArgsValuefromFieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecArgsValuefromSecretkeyrefArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecArgsValuefromFieldrefArgs {
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecArgsValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecDryrunArgs {
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMeasurementretentionArgs {
+            limit: pulumi.Input<number>;
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsArgs {
+            consecutiveErrorLimit?: pulumi.Input<number | string>;
+            count?: pulumi.Input<number | string>;
+            failureCondition?: pulumi.Input<string>;
+            failureLimit?: pulumi.Input<number | string>;
+            inconclusiveLimit?: pulumi.Input<number | string>;
+            initialDelay?: pulumi.Input<string>;
+            interval?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            provider: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderArgs>;
+            successCondition?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderArgs {
+            cloudWatch?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderCloudwatchArgs>;
+            datadog?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderDatadogArgs>;
+            graphite?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderGraphiteArgs>;
+            influxdb?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderInfluxdbArgs>;
+            job?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobArgs>;
+            kayenta?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderKayentaArgs>;
+            newRelic?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderNewrelicArgs>;
+            prometheus?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderPrometheusArgs>;
+            wavefront?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderWavefrontArgs>;
+            web?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderWebArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderCloudwatchArgs {
+            interval?: pulumi.Input<string>;
+            metricDataQueries: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesArgs>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesArgs {
+            expression?: pulumi.Input<string>;
+            id?: pulumi.Input<string>;
+            label?: pulumi.Input<string>;
+            metricStat?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatArgs>;
+            period?: pulumi.Input<number | string>;
+            returnData?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatArgs {
+            metric?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricArgs>;
+            period?: pulumi.Input<number | string>;
+            stat?: pulumi.Input<string>;
+            unit?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricArgs {
+            dimensions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricDimensionsArgs>[]>;
+            metricName?: pulumi.Input<string>;
+            namespace?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderCloudwatchMetricdataqueriesMetricstatMetricDimensionsArgs {
+            name?: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderDatadogArgs {
+            interval?: pulumi.Input<string>;
+            query: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderGraphiteArgs {
+            address?: pulumi.Input<string>;
+            query?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderInfluxdbArgs {
+            profile?: pulumi.Input<string>;
+            query?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobArgs {
+            metadata?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobMetadataArgs>;
+            spec: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobMetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecArgs {
+            activeDeadlineSeconds?: pulumi.Input<number>;
+            backoffLimit?: pulumi.Input<number>;
+            completionMode?: pulumi.Input<string>;
+            completions?: pulumi.Input<number>;
+            manualSelector?: pulumi.Input<boolean>;
+            parallelism?: pulumi.Input<number>;
+            selector?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecSelectorArgs>;
+            suspend?: pulumi.Input<boolean>;
+            template: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateArgs>;
+            ttlSecondsAfterFinished?: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecSelectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecSelectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecSelectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateArgs {
+            metadata?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateMetadataArgs>;
+            spec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateMetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecArgs {
+            activeDeadlineSeconds?: pulumi.Input<number>;
+            affinity?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityArgs>;
+            automountServiceAccountToken?: pulumi.Input<boolean>;
+            containers: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersArgs>[]>;
+            dnsConfig?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfigArgs>;
+            dnsPolicy?: pulumi.Input<string>;
+            enableServiceLinks?: pulumi.Input<boolean>;
+            ephemeralContainers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersArgs>[]>;
+            hostAliases?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecHostaliasesArgs>[]>;
+            hostIPC?: pulumi.Input<boolean>;
+            hostNetwork?: pulumi.Input<boolean>;
+            hostPID?: pulumi.Input<boolean>;
+            hostname?: pulumi.Input<string>;
+            imagePullSecrets?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecImagepullsecretsArgs>[]>;
+            initContainers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersArgs>[]>;
+            nodeName?: pulumi.Input<string>;
+            nodeSelector?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            os?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecOsArgs>;
+            overhead?: pulumi.Input<{[key: string]: pulumi.Input<number | string>}>;
+            preemptionPolicy?: pulumi.Input<string>;
+            priority?: pulumi.Input<number>;
+            priorityClassName?: pulumi.Input<string>;
+            readinessGates?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecReadinessgatesArgs>[]>;
+            restartPolicy?: pulumi.Input<string>;
+            runtimeClassName?: pulumi.Input<string>;
+            schedulerName?: pulumi.Input<string>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextArgs>;
+            serviceAccount?: pulumi.Input<string>;
+            serviceAccountName?: pulumi.Input<string>;
+            setHostnameAsFQDN?: pulumi.Input<boolean>;
+            shareProcessNamespace?: pulumi.Input<boolean>;
+            subdomain?: pulumi.Input<string>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            tolerations?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTolerationsArgs>[]>;
+            topologySpreadConstraints?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsArgs>[]>;
+            volumes?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityArgs {
+            nodeAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityArgs>;
+            podAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityArgs>;
+            podAntiAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            preference: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressionsArgs>[]>;
+            matchFields?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfieldsArgs>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfieldsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            nodeSelectorTerms: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsArgs>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressionsArgs>[]>;
+            matchFields?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfieldsArgs>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfieldsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionArgs>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            podAffinityTerm: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionArgs>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            podAffinityTerm: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromSecretrefArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * clusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgsProvideDefaults sets the appropriate defaults for ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs
+         */
+        export function clusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgsProvideDefaults(val: ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs): ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecContainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfigArgs {
+            nameservers?: pulumi.Input<pulumi.Input<string>[]>;
+            options?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfigOptionsArgs>[]>;
+            searches?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecDnsconfigOptionsArgs {
+            name?: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            targetContainerName?: pulumi.Input<string>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromSecretrefArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * clusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgsProvideDefaults sets the appropriate defaults for ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs
+         */
+        export function clusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgsProvideDefaults(val: ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs): ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecEphemeralcontainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecHostaliasesArgs {
+            hostnames?: pulumi.Input<pulumi.Input<string>[]>;
+            ip?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecImagepullsecretsArgs {
+            name?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromSecretrefArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * clusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgsProvideDefaults sets the appropriate defaults for ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs
+         */
+        export function clusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgsProvideDefaults(val: ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs): ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecInitcontainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecOsArgs {
+            name: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecReadinessgatesArgs {
+            conditionType: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextArgs {
+            fsGroup?: pulumi.Input<number>;
+            fsGroupChangePolicy?: pulumi.Input<string>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSeccompprofileArgs>;
+            supplementalGroups?: pulumi.Input<pulumi.Input<number>[]>;
+            sysctls?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSysctlsArgs>[]>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextSysctlsArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTolerationsArgs {
+            effect?: pulumi.Input<string>;
+            key?: pulumi.Input<string>;
+            operator?: pulumi.Input<string>;
+            tolerationSeconds?: pulumi.Input<number>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorArgs>;
+            maxSkew: pulumi.Input<number>;
+            minDomains?: pulumi.Input<number>;
+            topologyKey: pulumi.Input<string>;
+            whenUnsatisfiable: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderJobSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderKayentaArgs {
+            address: pulumi.Input<string>;
+            application: pulumi.Input<string>;
+            canaryConfigName: pulumi.Input<string>;
+            configurationAccountName: pulumi.Input<string>;
+            metricsAccountName: pulumi.Input<string>;
+            scopes: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderKayentaScopesArgs>[]>;
+            storageAccountName: pulumi.Input<string>;
+            threshold: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderKayentaThresholdArgs>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderKayentaScopesArgs {
+            controlScope: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderKayentaScopesControlscopeArgs>;
+            experimentScope: pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderKayentaScopesExperimentscopeArgs>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderKayentaScopesControlscopeArgs {
+            end: pulumi.Input<string>;
+            region: pulumi.Input<string>;
+            scope: pulumi.Input<string>;
+            start: pulumi.Input<string>;
+            step: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderKayentaScopesExperimentscopeArgs {
+            end: pulumi.Input<string>;
+            region: pulumi.Input<string>;
+            scope: pulumi.Input<string>;
+            start: pulumi.Input<string>;
+            step: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderKayentaThresholdArgs {
+            marginal: pulumi.Input<number>;
+            pass: pulumi.Input<number>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderNewrelicArgs {
+            profile?: pulumi.Input<string>;
+            query: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderPrometheusArgs {
+            address?: pulumi.Input<string>;
+            query?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderWavefrontArgs {
+            address?: pulumi.Input<string>;
+            query?: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderWebArgs {
+            body?: pulumi.Input<string>;
+            headers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ClusterAnalysisTemplateSpecMetricsProviderWebHeadersArgs>[]>;
+            insecure?: pulumi.Input<boolean>;
+            jsonPath?: pulumi.Input<string>;
+            method?: pulumi.Input<string>;
+            timeoutSeconds?: pulumi.Input<number>;
+            url: pulumi.Input<string>;
+        }
+
+        export interface ClusterAnalysisTemplateSpecMetricsProviderWebHeadersArgs {
+            key: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecArgs {
+            analyses?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecAnalysesArgs>[]>;
+            dryRun?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecDryrunArgs>[]>;
+            duration?: pulumi.Input<string>;
+            measurementRetention?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecMeasurementretentionArgs>[]>;
+            progressDeadlineSeconds?: pulumi.Input<number>;
+            scaleDownDelaySeconds?: pulumi.Input<number>;
+            templates: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesArgs>[]>;
+            terminate?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecAnalysesArgs {
+            args?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecAnalysesArgsArgs>[]>;
+            clusterScope?: pulumi.Input<boolean>;
+            name: pulumi.Input<string>;
+            requiredForCompletion?: pulumi.Input<boolean>;
+            templateName: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecAnalysesArgsArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecAnalysesArgsValuefromArgs>;
+        }
+
+        export interface ExperimentSpecAnalysesArgsValuefromArgs {
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecAnalysesArgsValuefromFieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecAnalysesArgsValuefromSecretkeyrefArgs>;
+        }
+
+        export interface ExperimentSpecAnalysesArgsValuefromFieldrefArgs {
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecAnalysesArgsValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecDryrunArgs {
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecMeasurementretentionArgs {
+            limit: pulumi.Input<number>;
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesArgs {
+            minReadySeconds?: pulumi.Input<number>;
+            name: pulumi.Input<string>;
+            replicas?: pulumi.Input<number>;
+            selector: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesSelectorArgs>;
+            service?: pulumi.Input<{[key: string]: any}>;
+            template: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesSelectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesSelectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ExperimentSpecTemplatesSelectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateArgs {
+            metadata?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateMetadataArgs>;
+            spec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateMetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecArgs {
+            activeDeadlineSeconds?: pulumi.Input<number>;
+            affinity?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityArgs>;
+            automountServiceAccountToken?: pulumi.Input<boolean>;
+            containers: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersArgs>[]>;
+            dnsConfig?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecDnsconfigArgs>;
+            dnsPolicy?: pulumi.Input<string>;
+            enableServiceLinks?: pulumi.Input<boolean>;
+            ephemeralContainers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersArgs>[]>;
+            hostAliases?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecHostaliasesArgs>[]>;
+            hostIPC?: pulumi.Input<boolean>;
+            hostNetwork?: pulumi.Input<boolean>;
+            hostPID?: pulumi.Input<boolean>;
+            hostname?: pulumi.Input<string>;
+            imagePullSecrets?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecImagepullsecretsArgs>[]>;
+            initContainers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersArgs>[]>;
+            nodeName?: pulumi.Input<string>;
+            nodeSelector?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            os?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecOsArgs>;
+            overhead?: pulumi.Input<{[key: string]: pulumi.Input<number | string>}>;
+            preemptionPolicy?: pulumi.Input<string>;
+            priority?: pulumi.Input<number>;
+            priorityClassName?: pulumi.Input<string>;
+            readinessGates?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecReadinessgatesArgs>[]>;
+            restartPolicy?: pulumi.Input<string>;
+            runtimeClassName?: pulumi.Input<string>;
+            schedulerName?: pulumi.Input<string>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecSecuritycontextArgs>;
+            serviceAccount?: pulumi.Input<string>;
+            serviceAccountName?: pulumi.Input<string>;
+            setHostnameAsFQDN?: pulumi.Input<boolean>;
+            shareProcessNamespace?: pulumi.Input<boolean>;
+            subdomain?: pulumi.Input<string>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            tolerations?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecTolerationsArgs>[]>;
+            topologySpreadConstraints?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecTopologyspreadconstraintsArgs>[]>;
+            volumes?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityArgs {
+            nodeAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityArgs>;
+            podAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityArgs>;
+            podAntiAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            preference: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressionsArgs>[]>;
+            matchFields?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfieldsArgs>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfieldsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            nodeSelectorTerms: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsArgs>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressionsArgs>[]>;
+            matchFields?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfieldsArgs>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfieldsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionArgs>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            podAffinityTerm: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionArgs>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            podAffinityTerm: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersEnvfromSecretrefArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * experimentSpecTemplatesTemplateSpecContainersPortsArgsProvideDefaults sets the appropriate defaults for ExperimentSpecTemplatesTemplateSpecContainersPortsArgs
+         */
+        export function experimentSpecTemplatesTemplateSpecContainersPortsArgsProvideDefaults(val: ExperimentSpecTemplatesTemplateSpecContainersPortsArgs): ExperimentSpecTemplatesTemplateSpecContainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecContainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecContainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecDnsconfigArgs {
+            nameservers?: pulumi.Input<pulumi.Input<string>[]>;
+            options?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecDnsconfigOptionsArgs>[]>;
+            searches?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecDnsconfigOptionsArgs {
+            name?: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            targetContainerName?: pulumi.Input<string>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvfromSecretrefArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * experimentSpecTemplatesTemplateSpecEphemeralcontainersPortsArgsProvideDefaults sets the appropriate defaults for ExperimentSpecTemplatesTemplateSpecEphemeralcontainersPortsArgs
+         */
+        export function experimentSpecTemplatesTemplateSpecEphemeralcontainersPortsArgsProvideDefaults(val: ExperimentSpecTemplatesTemplateSpecEphemeralcontainersPortsArgs): ExperimentSpecTemplatesTemplateSpecEphemeralcontainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecEphemeralcontainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecHostaliasesArgs {
+            hostnames?: pulumi.Input<pulumi.Input<string>[]>;
+            ip?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecImagepullsecretsArgs {
+            name?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersEnvfromSecretrefArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * experimentSpecTemplatesTemplateSpecInitcontainersPortsArgsProvideDefaults sets the appropriate defaults for ExperimentSpecTemplatesTemplateSpecInitcontainersPortsArgs
+         */
+        export function experimentSpecTemplatesTemplateSpecInitcontainersPortsArgsProvideDefaults(val: ExperimentSpecTemplatesTemplateSpecInitcontainersPortsArgs): ExperimentSpecTemplatesTemplateSpecInitcontainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecInitcontainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecOsArgs {
+            name: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecReadinessgatesArgs {
+            conditionType: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecSecuritycontextArgs {
+            fsGroup?: pulumi.Input<number>;
+            fsGroupChangePolicy?: pulumi.Input<string>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecSecuritycontextSeccompprofileArgs>;
+            supplementalGroups?: pulumi.Input<pulumi.Input<number>[]>;
+            sysctls?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecSecuritycontextSysctlsArgs>[]>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecSecuritycontextSysctlsArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecTolerationsArgs {
+            effect?: pulumi.Input<string>;
+            key?: pulumi.Input<string>;
+            operator?: pulumi.Input<string>;
+            tolerationSeconds?: pulumi.Input<number>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecTopologyspreadconstraintsArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecTopologyspreadconstraintsLabelselectorArgs>;
+            maxSkew: pulumi.Input<number>;
+            minDomains?: pulumi.Input<number>;
+            topologyKey: pulumi.Input<string>;
+            whenUnsatisfiable: pulumi.Input<string>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecTopologyspreadconstraintsLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentSpecTemplatesTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface ExperimentSpecTemplatesTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ExperimentStatusArgs {
+            analysisRuns?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentStatusAnalysisrunsArgs>[]>;
+            availableAt?: pulumi.Input<string>;
+            conditions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentStatusConditionsArgs>[]>;
+            message?: pulumi.Input<string>;
+            phase?: pulumi.Input<string>;
+            templateStatuses?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.ExperimentStatusTemplatestatusesArgs>[]>;
+        }
+
+        export interface ExperimentStatusAnalysisrunsArgs {
+            analysisRun: pulumi.Input<string>;
+            message?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            phase: pulumi.Input<string>;
+        }
+
+        export interface ExperimentStatusConditionsArgs {
+            lastTransitionTime: pulumi.Input<string>;
+            lastUpdateTime: pulumi.Input<string>;
+            message: pulumi.Input<string>;
+            reason: pulumi.Input<string>;
+            status: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface ExperimentStatusTemplatestatusesArgs {
+            availableReplicas: pulumi.Input<number>;
+            collisionCount?: pulumi.Input<number>;
+            lastTransitionTime?: pulumi.Input<string>;
+            message?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            podTemplateHash?: pulumi.Input<string>;
+            readyReplicas: pulumi.Input<number>;
+            replicas: pulumi.Input<number>;
+            serviceName?: pulumi.Input<string>;
+            status?: pulumi.Input<string>;
+            updatedReplicas: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecArgs {
+            analysis?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecAnalysisArgs>;
+            minReadySeconds?: pulumi.Input<number>;
+            paused?: pulumi.Input<boolean>;
+            progressDeadlineAbort?: pulumi.Input<boolean>;
+            progressDeadlineSeconds?: pulumi.Input<number>;
+            replicas?: pulumi.Input<number>;
+            restartAt?: pulumi.Input<string>;
+            revisionHistoryLimit?: pulumi.Input<number>;
+            selector?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecSelectorArgs>;
+            strategy?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyArgs>;
+            template?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateArgs>;
+            workloadRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecWorkloadrefArgs>;
+        }
+
+        export interface RolloutSpecAnalysisArgs {
+            successfulRunHistoryLimit?: pulumi.Input<number>;
+            unsuccessfulRunHistoryLimit?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecSelectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecSelectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecSelectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecStrategyArgs {
+            blueGreen?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenArgs>;
+            canary?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryArgs>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenArgs {
+            abortScaleDownDelaySeconds?: pulumi.Input<number>;
+            activeMetadata?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenActivemetadataArgs>;
+            activeService: pulumi.Input<string>;
+            antiAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenAntiaffinityArgs>;
+            autoPromotionEnabled?: pulumi.Input<boolean>;
+            autoPromotionSeconds?: pulumi.Input<number>;
+            maxUnavailable?: pulumi.Input<number | string>;
+            postPromotionAnalysis?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisArgs>;
+            prePromotionAnalysis?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisArgs>;
+            previewMetadata?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPreviewmetadataArgs>;
+            previewReplicaCount?: pulumi.Input<number>;
+            previewService?: pulumi.Input<string>;
+            scaleDownDelayRevisionLimit?: pulumi.Input<number>;
+            scaleDownDelaySeconds?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenActivemetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenAntiaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenAntiaffinityPreferredduringschedulingignoredduringexecutionArgs>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenAntiaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            weight: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisArgs {
+            args?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisArgsArgs>[]>;
+            dryRun?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisDryrunArgs>[]>;
+            measurementRetention?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisMeasurementretentionArgs>[]>;
+            templates?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisTemplatesArgs>[]>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisArgsArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisArgsValuefromArgs>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisArgsValuefromArgs {
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPostpromotionanalysisArgsValuefromFieldrefArgs>;
+            podTemplateHashValue?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisArgsValuefromFieldrefArgs {
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisDryrunArgs {
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisMeasurementretentionArgs {
+            limit: pulumi.Input<number>;
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPostpromotionanalysisTemplatesArgs {
+            clusterScope?: pulumi.Input<boolean>;
+            templateName?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisArgs {
+            args?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisArgsArgs>[]>;
+            dryRun?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisDryrunArgs>[]>;
+            measurementRetention?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisMeasurementretentionArgs>[]>;
+            templates?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisTemplatesArgs>[]>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisArgsArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisArgsValuefromArgs>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisArgsValuefromArgs {
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyBluegreenPrepromotionanalysisArgsValuefromFieldrefArgs>;
+            podTemplateHashValue?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisArgsValuefromFieldrefArgs {
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisDryrunArgs {
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisMeasurementretentionArgs {
+            limit: pulumi.Input<number>;
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPrepromotionanalysisTemplatesArgs {
+            clusterScope?: pulumi.Input<boolean>;
+            templateName?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyBluegreenPreviewmetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecStrategyCanaryArgs {
+            abortScaleDownDelaySeconds?: pulumi.Input<number>;
+            analysis?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisArgs>;
+            antiAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAntiaffinityArgs>;
+            canaryMetadata?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryCanarymetadataArgs>;
+            canaryService?: pulumi.Input<string>;
+            dynamicStableScale?: pulumi.Input<boolean>;
+            maxSurge?: pulumi.Input<number | string>;
+            maxUnavailable?: pulumi.Input<number | string>;
+            pingPong?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryPingpongArgs>;
+            scaleDownDelayRevisionLimit?: pulumi.Input<number>;
+            scaleDownDelaySeconds?: pulumi.Input<number>;
+            stableMetadata?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStablemetadataArgs>;
+            stableService?: pulumi.Input<string>;
+            steps?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsArgs>[]>;
+            trafficRouting?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingArgs>;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisArgs {
+            args?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisArgsArgs>[]>;
+            dryRun?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisDryrunArgs>[]>;
+            measurementRetention?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisMeasurementretentionArgs>[]>;
+            startingStep?: pulumi.Input<number>;
+            templates?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisTemplatesArgs>[]>;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisArgsArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisArgsValuefromArgs>;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisArgsValuefromArgs {
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAnalysisArgsValuefromFieldrefArgs>;
+            podTemplateHashValue?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisArgsValuefromFieldrefArgs {
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisDryrunArgs {
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisMeasurementretentionArgs {
+            limit: pulumi.Input<number>;
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryAnalysisTemplatesArgs {
+            clusterScope?: pulumi.Input<boolean>;
+            templateName?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryAntiaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryAntiaffinityPreferredduringschedulingignoredduringexecutionArgs>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface RolloutSpecStrategyCanaryAntiaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            weight: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecStrategyCanaryCanarymetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecStrategyCanaryPingpongArgs {
+            pingService: pulumi.Input<string>;
+            pongService: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStablemetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsArgs {
+            analysis?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisArgs>;
+            experiment?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentArgs>;
+            pause?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsPauseArgs>;
+            setCanaryScale?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetcanaryscaleArgs>;
+            setHeaderRoute?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetheaderrouteArgs>;
+            setMirrorRoute?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetmirrorrouteArgs>;
+            setWeight?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisArgs {
+            args?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisArgsArgs>[]>;
+            dryRun?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisDryrunArgs>[]>;
+            measurementRetention?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisMeasurementretentionArgs>[]>;
+            templates?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisTemplatesArgs>[]>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisArgsArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisArgsValuefromArgs>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisArgsValuefromArgs {
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsAnalysisArgsValuefromFieldrefArgs>;
+            podTemplateHashValue?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisArgsValuefromFieldrefArgs {
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisDryrunArgs {
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisMeasurementretentionArgs {
+            limit: pulumi.Input<number>;
+            metricName: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsAnalysisTemplatesArgs {
+            clusterScope?: pulumi.Input<boolean>;
+            templateName?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentArgs {
+            analyses?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentAnalysesArgs>[]>;
+            duration?: pulumi.Input<string>;
+            templates: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentTemplatesArgs>[]>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentAnalysesArgs {
+            args?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentAnalysesArgsArgs>[]>;
+            clusterScope?: pulumi.Input<boolean>;
+            name: pulumi.Input<string>;
+            requiredForCompletion?: pulumi.Input<boolean>;
+            templateName: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentAnalysesArgsArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentAnalysesArgsValuefromArgs>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentAnalysesArgsValuefromArgs {
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentAnalysesArgsValuefromFieldrefArgs>;
+            podTemplateHashValue?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentAnalysesArgsValuefromFieldrefArgs {
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentTemplatesArgs {
+            metadata?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentTemplatesMetadataArgs>;
+            name: pulumi.Input<string>;
+            replicas?: pulumi.Input<number>;
+            selector?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentTemplatesSelectorArgs>;
+            specRef: pulumi.Input<string>;
+            weight?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentTemplatesMetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentTemplatesSelectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsExperimentTemplatesSelectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsExperimentTemplatesSelectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsPauseArgs {
+            duration?: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetcanaryscaleArgs {
+            matchTrafficWeight?: pulumi.Input<boolean>;
+            replicas?: pulumi.Input<number>;
+            weight?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetheaderrouteArgs {
+            match?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetheaderrouteMatchArgs>[]>;
+            name?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetheaderrouteMatchArgs {
+            headerName: pulumi.Input<string>;
+            headerValue: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetheaderrouteMatchHeadervalueArgs>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetheaderrouteMatchHeadervalueArgs {
+            exact?: pulumi.Input<string>;
+            prefix?: pulumi.Input<string>;
+            regex?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetmirrorrouteArgs {
+            match?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchArgs>[]>;
+            name: pulumi.Input<string>;
+            percentage?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchArgs {
+            headers?: pulumi.Input<{[key: string]: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchHeadersArgs>}>;
+            method?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchMethodArgs>;
+            path?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchPathArgs>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchHeadersArgs {
+            exact?: pulumi.Input<string>;
+            prefix?: pulumi.Input<string>;
+            regex?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchMethodArgs {
+            exact?: pulumi.Input<string>;
+            prefix?: pulumi.Input<string>;
+            regex?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryStepsSetmirrorrouteMatchPathArgs {
+            exact?: pulumi.Input<string>;
+            prefix?: pulumi.Input<string>;
+            regex?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingArgs {
+            alb?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAlbArgs>;
+            ambassador?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAmbassadorArgs>;
+            appMesh?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAppmeshArgs>;
+            istio?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingIstioArgs>;
+            managedRoutes?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingManagedroutesArgs>[]>;
+            nginx?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingNginxArgs>;
+            smi?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingSmiArgs>;
+            traefik?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingTraefikArgs>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAlbArgs {
+            annotationPrefix?: pulumi.Input<string>;
+            ingress: pulumi.Input<string>;
+            rootService?: pulumi.Input<string>;
+            servicePort: pulumi.Input<number>;
+            stickinessConfig?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAlbStickinessconfigArgs>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAlbStickinessconfigArgs {
+            durationSeconds: pulumi.Input<number>;
+            enabled: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAmbassadorArgs {
+            mappings: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAppmeshArgs {
+            virtualNodeGroup?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualnodegroupArgs>;
+            virtualService?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualserviceArgs>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualnodegroupArgs {
+            canaryVirtualNodeRef: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualnodegroupCanaryvirtualnoderefArgs>;
+            stableVirtualNodeRef: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualnodegroupStablevirtualnoderefArgs>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualnodegroupCanaryvirtualnoderefArgs {
+            name: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualnodegroupStablevirtualnoderefArgs {
+            name: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingAppmeshVirtualserviceArgs {
+            name: pulumi.Input<string>;
+            routes?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingIstioArgs {
+            destinationRule?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingIstioDestinationruleArgs>;
+            virtualService?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingIstioVirtualserviceArgs>;
+            virtualServices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingIstioVirtualservicesArgs>[]>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingIstioDestinationruleArgs {
+            canarySubsetName: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            stableSubsetName: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingIstioVirtualserviceArgs {
+            name: pulumi.Input<string>;
+            routes?: pulumi.Input<pulumi.Input<string>[]>;
+            tlsRoutes?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingIstioVirtualserviceTlsroutesArgs>[]>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingIstioVirtualserviceTlsroutesArgs {
+            port?: pulumi.Input<number>;
+            sniHosts?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingIstioVirtualservicesArgs {
+            name: pulumi.Input<string>;
+            routes?: pulumi.Input<pulumi.Input<string>[]>;
+            tlsRoutes?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecStrategyCanaryTrafficroutingIstioVirtualservicesTlsroutesArgs>[]>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingIstioVirtualservicesTlsroutesArgs {
+            port?: pulumi.Input<number>;
+            sniHosts?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingManagedroutesArgs {
+            name: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingNginxArgs {
+            additionalIngressAnnotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            annotationPrefix?: pulumi.Input<string>;
+            stableIngress: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingSmiArgs {
+            rootService?: pulumi.Input<string>;
+            trafficSplitName?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecStrategyCanaryTrafficroutingTraefikArgs {
+            weightedTraefikServiceName: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateArgs {
+            metadata?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateMetadataArgs>;
+            spec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecArgs>;
+        }
+
+        export interface RolloutSpecTemplateMetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecTemplateSpecArgs {
+            activeDeadlineSeconds?: pulumi.Input<number>;
+            affinity?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityArgs>;
+            automountServiceAccountToken?: pulumi.Input<boolean>;
+            containers: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersArgs>[]>;
+            dnsConfig?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecDnsconfigArgs>;
+            dnsPolicy?: pulumi.Input<string>;
+            enableServiceLinks?: pulumi.Input<boolean>;
+            ephemeralContainers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersArgs>[]>;
+            hostAliases?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecHostaliasesArgs>[]>;
+            hostIPC?: pulumi.Input<boolean>;
+            hostNetwork?: pulumi.Input<boolean>;
+            hostPID?: pulumi.Input<boolean>;
+            hostname?: pulumi.Input<string>;
+            imagePullSecrets?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecImagepullsecretsArgs>[]>;
+            initContainers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersArgs>[]>;
+            nodeName?: pulumi.Input<string>;
+            nodeSelector?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            os?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecOsArgs>;
+            overhead?: pulumi.Input<{[key: string]: pulumi.Input<number | string>}>;
+            preemptionPolicy?: pulumi.Input<string>;
+            priority?: pulumi.Input<number>;
+            priorityClassName?: pulumi.Input<string>;
+            readinessGates?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecReadinessgatesArgs>[]>;
+            restartPolicy?: pulumi.Input<string>;
+            runtimeClassName?: pulumi.Input<string>;
+            schedulerName?: pulumi.Input<string>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecSecuritycontextArgs>;
+            serviceAccount?: pulumi.Input<string>;
+            serviceAccountName?: pulumi.Input<string>;
+            setHostnameAsFQDN?: pulumi.Input<boolean>;
+            shareProcessNamespace?: pulumi.Input<boolean>;
+            subdomain?: pulumi.Input<string>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            tolerations?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecTolerationsArgs>[]>;
+            topologySpreadConstraints?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecTopologyspreadconstraintsArgs>[]>;
+            volumes?: pulumi.Input<pulumi.Input<{[key: string]: any}>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityArgs {
+            nodeAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityArgs>;
+            podAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityArgs>;
+            podAntiAffinity?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            preference: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressionsArgs>[]>;
+            matchFields?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfieldsArgs>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityPreferredduringschedulingignoredduringexecutionPreferenceMatchfieldsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            nodeSelectorTerms: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsArgs>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressionsArgs>[]>;
+            matchFields?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfieldsArgs>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityNodeaffinityRequiredduringschedulingignoredduringexecutionNodeselectortermsMatchfieldsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionArgs>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            podAffinityTerm: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityArgs {
+            preferredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionArgs>[]>;
+            requiredDuringSchedulingIgnoredDuringExecution?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionArgs>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionArgs {
+            podAffinityTerm: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityPreferredduringschedulingignoredduringexecutionPodaffinitytermNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs>;
+            namespaceSelector?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs>;
+            namespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            topologyKey: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecTemplateSpecAffinityPodantiaffinityRequiredduringschedulingignoredduringexecutionNamespaceselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvValuefromArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersEnvfromSecretrefArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePrestopArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * rolloutSpecTemplateSpecContainersPortsArgsProvideDefaults sets the appropriate defaults for RolloutSpecTemplateSpecContainersPortsArgs
+         */
+        export function rolloutSpecTemplateSpecContainersPortsArgsProvideDefaults(val: RolloutSpecTemplateSpecContainersPortsArgs): RolloutSpecTemplateSpecContainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface RolloutSpecTemplateSpecContainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecContainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecContainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecDnsconfigArgs {
+            nameservers?: pulumi.Input<pulumi.Input<string>[]>;
+            options?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecDnsconfigOptionsArgs>[]>;
+            searches?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecDnsconfigOptionsArgs {
+            name?: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            targetContainerName?: pulumi.Input<string>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersEnvfromSecretrefArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * rolloutSpecTemplateSpecEphemeralcontainersPortsArgsProvideDefaults sets the appropriate defaults for RolloutSpecTemplateSpecEphemeralcontainersPortsArgs
+         */
+        export function rolloutSpecTemplateSpecEphemeralcontainersPortsArgsProvideDefaults(val: RolloutSpecTemplateSpecEphemeralcontainersPortsArgs): RolloutSpecTemplateSpecEphemeralcontainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecEphemeralcontainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecHostaliasesArgs {
+            hostnames?: pulumi.Input<pulumi.Input<string>[]>;
+            ip?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecImagepullsecretsArgs {
+            name?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersArgs {
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            env?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvArgs>[]>;
+            envFrom?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvfromArgs>[]>;
+            image?: pulumi.Input<string>;
+            imagePullPolicy?: pulumi.Input<string>;
+            lifecycle?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecycleArgs>;
+            livenessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLivenessprobeArgs>;
+            name: pulumi.Input<string>;
+            ports?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersPortsArgs>[]>;
+            readinessProbe?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersReadinessprobeArgs>;
+            resources?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersResourcesArgs>;
+            securityContext?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersSecuritycontextArgs>;
+            startupProbe?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersStartupprobeArgs>;
+            stdin?: pulumi.Input<boolean>;
+            stdinOnce?: pulumi.Input<boolean>;
+            terminationMessagePath?: pulumi.Input<string>;
+            terminationMessagePolicy?: pulumi.Input<string>;
+            tty?: pulumi.Input<boolean>;
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersVolumedevicesArgs>[]>;
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersVolumemountsArgs>[]>;
+            workingDir?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvArgs {
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvValuefromArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyrefArgs>;
+            fieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvValuefromFieldrefArgs>;
+            resourceFieldRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvValuefromResourcefieldrefArgs>;
+            secretKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvValuefromFieldrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            fieldPath: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvValuefromResourcefieldrefArgs {
+            containerName?: pulumi.Input<string>;
+            divisor?: pulumi.Input<number | string>;
+            resource: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvValuefromSecretkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvfromArgs {
+            configMapRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvfromConfigmaprefArgs>;
+            prefix?: pulumi.Input<string>;
+            secretRef?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersEnvfromSecretrefArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvfromConfigmaprefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersEnvfromSecretrefArgs {
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecycleArgs {
+            postStart?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePoststartArgs>;
+            preStop?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePrestopArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePoststartArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePoststartExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePoststartExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePoststartHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePoststartTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePrestopArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePrestopExecArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetArgs>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePrestopExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePrestopHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLifecyclePrestopTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLivenessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLivenessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLivenessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLivenessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLivenessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLivenessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLivenessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLivenessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLivenessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersLivenessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersPortsArgs {
+            containerPort: pulumi.Input<number>;
+            hostIP?: pulumi.Input<string>;
+            hostPort?: pulumi.Input<number>;
+            name?: pulumi.Input<string>;
+            protocol?: pulumi.Input<string>;
+        }
+        /**
+         * rolloutSpecTemplateSpecInitcontainersPortsArgsProvideDefaults sets the appropriate defaults for RolloutSpecTemplateSpecInitcontainersPortsArgs
+         */
+        export function rolloutSpecTemplateSpecInitcontainersPortsArgsProvideDefaults(val: RolloutSpecTemplateSpecInitcontainersPortsArgs): RolloutSpecTemplateSpecInitcontainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersReadinessprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersReadinessprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersReadinessprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersReadinessprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersReadinessprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersReadinessprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersReadinessprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersReadinessprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersReadinessprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersReadinessprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersResourcesArgs {
+            limits?: pulumi.Input<{[key: string]: any}>;
+            requests?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersSecuritycontextArgs {
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            capabilities?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersSecuritycontextCapabilitiesArgs>;
+            privileged?: pulumi.Input<boolean>;
+            procMount?: pulumi.Input<string>;
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersSecuritycontextSeccompprofileArgs>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersSecuritycontextCapabilitiesArgs {
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersStartupprobeArgs {
+            exec?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersStartupprobeExecArgs>;
+            failureThreshold?: pulumi.Input<number>;
+            grpc?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersStartupprobeGrpcArgs>;
+            httpGet?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersStartupprobeHttpgetArgs>;
+            initialDelaySeconds?: pulumi.Input<number>;
+            periodSeconds?: pulumi.Input<number>;
+            successThreshold?: pulumi.Input<number>;
+            tcpSocket?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersStartupprobeTcpsocketArgs>;
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersStartupprobeExecArgs {
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersStartupprobeGrpcArgs {
+            port: pulumi.Input<number>;
+            service?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersStartupprobeHttpgetArgs {
+            host?: pulumi.Input<string>;
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            path?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+            scheme?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersStartupprobeHttpgetHttpheadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersStartupprobeTcpsocketArgs {
+            host?: pulumi.Input<string>;
+            port: pulumi.Input<number | string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersVolumedevicesArgs {
+            devicePath: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecInitcontainersVolumemountsArgs {
+            mountPath: pulumi.Input<string>;
+            mountPropagation?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            readOnly?: pulumi.Input<boolean>;
+            subPath?: pulumi.Input<string>;
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecOsArgs {
+            name: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecReadinessgatesArgs {
+            conditionType: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecSecuritycontextArgs {
+            fsGroup?: pulumi.Input<number>;
+            fsGroupChangePolicy?: pulumi.Input<string>;
+            runAsGroup?: pulumi.Input<number>;
+            runAsNonRoot?: pulumi.Input<boolean>;
+            runAsUser?: pulumi.Input<number>;
+            seLinuxOptions?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecSecuritycontextSelinuxoptionsArgs>;
+            seccompProfile?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecSecuritycontextSeccompprofileArgs>;
+            supplementalGroups?: pulumi.Input<pulumi.Input<number>[]>;
+            sysctls?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecSecuritycontextSysctlsArgs>[]>;
+            windowsOptions?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecSecuritycontextWindowsoptionsArgs>;
+        }
+
+        export interface RolloutSpecTemplateSpecSecuritycontextSeccompprofileArgs {
+            localhostProfile?: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecSecuritycontextSelinuxoptionsArgs {
+            level?: pulumi.Input<string>;
+            role?: pulumi.Input<string>;
+            type?: pulumi.Input<string>;
+            user?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecSecuritycontextSysctlsArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecSecuritycontextWindowsoptionsArgs {
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            hostProcess?: pulumi.Input<boolean>;
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecTolerationsArgs {
+            effect?: pulumi.Input<string>;
+            key?: pulumi.Input<string>;
+            operator?: pulumi.Input<string>;
+            tolerationSeconds?: pulumi.Input<number>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecTopologyspreadconstraintsArgs {
+            labelSelector?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecTopologyspreadconstraintsLabelselectorArgs>;
+            maxSkew: pulumi.Input<number>;
+            minDomains?: pulumi.Input<number>;
+            topologyKey: pulumi.Input<string>;
+            whenUnsatisfiable: pulumi.Input<string>;
+        }
+
+        export interface RolloutSpecTemplateSpecTopologyspreadconstraintsLabelselectorArgs {
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressionsArgs>[]>;
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface RolloutSpecTemplateSpecTopologyspreadconstraintsLabelselectorMatchexpressionsArgs {
+            key: pulumi.Input<string>;
+            operator: pulumi.Input<string>;
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface RolloutSpecWorkloadrefArgs {
+            apiVersion?: pulumi.Input<string>;
+            kind?: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+        }
+
+        export interface RolloutStatusArgs {
+            HPAReplicas?: pulumi.Input<number>;
+            abort?: pulumi.Input<boolean>;
+            abortedAt?: pulumi.Input<string>;
+            alb?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusAlbArgs>;
+            availableReplicas?: pulumi.Input<number>;
+            blueGreen?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusBluegreenArgs>;
+            canary?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusCanaryArgs>;
+            collisionCount?: pulumi.Input<number>;
+            conditions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusConditionsArgs>[]>;
+            controllerPause?: pulumi.Input<boolean>;
+            currentPodHash?: pulumi.Input<string>;
+            currentStepHash?: pulumi.Input<string>;
+            currentStepIndex?: pulumi.Input<number>;
+            message?: pulumi.Input<string>;
+            observedGeneration?: pulumi.Input<string>;
+            pauseConditions?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusPauseconditionsArgs>[]>;
+            phase?: pulumi.Input<string>;
+            promoteFull?: pulumi.Input<boolean>;
+            readyReplicas?: pulumi.Input<number>;
+            replicas?: pulumi.Input<number>;
+            restartedAt?: pulumi.Input<string>;
+            selector?: pulumi.Input<string>;
+            stableRS?: pulumi.Input<string>;
+            updatedReplicas?: pulumi.Input<number>;
+            workloadObservedGeneration?: pulumi.Input<string>;
+        }
+
+        export interface RolloutStatusAlbArgs {
+            canaryTargetGroup?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusAlbCanarytargetgroupArgs>;
+            loadBalancer?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusAlbLoadbalancerArgs>;
+            stableTargetGroup?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusAlbStabletargetgroupArgs>;
+        }
+
+        export interface RolloutStatusAlbCanarytargetgroupArgs {
+            arn: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface RolloutStatusAlbLoadbalancerArgs {
+            arn: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface RolloutStatusAlbStabletargetgroupArgs {
+            arn: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        export interface RolloutStatusBluegreenArgs {
+            activeSelector?: pulumi.Input<string>;
+            postPromotionAnalysisRunStatus?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusBluegreenPostpromotionanalysisrunstatusArgs>;
+            prePromotionAnalysisRunStatus?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusBluegreenPrepromotionanalysisrunstatusArgs>;
+            previewSelector?: pulumi.Input<string>;
+            scaleUpPreviewCheckPoint?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutStatusBluegreenPostpromotionanalysisrunstatusArgs {
+            message?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            status: pulumi.Input<string>;
+        }
+
+        export interface RolloutStatusBluegreenPrepromotionanalysisrunstatusArgs {
+            message?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            status: pulumi.Input<string>;
+        }
+
+        export interface RolloutStatusCanaryArgs {
+            currentBackgroundAnalysisRunStatus?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusCanaryCurrentbackgroundanalysisrunstatusArgs>;
+            currentExperiment?: pulumi.Input<string>;
+            currentStepAnalysisRunStatus?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusCanaryCurrentstepanalysisrunstatusArgs>;
+            stablePingPong?: pulumi.Input<string>;
+            weights?: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusCanaryWeightsArgs>;
+        }
+
+        export interface RolloutStatusCanaryCurrentbackgroundanalysisrunstatusArgs {
+            message?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            status: pulumi.Input<string>;
+        }
+
+        export interface RolloutStatusCanaryCurrentstepanalysisrunstatusArgs {
+            message?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            status: pulumi.Input<string>;
+        }
+
+        export interface RolloutStatusCanaryWeightsArgs {
+            additional?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusCanaryWeightsAdditionalArgs>[]>;
+            canary: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusCanaryWeightsCanaryArgs>;
+            stable: pulumi.Input<inputs.argoproj.v1alpha1.RolloutStatusCanaryWeightsStableArgs>;
+            verified?: pulumi.Input<boolean>;
+        }
+
+        export interface RolloutStatusCanaryWeightsAdditionalArgs {
+            podTemplateHash?: pulumi.Input<string>;
+            serviceName?: pulumi.Input<string>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface RolloutStatusCanaryWeightsCanaryArgs {
+            podTemplateHash?: pulumi.Input<string>;
+            serviceName?: pulumi.Input<string>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface RolloutStatusCanaryWeightsStableArgs {
+            podTemplateHash?: pulumi.Input<string>;
+            serviceName?: pulumi.Input<string>;
+            weight: pulumi.Input<number>;
+        }
+
+        export interface RolloutStatusConditionsArgs {
+            lastTransitionTime: pulumi.Input<string>;
+            lastUpdateTime: pulumi.Input<string>;
+            message: pulumi.Input<string>;
+            reason: pulumi.Input<string>;
+            status: pulumi.Input<string>;
+            type: pulumi.Input<string>;
+        }
+
+        export interface RolloutStatusPauseconditionsArgs {
+            reason: pulumi.Input<string>;
+            startTime: pulumi.Input<string>;
+        }
+
+        export interface WorkflowTaskResultOutputsArgs {
+            artifacts?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArgs>[]>;
+            exitCode?: pulumi.Input<string>;
+            parameters?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsParametersArgs>[]>;
+            result?: pulumi.Input<string>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArgs {
+            archive?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArchiveArgs>;
+            archiveLogs?: pulumi.Input<boolean>;
+            artifactGC?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArtifactgcArgs>;
+            artifactory?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArtifactoryArgs>;
+            azure?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsAzureArgs>;
+            deleted?: pulumi.Input<boolean>;
+            from?: pulumi.Input<string>;
+            fromExpression?: pulumi.Input<string>;
+            gcs?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsGcsArgs>;
+            git?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsGitArgs>;
+            globalName?: pulumi.Input<string>;
+            hdfs?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHdfsArgs>;
+            http?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpArgs>;
+            mode?: pulumi.Input<number>;
+            name: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+            oss?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsOssArgs>;
+            path?: pulumi.Input<string>;
+            raw?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsRawArgs>;
+            recurseMode?: pulumi.Input<boolean>;
+            s3?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsS3Args>;
+            subPath?: pulumi.Input<string>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArchiveArgs {
+            none?: pulumi.Input<{[key: string]: any}>;
+            tar?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArchiveTarArgs>;
+            zip?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArchiveTarArgs {
+            compressionLevel?: pulumi.Input<number>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArtifactgcArgs {
+            podMetadata?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArtifactgcPodmetadataArgs>;
+            serviceAccountName?: pulumi.Input<string>;
+            strategy?: pulumi.Input<string>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArtifactgcPodmetadataArgs {
+            annotations?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArtifactoryArgs {
+            passwordSecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArtifactoryPasswordsecretArgs>;
+            url: pulumi.Input<string>;
+            usernameSecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsArtifactoryUsernamesecretArgs>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArtifactoryPasswordsecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsArtifactoryUsernamesecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsAzureArgs {
+            accountKeySecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsAzureAccountkeysecretArgs>;
+            blob: pulumi.Input<string>;
+            container: pulumi.Input<string>;
+            endpoint: pulumi.Input<string>;
+            useSDKCreds?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsAzureAccountkeysecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsGcsArgs {
+            bucket?: pulumi.Input<string>;
+            key: pulumi.Input<string>;
+            serviceAccountKeySecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsGcsServiceaccountkeysecretArgs>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsGcsServiceaccountkeysecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsGitArgs {
+            branch?: pulumi.Input<string>;
+            depth?: pulumi.Input<number>;
+            disableSubmodules?: pulumi.Input<boolean>;
+            fetch?: pulumi.Input<pulumi.Input<string>[]>;
+            insecureIgnoreHostKey?: pulumi.Input<boolean>;
+            passwordSecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsGitPasswordsecretArgs>;
+            repo: pulumi.Input<string>;
+            revision?: pulumi.Input<string>;
+            singleBranch?: pulumi.Input<boolean>;
+            sshPrivateKeySecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsGitSshprivatekeysecretArgs>;
+            usernameSecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsGitUsernamesecretArgs>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsGitPasswordsecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsGitSshprivatekeysecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsGitUsernamesecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHdfsArgs {
+            addresses?: pulumi.Input<pulumi.Input<string>[]>;
+            force?: pulumi.Input<boolean>;
+            hdfsUser?: pulumi.Input<string>;
+            krbCCacheSecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHdfsKrbccachesecretArgs>;
+            krbConfigConfigMap?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHdfsKrbconfigconfigmapArgs>;
+            krbKeytabSecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHdfsKrbkeytabsecretArgs>;
+            krbRealm?: pulumi.Input<string>;
+            krbServicePrincipalName?: pulumi.Input<string>;
+            krbUsername?: pulumi.Input<string>;
+            path: pulumi.Input<string>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHdfsKrbccachesecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHdfsKrbconfigconfigmapArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHdfsKrbkeytabsecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpArgs {
+            auth?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthArgs>;
+            headers?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpHeadersArgs>[]>;
+            url: pulumi.Input<string>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthArgs {
+            basicAuth?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthBasicauthArgs>;
+            clientCert?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthClientcertArgs>;
+            oauth2?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthOauth2Args>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthBasicauthArgs {
+            passwordSecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthBasicauthPasswordsecretArgs>;
+            usernameSecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthBasicauthUsernamesecretArgs>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthBasicauthPasswordsecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthBasicauthUsernamesecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthClientcertArgs {
+            clientCertSecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthClientcertClientcertsecretArgs>;
+            clientKeySecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthClientcertClientkeysecretArgs>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthClientcertClientcertsecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthClientcertClientkeysecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthOauth2Args {
+            clientIDSecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthOauth2ClientidsecretArgs>;
+            clientSecretSecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthOauth2ClientsecretsecretArgs>;
+            endpointParams?: pulumi.Input<pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthOauth2EndpointparamsArgs>[]>;
+            scopes?: pulumi.Input<pulumi.Input<string>[]>;
+            tokenURLSecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsHttpAuthOauth2TokenurlsecretArgs>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthOauth2ClientidsecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthOauth2ClientsecretsecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthOauth2EndpointparamsArgs {
+            key: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpAuthOauth2TokenurlsecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsHttpHeadersArgs {
+            name: pulumi.Input<string>;
+            value: pulumi.Input<string>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsOssArgs {
+            accessKeySecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsOssAccesskeysecretArgs>;
+            bucket?: pulumi.Input<string>;
+            createBucketIfNotPresent?: pulumi.Input<boolean>;
+            endpoint?: pulumi.Input<string>;
+            key: pulumi.Input<string>;
+            lifecycleRule?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsOssLifecycleruleArgs>;
+            secretKeySecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsOssSecretkeysecretArgs>;
+            securityToken?: pulumi.Input<string>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsOssAccesskeysecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsOssLifecycleruleArgs {
+            markDeletionAfterDays?: pulumi.Input<number>;
+            markInfrequentAccessAfterDays?: pulumi.Input<number>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsOssSecretkeysecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsRawArgs {
+            data: pulumi.Input<string>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsS3Args {
+            accessKeySecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsS3AccesskeysecretArgs>;
+            bucket?: pulumi.Input<string>;
+            createBucketIfNotPresent?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsS3CreatebucketifnotpresentArgs>;
+            encryptionOptions?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsS3EncryptionoptionsArgs>;
+            endpoint?: pulumi.Input<string>;
+            insecure?: pulumi.Input<boolean>;
+            key?: pulumi.Input<string>;
+            region?: pulumi.Input<string>;
+            roleARN?: pulumi.Input<string>;
+            secretKeySecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsS3SecretkeysecretArgs>;
+            useSDKCreds?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsS3AccesskeysecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsS3CreatebucketifnotpresentArgs {
+            objectLocking?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsS3EncryptionoptionsArgs {
+            enableEncryption?: pulumi.Input<boolean>;
+            kmsEncryptionContext?: pulumi.Input<string>;
+            kmsKeyId?: pulumi.Input<string>;
+            serverSideCustomerKeySecret?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsArtifactsS3EncryptionoptionsServersidecustomerkeysecretArgs>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsS3EncryptionoptionsServersidecustomerkeysecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsArtifactsS3SecretkeysecretArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
+        export interface WorkflowTaskResultOutputsParametersArgs {
+            description?: pulumi.Input<string>;
+            enum?: pulumi.Input<pulumi.Input<string>[]>;
+            globalName?: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+            value?: pulumi.Input<string>;
+            valueFrom?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsParametersValuefromArgs>;
+        }
+
+        export interface WorkflowTaskResultOutputsParametersValuefromArgs {
+            configMapKeyRef?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowTaskResultOutputsParametersValuefromConfigmapkeyrefArgs>;
+            event?: pulumi.Input<string>;
+            expression?: pulumi.Input<string>;
+            jqFilter?: pulumi.Input<string>;
+            jsonPath?: pulumi.Input<string>;
+            parameter?: pulumi.Input<string>;
+            path?: pulumi.Input<string>;
+            supplied?: pulumi.Input<{[key: string]: any}>;
+        }
+
+        export interface WorkflowTaskResultOutputsParametersValuefromConfigmapkeyrefArgs {
+            key: pulumi.Input<string>;
+            name?: pulumi.Input<string>;
+            optional?: pulumi.Input<boolean>;
+        }
+
     }
 }
 
