@@ -1,4 +1,4 @@
-type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'meilisearch' | 'cilium' | 'grafana';
+type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'meilisearch' | 'cilium' | 'grafana' | 'harbor';
 
 type ChartInfo = {
     chart: string;
@@ -148,6 +148,12 @@ export const helmChartsInfo = {
                 externalCrds: [] as string[],
                 skipCrdRender: false,
             },
+            harbor: {
+                chart: 'harbor',
+                version: '15.2.5',
+                externalCrds: [] as string[],
+                skipCrdRender: false,
+            },
         },
     },
     jetstack: {
@@ -274,6 +280,17 @@ export const helmChartsInfo = {
                 externalCrds: [] as string[],
                 skipCrdRender: false
             },
+        }
+    },
+    harbor: {
+        repo: 'https://helm.goharbor.io',
+        charts: {
+            harbor: {
+                chart: 'harbor',
+                version: '1.10.1',
+                externalCrds: [] as string[],
+                skipCrdRender: false
+            }
         }
     }
 }  satisfies ChartsInfo;
