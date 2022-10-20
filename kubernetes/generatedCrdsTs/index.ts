@@ -22,6 +22,7 @@ import * as pingcap from "./pingcap";
 import * as policy from "./policy";
 import * as trust from "./trust";
 import * as types from "./types";
+import * as velero from "./velero";
 
 export {
     acme,
@@ -38,6 +39,7 @@ export {
     policy,
     trust,
     types,
+    velero,
 };
 
 import { Provider } from "./provider";
