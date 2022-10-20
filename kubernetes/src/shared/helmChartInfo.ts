@@ -1,4 +1,4 @@
-type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'meilisearch' | 'cilium' | 'grafana' | 'harbor';
+type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'meilisearch' | 'cilium' | 'grafana' | 'harbor' | 'gitea';
 
 type ChartInfo = {
     chart: string;
@@ -288,6 +288,17 @@ export const helmChartsInfo = {
             harbor: {
                 chart: 'harbor',
                 version: '1.10.1',
+                externalCrds: [] as string[],
+                skipCrdRender: false
+            }
+        }
+    },
+    gitea: {
+        repo: 'https://dl.gitea.io/charts/',
+        charts: {
+            gitea: {
+                chart: 'gitea',
+                version: '6.0.2',
                 externalCrds: [] as string[],
                 skipCrdRender: false
             }
