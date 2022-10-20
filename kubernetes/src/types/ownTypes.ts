@@ -40,6 +40,11 @@ export const ArgocdAppResourceNameSchema = z.union([
 
 export type ArgocdAppResourceName = z.infer<typeof ArgocdAppResourceNameSchema>;
 
+// This is used for subfolders in outputed manifests.
+//  They are commonly same as the namespace but it might make sense
+// to use separate name sometimes for logical grouping e.g
+// monitoring groups grafana, loki, thanos, prometheus, and tempo as they
+// make sense to be logical grouped together
 export const InfrastructureNamesSchema = z.union([
     z.literal('namespaces'),
     z.literal('sealed-secrets'),
@@ -61,6 +66,7 @@ export const InfrastructureNamesSchema = z.union([
     z.literal('cilium'),
     z.literal('monitoring'),
     z.literal('harbor'),
+    z.literal('gitea'),
 ]);
 
 export type InfrastructureName = z.infer<typeof InfrastructureNamesSchema> | ArgocdAppResourceName;
@@ -86,6 +92,7 @@ export const namespaceSchema = z.union([
     z.literal('longhorn-system'),
     z.literal('monitoring'),
     z.literal('harbor'),
+    z.literal('gitea'),
 ]);
 
 export type Namespace = z.infer<typeof namespaceSchema>;
@@ -110,6 +117,7 @@ export const namespaces: Record<CamelCase<Namespace>, Namespace> = {
     longhornSystem: 'longhorn-system',
     monitoring: 'monitoring',
     harbor: 'harbor',
+    gitea: 'gitea',
     // infrastructure: "infrastructure",
 } as const;
 
