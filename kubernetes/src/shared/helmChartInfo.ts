@@ -307,7 +307,7 @@ export const helmChartsInfo = {
     vmwareTanzu: {
         repo: 'https://vmware-tanzu.github.io/helm-charts/',
         charts: {
-            gitea: {
+            velero: {
                 chart: 'velero',
                 version: '2.32.1',
                 externalCrds: [] as string[],

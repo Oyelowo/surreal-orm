@@ -15,6 +15,7 @@ export * from './src/infrastructure/metalb/index.js';
 export * from './src/infrastructure/cilium/index.js';
 export * from './src/infrastructure/monitoring/index.js';
 export * from './src/infrastructure/harbor/index.js';
+export * from './src/infrastructure/velero/index.js';
 
 // SERVICES
 // Rust server backend with support for graphql, surrealdb and redis
