@@ -3,9 +3,9 @@ import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesFor
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
-export const monitoringApplication = createArgocdApplication({
+export const giteaApplication = createArgocdApplication({
     environment: ENVIRONMENT,
-    sourceAppDirectory: 'infrastructure/monitoring',
+    sourceAppDirectory: 'infrastructure/gitea',
     outputDirectory: 'infrastructure/argocd-applications-children-infrastructure',
-    namespace: 'monitoring',
+    namespace: 'gitea',
 });
