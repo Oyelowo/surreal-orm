@@ -68936,3 +68936,2423 @@ export namespace trust {
 
     }
 }
+
+export namespace velero {
+    export namespace v1 {
+        /**
+         * BackupSpec defines the specification for a Velero backup.
+         */
+        export interface BackupSpec {
+            /**
+             * CSISnapshotTimeout specifies the time used to wait for CSI VolumeSnapshot status turns to ReadyToUse during creation, before returning error as timeout. The default value is 10 minute.
+             */
+            csiSnapshotTimeout?: string;
+            /**
+             * DefaultVolumesToRestic specifies whether restic should be used to take a backup of all pod volumes by default.
+             */
+            defaultVolumesToRestic?: boolean;
+            /**
+             * ExcludedNamespaces contains a list of namespaces that are not included in the backup.
+             */
+            excludedNamespaces?: string[];
+            /**
+             * ExcludedResources is a slice of resource names that are not included in the backup.
+             */
+            excludedResources?: string[];
+            /**
+             * Hooks represent custom behaviors that should be executed at different phases of the backup.
+             */
+            hooks?: outputs.velero.v1.BackupSpecHooks;
+            /**
+             * IncludeClusterResources specifies whether cluster-scoped resources should be included for consideration in the backup.
+             */
+            includeClusterResources?: boolean;
+            /**
+             * IncludedNamespaces is a slice of namespace names to include objects from. If empty, all namespaces are included.
+             */
+            includedNamespaces?: string[];
+            /**
+             * IncludedResources is a slice of resource names to include in the backup. If empty, all resources are included.
+             */
+            includedResources?: string[];
+            /**
+             * LabelSelector is a metav1.LabelSelector to filter with when adding individual objects to the backup. If empty or nil, all objects are included. Optional.
+             */
+            labelSelector?: outputs.velero.v1.BackupSpecLabelselector;
+            metadata?: outputs.velero.v1.BackupSpecMetadata;
+            /**
+             * OrLabelSelectors is list of metav1.LabelSelector to filter with when adding individual objects to the backup. If multiple provided they will be joined by the OR operator. LabelSelector as well as OrLabelSelectors cannot co-exist in backup request, only one of them can be used.
+             */
+            orLabelSelectors?: outputs.velero.v1.BackupSpecOrlabelselectors[];
+            /**
+             * OrderedResources specifies the backup order of resources of specific Kind. The map key is the Kind name and value is a list of resource names separated by commas. Each resource name has format "namespace/resourcename".  For cluster resources, simply use "resourcename".
+             */
+            orderedResources?: {[key: string]: string};
+            /**
+             * SnapshotVolumes specifies whether to take cloud snapshots of any PV's referenced in the set of objects included in the Backup.
+             */
+            snapshotVolumes?: boolean;
+            /**
+             * StorageLocation is a string containing the name of a BackupStorageLocation where the backup should be stored.
+             */
+            storageLocation?: string;
+            /**
+             * TTL is a time.Duration-parseable string describing how long the Backup should be retained for.
+             */
+            ttl?: string;
+            /**
+             * VolumeSnapshotLocations is a list containing names of VolumeSnapshotLocations associated with this backup.
+             */
+            volumeSnapshotLocations?: string[];
+        }
+
+        /**
+         * Hooks represent custom behaviors that should be executed at different phases of the backup.
+         */
+        export interface BackupSpecHooks {
+            /**
+             * Resources are hooks that should be executed when backing up individual instances of a resource.
+             */
+            resources?: outputs.velero.v1.BackupSpecHooksResources[];
+        }
+
+        /**
+         * BackupResourceHookSpec defines one or more BackupResourceHooks that should be executed based on the rules defined for namespaces, resources, and label selector.
+         */
+        export interface BackupSpecHooksResources {
+            /**
+             * ExcludedNamespaces specifies the namespaces to which this hook spec does not apply.
+             */
+            excludedNamespaces?: string[];
+            /**
+             * ExcludedResources specifies the resources to which this hook spec does not apply.
+             */
+            excludedResources?: string[];
+            /**
+             * IncludedNamespaces specifies the namespaces to which this hook spec applies. If empty, it applies to all namespaces.
+             */
+            includedNamespaces?: string[];
+            /**
+             * IncludedResources specifies the resources to which this hook spec applies. If empty, it applies to all resources.
+             */
+            includedResources?: string[];
+            /**
+             * LabelSelector, if specified, filters the resources to which this hook spec applies.
+             */
+            labelSelector?: outputs.velero.v1.BackupSpecHooksResourcesLabelselector;
+            /**
+             * Name is the name of this hook.
+             */
+            name: string;
+            /**
+             * PostHooks is a list of BackupResourceHooks to execute after storing the item in the backup. These are executed after all "additional items" from item actions are processed.
+             */
+            post?: outputs.velero.v1.BackupSpecHooksResourcesPost[];
+            /**
+             * PreHooks is a list of BackupResourceHooks to execute prior to storing the item in the backup. These are executed before any "additional items" from item actions are processed.
+             */
+            pre?: outputs.velero.v1.BackupSpecHooksResourcesPre[];
+        }
+
+        /**
+         * LabelSelector, if specified, filters the resources to which this hook spec applies.
+         */
+        export interface BackupSpecHooksResourcesLabelselector {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.velero.v1.BackupSpecHooksResourcesLabelselectorMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface BackupSpecHooksResourcesLabelselectorMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        /**
+         * BackupResourceHook defines a hook for a resource.
+         */
+        export interface BackupSpecHooksResourcesPost {
+            /**
+             * Exec defines an exec hook.
+             */
+            exec: outputs.velero.v1.BackupSpecHooksResourcesPostExec;
+        }
+
+        /**
+         * Exec defines an exec hook.
+         */
+        export interface BackupSpecHooksResourcesPostExec {
+            /**
+             * Command is the command and arguments to execute.
+             */
+            command: string[];
+            /**
+             * Container is the container in the pod where the command should be executed. If not specified, the pod's first container is used.
+             */
+            container?: string;
+            /**
+             * OnError specifies how Velero should behave if it encounters an error executing this hook.
+             */
+            onError?: string;
+            /**
+             * Timeout defines the maximum amount of time Velero should wait for the hook to complete before considering the execution a failure.
+             */
+            timeout?: string;
+        }
+
+        /**
+         * BackupResourceHook defines a hook for a resource.
+         */
+        export interface BackupSpecHooksResourcesPre {
+            /**
+             * Exec defines an exec hook.
+             */
+            exec: outputs.velero.v1.BackupSpecHooksResourcesPreExec;
+        }
+
+        /**
+         * Exec defines an exec hook.
+         */
+        export interface BackupSpecHooksResourcesPreExec {
+            /**
+             * Command is the command and arguments to execute.
+             */
+            command: string[];
+            /**
+             * Container is the container in the pod where the command should be executed. If not specified, the pod's first container is used.
+             */
+            container?: string;
+            /**
+             * OnError specifies how Velero should behave if it encounters an error executing this hook.
+             */
+            onError?: string;
+            /**
+             * Timeout defines the maximum amount of time Velero should wait for the hook to complete before considering the execution a failure.
+             */
+            timeout?: string;
+        }
+
+        /**
+         * LabelSelector is a metav1.LabelSelector to filter with when adding individual objects to the backup. If empty or nil, all objects are included. Optional.
+         */
+        export interface BackupSpecLabelselector {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.velero.v1.BackupSpecLabelselectorMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface BackupSpecLabelselectorMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        export interface BackupSpecMetadata {
+            labels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface BackupSpecOrlabelselectors {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.velero.v1.BackupSpecOrlabelselectorsMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface BackupSpecOrlabelselectorsMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        /**
+         * BackupStatus captures the current status of a Velero backup.
+         */
+        export interface BackupStatus {
+            /**
+             * CompletionTimestamp records the time a backup was completed. Completion time is recorded even on failed backups. Completion time is recorded before uploading the backup object. The server's time is used for CompletionTimestamps
+             */
+            completionTimestamp?: string;
+            /**
+             * CSIVolumeSnapshotsAttempted is the total number of attempted CSI VolumeSnapshots for this backup.
+             */
+            csiVolumeSnapshotsAttempted?: number;
+            /**
+             * CSIVolumeSnapshotsCompleted is the total number of successfully completed CSI VolumeSnapshots for this backup.
+             */
+            csiVolumeSnapshotsCompleted?: number;
+            /**
+             * Errors is a count of all error messages that were generated during execution of the backup.  The actual errors are in the backup's log file in object storage.
+             */
+            errors?: number;
+            /**
+             * Expiration is when this Backup is eligible for garbage-collection.
+             */
+            expiration?: string;
+            /**
+             * FailureReason is an error that caused the entire backup to fail.
+             */
+            failureReason?: string;
+            /**
+             * FormatVersion is the backup format version, including major, minor, and patch version.
+             */
+            formatVersion?: string;
+            /**
+             * Phase is the current state of the Backup.
+             */
+            phase?: string;
+            /**
+             * Progress contains information about the backup's execution progress. Note that this information is best-effort only -- if Velero fails to update it during a backup for any reason, it may be inaccurate/stale.
+             */
+            progress?: outputs.velero.v1.BackupStatusProgress;
+            /**
+             * StartTimestamp records the time a backup was started. Separate from CreationTimestamp, since that value changes on restores. The server's time is used for StartTimestamps
+             */
+            startTimestamp?: string;
+            /**
+             * ValidationErrors is a slice of all validation errors (if applicable).
+             */
+            validationErrors?: string[];
+            /**
+             * Version is the backup format major version. Deprecated: Please see FormatVersion
+             */
+            version?: number;
+            /**
+             * VolumeSnapshotsAttempted is the total number of attempted volume snapshots for this backup.
+             */
+            volumeSnapshotsAttempted?: number;
+            /**
+             * VolumeSnapshotsCompleted is the total number of successfully completed volume snapshots for this backup.
+             */
+            volumeSnapshotsCompleted?: number;
+            /**
+             * Warnings is a count of all warning messages that were generated during execution of the backup. The actual warnings are in the backup's log file in object storage.
+             */
+            warnings?: number;
+        }
+
+        /**
+         * Progress contains information about the backup's execution progress. Note that this information is best-effort only -- if Velero fails to update it during a backup for any reason, it may be inaccurate/stale.
+         */
+        export interface BackupStatusProgress {
+            /**
+             * ItemsBackedUp is the number of items that have actually been written to the backup tarball so far.
+             */
+            itemsBackedUp?: number;
+            /**
+             * TotalItems is the total number of items to be backed up. This number may change throughout the execution of the backup due to plugins that return additional related items to back up, the velero.io/exclude-from-backup label, and various other filters that happen as items are processed.
+             */
+            totalItems?: number;
+        }
+
+        /**
+         * BackupStorageLocationSpec defines the desired state of a Velero BackupStorageLocation
+         */
+        export interface BackupStorageLocationSpec {
+            /**
+             * AccessMode defines the permissions for the backup storage location.
+             */
+            accessMode?: string;
+            /**
+             * BackupSyncPeriod defines how frequently to sync backup API objects from object storage. A value of 0 disables sync.
+             */
+            backupSyncPeriod?: string;
+            /**
+             * Config is for provider-specific configuration fields.
+             */
+            config?: {[key: string]: string};
+            /**
+             * Credential contains the credential information intended to be used with this location
+             */
+            credential?: outputs.velero.v1.BackupStorageLocationSpecCredential;
+            /**
+             * ObjectStorageLocation specifies the settings necessary to connect to a provider's object storage.
+             */
+            objectStorage: outputs.velero.v1.BackupStorageLocationSpecObjectstorage;
+            /**
+             * Provider is the provider of the backup storage.
+             */
+            provider: string;
+            /**
+             * ValidationFrequency defines how frequently to validate the corresponding object storage. A value of 0 disables validation.
+             */
+            validationFrequency?: string;
+        }
+
+        /**
+         * Credential contains the credential information intended to be used with this location
+         */
+        export interface BackupStorageLocationSpecCredential {
+            /**
+             * The key of the secret to select from.  Must be a valid secret key.
+             */
+            key: string;
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?
+             */
+            name?: string;
+            /**
+             * Specify whether the Secret or its key must be defined
+             */
+            optional?: boolean;
+        }
+
+        /**
+         * ObjectStorageLocation specifies the settings necessary to connect to a provider's object storage.
+         */
+        export interface BackupStorageLocationSpecObjectstorage {
+            /**
+             * Bucket is the bucket to use for object storage.
+             */
+            bucket: string;
+            /**
+             * CACert defines a CA bundle to use when verifying TLS connections to the provider.
+             */
+            caCert?: string;
+            /**
+             * Prefix is the path inside a bucket to use for Velero storage. Optional.
+             */
+            prefix?: string;
+        }
+
+        /**
+         * BackupStorageLocationStatus defines the observed state of BackupStorageLocation
+         */
+        export interface BackupStorageLocationStatus {
+            /**
+             * AccessMode is an unused field. 
+             *  Deprecated: there is now an AccessMode field on the Spec and this field will be removed entirely as of v2.0.
+             */
+            accessMode?: string;
+            /**
+             * LastSyncedRevision is the value of the `metadata/revision` file in the backup storage location the last time the BSL's contents were synced into the cluster. 
+             *  Deprecated: this field is no longer updated or used for detecting changes to the location's contents and will be removed entirely in v2.0.
+             */
+            lastSyncedRevision?: string;
+            /**
+             * LastSyncedTime is the last time the contents of the location were synced into the cluster.
+             */
+            lastSyncedTime?: string;
+            /**
+             * LastValidationTime is the last time the backup store location was validated the cluster.
+             */
+            lastValidationTime?: string;
+            /**
+             * Message is a message about the backup storage location's status.
+             */
+            message?: string;
+            /**
+             * Phase is the current state of the BackupStorageLocation.
+             */
+            phase?: string;
+        }
+
+        /**
+         * DeleteBackupRequestSpec is the specification for which backups to delete.
+         */
+        export interface DeleteBackupRequestSpec {
+            backupName: string;
+        }
+
+        /**
+         * DeleteBackupRequestStatus is the current status of a DeleteBackupRequest.
+         */
+        export interface DeleteBackupRequestStatus {
+            /**
+             * Errors contains any errors that were encountered during the deletion process.
+             */
+            errors?: string[];
+            /**
+             * Phase is the current state of the DeleteBackupRequest.
+             */
+            phase?: string;
+        }
+
+        /**
+         * DownloadRequestSpec is the specification for a download request.
+         */
+        export interface DownloadRequestSpec {
+            /**
+             * Target is what to download (e.g. logs for a backup).
+             */
+            target: outputs.velero.v1.DownloadRequestSpecTarget;
+        }
+
+        /**
+         * Target is what to download (e.g. logs for a backup).
+         */
+        export interface DownloadRequestSpecTarget {
+            /**
+             * Kind is the type of file to download.
+             */
+            kind: string;
+            /**
+             * Name is the name of the kubernetes resource with which the file is associated.
+             */
+            name: string;
+        }
+
+        /**
+         * DownloadRequestStatus is the current status of a DownloadRequest.
+         */
+        export interface DownloadRequestStatus {
+            /**
+             * DownloadURL contains the pre-signed URL for the target file.
+             */
+            downloadURL?: string;
+            /**
+             * Expiration is when this DownloadRequest expires and can be deleted by the system.
+             */
+            expiration?: string;
+            /**
+             * Phase is the current state of the DownloadRequest.
+             */
+            phase?: string;
+        }
+
+        /**
+         * PodVolumeBackupSpec is the specification for a PodVolumeBackup.
+         */
+        export interface PodVolumeBackupSpec {
+            /**
+             * BackupStorageLocation is the name of the backup storage location where the restic repository is stored.
+             */
+            backupStorageLocation: string;
+            /**
+             * Node is the name of the node that the Pod is running on.
+             */
+            node: string;
+            /**
+             * Pod is a reference to the pod containing the volume to be backed up.
+             */
+            pod: outputs.velero.v1.PodVolumeBackupSpecPod;
+            /**
+             * RepoIdentifier is the restic repository identifier.
+             */
+            repoIdentifier: string;
+            /**
+             * Tags are a map of key-value pairs that should be applied to the volume backup as tags.
+             */
+            tags?: {[key: string]: string};
+            /**
+             * Volume is the name of the volume within the Pod to be backed up.
+             */
+            volume: string;
+        }
+
+        /**
+         * Pod is a reference to the pod containing the volume to be backed up.
+         */
+        export interface PodVolumeBackupSpecPod {
+            /**
+             * API version of the referent.
+             */
+            apiVersion?: string;
+            /**
+             * If referring to a piece of an object instead of an entire object, this string should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2]. For example, if the object reference is to a container within a pod, this would take on a value like: "spec.containers{name}" (where "name" refers to the name of the container that triggered the event) or if no container name is specified "spec.containers[2]" (container with index 2 in this pod). This syntax is chosen only to have some well-defined way of referencing a part of an object. TODO: this design is not final and this field is subject to change in the future.
+             */
+            fieldPath?: string;
+            /**
+             * Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+             */
+            kind?: string;
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+             */
+            name?: string;
+            /**
+             * Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+             */
+            namespace?: string;
+            /**
+             * Specific resourceVersion to which this reference is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+             */
+            resourceVersion?: string;
+            /**
+             * UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+             */
+            uid?: string;
+        }
+
+        /**
+         * PodVolumeBackupStatus is the current status of a PodVolumeBackup.
+         */
+        export interface PodVolumeBackupStatus {
+            /**
+             * CompletionTimestamp records the time a backup was completed. Completion time is recorded even on failed backups. Completion time is recorded before uploading the backup object. The server's time is used for CompletionTimestamps
+             */
+            completionTimestamp?: string;
+            /**
+             * Message is a message about the pod volume backup's status.
+             */
+            message?: string;
+            /**
+             * Path is the full path within the controller pod being backed up.
+             */
+            path?: string;
+            /**
+             * Phase is the current state of the PodVolumeBackup.
+             */
+            phase?: string;
+            /**
+             * Progress holds the total number of bytes of the volume and the current number of backed up bytes. This can be used to display progress information about the backup operation.
+             */
+            progress?: outputs.velero.v1.PodVolumeBackupStatusProgress;
+            /**
+             * SnapshotID is the identifier for the snapshot of the pod volume.
+             */
+            snapshotID?: string;
+            /**
+             * StartTimestamp records the time a backup was started. Separate from CreationTimestamp, since that value changes on restores. The server's time is used for StartTimestamps
+             */
+            startTimestamp?: string;
+        }
+
+        /**
+         * Progress holds the total number of bytes of the volume and the current number of backed up bytes. This can be used to display progress information about the backup operation.
+         */
+        export interface PodVolumeBackupStatusProgress {
+            bytesDone?: number;
+            totalBytes?: number;
+        }
+
+        /**
+         * PodVolumeRestoreSpec is the specification for a PodVolumeRestore.
+         */
+        export interface PodVolumeRestoreSpec {
+            /**
+             * BackupStorageLocation is the name of the backup storage location where the restic repository is stored.
+             */
+            backupStorageLocation: string;
+            /**
+             * Pod is a reference to the pod containing the volume to be restored.
+             */
+            pod: outputs.velero.v1.PodVolumeRestoreSpecPod;
+            /**
+             * RepoIdentifier is the restic repository identifier.
+             */
+            repoIdentifier: string;
+            /**
+             * SnapshotID is the ID of the volume snapshot to be restored.
+             */
+            snapshotID: string;
+            /**
+             * Volume is the name of the volume within the Pod to be restored.
+             */
+            volume: string;
+        }
+
+        /**
+         * Pod is a reference to the pod containing the volume to be restored.
+         */
+        export interface PodVolumeRestoreSpecPod {
+            /**
+             * API version of the referent.
+             */
+            apiVersion?: string;
+            /**
+             * If referring to a piece of an object instead of an entire object, this string should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2]. For example, if the object reference is to a container within a pod, this would take on a value like: "spec.containers{name}" (where "name" refers to the name of the container that triggered the event) or if no container name is specified "spec.containers[2]" (container with index 2 in this pod). This syntax is chosen only to have some well-defined way of referencing a part of an object. TODO: this design is not final and this field is subject to change in the future.
+             */
+            fieldPath?: string;
+            /**
+             * Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+             */
+            kind?: string;
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+             */
+            name?: string;
+            /**
+             * Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+             */
+            namespace?: string;
+            /**
+             * Specific resourceVersion to which this reference is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+             */
+            resourceVersion?: string;
+            /**
+             * UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+             */
+            uid?: string;
+        }
+
+        /**
+         * PodVolumeRestoreStatus is the current status of a PodVolumeRestore.
+         */
+        export interface PodVolumeRestoreStatus {
+            /**
+             * CompletionTimestamp records the time a restore was completed. Completion time is recorded even on failed restores. The server's time is used for CompletionTimestamps
+             */
+            completionTimestamp?: string;
+            /**
+             * Message is a message about the pod volume restore's status.
+             */
+            message?: string;
+            /**
+             * Phase is the current state of the PodVolumeRestore.
+             */
+            phase?: string;
+            /**
+             * Progress holds the total number of bytes of the snapshot and the current number of restored bytes. This can be used to display progress information about the restore operation.
+             */
+            progress?: outputs.velero.v1.PodVolumeRestoreStatusProgress;
+            /**
+             * StartTimestamp records the time a restore was started. The server's time is used for StartTimestamps
+             */
+            startTimestamp?: string;
+        }
+
+        /**
+         * Progress holds the total number of bytes of the snapshot and the current number of restored bytes. This can be used to display progress information about the restore operation.
+         */
+        export interface PodVolumeRestoreStatusProgress {
+            bytesDone?: number;
+            totalBytes?: number;
+        }
+
+        /**
+         * ResticRepositorySpec is the specification for a ResticRepository.
+         */
+        export interface ResticRepositorySpec {
+            /**
+             * BackupStorageLocation is the name of the BackupStorageLocation that should contain this repository.
+             */
+            backupStorageLocation: string;
+            /**
+             * MaintenanceFrequency is how often maintenance should be run.
+             */
+            maintenanceFrequency: string;
+            /**
+             * ResticIdentifier is the full restic-compatible string for identifying this repository.
+             */
+            resticIdentifier: string;
+            /**
+             * VolumeNamespace is the namespace this restic repository contains pod volume backups for.
+             */
+            volumeNamespace: string;
+        }
+
+        /**
+         * ResticRepositoryStatus is the current status of a ResticRepository.
+         */
+        export interface ResticRepositoryStatus {
+            /**
+             * LastMaintenanceTime is the last time maintenance was run.
+             */
+            lastMaintenanceTime?: string;
+            /**
+             * Message is a message about the current status of the ResticRepository.
+             */
+            message?: string;
+            /**
+             * Phase is the current state of the ResticRepository.
+             */
+            phase?: string;
+        }
+
+        /**
+         * RestoreSpec defines the specification for a Velero restore.
+         */
+        export interface RestoreSpec {
+            /**
+             * BackupName is the unique name of the Velero backup to restore from.
+             */
+            backupName: string;
+            /**
+             * ExcludedNamespaces contains a list of namespaces that are not included in the restore.
+             */
+            excludedNamespaces?: string[];
+            /**
+             * ExcludedResources is a slice of resource names that are not included in the restore.
+             */
+            excludedResources?: string[];
+            /**
+             * ExistingResourcePolicy specifies the restore behaviour for the kubernetes resource to be restored
+             */
+            existingResourcePolicy?: string;
+            /**
+             * Hooks represent custom behaviors that should be executed during or post restore.
+             */
+            hooks?: outputs.velero.v1.RestoreSpecHooks;
+            /**
+             * IncludeClusterResources specifies whether cluster-scoped resources should be included for consideration in the restore. If null, defaults to true.
+             */
+            includeClusterResources?: boolean;
+            /**
+             * IncludedNamespaces is a slice of namespace names to include objects from. If empty, all namespaces are included.
+             */
+            includedNamespaces?: string[];
+            /**
+             * IncludedResources is a slice of resource names to include in the restore. If empty, all resources in the backup are included.
+             */
+            includedResources?: string[];
+            /**
+             * LabelSelector is a metav1.LabelSelector to filter with when restoring individual objects from the backup. If empty or nil, all objects are included. Optional.
+             */
+            labelSelector?: outputs.velero.v1.RestoreSpecLabelselector;
+            /**
+             * NamespaceMapping is a map of source namespace names to target namespace names to restore into. Any source namespaces not included in the map will be restored into namespaces of the same name.
+             */
+            namespaceMapping?: {[key: string]: string};
+            /**
+             * OrLabelSelectors is list of metav1.LabelSelector to filter with when restoring individual objects from the backup. If multiple provided they will be joined by the OR operator. LabelSelector as well as OrLabelSelectors cannot co-exist in restore request, only one of them can be used
+             */
+            orLabelSelectors?: outputs.velero.v1.RestoreSpecOrlabelselectors[];
+            /**
+             * PreserveNodePorts specifies whether to restore old nodePorts from backup.
+             */
+            preserveNodePorts?: boolean;
+            /**
+             * RestorePVs specifies whether to restore all included PVs from snapshot (via the cloudprovider).
+             */
+            restorePVs?: boolean;
+            /**
+             * RestoreStatus specifies which resources we should restore the status field. If nil, no objects are included. Optional.
+             */
+            restoreStatus?: outputs.velero.v1.RestoreSpecRestorestatus;
+            /**
+             * ScheduleName is the unique name of the Velero schedule to restore from. If specified, and BackupName is empty, Velero will restore from the most recent successful backup created from this schedule.
+             */
+            scheduleName?: string;
+        }
+
+        /**
+         * Hooks represent custom behaviors that should be executed during or post restore.
+         */
+        export interface RestoreSpecHooks {
+            resources?: outputs.velero.v1.RestoreSpecHooksResources[];
+        }
+
+        /**
+         * RestoreResourceHookSpec defines one or more RestoreResrouceHooks that should be executed based on the rules defined for namespaces, resources, and label selector.
+         */
+        export interface RestoreSpecHooksResources {
+            /**
+             * ExcludedNamespaces specifies the namespaces to which this hook spec does not apply.
+             */
+            excludedNamespaces?: string[];
+            /**
+             * ExcludedResources specifies the resources to which this hook spec does not apply.
+             */
+            excludedResources?: string[];
+            /**
+             * IncludedNamespaces specifies the namespaces to which this hook spec applies. If empty, it applies to all namespaces.
+             */
+            includedNamespaces?: string[];
+            /**
+             * IncludedResources specifies the resources to which this hook spec applies. If empty, it applies to all resources.
+             */
+            includedResources?: string[];
+            /**
+             * LabelSelector, if specified, filters the resources to which this hook spec applies.
+             */
+            labelSelector?: outputs.velero.v1.RestoreSpecHooksResourcesLabelselector;
+            /**
+             * Name is the name of this hook.
+             */
+            name: string;
+            /**
+             * PostHooks is a list of RestoreResourceHooks to execute during and after restoring a resource.
+             */
+            postHooks?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooks[];
+        }
+
+        /**
+         * LabelSelector, if specified, filters the resources to which this hook spec applies.
+         */
+        export interface RestoreSpecHooksResourcesLabelselector {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.velero.v1.RestoreSpecHooksResourcesLabelselectorMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface RestoreSpecHooksResourcesLabelselectorMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        /**
+         * RestoreResourceHook defines a restore hook for a resource.
+         */
+        export interface RestoreSpecHooksResourcesPosthooks {
+            /**
+             * Exec defines an exec restore hook.
+             */
+            exec?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksExec;
+            /**
+             * Init defines an init restore hook.
+             */
+            init?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInit;
+        }
+
+        /**
+         * Exec defines an exec restore hook.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksExec {
+            /**
+             * Command is the command and arguments to execute from within a container after a pod has been restored.
+             */
+            command: string[];
+            /**
+             * Container is the container in the pod where the command should be executed. If not specified, the pod's first container is used.
+             */
+            container?: string;
+            /**
+             * ExecTimeout defines the maximum amount of time Velero should wait for the hook to complete before considering the execution a failure.
+             */
+            execTimeout?: string;
+            /**
+             * OnError specifies how Velero should behave if it encounters an error executing this hook.
+             */
+            onError?: string;
+            /**
+             * WaitTimeout defines the maximum amount of time Velero should wait for the container to be Ready before attempting to run the command.
+             */
+            waitTimeout?: string;
+        }
+
+        /**
+         * Init defines an init restore hook.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInit {
+            /**
+             * InitContainers is list of init containers to be added to a pod during its restore.
+             */
+            initContainers?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainers[];
+            /**
+             * Timeout defines the maximum amount of time Velero should wait for the initContainers to complete.
+             */
+            timeout?: string;
+        }
+
+        /**
+         * A single application container that you want to run within a pod.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainers {
+            /**
+             * Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+             */
+            args?: string[];
+            /**
+             * Entrypoint array. Not executed within a shell. The docker image's ENTRYPOINT is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+             */
+            command?: string[];
+            /**
+             * List of environment variables to set in the container. Cannot be updated.
+             */
+            env?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnv[];
+            /**
+             * List of sources to populate environment variables in the container. The keys defined within a source must be a C_IDENTIFIER. All invalid keys will be reported as an event when the container is starting. When a key exists in multiple sources, the value associated with the last source will take precedence. Values defined by an Env with a duplicate key will take precedence. Cannot be updated.
+             */
+            envFrom?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvfrom[];
+            /**
+             * Docker image name. More info: https://kubernetes.io/docs/concepts/containers/images This field is optional to allow higher level config management to default or override container images in workload controllers like Deployments and StatefulSets.
+             */
+            image?: string;
+            /**
+             * Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
+             */
+            imagePullPolicy?: string;
+            /**
+             * Actions that the management system should take in response to container lifecycle events. Cannot be updated.
+             */
+            lifecycle?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecycle;
+            /**
+             * Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            livenessProbe?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobe;
+            /**
+             * Name of the container specified as a DNS_LABEL. Each container in a pod must have a unique name (DNS_LABEL). Cannot be updated.
+             */
+            name: string;
+            /**
+             * List of ports to expose from the container. Exposing a port here gives the system additional information about the network connections a container uses, but is primarily informational. Not specifying a port here DOES NOT prevent that port from being exposed. Any port which is listening on the default "0.0.0.0" address inside a container will be accessible from the network. Cannot be updated.
+             */
+            ports?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersPorts[];
+            /**
+             * Periodic probe of container service readiness. Container will be removed from service endpoints if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            readinessProbe?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobe;
+            /**
+             * Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+             */
+            resources?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersResources;
+            /**
+             * SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+             */
+            securityContext?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontext;
+            /**
+             * StartupProbe indicates that the Pod has successfully initialized. If specified, no other probes are executed until this completes successfully. If this probe fails, the Pod will be restarted, just as if the livenessProbe failed. This can be used to provide different probe parameters at the beginning of a Pod's lifecycle, when it might take a long time to load data or warm a cache, than during "steady-state operation. This cannot be updated. More info: https"://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            startupProbe?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobe;
+            /**
+             * Whether this container should allocate a buffer for stdin in the container runtime. If this is not set, reads from stdin in the container will always result in EOF. Default is false.
+             */
+            stdin?: boolean;
+            /**
+             * Whether the container runtime should close the stdin channel after it has been opened by a single attach. When stdin is true the stdin stream will remain open across multiple attach sessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the first client attaches to stdin, and then remains open and accepts data until the client disconnects, at which time stdin is closed and remains closed until the container is restarted. If this flag is false, a container processes that reads from stdin will never receive an EOF. Default is false
+             */
+            stdinOnce?: boolean;
+            /**
+             * Optional: Path at which the file to which the container's termination message will be written is mounted into the container's filesystem. Message written is intended to be brief final status, such as an assertion failure message. Will be truncated by the node if greater than 4096 bytes. The total message length across all containers will be limited to 12kb. Defaults to /dev/termination-log. Cannot be updated.
+             */
+            terminationMessagePath?: string;
+            /**
+             * Indicate how the termination message should be populated. File will use the contents of terminationMessagePath to populate the container status message on both success and failure. FallbackToLogsOnError will use the last chunk of container log output if the termination message file is empty and the container exited with an error. The log output is limited to 2048 bytes or 80 lines, whichever is smaller. Defaults to File. Cannot be updated.
+             */
+            terminationMessagePolicy?: string;
+            /**
+             * Whether this container should allocate a TTY for itself, also requires 'stdin' to be true. Default is false.
+             */
+            tty?: boolean;
+            /**
+             * volumeDevices is the list of block devices to be used by the container.
+             */
+            volumeDevices?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersVolumedevices[];
+            /**
+             * Pod volumes to mount into the container's filesystem. Cannot be updated.
+             */
+            volumeMounts?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersVolumemounts[];
+            /**
+             * Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image. Cannot be updated.
+             */
+            workingDir?: string;
+        }
+
+        /**
+         * EnvVar represents an environment variable present in a Container.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnv {
+            /**
+             * Name of the environment variable. Must be a C_IDENTIFIER.
+             */
+            name: string;
+            /**
+             * Variable references $(VAR_NAME) are expanded using the previously defined environment variables in the container and any service environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "".
+             */
+            value?: string;
+            /**
+             * Source for the environment variable's value. Cannot be used if value is not empty.
+             */
+            valueFrom?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefrom;
+        }
+
+        /**
+         * Source for the environment variable's value. Cannot be used if value is not empty.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefrom {
+            /**
+             * Selects a key of a ConfigMap.
+             */
+            configMapKeyRef?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromConfigmapkeyref;
+            /**
+             * Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
+             */
+            fieldRef?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromFieldref;
+            /**
+             * Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
+             */
+            resourceFieldRef?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromResourcefieldref;
+            /**
+             * Selects a key of a secret in the pod's namespace
+             */
+            secretKeyRef?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromSecretkeyref;
+        }
+
+        /**
+         * Selects a key of a ConfigMap.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromConfigmapkeyref {
+            /**
+             * The key to select.
+             */
+            key: string;
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?
+             */
+            name?: string;
+            /**
+             * Specify whether the ConfigMap or its key must be defined
+             */
+            optional?: boolean;
+        }
+
+        /**
+         * Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromFieldref {
+            /**
+             * Version of the schema the FieldPath is written in terms of, defaults to "v1".
+             */
+            apiVersion?: string;
+            /**
+             * Path of the field to select in the specified API version.
+             */
+            fieldPath: string;
+        }
+
+        /**
+         * Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromResourcefieldref {
+            /**
+             * Container name: required for volumes, optional for env vars
+             */
+            containerName?: string;
+            /**
+             * Specifies the output format of the exposed resources, defaults to "1"
+             */
+            divisor?: number | string;
+            /**
+             * Required: resource to select
+             */
+            resource: string;
+        }
+
+        /**
+         * Selects a key of a secret in the pod's namespace
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromSecretkeyref {
+            /**
+             * The key of the secret to select from.  Must be a valid secret key.
+             */
+            key: string;
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?
+             */
+            name?: string;
+            /**
+             * Specify whether the Secret or its key must be defined
+             */
+            optional?: boolean;
+        }
+
+        /**
+         * EnvFromSource represents the source of a set of ConfigMaps
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvfrom {
+            /**
+             * The ConfigMap to select from
+             */
+            configMapRef?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvfromConfigmapref;
+            /**
+             * An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.
+             */
+            prefix?: string;
+            /**
+             * The Secret to select from
+             */
+            secretRef?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvfromSecretref;
+        }
+
+        /**
+         * The ConfigMap to select from
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvfromConfigmapref {
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?
+             */
+            name?: string;
+            /**
+             * Specify whether the ConfigMap must be defined
+             */
+            optional?: boolean;
+        }
+
+        /**
+         * The Secret to select from
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvfromSecretref {
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?
+             */
+            name?: string;
+            /**
+             * Specify whether the Secret must be defined
+             */
+            optional?: boolean;
+        }
+
+        /**
+         * Actions that the management system should take in response to container lifecycle events. Cannot be updated.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecycle {
+            /**
+             * PostStart is called immediately after a container is created. If the handler fails, the container is terminated and restarted according to its restart policy. Other management of the container blocks until the hook completes. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
+             */
+            postStart?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststart;
+            /**
+             * PreStop is called immediately before a container is terminated due to an API request or management event such as liveness/startup probe failure, preemption, resource contention, etc. The handler is not called if the container crashes or exits. The reason for termination is passed to the handler. The Pod's termination grace period countdown begins before the PreStop hooked is executed. Regardless of the outcome of the handler, the container will eventually terminate within the Pod's termination grace period. Other management of the container blocks until the hook completes or until the termination grace period is reached. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
+             */
+            preStop?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestop;
+        }
+
+        /**
+         * PostStart is called immediately after a container is created. If the handler fails, the container is terminated and restarted according to its restart policy. Other management of the container blocks until the hook completes. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststart {
+            /**
+             * One and only one of the following should be specified. Exec specifies the action to take.
+             */
+            exec?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartExec;
+            /**
+             * HTTPGet specifies the http request to perform.
+             */
+            httpGet?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartHttpget;
+            /**
+             * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+             */
+            tcpSocket?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartTcpsocket;
+        }
+
+        /**
+         * One and only one of the following should be specified. Exec specifies the action to take.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartExec {
+            /**
+             * Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.
+             */
+            command?: string[];
+        }
+
+        /**
+         * HTTPGet specifies the http request to perform.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartHttpget {
+            /**
+             * Host name to connect to, defaults to the pod IP. You probably want to set "Host" in httpHeaders instead.
+             */
+            host?: string;
+            /**
+             * Custom headers to set in the request. HTTP allows repeated headers.
+             */
+            httpHeaders?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartHttpgetHttpheaders[];
+            /**
+             * Path to access on the HTTP server.
+             */
+            path?: string;
+            /**
+             * Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: number | string;
+            /**
+             * Scheme to use for connecting to the host. Defaults to HTTP.
+             */
+            scheme?: string;
+        }
+
+        /**
+         * HTTPHeader describes a custom header to be used in HTTP probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartHttpgetHttpheaders {
+            /**
+             * The header field name
+             */
+            name: string;
+            /**
+             * The header field value
+             */
+            value: string;
+        }
+
+        /**
+         * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartTcpsocket {
+            /**
+             * Optional: Host name to connect to, defaults to the pod IP.
+             */
+            host?: string;
+            /**
+             * Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: number | string;
+        }
+
+        /**
+         * PreStop is called immediately before a container is terminated due to an API request or management event such as liveness/startup probe failure, preemption, resource contention, etc. The handler is not called if the container crashes or exits. The reason for termination is passed to the handler. The Pod's termination grace period countdown begins before the PreStop hooked is executed. Regardless of the outcome of the handler, the container will eventually terminate within the Pod's termination grace period. Other management of the container blocks until the hook completes or until the termination grace period is reached. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestop {
+            /**
+             * One and only one of the following should be specified. Exec specifies the action to take.
+             */
+            exec?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopExec;
+            /**
+             * HTTPGet specifies the http request to perform.
+             */
+            httpGet?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopHttpget;
+            /**
+             * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+             */
+            tcpSocket?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopTcpsocket;
+        }
+
+        /**
+         * One and only one of the following should be specified. Exec specifies the action to take.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopExec {
+            /**
+             * Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.
+             */
+            command?: string[];
+        }
+
+        /**
+         * HTTPGet specifies the http request to perform.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopHttpget {
+            /**
+             * Host name to connect to, defaults to the pod IP. You probably want to set "Host" in httpHeaders instead.
+             */
+            host?: string;
+            /**
+             * Custom headers to set in the request. HTTP allows repeated headers.
+             */
+            httpHeaders?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopHttpgetHttpheaders[];
+            /**
+             * Path to access on the HTTP server.
+             */
+            path?: string;
+            /**
+             * Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: number | string;
+            /**
+             * Scheme to use for connecting to the host. Defaults to HTTP.
+             */
+            scheme?: string;
+        }
+
+        /**
+         * HTTPHeader describes a custom header to be used in HTTP probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopHttpgetHttpheaders {
+            /**
+             * The header field name
+             */
+            name: string;
+            /**
+             * The header field value
+             */
+            value: string;
+        }
+
+        /**
+         * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopTcpsocket {
+            /**
+             * Optional: Host name to connect to, defaults to the pod IP.
+             */
+            host?: string;
+            /**
+             * Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: number | string;
+        }
+
+        /**
+         * Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobe {
+            /**
+             * One and only one of the following should be specified. Exec specifies the action to take.
+             */
+            exec?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeExec;
+            /**
+             * Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+             */
+            failureThreshold?: number;
+            /**
+             * HTTPGet specifies the http request to perform.
+             */
+            httpGet?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeHttpget;
+            /**
+             * Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            initialDelaySeconds?: number;
+            /**
+             * How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1.
+             */
+            periodSeconds?: number;
+            /**
+             * Minimum consecutive successes for the probe to be considered successful after having failed. Defaults to 1. Must be 1 for liveness and startup. Minimum value is 1.
+             */
+            successThreshold?: number;
+            /**
+             * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+             */
+            tcpSocket?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeTcpsocket;
+            /**
+             * Optional duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. If this value is nil, the pod's terminationGracePeriodSeconds will be used. Otherwise, this value overrides the value provided by the pod spec. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down). This is a beta field and requires enabling ProbeTerminationGracePeriod feature gate. Minimum value is 1. spec.terminationGracePeriodSeconds is used if unset.
+             */
+            terminationGracePeriodSeconds?: number;
+            /**
+             * Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            timeoutSeconds?: number;
+        }
+
+        /**
+         * One and only one of the following should be specified. Exec specifies the action to take.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeExec {
+            /**
+             * Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.
+             */
+            command?: string[];
+        }
+
+        /**
+         * HTTPGet specifies the http request to perform.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeHttpget {
+            /**
+             * Host name to connect to, defaults to the pod IP. You probably want to set "Host" in httpHeaders instead.
+             */
+            host?: string;
+            /**
+             * Custom headers to set in the request. HTTP allows repeated headers.
+             */
+            httpHeaders?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeHttpgetHttpheaders[];
+            /**
+             * Path to access on the HTTP server.
+             */
+            path?: string;
+            /**
+             * Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: number | string;
+            /**
+             * Scheme to use for connecting to the host. Defaults to HTTP.
+             */
+            scheme?: string;
+        }
+
+        /**
+         * HTTPHeader describes a custom header to be used in HTTP probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeHttpgetHttpheaders {
+            /**
+             * The header field name
+             */
+            name: string;
+            /**
+             * The header field value
+             */
+            value: string;
+        }
+
+        /**
+         * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeTcpsocket {
+            /**
+             * Optional: Host name to connect to, defaults to the pod IP.
+             */
+            host?: string;
+            /**
+             * Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: number | string;
+        }
+
+        /**
+         * ContainerPort represents a network port in a single container.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersPorts {
+            /**
+             * Number of port to expose on the pod's IP address. This must be a valid port number, 0 < x < 65536.
+             */
+            containerPort: number;
+            /**
+             * What host IP to bind the external port to.
+             */
+            hostIP?: string;
+            /**
+             * Number of port to expose on the host. If specified, this must be a valid port number, 0 < x < 65536. If HostNetwork is specified, this must match ContainerPort. Most containers do not need this.
+             */
+            hostPort?: number;
+            /**
+             * If specified, this must be an IANA_SVC_NAME and unique within the pod. Each named port in a pod must have a unique name. Name for the port that can be referred to by services.
+             */
+            name?: string;
+            /**
+             * Protocol for port. Must be UDP, TCP, or SCTP. Defaults to "TCP".
+             */
+            protocol: string;
+        }
+        /**
+         * restoreSpecHooksResourcesPosthooksInitInitcontainersPortsProvideDefaults sets the appropriate defaults for RestoreSpecHooksResourcesPosthooksInitInitcontainersPorts
+         */
+        export function restoreSpecHooksResourcesPosthooksInitInitcontainersPortsProvideDefaults(val: RestoreSpecHooksResourcesPosthooksInitInitcontainersPorts): RestoreSpecHooksResourcesPosthooksInitInitcontainersPorts {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        /**
+         * Periodic probe of container service readiness. Container will be removed from service endpoints if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobe {
+            /**
+             * One and only one of the following should be specified. Exec specifies the action to take.
+             */
+            exec?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeExec;
+            /**
+             * Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+             */
+            failureThreshold?: number;
+            /**
+             * HTTPGet specifies the http request to perform.
+             */
+            httpGet?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeHttpget;
+            /**
+             * Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            initialDelaySeconds?: number;
+            /**
+             * How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1.
+             */
+            periodSeconds?: number;
+            /**
+             * Minimum consecutive successes for the probe to be considered successful after having failed. Defaults to 1. Must be 1 for liveness and startup. Minimum value is 1.
+             */
+            successThreshold?: number;
+            /**
+             * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+             */
+            tcpSocket?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeTcpsocket;
+            /**
+             * Optional duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. If this value is nil, the pod's terminationGracePeriodSeconds will be used. Otherwise, this value overrides the value provided by the pod spec. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down). This is a beta field and requires enabling ProbeTerminationGracePeriod feature gate. Minimum value is 1. spec.terminationGracePeriodSeconds is used if unset.
+             */
+            terminationGracePeriodSeconds?: number;
+            /**
+             * Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            timeoutSeconds?: number;
+        }
+
+        /**
+         * One and only one of the following should be specified. Exec specifies the action to take.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeExec {
+            /**
+             * Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.
+             */
+            command?: string[];
+        }
+
+        /**
+         * HTTPGet specifies the http request to perform.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeHttpget {
+            /**
+             * Host name to connect to, defaults to the pod IP. You probably want to set "Host" in httpHeaders instead.
+             */
+            host?: string;
+            /**
+             * Custom headers to set in the request. HTTP allows repeated headers.
+             */
+            httpHeaders?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeHttpgetHttpheaders[];
+            /**
+             * Path to access on the HTTP server.
+             */
+            path?: string;
+            /**
+             * Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: number | string;
+            /**
+             * Scheme to use for connecting to the host. Defaults to HTTP.
+             */
+            scheme?: string;
+        }
+
+        /**
+         * HTTPHeader describes a custom header to be used in HTTP probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeHttpgetHttpheaders {
+            /**
+             * The header field name
+             */
+            name: string;
+            /**
+             * The header field value
+             */
+            value: string;
+        }
+
+        /**
+         * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeTcpsocket {
+            /**
+             * Optional: Host name to connect to, defaults to the pod IP.
+             */
+            host?: string;
+            /**
+             * Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: number | string;
+        }
+
+        /**
+         * Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersResources {
+            /**
+             * Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+             */
+            limits?: {[key: string]: number | string};
+            /**
+             * Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an "implementation-defined value. More info: https"://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+             */
+            requests?: {[key: string]: number | string};
+        }
+
+        /**
+         * SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontext {
+            /**
+             * AllowPrivilegeEscalation controls whether a process can gain more privileges than its parent process. This bool directly controls if the no_new_privs flag will be set on the container process. AllowPrivilegeEscalation is true always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN
+             */
+            allowPrivilegeEscalation?: boolean;
+            /**
+             * The capabilities to add/drop when running containers. Defaults to the default set of capabilities granted by the container runtime.
+             */
+            capabilities?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextCapabilities;
+            /**
+             * Run container in privileged mode. Processes in privileged containers are essentially equivalent to root on the host. Defaults to false.
+             */
+            privileged?: boolean;
+            /**
+             * procMount denotes the type of proc mount to use for the containers. The default is DefaultProcMount which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled.
+             */
+            procMount?: string;
+            /**
+             * Whether this container has a read-only root filesystem. Default is false.
+             */
+            readOnlyRootFilesystem?: boolean;
+            /**
+             * The GID to run the entrypoint of the container process. Uses runtime default if unset. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+             */
+            runAsGroup?: number;
+            /**
+             * Indicates that the container must run as a non-root user. If true, the Kubelet will validate the image at runtime to ensure that it does not run as UID 0 (root) and fail to start the container if it does. If unset or false, no such validation will be performed. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+             */
+            runAsNonRoot?: boolean;
+            /**
+             * The UID to run the entrypoint of the container process. Defaults to user specified in image metadata if unspecified. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+             */
+            runAsUser?: number;
+            /**
+             * The SELinux context to be applied to the container. If unspecified, the container runtime will allocate a random SELinux context for each container.  May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+             */
+            seLinuxOptions?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextSelinuxoptions;
+            /**
+             * The seccomp options to use by this container. If seccomp options are provided at both the pod & container level, the container options override the pod options.
+             */
+            seccompProfile?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextSeccompprofile;
+            /**
+             * The Windows specific settings applied to all containers. If unspecified, the options from the PodSecurityContext will be used. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+             */
+            windowsOptions?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextWindowsoptions;
+        }
+
+        /**
+         * The capabilities to add/drop when running containers. Defaults to the default set of capabilities granted by the container runtime.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextCapabilities {
+            /**
+             * Added capabilities
+             */
+            add?: string[];
+            /**
+             * Removed capabilities
+             */
+            drop?: string[];
+        }
+
+        /**
+         * The seccomp options to use by this container. If seccomp options are provided at both the pod & container level, the container options override the pod options.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextSeccompprofile {
+            /**
+             * localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must only be set if type is "Localhost".
+             */
+            localhostProfile?: string;
+            /**
+             * type indicates which kind of seccomp profile will be applied. Valid options are: 
+             *  Localhost - a profile defined in a file on the node should be used. RuntimeDefault - the container runtime default profile should be used. Unconfined - no profile should be applied.
+             */
+            type: string;
+        }
+
+        /**
+         * The SELinux context to be applied to the container. If unspecified, the container runtime will allocate a random SELinux context for each container.  May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextSelinuxoptions {
+            /**
+             * Level is SELinux level label that applies to the container.
+             */
+            level?: string;
+            /**
+             * Role is a SELinux role label that applies to the container.
+             */
+            role?: string;
+            /**
+             * Type is a SELinux type label that applies to the container.
+             */
+            type?: string;
+            /**
+             * User is a SELinux user label that applies to the container.
+             */
+            user?: string;
+        }
+
+        /**
+         * The Windows specific settings applied to all containers. If unspecified, the options from the PodSecurityContext will be used. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextWindowsoptions {
+            /**
+             * GMSACredentialSpec is where the GMSA admission webhook (https://github.com/kubernetes-sigs/windows-gmsa) inlines the contents of the GMSA credential spec named by the GMSACredentialSpecName field.
+             */
+            gmsaCredentialSpec?: string;
+            /**
+             * GMSACredentialSpecName is the name of the GMSA credential spec to use.
+             */
+            gmsaCredentialSpecName?: string;
+            /**
+             * HostProcess determines if a container should be run as a 'Host Process' container. This field is alpha-level and will only be honored by components that enable the WindowsHostProcessContainers feature flag. Setting this field without the feature flag will result in errors when validating the Pod. All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers).  In addition, if HostProcess is true then HostNetwork must also be set to true.
+             */
+            hostProcess?: boolean;
+            /**
+             * The UserName in Windows to run the entrypoint of the container process. Defaults to the user specified in image metadata if unspecified. May also be set in PodSecurityContext. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+             */
+            runAsUserName?: string;
+        }
+
+        /**
+         * StartupProbe indicates that the Pod has successfully initialized. If specified, no other probes are executed until this completes successfully. If this probe fails, the Pod will be restarted, just as if the livenessProbe failed. This can be used to provide different probe parameters at the beginning of a Pod's lifecycle, when it might take a long time to load data or warm a cache, than during "steady-state operation. This cannot be updated. More info: https"://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobe {
+            /**
+             * One and only one of the following should be specified. Exec specifies the action to take.
+             */
+            exec?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeExec;
+            /**
+             * Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+             */
+            failureThreshold?: number;
+            /**
+             * HTTPGet specifies the http request to perform.
+             */
+            httpGet?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeHttpget;
+            /**
+             * Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            initialDelaySeconds?: number;
+            /**
+             * How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1.
+             */
+            periodSeconds?: number;
+            /**
+             * Minimum consecutive successes for the probe to be considered successful after having failed. Defaults to 1. Must be 1 for liveness and startup. Minimum value is 1.
+             */
+            successThreshold?: number;
+            /**
+             * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+             */
+            tcpSocket?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeTcpsocket;
+            /**
+             * Optional duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. If this value is nil, the pod's terminationGracePeriodSeconds will be used. Otherwise, this value overrides the value provided by the pod spec. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down). This is a beta field and requires enabling ProbeTerminationGracePeriod feature gate. Minimum value is 1. spec.terminationGracePeriodSeconds is used if unset.
+             */
+            terminationGracePeriodSeconds?: number;
+            /**
+             * Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            timeoutSeconds?: number;
+        }
+
+        /**
+         * One and only one of the following should be specified. Exec specifies the action to take.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeExec {
+            /**
+             * Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.
+             */
+            command?: string[];
+        }
+
+        /**
+         * HTTPGet specifies the http request to perform.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeHttpget {
+            /**
+             * Host name to connect to, defaults to the pod IP. You probably want to set "Host" in httpHeaders instead.
+             */
+            host?: string;
+            /**
+             * Custom headers to set in the request. HTTP allows repeated headers.
+             */
+            httpHeaders?: outputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeHttpgetHttpheaders[];
+            /**
+             * Path to access on the HTTP server.
+             */
+            path?: string;
+            /**
+             * Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: number | string;
+            /**
+             * Scheme to use for connecting to the host. Defaults to HTTP.
+             */
+            scheme?: string;
+        }
+
+        /**
+         * HTTPHeader describes a custom header to be used in HTTP probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeHttpgetHttpheaders {
+            /**
+             * The header field name
+             */
+            name: string;
+            /**
+             * The header field value
+             */
+            value: string;
+        }
+
+        /**
+         * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeTcpsocket {
+            /**
+             * Optional: Host name to connect to, defaults to the pod IP.
+             */
+            host?: string;
+            /**
+             * Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: number | string;
+        }
+
+        /**
+         * volumeDevice describes a mapping of a raw block device within a container.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersVolumedevices {
+            /**
+             * devicePath is the path inside of the container that the device will be mapped to.
+             */
+            devicePath: string;
+            /**
+             * name must match the name of a persistentVolumeClaim in the pod
+             */
+            name: string;
+        }
+
+        /**
+         * VolumeMount describes a mounting of a Volume within a container.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersVolumemounts {
+            /**
+             * Path within the container at which the volume should be mounted.  Must not contain ':'.
+             */
+            mountPath: string;
+            /**
+             * mountPropagation determines how mounts are propagated from the host to container and the other way around. When not set, MountPropagationNone is used. This field is beta in 1.10.
+             */
+            mountPropagation?: string;
+            /**
+             * This must match the Name of a Volume.
+             */
+            name: string;
+            /**
+             * Mounted read-only if true, read-write otherwise (false or unspecified). Defaults to false.
+             */
+            readOnly?: boolean;
+            /**
+             * Path within the volume from which the container's volume should be mounted. Defaults to "" (volume's root).
+             */
+            subPath?: string;
+            /**
+             * Expanded path within the volume from which the container's volume should be mounted. Behaves similarly to SubPath but environment variable references $(VAR_NAME) are expanded using the container's environment. Defaults to "" (volume's root). SubPathExpr and SubPath are mutually exclusive.
+             */
+            subPathExpr?: string;
+        }
+
+        /**
+         * LabelSelector is a metav1.LabelSelector to filter with when restoring individual objects from the backup. If empty or nil, all objects are included. Optional.
+         */
+        export interface RestoreSpecLabelselector {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.velero.v1.RestoreSpecLabelselectorMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface RestoreSpecLabelselectorMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface RestoreSpecOrlabelselectors {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.velero.v1.RestoreSpecOrlabelselectorsMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface RestoreSpecOrlabelselectorsMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        /**
+         * RestoreStatus specifies which resources we should restore the status field. If nil, no objects are included. Optional.
+         */
+        export interface RestoreSpecRestorestatus {
+            /**
+             * ExcludedResources specifies the resources to which will not restore the status.
+             */
+            excludedResources?: string[];
+            /**
+             * IncludedResources specifies the resources to which will restore the status. If empty, it applies to all resources.
+             */
+            includedResources?: string[];
+        }
+
+        /**
+         * RestoreStatus captures the current status of a Velero restore
+         */
+        export interface RestoreStatus {
+            /**
+             * CompletionTimestamp records the time the restore operation was completed. Completion time is recorded even on failed restore. The server's time is used for StartTimestamps
+             */
+            completionTimestamp?: string;
+            /**
+             * Errors is a count of all error messages that were generated during execution of the restore. The actual errors are stored in object storage.
+             */
+            errors?: number;
+            /**
+             * FailureReason is an error that caused the entire restore to fail.
+             */
+            failureReason?: string;
+            /**
+             * Phase is the current state of the Restore
+             */
+            phase?: string;
+            /**
+             * Progress contains information about the restore's execution progress. Note that this information is best-effort only -- if Velero fails to update it during a restore for any reason, it may be inaccurate/stale.
+             */
+            progress?: outputs.velero.v1.RestoreStatusProgress;
+            /**
+             * StartTimestamp records the time the restore operation was started. The server's time is used for StartTimestamps
+             */
+            startTimestamp?: string;
+            /**
+             * ValidationErrors is a slice of all validation errors (if applicable)
+             */
+            validationErrors?: string[];
+            /**
+             * Warnings is a count of all warning messages that were generated during execution of the restore. The actual warnings are stored in object storage.
+             */
+            warnings?: number;
+        }
+
+        /**
+         * Progress contains information about the restore's execution progress. Note that this information is best-effort only -- if Velero fails to update it during a restore for any reason, it may be inaccurate/stale.
+         */
+        export interface RestoreStatusProgress {
+            /**
+             * ItemsRestored is the number of items that have actually been restored so far
+             */
+            itemsRestored?: number;
+            /**
+             * TotalItems is the total number of items to be restored. This number may change throughout the execution of the restore due to plugins that return additional related items to restore
+             */
+            totalItems?: number;
+        }
+
+        /**
+         * ScheduleSpec defines the specification for a Velero schedule
+         */
+        export interface ScheduleSpec {
+            /**
+             * Schedule is a Cron expression defining when to run the Backup.
+             */
+            schedule: string;
+            /**
+             * Template is the definition of the Backup to be run on the provided schedule
+             */
+            template: outputs.velero.v1.ScheduleSpecTemplate;
+            /**
+             * UseOwnerReferencesBackup specifies whether to use OwnerReferences on backups created by this Schedule.
+             */
+            useOwnerReferencesInBackup?: boolean;
+        }
+
+        /**
+         * Template is the definition of the Backup to be run on the provided schedule
+         */
+        export interface ScheduleSpecTemplate {
+            /**
+             * CSISnapshotTimeout specifies the time used to wait for CSI VolumeSnapshot status turns to ReadyToUse during creation, before returning error as timeout. The default value is 10 minute.
+             */
+            csiSnapshotTimeout?: string;
+            /**
+             * DefaultVolumesToRestic specifies whether restic should be used to take a backup of all pod volumes by default.
+             */
+            defaultVolumesToRestic?: boolean;
+            /**
+             * ExcludedNamespaces contains a list of namespaces that are not included in the backup.
+             */
+            excludedNamespaces?: string[];
+            /**
+             * ExcludedResources is a slice of resource names that are not included in the backup.
+             */
+            excludedResources?: string[];
+            /**
+             * Hooks represent custom behaviors that should be executed at different phases of the backup.
+             */
+            hooks?: outputs.velero.v1.ScheduleSpecTemplateHooks;
+            /**
+             * IncludeClusterResources specifies whether cluster-scoped resources should be included for consideration in the backup.
+             */
+            includeClusterResources?: boolean;
+            /**
+             * IncludedNamespaces is a slice of namespace names to include objects from. If empty, all namespaces are included.
+             */
+            includedNamespaces?: string[];
+            /**
+             * IncludedResources is a slice of resource names to include in the backup. If empty, all resources are included.
+             */
+            includedResources?: string[];
+            /**
+             * LabelSelector is a metav1.LabelSelector to filter with when adding individual objects to the backup. If empty or nil, all objects are included. Optional.
+             */
+            labelSelector?: outputs.velero.v1.ScheduleSpecTemplateLabelselector;
+            metadata?: outputs.velero.v1.ScheduleSpecTemplateMetadata;
+            /**
+             * OrLabelSelectors is list of metav1.LabelSelector to filter with when adding individual objects to the backup. If multiple provided they will be joined by the OR operator. LabelSelector as well as OrLabelSelectors cannot co-exist in backup request, only one of them can be used.
+             */
+            orLabelSelectors?: outputs.velero.v1.ScheduleSpecTemplateOrlabelselectors[];
+            /**
+             * OrderedResources specifies the backup order of resources of specific Kind. The map key is the Kind name and value is a list of resource names separated by commas. Each resource name has format "namespace/resourcename".  For cluster resources, simply use "resourcename".
+             */
+            orderedResources?: {[key: string]: string};
+            /**
+             * SnapshotVolumes specifies whether to take cloud snapshots of any PV's referenced in the set of objects included in the Backup.
+             */
+            snapshotVolumes?: boolean;
+            /**
+             * StorageLocation is a string containing the name of a BackupStorageLocation where the backup should be stored.
+             */
+            storageLocation?: string;
+            /**
+             * TTL is a time.Duration-parseable string describing how long the Backup should be retained for.
+             */
+            ttl?: string;
+            /**
+             * VolumeSnapshotLocations is a list containing names of VolumeSnapshotLocations associated with this backup.
+             */
+            volumeSnapshotLocations?: string[];
+        }
+
+        /**
+         * Hooks represent custom behaviors that should be executed at different phases of the backup.
+         */
+        export interface ScheduleSpecTemplateHooks {
+            /**
+             * Resources are hooks that should be executed when backing up individual instances of a resource.
+             */
+            resources?: outputs.velero.v1.ScheduleSpecTemplateHooksResources[];
+        }
+
+        /**
+         * BackupResourceHookSpec defines one or more BackupResourceHooks that should be executed based on the rules defined for namespaces, resources, and label selector.
+         */
+        export interface ScheduleSpecTemplateHooksResources {
+            /**
+             * ExcludedNamespaces specifies the namespaces to which this hook spec does not apply.
+             */
+            excludedNamespaces?: string[];
+            /**
+             * ExcludedResources specifies the resources to which this hook spec does not apply.
+             */
+            excludedResources?: string[];
+            /**
+             * IncludedNamespaces specifies the namespaces to which this hook spec applies. If empty, it applies to all namespaces.
+             */
+            includedNamespaces?: string[];
+            /**
+             * IncludedResources specifies the resources to which this hook spec applies. If empty, it applies to all resources.
+             */
+            includedResources?: string[];
+            /**
+             * LabelSelector, if specified, filters the resources to which this hook spec applies.
+             */
+            labelSelector?: outputs.velero.v1.ScheduleSpecTemplateHooksResourcesLabelselector;
+            /**
+             * Name is the name of this hook.
+             */
+            name: string;
+            /**
+             * PostHooks is a list of BackupResourceHooks to execute after storing the item in the backup. These are executed after all "additional items" from item actions are processed.
+             */
+            post?: outputs.velero.v1.ScheduleSpecTemplateHooksResourcesPost[];
+            /**
+             * PreHooks is a list of BackupResourceHooks to execute prior to storing the item in the backup. These are executed before any "additional items" from item actions are processed.
+             */
+            pre?: outputs.velero.v1.ScheduleSpecTemplateHooksResourcesPre[];
+        }
+
+        /**
+         * LabelSelector, if specified, filters the resources to which this hook spec applies.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesLabelselector {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.velero.v1.ScheduleSpecTemplateHooksResourcesLabelselectorMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesLabelselectorMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        /**
+         * BackupResourceHook defines a hook for a resource.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesPost {
+            /**
+             * Exec defines an exec hook.
+             */
+            exec: outputs.velero.v1.ScheduleSpecTemplateHooksResourcesPostExec;
+        }
+
+        /**
+         * Exec defines an exec hook.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesPostExec {
+            /**
+             * Command is the command and arguments to execute.
+             */
+            command: string[];
+            /**
+             * Container is the container in the pod where the command should be executed. If not specified, the pod's first container is used.
+             */
+            container?: string;
+            /**
+             * OnError specifies how Velero should behave if it encounters an error executing this hook.
+             */
+            onError?: string;
+            /**
+             * Timeout defines the maximum amount of time Velero should wait for the hook to complete before considering the execution a failure.
+             */
+            timeout?: string;
+        }
+
+        /**
+         * BackupResourceHook defines a hook for a resource.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesPre {
+            /**
+             * Exec defines an exec hook.
+             */
+            exec: outputs.velero.v1.ScheduleSpecTemplateHooksResourcesPreExec;
+        }
+
+        /**
+         * Exec defines an exec hook.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesPreExec {
+            /**
+             * Command is the command and arguments to execute.
+             */
+            command: string[];
+            /**
+             * Container is the container in the pod where the command should be executed. If not specified, the pod's first container is used.
+             */
+            container?: string;
+            /**
+             * OnError specifies how Velero should behave if it encounters an error executing this hook.
+             */
+            onError?: string;
+            /**
+             * Timeout defines the maximum amount of time Velero should wait for the hook to complete before considering the execution a failure.
+             */
+            timeout?: string;
+        }
+
+        /**
+         * LabelSelector is a metav1.LabelSelector to filter with when adding individual objects to the backup. If empty or nil, all objects are included. Optional.
+         */
+        export interface ScheduleSpecTemplateLabelselector {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.velero.v1.ScheduleSpecTemplateLabelselectorMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface ScheduleSpecTemplateLabelselectorMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        export interface ScheduleSpecTemplateMetadata {
+            labels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface ScheduleSpecTemplateOrlabelselectors {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: outputs.velero.v1.ScheduleSpecTemplateOrlabelselectorsMatchexpressions[];
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: {[key: string]: string};
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface ScheduleSpecTemplateOrlabelselectorsMatchexpressions {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: string;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: string;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: string[];
+        }
+
+        /**
+         * ScheduleStatus captures the current state of a Velero schedule
+         */
+        export interface ScheduleStatus {
+            /**
+             * LastBackup is the last time a Backup was run for this Schedule schedule
+             */
+            lastBackup?: string;
+            /**
+             * Phase is the current phase of the Schedule
+             */
+            phase?: string;
+            /**
+             * ValidationErrors is a slice of all validation errors (if applicable)
+             */
+            validationErrors?: string[];
+        }
+
+        /**
+         * ServerStatusRequestStatus is the current status of a ServerStatusRequest.
+         */
+        export interface ServerStatusRequestStatus {
+            /**
+             * Phase is the current lifecycle phase of the ServerStatusRequest.
+             */
+            phase?: string;
+            /**
+             * Plugins list information about the plugins running on the Velero server
+             */
+            plugins?: outputs.velero.v1.ServerStatusRequestStatusPlugins[];
+            /**
+             * ProcessedTimestamp is when the ServerStatusRequest was processed by the ServerStatusRequestController.
+             */
+            processedTimestamp?: string;
+            /**
+             * ServerVersion is the Velero server version.
+             */
+            serverVersion?: string;
+        }
+
+        /**
+         * PluginInfo contains attributes of a Velero plugin
+         */
+        export interface ServerStatusRequestStatusPlugins {
+            kind: string;
+            name: string;
+        }
+
+        /**
+         * VolumeSnapshotLocationSpec defines the specification for a Velero VolumeSnapshotLocation.
+         */
+        export interface VolumeSnapshotLocationSpec {
+            /**
+             * Config is for provider-specific configuration fields.
+             */
+            config?: {[key: string]: string};
+            /**
+             * Provider is the provider of the volume storage.
+             */
+            provider: string;
+        }
+
+        /**
+         * VolumeSnapshotLocationStatus describes the current status of a Velero VolumeSnapshotLocation.
+         */
+        export interface VolumeSnapshotLocationStatus {
+            /**
+             * VolumeSnapshotLocationPhase is the lifecycle phase of a Velero VolumeSnapshotLocation.
+             */
+            phase?: string;
+        }
+    }
+}

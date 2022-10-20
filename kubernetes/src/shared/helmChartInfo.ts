@@ -1,4 +1,4 @@
-type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'meilisearch' | 'cilium' | 'grafana' | 'harbor' | 'gitea';
+type Repo = 'oyelowo' | 'nats' | 'pingcap' | 'bitnami' | 'longhorn' | 'jetstack' | 'linkerd' | 'argo' | 'meilisearch' | 'cilium' | 'grafana' | 'harbor' | 'gitea' | 'vmwareTanzu';
 
 type ChartInfo = {
     chart: string;
@@ -299,6 +299,17 @@ export const helmChartsInfo = {
             gitea: {
                 chart: 'gitea',
                 version: '6.0.2',
+                externalCrds: [] as string[],
+                skipCrdRender: false
+            }
+        }
+    },
+    vmwareTanzu: {
+        repo: 'https://vmware-tanzu.github.io/helm-charts/',
+        charts: {
+            velero: {
+                chart: 'velero',
+                version: '2.32.1',
                 externalCrds: [] as string[],
                 skipCrdRender: false
             }

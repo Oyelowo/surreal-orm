@@ -68932,3 +68932,2423 @@ export namespace trust {
 
     }
 }
+
+export namespace velero {
+    export namespace v1 {
+        /**
+         * BackupSpec defines the specification for a Velero backup.
+         */
+        export interface BackupSpecArgs {
+            /**
+             * CSISnapshotTimeout specifies the time used to wait for CSI VolumeSnapshot status turns to ReadyToUse during creation, before returning error as timeout. The default value is 10 minute.
+             */
+            csiSnapshotTimeout?: pulumi.Input<string>;
+            /**
+             * DefaultVolumesToRestic specifies whether restic should be used to take a backup of all pod volumes by default.
+             */
+            defaultVolumesToRestic?: pulumi.Input<boolean>;
+            /**
+             * ExcludedNamespaces contains a list of namespaces that are not included in the backup.
+             */
+            excludedNamespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * ExcludedResources is a slice of resource names that are not included in the backup.
+             */
+            excludedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * Hooks represent custom behaviors that should be executed at different phases of the backup.
+             */
+            hooks?: pulumi.Input<inputs.velero.v1.BackupSpecHooksArgs>;
+            /**
+             * IncludeClusterResources specifies whether cluster-scoped resources should be included for consideration in the backup.
+             */
+            includeClusterResources?: pulumi.Input<boolean>;
+            /**
+             * IncludedNamespaces is a slice of namespace names to include objects from. If empty, all namespaces are included.
+             */
+            includedNamespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * IncludedResources is a slice of resource names to include in the backup. If empty, all resources are included.
+             */
+            includedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * LabelSelector is a metav1.LabelSelector to filter with when adding individual objects to the backup. If empty or nil, all objects are included. Optional.
+             */
+            labelSelector?: pulumi.Input<inputs.velero.v1.BackupSpecLabelselectorArgs>;
+            metadata?: pulumi.Input<inputs.velero.v1.BackupSpecMetadataArgs>;
+            /**
+             * OrLabelSelectors is list of metav1.LabelSelector to filter with when adding individual objects to the backup. If multiple provided they will be joined by the OR operator. LabelSelector as well as OrLabelSelectors cannot co-exist in backup request, only one of them can be used.
+             */
+            orLabelSelectors?: pulumi.Input<pulumi.Input<inputs.velero.v1.BackupSpecOrlabelselectorsArgs>[]>;
+            /**
+             * OrderedResources specifies the backup order of resources of specific Kind. The map key is the Kind name and value is a list of resource names separated by commas. Each resource name has format "namespace/resourcename".  For cluster resources, simply use "resourcename".
+             */
+            orderedResources?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * SnapshotVolumes specifies whether to take cloud snapshots of any PV's referenced in the set of objects included in the Backup.
+             */
+            snapshotVolumes?: pulumi.Input<boolean>;
+            /**
+             * StorageLocation is a string containing the name of a BackupStorageLocation where the backup should be stored.
+             */
+            storageLocation?: pulumi.Input<string>;
+            /**
+             * TTL is a time.Duration-parseable string describing how long the Backup should be retained for.
+             */
+            ttl?: pulumi.Input<string>;
+            /**
+             * VolumeSnapshotLocations is a list containing names of VolumeSnapshotLocations associated with this backup.
+             */
+            volumeSnapshotLocations?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * Hooks represent custom behaviors that should be executed at different phases of the backup.
+         */
+        export interface BackupSpecHooksArgs {
+            /**
+             * Resources are hooks that should be executed when backing up individual instances of a resource.
+             */
+            resources?: pulumi.Input<pulumi.Input<inputs.velero.v1.BackupSpecHooksResourcesArgs>[]>;
+        }
+
+        /**
+         * BackupResourceHookSpec defines one or more BackupResourceHooks that should be executed based on the rules defined for namespaces, resources, and label selector.
+         */
+        export interface BackupSpecHooksResourcesArgs {
+            /**
+             * ExcludedNamespaces specifies the namespaces to which this hook spec does not apply.
+             */
+            excludedNamespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * ExcludedResources specifies the resources to which this hook spec does not apply.
+             */
+            excludedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * IncludedNamespaces specifies the namespaces to which this hook spec applies. If empty, it applies to all namespaces.
+             */
+            includedNamespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * IncludedResources specifies the resources to which this hook spec applies. If empty, it applies to all resources.
+             */
+            includedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * LabelSelector, if specified, filters the resources to which this hook spec applies.
+             */
+            labelSelector?: pulumi.Input<inputs.velero.v1.BackupSpecHooksResourcesLabelselectorArgs>;
+            /**
+             * Name is the name of this hook.
+             */
+            name: pulumi.Input<string>;
+            /**
+             * PostHooks is a list of BackupResourceHooks to execute after storing the item in the backup. These are executed after all "additional items" from item actions are processed.
+             */
+            post?: pulumi.Input<pulumi.Input<inputs.velero.v1.BackupSpecHooksResourcesPostArgs>[]>;
+            /**
+             * PreHooks is a list of BackupResourceHooks to execute prior to storing the item in the backup. These are executed before any "additional items" from item actions are processed.
+             */
+            pre?: pulumi.Input<pulumi.Input<inputs.velero.v1.BackupSpecHooksResourcesPreArgs>[]>;
+        }
+
+        /**
+         * LabelSelector, if specified, filters the resources to which this hook spec applies.
+         */
+        export interface BackupSpecHooksResourcesLabelselectorArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.velero.v1.BackupSpecHooksResourcesLabelselectorMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface BackupSpecHooksResourcesLabelselectorMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * BackupResourceHook defines a hook for a resource.
+         */
+        export interface BackupSpecHooksResourcesPostArgs {
+            /**
+             * Exec defines an exec hook.
+             */
+            exec: pulumi.Input<inputs.velero.v1.BackupSpecHooksResourcesPostExecArgs>;
+        }
+
+        /**
+         * Exec defines an exec hook.
+         */
+        export interface BackupSpecHooksResourcesPostExecArgs {
+            /**
+             * Command is the command and arguments to execute.
+             */
+            command: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * Container is the container in the pod where the command should be executed. If not specified, the pod's first container is used.
+             */
+            container?: pulumi.Input<string>;
+            /**
+             * OnError specifies how Velero should behave if it encounters an error executing this hook.
+             */
+            onError?: pulumi.Input<string>;
+            /**
+             * Timeout defines the maximum amount of time Velero should wait for the hook to complete before considering the execution a failure.
+             */
+            timeout?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackupResourceHook defines a hook for a resource.
+         */
+        export interface BackupSpecHooksResourcesPreArgs {
+            /**
+             * Exec defines an exec hook.
+             */
+            exec: pulumi.Input<inputs.velero.v1.BackupSpecHooksResourcesPreExecArgs>;
+        }
+
+        /**
+         * Exec defines an exec hook.
+         */
+        export interface BackupSpecHooksResourcesPreExecArgs {
+            /**
+             * Command is the command and arguments to execute.
+             */
+            command: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * Container is the container in the pod where the command should be executed. If not specified, the pod's first container is used.
+             */
+            container?: pulumi.Input<string>;
+            /**
+             * OnError specifies how Velero should behave if it encounters an error executing this hook.
+             */
+            onError?: pulumi.Input<string>;
+            /**
+             * Timeout defines the maximum amount of time Velero should wait for the hook to complete before considering the execution a failure.
+             */
+            timeout?: pulumi.Input<string>;
+        }
+
+        /**
+         * LabelSelector is a metav1.LabelSelector to filter with when adding individual objects to the backup. If empty or nil, all objects are included. Optional.
+         */
+        export interface BackupSpecLabelselectorArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.velero.v1.BackupSpecLabelselectorMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface BackupSpecLabelselectorMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface BackupSpecMetadataArgs {
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface BackupSpecOrlabelselectorsArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.velero.v1.BackupSpecOrlabelselectorsMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface BackupSpecOrlabelselectorsMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * BackupStatus captures the current status of a Velero backup.
+         */
+        export interface BackupStatusArgs {
+            /**
+             * CompletionTimestamp records the time a backup was completed. Completion time is recorded even on failed backups. Completion time is recorded before uploading the backup object. The server's time is used for CompletionTimestamps
+             */
+            completionTimestamp?: pulumi.Input<string>;
+            /**
+             * CSIVolumeSnapshotsAttempted is the total number of attempted CSI VolumeSnapshots for this backup.
+             */
+            csiVolumeSnapshotsAttempted?: pulumi.Input<number>;
+            /**
+             * CSIVolumeSnapshotsCompleted is the total number of successfully completed CSI VolumeSnapshots for this backup.
+             */
+            csiVolumeSnapshotsCompleted?: pulumi.Input<number>;
+            /**
+             * Errors is a count of all error messages that were generated during execution of the backup.  The actual errors are in the backup's log file in object storage.
+             */
+            errors?: pulumi.Input<number>;
+            /**
+             * Expiration is when this Backup is eligible for garbage-collection.
+             */
+            expiration?: pulumi.Input<string>;
+            /**
+             * FailureReason is an error that caused the entire backup to fail.
+             */
+            failureReason?: pulumi.Input<string>;
+            /**
+             * FormatVersion is the backup format version, including major, minor, and patch version.
+             */
+            formatVersion?: pulumi.Input<string>;
+            /**
+             * Phase is the current state of the Backup.
+             */
+            phase?: pulumi.Input<string>;
+            /**
+             * Progress contains information about the backup's execution progress. Note that this information is best-effort only -- if Velero fails to update it during a backup for any reason, it may be inaccurate/stale.
+             */
+            progress?: pulumi.Input<inputs.velero.v1.BackupStatusProgressArgs>;
+            /**
+             * StartTimestamp records the time a backup was started. Separate from CreationTimestamp, since that value changes on restores. The server's time is used for StartTimestamps
+             */
+            startTimestamp?: pulumi.Input<string>;
+            /**
+             * ValidationErrors is a slice of all validation errors (if applicable).
+             */
+            validationErrors?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * Version is the backup format major version. Deprecated: Please see FormatVersion
+             */
+            version?: pulumi.Input<number>;
+            /**
+             * VolumeSnapshotsAttempted is the total number of attempted volume snapshots for this backup.
+             */
+            volumeSnapshotsAttempted?: pulumi.Input<number>;
+            /**
+             * VolumeSnapshotsCompleted is the total number of successfully completed volume snapshots for this backup.
+             */
+            volumeSnapshotsCompleted?: pulumi.Input<number>;
+            /**
+             * Warnings is a count of all warning messages that were generated during execution of the backup. The actual warnings are in the backup's log file in object storage.
+             */
+            warnings?: pulumi.Input<number>;
+        }
+
+        /**
+         * Progress contains information about the backup's execution progress. Note that this information is best-effort only -- if Velero fails to update it during a backup for any reason, it may be inaccurate/stale.
+         */
+        export interface BackupStatusProgressArgs {
+            /**
+             * ItemsBackedUp is the number of items that have actually been written to the backup tarball so far.
+             */
+            itemsBackedUp?: pulumi.Input<number>;
+            /**
+             * TotalItems is the total number of items to be backed up. This number may change throughout the execution of the backup due to plugins that return additional related items to back up, the velero.io/exclude-from-backup label, and various other filters that happen as items are processed.
+             */
+            totalItems?: pulumi.Input<number>;
+        }
+
+        /**
+         * BackupStorageLocationSpec defines the desired state of a Velero BackupStorageLocation
+         */
+        export interface BackupStorageLocationSpecArgs {
+            /**
+             * AccessMode defines the permissions for the backup storage location.
+             */
+            accessMode?: pulumi.Input<string>;
+            /**
+             * BackupSyncPeriod defines how frequently to sync backup API objects from object storage. A value of 0 disables sync.
+             */
+            backupSyncPeriod?: pulumi.Input<string>;
+            /**
+             * Config is for provider-specific configuration fields.
+             */
+            config?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * Credential contains the credential information intended to be used with this location
+             */
+            credential?: pulumi.Input<inputs.velero.v1.BackupStorageLocationSpecCredentialArgs>;
+            /**
+             * ObjectStorageLocation specifies the settings necessary to connect to a provider's object storage.
+             */
+            objectStorage: pulumi.Input<inputs.velero.v1.BackupStorageLocationSpecObjectstorageArgs>;
+            /**
+             * Provider is the provider of the backup storage.
+             */
+            provider: pulumi.Input<string>;
+            /**
+             * ValidationFrequency defines how frequently to validate the corresponding object storage. A value of 0 disables validation.
+             */
+            validationFrequency?: pulumi.Input<string>;
+        }
+
+        /**
+         * Credential contains the credential information intended to be used with this location
+         */
+        export interface BackupStorageLocationSpecCredentialArgs {
+            /**
+             * The key of the secret to select from.  Must be a valid secret key.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * Specify whether the Secret or its key must be defined
+             */
+            optional?: pulumi.Input<boolean>;
+        }
+
+        /**
+         * ObjectStorageLocation specifies the settings necessary to connect to a provider's object storage.
+         */
+        export interface BackupStorageLocationSpecObjectstorageArgs {
+            /**
+             * Bucket is the bucket to use for object storage.
+             */
+            bucket: pulumi.Input<string>;
+            /**
+             * CACert defines a CA bundle to use when verifying TLS connections to the provider.
+             */
+            caCert?: pulumi.Input<string>;
+            /**
+             * Prefix is the path inside a bucket to use for Velero storage. Optional.
+             */
+            prefix?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackupStorageLocationStatus defines the observed state of BackupStorageLocation
+         */
+        export interface BackupStorageLocationStatusArgs {
+            /**
+             * AccessMode is an unused field. 
+             *  Deprecated: there is now an AccessMode field on the Spec and this field will be removed entirely as of v2.0.
+             */
+            accessMode?: pulumi.Input<string>;
+            /**
+             * LastSyncedRevision is the value of the `metadata/revision` file in the backup storage location the last time the BSL's contents were synced into the cluster. 
+             *  Deprecated: this field is no longer updated or used for detecting changes to the location's contents and will be removed entirely in v2.0.
+             */
+            lastSyncedRevision?: pulumi.Input<string>;
+            /**
+             * LastSyncedTime is the last time the contents of the location were synced into the cluster.
+             */
+            lastSyncedTime?: pulumi.Input<string>;
+            /**
+             * LastValidationTime is the last time the backup store location was validated the cluster.
+             */
+            lastValidationTime?: pulumi.Input<string>;
+            /**
+             * Message is a message about the backup storage location's status.
+             */
+            message?: pulumi.Input<string>;
+            /**
+             * Phase is the current state of the BackupStorageLocation.
+             */
+            phase?: pulumi.Input<string>;
+        }
+
+        /**
+         * DeleteBackupRequestSpec is the specification for which backups to delete.
+         */
+        export interface DeleteBackupRequestSpecArgs {
+            backupName: pulumi.Input<string>;
+        }
+
+        /**
+         * DeleteBackupRequestStatus is the current status of a DeleteBackupRequest.
+         */
+        export interface DeleteBackupRequestStatusArgs {
+            /**
+             * Errors contains any errors that were encountered during the deletion process.
+             */
+            errors?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * Phase is the current state of the DeleteBackupRequest.
+             */
+            phase?: pulumi.Input<string>;
+        }
+
+        /**
+         * DownloadRequestSpec is the specification for a download request.
+         */
+        export interface DownloadRequestSpecArgs {
+            /**
+             * Target is what to download (e.g. logs for a backup).
+             */
+            target: pulumi.Input<inputs.velero.v1.DownloadRequestSpecTargetArgs>;
+        }
+
+        /**
+         * Target is what to download (e.g. logs for a backup).
+         */
+        export interface DownloadRequestSpecTargetArgs {
+            /**
+             * Kind is the type of file to download.
+             */
+            kind: pulumi.Input<string>;
+            /**
+             * Name is the name of the kubernetes resource with which the file is associated.
+             */
+            name: pulumi.Input<string>;
+        }
+
+        /**
+         * DownloadRequestStatus is the current status of a DownloadRequest.
+         */
+        export interface DownloadRequestStatusArgs {
+            /**
+             * DownloadURL contains the pre-signed URL for the target file.
+             */
+            downloadURL?: pulumi.Input<string>;
+            /**
+             * Expiration is when this DownloadRequest expires and can be deleted by the system.
+             */
+            expiration?: pulumi.Input<string>;
+            /**
+             * Phase is the current state of the DownloadRequest.
+             */
+            phase?: pulumi.Input<string>;
+        }
+
+        /**
+         * PodVolumeBackupSpec is the specification for a PodVolumeBackup.
+         */
+        export interface PodVolumeBackupSpecArgs {
+            /**
+             * BackupStorageLocation is the name of the backup storage location where the restic repository is stored.
+             */
+            backupStorageLocation: pulumi.Input<string>;
+            /**
+             * Node is the name of the node that the Pod is running on.
+             */
+            node: pulumi.Input<string>;
+            /**
+             * Pod is a reference to the pod containing the volume to be backed up.
+             */
+            pod: pulumi.Input<inputs.velero.v1.PodVolumeBackupSpecPodArgs>;
+            /**
+             * RepoIdentifier is the restic repository identifier.
+             */
+            repoIdentifier: pulumi.Input<string>;
+            /**
+             * Tags are a map of key-value pairs that should be applied to the volume backup as tags.
+             */
+            tags?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * Volume is the name of the volume within the Pod to be backed up.
+             */
+            volume: pulumi.Input<string>;
+        }
+
+        /**
+         * Pod is a reference to the pod containing the volume to be backed up.
+         */
+        export interface PodVolumeBackupSpecPodArgs {
+            /**
+             * API version of the referent.
+             */
+            apiVersion?: pulumi.Input<string>;
+            /**
+             * If referring to a piece of an object instead of an entire object, this string should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2]. For example, if the object reference is to a container within a pod, this would take on a value like: "spec.containers{name}" (where "name" refers to the name of the container that triggered the event) or if no container name is specified "spec.containers[2]" (container with index 2 in this pod). This syntax is chosen only to have some well-defined way of referencing a part of an object. TODO: this design is not final and this field is subject to change in the future.
+             */
+            fieldPath?: pulumi.Input<string>;
+            /**
+             * Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+             */
+            kind?: pulumi.Input<string>;
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+             */
+            namespace?: pulumi.Input<string>;
+            /**
+             * Specific resourceVersion to which this reference is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+             */
+            resourceVersion?: pulumi.Input<string>;
+            /**
+             * UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+             */
+            uid?: pulumi.Input<string>;
+        }
+
+        /**
+         * PodVolumeBackupStatus is the current status of a PodVolumeBackup.
+         */
+        export interface PodVolumeBackupStatusArgs {
+            /**
+             * CompletionTimestamp records the time a backup was completed. Completion time is recorded even on failed backups. Completion time is recorded before uploading the backup object. The server's time is used for CompletionTimestamps
+             */
+            completionTimestamp?: pulumi.Input<string>;
+            /**
+             * Message is a message about the pod volume backup's status.
+             */
+            message?: pulumi.Input<string>;
+            /**
+             * Path is the full path within the controller pod being backed up.
+             */
+            path?: pulumi.Input<string>;
+            /**
+             * Phase is the current state of the PodVolumeBackup.
+             */
+            phase?: pulumi.Input<string>;
+            /**
+             * Progress holds the total number of bytes of the volume and the current number of backed up bytes. This can be used to display progress information about the backup operation.
+             */
+            progress?: pulumi.Input<inputs.velero.v1.PodVolumeBackupStatusProgressArgs>;
+            /**
+             * SnapshotID is the identifier for the snapshot of the pod volume.
+             */
+            snapshotID?: pulumi.Input<string>;
+            /**
+             * StartTimestamp records the time a backup was started. Separate from CreationTimestamp, since that value changes on restores. The server's time is used for StartTimestamps
+             */
+            startTimestamp?: pulumi.Input<string>;
+        }
+
+        /**
+         * Progress holds the total number of bytes of the volume and the current number of backed up bytes. This can be used to display progress information about the backup operation.
+         */
+        export interface PodVolumeBackupStatusProgressArgs {
+            bytesDone?: pulumi.Input<number>;
+            totalBytes?: pulumi.Input<number>;
+        }
+
+        /**
+         * PodVolumeRestoreSpec is the specification for a PodVolumeRestore.
+         */
+        export interface PodVolumeRestoreSpecArgs {
+            /**
+             * BackupStorageLocation is the name of the backup storage location where the restic repository is stored.
+             */
+            backupStorageLocation: pulumi.Input<string>;
+            /**
+             * Pod is a reference to the pod containing the volume to be restored.
+             */
+            pod: pulumi.Input<inputs.velero.v1.PodVolumeRestoreSpecPodArgs>;
+            /**
+             * RepoIdentifier is the restic repository identifier.
+             */
+            repoIdentifier: pulumi.Input<string>;
+            /**
+             * SnapshotID is the ID of the volume snapshot to be restored.
+             */
+            snapshotID: pulumi.Input<string>;
+            /**
+             * Volume is the name of the volume within the Pod to be restored.
+             */
+            volume: pulumi.Input<string>;
+        }
+
+        /**
+         * Pod is a reference to the pod containing the volume to be restored.
+         */
+        export interface PodVolumeRestoreSpecPodArgs {
+            /**
+             * API version of the referent.
+             */
+            apiVersion?: pulumi.Input<string>;
+            /**
+             * If referring to a piece of an object instead of an entire object, this string should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2]. For example, if the object reference is to a container within a pod, this would take on a value like: "spec.containers{name}" (where "name" refers to the name of the container that triggered the event) or if no container name is specified "spec.containers[2]" (container with index 2 in this pod). This syntax is chosen only to have some well-defined way of referencing a part of an object. TODO: this design is not final and this field is subject to change in the future.
+             */
+            fieldPath?: pulumi.Input<string>;
+            /**
+             * Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+             */
+            kind?: pulumi.Input<string>;
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+             */
+            namespace?: pulumi.Input<string>;
+            /**
+             * Specific resourceVersion to which this reference is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+             */
+            resourceVersion?: pulumi.Input<string>;
+            /**
+             * UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+             */
+            uid?: pulumi.Input<string>;
+        }
+
+        /**
+         * PodVolumeRestoreStatus is the current status of a PodVolumeRestore.
+         */
+        export interface PodVolumeRestoreStatusArgs {
+            /**
+             * CompletionTimestamp records the time a restore was completed. Completion time is recorded even on failed restores. The server's time is used for CompletionTimestamps
+             */
+            completionTimestamp?: pulumi.Input<string>;
+            /**
+             * Message is a message about the pod volume restore's status.
+             */
+            message?: pulumi.Input<string>;
+            /**
+             * Phase is the current state of the PodVolumeRestore.
+             */
+            phase?: pulumi.Input<string>;
+            /**
+             * Progress holds the total number of bytes of the snapshot and the current number of restored bytes. This can be used to display progress information about the restore operation.
+             */
+            progress?: pulumi.Input<inputs.velero.v1.PodVolumeRestoreStatusProgressArgs>;
+            /**
+             * StartTimestamp records the time a restore was started. The server's time is used for StartTimestamps
+             */
+            startTimestamp?: pulumi.Input<string>;
+        }
+
+        /**
+         * Progress holds the total number of bytes of the snapshot and the current number of restored bytes. This can be used to display progress information about the restore operation.
+         */
+        export interface PodVolumeRestoreStatusProgressArgs {
+            bytesDone?: pulumi.Input<number>;
+            totalBytes?: pulumi.Input<number>;
+        }
+
+        /**
+         * ResticRepositorySpec is the specification for a ResticRepository.
+         */
+        export interface ResticRepositorySpecArgs {
+            /**
+             * BackupStorageLocation is the name of the BackupStorageLocation that should contain this repository.
+             */
+            backupStorageLocation: pulumi.Input<string>;
+            /**
+             * MaintenanceFrequency is how often maintenance should be run.
+             */
+            maintenanceFrequency: pulumi.Input<string>;
+            /**
+             * ResticIdentifier is the full restic-compatible string for identifying this repository.
+             */
+            resticIdentifier: pulumi.Input<string>;
+            /**
+             * VolumeNamespace is the namespace this restic repository contains pod volume backups for.
+             */
+            volumeNamespace: pulumi.Input<string>;
+        }
+
+        /**
+         * ResticRepositoryStatus is the current status of a ResticRepository.
+         */
+        export interface ResticRepositoryStatusArgs {
+            /**
+             * LastMaintenanceTime is the last time maintenance was run.
+             */
+            lastMaintenanceTime?: pulumi.Input<string>;
+            /**
+             * Message is a message about the current status of the ResticRepository.
+             */
+            message?: pulumi.Input<string>;
+            /**
+             * Phase is the current state of the ResticRepository.
+             */
+            phase?: pulumi.Input<string>;
+        }
+
+        /**
+         * RestoreSpec defines the specification for a Velero restore.
+         */
+        export interface RestoreSpecArgs {
+            /**
+             * BackupName is the unique name of the Velero backup to restore from.
+             */
+            backupName: pulumi.Input<string>;
+            /**
+             * ExcludedNamespaces contains a list of namespaces that are not included in the restore.
+             */
+            excludedNamespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * ExcludedResources is a slice of resource names that are not included in the restore.
+             */
+            excludedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * ExistingResourcePolicy specifies the restore behaviour for the kubernetes resource to be restored
+             */
+            existingResourcePolicy?: pulumi.Input<string>;
+            /**
+             * Hooks represent custom behaviors that should be executed during or post restore.
+             */
+            hooks?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksArgs>;
+            /**
+             * IncludeClusterResources specifies whether cluster-scoped resources should be included for consideration in the restore. If null, defaults to true.
+             */
+            includeClusterResources?: pulumi.Input<boolean>;
+            /**
+             * IncludedNamespaces is a slice of namespace names to include objects from. If empty, all namespaces are included.
+             */
+            includedNamespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * IncludedResources is a slice of resource names to include in the restore. If empty, all resources in the backup are included.
+             */
+            includedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * LabelSelector is a metav1.LabelSelector to filter with when restoring individual objects from the backup. If empty or nil, all objects are included. Optional.
+             */
+            labelSelector?: pulumi.Input<inputs.velero.v1.RestoreSpecLabelselectorArgs>;
+            /**
+             * NamespaceMapping is a map of source namespace names to target namespace names to restore into. Any source namespaces not included in the map will be restored into namespaces of the same name.
+             */
+            namespaceMapping?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * OrLabelSelectors is list of metav1.LabelSelector to filter with when restoring individual objects from the backup. If multiple provided they will be joined by the OR operator. LabelSelector as well as OrLabelSelectors cannot co-exist in restore request, only one of them can be used
+             */
+            orLabelSelectors?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecOrlabelselectorsArgs>[]>;
+            /**
+             * PreserveNodePorts specifies whether to restore old nodePorts from backup.
+             */
+            preserveNodePorts?: pulumi.Input<boolean>;
+            /**
+             * RestorePVs specifies whether to restore all included PVs from snapshot (via the cloudprovider).
+             */
+            restorePVs?: pulumi.Input<boolean>;
+            /**
+             * RestoreStatus specifies which resources we should restore the status field. If nil, no objects are included. Optional.
+             */
+            restoreStatus?: pulumi.Input<inputs.velero.v1.RestoreSpecRestorestatusArgs>;
+            /**
+             * ScheduleName is the unique name of the Velero schedule to restore from. If specified, and BackupName is empty, Velero will restore from the most recent successful backup created from this schedule.
+             */
+            scheduleName?: pulumi.Input<string>;
+        }
+
+        /**
+         * Hooks represent custom behaviors that should be executed during or post restore.
+         */
+        export interface RestoreSpecHooksArgs {
+            resources?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesArgs>[]>;
+        }
+
+        /**
+         * RestoreResourceHookSpec defines one or more RestoreResrouceHooks that should be executed based on the rules defined for namespaces, resources, and label selector.
+         */
+        export interface RestoreSpecHooksResourcesArgs {
+            /**
+             * ExcludedNamespaces specifies the namespaces to which this hook spec does not apply.
+             */
+            excludedNamespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * ExcludedResources specifies the resources to which this hook spec does not apply.
+             */
+            excludedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * IncludedNamespaces specifies the namespaces to which this hook spec applies. If empty, it applies to all namespaces.
+             */
+            includedNamespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * IncludedResources specifies the resources to which this hook spec applies. If empty, it applies to all resources.
+             */
+            includedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * LabelSelector, if specified, filters the resources to which this hook spec applies.
+             */
+            labelSelector?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesLabelselectorArgs>;
+            /**
+             * Name is the name of this hook.
+             */
+            name: pulumi.Input<string>;
+            /**
+             * PostHooks is a list of RestoreResourceHooks to execute during and after restoring a resource.
+             */
+            postHooks?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksArgs>[]>;
+        }
+
+        /**
+         * LabelSelector, if specified, filters the resources to which this hook spec applies.
+         */
+        export interface RestoreSpecHooksResourcesLabelselectorArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesLabelselectorMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface RestoreSpecHooksResourcesLabelselectorMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * RestoreResourceHook defines a restore hook for a resource.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksArgs {
+            /**
+             * Exec defines an exec restore hook.
+             */
+            exec?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksExecArgs>;
+            /**
+             * Init defines an init restore hook.
+             */
+            init?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitArgs>;
+        }
+
+        /**
+         * Exec defines an exec restore hook.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksExecArgs {
+            /**
+             * Command is the command and arguments to execute from within a container after a pod has been restored.
+             */
+            command: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * Container is the container in the pod where the command should be executed. If not specified, the pod's first container is used.
+             */
+            container?: pulumi.Input<string>;
+            /**
+             * ExecTimeout defines the maximum amount of time Velero should wait for the hook to complete before considering the execution a failure.
+             */
+            execTimeout?: pulumi.Input<string>;
+            /**
+             * OnError specifies how Velero should behave if it encounters an error executing this hook.
+             */
+            onError?: pulumi.Input<string>;
+            /**
+             * WaitTimeout defines the maximum amount of time Velero should wait for the container to be Ready before attempting to run the command.
+             */
+            waitTimeout?: pulumi.Input<string>;
+        }
+
+        /**
+         * Init defines an init restore hook.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitArgs {
+            /**
+             * InitContainers is list of init containers to be added to a pod during its restore.
+             */
+            initContainers?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersArgs>[]>;
+            /**
+             * Timeout defines the maximum amount of time Velero should wait for the initContainers to complete.
+             */
+            timeout?: pulumi.Input<string>;
+        }
+
+        /**
+         * A single application container that you want to run within a pod.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersArgs {
+            /**
+             * Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+             */
+            args?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * Entrypoint array. Not executed within a shell. The docker image's ENTRYPOINT is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+             */
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * List of environment variables to set in the container. Cannot be updated.
+             */
+            env?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvArgs>[]>;
+            /**
+             * List of sources to populate environment variables in the container. The keys defined within a source must be a C_IDENTIFIER. All invalid keys will be reported as an event when the container is starting. When a key exists in multiple sources, the value associated with the last source will take precedence. Values defined by an Env with a duplicate key will take precedence. Cannot be updated.
+             */
+            envFrom?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvfromArgs>[]>;
+            /**
+             * Docker image name. More info: https://kubernetes.io/docs/concepts/containers/images This field is optional to allow higher level config management to default or override container images in workload controllers like Deployments and StatefulSets.
+             */
+            image?: pulumi.Input<string>;
+            /**
+             * Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
+             */
+            imagePullPolicy?: pulumi.Input<string>;
+            /**
+             * Actions that the management system should take in response to container lifecycle events. Cannot be updated.
+             */
+            lifecycle?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecycleArgs>;
+            /**
+             * Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            livenessProbe?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeArgs>;
+            /**
+             * Name of the container specified as a DNS_LABEL. Each container in a pod must have a unique name (DNS_LABEL). Cannot be updated.
+             */
+            name: pulumi.Input<string>;
+            /**
+             * List of ports to expose from the container. Exposing a port here gives the system additional information about the network connections a container uses, but is primarily informational. Not specifying a port here DOES NOT prevent that port from being exposed. Any port which is listening on the default "0.0.0.0" address inside a container will be accessible from the network. Cannot be updated.
+             */
+            ports?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersPortsArgs>[]>;
+            /**
+             * Periodic probe of container service readiness. Container will be removed from service endpoints if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            readinessProbe?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeArgs>;
+            /**
+             * Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+             */
+            resources?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersResourcesArgs>;
+            /**
+             * SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+             */
+            securityContext?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextArgs>;
+            /**
+             * StartupProbe indicates that the Pod has successfully initialized. If specified, no other probes are executed until this completes successfully. If this probe fails, the Pod will be restarted, just as if the livenessProbe failed. This can be used to provide different probe parameters at the beginning of a Pod's lifecycle, when it might take a long time to load data or warm a cache, than during "steady-state operation. This cannot be updated. More info: https"://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            startupProbe?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeArgs>;
+            /**
+             * Whether this container should allocate a buffer for stdin in the container runtime. If this is not set, reads from stdin in the container will always result in EOF. Default is false.
+             */
+            stdin?: pulumi.Input<boolean>;
+            /**
+             * Whether the container runtime should close the stdin channel after it has been opened by a single attach. When stdin is true the stdin stream will remain open across multiple attach sessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the first client attaches to stdin, and then remains open and accepts data until the client disconnects, at which time stdin is closed and remains closed until the container is restarted. If this flag is false, a container processes that reads from stdin will never receive an EOF. Default is false
+             */
+            stdinOnce?: pulumi.Input<boolean>;
+            /**
+             * Optional: Path at which the file to which the container's termination message will be written is mounted into the container's filesystem. Message written is intended to be brief final status, such as an assertion failure message. Will be truncated by the node if greater than 4096 bytes. The total message length across all containers will be limited to 12kb. Defaults to /dev/termination-log. Cannot be updated.
+             */
+            terminationMessagePath?: pulumi.Input<string>;
+            /**
+             * Indicate how the termination message should be populated. File will use the contents of terminationMessagePath to populate the container status message on both success and failure. FallbackToLogsOnError will use the last chunk of container log output if the termination message file is empty and the container exited with an error. The log output is limited to 2048 bytes or 80 lines, whichever is smaller. Defaults to File. Cannot be updated.
+             */
+            terminationMessagePolicy?: pulumi.Input<string>;
+            /**
+             * Whether this container should allocate a TTY for itself, also requires 'stdin' to be true. Default is false.
+             */
+            tty?: pulumi.Input<boolean>;
+            /**
+             * volumeDevices is the list of block devices to be used by the container.
+             */
+            volumeDevices?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersVolumedevicesArgs>[]>;
+            /**
+             * Pod volumes to mount into the container's filesystem. Cannot be updated.
+             */
+            volumeMounts?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersVolumemountsArgs>[]>;
+            /**
+             * Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image. Cannot be updated.
+             */
+            workingDir?: pulumi.Input<string>;
+        }
+
+        /**
+         * EnvVar represents an environment variable present in a Container.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvArgs {
+            /**
+             * Name of the environment variable. Must be a C_IDENTIFIER.
+             */
+            name: pulumi.Input<string>;
+            /**
+             * Variable references $(VAR_NAME) are expanded using the previously defined environment variables in the container and any service environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "".
+             */
+            value?: pulumi.Input<string>;
+            /**
+             * Source for the environment variable's value. Cannot be used if value is not empty.
+             */
+            valueFrom?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromArgs>;
+        }
+
+        /**
+         * Source for the environment variable's value. Cannot be used if value is not empty.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromArgs {
+            /**
+             * Selects a key of a ConfigMap.
+             */
+            configMapKeyRef?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromConfigmapkeyrefArgs>;
+            /**
+             * Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
+             */
+            fieldRef?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromFieldrefArgs>;
+            /**
+             * Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
+             */
+            resourceFieldRef?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromResourcefieldrefArgs>;
+            /**
+             * Selects a key of a secret in the pod's namespace
+             */
+            secretKeyRef?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromSecretkeyrefArgs>;
+        }
+
+        /**
+         * Selects a key of a ConfigMap.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromConfigmapkeyrefArgs {
+            /**
+             * The key to select.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * Specify whether the ConfigMap or its key must be defined
+             */
+            optional?: pulumi.Input<boolean>;
+        }
+
+        /**
+         * Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromFieldrefArgs {
+            /**
+             * Version of the schema the FieldPath is written in terms of, defaults to "v1".
+             */
+            apiVersion?: pulumi.Input<string>;
+            /**
+             * Path of the field to select in the specified API version.
+             */
+            fieldPath: pulumi.Input<string>;
+        }
+
+        /**
+         * Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromResourcefieldrefArgs {
+            /**
+             * Container name: required for volumes, optional for env vars
+             */
+            containerName?: pulumi.Input<string>;
+            /**
+             * Specifies the output format of the exposed resources, defaults to "1"
+             */
+            divisor?: pulumi.Input<number | string>;
+            /**
+             * Required: resource to select
+             */
+            resource: pulumi.Input<string>;
+        }
+
+        /**
+         * Selects a key of a secret in the pod's namespace
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvValuefromSecretkeyrefArgs {
+            /**
+             * The key of the secret to select from.  Must be a valid secret key.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * Specify whether the Secret or its key must be defined
+             */
+            optional?: pulumi.Input<boolean>;
+        }
+
+        /**
+         * EnvFromSource represents the source of a set of ConfigMaps
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvfromArgs {
+            /**
+             * The ConfigMap to select from
+             */
+            configMapRef?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvfromConfigmaprefArgs>;
+            /**
+             * An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.
+             */
+            prefix?: pulumi.Input<string>;
+            /**
+             * The Secret to select from
+             */
+            secretRef?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvfromSecretrefArgs>;
+        }
+
+        /**
+         * The ConfigMap to select from
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvfromConfigmaprefArgs {
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * Specify whether the ConfigMap must be defined
+             */
+            optional?: pulumi.Input<boolean>;
+        }
+
+        /**
+         * The Secret to select from
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersEnvfromSecretrefArgs {
+            /**
+             * Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * Specify whether the Secret must be defined
+             */
+            optional?: pulumi.Input<boolean>;
+        }
+
+        /**
+         * Actions that the management system should take in response to container lifecycle events. Cannot be updated.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecycleArgs {
+            /**
+             * PostStart is called immediately after a container is created. If the handler fails, the container is terminated and restarted according to its restart policy. Other management of the container blocks until the hook completes. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
+             */
+            postStart?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartArgs>;
+            /**
+             * PreStop is called immediately before a container is terminated due to an API request or management event such as liveness/startup probe failure, preemption, resource contention, etc. The handler is not called if the container crashes or exits. The reason for termination is passed to the handler. The Pod's termination grace period countdown begins before the PreStop hooked is executed. Regardless of the outcome of the handler, the container will eventually terminate within the Pod's termination grace period. Other management of the container blocks until the hook completes or until the termination grace period is reached. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
+             */
+            preStop?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopArgs>;
+        }
+
+        /**
+         * PostStart is called immediately after a container is created. If the handler fails, the container is terminated and restarted according to its restart policy. Other management of the container blocks until the hook completes. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartArgs {
+            /**
+             * One and only one of the following should be specified. Exec specifies the action to take.
+             */
+            exec?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartExecArgs>;
+            /**
+             * HTTPGet specifies the http request to perform.
+             */
+            httpGet?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartHttpgetArgs>;
+            /**
+             * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+             */
+            tcpSocket?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartTcpsocketArgs>;
+        }
+
+        /**
+         * One and only one of the following should be specified. Exec specifies the action to take.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartExecArgs {
+            /**
+             * Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.
+             */
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * HTTPGet specifies the http request to perform.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartHttpgetArgs {
+            /**
+             * Host name to connect to, defaults to the pod IP. You probably want to set "Host" in httpHeaders instead.
+             */
+            host?: pulumi.Input<string>;
+            /**
+             * Custom headers to set in the request. HTTP allows repeated headers.
+             */
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartHttpgetHttpheadersArgs>[]>;
+            /**
+             * Path to access on the HTTP server.
+             */
+            path?: pulumi.Input<string>;
+            /**
+             * Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: pulumi.Input<number | string>;
+            /**
+             * Scheme to use for connecting to the host. Defaults to HTTP.
+             */
+            scheme?: pulumi.Input<string>;
+        }
+
+        /**
+         * HTTPHeader describes a custom header to be used in HTTP probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartHttpgetHttpheadersArgs {
+            /**
+             * The header field name
+             */
+            name: pulumi.Input<string>;
+            /**
+             * The header field value
+             */
+            value: pulumi.Input<string>;
+        }
+
+        /**
+         * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePoststartTcpsocketArgs {
+            /**
+             * Optional: Host name to connect to, defaults to the pod IP.
+             */
+            host?: pulumi.Input<string>;
+            /**
+             * Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: pulumi.Input<number | string>;
+        }
+
+        /**
+         * PreStop is called immediately before a container is terminated due to an API request or management event such as liveness/startup probe failure, preemption, resource contention, etc. The handler is not called if the container crashes or exits. The reason for termination is passed to the handler. The Pod's termination grace period countdown begins before the PreStop hooked is executed. Regardless of the outcome of the handler, the container will eventually terminate within the Pod's termination grace period. Other management of the container blocks until the hook completes or until the termination grace period is reached. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopArgs {
+            /**
+             * One and only one of the following should be specified. Exec specifies the action to take.
+             */
+            exec?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopExecArgs>;
+            /**
+             * HTTPGet specifies the http request to perform.
+             */
+            httpGet?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopHttpgetArgs>;
+            /**
+             * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+             */
+            tcpSocket?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopTcpsocketArgs>;
+        }
+
+        /**
+         * One and only one of the following should be specified. Exec specifies the action to take.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopExecArgs {
+            /**
+             * Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.
+             */
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * HTTPGet specifies the http request to perform.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopHttpgetArgs {
+            /**
+             * Host name to connect to, defaults to the pod IP. You probably want to set "Host" in httpHeaders instead.
+             */
+            host?: pulumi.Input<string>;
+            /**
+             * Custom headers to set in the request. HTTP allows repeated headers.
+             */
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopHttpgetHttpheadersArgs>[]>;
+            /**
+             * Path to access on the HTTP server.
+             */
+            path?: pulumi.Input<string>;
+            /**
+             * Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: pulumi.Input<number | string>;
+            /**
+             * Scheme to use for connecting to the host. Defaults to HTTP.
+             */
+            scheme?: pulumi.Input<string>;
+        }
+
+        /**
+         * HTTPHeader describes a custom header to be used in HTTP probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopHttpgetHttpheadersArgs {
+            /**
+             * The header field name
+             */
+            name: pulumi.Input<string>;
+            /**
+             * The header field value
+             */
+            value: pulumi.Input<string>;
+        }
+
+        /**
+         * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLifecyclePrestopTcpsocketArgs {
+            /**
+             * Optional: Host name to connect to, defaults to the pod IP.
+             */
+            host?: pulumi.Input<string>;
+            /**
+             * Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: pulumi.Input<number | string>;
+        }
+
+        /**
+         * Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeArgs {
+            /**
+             * One and only one of the following should be specified. Exec specifies the action to take.
+             */
+            exec?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeExecArgs>;
+            /**
+             * Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+             */
+            failureThreshold?: pulumi.Input<number>;
+            /**
+             * HTTPGet specifies the http request to perform.
+             */
+            httpGet?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeHttpgetArgs>;
+            /**
+             * Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            initialDelaySeconds?: pulumi.Input<number>;
+            /**
+             * How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1.
+             */
+            periodSeconds?: pulumi.Input<number>;
+            /**
+             * Minimum consecutive successes for the probe to be considered successful after having failed. Defaults to 1. Must be 1 for liveness and startup. Minimum value is 1.
+             */
+            successThreshold?: pulumi.Input<number>;
+            /**
+             * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+             */
+            tcpSocket?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeTcpsocketArgs>;
+            /**
+             * Optional duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. If this value is nil, the pod's terminationGracePeriodSeconds will be used. Otherwise, this value overrides the value provided by the pod spec. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down). This is a beta field and requires enabling ProbeTerminationGracePeriod feature gate. Minimum value is 1. spec.terminationGracePeriodSeconds is used if unset.
+             */
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            /**
+             * Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        /**
+         * One and only one of the following should be specified. Exec specifies the action to take.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeExecArgs {
+            /**
+             * Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.
+             */
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * HTTPGet specifies the http request to perform.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeHttpgetArgs {
+            /**
+             * Host name to connect to, defaults to the pod IP. You probably want to set "Host" in httpHeaders instead.
+             */
+            host?: pulumi.Input<string>;
+            /**
+             * Custom headers to set in the request. HTTP allows repeated headers.
+             */
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeHttpgetHttpheadersArgs>[]>;
+            /**
+             * Path to access on the HTTP server.
+             */
+            path?: pulumi.Input<string>;
+            /**
+             * Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: pulumi.Input<number | string>;
+            /**
+             * Scheme to use for connecting to the host. Defaults to HTTP.
+             */
+            scheme?: pulumi.Input<string>;
+        }
+
+        /**
+         * HTTPHeader describes a custom header to be used in HTTP probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeHttpgetHttpheadersArgs {
+            /**
+             * The header field name
+             */
+            name: pulumi.Input<string>;
+            /**
+             * The header field value
+             */
+            value: pulumi.Input<string>;
+        }
+
+        /**
+         * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersLivenessprobeTcpsocketArgs {
+            /**
+             * Optional: Host name to connect to, defaults to the pod IP.
+             */
+            host?: pulumi.Input<string>;
+            /**
+             * Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: pulumi.Input<number | string>;
+        }
+
+        /**
+         * ContainerPort represents a network port in a single container.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersPortsArgs {
+            /**
+             * Number of port to expose on the pod's IP address. This must be a valid port number, 0 < x < 65536.
+             */
+            containerPort: pulumi.Input<number>;
+            /**
+             * What host IP to bind the external port to.
+             */
+            hostIP?: pulumi.Input<string>;
+            /**
+             * Number of port to expose on the host. If specified, this must be a valid port number, 0 < x < 65536. If HostNetwork is specified, this must match ContainerPort. Most containers do not need this.
+             */
+            hostPort?: pulumi.Input<number>;
+            /**
+             * If specified, this must be an IANA_SVC_NAME and unique within the pod. Each named port in a pod must have a unique name. Name for the port that can be referred to by services.
+             */
+            name?: pulumi.Input<string>;
+            /**
+             * Protocol for port. Must be UDP, TCP, or SCTP. Defaults to "TCP".
+             */
+            protocol: pulumi.Input<string>;
+        }
+        /**
+         * restoreSpecHooksResourcesPosthooksInitInitcontainersPortsArgsProvideDefaults sets the appropriate defaults for RestoreSpecHooksResourcesPosthooksInitInitcontainersPortsArgs
+         */
+        export function restoreSpecHooksResourcesPosthooksInitInitcontainersPortsArgsProvideDefaults(val: RestoreSpecHooksResourcesPosthooksInitInitcontainersPortsArgs): RestoreSpecHooksResourcesPosthooksInitInitcontainersPortsArgs {
+            return {
+                ...val,
+                protocol: (val.protocol) ?? "TCP",
+            };
+        }
+
+        /**
+         * Periodic probe of container service readiness. Container will be removed from service endpoints if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeArgs {
+            /**
+             * One and only one of the following should be specified. Exec specifies the action to take.
+             */
+            exec?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeExecArgs>;
+            /**
+             * Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+             */
+            failureThreshold?: pulumi.Input<number>;
+            /**
+             * HTTPGet specifies the http request to perform.
+             */
+            httpGet?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeHttpgetArgs>;
+            /**
+             * Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            initialDelaySeconds?: pulumi.Input<number>;
+            /**
+             * How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1.
+             */
+            periodSeconds?: pulumi.Input<number>;
+            /**
+             * Minimum consecutive successes for the probe to be considered successful after having failed. Defaults to 1. Must be 1 for liveness and startup. Minimum value is 1.
+             */
+            successThreshold?: pulumi.Input<number>;
+            /**
+             * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+             */
+            tcpSocket?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeTcpsocketArgs>;
+            /**
+             * Optional duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. If this value is nil, the pod's terminationGracePeriodSeconds will be used. Otherwise, this value overrides the value provided by the pod spec. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down). This is a beta field and requires enabling ProbeTerminationGracePeriod feature gate. Minimum value is 1. spec.terminationGracePeriodSeconds is used if unset.
+             */
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            /**
+             * Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        /**
+         * One and only one of the following should be specified. Exec specifies the action to take.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeExecArgs {
+            /**
+             * Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.
+             */
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * HTTPGet specifies the http request to perform.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeHttpgetArgs {
+            /**
+             * Host name to connect to, defaults to the pod IP. You probably want to set "Host" in httpHeaders instead.
+             */
+            host?: pulumi.Input<string>;
+            /**
+             * Custom headers to set in the request. HTTP allows repeated headers.
+             */
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeHttpgetHttpheadersArgs>[]>;
+            /**
+             * Path to access on the HTTP server.
+             */
+            path?: pulumi.Input<string>;
+            /**
+             * Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: pulumi.Input<number | string>;
+            /**
+             * Scheme to use for connecting to the host. Defaults to HTTP.
+             */
+            scheme?: pulumi.Input<string>;
+        }
+
+        /**
+         * HTTPHeader describes a custom header to be used in HTTP probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeHttpgetHttpheadersArgs {
+            /**
+             * The header field name
+             */
+            name: pulumi.Input<string>;
+            /**
+             * The header field value
+             */
+            value: pulumi.Input<string>;
+        }
+
+        /**
+         * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersReadinessprobeTcpsocketArgs {
+            /**
+             * Optional: Host name to connect to, defaults to the pod IP.
+             */
+            host?: pulumi.Input<string>;
+            /**
+             * Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: pulumi.Input<number | string>;
+        }
+
+        /**
+         * Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersResourcesArgs {
+            /**
+             * Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+             */
+            limits?: pulumi.Input<{[key: string]: pulumi.Input<number | string>}>;
+            /**
+             * Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an "implementation-defined value. More info: https"://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+             */
+            requests?: pulumi.Input<{[key: string]: pulumi.Input<number | string>}>;
+        }
+
+        /**
+         * SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextArgs {
+            /**
+             * AllowPrivilegeEscalation controls whether a process can gain more privileges than its parent process. This bool directly controls if the no_new_privs flag will be set on the container process. AllowPrivilegeEscalation is true always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN
+             */
+            allowPrivilegeEscalation?: pulumi.Input<boolean>;
+            /**
+             * The capabilities to add/drop when running containers. Defaults to the default set of capabilities granted by the container runtime.
+             */
+            capabilities?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextCapabilitiesArgs>;
+            /**
+             * Run container in privileged mode. Processes in privileged containers are essentially equivalent to root on the host. Defaults to false.
+             */
+            privileged?: pulumi.Input<boolean>;
+            /**
+             * procMount denotes the type of proc mount to use for the containers. The default is DefaultProcMount which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled.
+             */
+            procMount?: pulumi.Input<string>;
+            /**
+             * Whether this container has a read-only root filesystem. Default is false.
+             */
+            readOnlyRootFilesystem?: pulumi.Input<boolean>;
+            /**
+             * The GID to run the entrypoint of the container process. Uses runtime default if unset. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+             */
+            runAsGroup?: pulumi.Input<number>;
+            /**
+             * Indicates that the container must run as a non-root user. If true, the Kubelet will validate the image at runtime to ensure that it does not run as UID 0 (root) and fail to start the container if it does. If unset or false, no such validation will be performed. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+             */
+            runAsNonRoot?: pulumi.Input<boolean>;
+            /**
+             * The UID to run the entrypoint of the container process. Defaults to user specified in image metadata if unspecified. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+             */
+            runAsUser?: pulumi.Input<number>;
+            /**
+             * The SELinux context to be applied to the container. If unspecified, the container runtime will allocate a random SELinux context for each container.  May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+             */
+            seLinuxOptions?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextSelinuxoptionsArgs>;
+            /**
+             * The seccomp options to use by this container. If seccomp options are provided at both the pod & container level, the container options override the pod options.
+             */
+            seccompProfile?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextSeccompprofileArgs>;
+            /**
+             * The Windows specific settings applied to all containers. If unspecified, the options from the PodSecurityContext will be used. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+             */
+            windowsOptions?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextWindowsoptionsArgs>;
+        }
+
+        /**
+         * The capabilities to add/drop when running containers. Defaults to the default set of capabilities granted by the container runtime.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextCapabilitiesArgs {
+            /**
+             * Added capabilities
+             */
+            add?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * Removed capabilities
+             */
+            drop?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * The seccomp options to use by this container. If seccomp options are provided at both the pod & container level, the container options override the pod options.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextSeccompprofileArgs {
+            /**
+             * localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must only be set if type is "Localhost".
+             */
+            localhostProfile?: pulumi.Input<string>;
+            /**
+             * type indicates which kind of seccomp profile will be applied. Valid options are: 
+             *  Localhost - a profile defined in a file on the node should be used. RuntimeDefault - the container runtime default profile should be used. Unconfined - no profile should be applied.
+             */
+            type: pulumi.Input<string>;
+        }
+
+        /**
+         * The SELinux context to be applied to the container. If unspecified, the container runtime will allocate a random SELinux context for each container.  May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextSelinuxoptionsArgs {
+            /**
+             * Level is SELinux level label that applies to the container.
+             */
+            level?: pulumi.Input<string>;
+            /**
+             * Role is a SELinux role label that applies to the container.
+             */
+            role?: pulumi.Input<string>;
+            /**
+             * Type is a SELinux type label that applies to the container.
+             */
+            type?: pulumi.Input<string>;
+            /**
+             * User is a SELinux user label that applies to the container.
+             */
+            user?: pulumi.Input<string>;
+        }
+
+        /**
+         * The Windows specific settings applied to all containers. If unspecified, the options from the PodSecurityContext will be used. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersSecuritycontextWindowsoptionsArgs {
+            /**
+             * GMSACredentialSpec is where the GMSA admission webhook (https://github.com/kubernetes-sigs/windows-gmsa) inlines the contents of the GMSA credential spec named by the GMSACredentialSpecName field.
+             */
+            gmsaCredentialSpec?: pulumi.Input<string>;
+            /**
+             * GMSACredentialSpecName is the name of the GMSA credential spec to use.
+             */
+            gmsaCredentialSpecName?: pulumi.Input<string>;
+            /**
+             * HostProcess determines if a container should be run as a 'Host Process' container. This field is alpha-level and will only be honored by components that enable the WindowsHostProcessContainers feature flag. Setting this field without the feature flag will result in errors when validating the Pod. All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers).  In addition, if HostProcess is true then HostNetwork must also be set to true.
+             */
+            hostProcess?: pulumi.Input<boolean>;
+            /**
+             * The UserName in Windows to run the entrypoint of the container process. Defaults to the user specified in image metadata if unspecified. May also be set in PodSecurityContext. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+             */
+            runAsUserName?: pulumi.Input<string>;
+        }
+
+        /**
+         * StartupProbe indicates that the Pod has successfully initialized. If specified, no other probes are executed until this completes successfully. If this probe fails, the Pod will be restarted, just as if the livenessProbe failed. This can be used to provide different probe parameters at the beginning of a Pod's lifecycle, when it might take a long time to load data or warm a cache, than during "steady-state operation. This cannot be updated. More info: https"://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeArgs {
+            /**
+             * One and only one of the following should be specified. Exec specifies the action to take.
+             */
+            exec?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeExecArgs>;
+            /**
+             * Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+             */
+            failureThreshold?: pulumi.Input<number>;
+            /**
+             * HTTPGet specifies the http request to perform.
+             */
+            httpGet?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeHttpgetArgs>;
+            /**
+             * Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            initialDelaySeconds?: pulumi.Input<number>;
+            /**
+             * How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1.
+             */
+            periodSeconds?: pulumi.Input<number>;
+            /**
+             * Minimum consecutive successes for the probe to be considered successful after having failed. Defaults to 1. Must be 1 for liveness and startup. Minimum value is 1.
+             */
+            successThreshold?: pulumi.Input<number>;
+            /**
+             * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+             */
+            tcpSocket?: pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeTcpsocketArgs>;
+            /**
+             * Optional duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. If this value is nil, the pod's terminationGracePeriodSeconds will be used. Otherwise, this value overrides the value provided by the pod spec. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down). This is a beta field and requires enabling ProbeTerminationGracePeriod feature gate. Minimum value is 1. spec.terminationGracePeriodSeconds is used if unset.
+             */
+            terminationGracePeriodSeconds?: pulumi.Input<number>;
+            /**
+             * Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+             */
+            timeoutSeconds?: pulumi.Input<number>;
+        }
+
+        /**
+         * One and only one of the following should be specified. Exec specifies the action to take.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeExecArgs {
+            /**
+             * Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.
+             */
+            command?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * HTTPGet specifies the http request to perform.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeHttpgetArgs {
+            /**
+             * Host name to connect to, defaults to the pod IP. You probably want to set "Host" in httpHeaders instead.
+             */
+            host?: pulumi.Input<string>;
+            /**
+             * Custom headers to set in the request. HTTP allows repeated headers.
+             */
+            httpHeaders?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeHttpgetHttpheadersArgs>[]>;
+            /**
+             * Path to access on the HTTP server.
+             */
+            path?: pulumi.Input<string>;
+            /**
+             * Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: pulumi.Input<number | string>;
+            /**
+             * Scheme to use for connecting to the host. Defaults to HTTP.
+             */
+            scheme?: pulumi.Input<string>;
+        }
+
+        /**
+         * HTTPHeader describes a custom header to be used in HTTP probes
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeHttpgetHttpheadersArgs {
+            /**
+             * The header field name
+             */
+            name: pulumi.Input<string>;
+            /**
+             * The header field value
+             */
+            value: pulumi.Input<string>;
+        }
+
+        /**
+         * TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported TODO: implement a realistic TCP lifecycle hook
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersStartupprobeTcpsocketArgs {
+            /**
+             * Optional: Host name to connect to, defaults to the pod IP.
+             */
+            host?: pulumi.Input<string>;
+            /**
+             * Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.
+             */
+            port: pulumi.Input<number | string>;
+        }
+
+        /**
+         * volumeDevice describes a mapping of a raw block device within a container.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersVolumedevicesArgs {
+            /**
+             * devicePath is the path inside of the container that the device will be mapped to.
+             */
+            devicePath: pulumi.Input<string>;
+            /**
+             * name must match the name of a persistentVolumeClaim in the pod
+             */
+            name: pulumi.Input<string>;
+        }
+
+        /**
+         * VolumeMount describes a mounting of a Volume within a container.
+         */
+        export interface RestoreSpecHooksResourcesPosthooksInitInitcontainersVolumemountsArgs {
+            /**
+             * Path within the container at which the volume should be mounted.  Must not contain ':'.
+             */
+            mountPath: pulumi.Input<string>;
+            /**
+             * mountPropagation determines how mounts are propagated from the host to container and the other way around. When not set, MountPropagationNone is used. This field is beta in 1.10.
+             */
+            mountPropagation?: pulumi.Input<string>;
+            /**
+             * This must match the Name of a Volume.
+             */
+            name: pulumi.Input<string>;
+            /**
+             * Mounted read-only if true, read-write otherwise (false or unspecified). Defaults to false.
+             */
+            readOnly?: pulumi.Input<boolean>;
+            /**
+             * Path within the volume from which the container's volume should be mounted. Defaults to "" (volume's root).
+             */
+            subPath?: pulumi.Input<string>;
+            /**
+             * Expanded path within the volume from which the container's volume should be mounted. Behaves similarly to SubPath but environment variable references $(VAR_NAME) are expanded using the container's environment. Defaults to "" (volume's root). SubPathExpr and SubPath are mutually exclusive.
+             */
+            subPathExpr?: pulumi.Input<string>;
+        }
+
+        /**
+         * LabelSelector is a metav1.LabelSelector to filter with when restoring individual objects from the backup. If empty or nil, all objects are included. Optional.
+         */
+        export interface RestoreSpecLabelselectorArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecLabelselectorMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface RestoreSpecLabelselectorMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface RestoreSpecOrlabelselectorsArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.velero.v1.RestoreSpecOrlabelselectorsMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface RestoreSpecOrlabelselectorsMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * RestoreStatus specifies which resources we should restore the status field. If nil, no objects are included. Optional.
+         */
+        export interface RestoreSpecRestorestatusArgs {
+            /**
+             * ExcludedResources specifies the resources to which will not restore the status.
+             */
+            excludedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * IncludedResources specifies the resources to which will restore the status. If empty, it applies to all resources.
+             */
+            includedResources?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * RestoreStatus captures the current status of a Velero restore
+         */
+        export interface RestoreStatusArgs {
+            /**
+             * CompletionTimestamp records the time the restore operation was completed. Completion time is recorded even on failed restore. The server's time is used for StartTimestamps
+             */
+            completionTimestamp?: pulumi.Input<string>;
+            /**
+             * Errors is a count of all error messages that were generated during execution of the restore. The actual errors are stored in object storage.
+             */
+            errors?: pulumi.Input<number>;
+            /**
+             * FailureReason is an error that caused the entire restore to fail.
+             */
+            failureReason?: pulumi.Input<string>;
+            /**
+             * Phase is the current state of the Restore
+             */
+            phase?: pulumi.Input<string>;
+            /**
+             * Progress contains information about the restore's execution progress. Note that this information is best-effort only -- if Velero fails to update it during a restore for any reason, it may be inaccurate/stale.
+             */
+            progress?: pulumi.Input<inputs.velero.v1.RestoreStatusProgressArgs>;
+            /**
+             * StartTimestamp records the time the restore operation was started. The server's time is used for StartTimestamps
+             */
+            startTimestamp?: pulumi.Input<string>;
+            /**
+             * ValidationErrors is a slice of all validation errors (if applicable)
+             */
+            validationErrors?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * Warnings is a count of all warning messages that were generated during execution of the restore. The actual warnings are stored in object storage.
+             */
+            warnings?: pulumi.Input<number>;
+        }
+
+        /**
+         * Progress contains information about the restore's execution progress. Note that this information is best-effort only -- if Velero fails to update it during a restore for any reason, it may be inaccurate/stale.
+         */
+        export interface RestoreStatusProgressArgs {
+            /**
+             * ItemsRestored is the number of items that have actually been restored so far
+             */
+            itemsRestored?: pulumi.Input<number>;
+            /**
+             * TotalItems is the total number of items to be restored. This number may change throughout the execution of the restore due to plugins that return additional related items to restore
+             */
+            totalItems?: pulumi.Input<number>;
+        }
+
+        /**
+         * ScheduleSpec defines the specification for a Velero schedule
+         */
+        export interface ScheduleSpecArgs {
+            /**
+             * Schedule is a Cron expression defining when to run the Backup.
+             */
+            schedule: pulumi.Input<string>;
+            /**
+             * Template is the definition of the Backup to be run on the provided schedule
+             */
+            template: pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateArgs>;
+            /**
+             * UseOwnerReferencesBackup specifies whether to use OwnerReferences on backups created by this Schedule.
+             */
+            useOwnerReferencesInBackup?: pulumi.Input<boolean>;
+        }
+
+        /**
+         * Template is the definition of the Backup to be run on the provided schedule
+         */
+        export interface ScheduleSpecTemplateArgs {
+            /**
+             * CSISnapshotTimeout specifies the time used to wait for CSI VolumeSnapshot status turns to ReadyToUse during creation, before returning error as timeout. The default value is 10 minute.
+             */
+            csiSnapshotTimeout?: pulumi.Input<string>;
+            /**
+             * DefaultVolumesToRestic specifies whether restic should be used to take a backup of all pod volumes by default.
+             */
+            defaultVolumesToRestic?: pulumi.Input<boolean>;
+            /**
+             * ExcludedNamespaces contains a list of namespaces that are not included in the backup.
+             */
+            excludedNamespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * ExcludedResources is a slice of resource names that are not included in the backup.
+             */
+            excludedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * Hooks represent custom behaviors that should be executed at different phases of the backup.
+             */
+            hooks?: pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateHooksArgs>;
+            /**
+             * IncludeClusterResources specifies whether cluster-scoped resources should be included for consideration in the backup.
+             */
+            includeClusterResources?: pulumi.Input<boolean>;
+            /**
+             * IncludedNamespaces is a slice of namespace names to include objects from. If empty, all namespaces are included.
+             */
+            includedNamespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * IncludedResources is a slice of resource names to include in the backup. If empty, all resources are included.
+             */
+            includedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * LabelSelector is a metav1.LabelSelector to filter with when adding individual objects to the backup. If empty or nil, all objects are included. Optional.
+             */
+            labelSelector?: pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateLabelselectorArgs>;
+            metadata?: pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateMetadataArgs>;
+            /**
+             * OrLabelSelectors is list of metav1.LabelSelector to filter with when adding individual objects to the backup. If multiple provided they will be joined by the OR operator. LabelSelector as well as OrLabelSelectors cannot co-exist in backup request, only one of them can be used.
+             */
+            orLabelSelectors?: pulumi.Input<pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateOrlabelselectorsArgs>[]>;
+            /**
+             * OrderedResources specifies the backup order of resources of specific Kind. The map key is the Kind name and value is a list of resource names separated by commas. Each resource name has format "namespace/resourcename".  For cluster resources, simply use "resourcename".
+             */
+            orderedResources?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * SnapshotVolumes specifies whether to take cloud snapshots of any PV's referenced in the set of objects included in the Backup.
+             */
+            snapshotVolumes?: pulumi.Input<boolean>;
+            /**
+             * StorageLocation is a string containing the name of a BackupStorageLocation where the backup should be stored.
+             */
+            storageLocation?: pulumi.Input<string>;
+            /**
+             * TTL is a time.Duration-parseable string describing how long the Backup should be retained for.
+             */
+            ttl?: pulumi.Input<string>;
+            /**
+             * VolumeSnapshotLocations is a list containing names of VolumeSnapshotLocations associated with this backup.
+             */
+            volumeSnapshotLocations?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * Hooks represent custom behaviors that should be executed at different phases of the backup.
+         */
+        export interface ScheduleSpecTemplateHooksArgs {
+            /**
+             * Resources are hooks that should be executed when backing up individual instances of a resource.
+             */
+            resources?: pulumi.Input<pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateHooksResourcesArgs>[]>;
+        }
+
+        /**
+         * BackupResourceHookSpec defines one or more BackupResourceHooks that should be executed based on the rules defined for namespaces, resources, and label selector.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesArgs {
+            /**
+             * ExcludedNamespaces specifies the namespaces to which this hook spec does not apply.
+             */
+            excludedNamespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * ExcludedResources specifies the resources to which this hook spec does not apply.
+             */
+            excludedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * IncludedNamespaces specifies the namespaces to which this hook spec applies. If empty, it applies to all namespaces.
+             */
+            includedNamespaces?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * IncludedResources specifies the resources to which this hook spec applies. If empty, it applies to all resources.
+             */
+            includedResources?: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * LabelSelector, if specified, filters the resources to which this hook spec applies.
+             */
+            labelSelector?: pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateHooksResourcesLabelselectorArgs>;
+            /**
+             * Name is the name of this hook.
+             */
+            name: pulumi.Input<string>;
+            /**
+             * PostHooks is a list of BackupResourceHooks to execute after storing the item in the backup. These are executed after all "additional items" from item actions are processed.
+             */
+            post?: pulumi.Input<pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateHooksResourcesPostArgs>[]>;
+            /**
+             * PreHooks is a list of BackupResourceHooks to execute prior to storing the item in the backup. These are executed before any "additional items" from item actions are processed.
+             */
+            pre?: pulumi.Input<pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateHooksResourcesPreArgs>[]>;
+        }
+
+        /**
+         * LabelSelector, if specified, filters the resources to which this hook spec applies.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesLabelselectorArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateHooksResourcesLabelselectorMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesLabelselectorMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * BackupResourceHook defines a hook for a resource.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesPostArgs {
+            /**
+             * Exec defines an exec hook.
+             */
+            exec: pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateHooksResourcesPostExecArgs>;
+        }
+
+        /**
+         * Exec defines an exec hook.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesPostExecArgs {
+            /**
+             * Command is the command and arguments to execute.
+             */
+            command: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * Container is the container in the pod where the command should be executed. If not specified, the pod's first container is used.
+             */
+            container?: pulumi.Input<string>;
+            /**
+             * OnError specifies how Velero should behave if it encounters an error executing this hook.
+             */
+            onError?: pulumi.Input<string>;
+            /**
+             * Timeout defines the maximum amount of time Velero should wait for the hook to complete before considering the execution a failure.
+             */
+            timeout?: pulumi.Input<string>;
+        }
+
+        /**
+         * BackupResourceHook defines a hook for a resource.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesPreArgs {
+            /**
+             * Exec defines an exec hook.
+             */
+            exec: pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateHooksResourcesPreExecArgs>;
+        }
+
+        /**
+         * Exec defines an exec hook.
+         */
+        export interface ScheduleSpecTemplateHooksResourcesPreExecArgs {
+            /**
+             * Command is the command and arguments to execute.
+             */
+            command: pulumi.Input<pulumi.Input<string>[]>;
+            /**
+             * Container is the container in the pod where the command should be executed. If not specified, the pod's first container is used.
+             */
+            container?: pulumi.Input<string>;
+            /**
+             * OnError specifies how Velero should behave if it encounters an error executing this hook.
+             */
+            onError?: pulumi.Input<string>;
+            /**
+             * Timeout defines the maximum amount of time Velero should wait for the hook to complete before considering the execution a failure.
+             */
+            timeout?: pulumi.Input<string>;
+        }
+
+        /**
+         * LabelSelector is a metav1.LabelSelector to filter with when adding individual objects to the backup. If empty or nil, all objects are included. Optional.
+         */
+        export interface ScheduleSpecTemplateLabelselectorArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateLabelselectorMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface ScheduleSpecTemplateLabelselectorMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        export interface ScheduleSpecTemplateMetadataArgs {
+            labels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+         */
+        export interface ScheduleSpecTemplateOrlabelselectorsArgs {
+            /**
+             * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+             */
+            matchExpressions?: pulumi.Input<pulumi.Input<inputs.velero.v1.ScheduleSpecTemplateOrlabelselectorsMatchexpressionsArgs>[]>;
+            /**
+             * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+             */
+            matchLabels?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+        }
+
+        /**
+         * A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+         */
+        export interface ScheduleSpecTemplateOrlabelselectorsMatchexpressionsArgs {
+            /**
+             * key is the label key that the selector applies to.
+             */
+            key: pulumi.Input<string>;
+            /**
+             * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+             */
+            operator: pulumi.Input<string>;
+            /**
+             * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+             */
+            values?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * ScheduleStatus captures the current state of a Velero schedule
+         */
+        export interface ScheduleStatusArgs {
+            /**
+             * LastBackup is the last time a Backup was run for this Schedule schedule
+             */
+            lastBackup?: pulumi.Input<string>;
+            /**
+             * Phase is the current phase of the Schedule
+             */
+            phase?: pulumi.Input<string>;
+            /**
+             * ValidationErrors is a slice of all validation errors (if applicable)
+             */
+            validationErrors?: pulumi.Input<pulumi.Input<string>[]>;
+        }
+
+        /**
+         * ServerStatusRequestStatus is the current status of a ServerStatusRequest.
+         */
+        export interface ServerStatusRequestStatusArgs {
+            /**
+             * Phase is the current lifecycle phase of the ServerStatusRequest.
+             */
+            phase?: pulumi.Input<string>;
+            /**
+             * Plugins list information about the plugins running on the Velero server
+             */
+            plugins?: pulumi.Input<pulumi.Input<inputs.velero.v1.ServerStatusRequestStatusPluginsArgs>[]>;
+            /**
+             * ProcessedTimestamp is when the ServerStatusRequest was processed by the ServerStatusRequestController.
+             */
+            processedTimestamp?: pulumi.Input<string>;
+            /**
+             * ServerVersion is the Velero server version.
+             */
+            serverVersion?: pulumi.Input<string>;
+        }
+
+        /**
+         * PluginInfo contains attributes of a Velero plugin
+         */
+        export interface ServerStatusRequestStatusPluginsArgs {
+            kind: pulumi.Input<string>;
+            name: pulumi.Input<string>;
+        }
+
+        /**
+         * VolumeSnapshotLocationSpec defines the specification for a Velero VolumeSnapshotLocation.
+         */
+        export interface VolumeSnapshotLocationSpecArgs {
+            /**
+             * Config is for provider-specific configuration fields.
+             */
+            config?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+            /**
+             * Provider is the provider of the volume storage.
+             */
+            provider: pulumi.Input<string>;
+        }
+
+        /**
+         * VolumeSnapshotLocationStatus describes the current status of a Velero VolumeSnapshotLocation.
+         */
+        export interface VolumeSnapshotLocationStatusArgs {
+            /**
+             * VolumeSnapshotLocationPhase is the lifecycle phase of a Velero VolumeSnapshotLocation.
+             */
+            phase?: pulumi.Input<string>;
+        }
+    }
+}
