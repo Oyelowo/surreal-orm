@@ -8,3 +8,4 @@ resources/types/helm-charts
 # TODO: Temporarily disable checking this file till https://github.com/typescript-eslint/typescript-eslint/pull/5716 is merged
 scripts/utils/plainSecretsManager.ts 
 src/shared/helmChartInfo.ts
+src/infrastructure/argocd/argocdBitnami.ts

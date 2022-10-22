@@ -30,7 +30,7 @@ const argocdValuesOld: DeepPartial<IArgoCdBitnami> = {
             enabled: true,
             hostname: getIngressUrlHost({ environment: ENVIRONMENT, subDomain: 'argocd' }),
             annotations,
-            pathType: 'Prefix' as 'Exact' | 'ImplementationSpecific' | 'Prefix',
+            pathType: 'Prefix' satisfies 'Exact' | 'ImplementationSpecific' | 'Prefix',
             ingressClassName: INGRESS_CLASSNAME_NGINX,
             tls: true,
         },

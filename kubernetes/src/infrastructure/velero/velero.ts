@@ -4,7 +4,12 @@ import { DeepPartial, namespaces } from '../../types/ownTypes.js';
 import { veleroProvider } from './settings.js';
 import { helmChartsInfo } from '../../shared/helmChartInfo.js';
 
-const veleroValues: DeepPartial<IVeleroVmwareTanzu> = {};
+const veleroValues: DeepPartial<IVeleroVmwareTanzu> = {
+    backupsEnabled: true,
+    configuration: {
+        backupStorageLocation: {},
+    },
+};
 
 const {
     repo,
