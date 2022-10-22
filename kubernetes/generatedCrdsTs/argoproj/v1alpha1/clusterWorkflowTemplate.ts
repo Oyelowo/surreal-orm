@@ -2,6 +2,7 @@
 // *** Do not edit by hand unless you're certain you know what you are doing! ***
 
 import * as pulumi from "@pulumi/pulumi";
+import { input as inputs, output as outputs } from "../../types";
 import * as utilities from "../../utilities";
 
 import {ObjectMeta} from "../../meta/v1";
@@ -36,7 +37,7 @@ export class ClusterWorkflowTemplate extends pulumi.CustomResource {
     public readonly apiVersion!: pulumi.Output<"argoproj.io/v1alpha1" | undefined>;
     public readonly kind!: pulumi.Output<"ClusterWorkflowTemplate" | undefined>;
     public readonly metadata!: pulumi.Output<ObjectMeta>;
-    public readonly spec!: pulumi.Output<{[key: string]: any}>;
+    public readonly spec!: pulumi.Output<outputs.argoproj.v1alpha1.ClusterWorkflowTemplateSpec>;
 
     /**
      * Create a ClusterWorkflowTemplate resource with the given unique name, arguments, and options.
@@ -71,5 +72,5 @@ export interface ClusterWorkflowTemplateArgs {
     apiVersion?: pulumi.Input<"argoproj.io/v1alpha1">;
     kind?: pulumi.Input<"ClusterWorkflowTemplate">;
     metadata?: pulumi.Input<ObjectMeta>;
-    spec?: pulumi.Input<{[key: string]: any}>;
+    spec?: pulumi.Input<inputs.argoproj.v1alpha1.ClusterWorkflowTemplateSpecArgs>;
 }

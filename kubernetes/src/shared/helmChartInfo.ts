@@ -22,7 +22,7 @@ export const helmChartsInfo = {
             seaweedfs: {
                 chart: 'seaweedfs',
                 version: '3.30',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false
             },
         },
@@ -81,7 +81,7 @@ export const helmChartsInfo = {
             tikvCluster: {
                 chart: 'tidb-cluster',
                 version: 'v1.3.8',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
         },
@@ -103,55 +103,55 @@ export const helmChartsInfo = {
             sealedSecrets: {
                 chart: 'sealed-secrets',
                 version: '1.1.6',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             certManager: {
                 chart: 'cert-manager',
                 version: '0.8.4',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             nginxIngress: {
                 chart: 'nginx-ingress-controller',
                 version: '9.3.18',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             argocd: {
                 chart: 'argo-cd',
                 version: '4.2.3',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             metalb: {
                 chart: 'metallb',
                 version: '4.1.5',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             redis: {
                 chart: 'redis',
                 version: '17.3.2',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             prometheus: {
                 chart: 'kube-prometheus',
                 version: '8.1.11',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             thanos: {
                 chart: 'thanos',
                 version: '11.5.5',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             harbor: {
                 chart: 'harbor',
                 version: '15.2.5',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
         },
@@ -162,13 +162,13 @@ export const helmChartsInfo = {
             certManager: {
                 chart: 'cert-manager',
                 version: 'v1.9.1',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             certManagerTrust: {
                 chart: 'cert-manager-trust',
                 version: 'v0.2.0',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
         },
@@ -179,19 +179,19 @@ export const helmChartsInfo = {
             linkerdCrds: {
                 chart: 'linkerd-crds',
                 version: '1.4.0',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             linkerdControlPlane: {
                 chart: 'linkerd-control-plane',
                 version: '1.9.3',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: true
             },
             linkerdViz: {
                 chart: 'linkerd-viz',
                 version: '30.3.3',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
         },
@@ -202,7 +202,7 @@ export const helmChartsInfo = {
             meilisearch: {
                 chart: 'meilisearch',
                 version: '0.1.41',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false
             }
         }
@@ -213,31 +213,40 @@ export const helmChartsInfo = {
             argoCD: {
                 chart: 'argo-cd',
                 version: '5.6.0',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             argoWorkflows: {
                 chart: 'argo-workflows',
                 version: '0.20.1',
-                externalCrds: [] as string[],
+                externalCrds: [
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_workflows.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_clusterworkflowtemplates.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_cronworkflows.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_workflowartifactgctasks.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_workfloweventbindings.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_workflowtaskresults.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_workflowtasksets.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_workflowtemplates.yaml',
+                ]satisfies string[],
                 skipCrdRender: false,
             },
             argoEvent: {
                 chart: 'argo-events',
                 version: '2.0.6',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             argoRollout: {
                 chart: 'argo-rollouts',
                 version: '2.21.1',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
             argoImageUpdater: {
                 chart: 'argocd-image-updater',
                 version: '0.8.1',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false,
             },
         },
@@ -248,7 +257,7 @@ export const helmChartsInfo = {
             cilium: {
                 chart: 'cilium',
                 version: '1.12.3',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false
             }
         }
@@ -259,25 +268,25 @@ export const helmChartsInfo = {
             grafana: {
                 chart: 'grafana',
                 version: '6.42.2',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false
             },
             loki: {
                 chart: 'loki-distributed',
                 version: '0.63.1',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false
             },
             tempo: {
                 chart: 'tempo-distributed',
                 version: '0.26.7',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false
             },
             promtail: {
                 chart: 'promtail',
                 version: '6.5.1',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false
             },
         }
@@ -288,7 +297,7 @@ export const helmChartsInfo = {
             harbor: {
                 chart: 'harbor',
                 version: '1.10.1',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false
             }
         }
@@ -299,7 +308,7 @@ export const helmChartsInfo = {
             gitea: {
                 chart: 'gitea',
                 version: '6.0.2',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false
             }
         }
@@ -310,9 +319,9 @@ export const helmChartsInfo = {
             velero: {
                 chart: 'velero',
                 version: '2.32.1',
-                externalCrds: [] as string[],
+                externalCrds: []satisfies string[],
                 skipCrdRender: false
             }
         }
     }
-}  satisfies ChartsInfo;
+} satisfies ChartsInfo;
