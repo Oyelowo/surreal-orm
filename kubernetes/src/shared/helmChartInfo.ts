@@ -219,7 +219,16 @@ export const helmChartsInfo = {
             argoWorkflows: {
                 chart: 'argo-workflows',
                 version: '0.20.1',
-                externalCrds: [] as string[],
+                externalCrds: [
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_workflows.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_clusterworkflowtemplates.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_cronworkflows.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_workflowartifactgctasks.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_workfloweventbindings.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_workflowtaskresults.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_workflowtasksets.yaml',
+                    'https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/base/crds/full/argoproj.io_workflowtemplates.yaml',
+                ] as string[],
                 skipCrdRender: false,
             },
             argoEvent: {
@@ -315,4 +324,4 @@ export const helmChartsInfo = {
             }
         }
     }
-}  satisfies ChartsInfo;
+} satisfies ChartsInfo;

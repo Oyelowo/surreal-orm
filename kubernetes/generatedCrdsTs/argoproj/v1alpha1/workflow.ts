@@ -2,6 +2,7 @@
 // *** Do not edit by hand unless you're certain you know what you are doing! ***
 
 import * as pulumi from "@pulumi/pulumi";
+import { input as inputs, output as outputs } from "../../types";
 import * as utilities from "../../utilities";
 
 import {ObjectMeta} from "../../meta/v1";
@@ -36,8 +37,8 @@ export class Workflow extends pulumi.CustomResource {
     public readonly apiVersion!: pulumi.Output<"argoproj.io/v1alpha1" | undefined>;
     public readonly kind!: pulumi.Output<"Workflow" | undefined>;
     public readonly metadata!: pulumi.Output<ObjectMeta>;
-    public readonly spec!: pulumi.Output<{[key: string]: any}>;
-    public readonly status!: pulumi.Output<{[key: string]: any} | undefined>;
+    public readonly spec!: pulumi.Output<outputs.argoproj.v1alpha1.WorkflowSpec>;
+    public readonly status!: pulumi.Output<outputs.argoproj.v1alpha1.WorkflowStatus | undefined>;
 
     /**
      * Create a Workflow resource with the given unique name, arguments, and options.
@@ -74,6 +75,6 @@ export interface WorkflowArgs {
     apiVersion?: pulumi.Input<"argoproj.io/v1alpha1">;
     kind?: pulumi.Input<"Workflow">;
     metadata?: pulumi.Input<ObjectMeta>;
-    spec?: pulumi.Input<{[key: string]: any}>;
-    status?: pulumi.Input<{[key: string]: any}>;
+    spec?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowSpecArgs>;
+    status?: pulumi.Input<inputs.argoproj.v1alpha1.WorkflowStatusArgs>;
 }
