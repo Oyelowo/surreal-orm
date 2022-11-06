@@ -5,8 +5,8 @@ To carry out certain tasks in any directory, there are standard commands
 
 | Commands   |      Purpose      
 |----------|:-------------
-| `make setup`    |  To setup the codebase for development| 
-| `make install`  |    install packages   |   
+| `make setup`    | To setup the codebase for development| 
+| `make install`  | install packages   |   
 | `make upgrade`  | upgrade packages |    
 | `make sync`     | synchronize/generate local code e.g graphql queries, kubernetes configs etc |    
 | `make dev`      | start cluster/app locally in live reloading mode |    
