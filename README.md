@@ -14,3 +14,4 @@ To carry out certain tasks in any directory, there are standard commands
 | `make format`   | format code |   
 | `make check`    | check that code aligns with standard |    
 | `make test`     | run automated tests |    
+
