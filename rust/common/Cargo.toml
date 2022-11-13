@@ -48,7 +48,7 @@ uuid = { version = "1.2.1", features = ["v4", "serde"] }
 # Observability
 tracing = "0.1.37"
 
-redis = { version = "0.21.6", features = [
+redis = { version = "0.22.1", features = [
   "tokio-comp",
   "tokio-native-tls-comp",
 ] }
