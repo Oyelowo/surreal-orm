@@ -1,10 +1,10 @@
-ARG BASE_IMAGE=rust:1.64.0
+ARG BASE_IMAGE=rust:1.65.0
 
 FROM $BASE_IMAGE as planner
 WORKDIR /app
 # We only pay the installation cost once,
 # it will be cached from the second build onwards
-RUN cargo install cargo-chef --version 0.1.45
+RUN cargo install cargo-chef --version 0.1.47
 
 COPY . .
 RUN cargo chef prepare  --recipe-path recipe.json
@@ -13,7 +13,7 @@ RUN cargo chef prepare  --recipe-path recipe.json
 FROM $BASE_IMAGE as  cacher
 WORKDIR /app
 
-RUN cargo install cargo-chef --version 0.1.45
+RUN cargo install cargo-chef --version 0.1.47
 COPY --from=planner /app/recipe.json recipe.json
 
 # Install cmake which is now necessary for tonic
