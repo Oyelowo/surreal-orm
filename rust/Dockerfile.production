@@ -32,41 +32,41 @@ COPY --from=cacher $CARGO_HOME $CARGO_HOME
 COPY . .
 
 
-######### START GRAPHQL-SURREALDB BACKEND SERVICE  #################
+######### START APP-GRAPHQL-SURREALDB BACKEND SERVICE  #################
 ################################################################
-FROM builder-base as builder-graphql-surrealdb
-RUN cargo build --release --bin graphql-surrealdb
+FROM builder-base as builder-app-graphql-surrealdb
+RUN cargo build --release --bin app-graphql-surrealdb
 # Run as non-privileged user after installations and builds which require privileged access
 RUN useradd --uid 10000 runner
 USER 10000
 
-FROM gcr.io/distroless/cc AS graphql-surrealdb
+FROM gcr.io/distroless/cc AS app-graphql-surrealdb
 WORKDIR /app
 EXPOSE 8000
-COPY --from=builder-graphql-surrealdb /app/target/release/graphql-surrealdb /usr/local/bin/graphql-surrealdb
-ENTRYPOINT ["/usr/local/bin/graphql-surrealdb"]
-######### END GRAPHQL-SURREALDB BACKEND SERVICE  #################
+COPY --from=builder-app-graphql-surrealdb /app/target/release/app-graphql-surrealdb /usr/local/bin/app-graphql-surrealdb
+ENTRYPOINT ["/usr/local/bin/app-graphql-surrealdb"]
+######### END app-GRAPHQL-SURREALDB BACKEND SERVICE  #################
 ##############################################################
 
 
 
 ##############################################################
-######### START GRPC-surrealdb BACKEND SERVICE  #################
+######### START APP-GRPC-surrealdb BACKEND SERVICE  #################
 ################################################################
-FROM builder-base as builder-grpc-surrealdb
+FROM builder-base as builder-app-grpc-surrealdb
 # Necessary for tonic when building grpc protobuf
 RUN rustup component add rustfmt
-RUN cargo build --release --bin grpc-surrealdb
+RUN cargo build --release --bin app-grpc-surrealdb
 # Run as non-privileged user after installations and builds which require privileged access
 RUN useradd --uid 10000 runner
 USER 10000
 
-FROM gcr.io/distroless/cc AS grpc-surrealdb
+FROM gcr.io/distroless/cc AS app-grpc-surrealdb
 WORKDIR /app
 EXPOSE 8000
-COPY --from=builder-grpc-surrealdb /app/target/release/grpc-surrealdb /usr/local/bin/grpc-surrealdb
-ENTRYPOINT ["/usr/local/bin/grpc-surrealdb"]
-######### END GRPC-surrealdb BACKEND SERVICE  #################
+COPY --from=builder-app-grpc-surrealdb /app/target/release/app-grpc-surrealdb /usr/local/bin/app-grpc-surrealdb
+ENTRYPOINT ["/usr/local/bin/app-grpc-surrealdb"]
+######### END APP-GRPC-surrealdb BACKEND SERVICE  #################
 ##############################################################
 
 
