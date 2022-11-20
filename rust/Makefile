@@ -9,10 +9,10 @@ upgrade:
 
 sync:
 # Update graphql schemas which is then consumed by the frontend graphql build script
-	cargo run -p graphql-surrealdb --bin graphql_generator_graphql_surrealdb
+	cargo run -p app-graphql-surrealdb --bin graphql_generator_graphql_surrealdb
 
 dev:
-	cargo run -p graphql-surrealdb --bin graphql-surrealdb
+	cargo run -p app-graphql-surrealdb --bin app-graphql-surrealdb
 
 format:
 	cargo fmt --all -- --check
@@ -31,7 +31,7 @@ build:
 	cargo build
 
 run:
-	cargo run -p graphql-surrealdb --bin graphql-surrealdb
+	cargo run -p app-graphql-surrealdb --bin app-graphql-surrealdb
 
 run-surrealdb:
 	# docker run --rm -p 8000:8000 surrealdb/surrealdb:latest start

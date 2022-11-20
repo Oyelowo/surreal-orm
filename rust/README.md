@@ -1,16 +1,16 @@
-# Build graphql-surrealdb
+# Build app-graphql-surrealdb
 ```bash
-docker build . --target graphql-surrealdb  -t oyelowo/graphql-surrealdb
+docker build . --target app-graphql-surrealdb  -t oyelowo/app-graphql-surrealdb
 
 ## Run
-docker run -p 8000:8000 -e RUST_ENV=local oyelowo/graphql-surrealdb
+docker run -p 8000:8000 -e RUST_ENV=local oyelowo/app-graphql-surrealdb
 ```
 
-# Build grpc-surrealdb
+# Build app-grpc-surrealdb
 ```bash
-docker build . --target grpc-surrealdb  -t oyelowo/grpc-surrealdb
+docker build . --target app-grpc-surrealdb  -t oyelowo/app-grpc-surrealdb
 
 ## Run
-docker run -p 8000:8000 oyelowo/grpc-surrealdb
+docker run -p 8000:8000 oyelowo/app-grpc-surrealdb
 ```bash
 
