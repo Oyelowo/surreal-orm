@@ -1,9 +1,9 @@
 [workspace]
 
 members = [
-    "graphql-surrealdb",
-    "grpc-surrealdb",
-    "common",
-    "my-macros",
+    "app-graphql-surrealdb",
+    "app-grpc-surrealdb",
+    "lib-common",
+    "lib-my-macros",
     # "derive",
 ]
