@@ -10,7 +10,7 @@ upgrade:
 
 sync:
 	pnpm ts-node scripts/syncConfigs.ts
-	# make format
+	make format
 
 dev:
 	npx ts-node scripts/bootstrapLocalCluster.ts

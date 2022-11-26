@@ -1,6 +1,6 @@
-export * from './domain.js';
-export * from './lkeCluster.js';
-export * from './nodeBalancer.js';
+export * from "./domain.js";
+export * from "./lkeCluster.js";
+export * from "./nodeBalancer.js";
 // Typical cloud resources I might want to deploy for my kubernetes cluster
 // linode.NodeBalancer
 // linode.LkeCluster
