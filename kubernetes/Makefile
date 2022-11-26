@@ -24,10 +24,7 @@ check:
 	pnpm rome check .
 
 test:
-	pnpm --filter "*" test
-
-build:
-	pnpm --filter "*" build
+	pnpm test
 
 run:
 	pnpm --filter "*" start
