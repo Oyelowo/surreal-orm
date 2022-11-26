@@ -1,59 +1,64 @@
-import sh from 'shelljs';
-import { promptKubernetesClusterSwitch } from './utils/promptKubernetesClusterSwitch.js';
-import { setupCluster } from './utils/setupCluster.js';
-import chalk from 'chalk';
-import inquirer from 'inquirer';
+import sh from "shelljs";
+import { promptKubernetesClusterSwitch } from "./utils/promptKubernetesClusterSwitch.js";
+import { setupCluster } from "./utils/setupCluster.js";
+import chalk from "chalk";
+import inquirer from "inquirer";
 
 /* 
 Creates and bootstraps cluster
 */
 
 async function main() {
-    const { shouldRebuild, clusterRefreshMode } = await promptQuestions();
-    await promptKubernetesClusterSwitch('local');
+	const { shouldRebuild, clusterRefreshMode } = await promptQuestions();
+	await promptKubernetesClusterSwitch("local");
 
-    const trigger = clusterRefreshMode === 'live' ? '' : '--trigger="manual"';
+	const trigger = clusterRefreshMode === "live" ? "" : '--trigger="manual"';
 
-    if (!shouldRebuild) {
-        sh.exec(`skaffold dev --port-forward --cleanup=false  ${trigger}  --no-prune=true --no-prune-children=true`);
-        return;
-    }
+	if (!shouldRebuild) {
+		sh.exec(
+			`skaffold dev --port-forward --cleanup=false  ${trigger}  --no-prune=true --no-prune-children=true`,
+		);
+		return;
+	}
 
-    await setupCluster('local');
+	await setupCluster("local");
 
-    sh.exec(`skaffold dev --port-forward --cleanup=false  ${trigger}  --no-prune=true --no-prune-children=true`);
+	sh.exec(
+		`skaffold dev --port-forward --cleanup=false  ${trigger}  --no-prune=true --no-prune-children=true`,
+	);
 }
 
 await main();
 
 async function promptQuestions() {
-    const clusterRefreshMode = 'clusterRefreshMode';
-    const shouldRebuild = 'shouldRebuild';
+	const clusterRefreshMode = "clusterRefreshMode";
+	const shouldRebuild = "shouldRebuild";
 
-    const manualTrigger = 'Manual Trigger (Requires keyboard input from the termial)';
-    const clusterRefreshModesChoices = ['live', manualTrigger] as const;
-    type ClusterMode = typeof clusterRefreshModesChoices[number];
-    const defaultTriggerMode: ClusterMode = 'live';
+	const manualTrigger =
+		"Manual Trigger (Requires keyboard input from the termial)";
+	const clusterRefreshModesChoices = ["live", manualTrigger] as const;
+	type ClusterMode = typeof clusterRefreshModesChoices[number];
+	const defaultTriggerMode: ClusterMode = "live";
 
-    type Prompt = {
-        [shouldRebuild]: boolean;
-        [clusterRefreshMode]: ClusterMode;
-    };
-    const answers = await inquirer.prompt<Prompt>([
-        {
-            type: 'confirm',
-            name: shouldRebuild,
-            message: chalk.blueBright(`Do you want to rebuild?`),
-            default: false,
-        },
-        {
-            type: 'list',
-            name: clusterRefreshMode,
-            choices: clusterRefreshModesChoices,
-            message: chalk.blueBright('Choose cluster Refresh Mode ‼️‼️‼️‼️'),
-            default: defaultTriggerMode,
-        },
-    ]);
+	type Prompt = {
+		[shouldRebuild]: boolean;
+		[clusterRefreshMode]: ClusterMode;
+	};
+	const answers = await inquirer.prompt<Prompt>([
+		{
+			type: "confirm",
+			name: shouldRebuild,
+			message: chalk.blueBright("Do you want to rebuild?"),
+			default: false,
+		},
+		{
+			type: "list",
+			name: clusterRefreshMode,
+			choices: clusterRefreshModesChoices,
+			message: chalk.blueBright("Choose cluster Refresh Mode ‼️‼️‼️‼️"),
+			default: defaultTriggerMode,
+		},
+	]);
 
-    return answers;
+	return answers;
 }

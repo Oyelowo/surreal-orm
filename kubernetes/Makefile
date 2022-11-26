@@ -2,29 +2,37 @@
 ## STANDARD
 #############
 install:
-	npm install
+	pnpm install
 
 upgrade:
-	npm run update
+	pnpm update
 	make sync
 
 sync:
-	npx ts-node scripts/syncConfigs.ts
-	make format
+	pnpm ts-node scripts/syncConfigs.ts
+	# make format
 
 dev:
 	npx ts-node scripts/bootstrapLocalCluster.ts
 
+
 format:
-	npm run prettier-fix
-	npm run lint-fix
+	pnpm rome check . --apply-suggested
+	pnpm rome format . --write
 	
 check:
-	npm run prettier-check
-	npm run lint-check
+	pnpm rome check .
 
 test:
-	npm test
+	pnpm test
+
+run:
+	pnpm --filter "*" start
+
+cleanup:
+	rm -rf ~/Library/pnpm/store/v3/files/  
+	pnpm store prune 
+
 
 
 

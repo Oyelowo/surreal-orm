@@ -1,40 +1,46 @@
-import c from 'chalk';
-import path from 'node:path';
-import sh from 'shelljs';
-import { getResourceAbsolutePath } from '../../shared/directoriesManager.js';
-import { Environment } from '../../types/ownTypes.js';
-import { namespaces } from '../../types/ownTypes.js';
-import { getEnvVarsForKubeManifests } from '../../shared/environmentVariablesForManifests.js';
-import { PlainSecretsManager } from '../../../scripts/utils/plainSecretsManager.js';
+import c from "chalk";
+import path from "node:path";
+import sh from "shelljs";
+import { getResourceAbsolutePath } from "../../shared/directoriesManager.js";
+import { Environment } from "../../types/ownTypes.js";
+import { namespaces } from "../../types/ownTypes.js";
+import { getEnvVarsForKubeManifests } from "../../shared/environmentVariablesForManifests.js";
+import { PlainSecretsManager } from "../../../scripts/utils/plainSecretsManager.js";
 
-const DOCKER_SERVER = 'ghcr.io';
-export const DOCKER_REGISTRY_KEY = 'my-registry-key';
+const DOCKER_SERVER = "ghcr.io";
+export const DOCKER_REGISTRY_KEY = "my-registry-key";
 
 const env = getEnvVarsForKubeManifests();
-const secrets = new PlainSecretsManager('infrastructure', 'argocd', env.ENVIRONMENT).getSecrets();
+const secrets = new PlainSecretsManager(
+	"infrastructure",
+	"argocd",
+	env.ENVIRONMENT,
+).getSecrets();
 const DOCKER_USERNAME = secrets.CONTAINER_REGISTRY_USERNAME;
 const DOCKER_PASSWORD = secrets.CONTAINER_REGISTRY_PASSWORD;
 
 // Create secret for argocd to be able to access repo where docker images are stored
 export function createContainerRegistrySecret(environment: Environment): void {
-    const dir = path.join(
-        getResourceAbsolutePath({
-            outputDirectory: 'infrastructure/argocd-applications-parents',
-            environment,
-        }),
-        '1-manifest'
-    );
-    const file = path.join(dir, 'secret-docker-registry.yaml');
+	const dir = path.join(
+		getResourceAbsolutePath({
+			outputDirectory: "infrastructure/argocd-applications-parents",
+			environment,
+		}),
+		"1-manifest",
+	);
+	const file = path.join(dir, "secret-docker-registry.yaml");
 
-    if (!DOCKER_USERNAME || !DOCKER_PASSWORD) {
-        console.warn(c.bgYellowBright('docker username nor password not provideed'));
-        return;
-    }
+	if (!(DOCKER_USERNAME && DOCKER_PASSWORD)) {
+		console.warn(
+			c.bgYellowBright("docker username nor password not provideed"),
+		);
+		return;
+	}
 
-    sh.mkdir(dir);
-    sh.touch(file);
+	sh.mkdir(dir);
+	sh.touch(file);
 
-    sh.exec(`
+	sh.exec(`
   kubectl create secret docker-registry ${DOCKER_REGISTRY_KEY} --docker-server=${DOCKER_SERVER} \
      --docker-username=${DOCKER_USERNAME} --docker-password=${DOCKER_PASSWORD} --namespace=${namespaces.applications} \
      -o yaml --dry-run=client > ${file}`);

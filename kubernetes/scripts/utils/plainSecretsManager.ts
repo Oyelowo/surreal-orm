@@ -108,7 +108,8 @@ export class PlainSecretsManager<
             const envPath = this.#getSecretPath(environment);
 
             sh.exec(`echo '${JSON.stringify(getSecretsSample())}' > ${envPath}`);
-            sh.exec(`npx prettier --write ${envPath}`);
+            // sh.exec(`npx prettier --write ${envPath}`);
+            sh.exec(`make format`);
         });
     };
 
@@ -120,7 +121,7 @@ export class PlainSecretsManager<
             const envPath = this.#getSecretPath(environment);
             const existingEnvSecret = this.#getSecretJsonObject(environment) ?? {};
 
-            if (_.isEmpty(existingEnvSecret)) sh.touch(envPath);
+            if (_.isEmpty(existingEnvSecret)) { sh.touch(envPath); }
 
             // Allows us to only get valid keys out, so we can parse the merged secrets out.
             // const secretsSchema = getSecretsSchema({ allowEmptyValues: true, environment });
@@ -131,7 +132,8 @@ export class PlainSecretsManager<
             });
 
             sh.exec(`echo '${JSON.stringify(mergedObject)}' > ${envPath}`);
-            sh.exec(`npx prettier --write ${envPath}`);
+            // sh.exec(`npx prettier --write ${envPath}`);
+            sh.exec(`make format`);
         });
     };
 
