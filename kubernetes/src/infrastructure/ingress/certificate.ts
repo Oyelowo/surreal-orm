@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-empty-file */
 /* An alternative for creating secrets for nginx-ingress. However, this is
 automatically handled in the cert-manager cluster issuer.
 This is left as a reference in case you want to create

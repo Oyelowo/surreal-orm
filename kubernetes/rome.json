@@ -1,0 +1,36 @@
+{
+  "linter": {
+    "enabled": true,
+    "ignore": [
+      "build",
+      "coverage",
+      "node_modules",
+      "generatedCrdsTs",
+      "generatedManifests",
+      "resources/types/helm-charts",
+      "scripts/utils/plainSecretsManager.ts ",
+      "src/shared/helmChartInfo.ts",
+      "src/infrastructure/argocd/argocdBitnami.ts"
+    ],
+    "rules": {
+      "correctness": {},
+      "recommended": true,
+      "style": {
+        "noImplicitBoolean": "off"
+      }
+    }
+  },
+  "formatter": {
+    "ignore": [
+      "build",
+      "coverage",
+      "node_modules",
+      "generatedCrdsTs",
+      "generatedManifests",
+      "resources/types/helm-charts",
+      "scripts/utils/plainSecretsManager.ts ",
+      "src/shared/helmChartInfo.ts",
+      "src/infrastructure/argocd/argocdBitnami.ts"
+    ]
+  }
+}

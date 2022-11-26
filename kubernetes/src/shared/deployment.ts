@@ -14,7 +14,7 @@ import { getEnvVarsForKubeManifests } from './environmentVariablesForManifests.j
 
 const { ENVIRONMENT } = getEnvVarsForKubeManifests();
 
-// eslint-disable-next-line no-restricted-syntax
+
 export class ServiceDeployment<N extends ServiceName, NS extends NamespaceOfApps> extends pulumi.ComponentResource {
     public readonly deployment: kx.Deployment;
     public readonly configMaps: kx.ConfigMap;
