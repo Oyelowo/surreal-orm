@@ -108,7 +108,8 @@ export class PlainSecretsManager<
             const envPath = this.#getSecretPath(environment);
 
             sh.exec(`echo '${JSON.stringify(getSecretsSample())}' > ${envPath}`);
-            sh.exec(`npx prettier --write ${envPath}`);
+            // sh.exec(`npx prettier --write ${envPath}`);
+            sh.exec(`make format`);
         });
     };
 
@@ -131,7 +132,8 @@ export class PlainSecretsManager<
             });
 
             sh.exec(`echo '${JSON.stringify(mergedObject)}' > ${envPath}`);
-            sh.exec(`npx prettier --write ${envPath}`);
+            // sh.exec(`npx prettier --write ${envPath}`);
+            sh.exec(`make format`);
         });
     };
 

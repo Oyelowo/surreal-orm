@@ -2,15 +2,15 @@
 ## STANDARD
 #############
 install:
-	npm install
+	pnpm install
 
 upgrade:
-	npm run update
+	pnpm update
 	make sync
 
 sync:
-	npx ts-node scripts/syncConfigs.ts
-	make format
+	pnpm ts-node scripts/syncConfigs.ts
+	# make format
 
 dev:
 	npx ts-node scripts/bootstrapLocalCluster.ts
