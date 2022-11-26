@@ -1,3 +1,3 @@
-export * from './argoApp.js';
-export * from './cilium.js';
-export * from './settings.js';
+export * from "./argoApp.js";
+export * from "./cilium.js";
+export * from "./settings.js";

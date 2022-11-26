@@ -41,7 +41,6 @@
     "dependencies": {
         "@pulumi/docker": "^3.6.1",
         "@pulumi/kubernetes": "^3.22.1",
-        "@pulumi/kubernetes-ingress-nginx": "^0.0.9",
         "@pulumi/kubernetesx": "^0.1.6",
         "@pulumi/linode": "^3.10.1",
         "@pulumi/pulumi": "3.48.0",

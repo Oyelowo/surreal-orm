@@ -120,7 +120,7 @@ export class PlainSecretsManager<
             const envPath = this.#getSecretPath(environment);
             const existingEnvSecret = this.#getSecretJsonObject(environment) ?? {};
 
-            if (_.isEmpty(existingEnvSecret)) sh.touch(envPath);
+            if (_.isEmpty(existingEnvSecret)) { sh.touch(envPath); }
 
             // Allows us to only get valid keys out, so we can parse the merged secrets out.
             // const secretsSchema = getSecretsSchema({ allowEmptyValues: true, environment });

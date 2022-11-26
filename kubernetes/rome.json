@@ -8,7 +8,7 @@
       "generatedCrdsTs",
       "generatedManifests",
       "resources/types/helm-charts",
-      "scripts/utils/plainSecretsManager.ts ",
+      "scripts/utils/plainSecretsManager.ts",
       "src/shared/helmChartInfo.ts",
       "src/infrastructure/argocd/argocdBitnami.ts"
     ],
@@ -28,7 +28,7 @@
       "generatedCrdsTs",
       "generatedManifests",
       "resources/types/helm-charts",
-      "scripts/utils/plainSecretsManager.ts ",
+      "scripts/utils/plainSecretsManager.ts",
       "src/shared/helmChartInfo.ts",
       "src/infrastructure/argocd/argocdBitnami.ts"
     ]
