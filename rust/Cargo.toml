@@ -12,7 +12,7 @@ members = [
 [workspace.package]
 version = "1.0.0"
 edition = "2021"
-authors = ["Oyelowo Oyedayp"]
+authors = ["Oyelowo Oyedayo"]
 description = "One codebase to rule them all"
 documentation = "https://codebreather.com/oyelowo"
 
@@ -21,6 +21,7 @@ documentation = "https://codebreather.com/oyelowo"
 lib-common = { path = "./lib-common" }
 lib-my-macros = { path = "./lib-my-macros" }
 surrealdb = "1.0.0-beta.8"
+# surrealdb = { git = "https://github.com/rushmorem/surrealdb", branch = "suppress-warnings", default-features = false }
 surrealdb-rs = { git = "https://github.com/surrealdb/surrealdb.rs", branch = "main" }
 poem = { version = "1.3.48", features = [
     "redis-session",
