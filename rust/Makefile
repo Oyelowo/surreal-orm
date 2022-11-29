@@ -14,7 +14,8 @@ dev:
 	cargo run -p app-graphql-surrealdb --bin app-graphql-surrealdb
 
 format:
-	cargo fmt --all -- --check
+	cargo fmt
+	
 	cargo clippy --fix
 	
 check:
