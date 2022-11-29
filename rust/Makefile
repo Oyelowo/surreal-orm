@@ -8,8 +8,7 @@ upgrade:
 	cargo upgrade
 
 sync:
-# Update graphql schemas which is then consumed by the frontend graphql build script
-	cargo run -p app-graphql-surrealdb --bin graphql_generator_graphql_surrealdb
+	
 
 dev:
 	cargo run -p app-graphql-surrealdb --bin app-graphql-surrealdb
