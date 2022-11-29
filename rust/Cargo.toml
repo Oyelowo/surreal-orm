@@ -3,6 +3,7 @@
 members = [
     "app-graphql-surrealdb",
     "app-grpc-surrealdb",
+    "lib-scripts",
     "lib-common",
     "lib-my-macros",
     "lib-my-macros/derive",
