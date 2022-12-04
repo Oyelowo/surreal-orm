@@ -1,0 +1,13 @@
+#V2
+CREATE company:surrealdb SET name = 'SurrealDB', cofounders = [person:tobie, person:jaime];\n
+INFO company
+USE NS test DB test; -- Switch to the 'test' Namespace and 'test' Database\n
+INFO company
+CREATE company:surrealdb SET name = 'SurrealDB', cofounders = [person:tobie, person:jaime];\n
+INFO company
+select * from company;
+select * from company fetch;
+select * from company FETCH;
+select * from company fetch cofounders;
+select * from company
+select * from company;

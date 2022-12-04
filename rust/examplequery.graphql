@@ -21,6 +21,66 @@ mutation createUser($userInput: UserInput!) {
   }
 }
 
+mutation signIn($signInCredentials: SignInCredentials!) {
+  signIn(signInCredentials: $signInCredentials) {
+    ...on ServerError {
+      __typename
+      message
+    }
+    ...on User{
+        id
+    firstName
+    lastName
+    email
+    age
+    }
+  }
+}
+
+# The input
+{
+  "signInCredentials": {
+    "username": "oyelowo",
+    "password": "12345"
+  }
+}
+
+
+
+mutation signUp($userInput: UserInput!) {
+  signUp(user: $userInput) {
+    __typename
+    ...on UserNotFoundError {
+
+      message
+    }
+    ...on UserRegisterInvalidInputError {
+      usernameErrorMessage
+      emailErrorMessage
+    }
+    ...on User{
+        id
+    firstName
+    lastName
+    email
+    age
+    }
+  }
+}
+
+{
+  "userInput": {
+    "username": "dayo",
+    "password": "1234",
+  "firstName": "samo",
+      "lastName":  "nama",
+    "email": "jokoo@gmail.com",
+  "age": 40,
+    "socialMedia": ["li", "facebook"]
+  }
+}
+
+
 
 mutation createPost($postInput: PostInput!) {
   createPost(postInput: $postInput) {

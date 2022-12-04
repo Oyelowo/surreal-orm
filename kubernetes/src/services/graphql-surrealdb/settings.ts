@@ -66,3 +66,26 @@ export const graphqlSurrealdbSettings: AppConfigs<
 		namespace: "applications",
 	},
 };
+
+/* 
+		APP_ENVIRONMENT: local,
+		APP_HOST: "0.0.0.0",
+		APP_PORT: "8000",
+		APP_EXTERNAL_BASE_URL: getIngressUrl({ environment: env.ENVIRONMENT }),
+		OAUTH_GITHUB_CLIENT_ID: secrets.OAUTH_GITHUB_CLIENT_ID,
+		OAUTH_GITHUB_CLIENT_SECRET: secrets.OAUTH_GITHUB_CLIENT_SECRET,
+		OAUTH_GOOGLE_CLIENT_ID: secrets.OAUTH_GOOGLE_CLIENT_ID,
+		OAUTH_GOOGLE_CLIENT_SECRET: secrets.OAUTH_GOOGLE_CLIENT_SECRET,
+		SURREALDB_HOST: "surrealdb.applications",
+		SURREALDB_NAME: "surrealdb",
+		SURREALDB_SERVICE_NAME: "surrealdb",
+		SURREALDB_PORT: "8000",
+		SURREALDB_ROOT_USERNAME: secrets.SURREALDB_ROOT_USERNAME,
+		SURREALDB_ROOT_PASSWORD: secrets.SURREALDB_ROOT_PASSWORD,
+		REDIS_USERNAME: secrets.REDIS_USERNAME,
+		REDIS_PASSWORD: secrets.REDIS_PASSWORD,
+		REDIS_HOST: "redis-master.applications",
+		REDIS_PORT: "6379",
+		REDIS_SERVICE_NAME: "redis",
+		REDIS_SERVICE_NAME_MASTER: "redis-master",
+*/
