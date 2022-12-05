@@ -23,6 +23,30 @@ mutation createUser($userInput: UserInput!) {
 
 mutation signIn($signInCredentials: SignInCredentials!) {
   signIn(signInCredentials: $signInCredentials) {
+    __typename
+    ...on ServerError {
+      __typename
+      message
+    }
+    ...on UserNotFoundError{
+      message
+      solution
+    }
+    ...on UserSignInInvalidInputError {
+      loginErrorMessage
+    }
+    ...on User{
+        id
+    firstName
+    lastName
+    email
+    age
+    }
+  }
+}
+
+mutation signIn($signInCredentials: SignInCredentials!) {
+  signIn(signInCredentials: $signInCredentials) {
     ...on ServerError {
       __typename
       message
@@ -45,6 +69,31 @@ mutation signIn($signInCredentials: SignInCredentials!) {
   }
 }
 
+
+mutation signUp($userInput: UserInput!) {
+  signUp(user: $userInput) {
+    __typename
+    ...on ServerError {
+      message
+      solution
+    }
+    ...on UserNotFoundError {
+
+      message
+    }
+    ...on UserRegisterInvalidInputError {
+      usernameErrorMessage
+      emailErrorMessage
+    }
+    ...on User{
+        id
+    firstName
+    lastName
+    email
+    age
+    }
+  }
+}
 
 
 mutation signUp($userInput: UserInput!) {
@@ -153,6 +202,30 @@ mutation createPost($postInput: PostInput!) {
         firstName
         socialMedia
       }
+    }
+  }
+}
+
+
+query {
+  session {
+    __typename
+    ...on Session{
+    userId
+    expiresAt
+    __typename
+    },
+    ...on ServerError {
+      message
+      solution
+    }
+        ...on UserSessionExpiredError {
+      message
+      solution
+    }
+        ...on UserBaseError {
+      message
+      solution
     }
   }
 }
