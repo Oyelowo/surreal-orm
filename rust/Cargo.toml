@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
-    "tester",
     "app-graphql-surrealdb",
     "app-grpc-surrealdb",
     "lib-scripts",
@@ -25,7 +24,7 @@ lib-my-macros = { path = "./lib-my-macros" }
 # surrealdb = "1.0.0-beta.8"
 surrealdb = { git = "https://github.com/rushmorem/surrealdb", branch = "suppress-warnings" }
 # surrealdb-rs = { git = "https://github.com/rushmorem/surrealdb.rs", branch = "embedded-db", rev="36c243bbec716cd113c6b37b51ce04b6244ea166", features = [
-surrealdb-rs = { git = "https://github.com/rushmorem/surrealdb.rs", rev="afe627129b5de88087c26761e0f3b40ed0c0219e", features = [
+surrealdb-rs = { git = "https://github.com/rushmorem/surrealdb.rs", rev = "afe627129b5de88087c26761e0f3b40ed0c0219e", features = [
     "mem",
     # "tikv",
 ] }
