@@ -32,13 +32,13 @@ async fn main() -> Result<()> {
         })
         .await
         .unwrap();
-    println!("Hello, world!: {xx:?}");
+    
 
     let all: Vec<Session> = db.select("poem").await.unwrap();
-    println!("Sez result!: {all:?}");
+    
 
     let mm: Session = db.select(("poem", "session_id")).await.unwrap();
-    println!("Sez result!: {mm:?}");
+    
 
     // let selected: Session = db.select("poem:session_id").await.unwrap();
     let selected: Session = db
@@ -47,12 +47,12 @@ async fn main() -> Result<()> {
         .unwrap()
         .get(0, 0)
         .unwrap();
-    println!("select result!: {selected:?}");
+    
 
     // let deleted = db.delete(("poem", "session_id")).await.unwrap();
     let sx = "session_id";
     // let cleanup: Option<()> = db.query("delete from type::table($tb) where expires < $expires").bind("tb", "poem:session_id").await.unwrap().get(0,0).unwrap();
-    // println!("select result!: {cleanup:?}");
+    // 
     // let deleted: Option<()> = db.query("delete FROM type::table($tb) where expires < time::now()").bind("tb", "poem").await.unwrap().get(0,0).unwrap();
     // let cleanup: Option<()> = db
     //     .query("delete FROM type::thing($tb, $id) where expires < type::datetime($expires_at)")
@@ -73,11 +73,11 @@ async fn main() -> Result<()> {
             .await
             .unwrap()
             .get(0, 0).unwrap();
-    println!("sx result!: {session:?}");
+    
 
     let afer_delete: Option<Session> = db.select(("poem", "session_id")).await.unwrap();
-    println!("ager delete result!: {afer_delete:?}");
+    
 
-    // println!("xxxx:{}", Utc::now());
+    // 
     Ok(())
 }
