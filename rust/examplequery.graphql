@@ -129,6 +129,55 @@ mutation signUp($userInput: UserInput!) {
   }
 }
 
+#  Pagination
+query postConnections {
+  users {
+    id
+    username
+    firstName
+    lastName
+    age
+    # only one of last of first should be provided
+    postsConnection(first: 12, after:"xx", last: 8, before:"mm") {
+      ...on  PostConnection{
+      edges {
+        node {
+          posterId
+          id
+
+
+        }
+        cursor
+        relationshipToNextNode
+      }
+      nodes {
+        posterId
+        id
+
+      }
+      pageInfo{
+        hasPreviousPage
+        hasNextPage
+        endCursor
+        startCursor
+      }
+    
+      }
+      ...on UserNotFoundError {
+        message
+        solution
+      }
+      ...on FirstOrLastParamsError {
+        message
+        solution
+      }
+      ...on UserBaseError {
+        solution
+        message
+      }
+    }
+  }
+}
 
 
 mutation createPost($postInput: PostInput!) {
