@@ -6,11 +6,7 @@
       "coverage",
       "node_modules",
       "generatedCrdsTs",
-      "generatedManifests",
-      "resources/types/helm-charts",
-      "scripts/utils/plainSecretsManager.ts",
-      "src/shared/helmChartInfo.ts",
-      "src/infrastructure/argocd/argocdBitnami.ts"
+      "generatedManifests"
     ],
     "rules": {
       "correctness": {},
@@ -27,10 +23,7 @@
       "node_modules",
       "generatedCrdsTs",
       "generatedManifests",
-      "resources/types/helm-charts",
-      "scripts/utils/plainSecretsManager.ts",
-      "src/shared/helmChartInfo.ts",
-      "src/infrastructure/argocd/argocdBitnami.ts"
+      "resources/types/helm-charts"
     ]
   }
 }
