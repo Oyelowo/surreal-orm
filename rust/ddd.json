@@ -1,0 +1,20 @@
+[
+  {
+    "time": "209.458µs",
+    "status": "OK",
+    "result": [
+      {
+        "age": 22,
+        "email": "samue@gmail.com",
+        "id": "users:cljfcwhlm86lc3y554hb",
+        "name": "samue"
+      },
+      {
+        "age": 18,
+        "email": "lowo@gmail.com",
+        "id": "users:mfya5lllgtro86y1qij7",
+        "name": "lowo"
+      }
+    ]
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "time": "114.541µs",
+    "status": "OK",
+    "result": [
+      {
+        "age": 52,
+        "email": "mana@htma.com",
+        "id": "users:aohi3zunz9nzf18onpsb",
+        "name": "mana"
+      },
+      {
+        "age": 22,
+        "email": "samue@gmail.com",
+        "id": "users:cljfcwhlm86lc3y554hb",
+        "name": "samue"
+      },
+      {
+        "age": 18,
+        "email": "lowo@gmail.com",
+        "id": "users:mfya5lllgtro86y1qij7",
+        "name": "lowo"
+      },
+      {
+        "age": 52,
+        "email": "mana@htma.com",
+        "id": "users:mmmana",
+        "name": "mana"
+      }
+    ]
+  }
+]
