@@ -1,0 +1,61 @@
+SELECT * FROM users;
+SELECT * FROM users:cljfcwhlm86lc3y554hb;
+SELECT * FROM users WHERE id = 'users:cljfcwhlm86lc3y554hb';
+select *, count() as kl, math::sum(age) as tt, math::sum(array::len(mediate)) as sm FROM users WHERE name = 'lowo' group by name order by name;
+
+select * from posts
+
+RELATE users:cljfcwhlm86lc3y554hb -> writes -> posts:g118lqxq5a77pcpslsd7
+RELATE users:cljfcwhlm86lc3y554hb -> writes -> posts:g118lqxq5a77pcpslsd7 SET createdAt = time::now()
+select * from writes;
+select ->writes->posts as tweet from users:cljfcwhlm86lc3y554hb;
+select ->writes->posts as tweet from users:cljfcwhlm86lc3y554hb fetch tweet;
+
+
+select <-writes<-users as writer from posts:kq0ch5e9iz3m0wivrirm fetch writer
+
+select ->writes->(posts where title = 'namanka') as tweet from users:cljfcwhlm86lc3y554hb fetch tweet;
+select ->writes->posts[where title = 'namanka'] as tweet from users:cljfcwhlm86lc3y554hb fetch tweet;
+select ->writes->(posts where title = 'namanka')<-writes<-users as tweet from users:cljfcwhlm86lc3y554hb fetch tweet;
+
+[{"time":"46.25µs","status":"OK","result":[{"id":"writes:nja0bi9wp9952ajb0nhq","in":"users:cljfcwhlm86lc3y554hb","out":"posts:g118lqxq5a77pcpslsd7"}]}]
+> 
+
+
+CREATE posts CONTENT {
+    title: 'namanka',
+    content: 'analogakakek',
+}
+
+CREATE users CONTENT {
+    name: 'xyn',
+    age: 18,
+    email: 'xyn@gmail.com',
+    mediate: ['frea', 'neit'],
+    gap: [posts:kq0ch5e9iz3m0wivrirm]
+}
+
+CREATE users CONTENT {
+    name: 'dayo',
+    age: 99,
+    email: 'dayo@yahoo.com'
+}
+
+CREATE users CONTENT {
+    name: 'samue',
+    age: 22,
+    email: 'samue@gmail.com'
+}
+
+CREATE users:xaxa CONTENT {
+    name: 'zzzz',
+    age: 52,
+    email: 'zzz@htma.com'
+}
+
+
+/* 
+SELECT * FROM users;
+> SELECT * FROM users;
+[{"time":"80.291µs","status":"OK","result":[{"age":22,"email":"samue@gmail.com","id":"users:cljfcwhlm86lc3y554hb","name":"samue"},{"age":18,"email":"lowo@gmail.com","id":"users:mfya5lllgtro86y1qij7","name":"lowo"},{"age":99,"email":"dayo@yahoo.com","id":"users:s2s5b2fhc84mdx3g6gsq","name":"dayo"}]}]
+ */
