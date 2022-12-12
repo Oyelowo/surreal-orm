@@ -1,2 +1,1 @@
-cloudInfrastructure/** linguist-vendored
-kubernetes/** linguist-vendored
+infrastructure/** linguist-vendored
