@@ -7,6 +7,7 @@ select * from posts
 
 RELATE users:cljfcwhlm86lc3y554hb -> writes -> posts:g118lqxq5a77pcpslsd7
 RELATE users:cljfcwhlm86lc3y554hb -> writes -> posts:g118lqxq5a77pcpslsd7 SET createdAt = time::now()
+RELATE users:dayo -> writes -> posts:helsinki
 select * from writes;
 select ->writes->posts as tweet from users:cljfcwhlm86lc3y554hb;
 select ->writes->posts as tweet from users:cljfcwhlm86lc3y554hb fetch tweet;
@@ -22,18 +23,26 @@ select ->writes->(posts where title = 'namanka')<-writes<-users as tweet from us
 > 
 
 
-CREATE posts CONTENT {
-    title: 'namanka',
-    content: 'analogakakek',
+CREATE posts:helsinki CONTENT {
+    title: 'hjk',
+    content: 'content hjk',
+}
+CREATE posts:alberta CONTENT {
+    title: 'Calgary',
+    content: 'Ravers',
 }
 
-CREATE users CONTENT {
-    name: 'xyn',
+CREATE users:oye CONTENT {
+    name: 'oye',
     age: 18,
-    email: 'xyn@gmail.com',
-    mediate: ['frea', 'neit'],
-    gap: [posts:kq0ch5e9iz3m0wivrirm]
+    email: 'oye@gmail.com',
+    mediate: ['Calm', 'Geeky'],
 }
+
+RELATE users:dayo->writes->posts:helsinki  SET createdAt = time::now()
+RELATE users:dayo->writes->posts:vantaa  SET createdAt = time::now()
+RELATE users:oye->writes->posts:alberta  SET createdAt = time::now()
+SELECT ->writes->posts:helsinki FROM users:dayo;
 
 CREATE users CONTENT {
     name: 'dayo',
