@@ -7,6 +7,11 @@ pub trait FieldsGetter {
     fn get_fields_serialized() -> Self::Fields;
 }
 
+pub trait SurrealdbModel {
+    type Fields;
+    fn get_fields_serialized() -> Self::Fields;
+}
+
 // Examples
 
 pub trait HelloMacro {

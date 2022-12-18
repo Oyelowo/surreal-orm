@@ -23,6 +23,7 @@ mod account {
     pub handle,
     pub password,
     pub email,
+    projects<Project>,
     friend<Account>,
 
     ->manage->Project as managed_projects,
@@ -315,6 +316,7 @@ fn test_foreign_deserialize() {
 /// Test that a model can have fields that reference the `Self` type.
 #[test]
 fn test_model_self_reference() {
+
   assert_eq!("friend", account.friend.to_string());
   assert_eq!("Account", account.friend().to_string());
   assert_eq!("friend.handle", account.friend().handle.to_string());

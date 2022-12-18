@@ -4,6 +4,7 @@ use proc_macro::TokenStream;
 
 mod examples;
 mod fields_getter;
+mod surrealdb_model;
 
 // #[proc_macro_derive(<ChangeMeToYourTrait>, attributes(<attribute1>, <attribute2>, ..))]
 /// #[derive(KeyNamesGetter)]
@@ -22,9 +23,9 @@ pub fn fields_getter_trait_derive(input: TokenStream) -> TokenStream {
     fields_getter::generate_fields_getter_trait(input)
 }
 
-#[proc_macro_derive(SurrealModel, attributes(field_getter))]
+#[proc_macro_derive(SurrealdbModel, attributes(field_getter))]
 pub fn surreal_model_trait_derive(input: TokenStream) -> TokenStream {
-    fields_getter::generate_fields_getter_trait(input)
+    surrealdb_model::generate_fields_getter_trait(input)
 }
 
 // rust utility functions

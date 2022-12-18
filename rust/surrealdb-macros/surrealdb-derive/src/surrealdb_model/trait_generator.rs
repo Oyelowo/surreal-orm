@@ -31,7 +31,7 @@ impl FromMeta for Rename {
 
     fn from_list(items: &[syn::NestedMeta]) -> ::darling::Result<Self> {
         #[derive(FromMeta)]
-        struct FullRename {
+        struct FullRename { 
             serialize: String,
 
             #[darling(default)]
@@ -103,24 +103,61 @@ impl ToTokens for FieldsGetterOpts {
         let FieldStore {
             struct_ty_fields,
             struct_values_fields,
+            models_serialized_values,
         } = get_struct_types_and_fields(fields, struct_level_casing);
 
-        let struct_name = syn::Ident::new(
+        let fields_getter_struct_name = syn::Ident::new(
             format!("{my_struct}Fields").as_str(),
             ::proc_macro2::Span::call_site(),
         );
 
-        let struct_type = quote!(pub struct #struct_name {
+        let struct_type = quote!(pub struct #fields_getter_struct_name {
            #( #struct_ty_fields), *
         });
 
+        // struct Noma {
+        //     name: String
+        // }
+        // ::surreal_simple_querybuilder::model!(Name {
+        //     pub name
+        // });
+
+        // schema::model.name;
+        /* 
+        model!(Project {
+  id, // <- won't be serialized
+  pub name, // <- will be serialized
+})
+         */
         let crate_name = get_crate_name(false);
+     
         tokens.extend(quote! {
             #struct_type
-            impl #crate_name::FieldsGetter for #my_struct {
-                type Fields = #struct_name;
+
+             ::surreal_simple_querybuilder::prelude::model!(
+                 #my_struct  {
+         #( #models_serialized_values), *
+        }
+             );
+
+                         impl ::surreal_simple_querybuilder::prelude::IntoKey<String> for #my_struct {
+   fn into_key<E>(&self) -> Result<String, E>
+  where
+    E: ::serde::ser::Error,
+  {
+    self
+      .id
+      .as_ref()
+      .map(String::clone)
+      .ok_or(::serde::ser::Error::custom("The project has no ID"))
+  }
+}
+
+            
+            impl #crate_name::SurrealdbModel for #my_struct {
+                type Fields = #fields_getter_struct_name;
                 fn get_fields_serialized() -> Self::Fields {
-                    #struct_name {
+                    #fields_getter_struct_name {
                         #( #struct_values_fields), *
                     }
                 }

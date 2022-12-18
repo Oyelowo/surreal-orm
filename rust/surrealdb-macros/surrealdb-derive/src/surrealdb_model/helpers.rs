@@ -12,6 +12,7 @@ use super::{trait_generator::MyFieldReceiver, types::CaseString};
 pub(crate) struct FieldStore {
     pub struct_ty_fields: Vec<TokenStream>,
     pub struct_values_fields: Vec<TokenStream>,
+    pub models_serialized_values: Vec<TokenStream>,
 }
 
 pub(crate) fn get_struct_types_and_fields(
@@ -45,7 +46,7 @@ pub(crate) fn create_fields_types_and_values(
     let field_ident = get_field_identifier(f, i);
     let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
 
-    let FieldFormat { serialized, ident } =
+    let FieldFormat { serialized, ident, serialized_as_ident } =
         get_field_str_and_ident(&field_case, &field_identifier_string, f);
 
     // struct type used to type the function
@@ -55,10 +56,12 @@ pub(crate) fn create_fields_types_and_values(
 
     // struct values themselves
     store.struct_values_fields.push(quote!(#ident: #serialized));
+    store.models_serialized_values.push(quote!(#serialized_as_ident));
 }
 
 pub(crate) struct FieldFormat {
     serialized: ::std::string::String,
+    serialized_as_ident: syn::Ident,
     ident: syn::Ident,
 }
 pub(crate) fn get_field_str_and_ident(
@@ -99,6 +102,7 @@ pub(crate) fn get_field_str_and_ident(
         uses rename attribute on a specific field, in which case that takes precedence.
         */
         ident: field_ident,
+        serialized_as_ident: syn::Ident::new(field, ::proc_macro2::Span::call_site()),
         serialized: ::std::string::ToString::to_string(field),
     }
 }
