@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
-use surrealdb_macros::FieldsGetter;
 use serde::{Deserialize, Serialize};
+use surrealdb_macros::FieldsGetter;
 
 #[test]
 fn ddefault_to_how_fields_are_written_if_no_rename_all_struct_attribute_specified() {

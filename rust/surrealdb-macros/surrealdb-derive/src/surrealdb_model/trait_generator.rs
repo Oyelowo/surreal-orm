@@ -48,6 +48,8 @@ impl FromMeta for Rename {
     }
 }
 
+
+
 #[derive(Debug, FromField)]
 #[darling(attributes(field_getter, serde), forward_attrs(allow, doc, cfg))]
 pub(crate) struct MyFieldReceiver {
@@ -60,6 +62,12 @@ pub(crate) struct MyFieldReceiver {
 
     #[darling(default)]
     pub(crate) rename: ::std::option::Option<Rename>,
+
+    #[darling(default)]
+    pub(crate) relate: ::std::option::Option<String>,
+
+    // #[darling(default)]
+    // pub(crate) reference: ::std::option::Option<Reference>,
 
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
@@ -115,29 +123,19 @@ impl ToTokens for FieldsGetterOpts {
            #( #struct_ty_fields), *
         });
 
-        // struct Noma {
-        //     name: String
-        // }
-        // ::surreal_simple_querybuilder::model!(Name {
-        //     pub name
-        // });
-
-        // schema::model.name;
-        /* 
-        model!(Project {
-  id, // <- won't be serialized
-  pub name, // <- will be serialized
-})
-         */
+        let mod_name = syn::Ident::new(my_struct.to_string().to_lowercase().as_str(), ::proc_macro2::Span::call_site());
         let crate_name = get_crate_name(false);
      
         tokens.extend(quote! {
             #struct_type
 
+            pub mod #mod_name {
+                use surreal_simple_querybuilder::prelude::*;
+                
              ::surreal_simple_querybuilder::prelude::model!(
                  #my_struct  {
-         #( #models_serialized_values), *
-        }
+                    #( #models_serialized_values), *
+                }
              );
 
                          impl ::surreal_simple_querybuilder::prelude::IntoKey<String> for #my_struct {
@@ -153,7 +151,7 @@ impl ToTokens for FieldsGetterOpts {
   }
 }
 
-            
+}      
             impl #crate_name::SurrealdbModel for #my_struct {
                 type Fields = #fields_getter_struct_name;
                 fn get_fields_serialized() -> Self::Fields {

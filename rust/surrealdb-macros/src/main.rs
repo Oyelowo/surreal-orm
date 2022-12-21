@@ -2,8 +2,8 @@
 #![allow(non_snake_case)]
 
 // For testing macros made here
-use surrealdb_macros::{FieldsGetter, HelloMacro, MyTrait};
 use serde::{Deserialize, Serialize};
+use surrealdb_macros::{FieldsGetter, HelloMacro, MyTrait};
 
 #[derive(HelloMacro)]
 struct Pancakes;
