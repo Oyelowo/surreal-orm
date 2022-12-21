@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use super::{
-    helpers::{get_crate_name, get_fields, get_struct_types_and_fields, FieldStore},
+    helpers::{get_crate_name, get_fields, get_struct_types_and_fields, FieldsMapper},
     types::CaseString,
 };
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
@@ -108,7 +108,7 @@ impl ToTokens for FieldsGetterOpts {
 
         let fields = get_fields(data);
 
-        let FieldStore {
+        let FieldsMapper {
             struct_ty_fields,
             struct_values_fields,
             models_serialized_values,

@@ -2,14 +2,8 @@
 #![feature(generic_const_exprs)]
 #![feature(inherent_associated_types)]
 #![feature(const_mut_refs)]
-use proc_macro2::TokenStream;
-use quote::format_ident;
-use quote::quote;
 use serde::Deserialize;
 use serde::Serialize;
-// use lazy_static::lazy_static;
-#[macro_use]
-extern crate lazy_static;
 use surreal_simple_querybuilder::prelude::*;
 
 /*
