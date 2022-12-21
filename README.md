@@ -2,7 +2,7 @@
 
 
 ## Convention
-To carry out certain tasks in any directory, there are standard commands
+To carry out certain tasks in any directory, these are the standard commands:
 
 | Commands   |      Purpose      
 |----------|:-------------
