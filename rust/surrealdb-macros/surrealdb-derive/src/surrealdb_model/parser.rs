@@ -184,16 +184,18 @@ impl FieldCaseMapper {
 
             let surreal_model_field = match field_receiver.relate.clone() {
                 Some(relation) => ::quote::quote!(#relation as #field_renamed_from_attribute),
-                None => ::quote::quote!(#field_renamed_from_attribute),
+                None => {
+                    let field_renamed_from_attribute_ident = syn::Ident::new(
+                        &field_renamed_from_attribute,
+                        ::proc_macro2::Span::call_site(),
+                    );
+                    ::quote::quote!(#field_renamed_from_attribute_ident)
+                }
             };
             // let surreal_model_field = match field_receiver.relate.clone() {
             //     Some(relation) => ::quote::quote!(#relation as #field_renamed_from_attribute),
             //     None => ::quote::quote!(#field_renamed_from_attribute),
             // };
-            let xx = syn::Ident::new(
-                    &field_renamed_from_attribute,
-                    ::proc_macro2::Span::call_site(),
-                );
 
             return FieldIdentifier {
                 ident: syn::Ident::new(
@@ -203,11 +205,9 @@ impl FieldCaseMapper {
                 serialized: field_renamed_from_attribute,
                 // surrealdb_field_ident: syn::Ident::new(&field_renamed_from_attribute, ::proc_macro2::Span::call_site()),
                 // surrealdb_field_ident: ::quote::quote!(#surreal_schema_serializer #surreal_model_field),
-                surrealdb_field_ident: ::quote::quote!(#xx),
+                surrealdb_field_ident: surreal_model_field,
             };
         }
-
-        
 
         // TODO: Dededup with the above
         let surreal_model_field = match field_receiver.relate.clone() {
