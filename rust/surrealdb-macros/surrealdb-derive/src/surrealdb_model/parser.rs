@@ -2,7 +2,7 @@
 
 use darling::{ast, util};
 use proc_macro2::TokenStream;
-use quote::quote;
+use quote::{format_ident, quote};
 
 use syn;
 
@@ -183,12 +183,17 @@ impl FieldCaseMapper {
             // let field_renamed_from_attribute = syn::Ident::new(name.serialize.to_string(), ::proc_macro2::Span::call_site());
 
             let surreal_model_field = match field_receiver.relate.clone() {
-                Some(relation) => ::quote::quote!(#relation as #field_renamed_from_attribute),
+                Some(relation) => {
+                    // ->loves->Project as fav_project
+                    let xx = format_ident!("{relation} as {field_renamed_from_attribute}");
+                    // let ident =
+                    // ::quote::quote!(#relation as #field_renamed_from_attribute)
+                    ::quote::quote!(#xx)
+                }
                 None => {
-                    let field_renamed_from_attribute_ident = syn::Ident::new(
-                        &field_renamed_from_attribute,
-                        ::proc_macro2::Span::call_site(),
-                    );
+                    let field_renamed_from_attribute_ident =
+                        format_ident!("{}", &field_renamed_from_attribute);
+
                     ::quote::quote!(#field_renamed_from_attribute_ident)
                 }
             };
@@ -198,10 +203,7 @@ impl FieldCaseMapper {
             // };
 
             return FieldIdentifier {
-                ident: syn::Ident::new(
-                    &field_renamed_from_attribute,
-                    ::proc_macro2::Span::call_site(),
-                ),
+                ident: ::quote::format_ident!("{}", &field_renamed_from_attribute),
                 serialized: field_renamed_from_attribute,
                 // surrealdb_field_ident: syn::Ident::new(&field_renamed_from_attribute, ::proc_macro2::Span::call_site()),
                 // surrealdb_field_ident: ::quote::quote!(#surreal_schema_serializer #surreal_model_field),

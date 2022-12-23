@@ -3,7 +3,7 @@
 use super::{get_crate_name, parser::FieldsNames, types::CaseString,};
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
-use quote::quote;
+use quote::{quote, format_ident};
 use std::str::FromStr;
 
 use syn::{self, parse_macro_input};
@@ -113,16 +113,10 @@ impl ToTokens for FieldsGetterOpts {
         } = FieldsNames::from_receiver_data(data, struct_level_casing);
 
         // e.g for Account => AccountFields
-        let fields_getter_struct_name = syn::Ident::new(
-            format!("{my_struct}Fields").as_str(),
-            ::proc_macro2::Span::call_site(),
-        );
+        let fields_getter_struct_name = ::quote::format_ident!("{my_struct}Fields");
 
         // e.g for Account => AccountSchema
-        let schema_type_alias_name = syn::Ident::new(
-            format!("{my_struct}Schema").as_str(),
-            ::proc_macro2::Span::call_site(),
-        );
+        let schema_type_alias_name = ::quote::format_ident!("{my_struct}Schema");
 
         let struct_type = quote!(pub struct #fields_getter_struct_name {
            #( #struct_ty_fields), *
@@ -131,7 +125,7 @@ impl ToTokens for FieldsGetterOpts {
         // let surr = ::surreal_simple_querybuilder::model!()
         // let surr = 
 
-        let schema_mod_name = syn::Ident::new(my_struct.to_string().to_lowercase().as_str(), ::proc_macro2::Span::call_site());
+        let schema_mod_name = format_ident!("{}", my_struct.to_string().to_lowercase());
         let crate_name = get_crate_name(false);
      
         tokens.extend(quote! {
