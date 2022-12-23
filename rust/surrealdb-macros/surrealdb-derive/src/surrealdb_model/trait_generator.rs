@@ -1,9 +1,6 @@
 #![allow(dead_code)]
 
-use super::{
-    helpers::{get_crate_name, get_fields, get_struct_types_and_fields, FieldsMapper},
-    types::CaseString,
-};
+use super::{get_crate_name, parser::FieldsNames, types::CaseString,};
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use quote::quote;
@@ -66,6 +63,9 @@ pub(crate) struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) relate: ::std::option::Option<String>,
 
+    #[darling(default)]
+    pub(crate) skip_serializing: bool,
+
     // #[darling(default)]
     // pub(crate) reference: ::std::option::Option<Reference>,
 
@@ -106,13 +106,11 @@ impl ToTokens for FieldsGetterOpts {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
 
-        let fields = get_fields(data);
-
-        let FieldsMapper {
+        let FieldsNames {
             struct_ty_fields,
             struct_values_fields,
             models_serialized_values,
-        } = get_struct_types_and_fields(fields, struct_level_casing);
+        } = FieldsNames::from_receiver_data(data, struct_level_casing);
 
         let fields_getter_struct_name = syn::Ident::new(
             format!("{my_struct}Fields").as_str(),
@@ -123,35 +121,56 @@ impl ToTokens for FieldsGetterOpts {
            #( #struct_ty_fields), *
         });
 
+        // let surr = ::surreal_simple_querybuilder::model!()
+        // let surr = 
+
         let mod_name = syn::Ident::new(my_struct.to_string().to_lowercase().as_str(), ::proc_macro2::Span::call_site());
         let crate_name = get_crate_name(false);
      
         tokens.extend(quote! {
+            use ::surreal_simple_querybuilder::prelude::*;
             #struct_type
 
-            pub mod #mod_name {
+
+            mod account {
+
                 use surreal_simple_querybuilder::prelude::*;
                 
              ::surreal_simple_querybuilder::prelude::model!(
                  #my_struct  {
-                    #( #models_serialized_values), *
+                    // #( #models_serialized_values), *
+                                           id,
+                handle,
+                password,
+                email,
                 }
              );
+            }
 
-                         impl ::surreal_simple_querybuilder::prelude::IntoKey<String> for #my_struct {
-   fn into_key<E>(&self) -> Result<String, E>
-  where
-    E: ::serde::ser::Error,
-  {
-    self
-      .id
-      .as_ref()
-      .map(String::clone)
-      .ok_or(::serde::ser::Error::custom("The project has no ID"))
-  }
-}
+            type AccountSchema<const N: usize> = account::schema::Account<N>;
 
-}      
+            impl #my_struct {
+                // type Schema = account::schema::Account<0>;
+                const fn get_schema() -> AccountSchema<0> {
+                    // project::schema::model
+                    //  account::schema::Account<0>::new()
+                    account::schema::Account::<0>::new()
+                }
+            }
+            impl ::surreal_simple_querybuilder::prelude::IntoKey<String> for #my_struct {
+                fn into_key<E>(&self) -> Result<String, E>
+                    where
+                        E: ::serde::ser::Error
+                    {
+                        self
+                        .id
+                        .as_ref()
+                        .map(String::clone)
+                        .ok_or(::serde::ser::Error::custom("The project has no ID"))
+                    }
+            }
+
+            // }      
             impl #crate_name::SurrealdbModel for #my_struct {
                 type Fields = #fields_getter_struct_name;
                 fn get_fields_serialized() -> Self::Fields {
