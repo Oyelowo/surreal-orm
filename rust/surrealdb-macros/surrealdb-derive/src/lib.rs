@@ -23,7 +23,7 @@ pub fn fields_getter_trait_derive(input: TokenStream) -> TokenStream {
     fields_getter::generate_fields_getter_trait(input)
 }
 
-#[proc_macro_derive(SurrealdbModel, attributes(field_getter))]
+#[proc_macro_derive(SurrealdbModel, attributes(surrealdb))]
 pub fn surreal_model_trait_derive(input: TokenStream) -> TokenStream {
     surrealdb_model::generate_fields_getter_trait(input)
 }
