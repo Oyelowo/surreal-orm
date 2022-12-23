@@ -124,7 +124,7 @@ impl ToTokens for FieldsGetterOpts {
         // let surr = ::surreal_simple_querybuilder::model!()
         // let surr = 
 
-        let mod_name = syn::Ident::new(my_struct.to_string().to_lowercase().as_str(), ::proc_macro2::Span::call_site());
+        let schema_mod_name = syn::Ident::new(my_struct.to_string().to_lowercase().as_str(), ::proc_macro2::Span::call_site());
         let crate_name = get_crate_name(false);
      
         tokens.extend(quote! {
@@ -132,22 +132,22 @@ impl ToTokens for FieldsGetterOpts {
             #struct_type
 
 
-            mod account {
+            mod #schema_mod_name {
 
                 use surreal_simple_querybuilder::prelude::*;
                 
              ::surreal_simple_querybuilder::prelude::model!(
                  #my_struct  {
-                    // #( #models_serialized_values), *
-                                           id,
-                handle,
-                password,
-                email,
+                    #( #models_serialized_values), *
+                                        //    id,
+                // handle,
+                // password,
+                // email,
                 }
              );
             }
 
-            type AccountSchema<const N: usize> = account::schema::Account<N>;
+            type AccountSchema<const N: usize> = #schema_mod_name::schema::Account<N>;
 
             impl #my_struct {
                 // type Schema = account::schema::Account<0>;

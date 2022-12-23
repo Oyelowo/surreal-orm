@@ -14,7 +14,8 @@ pub(crate) struct FieldIdentifier {
     serialized: ::std::string::String,
     /// The identifier version of the field name.
     ident: syn::Ident,
-    surrealdb_field_ident: TokenStream,
+    // surrealdb_field_ident: TokenStream,
+    surrealdb_field_ident: ::std::string::String,
 }
 
 /// A struct that contains the `struct_ty_fields` and `struct_values_fields` vectors.
@@ -71,7 +72,7 @@ impl FieldsNames {
 
                 field_names_accumulator
                     .models_serialized_values
-                    .push(surrealdb_field_ident);
+                    .push(quote!(#ident));
                 field_names_accumulator
             },
         )
@@ -188,9 +189,10 @@ impl FieldCaseMapper {
                     &field_renamed_from_attribute,
                     ::proc_macro2::Span::call_site(),
                 ),
-                serialized: field_renamed_from_attribute,
+                serialized: field_renamed_from_attribute.clone(),
                 // surrealdb_field_ident: syn::Ident::new(&field_renamed_from_attribute, ::proc_macro2::Span::call_site()),
-                surrealdb_field_ident: ::quote::quote!(#surreal_schema_serializer #surreal_model_field),
+                // surrealdb_field_ident: ::quote::quote!(#surreal_schema_serializer #surreal_model_field),
+                surrealdb_field_ident: field_renamed_from_attribute,
             };
         }
 
@@ -204,7 +206,8 @@ impl FieldCaseMapper {
         FieldIdentifier {
             ident: field_ident,
             serialized: ::std::string::ToString::to_string(field),
-            surrealdb_field_ident: ::quote::quote!(#surreal_schema_serializer #surreal_model_field),
+            // surrealdb_field_ident: ::quote::quote!(#surreal_schema_serializer #surreal_model_field),
+            surrealdb_field_ident: ::std::string::ToString::to_string(field),
         }
     }
 }

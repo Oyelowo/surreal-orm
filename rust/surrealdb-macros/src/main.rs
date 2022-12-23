@@ -35,9 +35,13 @@ pub struct ConsumingType {
 use surrealdb_derive::SurrealdbModel;
 
 #[derive(SurrealdbModel, Default)]
+#[field_getter(rename_all = "camelCase")]
 pub struct Account {
     id: Option<String>,
     handle: String,
+    // #[field_getter(rename = "nawao")]
+    first_name: String,
+    chess: String,
     password: String,
     email: String,
     // projects: ForeignVec<Project>,
@@ -46,8 +50,11 @@ pub struct Account {
 use surreal_simple_querybuilder::prelude::*;
 
 fn main() {
-    Account::get_schema().email.contains_none(values)
-    // Account::get_schema().handle
+    // Account::get_fields_serialized()
+    // Account::get_schema().email;
+    // Account::get_schema()
+    // Account::get_schema()
+    // Account::get_schema().email.contains_all(values)
     // account::schema::model
     let ConsumingTypeFields {
         lowo_cool, lmsar, ..
