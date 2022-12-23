@@ -48,7 +48,7 @@ impl FromMeta for Rename {
 
 
 #[derive(Debug, FromField)]
-#[darling(attributes(field_getter, serde), forward_attrs(allow, doc, cfg))]
+#[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
 pub(crate) struct MyFieldReceiver {
     /// Get the ident of the field. For fields in tuple or newtype structs or
     /// enum bodies, this can be `None`.
@@ -80,7 +80,7 @@ pub(crate) struct MyFieldReceiver {
 }
 
 #[derive(Debug, FromDeriveInput)]
-#[darling(attributes(field_getter, serde), forward_attrs(allow, doc, cfg))]
+#[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
 pub struct FieldsGetterOpts {
     ident: syn::Ident,
     attrs: Vec<syn::Attribute>,

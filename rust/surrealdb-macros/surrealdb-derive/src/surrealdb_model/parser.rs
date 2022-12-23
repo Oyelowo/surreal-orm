@@ -14,8 +14,8 @@ pub(crate) struct FieldIdentifier {
     serialized: ::std::string::String,
     /// The identifier version of the field name.
     ident: syn::Ident,
-    // surrealdb_field_ident: TokenStream,
-    surrealdb_field_ident: ::std::string::String,
+    surrealdb_field_ident: TokenStream,
+    // surrealdb_field_ident: ::std::string::String,
 }
 
 /// A struct that contains the `struct_ty_fields` and `struct_values_fields` vectors.
@@ -50,7 +50,7 @@ impl FieldsNames {
             Self::default(),
             |mut field_names_accumulator, (index, field_receiver)| {
                 let field_case = struct_level_casing.unwrap_or(CaseString::None);
-                let field_ident = Self::get_field_identifier(field_receiver, index);
+                let field_ident = Self::get_field_identifier_name(field_receiver, index);
                 let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
 
                 let FieldIdentifier {
@@ -72,7 +72,7 @@ impl FieldsNames {
 
                 field_names_accumulator
                     .models_serialized_values
-                    .push(quote!(#ident));
+                    .push(quote!(#surrealdb_field_ident));
                 field_names_accumulator
             },
         )
@@ -89,7 +89,7 @@ impl FieldsNames {
     ///
     /// * `field_receiver` - A field receiver containing field information.
     /// * `index` - The index of the field.
-    fn get_field_identifier(field_receiver: &MyFieldReceiver, index: usize) -> TokenStream {
+    fn get_field_identifier_name(field_receiver: &MyFieldReceiver, index: usize) -> TokenStream {
         // This works with named or indexed fields, so we'll fall back to the index so we can
         // write the output as a key-value pair.
         // The index is rarely necessary since our models are usually not tuple struct
@@ -159,6 +159,8 @@ impl FieldCaseMapper {
     pub(crate) fn get_field_ident(self, field_receiver: &MyFieldReceiver) -> FieldIdentifier {
         let field = self.to_case_string();
         let field = field.as_str();
+        let field_ident_exact = syn::Ident::new(field, ::proc_macro2::Span::call_site());
+
         let surreal_schema_serializer = if field_receiver.skip_serializing {
             ::quote::quote!()
         } else {
@@ -178,36 +180,47 @@ impl FieldCaseMapper {
         // Prioritize serde/field_getter field_attribute renaming for field string
         if let ::std::option::Option::Some(name) = field_receiver.rename.as_ref() {
             let field_renamed_from_attribute = name.serialize.to_string();
+            // let field_renamed_from_attribute = syn::Ident::new(name.serialize.to_string(), ::proc_macro2::Span::call_site());
 
             let surreal_model_field = match field_receiver.relate.clone() {
                 Some(relation) => ::quote::quote!(#relation as #field_renamed_from_attribute),
                 None => ::quote::quote!(#field_renamed_from_attribute),
             };
+            // let surreal_model_field = match field_receiver.relate.clone() {
+            //     Some(relation) => ::quote::quote!(#relation as #field_renamed_from_attribute),
+            //     None => ::quote::quote!(#field_renamed_from_attribute),
+            // };
+            let xx = syn::Ident::new(
+                    &field_renamed_from_attribute,
+                    ::proc_macro2::Span::call_site(),
+                );
 
             return FieldIdentifier {
                 ident: syn::Ident::new(
                     &field_renamed_from_attribute,
                     ::proc_macro2::Span::call_site(),
                 ),
-                serialized: field_renamed_from_attribute.clone(),
+                serialized: field_renamed_from_attribute,
                 // surrealdb_field_ident: syn::Ident::new(&field_renamed_from_attribute, ::proc_macro2::Span::call_site()),
                 // surrealdb_field_ident: ::quote::quote!(#surreal_schema_serializer #surreal_model_field),
-                surrealdb_field_ident: field_renamed_from_attribute,
+                surrealdb_field_ident: ::quote::quote!(#xx),
             };
         }
 
+        
 
         // TODO: Dededup with the above
         let surreal_model_field = match field_receiver.relate.clone() {
-            Some(relation) => ::quote::quote!(#relation as #field),
-            None => ::quote::quote!(#field),
+            Some(relation) => ::quote::quote!(#relation as #field_ident_exact),
+            None => ::quote::quote!(#field_ident_exact),
         };
 
         FieldIdentifier {
-            ident: field_ident,
+            ident: field_ident.clone(),
             serialized: ::std::string::ToString::to_string(field),
             // surrealdb_field_ident: ::quote::quote!(#surreal_schema_serializer #surreal_model_field),
-            surrealdb_field_ident: ::std::string::ToString::to_string(field),
+            // surrealdb_field_ident: ::std::string::ToString::to_string(field),
+            surrealdb_field_ident: ::quote::quote!(#surreal_model_field),
         }
     }
 }
