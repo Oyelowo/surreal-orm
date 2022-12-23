@@ -112,8 +112,15 @@ impl ToTokens for FieldsGetterOpts {
             models_serialized_values,
         } = FieldsNames::from_receiver_data(data, struct_level_casing);
 
+        // e.g for Account => AccountFields
         let fields_getter_struct_name = syn::Ident::new(
             format!("{my_struct}Fields").as_str(),
+            ::proc_macro2::Span::call_site(),
+        );
+
+        // e.g for Account => AccountSchema
+        let schema_type_alias_name = syn::Ident::new(
+            format!("{my_struct}Schema").as_str(),
             ::proc_macro2::Span::call_site(),
         );
 
@@ -131,41 +138,39 @@ impl ToTokens for FieldsGetterOpts {
             use ::surreal_simple_querybuilder::prelude::*;
             #struct_type
 
-
             mod #schema_mod_name {
-
                 use surreal_simple_querybuilder::prelude::*;
                 
-             ::surreal_simple_querybuilder::prelude::model!(
-                 #my_struct  {
+                ::surreal_simple_querybuilder::prelude::model!(
+                 #my_struct {
                     #( #models_serialized_values), *
-                                        //    id,
-                // handle,
-                // password,
-                // email,
                 }
              );
             }
 
-            type AccountSchema<const N: usize> = #schema_mod_name::schema::Account<N>;
+            // e.g: type alias: type AccountSchema<const N: usize> = account::schema::Account<N>;
+            type #schema_type_alias_name<const N: usize> = #schema_mod_name::schema::#my_struct<N>;
 
             impl #my_struct {
                 // type Schema = account::schema::Account<0>;
-                const fn get_schema() -> AccountSchema<0> {
+                // type Schema = #schema_mod_name::schema::#my_struct<0>;
+                const fn get_schema() -> #schema_type_alias_name<0> {
                     // project::schema::model
                     //  account::schema::Account<0>::new()
-                    account::schema::Account::<0>::new()
+                    // e.g: account::schema::Account::<0>::new()
+                    #schema_mod_name::schema::#my_struct::<0>::new()
                 }
             }
-            impl ::surreal_simple_querybuilder::prelude::IntoKey<String> for #my_struct {
-                fn into_key<E>(&self) -> Result<String, E>
+
+            impl ::surreal_simple_querybuilder::prelude::IntoKey<::std::string::String> for #my_struct {
+                fn into_key<E>(&self) -> ::std::result::Result<String, E>
                     where
                         E: ::serde::ser::Error
                     {
                         self
                         .id
                         .as_ref()
-                        .map(String::clone)
+                        .map(::std::string::String::clone)
                         .ok_or(::serde::ser::Error::custom("The project has no ID"))
                     }
             }
@@ -178,8 +183,6 @@ impl ToTokens for FieldsGetterOpts {
                         #( #struct_values_fields), *
                     }
                 }
-
-
             }
         });
     }
