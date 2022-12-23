@@ -72,7 +72,7 @@ impl FieldsNames {
 
                 field_names_accumulator
                     .models_serialized_values
-                    .push(quote!(#ident));
+                    .push(quote!(#surrealdb_field_ident));
                 field_names_accumulator
             },
         )

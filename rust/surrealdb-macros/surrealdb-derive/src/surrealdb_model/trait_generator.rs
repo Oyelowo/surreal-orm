@@ -154,6 +154,7 @@ impl ToTokens for FieldsGetterOpts {
             impl #my_struct {
                 // type Schema = account::schema::Account<0>;
                 // type Schema = #schema_mod_name::schema::#my_struct<0>;
+                const schema: #schema_mod_name::schema::#my_struct<0> = #schema_mod_name::schema::#my_struct::<0>::new();
                 const fn get_schema() -> #schema_type_alias_name<0> {
                     // project::schema::model
                     //  account::schema::Account<0>::new()
