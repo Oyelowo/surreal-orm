@@ -15,6 +15,7 @@ pub(crate) struct FieldIdentifier {
     /// The identifier version of the field name.
     ident: syn::Ident,
     surrealdb_field_ident: TokenStream,
+    surrealdb_imported_schema_dependency: TokenStream,
     // surrealdb_field_ident: ::std::string::String,
 }
 
@@ -27,6 +28,7 @@ pub(crate) struct FieldsNames {
     pub struct_values_fields: Vec<TokenStream>,
 
     pub models_serialized_values: Vec<TokenStream>,
+    pub surrealdb_imported_schema_dependencies: Vec<TokenStream>,
 }
 
 impl FieldsNames {
@@ -57,6 +59,7 @@ impl FieldsNames {
                     serialized,
                     ident,
                     surrealdb_field_ident,
+                    surrealdb_imported_schema_dependency,
                 } = FieldCaseMapper::new(field_case, field_identifier_string)
                     .get_field_ident(&field_receiver);
 
@@ -73,6 +76,10 @@ impl FieldsNames {
                 field_names_accumulator
                     .models_serialized_values
                     .push(quote!(#surrealdb_field_ident));
+
+                field_names_accumulator
+                    .surrealdb_imported_schema_dependencies
+                    .push(surrealdb_imported_schema_dependency);
                 field_names_accumulator
             },
         )
@@ -182,21 +189,29 @@ impl FieldCaseMapper {
             let field_renamed_from_attribute = name.serialize.to_string();
             // let field_renamed_from_attribute = syn::Ident::new(name.serialize.to_string(), ::proc_macro2::Span::call_site());
 
-            let surreal_model_field = match field_receiver.relate.clone() {
-                Some(relation) => {
-                    // ->loves->Project as fav_project
-                    let xx = format_ident!("{relation} as {field_renamed_from_attribute}");
-                    // let ident =
-                    // ::quote::quote!(#relation as #field_renamed_from_attribute)
-                    ::quote::quote!(#xx)
-                }
-                None => {
-                    let field_renamed_from_attribute_ident =
-                        format_ident!("{}", &field_renamed_from_attribute);
+            let (surreal_model_field, surrealdb_imported_schema_dependency) =
+                match field_receiver.relate.clone() {
+                    Some(relation) => {
+                        // ->loves->Project as fav_project
+                        // let dependent_type =
+                        let xx = format_ident!("{relation} as {field_renamed_from_attribute}");
+                        // let ident =
+                        // ::quote::quote!(#relation as #field_renamed_from_attribute)
+                        (
+                            ::quote::quote!(#xx),
+                            ::quote::quote!(use super::ProjectSchema as Project;),
+                        )
+                    }
+                    None => {
+                        let field_renamed_from_attribute_ident =
+                            format_ident!("{}", &field_renamed_from_attribute);
 
-                    ::quote::quote!(#field_renamed_from_attribute_ident)
-                }
-            };
+                        (
+                            ::quote::quote!(#field_renamed_from_attribute_ident),
+                            quote!(),
+                        )
+                    }
+                };
             // let surreal_model_field = match field_receiver.relate.clone() {
             //     Some(relation) => ::quote::quote!(#relation as #field_renamed_from_attribute),
             //     None => ::quote::quote!(#field_renamed_from_attribute),
@@ -208,14 +223,19 @@ impl FieldCaseMapper {
                 // surrealdb_field_ident: syn::Ident::new(&field_renamed_from_attribute, ::proc_macro2::Span::call_site()),
                 // surrealdb_field_ident: ::quote::quote!(#surreal_schema_serializer #surreal_model_field),
                 surrealdb_field_ident: surreal_model_field,
+                surrealdb_imported_schema_dependency,
             };
         }
 
         // TODO: Dededup with the above
-        let surreal_model_field = match field_receiver.relate.clone() {
-            Some(relation) => ::quote::quote!(#relation as #field_ident_exact),
-            None => ::quote::quote!(#field_ident_exact),
-        };
+        let (surreal_model_field, surrealdb_imported_schema_dependency) =
+            match field_receiver.relate.clone() {
+                Some(relation) => (
+                    ::quote::quote!(#relation as #field_ident_exact),
+                    ::quote::quote!(use super::ProjectSchema as Project;),
+                ),
+                None => (::quote::quote!(#field_ident_exact), quote!()),
+            };
 
         FieldIdentifier {
             ident: field_ident.clone(),
@@ -223,6 +243,7 @@ impl FieldCaseMapper {
             // surrealdb_field_ident: ::quote::quote!(#surreal_schema_serializer #surreal_model_field),
             // surrealdb_field_ident: ::std::string::ToString::to_string(field),
             surrealdb_field_ident: ::quote::quote!(#surreal_model_field),
+            surrealdb_imported_schema_dependency: surrealdb_imported_schema_dependency,
         }
     }
 }

@@ -110,6 +110,7 @@ impl ToTokens for FieldsGetterOpts {
             struct_ty_fields,
             struct_values_fields,
             models_serialized_values,
+            surrealdb_imported_schema_dependencies,
         } = FieldsNames::from_receiver_data(data, struct_level_casing);
 
         // e.g for Account => AccountFields
@@ -121,22 +122,26 @@ impl ToTokens for FieldsGetterOpts {
         let struct_type = quote!(pub struct #fields_getter_struct_name {
            #( #struct_ty_fields), *
         });
-
+        
         // let surr = ::surreal_simple_querybuilder::model!()
         // let surr = 
-
+        
         let schema_mod_name = format_ident!("{}", my_struct.to_string().to_lowercase());
         let crate_name = get_crate_name(false);
-     
+        
         tokens.extend(quote! {
             use ::surreal_simple_querybuilder::prelude::*;
             #struct_type
-
+            
             mod #schema_mod_name {
+                #( #surrealdb_imported_schema_dependencies) *
+                use super::ProjectSchema as Project;
+                
                 use surreal_simple_querybuilder::prelude::*;
                 
                 ::surreal_simple_querybuilder::prelude::model!(
                  #my_struct {
+                     ->loves->Project as fav_proj,
                     #( #models_serialized_values), *
                 }
              );
