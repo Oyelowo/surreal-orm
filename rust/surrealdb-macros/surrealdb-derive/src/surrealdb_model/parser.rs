@@ -293,6 +293,7 @@ impl FieldCaseMapper {
                     // ::quote::quote!(#strp),
                     ::quote::quote!(
                         use super::ProjectSchema as Project;
+                        // use super::AccountSchema as Account;
                     ),
                 )
             }
@@ -313,4 +314,69 @@ impl FieldCaseMapper {
 fn map_string_to_tokenstream(string: &str) -> TokenStream {
     let literal = Literal::string(string);
     quote::quote_spanned! {literal.span()=> #literal}
+}
+
+enum EdgeDirection {
+    OutArrowRight,
+    InArrowLeft,
+}
+
+impl From<EdgeDirection> for TokenStream {
+    fn from(direction: EdgeDirection) -> Self {
+        match direction {
+            EdgeDirection::OutArrowRight => quote::quote!(->),
+            EdgeDirection::InArrowLeft => quote::quote!(<-),
+        }
+    }
+}
+
+macro_rules! wrapper_struct_to_token_stream {
+    ($simple_wrapper_struct:ty) => {
+        impl From<$simple_wrapper_struct> for TokenStream {
+            fn from(simple_wrapper_struct: $simple_wrapper_struct) -> Self {
+                let action = format_ident!("{}", simple_wrapper_struct.0);
+                quote!(#action)
+            }
+        }
+    };
+}
+
+/*
+impl From<EdgeAction> for TokenStream {
+    fn from(edge_action: EdgeAction) -> Self {
+        let action = format_ident!("{}", edge_action.0);
+        quote!(#action)
+    }
+}
+*/
+struct EdgeAction(String);
+wrapper_struct_to_token_stream!(EdgeAction);
+
+struct NodeObject(String);
+wrapper_struct_to_token_stream!(NodeObject);
+
+struct RelateAttribute {
+    edge_direction: EdgeDirection,
+    edge_action: EdgeAction,
+    node_object: NodeObject,
+}
+
+impl From<RelateAttribute> for TokenStream {
+    fn from(relate_attrs: RelateAttribute) -> Self {
+        let edge_direction = TokenStream::from(relate_attrs.edge_direction);
+        let edge_action = TokenStream::from(relate_attrs.edge_action);
+        let node_object = TokenStream::from(relate_attrs.node_object);
+        // ->action->NodeObject
+        // <-action<-NodeObject
+        // e.g ->manages->Project
+        quote!(#edge_direction #edge_action #node_object)
+    }
+}
+
+struct Relation(String);
+
+impl From<Relation> for RelateAttribute {
+    fn from(relation: Relation) -> Self {
+        todo!()
+    }
 }
