@@ -170,11 +170,10 @@ impl FieldCaseMapper {
         let field = field.as_str();
         let field_ident_exact = syn::Ident::new(field, ::proc_macro2::Span::call_site());
 
-        let surreal_schema_serializer = if field_receiver.skip_serializing {
-            ::quote::quote!()
-        } else {
-            ::quote::quote!(pub)
-        };
+        let relationship = RelationType::from(field_receiver);
+
+        // pub determines whether the field will be serialized or not during creation/update
+        let surreal_schema_serializer = SkipSerializing::from(field_receiver.skip_serializing);
 
         let field_ident = match &self.field_case {
             // Tries to keep the field name ident as written in the struct
@@ -347,10 +346,40 @@ enum RelationType {
     None,
 }
 
+impl From<&MyFieldReceiver> for RelationType {
+    fn from(field_receiver: &MyFieldReceiver) -> Self {
+        use RelationType::*;
+        match field_receiver {
+            MyFieldReceiver {
+                relate: Some(relation),
+                ..
+            } => RelationGraph(Relation(relation.to_owned())),
+            MyFieldReceiver {
+                reference_one: Some(foreign_schema),
+                ..
+            } => ReferenceOne(NodeObject(foreign_schema.to_owned())),
+            MyFieldReceiver {
+                reference_many: Some(many_foreign_schema),
+                ..
+            } => ReferenceMany(NodeObject(many_foreign_schema.to_owned())),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 enum SkipSerializing {
     Yes,
     No,
+}
+
+impl From<bool> for SkipSerializing {
+    fn from(value: bool) -> Self {
+        match value {
+            true => SkipSerializing::Yes,
+            false => SkipSerializing::No,
+        }
+    }
 }
 
 impl From<SkipSerializing> for bool {

@@ -60,8 +60,17 @@ pub(crate) struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) rename: ::std::option::Option<Rename>,
 
+    // graph relation: e.g ->has->Account
     #[darling(default)]
     pub(crate) relate: ::std::option::Option<String>,
+    
+    // reference singular: Foreign<Account>
+    #[darling(default)]
+    pub(crate) reference_one: ::std::option::Option<String>,
+    
+    // reference plural: Foreign<Vec<Account>>
+    #[darling(default)]
+    pub(crate) reference_many: ::std::option::Option<String>,
 
     #[darling(default)]
     pub(crate) skip_serializing: bool,
