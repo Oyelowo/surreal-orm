@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use darling::{ast, util};
-use proc_macro2::TokenStream;
+use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
 
 use syn;
@@ -198,8 +198,10 @@ impl FieldCaseMapper {
                         // let ident =
                         // ::quote::quote!(#relation as #field_renamed_from_attribute)
                         (
-                            ::quote::quote!(#xx),
-                            ::quote::quote!(use super::ProjectSchema as Project;),
+                            ::quote::quote!(->loves->Project as fav_proj),
+                            ::quote::quote!(
+                                use super::ProjectSchema as Project;
+                            ),
                         )
                     }
                     None => {
@@ -228,14 +230,74 @@ impl FieldCaseMapper {
         }
 
         // TODO: Dededup with the above
-        let (surreal_model_field, surrealdb_imported_schema_dependency) =
-            match field_receiver.relate.clone() {
-                Some(relation) => (
-                    ::quote::quote!(#relation as #field_ident_exact),
-                    ::quote::quote!(use super::ProjectSchema as Project;),
-                ),
-                None => (::quote::quote!(#field_ident_exact), quote!()),
-            };
+        let (surreal_model_field, surrealdb_imported_schema_dependency) = match field_receiver
+            .relate
+            .clone()
+        {
+            Some(relation) => {
+                let right_arrow_count = relation.matches("->").count();
+                let left_arrow_count = relation.matches("->").count();
+                let substrings = relation
+                    .split("->")
+                    .flat_map(|s| s.split("<-"))
+                    .filter(|x| !x.is_empty())
+                    .collect::<Vec<&str>>();
+                let span = syn::spanned::Spanned::span(&relation);
+                let start = span.start();
+                let end = span.end();
+
+                let message = format_args!(
+                        "Invalid expression at  Check that your arrows are properly faced. e.g ->has->Heart or <-owned_by<-Human",
+                        // &start.line,
+                        // &start.column,
+                        // &end.column
+                    );
+
+                if right_arrow_count > 2 || left_arrow_count > 2 || substrings.len() > 2 {
+                    panic!("{}", &message);
+                    // let error = syn::Error::new_spanned(2, "Input cannot be empty");
+                    // return Err(error);
+                }
+
+                let string = "hello world";
+                let literal = Literal::string(string);
+                // let tokens: TokenStream = literal.into_token_stream();
+
+                let direction = if right_arrow_count == 2 {
+                    quote::quote!(->)
+                } else {
+                    quote::quote!(<-)
+                };
+                // let xxxx = match substrings.as_slice() {
+                //     [edge_action, node_object] => {
+                //         let edge_action = format_ident!("{edge_action}");
+                //         let node_object = format_ident!("{node_object}");
+                //         quote!(->#edge_action->#node_object)
+                //     }
+                //     _ => panic!("{}", &message),
+                // };
+                let (edge_action, node_object) = substrings.get(0).zip(substrings.get(1)).unwrap();
+                let edge_action = format_ident!("{edge_action}");
+                let node_object = format_ident!("{node_object}");
+
+                // if right_arrow_count == 2 {
+                //     ::quote::quote!(->loves->Project as fav_proj)
+                // }
+                let x = "".split("pat").collect::<Vec<_>>();
+                // let strp = Literal::from("->loves->Project as fav_proj");
+                let strp = map_string_to_tokenstream("->loves->Project as fav_proj");
+                (
+                    // ::quote::quote!(#relation as #field_ident_exact),
+                    // ::quote::quote!(->loves->Project as fav_proj),
+                    ::quote::quote!(#direction #edge_action #direction #node_object as #field_ident_exact),
+                    // ::quote::quote!(#strp),
+                    ::quote::quote!(
+                        use super::ProjectSchema as Project;
+                    ),
+                )
+            }
+            None => (::quote::quote!(#field_ident_exact), quote!()),
+        };
 
         FieldIdentifier {
             ident: field_ident.clone(),
@@ -246,4 +308,9 @@ impl FieldCaseMapper {
             surrealdb_imported_schema_dependency: surrealdb_imported_schema_dependency,
         }
     }
+}
+
+fn map_string_to_tokenstream(string: &str) -> TokenStream {
+    let literal = Literal::string(string);
+    quote::quote_spanned! {literal.span()=> #literal}
 }

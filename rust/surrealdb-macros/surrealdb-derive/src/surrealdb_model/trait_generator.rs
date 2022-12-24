@@ -135,13 +135,12 @@ impl ToTokens for FieldsGetterOpts {
             
             mod #schema_mod_name {
                 #( #surrealdb_imported_schema_dependencies) *
-                use super::ProjectSchema as Project;
+                
                 
                 use surreal_simple_querybuilder::prelude::*;
                 
                 ::surreal_simple_querybuilder::prelude::model!(
                  #my_struct {
-                     ->loves->Project as fav_proj,
                     #( #models_serialized_values), *
                 }
              );
