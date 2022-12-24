@@ -116,6 +116,39 @@ impl FieldsNames {
             |name_ident| quote!(#name_ident),
         )
     }
+
+    /// Ident format is the name used in the code
+    /// e.g
+    /// ```
+    /// struct User {
+    ///     //user_name is ident and the serialized format by serde is "user_name"
+    ///     user_name: String  
+    /// }
+    /// ```
+    /// This is what we use as the field name and is mostly same as the serialized format
+    /// except in the case of kebab-case serialized format in which case we fallback
+    /// to the original ident format as written exactly in the code except when a user
+    /// uses rename attribute on a specific field, in which case that takes precedence.
+    pub(crate) fn get_field_ident(
+        &self,
+        field_receiver: &MyFieldReceiver,
+        struct_level_casing: Option<CaseString>,
+        index: usize,
+    ) -> FieldIdentifier {
+        let casing = struct_level_casing.unwrap_or(CaseString::None);
+        let field_ident = Self::get_field_identifier_name(field_receiver, index);
+        let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
+
+        let field_ident_cased = FieldIdentCased::from(FieldIdentUnCased {
+            uncased_field_name,
+            casing,
+        });
+        let field_ident_normalised = field_receiver
+            .rename
+            .map_or_else(|| field_ident_cased.into(), |renamed| renamed.serialize);
+
+        todo!()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -329,6 +362,12 @@ struct FieldIdentCased(String);
 impl From<String> for FieldIdentCased {
     fn from(value: String) -> Self {
         Self(value)
+    }
+}
+
+impl From<FieldIdentCased> for String {
+    fn from(value: FieldIdentCased) -> Self {
+        value.0
     }
 }
 
