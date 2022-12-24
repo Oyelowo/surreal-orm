@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use std::fmt::Arguments;
+
 use darling::{ast, util};
 use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
@@ -66,7 +68,7 @@ impl FieldsNames {
                 // struct type used to type the function
                 field_names_accumulator
                     .struct_ty_fields
-                    .push(quote!(pub #ident: &'static str));
+                    .push(quote!(pub #ident: String));
 
                 // struct values themselves
                 field_names_accumulator
@@ -184,6 +186,24 @@ impl FieldCaseMapper {
 
         let field_ident = syn::Ident::new(field_ident, ::proc_macro2::Span::call_site());
 
+        let x = RelateAttribute::from(field_receiver.relate.unwrap().into());
+        let arrow_direction = TokenStream::from(x.edge_direction);
+        let edge_action = TokenStream::from(x.edge_action);
+        let schema_name_str = x.node_object.into();
+        let schema_name = format_ident!("{schema_name_str}");
+        let schema_name_alias = format_ident!("{schema_name_str}Schema");
+        //  use super::AccountSchema as Account;
+        let model_import_stream = quote!(use super::#schema_name_alias as #schema_name;);
+
+        /*
+        // This can the access the alias
+          model!(Account{
+            ->has->Account,
+          })
+        */
+        let model_field_stream =
+            quote!(#arrow_direction #edge_action #arrow_direction #schema_name,);
+
         // Prioritize serde/field_getter field_attribute renaming for field string
         if let ::std::option::Option::Some(name) = field_receiver.rename.as_ref() {
             let field_renamed_from_attribute = name.serialize.to_string();
@@ -230,76 +250,79 @@ impl FieldCaseMapper {
         }
 
         // TODO: Dededup with the above
-        let (surreal_model_field, surrealdb_imported_schema_dependency) = match field_receiver
-            .relate
-            .clone()
-        {
-            Some(relation) => {
-                let right_arrow_count = relation.matches("->").count();
-                let left_arrow_count = relation.matches("->").count();
-                let substrings = relation
-                    .split("->")
-                    .flat_map(|s| s.split("<-"))
-                    .filter(|x| !x.is_empty())
-                    .collect::<Vec<&str>>();
-                let span = syn::spanned::Spanned::span(&relation);
-                let start = span.start();
-                let end = span.end();
+        /*      let (surreal_model_field, surrealdb_imported_schema_dependency) = match field_receiver
+                   .relate
+                   .clone()
+               {
+                   Some(relation) => {
+                       let right_arrow_count = relation.matches("->").count();
+                       let left_arrow_count = relation.matches("->").count();
+                       let substrings = relation
+                           .split("->")
+                           .flat_map(|s| s.split("<-"))
+                           .filter(|x| !x.is_empty())
+                           .collect::<Vec<&str>>();
+                       let span = syn::spanned::Spanned::span(&relation);
+                       let start = span.start();
+                       let end = span.end();
 
-                let message = format_args!(
-                        "Invalid expression at  Check that your arrows are properly faced. e.g ->has->Heart or <-owned_by<-Human",
-                        // &start.line,
-                        // &start.column,
-                        // &end.column
-                    );
+                       let message = format_args!(
+                               "Invalid expression at  Check that your arrows are properly faced. e.g ->has->Heart or <-owned_by<-Human",
+                               // &start.line,
+                               // &start.column,
+                               // &end.column
+                           );
 
-                if right_arrow_count > 2 || left_arrow_count > 2 || substrings.len() > 2 {
-                    panic!("{}", &message);
-                    // let error = syn::Error::new_spanned(2, "Input cannot be empty");
-                    // return Err(error);
-                }
+                       if right_arrow_count > 2 || left_arrow_count > 2 || substrings.len() > 2 {
+                           panic!("{}", &message);
+                           // let error = syn::Error::new_spanned(2, "Input cannot be empty");
+                           // return Err(error);
+                       }
 
-                let string = "hello world";
-                let literal = Literal::string(string);
-                // let tokens: TokenStream = literal.into_token_stream();
+                       let string = "hello world";
+                       let literal = Literal::string(string);
+                       // let tokens: TokenStream = literal.into_token_stream();
 
-                let direction = if right_arrow_count == 2 {
-                    quote::quote!(->)
-                } else {
-                    quote::quote!(<-)
-                };
-                // let xxxx = match substrings.as_slice() {
-                //     [edge_action, node_object] => {
-                //         let edge_action = format_ident!("{edge_action}");
-                //         let node_object = format_ident!("{node_object}");
-                //         quote!(->#edge_action->#node_object)
-                //     }
-                //     _ => panic!("{}", &message),
-                // };
-                let (edge_action, node_object) = substrings.get(0).zip(substrings.get(1)).unwrap();
-                let edge_action = format_ident!("{edge_action}");
-                let node_object = format_ident!("{node_object}");
+                       let direction = if right_arrow_count == 2 {
+                           quote::quote!(->)
+                       } else {
+                           quote::quote!(<-)
+                       };
+                       // let xxxx = match substrings.as_slice() {
+                       //     [edge_action, node_object] => {
+                       //         let edge_action = format_ident!("{edge_action}");
+                       //         let node_object = format_ident!("{node_object}");
+                       //         quote!(->#edge_action->#node_object)
+                       //     }
+                       //     _ => panic!("{}", &message),
+                       // };
+                       let (edge_action, node_object) = substrings.get(0).zip(substrings.get(1)).unwrap();
+                       let edge_action = format_ident!("{edge_action}");
+                       let node_object = format_ident!("{node_object}");
 
-                // if right_arrow_count == 2 {
-                //     ::quote::quote!(->loves->Project as fav_proj)
-                // }
-                let x = "".split("pat").collect::<Vec<_>>();
-                // let strp = Literal::from("->loves->Project as fav_proj");
-                let strp = map_string_to_tokenstream("->loves->Project as fav_proj");
-                (
-                    // ::quote::quote!(#relation as #field_ident_exact),
-                    // ::quote::quote!(->loves->Project as fav_proj),
-                    ::quote::quote!(#direction #edge_action #direction #node_object as #field_ident_exact),
-                    // ::quote::quote!(#strp),
-                    ::quote::quote!(
-                        use super::ProjectSchema as Project;
-                        // use super::AccountSchema as Account;
-                    ),
-                )
-            }
-            None => (::quote::quote!(#field_ident_exact), quote!()),
-        };
+                       // if right_arrow_count == 2 {
+                       //     ::quote::quote!(->loves->Project as fav_proj)
+                       // }
+                       let x = "".split("pat").collect::<Vec<_>>();
+                       // let strp = Literal::from("->loves->Project as fav_proj");
+                       let strp = map_string_to_tokenstream("->loves->Project as fav_proj");
+                       (
+                           // ::quote::quote!(#relation as #field_ident_exact),
+                           // ::quote::quote!(->loves->Project as fav_proj),
+                           ::quote::quote!(#direction #edge_action #direction #node_object as #field_ident_exact),
+                           // ::quote::quote!(#strp),
+                           ::quote::quote!(
+                               use super::ProjectSchema as Project;
+                               // use super::AccountSchema as Account;
+                           ),
+                       )
+                   }
+                   None => (::quote::quote!(#field_ident_exact), quote!()),
+               };
+        */
 
+        let x = RelateAttribute::from(field_receiver.relate.unwrap().into());
+        // let skip_serializing = SkipSerializing::from(field_receiver.skip_serializing);
         FieldIdentifier {
             ident: field_ident.clone(),
             serialized: ::std::string::ToString::to_string(field),
@@ -316,6 +339,39 @@ fn map_string_to_tokenstream(string: &str) -> TokenStream {
     quote::quote_spanned! {literal.span()=> #literal}
 }
 
+#[derive(Debug, Clone, Copy)]
+enum RelationType {
+    RelationGraph,
+    ReferenceOne,
+    ReferenceMany,
+    None,
+}
+
+#[derive(Debug, Clone, Copy)]
+enum SkipSerializing {
+    Yes,
+    No,
+}
+
+impl From<SkipSerializing> for bool {
+    fn from(value: SkipSerializing) -> Self {
+        match value {
+            SkipSerializing::Yes => true,
+            SkipSerializing::No => false,
+        }
+    }
+}
+
+impl From<SkipSerializing> for TokenStream {
+    fn from(value: SkipSerializing) -> Self {
+        match value {
+            SkipSerializing::Yes => quote!(pub),
+            SkipSerializing::No => quote!(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 enum EdgeDirection {
     OutArrowRight,
     InArrowLeft,
@@ -330,12 +386,21 @@ impl From<EdgeDirection> for TokenStream {
     }
 }
 
-macro_rules! wrapper_struct_to_token_stream {
+impl From<EdgeDirection> for String {
+    fn from(direction: EdgeDirection) -> Self {
+        match direction {
+            EdgeDirection::OutArrowRight => "->".into(),
+            EdgeDirection::InArrowLeft => "<-".into(),
+        }
+    }
+}
+
+macro_rules! wrapper_struct_to_ident {
     ($simple_wrapper_struct:ty) => {
         impl From<$simple_wrapper_struct> for TokenStream {
             fn from(simple_wrapper_struct: $simple_wrapper_struct) -> Self {
-                let action = format_ident!("{}", simple_wrapper_struct.0);
-                quote!(#action)
+                let ident = format_ident!("{}", simple_wrapper_struct.0);
+                ::quote::quote!(#ident)
             }
         }
     };
@@ -349,12 +414,16 @@ impl From<EdgeAction> for TokenStream {
     }
 }
 */
+
+#[derive(Debug, Clone)]
 struct EdgeAction(String);
-wrapper_struct_to_token_stream!(EdgeAction);
+wrapper_struct_to_ident!(EdgeAction);
 
+#[derive(Debug, Clone)]
 struct NodeObject(String);
-wrapper_struct_to_token_stream!(NodeObject);
+wrapper_struct_to_ident!(NodeObject);
 
+#[derive(Debug, Clone)]
 struct RelateAttribute {
     edge_direction: EdgeDirection,
     edge_action: EdgeAction,
@@ -375,8 +444,66 @@ impl From<RelateAttribute> for TokenStream {
 
 struct Relation(String);
 
+impl From<Relation> for String {
+    fn from(relation: Relation) -> Self {
+        relation.0
+    }
+}
+impl From<String> for Relation {
+    fn from(str: String) -> Self {
+        Relation(str)
+    }
+}
+
 impl From<Relation> for RelateAttribute {
     fn from(relation: Relation) -> Self {
-        todo!()
+        let right_arrow_count = relation.0.matches("->").count();
+        let left_arrow_count = relation.0.matches("<-").count();
+        let edge_direction = match (left_arrow_count, right_arrow_count) {
+            (2, 0) => EdgeDirection::InArrowLeft,
+            (0, 2) => EdgeDirection::OutArrowRight,
+            _ => panic!("Arrow incorrectly used"),
+        };
+
+        let edge_direction_str: String = edge_direction.into();
+        let mut substrings = relation
+            .0
+            .split(edge_direction_str.as_str())
+            .filter(|x| !x.is_empty());
+
+        let (edge_action, node_object) =
+            match (substrings.next(), substrings.next(), substrings.next()) {
+                (Some(action), Some(node_obj), None) => {
+                    (EdgeAction(action.into()), NodeObject(node_obj.into()))
+                }
+                _ => panic!(
+                    "too many actions or object, {}",
+                    get_relation_error(&relation)
+                ),
+            };
+
+        Self {
+            node_object,
+            edge_action,
+            edge_direction,
+        }
     }
+}
+
+fn get_relation_error<'a>(relation: &Relation) -> Arguments<'a> {
+    // let span = syn::spanned::Spanned::span(relation.0.clone()).clone();
+    let span = syn::spanned::Spanned::span(relation.0.as_str()).clone();
+
+    let start = span.clone().start().clone();
+    let end = span.clone().end().clone();
+    let start_line = start.line;
+    let start_column = start.column;
+    let end_column = end.column;
+    let c = format_args!(
+        " Check that your arrows are properly faced. e.g ->has->Heart or <-owned_by<-Human",
+        // start_line,
+        // start_column,
+        // end_column
+    );
+    c
 }
