@@ -56,6 +56,11 @@ impl FieldsNames {
                 let field_case = struct_level_casing.unwrap_or(CaseString::None);
                 let field_ident = Self::get_field_identifier_name(field_receiver, index);
                 let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
+                let field_ident_uncased = FieldIdentUnCased {
+                    uncased_field_name: field_identifier_string,
+                    casing: field_case,
+                };
+                // let field = Fi
 
                 let FieldIdentifier {
                     serialized,
@@ -124,32 +129,6 @@ impl FieldCaseMapper {
         Self {
             field_case,
             field_identifier_string,
-        }
-    }
-
-    /// Converts the field identifier string to the specified case.
-    /// Also, if rename_all attribute is not specified to change the casing,
-    /// it defaults to exactly how the fields are written out.
-    /// However, Field rename attribute overrides this.
-    pub(crate) fn to_case_string(&self) -> ::std::string::String {
-        let convert_field_identifier = |case: convert_case::Case| {
-            convert_case::Converter::new()
-                .to_case(case)
-                .convert(&self.field_identifier_string)
-        };
-
-        match self.field_case {
-            CaseString::None => self.field_identifier_string.to_string(),
-            CaseString::Camel => convert_field_identifier(convert_case::Case::Camel),
-            CaseString::Snake => convert_field_identifier(convert_case::Case::Snake),
-            CaseString::Pascal => convert_field_identifier(convert_case::Case::Pascal),
-            CaseString::Lower => convert_field_identifier(convert_case::Case::Lower),
-            CaseString::Upper => convert_field_identifier(convert_case::Case::Upper),
-            CaseString::ScreamingSnake => {
-                convert_field_identifier(convert_case::Case::ScreamingSnake)
-            }
-            CaseString::Kebab => convert_field_identifier(convert_case::Case::Kebab),
-            CaseString::ScreamingKebab => convert_field_identifier(convert_case::Case::UpperKebab),
         }
     }
 

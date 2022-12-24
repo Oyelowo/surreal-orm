@@ -75,9 +75,6 @@ pub(crate) struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) skip_serializing: bool,
 
-    // #[darling(default)]
-    // pub(crate) reference: ::std::option::Option<Reference>,
-
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
 
