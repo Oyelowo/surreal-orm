@@ -339,6 +339,50 @@ fn map_string_to_tokenstream(string: &str) -> TokenStream {
 }
 
 #[derive(Debug, Clone)]
+struct FieldIdentUnCased {
+    uncased_field_name: String,
+    casing: CaseString,
+}
+
+#[derive(Debug, Clone)]
+struct FieldIdentCased(String);
+
+impl From<String> for FieldIdentCased {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+impl From<FieldIdentUnCased> for FieldIdentCased {
+    /// Converts the field identifier string to the specified case.
+    /// Also, if rename_all attribute is not specified to change the casing,
+    /// it defaults to exactly how the fields are written out.
+    /// However, Field rename attribute overrides this.
+    fn from(field_uncased: FieldIdentUnCased) -> Self {
+        let convert_field_identifier = |case: convert_case::Case| {
+            convert_case::Converter::new()
+                .to_case(case)
+                .convert(&field_uncased.uncased_field_name)
+        };
+
+        match field_uncased.casing {
+            CaseString::None => field_uncased.uncased_field_name,
+            CaseString::Camel => convert_field_identifier(convert_case::Case::Camel),
+            CaseString::Snake => convert_field_identifier(convert_case::Case::Snake),
+            CaseString::Pascal => convert_field_identifier(convert_case::Case::Pascal),
+            CaseString::Lower => convert_field_identifier(convert_case::Case::Lower),
+            CaseString::Upper => convert_field_identifier(convert_case::Case::Upper),
+            CaseString::ScreamingSnake => {
+                convert_field_identifier(convert_case::Case::ScreamingSnake)
+            }
+            CaseString::Kebab => convert_field_identifier(convert_case::Case::Kebab),
+            CaseString::ScreamingKebab => convert_field_identifier(convert_case::Case::UpperKebab),
+        }
+        .into()
+    }
+}
+
+#[derive(Debug, Clone)]
 enum RelationType {
     RelationGraph(Relation),
     ReferenceOne(NodeObject),
