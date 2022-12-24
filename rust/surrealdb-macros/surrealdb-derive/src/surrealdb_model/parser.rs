@@ -139,14 +139,73 @@ impl FieldsNames {
         let field_ident = Self::get_field_identifier_name(field_receiver, index);
         let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
 
+        // pub determines whether the field will be serialized or not during creation/update
+        let visibility: TokenStream = SkipSerializing::from(field_receiver.skip_serializing).into();
+
         let field_ident_cased = FieldIdentCased::from(FieldIdentUnCased {
             uncased_field_name,
             casing,
         });
+
+        // get the field's proper serialized format. Renaming should take precedence
         let field_ident_normalised = field_receiver
             .rename
             .map_or_else(|| field_ident_cased.into(), |renamed| renamed.serialize);
 
+        let field_ident_normalised = format_ident!("{field_ident_normalised}");
+
+        let relationship = RelationType::from(field_receiver);
+
+        let x = match relationship {
+            RelationType::RelationGraph(relation) => {
+                let x = RelateAttribute::from(field_receiver.relate.unwrap().into());
+                let arrow_direction = TokenStream::from(x.edge_direction);
+                let edge_action = TokenStream::from(x.edge_action);
+                let schema_name_str = x.node_object.into();
+                let schema_name_basic = format_ident!("{schema_name_str}");
+                let schema_name_aliased = format_ident!("{schema_name_str}Schema");
+                //  import Schema from outside. To prevent model name collision with their struct names,
+                //  all schemas are suffixed-aliased to i.e<schema_name>Schema e.g Account => AccountSchema
+                //  use super::AccountSchema as Account;
+                let model_import = quote!(use super::#schema_name_aliased as #schema_name_basic;);
+                //
+                /*
+                // This can the access the alias
+                  model!(Student {
+                    pub ->takes->Course as enrolled_courses, // This is what we want
+                  })
+                */
+                // e.g: ->has->Account
+                let model_field_stream = quote!(#visibility #arrow_direction #edge_action #arrow_direction #schema_name_basic as field_ident_normalised,);
+
+                todo!()
+            }
+            RelationType::ReferenceOne(ref_one) => todo!(),
+            RelationType::ReferenceMany(ref_many) => todo!(),
+            RelationType::None => todo!(),
+        };
+
+        // pub determines whether the field will be serialized or not during creation/update
+        let surreal_schema_serializer = SkipSerializing::from(field_receiver.skip_serializing);
+
+        let field_ident = match &self.field_case {
+            // Tries to keep the field name ident as written in the struct
+            //  if ure using kebab case which cannot be used as an identifier.
+            // However, Field rename attribute overrides this
+            CaseString::Kebab | CaseString::ScreamingKebab => &self.field_identifier_string,
+            _ => field,
+        };
+
+        let field_ident = syn::Ident::new(field_ident, ::proc_macro2::Span::call_site());
+
+        let x = RelateAttribute::from(field_receiver.relate.unwrap().into());
+        let arrow_direction = TokenStream::from(x.edge_direction);
+        let edge_action = TokenStream::from(x.edge_action);
+        let schema_name_str = x.node_object.into();
+        let schema_name = format_ident!("{schema_name_str}");
+        let schema_name_alias = format_ident!("{schema_name_str}Schema");
+        //  use super::AccountSchema as Account;
+        let model_import_stream = quote!(use super::#schema_name_alias as #schema_name;);
         todo!()
     }
 }
@@ -178,8 +237,8 @@ impl FieldCaseMapper {
     /// to the original ident format as written exactly in the code except when a user
     /// uses rename attribute on a specific field, in which case that takes precedence.
     pub(crate) fn get_field_ident(self, field_receiver: &MyFieldReceiver) -> FieldIdentifier {
-        let field = self.to_case_string();
-        let field = field.as_str();
+        // let field = self.to_case_string();
+        // let field = field.as_str();
         let field_ident_exact = syn::Ident::new(field, ::proc_macro2::Span::call_site());
 
         let relationship = RelationType::from(field_receiver);
