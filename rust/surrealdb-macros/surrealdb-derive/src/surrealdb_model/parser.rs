@@ -339,11 +339,11 @@ fn map_string_to_tokenstream(string: &str) -> TokenStream {
     quote::quote_spanned! {literal.span()=> #literal}
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 enum RelationType {
-    RelationGraph,
-    ReferenceOne,
-    ReferenceMany,
+    RelationGraph(Relation),
+    ReferenceOne(NodeObject),
+    ReferenceMany(NodeObject),
     None,
 }
 
@@ -442,6 +442,7 @@ impl From<RelateAttribute> for TokenStream {
     }
 }
 
+#[derive(Debug, Clone)]
 struct Relation(String);
 
 impl From<Relation> for String {
