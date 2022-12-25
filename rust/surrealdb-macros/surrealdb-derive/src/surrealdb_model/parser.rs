@@ -134,7 +134,7 @@ impl FieldsNames {
         field_receiver: &MyFieldReceiver,
         struct_level_casing: Option<CaseString>,
         index: usize,
-    ) -> FieldIdentifier {
+    ) -> ModelMedataTokenStream {
         let casing = struct_level_casing.unwrap_or(CaseString::None);
         let field_ident = Self::get_field_identifier_name(field_receiver, index);
         let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
@@ -156,18 +156,19 @@ impl FieldsNames {
 
         let relationship = RelationType::from(field_receiver);
 
-        let x = match relationship {
+        match relationship {
             RelationType::RelationGraph(relation) => {
-                let x = RelateAttribute::from(field_receiver.relate.unwrap().into());
+                let x = RelateAttribute::from(relation);
                 let arrow_direction = TokenStream::from(x.edge_direction);
                 let edge_action = TokenStream::from(x.edge_action);
-                let schema_name_str = x.node_object.into();
+                let schema_name_str = String::from(x.node_object);
                 let schema_name_basic = format_ident!("{schema_name_str}");
                 let schema_name_aliased = format_ident!("{schema_name_str}Schema");
                 //  import Schema from outside. To prevent model name collision with their struct names,
                 //  all schemas are suffixed-aliased to i.e<schema_name>Schema e.g Account => AccountSchema
                 //  use super::AccountSchema as Account;
                 let model_import = quote!(use super::#schema_name_aliased as #schema_name_basic;);
+
                 //
                 /*
                 // This can the access the alias
@@ -177,37 +178,39 @@ impl FieldsNames {
                 */
                 // e.g: ->has->Account
                 let model_field_stream = quote!(#visibility #arrow_direction #edge_action #arrow_direction #schema_name_basic as field_ident_normalised,);
-
-                todo!()
+                ModelMedataTokenStream {
+                    field: quote!(#model_field_stream),
+                    schema_name: quote!(#schema_name_basic),
+                    import: quote!(#model_import),
+                    schema_reexport_alias: quote!(#schema_name_aliased),
+                }
             }
             RelationType::ReferenceOne(ref_one) => todo!(),
             RelationType::ReferenceMany(ref_many) => todo!(),
             RelationType::None => todo!(),
-        };
-
-        // pub determines whether the field will be serialized or not during creation/update
-        let surreal_schema_serializer = SkipSerializing::from(field_receiver.skip_serializing);
-
-        let field_ident = match &self.field_case {
-            // Tries to keep the field name ident as written in the struct
-            //  if ure using kebab case which cannot be used as an identifier.
-            // However, Field rename attribute overrides this
-            CaseString::Kebab | CaseString::ScreamingKebab => &self.field_identifier_string,
-            _ => field,
-        };
-
-        let field_ident = syn::Ident::new(field_ident, ::proc_macro2::Span::call_site());
-
-        let x = RelateAttribute::from(field_receiver.relate.unwrap().into());
-        let arrow_direction = TokenStream::from(x.edge_direction);
-        let edge_action = TokenStream::from(x.edge_action);
-        let schema_name_str = x.node_object.into();
-        let schema_name = format_ident!("{schema_name_str}");
-        let schema_name_alias = format_ident!("{schema_name_str}Schema");
-        //  use super::AccountSchema as Account;
-        let model_import_stream = quote!(use super::#schema_name_alias as #schema_name;);
-        todo!()
+        }
     }
+}
+
+/*
+mod account {
+    // Project is schema name, ProjectSchema is schema alias
+    use super::ProjectSchema as Project;   //  import
+    use super::SchemaSchema as Schema;      // import
+    model!(Account {
+        field1,  // field
+        field2   // field
+        field_with_reference<Project>,  // field
+        ->manages->School as managed_school  //field
+    })
+}
+*/
+struct ModelMedataTokenStream {
+    import: TokenStream,
+    field: TokenStream,
+    schema_name: TokenStream,
+    // account::schema::model -> AccountSchema
+    schema_reexport_alias: TokenStream,
 }
 
 #[derive(Debug, Clone)]
@@ -571,6 +574,12 @@ wrapper_struct_to_ident!(EdgeAction);
 
 #[derive(Debug, Clone)]
 struct NodeObject(String);
+
+impl From<NodeObject> for String {
+    fn from(value: NodeObject) -> Self {
+        value.0
+    }
+}
 wrapper_struct_to_ident!(NodeObject);
 
 #[derive(Debug, Clone)]
