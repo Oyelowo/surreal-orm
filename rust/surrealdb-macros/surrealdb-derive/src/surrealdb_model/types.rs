@@ -1,3 +1,8 @@
+/*
+Author: Oyelowo Oyedayo
+Email: oyelowooyedayo@gmail.com
+*/
+
 #![allow(dead_code)]
 
 use strum_macros::EnumString;

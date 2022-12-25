@@ -1,3 +1,8 @@
+/*
+Author: Oyelowo Oyedayo
+Email: oyelowooyedayo@gmail.com
+*/
+
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
