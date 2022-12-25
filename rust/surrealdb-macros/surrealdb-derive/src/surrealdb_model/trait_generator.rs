@@ -143,7 +143,7 @@ impl ToTokens for FieldsGetterOpts {
 
             // e.g: type alias: type AccountSchema<const N: usize> = account::schema::Account<N>;
             type #schema_type_alias_name<const N: usize> = #schema_mod_name::schema::#my_struct<N>;
-            // use #schema_mod_name::schema::model as #schema_type_alias_name
+            // use #schema_mod_name::schema::model as #schema_type_alias_name;
 
             impl #my_struct {
                 // type Schema = account::schema::Account<0>;

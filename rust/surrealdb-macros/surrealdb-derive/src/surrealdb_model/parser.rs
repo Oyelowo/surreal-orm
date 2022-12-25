@@ -161,7 +161,7 @@ impl ModelAttributesTokensDeriver {
 
                 ModelMedataTokenStream {
                     // friend<User>
-                    field: quote!(#field_ident_normalised<#schema_name_basic>),
+                    field: quote!(#field_ident_normalised<#schema_name_basic>,),
                     extra,
                 }
             }
@@ -172,7 +172,7 @@ impl ModelAttributesTokensDeriver {
                 ModelMedataTokenStream {
                     // friend<Vec<User>>
                     // TODO: Confirm/Or fix this on the querybuilder side this.
-                    field: quote!(#field_ident_normalised<Vec<#schema_name_basic>>),
+                    field: quote!(#field_ident_normalised<Vec<#schema_name_basic>>,),
                     extra,
                 }
             }
@@ -235,7 +235,7 @@ impl From<NodeObject> for ModelMetadataBasic {
         //  all schemas are suffixed-aliased to i.e<schema_name>Schema e.g Account => AccountSchema
         //  use super::AccountSchema as Account;
         let model_import = quote!(use super::#schema_name_aliased as #schema_name_basic;);
-        let schema_reexported_alias = quote!(use #schema_name_basic_lower_case::schema::#schema_name_basic as #schema_name_aliased;);
+        let schema_reexported_alias = quote!(use #schema_name_basic_lower_case::schema::#schema_name_basic as #schema_name_aliased);;
 
         Self {
             schema_reexported_alias,
@@ -485,13 +485,13 @@ impl From<Relation> for RelateAttribute {
 
 fn get_relation_error<'a>(relation: &Relation) -> Arguments<'a> {
     // let span = syn::spanned::Spanned::span(relation.0.clone()).clone();
-    let span = syn::spanned::Spanned::span(relation.0.as_str()).clone();
+    // let span = syn::spanned::Spanned::span(relation.0.as_str()).clone();
 
-    let start = span.clone().start().clone();
-    let end = span.clone().end().clone();
-    let start_line = start.line;
-    let start_column = start.column;
-    let end_column = end.column;
+    // let start = span.clone().start().clone();
+    // let end = span.clone().end().clone();
+    // let start_line = start.line;
+    // let start_column = start.column;
+    // let end_column = end.column;
     let c = format_args!(
         " Check that your arrows are properly faced. e.g ->has->Heart or <-owned_by<-Human",
         // start_line,
