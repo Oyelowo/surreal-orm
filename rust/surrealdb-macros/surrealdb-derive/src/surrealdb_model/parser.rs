@@ -174,7 +174,7 @@ impl FieldsNames {
                 let field = quote!(#visibility #arrow_direction #edge_action #arrow_direction #schema_name_basic as #field_ident_normalised,);
                 ModelMedataTokenStream {
                     field: quote!(#field),
-                    extra,
+                    extra: Some(extra),
                 }
             }
             RelationType::ReferenceOne(node_object) => {
@@ -184,7 +184,7 @@ impl FieldsNames {
                 ModelMedataTokenStream {
                     // friend<User>
                     field: quote!(#field_ident_normalised<#schema_name_basic>),
-                    extra,
+                    extra: Some(extra),
                 }
             }
             RelationType::ReferenceMany(node_object) => {
@@ -195,17 +195,14 @@ impl FieldsNames {
                     // friend<Vec<User>>
                     // TODO: Confirm/Or fix this on the querybuilder side this.
                     field: quote!(#field_ident_normalised<Vec<#schema_name_basic>>),
-                    extra,
+                    extra: Some(extra),
                 }
             }
             RelationType::None => {
-                let extra = ModelMetadataBasic::from(node_object);
-                let schema_name_basic = extra.schema_name_basic;
                 ModelMedataTokenStream {
-                    // friend<Vec<User>>
-                    // TODO: Confirm/Or fix this on the querybuilder side this.
-                    field: quote!(#field_ident_normalised<Vec<#schema_name_basic>>),
-                    extra,
+                    // email,
+                    field: quote!(#field_ident_normalised,),
+                    extra: None,
                 }
             }
         }
@@ -227,7 +224,7 @@ mod account {
 */
 struct ModelMedataTokenStream {
     field: TokenStream,
-    extra: ModelMetadataBasic,
+    extra: Option<ModelMetadataBasic>,
 }
 
 /*
