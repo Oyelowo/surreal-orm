@@ -1,0 +1,33 @@
+[package]
+name = "surrealdb-macros"
+version = { workspace = true }
+edition = { workspace = true }
+authors = { workspace = true }
+description = { workspace = true }
+documentation = { workspace = true }
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+surrealdb-derive = { path = "./surrealdb-derive" }
+surreal-simple-querybuilder = { workspace = true }
+# hello-macro-derive = { workspace = true }
+# macro-derive = { workspace = true }
+syn = { workspace = true }
+quote = { workspace = true }
+proc-macro2 = { workspace = true }
+# syn = { version = { workspace = true }
+# quote = { workspace = true }
+# Inflector = { workspace = true }
+# proc-macro-crate = { workspace = true }
+darling = { workspace = true }
+convert_case = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+rayon = { workspace = true }
+# thiserror = { workspace = true }
+# proc-macro2-diagnostics = { workspace = true }
+
+# [lib]
+# proc-macro = true
+# crate_type = ["proc-macro"]
