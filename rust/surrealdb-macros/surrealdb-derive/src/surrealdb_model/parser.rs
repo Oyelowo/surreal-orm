@@ -16,17 +16,6 @@ use super::{
     trait_generator::MyFieldReceiver,
 };
 
-/// A struct that contains the serialized and identifier versions of a field.
-// pub(crate) struct FieldIdentifier {
-//     /// The serialized version of the field name.
-//     serialized: ::std::string::String,
-//     /// The identifier version of the field name.
-//     ident: syn::Ident,
-//     surrealdb_field_ident: TokenStream,
-//     surrealdb_imported_schema_dependency: TokenStream,
-//     // surrealdb_field_ident: ::std::string::String,
-// }
-
 /// A struct that contains the `struct_ty_fields` and `struct_values_fields` vectors.
 #[derive(Default)]
 pub(crate) struct ModelAttributesTokensDeriver {
@@ -34,7 +23,6 @@ pub(crate) struct ModelAttributesTokensDeriver {
     pub all_model_imports: Vec<TokenStream>,
     pub all_schema_names_basic: Vec<TokenStream>,
     pub all_fields: Vec<TokenStream>,
-    // metadata: Vec<ModelMedataTokenStream>,
 }
 
 impl ModelAttributesTokensDeriver {
@@ -117,13 +105,11 @@ impl ModelAttributesTokensDeriver {
         struct_level_casing: CaseString,
         index: usize,
     ) -> ModelMedataTokenStream {
-        // let struct_level_casing = struct_level_casing.unwrap_or(CaseString::None);
-        let field_ident = Self::get_field_identifier_name(&field_receiver.clone(), index);
+        let field_ident = Self::get_field_identifier_name(&field_receiver, index);
         let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
 
         // pub determines whether the field will be serialized or not during creation/update
-        let visibility: TokenStream =
-            SkipSerializing::from(field_receiver.clone().skip_serializing).into();
+        let visibility: TokenStream = SkipSerializing(field_receiver.skip_serializing).into();
 
         let field_ident_cased = FieldIdentCased::from(FieldIdentUnCased {
             uncased_field_name,
@@ -211,17 +197,6 @@ struct ModelMedataTokenStream {
     extra: ModelMetadataBasic,
 }
 
-/*
-          let schema_name_str = String::from(x.node_object);
-                let schema_name_basic = format_ident!("{schema_name_str}");
-                let schema_name_basic_lower_case =
-                    format_ident!("{}", schema_name_str.to_lowercase());
-                let schema_name_aliased = format_ident!("{schema_name_str}Schema");
-                //  import Schema from outside. To prevent model name collision with their struct names,
-                //  all schemas are suffixed-aliased to i.e<schema_name>Schema e.g Account => AccountSchema
-                //  use super::AccountSchema as Account;
-                let model_import = quote!(use super::#schema_name_aliased as #schema_name_basic;);
-*/
 
 #[derive(Default)]
 struct ModelMetadataBasic {
