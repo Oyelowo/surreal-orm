@@ -11,22 +11,23 @@ use syn;
 use super::{trait_generator::MyFieldReceiver, types::CaseString};
 
 /// A struct that contains the serialized and identifier versions of a field.
-pub(crate) struct FieldIdentifier {
-    /// The serialized version of the field name.
-    serialized: ::std::string::String,
-    /// The identifier version of the field name.
-    ident: syn::Ident,
-    surrealdb_field_ident: TokenStream,
-    surrealdb_imported_schema_dependency: TokenStream,
-    // surrealdb_field_ident: ::std::string::String,
-}
+// pub(crate) struct FieldIdentifier {
+//     /// The serialized version of the field name.
+//     serialized: ::std::string::String,
+//     /// The identifier version of the field name.
+//     ident: syn::Ident,
+//     surrealdb_field_ident: TokenStream,
+//     surrealdb_imported_schema_dependency: TokenStream,
+//     // surrealdb_field_ident: ::std::string::String,
+// }
 
 /// A struct that contains the `struct_ty_fields` and `struct_values_fields` vectors.
 #[derive(Default)]
 pub(crate) struct ModelAttributesTokensDeriver {
-    all_schema_reexported_aliases: Vec<TokenStream>,
-    all_model_imports: Vec<TokenStream>,
-    all_schema_names_basic: Vec<TokenStream>,
+    pub all_schema_reexported_aliases: Vec<TokenStream>,
+    pub all_model_imports: Vec<TokenStream>,
+    pub all_schema_names_basic: Vec<TokenStream>,
+    pub all_fields: Vec<TokenStream>,
     // metadata: Vec<ModelMedataTokenStream>,
 }
 
@@ -50,9 +51,11 @@ impl ModelAttributesTokensDeriver {
         fields
             .into_iter()
             .enumerate()
-            .fold(Self::default(), |acc, (index, field_receiver)| {
+            .fold(Self::default(), |mut acc, (index, field_receiver)| {
                 let struct_level_casing = struct_level_casing.unwrap_or(CaseString::None);
                 let meta = Self::get_field_ident(field_receiver, struct_level_casing, index);
+
+                acc.all_fields.push(meta.field);
 
                 acc.all_model_imports.push(meta.extra.model_import);
 
@@ -103,17 +106,18 @@ impl ModelAttributesTokensDeriver {
     /// except in the case of kebab-case serialized format in which case we fallback
     /// to the original ident format as written exactly in the code except when a user
     /// uses rename attribute on a specific field, in which case that takes precedence.
-    pub(crate) fn get_field_ident(
+    fn get_field_ident(
         field_receiver: &MyFieldReceiver,
         struct_level_casing: CaseString,
         index: usize,
     ) -> ModelMedataTokenStream {
         // let struct_level_casing = struct_level_casing.unwrap_or(CaseString::None);
-        let field_ident = Self::get_field_identifier_name(field_receiver, index);
+        let field_ident = Self::get_field_identifier_name(&field_receiver.clone(), index);
         let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
 
         // pub determines whether the field will be serialized or not during creation/update
-        let visibility: TokenStream = SkipSerializing::from(field_receiver.skip_serializing).into();
+        let visibility: TokenStream =
+            SkipSerializing::from(field_receiver.clone().skip_serializing).into();
 
         let field_ident_cased = FieldIdentCased::from(FieldIdentUnCased {
             uncased_field_name,
@@ -121,9 +125,10 @@ impl ModelAttributesTokensDeriver {
         });
 
         // get the field's proper serialized format. Renaming should take precedence
-        let field_ident_normalised = field_receiver
-            .rename
-            .map_or_else(|| field_ident_cased.into(), |renamed| renamed.serialize);
+        let field_ident_normalised = field_receiver.rename.as_ref().map_or_else(
+            || field_ident_cased.into(),
+            |renamed| renamed.clone().serialize,
+        );
 
         let field_ident_normalised = format_ident!("{field_ident_normalised}");
 
@@ -135,7 +140,7 @@ impl ModelAttributesTokensDeriver {
                 let arrow_direction = TokenStream::from(x.edge_direction);
                 let edge_action = TokenStream::from(x.edge_action);
                 let extra = ModelMetadataBasic::from(x.node_object);
-                let schema_name_basic = extra.schema_name_basic;
+                let schema_name_basic = &extra.schema_name_basic;
                 //
                 /*
                 // This can the access the alias
@@ -152,7 +157,7 @@ impl ModelAttributesTokensDeriver {
             }
             RelationType::ReferenceOne(node_object) => {
                 let extra = ModelMetadataBasic::from(node_object);
-                let schema_name_basic = extra.schema_name_basic;
+                let schema_name_basic = &extra.schema_name_basic;
 
                 ModelMedataTokenStream {
                     // friend<User>
@@ -162,7 +167,7 @@ impl ModelAttributesTokensDeriver {
             }
             RelationType::ReferenceMany(node_object) => {
                 let extra = ModelMetadataBasic::from(node_object);
-                let schema_name_basic = extra.schema_name_basic;
+                let schema_name_basic = &extra.schema_name_basic;
 
                 ModelMedataTokenStream {
                     // friend<Vec<User>>

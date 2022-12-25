@@ -113,47 +113,37 @@ impl ToTokens for FieldsGetterOpts {
         });
 
         let ModelAttributesTokensDeriver {
-            struct_ty_fields,
-            struct_values_fields,
-            models_serialized_values,
-            surrealdb_imported_schema_dependencies,
+           all_schema_reexported_aliases,
+           all_model_imports,
+           all_schema_names_basic,
+           all_fields,
         } = ModelAttributesTokensDeriver::from_receiver_data(data, struct_level_casing);
 
-        // e.g for Account => AccountFields
-        let fields_getter_struct_name = ::quote::format_ident!("{my_struct}Fields");
-
-        // e.g for Account => AccountSchema
         let schema_type_alias_name = ::quote::format_ident!("{my_struct}Schema");
-
-        let struct_type = quote!(pub struct #fields_getter_struct_name {
-           #( #struct_ty_fields), *
-        });
-        
-        // let surr = ::surreal_simple_querybuilder::model!()
-        // let surr = 
         
         let schema_mod_name = format_ident!("{}", my_struct.to_string().to_lowercase());
         let crate_name = get_crate_name(false);
         
         tokens.extend(quote! {
             use ::surreal_simple_querybuilder::prelude::*;
-            #struct_type
+            // #struct_type
             
             mod #schema_mod_name {
-                #( #surrealdb_imported_schema_dependencies) *
+                #( #all_model_imports) *
                 
                 
                 use surreal_simple_querybuilder::prelude::*;
                 
                 ::surreal_simple_querybuilder::prelude::model!(
                  #my_struct {
-                    #( #models_serialized_values), *
+                    #( #all_fields) *
                 }
              );
             }
 
             // e.g: type alias: type AccountSchema<const N: usize> = account::schema::Account<N>;
             type #schema_type_alias_name<const N: usize> = #schema_mod_name::schema::#my_struct<N>;
+            // use #schema_mod_name::schema::model as #schema_type_alias_name
 
             impl #my_struct {
                 // type Schema = account::schema::Account<0>;
@@ -181,14 +171,14 @@ impl ToTokens for FieldsGetterOpts {
             }
 
             // }      
-            impl #crate_name::SurrealdbModel for #my_struct {
-                type Fields = #fields_getter_struct_name;
-                fn get_fields_serialized() -> Self::Fields {
-                    #fields_getter_struct_name {
-                        #( #struct_values_fields), *
-                    }
-                }
-            }
+            // impl #crate_name::SurrealdbModel for #my_struct {
+            //     type Fields = #fields_getter_struct_name;
+            //     fn get_fields_serialized() -> Self::Fields {
+            //         #fields_getter_struct_name {
+            //             #( #struct_values_fields), *
+            //         }
+            //     }
+            // }
         });
     }
 }
