@@ -161,8 +161,11 @@ impl FieldsNames {
                 let x = RelateAttribute::from(relation);
                 let arrow_direction = TokenStream::from(x.edge_direction);
                 let edge_action = TokenStream::from(x.edge_action);
+                let extra = ModelMetadataBasic::from(x.node_object);
                 let schema_name_str = String::from(x.node_object);
                 let schema_name_basic = format_ident!("{schema_name_str}");
+                let schema_name_basic_lower_case =
+                    format_ident!("{}", schema_name_str.to_lowercase());
                 let schema_name_aliased = format_ident!("{schema_name_str}Schema");
                 //  import Schema from outside. To prevent model name collision with their struct names,
                 //  all schemas are suffixed-aliased to i.e<schema_name>Schema e.g Account => AccountSchema
@@ -177,15 +180,25 @@ impl FieldsNames {
                   })
                 */
                 // e.g: ->has->Account
-                let model_field_stream = quote!(#visibility #arrow_direction #edge_action #arrow_direction #schema_name_basic as field_ident_normalised,);
+                let field = quote!(#visibility #arrow_direction #edge_action #arrow_direction #schema_name_basic as field_ident_normalised,);
                 ModelMedataTokenStream {
-                    field: quote!(#model_field_stream),
-                    schema_name: quote!(#schema_name_basic),
-                    import: quote!(#model_import),
-                    schema_reexport_alias: quote!(#schema_name_aliased),
+                    field: quote!(#field),
+                    extra,
                 }
             }
-            RelationType::ReferenceOne(ref_one) => todo!(),
+            RelationType::ReferenceOne(ref_one) => {
+                let model_field_stream = todo!();
+                let schema_name_basic = todo!();
+                let model_import = todo!();
+                let schema_name_aliased = todo!();
+
+                ModelMedataTokenStream {
+                    field: quote!(#model_field_stream),
+                    schema_name_basic: quote!(#schema_name_basic),
+                    import: quote!(#model_import),
+                    schema_reexported_alias: quote!(#schema_name_aliased),
+                }
+            }
             RelationType::ReferenceMany(ref_many) => todo!(),
             RelationType::None => todo!(),
         }
@@ -206,210 +219,46 @@ mod account {
 }
 */
 struct ModelMedataTokenStream {
-    import: TokenStream,
     field: TokenStream,
-    schema_name: TokenStream,
+    extra: ModelMetadataBasic,
+}
+
+/*
+          let schema_name_str = String::from(x.node_object);
+                let schema_name_basic = format_ident!("{schema_name_str}");
+                let schema_name_basic_lower_case =
+                    format_ident!("{}", schema_name_str.to_lowercase());
+                let schema_name_aliased = format_ident!("{schema_name_str}Schema");
+                //  import Schema from outside. To prevent model name collision with their struct names,
+                //  all schemas are suffixed-aliased to i.e<schema_name>Schema e.g Account => AccountSchema
+                //  use super::AccountSchema as Account;
+                let model_import = quote!(use super::#schema_name_aliased as #schema_name_basic;);
+*/
+struct ModelMetadataBasic {
+    import: TokenStream,
+    schema_name_basic: TokenStream,
     // account::schema::model -> AccountSchema
-    schema_reexport_alias: TokenStream,
+    schema_reexported_alias: TokenStream,
 }
 
-#[derive(Debug, Clone)]
-struct FieldCaseMapper {
-    field_case: CaseString,
-    field_identifier_string: ::std::string::String,
-}
-
-impl FieldCaseMapper {
-    fn new(field_case: CaseString, field_identifier_string: ::std::string::String) -> Self {
-        Self {
-            field_case,
-            field_identifier_string,
-        }
-    }
-
-    /// Ident format is the name used in the code
-    /// e.g
-    /// ```
-    /// struct User {
-    ///     //user_name is ident and the serialized format by serde is "user_name"
-    ///     user_name: String  
-    /// }
-    /// ```
-    /// This is what we use as the field name and is mostly same as the serialized format
-    /// except in the case of kebab-case serialized format in which case we fallback
-    /// to the original ident format as written exactly in the code except when a user
-    /// uses rename attribute on a specific field, in which case that takes precedence.
-    pub(crate) fn get_field_ident(self, field_receiver: &MyFieldReceiver) -> FieldIdentifier {
-        // let field = self.to_case_string();
-        // let field = field.as_str();
-        let field_ident_exact = syn::Ident::new(field, ::proc_macro2::Span::call_site());
-
-        let relationship = RelationType::from(field_receiver);
-
-        // pub determines whether the field will be serialized or not during creation/update
-        let surreal_schema_serializer = SkipSerializing::from(field_receiver.skip_serializing);
-
-        let field_ident = match &self.field_case {
-            // Tries to keep the field name ident as written in the struct
-            //  if ure using kebab case which cannot be used as an identifier.
-            // However, Field rename attribute overrides this
-            CaseString::Kebab | CaseString::ScreamingKebab => &self.field_identifier_string,
-            _ => field,
-        };
-
-        let field_ident = syn::Ident::new(field_ident, ::proc_macro2::Span::call_site());
-
-        let x = RelateAttribute::from(field_receiver.relate.unwrap().into());
-        let arrow_direction = TokenStream::from(x.edge_direction);
-        let edge_action = TokenStream::from(x.edge_action);
-        let schema_name_str = x.node_object.into();
-        let schema_name = format_ident!("{schema_name_str}");
-        let schema_name_alias = format_ident!("{schema_name_str}Schema");
+impl From<NodeObject> for ModelMetadataBasic {
+    fn from(node_object: NodeObject) -> Self {
+        let schema_name_str = String::from(node_object);
+        let schema_name_basic = format_ident!("{schema_name_str}");
+        let schema_name_basic_lower_case = format_ident!("{}", schema_name_str.to_lowercase());
+        let schema_name_aliased = format_ident!("{schema_name_str}Schema");
+        //  import Schema from outside. To prevent model name collision with their struct names,
+        //  all schemas are suffixed-aliased to i.e<schema_name>Schema e.g Account => AccountSchema
         //  use super::AccountSchema as Account;
-        let model_import_stream = quote!(use super::#schema_name_alias as #schema_name;);
+        let model_import = quote!(use super::#schema_name_aliased as #schema_name_basic;);
+        let schema_reexported_alias = quote!(use #schema_name_basic_lower_case::schema::#schema_name_basic as #schema_name_aliased;);
 
-        /*
-        // This can the access the alias
-          model!(Account{
-            ->has->Account,
-          })
-        */
-        let model_field_stream =
-            quote!(#arrow_direction #edge_action #arrow_direction #schema_name,);
-
-        // Prioritize serde/field_getter field_attribute renaming for field string
-        if let ::std::option::Option::Some(name) = field_receiver.rename.as_ref() {
-            let field_renamed_from_attribute = name.serialize.to_string();
-            // let field_renamed_from_attribute = syn::Ident::new(name.serialize.to_string(), ::proc_macro2::Span::call_site());
-
-            let (surreal_model_field, surrealdb_imported_schema_dependency) =
-                match field_receiver.relate.clone() {
-                    Some(relation) => {
-                        // ->loves->Project as fav_project
-                        // let dependent_type =
-                        let xx = format_ident!("{relation} as {field_renamed_from_attribute}");
-                        // let ident =
-                        // ::quote::quote!(#relation as #field_renamed_from_attribute)
-                        (
-                            ::quote::quote!(->loves->Project as fav_proj),
-                            ::quote::quote!(
-                                use super::ProjectSchema as Project;
-                            ),
-                        )
-                    }
-                    None => {
-                        let field_renamed_from_attribute_ident =
-                            format_ident!("{}", &field_renamed_from_attribute);
-
-                        (
-                            ::quote::quote!(#field_renamed_from_attribute_ident),
-                            quote!(),
-                        )
-                    }
-                };
-            // let surreal_model_field = match field_receiver.relate.clone() {
-            //     Some(relation) => ::quote::quote!(#relation as #field_renamed_from_attribute),
-            //     None => ::quote::quote!(#field_renamed_from_attribute),
-            // };
-
-            return FieldIdentifier {
-                ident: ::quote::format_ident!("{}", &field_renamed_from_attribute),
-                serialized: field_renamed_from_attribute,
-                // surrealdb_field_ident: syn::Ident::new(&field_renamed_from_attribute, ::proc_macro2::Span::call_site()),
-                // surrealdb_field_ident: ::quote::quote!(#surreal_schema_serializer #surreal_model_field),
-                surrealdb_field_ident: surreal_model_field,
-                surrealdb_imported_schema_dependency,
-            };
-        }
-
-        // TODO: Dededup with the above
-        /*      let (surreal_model_field, surrealdb_imported_schema_dependency) = match field_receiver
-                   .relate
-                   .clone()
-               {
-                   Some(relation) => {
-                       let right_arrow_count = relation.matches("->").count();
-                       let left_arrow_count = relation.matches("->").count();
-                       let substrings = relation
-                           .split("->")
-                           .flat_map(|s| s.split("<-"))
-                           .filter(|x| !x.is_empty())
-                           .collect::<Vec<&str>>();
-                       let span = syn::spanned::Spanned::span(&relation);
-                       let start = span.start();
-                       let end = span.end();
-
-                       let message = format_args!(
-                               "Invalid expression at  Check that your arrows are properly faced. e.g ->has->Heart or <-owned_by<-Human",
-                               // &start.line,
-                               // &start.column,
-                               // &end.column
-                           );
-
-                       if right_arrow_count > 2 || left_arrow_count > 2 || substrings.len() > 2 {
-                           panic!("{}", &message);
-                           // let error = syn::Error::new_spanned(2, "Input cannot be empty");
-                           // return Err(error);
-                       }
-
-                       let string = "hello world";
-                       let literal = Literal::string(string);
-                       // let tokens: TokenStream = literal.into_token_stream();
-
-                       let direction = if right_arrow_count == 2 {
-                           quote::quote!(->)
-                       } else {
-                           quote::quote!(<-)
-                       };
-                       // let xxxx = match substrings.as_slice() {
-                       //     [edge_action, node_object] => {
-                       //         let edge_action = format_ident!("{edge_action}");
-                       //         let node_object = format_ident!("{node_object}");
-                       //         quote!(->#edge_action->#node_object)
-                       //     }
-                       //     _ => panic!("{}", &message),
-                       // };
-                       let (edge_action, node_object) = substrings.get(0).zip(substrings.get(1)).unwrap();
-                       let edge_action = format_ident!("{edge_action}");
-                       let node_object = format_ident!("{node_object}");
-
-                       // if right_arrow_count == 2 {
-                       //     ::quote::quote!(->loves->Project as fav_proj)
-                       // }
-                       let x = "".split("pat").collect::<Vec<_>>();
-                       // let strp = Literal::from("->loves->Project as fav_proj");
-                       let strp = map_string_to_tokenstream("->loves->Project as fav_proj");
-                       (
-                           // ::quote::quote!(#relation as #field_ident_exact),
-                           // ::quote::quote!(->loves->Project as fav_proj),
-                           ::quote::quote!(#direction #edge_action #direction #node_object as #field_ident_exact),
-                           // ::quote::quote!(#strp),
-                           ::quote::quote!(
-                               use super::ProjectSchema as Project;
-                               // use super::AccountSchema as Account;
-                           ),
-                       )
-                   }
-                   None => (::quote::quote!(#field_ident_exact), quote!()),
-               };
-        */
-
-        let x = RelateAttribute::from(field_receiver.relate.unwrap().into());
-        // let skip_serializing = SkipSerializing::from(field_receiver.skip_serializing);
-        FieldIdentifier {
-            ident: field_ident.clone(),
-            serialized: ::std::string::ToString::to_string(field),
-            // surrealdb_field_ident: ::quote::quote!(#surreal_schema_serializer #surreal_model_field),
-            // surrealdb_field_ident: ::std::string::ToString::to_string(field),
-            surrealdb_field_ident: ::quote::quote!(#surreal_model_field),
-            surrealdb_imported_schema_dependency: surrealdb_imported_schema_dependency,
+        Self {
+            schema_reexported_alias,
+            import: model_import,
+            schema_name_basic: quote!(#schema_name_basic),
         }
     }
-}
-
-fn map_string_to_tokenstream(string: &str) -> TokenStream {
-    let literal = Literal::string(string);
-    quote::quote_spanned! {literal.span()=> #literal}
 }
 
 #[derive(Debug, Clone)]
