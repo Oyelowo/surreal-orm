@@ -4,32 +4,6 @@
 #![feature(generic_const_exprs)]
 // #![feature(inherent_associated_types)]
 // #![feature(const_mut_refs)]
-
-// For testing macros made here
-use serde::{Deserialize, Serialize};
-use surrealdb_macros::{FieldsGetter, HelloMacro, MyTrait, SurrealdbModel};
-
-#[derive(HelloMacro)]
-struct Pancakes;
-
-#[derive(MyTrait)]
-#[my_trait(answer = 50, level = "high")]
-struct Foo {
-    group: String,
-}
-
-#[derive(FieldsGetter, Serialize, Deserialize)]
-#[field_getter(rename_all(serialize = "snake_case"))]
-// #[serde(rename_all = "camelCase")]
-pub struct ConsumingType {
-    // #[serde(rename = "lowo_cool")]
-    #[serde(rename(serialize = "lowo_cool", deserialize = "lowo_cool"))]
-    pub name_of_me: String,
-
-    #[serde(rename = "lmsar")]
-    pub age: u8,
-}
-
 // use serde::{Deserialize, Serialize};
 // use surreal_simple_querybuilder::prelude::*;
 use surrealdb_derive::SurrealdbModel;
@@ -57,8 +31,8 @@ pub struct Account {
 pub struct Project {
     id: Option<String>,
     title: String,
-    // #[surrealdb(relate = "->run_by->Accout")]
-    // account: ForeignVec<Project>,
+    #[surrealdb(relate = "->run_by->Account")]
+    account: ForeignVec<Project>,
     // projects: ForeignVec<Project>,
 }
 
@@ -83,16 +57,4 @@ fn main() {
     // Account::get_schema().firstName
     // Account::get_schema().email.contains_all(values)
     // account::schema::model
-    let ConsumingTypeFields {
-        lowo_cool, lmsar, ..
-    } = ConsumingType::get_fields_serialized();
-
-    println!("rere{lowo_cool}, {lmsar}")
-}
-
-#[test]
-fn default() {
-    assert_eq!(Foo::answer(), 50);
-    assert!(Foo::level().contains("High"));
-    assert!(!Foo::level().contains("Low"));
 }
