@@ -8,7 +8,9 @@ use surrealdb_derive::SurrealdbModel;
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
 struct Account {
+    #[surrealdb(skip_serializing)]
     id: Option<String>,
+
     handle: String,
     password: String,
     email: String,
@@ -16,9 +18,11 @@ struct Account {
     #[surrealdb(reference_one = "Account", skip_serializing)]
     // friend: Foreign<std::sync::Arc<Account>>,
     friend: String,
+
+    #[surrealdb(skip_serializing)]
     projects: ForeignVec<Project>,
 
-    #[surrealdb(relate = "->manage->Project")]
+    #[surrealdb(relate = "->manage->Project", skip_serializing)]
     managed_projects: ForeignVec<Project>,
 }
 
@@ -58,7 +62,7 @@ fn test_create_account_query() {
                 .handle
                 .as_named_label(&Account::schema.to_string()),
         )
-        .set_model(&account)
+        .set_model(&Account::schema)
         .unwrap()
         .build();
 

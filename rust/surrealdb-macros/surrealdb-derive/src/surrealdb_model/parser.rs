@@ -161,7 +161,7 @@ impl ModelAttributesTokensDeriver {
 
                 ModelMedataTokenStream {
                     // friend<User>
-                    field: quote!(#field_ident_normalised<#schema_name_basic>,),
+                    field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
                     extra,
                 }
             }
@@ -172,14 +172,14 @@ impl ModelAttributesTokensDeriver {
                 ModelMedataTokenStream {
                     // friend<Vec<User>>
                     // TODO: Confirm/Or fix this on the querybuilder side this.
-                    field: quote!(#field_ident_normalised<Vec<#schema_name_basic>>,),
+                    field: quote!(#visibility #field_ident_normalised<Vec<#schema_name_basic>>,),
                     extra,
                 }
             }
             RelationType::None => {
                 ModelMedataTokenStream {
                     // email,
-                    field: quote!(#field_ident_normalised,),
+                    field: quote!(#visibility #field_ident_normalised,),
                     extra: ModelMetadataBasic::default(),
                 }
             }
@@ -235,7 +235,7 @@ impl From<NodeObject> for ModelMetadataBasic {
         //  all schemas are suffixed-aliased to i.e<schema_name>Schema e.g Account => AccountSchema
         //  use super::AccountSchema as Account;
         let model_import = quote!(use super::#schema_name_aliased as #schema_name_basic;);
-        let schema_reexported_alias = quote!(use #schema_name_basic_lower_case::schema::#schema_name_basic as #schema_name_aliased);;
+        let schema_reexported_alias = quote!(use #schema_name_basic_lower_case::schema::#schema_name_basic as #schema_name_aliased;);
 
         Self {
             schema_reexported_alias,
@@ -351,8 +351,8 @@ impl From<SkipSerializing> for bool {
 impl From<SkipSerializing> for TokenStream {
     fn from(value: SkipSerializing) -> Self {
         match value {
-            SkipSerializing::Yes => quote!(pub),
-            SkipSerializing::No => quote!(),
+            SkipSerializing::Yes => quote!(),
+            SkipSerializing::No => quote!(pub),
         }
     }
 }
