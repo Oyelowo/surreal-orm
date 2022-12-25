@@ -162,16 +162,7 @@ impl FieldsNames {
                 let arrow_direction = TokenStream::from(x.edge_direction);
                 let edge_action = TokenStream::from(x.edge_action);
                 let extra = ModelMetadataBasic::from(x.node_object);
-                let schema_name_str = String::from(x.node_object);
-                let schema_name_basic = format_ident!("{schema_name_str}");
-                let schema_name_basic_lower_case =
-                    format_ident!("{}", schema_name_str.to_lowercase());
-                let schema_name_aliased = format_ident!("{schema_name_str}Schema");
-                //  import Schema from outside. To prevent model name collision with their struct names,
-                //  all schemas are suffixed-aliased to i.e<schema_name>Schema e.g Account => AccountSchema
-                //  use super::AccountSchema as Account;
-                let model_import = quote!(use super::#schema_name_aliased as #schema_name_basic;);
-
+                let schema_name_basic = extra.schema_name_basic;
                 //
                 /*
                 // This can the access the alias
@@ -180,27 +171,43 @@ impl FieldsNames {
                   })
                 */
                 // e.g: ->has->Account
-                let field = quote!(#visibility #arrow_direction #edge_action #arrow_direction #schema_name_basic as field_ident_normalised,);
+                let field = quote!(#visibility #arrow_direction #edge_action #arrow_direction #schema_name_basic as #field_ident_normalised,);
                 ModelMedataTokenStream {
                     field: quote!(#field),
                     extra,
                 }
             }
-            RelationType::ReferenceOne(ref_one) => {
-                let model_field_stream = todo!();
-                let schema_name_basic = todo!();
-                let model_import = todo!();
-                let schema_name_aliased = todo!();
+            RelationType::ReferenceOne(node_object) => {
+                let extra = ModelMetadataBasic::from(node_object);
+                let schema_name_basic = extra.schema_name_basic;
 
                 ModelMedataTokenStream {
-                    field: quote!(#model_field_stream),
-                    schema_name_basic: quote!(#schema_name_basic),
-                    import: quote!(#model_import),
-                    schema_reexported_alias: quote!(#schema_name_aliased),
+                    // friend<User>
+                    field: quote!(#field_ident_normalised<#schema_name_basic>),
+                    extra,
                 }
             }
-            RelationType::ReferenceMany(ref_many) => todo!(),
-            RelationType::None => todo!(),
+            RelationType::ReferenceMany(node_object) => {
+                let extra = ModelMetadataBasic::from(node_object);
+                let schema_name_basic = extra.schema_name_basic;
+
+                ModelMedataTokenStream {
+                    // friend<Vec<User>>
+                    // TODO: Confirm/Or fix this on the querybuilder side this.
+                    field: quote!(#field_ident_normalised<Vec<#schema_name_basic>>),
+                    extra,
+                }
+            }
+            RelationType::None => {
+                let extra = ModelMetadataBasic::from(node_object);
+                let schema_name_basic = extra.schema_name_basic;
+                ModelMedataTokenStream {
+                    // friend<Vec<User>>
+                    // TODO: Confirm/Or fix this on the querybuilder side this.
+                    field: quote!(#field_ident_normalised<Vec<#schema_name_basic>>),
+                    extra,
+                }
+            }
         }
     }
 }
@@ -328,13 +335,13 @@ impl From<&MyFieldReceiver> for RelationType {
                 ..
             } => RelationGraph(Relation(relation.to_owned())),
             MyFieldReceiver {
-                reference_one: Some(foreign_schema),
+                reference_one: Some(ref_one),
                 ..
-            } => ReferenceOne(NodeObject(foreign_schema.to_owned())),
+            } => ReferenceOne(NodeObject(ref_one.to_owned())),
             MyFieldReceiver {
-                reference_many: Some(many_foreign_schema),
+                reference_many: Some(ref_many),
                 ..
-            } => ReferenceMany(NodeObject(many_foreign_schema.to_owned())),
+            } => ReferenceMany(NodeObject(ref_many.to_owned())),
             _ => None,
         }
     }
