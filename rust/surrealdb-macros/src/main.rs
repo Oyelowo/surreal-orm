@@ -57,7 +57,6 @@ pub struct Account {
 pub struct Project {
     id: Option<String>,
     title: String,
-
     // #[surrealdb(relate = "->run_by->Accout")]
     // account: ForeignVec<Project>,
     // projects: ForeignVec<Project>,
