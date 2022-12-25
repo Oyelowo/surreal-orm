@@ -22,18 +22,15 @@ pub(crate) struct FieldIdentifier {
 }
 
 /// A struct that contains the `struct_ty_fields` and `struct_values_fields` vectors.
-#[derive(Debug, Default)]
-pub(crate) struct FieldsNames {
-    /// A vector of token streams representing the struct type fields.
-    pub struct_ty_fields: Vec<TokenStream>,
-    /// A vector of token streams representing the struct value fields.
-    pub struct_values_fields: Vec<TokenStream>,
-
-    pub models_serialized_values: Vec<TokenStream>,
-    pub surrealdb_imported_schema_dependencies: Vec<TokenStream>,
+#[derive(Default)]
+pub(crate) struct ModelAttributesTokensDeriver {
+    all_schema_reexported_aliases: Vec<TokenStream>,
+    all_model_imports: Vec<TokenStream>,
+    all_schema_names_basic: Vec<TokenStream>,
+    // metadata: Vec<ModelMedataTokenStream>,
 }
 
-impl FieldsNames {
+impl ModelAttributesTokensDeriver {
     /// Constructs a `FieldsNames` struct from the given `data` and `struct_level_casing`.
     ///
     /// # Arguments
@@ -50,46 +47,23 @@ impl FieldsNames {
             .expect("Should never be enum")
             .fields;
 
-        fields.into_iter().enumerate().fold(
-            Self::default(),
-            |mut field_names_accumulator, (index, field_receiver)| {
-                let field_case = struct_level_casing.unwrap_or(CaseString::None);
-                let field_ident = Self::get_field_identifier_name(field_receiver, index);
-                let field_identifier_string = ::std::string::ToString::to_string(&field_ident);
-                let field_ident_uncased = FieldIdentUnCased {
-                    uncased_field_name: field_identifier_string,
-                    casing: field_case,
-                };
-                // let field = Fi
+        fields
+            .into_iter()
+            .enumerate()
+            .fold(Self::default(), |acc, (index, field_receiver)| {
+                let struct_level_casing = struct_level_casing.unwrap_or(CaseString::None);
+                let meta = Self::get_field_ident(field_receiver, struct_level_casing, index);
 
-                let FieldIdentifier {
-                    serialized,
-                    ident,
-                    surrealdb_field_ident,
-                    surrealdb_imported_schema_dependency,
-                } = FieldCaseMapper::new(field_case, field_identifier_string)
-                    .get_field_ident(&field_receiver);
+                acc.all_model_imports.push(meta.extra.model_import);
 
-                // struct type used to type the function
-                field_names_accumulator
-                    .struct_ty_fields
-                    .push(quote!(pub #ident: String));
+                acc.all_schema_names_basic
+                    .push(meta.extra.schema_name_basic);
 
-                // struct values themselves
-                field_names_accumulator
-                    .struct_values_fields
-                    .push(quote!(#ident: #serialized));
+                acc.all_schema_reexported_aliases
+                    .push(meta.extra.schema_reexported_alias);
 
-                field_names_accumulator
-                    .models_serialized_values
-                    .push(quote!(#surrealdb_field_ident));
-
-                field_names_accumulator
-                    .surrealdb_imported_schema_dependencies
-                    .push(surrealdb_imported_schema_dependency);
-                field_names_accumulator
-            },
-        )
+                acc
+            })
     }
 
     /// Returns a `TokenStream` representing the field identifier for the given `field_receiver` and `index`.
@@ -130,12 +104,11 @@ impl FieldsNames {
     /// to the original ident format as written exactly in the code except when a user
     /// uses rename attribute on a specific field, in which case that takes precedence.
     pub(crate) fn get_field_ident(
-        &self,
         field_receiver: &MyFieldReceiver,
-        struct_level_casing: Option<CaseString>,
+        struct_level_casing: CaseString,
         index: usize,
     ) -> ModelMedataTokenStream {
-        let casing = struct_level_casing.unwrap_or(CaseString::None);
+        // let struct_level_casing = struct_level_casing.unwrap_or(CaseString::None);
         let field_ident = Self::get_field_identifier_name(field_receiver, index);
         let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
 
@@ -144,7 +117,7 @@ impl FieldsNames {
 
         let field_ident_cased = FieldIdentCased::from(FieldIdentUnCased {
             uncased_field_name,
-            casing,
+            casing: struct_level_casing,
         });
 
         // get the field's proper serialized format. Renaming should take precedence
@@ -174,7 +147,7 @@ impl FieldsNames {
                 let field = quote!(#visibility #arrow_direction #edge_action #arrow_direction #schema_name_basic as #field_ident_normalised,);
                 ModelMedataTokenStream {
                     field: quote!(#field),
-                    extra: Some(extra),
+                    extra,
                 }
             }
             RelationType::ReferenceOne(node_object) => {
@@ -184,7 +157,7 @@ impl FieldsNames {
                 ModelMedataTokenStream {
                     // friend<User>
                     field: quote!(#field_ident_normalised<#schema_name_basic>),
-                    extra: Some(extra),
+                    extra,
                 }
             }
             RelationType::ReferenceMany(node_object) => {
@@ -195,14 +168,14 @@ impl FieldsNames {
                     // friend<Vec<User>>
                     // TODO: Confirm/Or fix this on the querybuilder side this.
                     field: quote!(#field_ident_normalised<Vec<#schema_name_basic>>),
-                    extra: Some(extra),
+                    extra,
                 }
             }
             RelationType::None => {
                 ModelMedataTokenStream {
                     // email,
                     field: quote!(#field_ident_normalised,),
-                    extra: None,
+                    extra: ModelMetadataBasic::default(),
                 }
             }
         }
@@ -224,7 +197,7 @@ mod account {
 */
 struct ModelMedataTokenStream {
     field: TokenStream,
-    extra: Option<ModelMetadataBasic>,
+    extra: ModelMetadataBasic,
 }
 
 /*
@@ -238,8 +211,10 @@ struct ModelMedataTokenStream {
                 //  use super::AccountSchema as Account;
                 let model_import = quote!(use super::#schema_name_aliased as #schema_name_basic;);
 */
+
+#[derive(Default)]
 struct ModelMetadataBasic {
-    import: TokenStream,
+    model_import: TokenStream,
     schema_name_basic: TokenStream,
     // account::schema::model -> AccountSchema
     schema_reexported_alias: TokenStream,
@@ -259,7 +234,7 @@ impl From<NodeObject> for ModelMetadataBasic {
 
         Self {
             schema_reexported_alias,
-            import: model_import,
+            model_import,
             schema_name_basic: quote!(#schema_name_basic),
         }
     }

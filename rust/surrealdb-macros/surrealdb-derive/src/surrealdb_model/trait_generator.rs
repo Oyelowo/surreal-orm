@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use super::{get_crate_name, parser::FieldsNames, types::CaseString,};
+use super::{get_crate_name, parser::ModelAttributesTokensDeriver, types::CaseString,};
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{quote, format_ident};
@@ -112,12 +112,12 @@ impl ToTokens for FieldsGetterOpts {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
 
-        let FieldsNames {
+        let ModelAttributesTokensDeriver {
             struct_ty_fields,
             struct_values_fields,
             models_serialized_values,
             surrealdb_imported_schema_dependencies,
-        } = FieldsNames::from_receiver_data(data, struct_level_casing);
+        } = ModelAttributesTokensDeriver::from_receiver_data(data, struct_level_casing);
 
         // e.g for Account => AccountFields
         let fields_getter_struct_name = ::quote::format_ident!("{my_struct}Fields");
