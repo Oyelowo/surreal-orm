@@ -5,7 +5,7 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(dead_code)]
 
-use super::{get_crate_name, parser::ModelAttributesTokensDeriver, types::CaseString,};
+use super::{get_crate_name, parser::ModelAttributesTokensDeriver, casing::CaseString,};
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{quote, format_ident};
