@@ -15,7 +15,8 @@ impl From<&MyFieldReceiver> for RelationType {
             MyFieldReceiver {
                 relate: Some(relation),
                 ..
-            } => RelationGraph(Relation(relation.to_owned())),
+            } => {
+                RelationGraph(Relation(relation.to_owned()))},
             MyFieldReceiver {
                 reference_one: Some(ref_one),
                 ..

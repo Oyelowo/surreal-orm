@@ -22,9 +22,50 @@ struct Account {
     #[surrealdb(skip_serializing)]
     projects: ForeignVec<Project>,
 
+    // Account->manage->Project
+    // Project<-manage<-Account
     #[surrealdb(relate = "->manage->Project", skip_serializing)]
     managed_projects: ForeignVec<Project>,
 }
+
+/*
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
+struct Account {
+    email: String,
+
+    // #[surrealdb(relate = "->manage->Project")]
+    #[surrealdb(relate(edge=Account_Manage_Project, description="->manage->Project"))]
+    projects: ForeignVec<Project>,
+}
+
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
+struct Project {
+    #[surrealdb(skip_serializing)]
+    id: Option<String>,
+    name: String,
+
+    // #[surrealdb(relate = "<-manage<-Account")]
+    #[surrealdb(relate(edge=Account_Manage_Project, description="<-manage<-Account"))]
+    authors: ForeignVec<Account>,
+}
+
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
+#[surrealdb(edge_relation = "manage")]
+struct Account_Manage_Project {
+    id: String,
+    in: Account,
+    out: Project,
+    when: Any,
+    destination: Any,
+}
+
+if to().split(->).first() == (struct_name) and ending ===
+description == ending(i.e remaining part of the string)
+impl Account_Manage_Project {
+    fn to(){}
+    fn from(){}
+}
+*/
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
 struct Project {
