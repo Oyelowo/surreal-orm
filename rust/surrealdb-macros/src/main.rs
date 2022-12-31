@@ -92,25 +92,10 @@ use surrealdb_macros::Edge;
 
 fn main() {
     let xxx = Account_Manage_Project::default();
-    // let x = xxx.to();
     println!("to: {}", xxx.to());
     println!("from: {}", xxx.from());
-    // Account::schema.fav_proj()
-    // Account::schema.projects().title
-    // Account::schema.projects()
     Account::get_schema()
         .projects()
         .title
         .contains_none("values");
-    // Account::schema.fav_proj().title.contains_any("values");
-    // Account::get_fields_serialized()
-    // Account::get_schema().email;
-    // Account::get_schema().lastName
-    // Account::schema.firstName
-    // Account::get_schema().firstName.contains_one("value");
-    // Account::get_schema()
-    // Account::schema.nicePoa
-    // Account::get_schema().firstName
-    // Account::get_schema().email.contains_all(values)
-    // account::schema::model
 }
