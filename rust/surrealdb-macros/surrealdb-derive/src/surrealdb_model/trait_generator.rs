@@ -51,14 +51,14 @@ impl FromMeta for Rename {
 }
 
 pub trait Edge {
-    const edge_relation: &'static str;
+    const EDGE_RELATION: &'static str;
     fn to(&self) -> ::proc_macro2::TokenStream;
     fn from(&self) -> ::proc_macro2::TokenStream;
 }
 
 #[derive(Debug, Clone)]
 pub struct Relate {
-    link: String
+    pub link: String
 }
 
 impl FromMeta for Relate {
@@ -161,16 +161,17 @@ impl ToTokens for FieldsGetterOpts {
         });
 
         let ModelAttributesTokensDeriver {
-           all_schema_reexported_aliases,
+           // all_schema_reexported_aliases,
            all_model_imports,
-           all_schema_names_basic,
+           // all_schema_names_basic,
            all_fields,
+           ..
         } = ModelAttributesTokensDeriver::from_receiver_data(data, struct_level_casing);
 
         let schema_type_alias_name = ::quote::format_ident!("{my_struct}Schema");
         
         let schema_mod_name = format_ident!("{}", my_struct.to_string().to_lowercase());
-        let crate_name = get_crate_name(false);
+        let _crate_name = get_crate_name(false);
         
         tokens.extend(quote! {
             use ::surreal_simple_querybuilder::prelude::*;
@@ -196,7 +197,7 @@ impl ToTokens for FieldsGetterOpts {
             impl #my_struct {
                 // type Schema = account::schema::Account<0>;
                 // type Schema = #schema_mod_name::schema::#my_struct<0>;
-                const schema: #schema_mod_name::schema::#my_struct<0> = #schema_mod_name::schema::#my_struct::<0>::new();
+                const SCHEMA: #schema_mod_name::schema::#my_struct<0> = #schema_mod_name::schema::#my_struct::<0>::new();
                 const fn get_schema() -> #schema_type_alias_name<0> {
                     // project::schema::model
                     //  account::schema::Account<0>::new()

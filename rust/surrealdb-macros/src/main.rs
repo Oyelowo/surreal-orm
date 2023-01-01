@@ -29,6 +29,11 @@ pub struct Account {
     projects: ForeignVec<Project>,
 }
 
+// impl Account {
+//     fn own_schema(&self) -> Self {
+//         self
+//     }
+// }
 #[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
 pub struct Project {
@@ -69,6 +74,8 @@ impl Edge for Account_Manage_Project {
     const edge_relation: &'static str = "manage";
     fn to(&self) -> ::proc_macro2::TokenStream {
         // Account::get_schema().chess;
+        // Account::schema
+        // self.out
         let In = self.r#in.own_schema().to_string();
         let Out = self.out.own_schema().to_string();
         let In = format_ident!("{In}");
