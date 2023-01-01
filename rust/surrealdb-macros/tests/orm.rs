@@ -24,7 +24,8 @@ struct Account {
 
     // Account->manage->Project
     // Project<-manage<-Account
-    #[surrealdb(relate = "->manage->Project", skip_serializing)]
+    // #[surrealdb(relate = "->manage->Project", skip_serializing)]
+    #[surrealdb(relate(edge = "", link = "->manage->Project"), skip_serializing)]
     managed_projects: ForeignVec<Project>,
 }
 
