@@ -19,11 +19,11 @@ impl From<&MyFieldReceiver> for RelationType {
             MyFieldReceiver {
                 reference_one: Some(ref_one),
                 ..
-            } => ReferenceOne(NodeObject(ref_one.to_owned())),
+            } => ReferenceOne(ref_one.into()),
             MyFieldReceiver {
                 reference_many: Some(ref_many),
                 ..
-            } => ReferenceMany(NodeObject(ref_many.to_owned())),
+            } => ReferenceMany(ref_many.into()),
             _ => None,
         }
     }
@@ -80,6 +80,11 @@ wrapper_struct_to_ident!(EdgeAction);
 #[derive(Debug, Clone)]
 pub(crate) struct NodeObject(String);
 
+impl From<&String> for NodeObject {
+    fn from(value: &String) -> Self {
+        Self(value.into())
+    }
+}
 impl From<NodeObject> for String {
     fn from(value: NodeObject) -> Self {
         value.0
