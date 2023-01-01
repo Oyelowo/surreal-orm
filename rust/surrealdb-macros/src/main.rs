@@ -73,8 +73,7 @@ impl Edge for Account_Manage_Project {
     #[allow(non_upper_case_globals)]
     const edge_relation: &'static str = "manage";
     fn to(&self) -> ::proc_macro2::TokenStream {
-        // Account::get_schema().chess;
-        // Account::schema
+        // Account::;
         // self.out
         let In = self.r#in.own_schema().to_string();
         let Out = self.out.own_schema().to_string();

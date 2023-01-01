@@ -99,11 +99,11 @@ struct File {
 fn test_create_account_query() {
     let query = QueryBuilder::new()
         .create(
-            Account::schema
+            Account::SCHEMA
                 .handle
-                .as_named_label(&Account::schema.to_string()),
+                .as_named_label(&Account::SCHEMA.to_string()),
         )
-        .set_model(&Account::schema)
+        .set_model(&Account::SCHEMA)
         .unwrap()
         .build();
 
@@ -118,7 +118,7 @@ fn test_account_find_query() {
     let query = QueryBuilder::new()
         .select("*")
         .from(account)
-        .filter(Account::schema.email.equals_parameterized())
+        .filter(Account::SCHEMA.email.equals_parameterized())
         .build();
 
     assert_eq!(query, "SELECT * FROM Account WHERE email = $email");
@@ -298,23 +298,23 @@ fn test_foreign_deserialize() {
 /// Test that a model can have fields that reference the `Self` type.
 #[test]
 fn test_model_self_reference() {
-    assert_eq!("friend", Account::schema.friend.to_string());
-    assert_eq!("Account", Account::schema.friend().to_string());
-    assert_eq!("friend.handle", Account::schema.friend().handle.to_string());
+    assert_eq!("friend", Account::SCHEMA.friend.to_string());
+    assert_eq!("Account", Account::SCHEMA.friend().to_string());
+    assert_eq!("friend.handle", Account::SCHEMA.friend().handle.to_string());
 }
 
 #[test]
 fn test_model_serializing_relations() {
     assert_eq!(
         "->manage->Project AS account_projects",
-        Account::schema
+        Account::SCHEMA
             .managed_projects
             .as_alias("account_projects")
     );
-    assert_eq!("Project", Account::schema.managed_projects().to_string());
+    assert_eq!("Project", Account::SCHEMA.managed_projects().to_string());
     assert_eq!(
         "->manage->Project.name AS project_names",
-        Account::schema
+        Account::SCHEMA
             .managed_projects()
             .name
             .as_alias("project_names")
@@ -322,7 +322,7 @@ fn test_model_serializing_relations() {
 
     assert_eq!(
         "->manage->Project->has->Release AS account_projects_releases",
-        Account::schema
+        Account::SCHEMA
             .managed_projects()
             .releases
             .as_alias("account_projects_releases")
@@ -330,7 +330,7 @@ fn test_model_serializing_relations() {
 
     assert_eq!(
         "->manage->Project->has->Release.name AS account_projects_release_names",
-        Account::schema
+        Account::SCHEMA
             .managed_projects()
             .releases()
             .name
@@ -346,12 +346,12 @@ fn test_model_serializing_relations() {
 #[test]
 fn test_with_id_edge() {
     let query_one = "an_id"
-        .as_named_label(&Account::schema.to_string())
-        .with(&Account::schema.managed_projects.with_id("other_id"));
+        .as_named_label(&Account::SCHEMA.to_string())
+        .with(&Account::SCHEMA.managed_projects.with_id("other_id"));
 
     let query_two = account
         .with_id("an_id")
-        .with(&Account::schema.managed_projects.with_id("other_id"));
+        .with(&Account::SCHEMA.managed_projects.with_id("other_id"));
 
     assert_eq!("Account:an_id->manage->Project:other_id", query_two);
     assert_eq!(query_one, query_two);
