@@ -2,7 +2,7 @@ use super::trait_generator::{MyFieldReceiver, Relate};
 
 #[derive(Debug, Clone)]
 pub(crate) enum RelationType {
-    RelationGraph(Relation),
+    RelationGraph(Relate),
     ReferenceOne(NodeObject),
     ReferenceMany(NodeObject),
     None,
@@ -15,7 +15,7 @@ impl From<&MyFieldReceiver> for RelationType {
             MyFieldReceiver {
                 relate: Some(relation),
                 ..
-            } => RelationGraph(Relation(relation.to_owned())),
+            } => RelationGraph(relation.to_owned()),
             MyFieldReceiver {
                 reference_one: Some(ref_one),
                 ..
@@ -125,10 +125,11 @@ pub(crate) struct Relation(pub Relate);
 //     }
 // }
 
-impl From<Relation> for RelateAttribute {
-    fn from(relation: Relation) -> Self {
-        let right_arrow_count = relation.0.link.matches("->").count();
-        let left_arrow_count = relation.0.link.matches("<-").count();
+// impl From<Relation> for RelateAttribute {
+impl From<Relate> for RelateAttribute {
+    fn from(relation: Relate) -> Self {
+        let right_arrow_count = relation.link.matches("->").count();
+        let left_arrow_count = relation.link.matches("<-").count();
         let edge_direction = match (left_arrow_count, right_arrow_count) {
             (2, 0) => EdgeDirection::InArrowLeft,
             (0, 2) => EdgeDirection::OutArrowRight,
@@ -137,7 +138,6 @@ impl From<Relation> for RelateAttribute {
 
         let edge_direction_str: String = edge_direction.into();
         let mut substrings = relation
-            .0
             .link
             .split(edge_direction_str.as_str())
             .filter(|x| !x.is_empty());
@@ -161,7 +161,7 @@ impl From<Relation> for RelateAttribute {
     }
 }
 
-fn get_relation_error<'a>(_relation: &Relation) -> ::std::fmt::Arguments<'a> {
+fn get_relation_error<'a>(_relation: &Relate) -> ::std::fmt::Arguments<'a> {
     // let span = syn::spanned::Spanned::span(relation.0.clone()).clone();
     // let span = syn::spanned::Spanned::span(relation.0.as_str()).clone();
 
