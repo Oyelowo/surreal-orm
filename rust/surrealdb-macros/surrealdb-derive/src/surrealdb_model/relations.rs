@@ -10,21 +10,20 @@ pub(crate) enum RelationType {
 
 impl From<&MyFieldReceiver> for RelationType {
     fn from(field_receiver: &MyFieldReceiver) -> Self {
-        use RelationType::*;
         match field_receiver {
             MyFieldReceiver {
                 relate: Some(relation),
                 ..
-            } => RelationGraph(relation.to_owned()),
+            } => RelationType::RelationGraph(relation.to_owned()),
             MyFieldReceiver {
                 reference_one: Some(ref_one),
                 ..
-            } => ReferenceOne(ref_one.into()),
+            } => RelationType::ReferenceOne(ref_one.into()),
             MyFieldReceiver {
                 reference_many: Some(ref_many),
                 ..
-            } => ReferenceMany(ref_many.into()),
-            _ => None,
+            } => RelationType::ReferenceMany(ref_many.into()),
+            _ => RelationType::None,
         }
     }
 }
@@ -111,8 +110,8 @@ impl From<RelateAttribute> for ::proc_macro2::TokenStream {
     }
 }
 
-#[derive(Debug, Clone)]
-pub(crate) struct Relation(pub Relate);
+// #[derive(Debug, Clone)]
+// pub(crate) struct Relation(pub Relate);
 
 // impl From<Relation> for String {
 //     fn from(relation: Relation) -> Self {
