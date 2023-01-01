@@ -58,16 +58,20 @@ pub trait Edge {
 
 #[derive(Debug, Clone)]
 pub struct Relate {
-    pub link: String
-}
+    pub link: String,
+    // #[darling(default)]
+    pub edge: Option<String>,
 
+}
+//#[rename(se)]
 impl FromMeta for Relate {
     fn from_string(value: &str) -> darling::Result<Self> {
         Ok(Self {
-            link: value.into()
+            link: value.into(),
+            edge: None
         })
     }
-
+//TODO: Check to maybe remove cos I probably dont need this
     fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
         // pub trait Edge {
         //     const edge_relation: &'static str;
@@ -83,8 +87,8 @@ impl FromMeta for Relate {
 
         impl From<FullRelate> for Relate {
             fn from(v: FullRelate) -> Self {
-                let FullRelate {  link, .. } = v;
-                Self { link }
+                let FullRelate {  link,edge, .. } = v;
+                Self { link, edge: Some(edge)}
             }
         }
         FullRelate::from_list(items).map(Relate::from)

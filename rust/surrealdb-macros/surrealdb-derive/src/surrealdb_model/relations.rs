@@ -114,16 +114,16 @@ impl From<RelateAttribute> for ::proc_macro2::TokenStream {
 #[derive(Debug, Clone)]
 pub(crate) struct Relation(pub Relate);
 
-impl From<Relation> for String {
-    fn from(relation: Relation) -> Self {
-        relation.0.link
-    }
-}
-impl From<String> for Relation {
-    fn from(str: String) -> Self {
-        Relation(Relate { link: str })
-    }
-}
+// impl From<Relation> for String {
+//     fn from(relation: Relation) -> Self {
+//         relation.0.link
+//     }
+// }
+// impl From<String> for Relation {
+//     fn from(str: String) -> Self {
+//         Relation(Relate { link: str })
+//     }
+// }
 
 impl From<Relation> for RelateAttribute {
     fn from(relation: Relation) -> Self {
