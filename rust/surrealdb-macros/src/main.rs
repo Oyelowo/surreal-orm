@@ -8,8 +8,12 @@ use serde::{Deserialize, Serialize};
 // #![feature(const_mut_refs)]
 // use serde::{Deserialize, Serialize};
 // use surreal_simple_querybuilder::prelude::*;
-use surrealdb_derive::SurrealdbModel;
+use static_assertions::*;
 
+// const_assert!("oylelowo".as_str().len() > 3);
+assert_fields!(Account_Manage_Project: r#in, out);
+
+use surrealdb_derive::SurrealdbModel;
 #[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
 pub struct Account {
@@ -25,7 +29,7 @@ pub struct Account {
     email: String,
 
     // #[surrealdb(relate(edge="Account_Manage_Project", description="->manage->Account"))]
-    #[surrealdb(relate(edge = "Account_Manage_Project", link = "->runs->Project"))]
+    #[surrealdb(relate(edge = "Account_Manage_project", link = "->runs->Project"))]
     projects: ForeignVec<Project>,
 }
 
@@ -54,10 +58,25 @@ struct Account_Manage_Project {
     when: String,
     destination: String,
 }
+mod xama {
+    use super::Account;
+    pub type Kusa = Account;
+}
+impl Account_Manage_Project {
+    fn sama() -> String {
+        type Nama = Account;
+        assert_type_eq_all!(Account, Nama);
+        assert_type_eq_all!(xama::Kusa, Nama);
+        assert_type_eq_all!(xama::Kusa, Account);
+        // assert_type_eq_all!(xama::Kusa, String);
+        "lowo".to_string()
+    }
+}
 
 fn xc() {
     let xxx = Account_Manage_Project::default();
     let x = xxx.from();
+
     println!("{x}");
 }
 
@@ -91,6 +110,9 @@ impl Edge for Account_Manage_Project {
         let edge = format_ident!("{}", Self::edge_relation);
         let xx = ::quote::quote!(#Out<-#edge<-#In);
         xx
+    }
+    fn km(&self) -> String {
+        "oyelowo".to_string()
     }
 }
 use surreal_simple_querybuilder::prelude::*;
