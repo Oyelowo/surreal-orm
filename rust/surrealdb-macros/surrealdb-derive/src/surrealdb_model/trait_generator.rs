@@ -176,7 +176,7 @@ impl ToTokens for FieldsGetterOpts {
         
         let schema_mod_name = format_ident!("{}", my_struct.to_string().to_lowercase());
         let _crate_name = get_crate_name(false);
-        
+       let mok = "Account"; 
         tokens.extend(quote! {
             use ::surreal_simple_querybuilder::prelude::*;
             // #struct_type

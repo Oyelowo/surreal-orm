@@ -38,15 +38,16 @@ pub struct Account {
 //         self
 //     }
 // }
+
 #[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
 pub struct Project {
     id: Option<String>,
     title: String,
     #[surrealdb(relate = "->run_by->Account")]
-    account: ForeignVec<Project>,
-    // projects: ForeignVec<Project>,
+    account: ForeignVec<Account>,
 }
+
 #[allow(non_camel_case_types)]
 // #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
 #[derive(Debug, Serialize, Deserialize, Default)]
@@ -58,8 +59,60 @@ struct Account_Manage_Project {
     when: String,
     destination: String,
 }
+
+impl Edga for Account_Manage_Project {
+    type In = Account;
+    type Out = Project;
+}
+
+::static_assertions::assert_type_eq_all!(Account, <Account_Manage_Project as Edga>::In);
+
+trait Edga {
+    type In;
+    type Out;
+}
+
 mod xama {
     use super::Account;
+    use super::Project;
+
+    mod edges_types {
+        type In = super::Account;
+        type Out = super::Project;
+    }
+
+    mod nodes_checker {
+        pub struct In {
+            Account: super::Account,
+        }
+        pub struct Out {
+            Project: super::Project,
+        }
+    }
+    ::static_assertions::assert_type_eq_all!(Project, self::Project);
+    // use std::any::Any;
+
+    // use crate::Account_Manage_Project;
+    use static_assertions::{const_assert, const_assert_eq};
+
+    const_assert_eq!(false, false);
+
+    struct In {
+        Account: super::Account,
+    }
+    struct Out {
+        Project: super::Project,
+    }
+    ::static_assertions::assert_fields!(In: Account);
+    const Nama: &'static str = "tr";
+    const xx: &'static str = "tr";
+
+    // const_assert!(xx == Nama);
+
+    const FIVE: usize = 5;
+
+    const_assert!(FIVE * 2 == 10);
+    // const kp: String = Account_Manage_Project::sama();
     pub type Kusa = Account;
 }
 impl Account_Manage_Project {
@@ -69,6 +122,7 @@ impl Account_Manage_Project {
         assert_type_eq_all!(xama::Kusa, Nama);
         assert_type_eq_all!(xama::Kusa, Account);
         // assert_type_eq_all!(xama::Kusa, String);
+        assert_fields!(Account_Manage_Project: r#in, out);
         "lowo".to_string()
     }
 }
