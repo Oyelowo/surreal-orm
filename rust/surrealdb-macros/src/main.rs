@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 #![allow(incomplete_features)]
+#![feature(inherent_associated_types)]
 #![feature(generic_const_exprs)]
 use quote::format_ident;
 use serde::{Deserialize, Serialize};
@@ -64,14 +65,132 @@ impl Edga for Account_Manage_Project {
     type In = Account;
     type Out = Project;
 }
-
+type Kol = <Account_Manage_Project as Edga>::In;
 ::static_assertions::assert_type_eq_all!(Account, <Account_Manage_Project as Edga>::In);
 
 trait Edga {
     type In;
     type Out;
 }
+#[derive(Default, Serialize, Deserialize, Debug)]
+// #[surrealdb(rename_all = "camelCase")]
+pub struct Accountt {
+    id: Option<String>,
+    handle: String,
+    // #[surrealdb(rename = "nawao")]
+    first_name: String,
+    // #[surrealdb(rename = "lastName")]
+    another_name: String,
+    chess: String,
+    nice_poa: String,
 
+    password: String,
+    email: String,
+
+    // #[surrealdb(relate(edge="Account_Manage_Project", description="->manage->Account"))]
+    // #[surrealdb(relate(edge = "Account_Manage_project", link = "->runs->Project"))]
+    projects: ForeignVec<Project>,
+}
+impl Accountt {
+    // type Schema = account::schema::Account<0>;
+    // type Schema = #schema_mod_name::schema::#my_struct<0>;
+    const SCHEMA: accountt::schema::Accountt<0> = accountt::schema::Accountt::<0>::new();
+    const fn get_schema() -> accountt::schema::Accountt<0> {
+        // project::schema::model
+        //  account::schema::Account<0>::new()
+        // e.g: account::schema::Account::<0>::new()
+        accountt::schema::Accountt::<0>::new()
+    }
+    // fn own_schema(&self) -> #schema_type_alias_name<0> {
+    //     // project::schema::model
+    //     //  account::schema::Account<0>::new()
+    //     // e.g: account::schema::Account::<0>::new()
+    //     #schema_mod_name::schema::#my_struct::<0>::new()
+    // }
+}
+fn cre() {
+    let xx = Accountt::get_schema()
+        .managed_projects()
+        .manager()
+        .managed_projects()
+        .manager()
+        .managed_projects()
+        .manager();
+}
+mod accountt {
+    // use super::projectt::schema::Projectt;
+    use super::Mowa as Projectt;
+    // use super::Projectt;
+    // type Mowa = <Projectt as super::Edga2>::Schema;
+    use surreal_simple_querybuilder::prelude::*;
+
+    model!( Accountt {
+           pub id,
+           pub first_name,
+           pub email,
+       pub friend<Accountt>,
+           pub ->manage->Projectt as managed_projects,
+       }
+    );
+}
+
+mod projectt {
+    use super::accountt::schema::Accountt;
+    use surreal_simple_querybuilder::prelude::*;
+
+    model!( Projectt {
+           pub id,
+           pub first_name,
+           pub email,
+           pub <-run_by<-Accountt as manager
+       }
+    );
+}
+
+#[derive(Default, Serialize, Deserialize, Debug)]
+// #[surrealdb(rename_all = "camelCase")]
+pub struct Projectt {
+    id: Option<String>,
+    title: String,
+    // #[surrealdb(relate = "->run_by->Account")]
+    account: ForeignVec<Account>,
+}
+
+pub trait Edga2 {
+    type Schema<const T: usize>;
+}
+impl Edga2 for Projectt {
+    // type Schema = projectt::schema::Projectt<0>;
+    // type Schema = projectt::schema::Projectt<0>;
+    type Schema<const T: usize> = projectt::schema::Projectt<T>;
+}
+// type Mowa<const T: usize> = Projectt::Schema<T>;
+type Mowa<const T: usize> = <Projectt as Edga2>::Schema<T>;
+
+impl Projectt {
+    type Schema<const T: usize> = projectt::schema::Projectt<T>;
+    // type Schema = projectt::schema::Projectt<0>;
+    // type Schema = #schema_mod_name::schema::#my_struct<0>;
+    const SCHEMA: projectt::schema::Projectt<0> = projectt::schema::Projectt::<0>::new();
+    const fn get_schema() -> projectt::schema::Projectt<0> {
+        // project::schema::model
+        //  account::schema::Account<0>::new()
+        // e.g: account::schema::Account::<0>::new()
+        projectt::schema::Projectt::<0>::new()
+    }
+    // fn own_schema(&self) -> #schema_type_alias_name<0> {
+    //     // project::schema::model
+    //     //  account::schema::Account<0>::new()
+    //     // e.g: account::schema::Account::<0>::new()
+    //     #schema_mod_name::schema::#my_struct::<0>::new()
+    // }
+}
+fn protext() {
+    let xxx = Projectt::get_schema()
+        .manager()
+        .managed_projects()
+        .manager();
+}
 mod xama {
     use super::Account;
     use super::Project;
