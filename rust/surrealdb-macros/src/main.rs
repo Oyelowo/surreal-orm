@@ -90,7 +90,7 @@ fn xc() {
 // description == ending(i.e remaining part of the string)
 impl Edge for Account_Manage_Project {
     #[allow(non_upper_case_globals)]
-    const edge_relation: &'static str = "manage";
+    const EDGE_RELATION: &'static str = "manage";
     fn to(&self) -> ::proc_macro2::TokenStream {
         // Account::;
         // self.out
@@ -98,7 +98,7 @@ impl Edge for Account_Manage_Project {
         let Out = self.out.own_schema().to_string();
         let In = format_ident!("{In}");
         let Out = format_ident!("{Out}");
-        let edge = format_ident!("{}", Self::edge_relation);
+        let edge = format_ident!("{}", Self::EDGE_RELATION);
         let xx = ::quote::quote!(#In->#edge->#Out);
         xx
     }
@@ -107,7 +107,7 @@ impl Edge for Account_Manage_Project {
         let Out = self.out.own_schema().to_string();
         let In = format_ident!("{In}");
         let Out = format_ident!("{Out}");
-        let edge = format_ident!("{}", Self::edge_relation);
+        let edge = format_ident!("{}", Self::EDGE_RELATION);
         let xx = ::quote::quote!(#Out<-#edge<-#In);
         xx
     }
