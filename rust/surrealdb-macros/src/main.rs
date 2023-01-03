@@ -108,6 +108,11 @@ impl Accountt {
     //     #schema_mod_name::schema::#my_struct::<0>::new()
     // }
 }
+impl Edga2 for Accountt {
+    // type Schema = projectt::schema::Projectt<0>;
+    // type Schema = projectt::schema::Projectt<0>;
+    type Schema<const T: usize> = accountt::schema::Accountt<T>;
+}
 fn cre() {
     let xx = Accountt::get_schema()
         .managed_projects()
@@ -115,11 +120,19 @@ fn cre() {
         .managed_projects()
         .manager()
         .managed_projects()
-        .manager();
+        .manager()
+        .managed_projects()
+        .manager()
+        .managed_projects()
+        .email
+        .count();
 }
 mod accountt {
+    // mod xxx
     // use super::projectt::schema::Projectt;
-    use super::Mowa as Projectt;
+    type Projectt<const T: usize> = <super::Projectt as super::Edga2>::Schema<T>;
+    // type Projectt = Mowa;
+    // use super::Mowa as Projectt;
     // use super::Projectt;
     // type Mowa = <Projectt as super::Edga2>::Schema;
     use surreal_simple_querybuilder::prelude::*;
@@ -135,7 +148,8 @@ mod accountt {
 }
 
 mod projectt {
-    use super::accountt::schema::Accountt;
+    // use super::accountt::schema::Accountt;
+    type Accountt<const T: usize> = <super::Accountt as super::Edga2>::Schema<T>;
     use surreal_simple_querybuilder::prelude::*;
 
     model!( Projectt {
