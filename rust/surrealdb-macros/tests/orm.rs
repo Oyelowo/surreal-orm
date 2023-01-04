@@ -31,26 +31,6 @@ pub struct Account {
     managed_projects: ForeignVec<Project>,
 }
 
-// #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-// pub struct Account {
-//     email: String,
-//
-//     // #[surrealdb(relate = "->manage->Project")]
-//     #[surrealdb(relate(edge=Account_Manage_Project, description="->manage->Project"))]
-//     projects: ForeignVec<Project>,
-// }
-
-// #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-// pub struct Project {
-//     #[surrealdb(skip_serializing)]
-//     id: Option<String>,
-//     name: String,
-//
-//     // #[surrealdb(relate = "<-manage<-Account")]
-//     #[surrealdb(relate(edge = "Account_Manage_Project", link = "<-manage<-Account"))]
-//     authors: ForeignVec<Account>,
-// }
-
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
 // #[surrealdb(edge_relation = "manage")]
 pub struct Account_Manage_Project {
