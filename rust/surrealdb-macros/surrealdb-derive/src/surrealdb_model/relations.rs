@@ -1,8 +1,8 @@
-use super::trait_generator::MyFieldReceiver;
+use super::trait_generator::{MyFieldReceiver, Relate};
 
 #[derive(Debug, Clone)]
 pub(crate) enum RelationType {
-    RelationGraph(Relation),
+    RelationGraph(Relate),
     ReferenceOne(NodeObject),
     ReferenceMany(NodeObject),
     None,
@@ -10,21 +10,20 @@ pub(crate) enum RelationType {
 
 impl From<&MyFieldReceiver> for RelationType {
     fn from(field_receiver: &MyFieldReceiver) -> Self {
-        use RelationType::*;
         match field_receiver {
             MyFieldReceiver {
                 relate: Some(relation),
                 ..
-            } => RelationGraph(Relation(relation.to_owned())),
+            } => RelationType::RelationGraph(relation.to_owned()),
             MyFieldReceiver {
                 reference_one: Some(ref_one),
                 ..
-            } => ReferenceOne(NodeObject(ref_one.to_owned())),
+            } => RelationType::ReferenceOne(ref_one.into()),
             MyFieldReceiver {
                 reference_many: Some(ref_many),
                 ..
-            } => ReferenceMany(NodeObject(ref_many.to_owned())),
-            _ => None,
+            } => RelationType::ReferenceMany(ref_many.into()),
+            _ => RelationType::None,
         }
     }
 }
@@ -80,6 +79,11 @@ wrapper_struct_to_ident!(EdgeAction);
 #[derive(Debug, Clone)]
 pub(crate) struct NodeObject(String);
 
+impl From<&String> for NodeObject {
+    fn from(value: &String) -> Self {
+        Self(value.into())
+    }
+}
 impl From<NodeObject> for String {
     fn from(value: NodeObject) -> Self {
         value.0
@@ -106,24 +110,25 @@ impl From<RelateAttribute> for ::proc_macro2::TokenStream {
     }
 }
 
-#[derive(Debug, Clone)]
-pub(crate) struct Relation(String);
+// #[derive(Debug, Clone)]
+// pub(crate) struct Relation(pub Relate);
 
-impl From<Relation> for String {
-    fn from(relation: Relation) -> Self {
-        relation.0
-    }
-}
-impl From<String> for Relation {
-    fn from(str: String) -> Self {
-        Relation(str)
-    }
-}
+// impl From<Relation> for String {
+//     fn from(relation: Relation) -> Self {
+//         relation.0.link
+//     }
+// }
+// impl From<String> for Relation {
+//     fn from(str: String) -> Self {
+//         Relation(Relate { link: str })
+//     }
+// }
 
-impl From<Relation> for RelateAttribute {
-    fn from(relation: Relation) -> Self {
-        let right_arrow_count = relation.0.matches("->").count();
-        let left_arrow_count = relation.0.matches("<-").count();
+// impl From<Relation> for RelateAttribute {
+impl From<Relate> for RelateAttribute {
+    fn from(relation: Relate) -> Self {
+        let right_arrow_count = relation.link.matches("->").count();
+        let left_arrow_count = relation.link.matches("<-").count();
         let edge_direction = match (left_arrow_count, right_arrow_count) {
             (2, 0) => EdgeDirection::InArrowLeft,
             (0, 2) => EdgeDirection::OutArrowRight,
@@ -132,7 +137,7 @@ impl From<Relation> for RelateAttribute {
 
         let edge_direction_str: String = edge_direction.into();
         let mut substrings = relation
-            .0
+            .link
             .split(edge_direction_str.as_str())
             .filter(|x| !x.is_empty());
 
@@ -155,7 +160,7 @@ impl From<Relation> for RelateAttribute {
     }
 }
 
-fn get_relation_error<'a>(relation: &Relation) -> ::std::fmt::Arguments<'a> {
+fn get_relation_error<'a>(_relation: &Relate) -> ::std::fmt::Arguments<'a> {
     // let span = syn::spanned::Spanned::span(relation.0.clone()).clone();
     // let span = syn::spanned::Spanned::span(relation.0.as_str()).clone();
 

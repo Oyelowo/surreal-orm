@@ -128,10 +128,10 @@ impl ModelAttributesTokensDeriver {
 
         match relationship {
             RelationType::RelationGraph(relation) => {
-                let x = RelateAttribute::from(relation);
-                let arrow_direction = TokenStream::from(x.edge_direction);
-                let edge_action = TokenStream::from(x.edge_action);
-                let extra = ModelMetadataBasic::from(x.node_object);
+                let relation_attributes = RelateAttribute::from(relation);
+                let arrow_direction = TokenStream::from(relation_attributes.edge_direction);
+                let edge_action = TokenStream::from(relation_attributes.edge_action);
+                let extra = ModelMetadataBasic::from(relation_attributes.node_object);
                 let schema_name_basic = &extra.schema_name_basic;
                 //
                 /*
@@ -197,7 +197,6 @@ struct ModelMedataTokenStream {
     extra: ModelMetadataBasic,
 }
 
-
 #[derive(Default)]
 struct ModelMetadataBasic {
     model_import: TokenStream,
@@ -225,3 +224,4 @@ impl From<super::relations::NodeObject> for ModelMetadataBasic {
         }
     }
 }
+// test hunk save
