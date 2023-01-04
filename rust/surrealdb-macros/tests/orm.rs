@@ -9,7 +9,7 @@ use surreal_simple_querybuilder::prelude::*;
 use surrealdb_macros::SurrealdbModel;
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-struct Account {
+pub struct Account {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
 
@@ -32,7 +32,7 @@ struct Account {
 }
 
 // #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-// struct Account {
+// pub struct Account {
 //     email: String,
 //
 //     // #[surrealdb(relate = "->manage->Project")]
@@ -41,7 +41,7 @@ struct Account {
 // }
 
 // #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-// struct Project {
+// pub struct Project {
 //     #[surrealdb(skip_serializing)]
 //     id: Option<String>,
 //     name: String,
@@ -53,7 +53,7 @@ struct Account {
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
 // #[surrealdb(edge_relation = "manage")]
-struct Account_Manage_Project {
+pub struct Account_Manage_Project {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
     // r#in: Account,
@@ -70,7 +70,7 @@ impl Account_Manage_Project {
 }
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-struct Project {
+pub struct Project {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
     name: String,
@@ -82,7 +82,7 @@ struct Project {
 }
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-struct Release {
+pub struct Release {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
     name: String,
@@ -92,7 +92,7 @@ use account::schema::model as account;
 use project::schema::model as project;
 
 #[derive(Debug, Serialize, Deserialize)]
-struct File {
+pub struct File {
     name: String,
     author: Foreign<Account>,
 }

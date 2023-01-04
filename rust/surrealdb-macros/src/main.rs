@@ -4,7 +4,6 @@
 #![allow(incomplete_features)]
 #![feature(inherent_associated_types)]
 #![feature(generic_const_exprs)]
-use quote::format_ident;
 use serde::{Deserialize, Serialize};
 // #![feature(inherent_associated_types)]
 // #![feature(const_mut_refs)]
@@ -33,17 +32,18 @@ pub struct Account {
 
     // #[surrealdb(relate(edge="Account_Manage_Project", description="->manage->Account"))]
     #[surrealdb(relate(edge = "Account_Manage_project", link = "->runs->Project"))]
-    projects: ForeignVec<Project>,
+    managed_projects: ForeignVec<Project>,
 }
 
 fn kl() {
     let po = Account::get_schema()
-        .projects()
+        .managedProjects()
         .account()
-        .projects()
+        .managedProjects()
         .account()
-        .projects()
-        .account();
+        .managedProjects()
+        .account()
+        .lastName;
 }
 
 #[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
@@ -349,7 +349,7 @@ fn main() {
     // println!("to: {}", xxx.to());
     // println!("from: {}", xxx.from());
     Account::get_schema()
-        .projects()
+        .managedProjects()
         .title
         .contains_none("values");
 }
