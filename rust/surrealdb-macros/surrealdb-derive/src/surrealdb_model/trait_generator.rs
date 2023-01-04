@@ -174,13 +174,9 @@ impl ToTokens for FieldsGetterOpts {
         let crate_name = get_crate_name(false);
 
         tokens.extend(quote! {
-            // use ::surreal_simple_querybuilder::prelude::*;
-            // #struct_type
-            
             mod #schema_mod_name {
                 #( #all_model_imports) *
                 
-                // use surreal_simple_querybuilder::prelude::*;
                 ::surreal_simple_querybuilder::prelude::model!(
                  #struct_name_ident {
                     #( #all_fields) *
@@ -195,15 +191,15 @@ impl ToTokens for FieldsGetterOpts {
                     #schema_mod_name::schema::#struct_name_ident::<0>::new()
                 }
             }
-            // impl #my_struct {
+            // impl #struct_name_ident {
             //     // type Schema = account::schema::Account<0>;
             //     // type Schema = #schema_mod_name::schema::#my_struct<0>;
-            //     const SCHEMA: #schema_mod_name::schema::#my_struct<0> = #schema_mod_name::schema::#my_struct::<0>::new();
-            //     const fn get_schema() -> #schema_type_alias_name<0> {
+            //     const SCHEMA: #schema_mod_name::schema::#struct_name_ident<0> = #schema_mod_name::schema::#struct_name_ident::<0>::new();
+            //     const fn get_schema() -> <Self as #crate_name::SurrealdbModel>::Schema<0> {
             //         // project::schema::model
             //         //  account::schema::Account<0>::new()
             //         // e.g: account::schema::Account::<0>::new()
-            //         #schema_mod_name::schema::#my_struct::<0>::new()
+            //         #schema_mod_name::schema::#struct_name_ident::<0>::new()
             //     }
             //     // fn own_schema(&self) -> #schema_type_alias_name<0> {
             //     //     // project::schema::model

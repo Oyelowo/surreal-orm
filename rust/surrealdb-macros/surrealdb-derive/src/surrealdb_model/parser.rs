@@ -202,10 +202,10 @@ impl From<super::relations::NodeObject> for ModelMetadataBasic {
     fn from(node_object: super::relations::NodeObject) -> Self {
         let schema_name_str = String::from(node_object);
         let schema_name = format_ident!("{schema_name_str}");
-        let schema_name_lower_case = format_ident!("{}", schema_name_str.to_lowercase());
+
         // imports for specific model schema from the trait Generic Associated types e.g
         // type Account<const T: usize> = <super::Account as super::Account>::Schema<T>;
-        let model_import = quote!(type #schema_name<const T:usize> =  <super::#schema_name as super::SurrealdbModel>::Schema<T>;);
+        let model_import = quote!(pub type #schema_name<const T:usize> =  <super::#schema_name as super::SurrealdbModel>::Schema<T>;);
 
         Self {
             model_import,
