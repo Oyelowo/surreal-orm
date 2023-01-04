@@ -92,27 +92,31 @@ pub struct Accountt {
     // #[surrealdb(relate(edge = "Account_Manage_project", link = "->runs->Project"))]
     projects: ForeignVec<Project>,
 }
-impl Accountt {
-    // type Schema = account::schema::Account<0>;
-    // type Schema = #schema_mod_name::schema::#my_struct<0>;
-    const SCHEMA: accountt::schema::Accountt<0> = accountt::schema::Accountt::<0>::new();
-    const fn get_schema() -> accountt::schema::Accountt<0> {
-        // project::schema::model
-        //  account::schema::Account<0>::new()
-        // e.g: account::schema::Account::<0>::new()
-        accountt::schema::Accountt::<0>::new()
-    }
-    // fn own_schema(&self) -> #schema_type_alias_name<0> {
-    //     // project::schema::model
-    //     //  account::schema::Account<0>::new()
-    //     // e.g: account::schema::Account::<0>::new()
-    //     #schema_mod_name::schema::#my_struct::<0>::new()
-    // }
-}
+// impl Accountt {
+//     // type Schema = account::schema::Account<0>;
+//     // type Schema = #schema_mod_name::schema::#my_struct<0>;
+//     const SCHEMA: accountt::schema::Accountt<0> = accountt::schema::Accountt::<0>::new();
+//     const fn get_schema() -> accountt::schema::Accountt<0> {
+//         // project::schema::model
+//         //  account::schema::Account<0>::new()
+//         // e.g: account::schema::Account::<0>::new()
+//         accountt::schema::Accountt::<0>::new()
+//     }
+//     // fn own_schema(&self) -> #schema_type_alias_name<0> {
+//     //     // project::schema::model
+//     //     //  account::schema::Account<0>::new()
+//     //     // e.g: account::schema::Account::<0>::new()
+//     //     #schema_mod_name::schema::#my_struct::<0>::new()
+//     // }
+// }
 impl Edga2 for Accountt {
     // type Schema = projectt::schema::Projectt<0>;
     // type Schema = projectt::schema::Projectt<0>;
     type Schema<const T: usize> = accountt::schema::Accountt<T>;
+
+    fn get_schema() -> Self::Schema<0> {
+        accountt::schema::Accountt::<0>::new()
+    }
 }
 fn cre() {
     let xx = Accountt::get_schema()
@@ -127,6 +131,26 @@ fn cre() {
         .managed_projects()
         .email
         .count();
+
+    let pp = Projectt::get_schema()
+        .manager()
+        .managed_projects()
+        .manager()
+        .managed_projects()
+        .manager()
+        .managed_projects()
+        .manager()
+        .managed_projects()
+        .manager()
+        .first_name;
+    let po = Accountt::get_schema()
+        .friend()
+        .managed_projects()
+        .manager()
+        .friend()
+        .managed_projects()
+        .manager()
+        .managed_projects;
 }
 mod accountt {
     // mod xxx
@@ -173,33 +197,41 @@ pub struct Projectt {
 
 pub trait Edga2 {
     type Schema<const T: usize>;
+    fn get_schema() -> Self::Schema<0>;
 }
 impl Edga2 for Projectt {
     // type Schema = projectt::schema::Projectt<0>;
     // type Schema = projectt::schema::Projectt<0>;
     type Schema<const T: usize> = projectt::schema::Projectt<T>;
-}
-// type Mowa<const T: usize> = Projectt::Schema<T>;
-type Mowa<const T: usize> = <Projectt as Edga2>::Schema<T>;
-
-impl Projectt {
-    type Schema<const T: usize> = projectt::schema::Projectt<T>;
-    // type Schema = projectt::schema::Projectt<0>;
-    // type Schema = #schema_mod_name::schema::#my_struct<0>;
-    const SCHEMA: projectt::schema::Projectt<0> = projectt::schema::Projectt::<0>::new();
-    const fn get_schema() -> projectt::schema::Projectt<0> {
+    fn get_schema() -> Self::Schema<0> {
         // project::schema::model
         //  account::schema::Account<0>::new()
         // e.g: account::schema::Account::<0>::new()
         projectt::schema::Projectt::<0>::new()
     }
-    // fn own_schema(&self) -> #schema_type_alias_name<0> {
-    //     // project::schema::model
-    //     //  account::schema::Account<0>::new()
-    //     // e.g: account::schema::Account::<0>::new()
-    //     #schema_mod_name::schema::#my_struct::<0>::new()
-    // }
 }
+// type Mowa<const T: usize> = Projectt::Schema<T>;
+// type Mowa<const T: usize> = <Projectt as Edga2>::Schema<T>;
+
+// impl Projectt {
+//     type Schema<const T: usize> = projectt::schema::Projectt<T>;
+//     // type Schema = projectt::schema::Projectt<0>;
+//     // type Schema = #schema_mod_name::schema::#my_struct<0>;
+//     const SCHEMA: projectt::schema::Projectt<0> = projectt::schema::Projectt::<0>::new();
+//     const fn get_schema() -> projectt::schema::Projectt<0> {
+//         // project::schema::model
+//
+//         //  account::schema::Account<0>::new()
+//         // e.g: account::schema::Account::<0>::new()
+//         projectt::schema::Projectt::<0>::new()
+//     }
+//     // fn own_schema(&self) -> #schema_type_alias_name<0> {
+//     //     // project::schema::model
+//     //     //  account::schema::Account<0>::new()
+//     //     // e.g: account::schema::Account::<0>::new()
+//     //     #schema_mod_name::schema::#my_struct::<0>::new()
+//     // }
+// }
 fn protext() {
     let xxx = Projectt::get_schema()
         .manager()
@@ -264,7 +296,6 @@ impl Account_Manage_Project {
 fn xc() {
     let xxx = Account_Manage_Project::default();
     let x = xxx.from();
-
     println!("{x}");
 }
 
