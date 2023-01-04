@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use static_assertions::*;
 
 // const_assert!("oylelowo".as_str().len() > 3);
-assert_fields!(Account_Manage_Project: r#in, out);
+// assert_fields!(Account_Manage_Project: r#in, out);
 
 use surrealdb_macros::SurrealdbModel;
 
@@ -56,15 +56,26 @@ pub struct Project {
 }
 
 #[allow(non_camel_case_types)]
-// #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-#[derive(Debug, Serialize, Deserialize, Default)]
-// #[surrealdb(edge_relation = "manage")]
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
+#[surrealdb(relation_name = "manage")]
 struct Account_Manage_Project {
     id: String,
-    r#in: Account,
+    #[serde(rename = "in")]
+    _in: Account,
+    // r#in: Account,
+    #[serde(rename = "out")]
     out: Project,
     when: String,
     destination: String,
+}
+
+fn ki() {
+    struct Nomax {
+        in_: String,
+    }
+    // let pp = Nomax {
+    //     in_: String::from("normal"),
+    // };
 }
 
 impl Edga for Account_Manage_Project {
@@ -293,15 +304,15 @@ impl Account_Manage_Project {
         assert_type_eq_all!(xama::Kusa, Nama);
         assert_type_eq_all!(xama::Kusa, Account);
         // assert_type_eq_all!(xama::Kusa, String);
-        assert_fields!(Account_Manage_Project: r#in, out);
+        // assert_fields!(Account_Manage_Project: r#in, out);
         "lowo".to_string()
     }
 }
 
 fn xc() {
     let xxx = Account_Manage_Project::default();
-    let x = xxx.from();
-    println!("{x}");
+    // let x = xxx.from();
+    // println!("{x}");
 }
 
 // trait Edge {

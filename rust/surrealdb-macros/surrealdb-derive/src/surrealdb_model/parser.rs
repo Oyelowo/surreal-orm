@@ -21,7 +21,25 @@ use super::{
 pub(crate) struct ModelAttributesTokensDeriver {
     pub all_model_imports: Vec<TokenStream>,
     pub all_schema_names_basic: Vec<TokenStream>,
-    pub all_fields: Vec<TokenStream>,
+    pub all_model_schema_fields: Vec<TokenStream>,
+    pub all_original_field_names_normalised: Vec<String>,
+}
+
+#[derive(PartialEq, Eq)]
+enum EdgeOrientation {
+    In,
+    Out,
+    None,
+}
+
+impl From<&TokenStream> for EdgeOrientation {
+    fn from(value: &TokenStream) -> Self {
+        match value.to_string().as_str() {
+            "in" => Self::In,
+            "out" => Self::Out,
+            _ => Self::None,
+        }
+    }
 }
 
 impl ModelAttributesTokensDeriver {
@@ -34,6 +52,7 @@ impl ModelAttributesTokensDeriver {
     pub(crate) fn from_receiver_data(
         data: &ast::Data<util::Ignored, MyFieldReceiver>,
         struct_level_casing: Option<CaseString>,
+        relation_name: Option<String>,
     ) -> Self {
         let fields = data
             .as_ref()
@@ -41,21 +60,36 @@ impl ModelAttributesTokensDeriver {
             .expect("Should never be enum")
             .fields;
 
-        fields
-            .into_iter()
-            .enumerate()
-            .fold(Self::default(), |mut acc, (index, field_receiver)| {
+        let metas = fields.into_iter().enumerate().fold(
+            Self::default(),
+            |mut acc, (index, field_receiver)| {
                 let struct_level_casing = struct_level_casing.unwrap_or(CaseString::None);
                 let meta = Self::get_model_metadata(field_receiver, struct_level_casing, index);
 
-                acc.all_fields.push(meta.field);
+                acc.all_model_schema_fields.push(meta.model_schema_field);
 
                 acc.all_model_imports.push(meta.extra.model_import);
 
                 acc.all_schema_names_basic.push(meta.extra.schema_name);
+                acc.all_original_field_names_normalised
+                    .push(meta.original_field_name_normalised);
 
                 acc
-            })
+            },
+        );
+        let has_orig_dest_nodes = metas
+            .all_model_schema_fields
+            .iter()
+            .map(EdgeOrientation::from)
+            .filter(|f| matches!(f, EdgeOrientation::In | EdgeOrientation::Out))
+            .count()
+            == 2;
+        println!("rel_name: {relation_name:?}.....has_orig_dest_nodes:{has_orig_dest_nodes}");
+        let is_valid_edge_model = relation_name.is_some() && has_orig_dest_nodes;
+        if is_valid_edge_model {
+            panic!("in and out fields have to be specified with origin and destination nodes");
+        }
+        metas
     }
 
     /// Returns a `TokenStream` representing the field identifier for the given `field_receiver` and `index`.
@@ -112,19 +146,24 @@ impl ModelAttributesTokensDeriver {
         });
 
         // get the field's proper serialized format. Renaming should take precedence
-        let field_ident_normalised = field_receiver.rename.as_ref().map_or_else(
+        let original_field_name_normalised = field_receiver.rename.as_ref().map_or_else(
             || field_ident_cased.into(),
             |renamed| renamed.clone().serialize,
         );
+        let field_ident_normalised = format_ident!("{original_field_name_normalised}");
 
-        let field_ident_normalised = format_ident!("{field_ident_normalised}");
-
+        let xx = if original_field_name_normalised == "in".to_string() {
+            quote!(r#in)
+        } else {
+            quote!(#field_ident_normalised)
+        };
         let relationship = RelationType::from(field_receiver);
 
         match relationship {
             RelationType::RelationGraph(relation) => {
                 let relation_attributes = RelateAttribute::from(relation);
                 let arrow_direction = TokenStream::from(relation_attributes.edge_direction);
+
                 let edge_action = TokenStream::from(relation_attributes.edge_action);
                 let extra = ModelMetadataBasic::from(relation_attributes.node_object);
                 let schema_name_basic = &extra.schema_name;
@@ -138,7 +177,8 @@ impl ModelAttributesTokensDeriver {
                 // e.g: ->has->Account
                 let field = quote!(#visibility #arrow_direction #edge_action #arrow_direction #schema_name_basic as #field_ident_normalised,);
                 ModelMedataTokenStream {
-                    field: quote!(#field),
+                    model_schema_field: quote!(#field),
+                    original_field_name_normalised,
                     extra,
                 }
             }
@@ -148,7 +188,8 @@ impl ModelAttributesTokensDeriver {
 
                 ModelMedataTokenStream {
                     // friend<User>
-                    field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
+                    model_schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
+                    original_field_name_normalised,
                     extra,
                 }
             }
@@ -159,14 +200,16 @@ impl ModelAttributesTokensDeriver {
                 ModelMedataTokenStream {
                     // friend<Vec<User>>
                     // TODO: Confirm/Or fix this on the querybuilder side this.
-                    field: quote!(#visibility #field_ident_normalised<Vec<#schema_name_basic>>,),
+                    model_schema_field: quote!(#visibility #field_ident_normalised<Vec<#schema_name_basic>>,),
+                    original_field_name_normalised,
                     extra,
                 }
             }
             RelationType::None => {
                 ModelMedataTokenStream {
                     // email,
-                    field: quote!(#visibility #field_ident_normalised,),
+                    model_schema_field: quote!(#visibility #xx,),
+                    original_field_name_normalised,
                     extra: ModelMetadataBasic::default(),
                 }
             }
@@ -188,7 +231,8 @@ mod account {
 }
 */
 struct ModelMedataTokenStream {
-    field: TokenStream,
+    model_schema_field: TokenStream,
+    original_field_name_normalised: String,
     extra: ModelMetadataBasic,
 }
 
