@@ -154,7 +154,7 @@ pub struct FieldsGetterOpts {
 impl ToTokens for FieldsGetterOpts {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let FieldsGetterOpts {
-            ident: ref my_struct,
+            ident: ref struct_name_ident,
             ref data,
             ref rename_all,
             ..
@@ -165,58 +165,55 @@ impl ToTokens for FieldsGetterOpts {
         });
 
         let ModelAttributesTokensDeriver {
-           // all_schema_reexported_aliases,
            all_model_imports,
-           // all_schema_names_basic,
            all_fields,
            ..
         } = ModelAttributesTokensDeriver::from_receiver_data(data, struct_level_casing);
 
-        let schema_type_alias_name = ::quote::format_ident!("{my_struct}Schema");
-        
-        let schema_mod_name = format_ident!("{}", my_struct.to_string().to_lowercase());
-        let _crate_name = get_crate_name(false);
-       let mok = "Account"; 
+        let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
+        let crate_name = get_crate_name(false);
+
         tokens.extend(quote! {
-            use ::surreal_simple_querybuilder::prelude::*;
+            // use ::surreal_simple_querybuilder::prelude::*;
             // #struct_type
             
             mod #schema_mod_name {
                 #( #all_model_imports) *
                 
-                
-                use surreal_simple_querybuilder::prelude::*;
-                
+                // use surreal_simple_querybuilder::prelude::*;
                 ::surreal_simple_querybuilder::prelude::model!(
-                 #my_struct {
+                 #struct_name_ident {
                     #( #all_fields) *
                 }
              );
             }
 
-            // e.g: type alias: type AccountSchema<const N: usize> = account::schema::Account<N>;
-            type #schema_type_alias_name<const N: usize> = #schema_mod_name::schema::#my_struct<N>;
-            // use #schema_mod_name::schema::model as #schema_type_alias_name;
-
-            impl #my_struct {
-                // type Schema = account::schema::Account<0>;
-                // type Schema = #schema_mod_name::schema::#my_struct<0>;
-                const SCHEMA: #schema_mod_name::schema::#my_struct<0> = #schema_mod_name::schema::#my_struct::<0>::new();
-                const fn get_schema() -> #schema_type_alias_name<0> {
-                    // project::schema::model
-                    //  account::schema::Account<0>::new()
-                    // e.g: account::schema::Account::<0>::new()
-                    #schema_mod_name::schema::#my_struct::<0>::new()
-                }
-                fn own_schema(&self) -> #schema_type_alias_name<0> {
-                    // project::schema::model
-                    //  account::schema::Account<0>::new()
-                    // e.g: account::schema::Account::<0>::new()
-                    #schema_mod_name::schema::#my_struct::<0>::new()
+            impl #crate_name::SurrealdbModel for #struct_name_ident {
+                // e.g type Schema = account::schema::Account<0>;
+                type Schema<const T: usize> = #schema_mod_name::schema::#struct_name_ident<T>;
+                fn get_schema() -> Self::Schema<0> {
+                    #schema_mod_name::schema::#struct_name_ident::<0>::new()
                 }
             }
+            // impl #my_struct {
+            //     // type Schema = account::schema::Account<0>;
+            //     // type Schema = #schema_mod_name::schema::#my_struct<0>;
+            //     const SCHEMA: #schema_mod_name::schema::#my_struct<0> = #schema_mod_name::schema::#my_struct::<0>::new();
+            //     const fn get_schema() -> #schema_type_alias_name<0> {
+            //         // project::schema::model
+            //         //  account::schema::Account<0>::new()
+            //         // e.g: account::schema::Account::<0>::new()
+            //         #schema_mod_name::schema::#my_struct::<0>::new()
+            //     }
+            //     // fn own_schema(&self) -> #schema_type_alias_name<0> {
+            //     //     // project::schema::model
+            //     //     //  account::schema::Account<0>::new()
+            //     //     // e.g: account::schema::Account::<0>::new()
+            //     //     #schema_mod_name::schema::#my_struct::<0>::new()
+            //     // }
+            // }
 
-            impl ::surreal_simple_querybuilder::prelude::IntoKey<::std::string::String> for #my_struct {
+            impl ::surreal_simple_querybuilder::prelude::IntoKey<::std::string::String> for #struct_name_ident {
                 fn into_key<E>(&self) -> ::std::result::Result<String, E>
                     where
                         E: ::serde::ser::Error
@@ -229,15 +226,6 @@ impl ToTokens for FieldsGetterOpts {
                     }
             }
 
-            // }      
-            // impl #crate_name::SurrealdbModel for #my_struct {
-            //     type Fields = #fields_getter_struct_name;
-            //     fn get_fields_serialized() -> Self::Fields {
-            //         #fields_getter_struct_name {
-            //             #( #struct_values_fields), *
-            //         }
-            //     }
-            // }
         });
     }
 }

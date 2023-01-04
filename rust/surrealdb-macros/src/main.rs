@@ -15,7 +15,8 @@ use static_assertions::*;
 // const_assert!("oylelowo".as_str().len() > 3);
 assert_fields!(Account_Manage_Project: r#in, out);
 
-use surrealdb_derive::SurrealdbModel;
+use surrealdb_macros::SurrealdbModel;
+
 #[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
 pub struct Account {
@@ -35,11 +36,15 @@ pub struct Account {
     projects: ForeignVec<Project>,
 }
 
-// impl Account {
-//     fn own_schema(&self) -> Self {
-//         self
-//     }
-// }
+fn kl() {
+    let po = Account::get_schema()
+        .projects()
+        .account()
+        .projects()
+        .account()
+        .projects()
+        .account();
+}
 
 #[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
@@ -313,22 +318,24 @@ impl Edge for Account_Manage_Project {
     fn to(&self) -> ::proc_macro2::TokenStream {
         // Account::;
         // self.out
-        let In = self.r#in.own_schema().to_string();
-        let Out = self.out.own_schema().to_string();
-        let In = format_ident!("{In}");
-        let Out = format_ident!("{Out}");
-        let edge = format_ident!("{}", Self::EDGE_RELATION);
-        let xx = ::quote::quote!(#In->#edge->#Out);
-        xx
+        // let In = self.r#in.own_schema().to_string();
+        // let Out = self.out.own_schema().to_string();
+        // let In = format_ident!("{In}");
+        // let Out = format_ident!("{Out}");
+        // let edge = format_ident!("{}", Self::EDGE_RELATION);
+        // let xx = ::quote::quote!(#In->#edge->#Out);
+        // xx
+        todo!()
     }
     fn from(&self) -> ::proc_macro2::TokenStream {
-        let In = self.r#in.own_schema().to_string();
-        let Out = self.out.own_schema().to_string();
-        let In = format_ident!("{In}");
-        let Out = format_ident!("{Out}");
-        let edge = format_ident!("{}", Self::EDGE_RELATION);
-        let xx = ::quote::quote!(#Out<-#edge<-#In);
-        xx
+        // let In = self.r#in.own_schema().to_string();
+        // let Out = self.out.own_schema().to_string();
+        // let In = format_ident!("{In}");
+        // let Out = format_ident!("{Out}");
+        // let edge = format_ident!("{}", Self::EDGE_RELATION);
+        // let xx = ::quote::quote!(#Out<-#edge<-#In);
+        // xx
+        todo!()
     }
     fn km(&self) -> String {
         "dfoyelowo".to_string()
@@ -339,8 +346,8 @@ use surrealdb_macros::Edge;
 
 fn main() {
     let xxx = Account_Manage_Project::default();
-    println!("to: {}", xxx.to());
-    println!("from: {}", xxx.from());
+    // println!("to: {}", xxx.to());
+    // println!("from: {}", xxx.from());
     Account::get_schema()
         .projects()
         .title
