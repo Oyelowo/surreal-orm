@@ -4,7 +4,6 @@
 #![allow(incomplete_features)]
 #![feature(inherent_associated_types)]
 #![feature(generic_const_exprs)]
-use quote::format_ident;
 use serde::{Deserialize, Serialize};
 // #![feature(inherent_associated_types)]
 // #![feature(const_mut_refs)]
@@ -15,7 +14,8 @@ use static_assertions::*;
 // const_assert!("oylelowo".as_str().len() > 3);
 assert_fields!(Account_Manage_Project: r#in, out);
 
-use surrealdb_derive::SurrealdbModel;
+use surrealdb_macros::SurrealdbModel;
+
 #[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
 pub struct Account {
@@ -32,14 +32,19 @@ pub struct Account {
 
     // #[surrealdb(relate(edge="Account_Manage_Project", description="->manage->Account"))]
     #[surrealdb(relate(edge = "Account_Manage_project", link = "->runs->Project"))]
-    projects: ForeignVec<Project>,
+    managed_projects: ForeignVec<Project>,
 }
 
-// impl Account {
-//     fn own_schema(&self) -> Self {
-//         self
-//     }
-// }
+fn kl() {
+    let po = Account::get_schema()
+        .managedProjects()
+        .account()
+        .managedProjects()
+        .account()
+        .managedProjects()
+        .account()
+        .lastName;
+}
 
 #[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
@@ -92,27 +97,31 @@ pub struct Accountt {
     // #[surrealdb(relate(edge = "Account_Manage_project", link = "->runs->Project"))]
     projects: ForeignVec<Project>,
 }
-impl Accountt {
-    // type Schema = account::schema::Account<0>;
-    // type Schema = #schema_mod_name::schema::#my_struct<0>;
-    const SCHEMA: accountt::schema::Accountt<0> = accountt::schema::Accountt::<0>::new();
-    const fn get_schema() -> accountt::schema::Accountt<0> {
-        // project::schema::model
-        //  account::schema::Account<0>::new()
-        // e.g: account::schema::Account::<0>::new()
-        accountt::schema::Accountt::<0>::new()
-    }
-    // fn own_schema(&self) -> #schema_type_alias_name<0> {
-    //     // project::schema::model
-    //     //  account::schema::Account<0>::new()
-    //     // e.g: account::schema::Account::<0>::new()
-    //     #schema_mod_name::schema::#my_struct::<0>::new()
-    // }
-}
+// impl Accountt {
+//     // type Schema = account::schema::Account<0>;
+//     // type Schema = #schema_mod_name::schema::#my_struct<0>;
+//     const SCHEMA: accountt::schema::Accountt<0> = accountt::schema::Accountt::<0>::new();
+//     const fn get_schema() -> accountt::schema::Accountt<0> {
+//         // project::schema::model
+//         //  account::schema::Account<0>::new()
+//         // e.g: account::schema::Account::<0>::new()
+//         accountt::schema::Accountt::<0>::new()
+//     }
+//     // fn own_schema(&self) -> #schema_type_alias_name<0> {
+//     //     // project::schema::model
+//     //     //  account::schema::Account<0>::new()
+//     //     // e.g: account::schema::Account::<0>::new()
+//     //     #schema_mod_name::schema::#my_struct::<0>::new()
+//     // }
+// }
 impl Edga2 for Accountt {
     // type Schema = projectt::schema::Projectt<0>;
     // type Schema = projectt::schema::Projectt<0>;
     type Schema<const T: usize> = accountt::schema::Accountt<T>;
+
+    fn get_schema() -> Self::Schema<0> {
+        accountt::schema::Accountt::<0>::new()
+    }
 }
 fn cre() {
     let xx = Accountt::get_schema()
@@ -127,6 +136,26 @@ fn cre() {
         .managed_projects()
         .email
         .count();
+
+    let pp = Projectt::get_schema()
+        .manager()
+        .managed_projects()
+        .manager()
+        .managed_projects()
+        .manager()
+        .managed_projects()
+        .manager()
+        .managed_projects()
+        .manager()
+        .first_name;
+    let po = Accountt::get_schema()
+        .friend()
+        .managed_projects()
+        .manager()
+        .friend()
+        .managed_projects()
+        .manager()
+        .managed_projects;
 }
 mod accountt {
     // mod xxx
@@ -173,33 +202,41 @@ pub struct Projectt {
 
 pub trait Edga2 {
     type Schema<const T: usize>;
+    fn get_schema() -> Self::Schema<0>;
 }
 impl Edga2 for Projectt {
     // type Schema = projectt::schema::Projectt<0>;
     // type Schema = projectt::schema::Projectt<0>;
     type Schema<const T: usize> = projectt::schema::Projectt<T>;
-}
-// type Mowa<const T: usize> = Projectt::Schema<T>;
-type Mowa<const T: usize> = <Projectt as Edga2>::Schema<T>;
-
-impl Projectt {
-    type Schema<const T: usize> = projectt::schema::Projectt<T>;
-    // type Schema = projectt::schema::Projectt<0>;
-    // type Schema = #schema_mod_name::schema::#my_struct<0>;
-    const SCHEMA: projectt::schema::Projectt<0> = projectt::schema::Projectt::<0>::new();
-    const fn get_schema() -> projectt::schema::Projectt<0> {
+    fn get_schema() -> Self::Schema<0> {
         // project::schema::model
         //  account::schema::Account<0>::new()
         // e.g: account::schema::Account::<0>::new()
         projectt::schema::Projectt::<0>::new()
     }
-    // fn own_schema(&self) -> #schema_type_alias_name<0> {
-    //     // project::schema::model
-    //     //  account::schema::Account<0>::new()
-    //     // e.g: account::schema::Account::<0>::new()
-    //     #schema_mod_name::schema::#my_struct::<0>::new()
-    // }
 }
+// type Mowa<const T: usize> = Projectt::Schema<T>;
+// type Mowa<const T: usize> = <Projectt as Edga2>::Schema<T>;
+
+// impl Projectt {
+//     type Schema<const T: usize> = projectt::schema::Projectt<T>;
+//     // type Schema = projectt::schema::Projectt<0>;
+//     // type Schema = #schema_mod_name::schema::#my_struct<0>;
+//     const SCHEMA: projectt::schema::Projectt<0> = projectt::schema::Projectt::<0>::new();
+//     const fn get_schema() -> projectt::schema::Projectt<0> {
+//         // project::schema::model
+//
+//         //  account::schema::Account<0>::new()
+//         // e.g: account::schema::Account::<0>::new()
+//         projectt::schema::Projectt::<0>::new()
+//     }
+//     // fn own_schema(&self) -> #schema_type_alias_name<0> {
+//     //     // project::schema::model
+//     //     //  account::schema::Account<0>::new()
+//     //     // e.g: account::schema::Account::<0>::new()
+//     //     #schema_mod_name::schema::#my_struct::<0>::new()
+//     // }
+// }
 fn protext() {
     let xxx = Projectt::get_schema()
         .manager()
@@ -264,7 +301,6 @@ impl Account_Manage_Project {
 fn xc() {
     let xxx = Account_Manage_Project::default();
     let x = xxx.from();
-
     println!("{x}");
 }
 
@@ -282,22 +318,24 @@ impl Edge for Account_Manage_Project {
     fn to(&self) -> ::proc_macro2::TokenStream {
         // Account::;
         // self.out
-        let In = self.r#in.own_schema().to_string();
-        let Out = self.out.own_schema().to_string();
-        let In = format_ident!("{In}");
-        let Out = format_ident!("{Out}");
-        let edge = format_ident!("{}", Self::EDGE_RELATION);
-        let xx = ::quote::quote!(#In->#edge->#Out);
-        xx
+        // let In = self.r#in.own_schema().to_string();
+        // let Out = self.out.own_schema().to_string();
+        // let In = format_ident!("{In}");
+        // let Out = format_ident!("{Out}");
+        // let edge = format_ident!("{}", Self::EDGE_RELATION);
+        // let xx = ::quote::quote!(#In->#edge->#Out);
+        // xx
+        todo!()
     }
     fn from(&self) -> ::proc_macro2::TokenStream {
-        let In = self.r#in.own_schema().to_string();
-        let Out = self.out.own_schema().to_string();
-        let In = format_ident!("{In}");
-        let Out = format_ident!("{Out}");
-        let edge = format_ident!("{}", Self::EDGE_RELATION);
-        let xx = ::quote::quote!(#Out<-#edge<-#In);
-        xx
+        // let In = self.r#in.own_schema().to_string();
+        // let Out = self.out.own_schema().to_string();
+        // let In = format_ident!("{In}");
+        // let Out = format_ident!("{Out}");
+        // let edge = format_ident!("{}", Self::EDGE_RELATION);
+        // let xx = ::quote::quote!(#Out<-#edge<-#In);
+        // xx
+        todo!()
     }
     fn km(&self) -> String {
         "dfoyelowo".to_string()
@@ -308,10 +346,10 @@ use surrealdb_macros::Edge;
 
 fn main() {
     let xxx = Account_Manage_Project::default();
-    println!("to: {}", xxx.to());
-    println!("from: {}", xxx.from());
+    // println!("to: {}", xxx.to());
+    // println!("from: {}", xxx.from());
     Account::get_schema()
-        .projects()
+        .managedProjects()
         .title
         .contains_none("values");
 }

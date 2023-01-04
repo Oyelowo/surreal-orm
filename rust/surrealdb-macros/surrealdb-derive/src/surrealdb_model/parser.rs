@@ -19,7 +19,6 @@ use super::{
 /// A struct that contains the `struct_ty_fields` and `struct_values_fields` vectors.
 #[derive(Default)]
 pub(crate) struct ModelAttributesTokensDeriver {
-    pub all_schema_reexported_aliases: Vec<TokenStream>,
     pub all_model_imports: Vec<TokenStream>,
     pub all_schema_names_basic: Vec<TokenStream>,
     pub all_fields: Vec<TokenStream>,
@@ -53,11 +52,7 @@ impl ModelAttributesTokensDeriver {
 
                 acc.all_model_imports.push(meta.extra.model_import);
 
-                acc.all_schema_names_basic
-                    .push(meta.extra.schema_name_basic);
-
-                acc.all_schema_reexported_aliases
-                    .push(meta.extra.schema_reexported_alias);
+                acc.all_schema_names_basic.push(meta.extra.schema_name);
 
                 acc
             })
@@ -132,7 +127,7 @@ impl ModelAttributesTokensDeriver {
                 let arrow_direction = TokenStream::from(relation_attributes.edge_direction);
                 let edge_action = TokenStream::from(relation_attributes.edge_action);
                 let extra = ModelMetadataBasic::from(relation_attributes.node_object);
-                let schema_name_basic = &extra.schema_name_basic;
+                let schema_name_basic = &extra.schema_name;
                 //
                 /*
                 // This can the access the alias
@@ -149,7 +144,7 @@ impl ModelAttributesTokensDeriver {
             }
             RelationType::ReferenceOne(node_object) => {
                 let extra = ModelMetadataBasic::from(node_object);
-                let schema_name_basic = &extra.schema_name_basic;
+                let schema_name_basic = &extra.schema_name;
 
                 ModelMedataTokenStream {
                     // friend<User>
@@ -159,7 +154,7 @@ impl ModelAttributesTokensDeriver {
             }
             RelationType::ReferenceMany(node_object) => {
                 let extra = ModelMetadataBasic::from(node_object);
-                let schema_name_basic = &extra.schema_name_basic;
+                let schema_name_basic = &extra.schema_name;
 
                 ModelMedataTokenStream {
                     // friend<Vec<User>>
@@ -200,27 +195,20 @@ struct ModelMedataTokenStream {
 #[derive(Default)]
 struct ModelMetadataBasic {
     model_import: TokenStream,
-    schema_name_basic: TokenStream,
-    // account::schema::model -> AccountSchema
-    schema_reexported_alias: TokenStream,
+    schema_name: TokenStream,
 }
 
 impl From<super::relations::NodeObject> for ModelMetadataBasic {
     fn from(node_object: super::relations::NodeObject) -> Self {
-        let schema_name_str = String::from(node_object);
-        let schema_name_basic = format_ident!("{schema_name_str}");
-        let schema_name_basic_lower_case = format_ident!("{}", schema_name_str.to_lowercase());
-        let schema_name_aliased = format_ident!("{schema_name_str}Schema");
-        //  import Schema from outside. To prevent model name collision with their struct names,
-        //  all schemas are suffixed-aliased to i.e<schema_name>Schema e.g Account => AccountSchema
-        //  use super::AccountSchema as Account;
-        let model_import = quote!(use super::#schema_name_aliased as #schema_name_basic;);
-        let schema_reexported_alias = quote!(use #schema_name_basic_lower_case::schema::#schema_name_basic as #schema_name_aliased;);
+        let schema_name = format_ident!("{node_object}");
+
+        // imports for specific model schema from the trait Generic Associated types e.g
+        // type Account<const T: usize> = <super::Account as super::Account>::Schema<T>;
+        let model_import = quote!(type #schema_name<const T:usize> =  <super::#schema_name as super::SurrealdbModel>::Schema<T>;);
 
         Self {
-            schema_reexported_alias,
             model_import,
-            schema_name_basic: quote!(#schema_name_basic),
+            schema_name: quote!(#schema_name),
         }
     }
 }

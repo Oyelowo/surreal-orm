@@ -60,6 +60,12 @@ macro_rules! wrapper_struct_to_ident {
                 ::quote::quote!(#ident)
             }
         }
+
+        impl ::std::fmt::Display for $simple_wrapper_struct {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.write_fmt(format_args!("{}", self.0))
+            }
+        }
     };
 }
 

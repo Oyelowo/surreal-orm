@@ -1,13 +1,15 @@
 #![allow(incomplete_features)]
+#![allow(non_camel_case_types)]
+#![allow(non_upper_case_globals)]
 #![feature(generic_const_exprs)]
 use serde::Deserialize;
 use serde::Serialize;
 
 use surreal_simple_querybuilder::prelude::*;
-use surrealdb_derive::SurrealdbModel;
+use surrealdb_macros::SurrealdbModel;
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-struct Account {
+pub struct Account {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
 
@@ -29,47 +31,26 @@ struct Account {
     managed_projects: ForeignVec<Project>,
 }
 
-/*
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-struct Account {
-    email: String,
-
-    // #[surrealdb(relate = "->manage->Project")]
-    #[surrealdb(relate(edge=Account_Manage_Project, description="->manage->Project"))]
-    projects: ForeignVec<Project>,
-}
-
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-struct Project {
+// #[surrealdb(edge_relation = "manage")]
+pub struct Account_Manage_Project {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
-    name: String,
-
-    // #[surrealdb(relate = "<-manage<-Account")]
-    #[surrealdb(relate(edge=Account_Manage_Project, description="<-manage<-Account"))]
-    authors: ForeignVec<Account>,
-}
-
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-#[surrealdb(edge_relation = "manage")]
-struct Account_Manage_Project {
-    id: String,
-    in: Account,
+    // r#in: Account,
     out: Project,
-    when: Any,
-    destination: Any,
+    // when: Any,
+    // destination: Any,
 }
 
-if to().split(->).first() == (struct_name) and ending ===
-description == ending(i.e remaining part of the string)
+// if to().split(->).first() == (struct_name) and ending ===
+// description == ending(i.e remaining part of the string)
 impl Account_Manage_Project {
-    fn to(){}
-    fn from(){}
+    // fn to() {}
+    // fn from() {}
 }
-*/
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-struct Project {
+pub struct Project {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
     name: String,
@@ -81,7 +62,7 @@ struct Project {
 }
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-struct Release {
+pub struct Release {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
     name: String,
@@ -91,7 +72,7 @@ use account::schema::model as account;
 use project::schema::model as project;
 
 #[derive(Debug, Serialize, Deserialize)]
-struct File {
+pub struct File {
     name: String,
     author: Foreign<Account>,
 }
@@ -100,11 +81,11 @@ struct File {
 fn test_create_account_query() {
     let query = QueryBuilder::new()
         .create(
-            Account::SCHEMA
+            Account::get_schema()
                 .handle
-                .as_named_label(&Account::SCHEMA.to_string()),
+                .as_named_label(&Account::get_schema().to_string()),
         )
-        .set_model(&Account::SCHEMA)
+        .set_model(&Account::get_schema())
         .unwrap()
         .build();
 
@@ -119,7 +100,7 @@ fn test_account_find_query() {
     let query = QueryBuilder::new()
         .select("*")
         .from(account)
-        .filter(Account::SCHEMA.email.equals_parameterized())
+        .filter(Account::get_schema().email.equals_parameterized())
         .build();
 
     assert_eq!(query, "SELECT * FROM Account WHERE email = $email");
@@ -299,23 +280,29 @@ fn test_foreign_deserialize() {
 /// Test that a model can have fields that reference the `Self` type.
 #[test]
 fn test_model_self_reference() {
-    assert_eq!("friend", Account::SCHEMA.friend.to_string());
-    assert_eq!("Account", Account::SCHEMA.friend().to_string());
-    assert_eq!("friend.handle", Account::SCHEMA.friend().handle.to_string());
+    assert_eq!("friend", Account::get_schema().friend.to_string());
+    assert_eq!("Account", Account::get_schema().friend().to_string());
+    assert_eq!(
+        "friend.handle",
+        Account::get_schema().friend().handle.to_string()
+    );
 }
 
 #[test]
 fn test_model_serializing_relations() {
     assert_eq!(
         "->manage->Project AS account_projects",
-        Account::SCHEMA
+        Account::get_schema()
             .managed_projects
             .as_alias("account_projects")
     );
-    assert_eq!("Project", Account::SCHEMA.managed_projects().to_string());
+    assert_eq!(
+        "Project",
+        Account::get_schema().managed_projects().to_string()
+    );
     assert_eq!(
         "->manage->Project.name AS project_names",
-        Account::SCHEMA
+        Account::get_schema()
             .managed_projects()
             .name
             .as_alias("project_names")
@@ -323,7 +310,7 @@ fn test_model_serializing_relations() {
 
     assert_eq!(
         "->manage->Project->has->Release AS account_projects_releases",
-        Account::SCHEMA
+        Account::get_schema()
             .managed_projects()
             .releases
             .as_alias("account_projects_releases")
@@ -331,7 +318,7 @@ fn test_model_serializing_relations() {
 
     assert_eq!(
         "->manage->Project->has->Release.name AS account_projects_release_names",
-        Account::SCHEMA
+        Account::get_schema()
             .managed_projects()
             .releases()
             .name
@@ -347,12 +334,12 @@ fn test_model_serializing_relations() {
 #[test]
 fn test_with_id_edge() {
     let query_one = "an_id"
-        .as_named_label(&Account::SCHEMA.to_string())
-        .with(&Account::SCHEMA.managed_projects.with_id("other_id"));
+        .as_named_label(&Account::get_schema().to_string())
+        .with(&Account::get_schema().managed_projects.with_id("other_id"));
 
     let query_two = account
         .with_id("an_id")
-        .with(&Account::SCHEMA.managed_projects.with_id("other_id"));
+        .with(&Account::get_schema().managed_projects.with_id("other_id"));
 
     assert_eq!("Account:an_id->manage->Project:other_id", query_two);
     assert_eq!(query_one, query_two);
