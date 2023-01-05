@@ -60,16 +60,18 @@ pub struct Project {
 #[surrealdb(relation_name = "manage")]
 struct AccountManageProject {
     id: Option<String>,
-    // #[serde(rename = "in")]
-    r#in: Account,
+    #[surrealdb(reference_one = "Account", skip_serializing, rename = "in")]
+    _in: Account,
+    // r#in: Account,
+    #[surrealdb(reference_one = "Project", skip_serializing)]
     out: Project,
     when: String,
     destination: String,
 }
 
 fn ki() {
-    let xx = AccountManageProject::get_schema().r#in;
-    let xm = AccountManageProject::get_schema().out;
+    let _xx = AccountManageProject::get_schema().r#in;
+    let _xm = AccountManageProject::get_schema().when;
     struct Nomax {
         in_: String,
     }
