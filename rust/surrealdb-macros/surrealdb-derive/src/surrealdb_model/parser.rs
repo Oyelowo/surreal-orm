@@ -84,10 +84,9 @@ impl ModelAttributesTokensDeriver {
             .into_iter()
             .map(EdgeOrientation::from)
             .filter(|f| matches!(f, EdgeOrientation::In | EdgeOrientation::Out))
-            // .collect::<Vec<EdgeOrientation>>();
             .count()
             == 2;
-        println!("rel_name: {relation_name:?}.....has_orig_dest_nodes:{has_orig_dest_nodes:?}");
+
         let is_invalid_edge_model = relation_name.is_some() && !has_orig_dest_nodes;
         if is_invalid_edge_model {
             panic!("in and out fields have to be specified with origin and destination nodes");

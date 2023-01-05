@@ -62,14 +62,14 @@ struct AccountManageProject {
     id: Option<String>,
     // #[serde(rename = "in")]
     r#in: Account,
-    // r#in: Account,
-    #[serde(rename = "out")]
     out: Project,
     when: String,
     destination: String,
 }
 
 fn ki() {
+    let xx = AccountManageProject::get_schema().r#in;
+    let xm = AccountManageProject::get_schema().out;
     struct Nomax {
         in_: String,
     }

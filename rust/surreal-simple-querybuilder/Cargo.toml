@@ -17,7 +17,9 @@ repository = "https://github.com/Aelto/surreal-simple-querybuilder"
 [dependencies]
 serde = { version = "1.0.144", features = ["derive"] }
 
-surreal-simple-querybuilder-proc-macro = "0.2.0"
+# surreal-simple-querybuilder-proc-macro = "0.2.0"
+# surreal-simple-querybuilder-proc-macro = {workspace = true }
+surreal-simple-querybuilder-proc-macro = { path = "./model-proc-macro"}
 
 [dev-dependencies]
 serde_json = "1.0"

@@ -1,3 +1,4 @@
+use quote::__private::Span;
 use quote::__private::TokenStream;
 use quote::format_ident;
 use quote::quote;
@@ -51,9 +52,52 @@ pub struct FieldProperty {
   pub is_public: bool,
 }
 
+// #[derive(Debug, Clone, Copy)]
+// enum Keyword {
+//   In,
+// }
+//
+// impl From<Keyword> for &str {
+//   fn from(value: Keyword) -> Self {
+//     match value {
+//       Keyword::In => "in",
+//     }
+//   }
+// }
+//
+// impl From<&String> for FieldName {
+//   fn from(value: &String) -> Self {
+//     match value.as_str() {
+//       "in" | "r#in" => FieldName::Keyword(Keyword::In),
+//       v => FieldName::Others(v.to_string()),
+//     }
+//   }
+// }
+// #[derive(Debug, Clone)]
+// enum FieldName {
+//   Keyword(Keyword),
+//   Others(String),
+// }
+fn get_ident(name: &String) -> syn::Ident {
+  // let xx = match FieldName::from(name) {
+  //   FieldName::Keyword(x) => syn::Ident::new_raw(x.into(), Span::call_site()),
+  //   FieldName::Others(o) => syn::Ident::new(o.as_str(), Span::call_site()),
+  // };
+  // if name == &"in".to_string() {
+
+  if vec!["in", "r#in"].contains(&name.as_str()) {
+    syn::Ident::new_raw(name.trim_start_matches("r#"), Span::call_site())
+  // } else if name == "r#in" {
+  // syn::Ident::new("in", Span::call_site())
+  } else {
+    syn::Ident::new(name.as_str(), Span::call_site())
+  }
+}
+
 impl FieldProperty {
   fn emit_field(&self) -> TokenStream {
-    let name = format_ident!("{}", self.name);
+    // let name = format_ident!("{}", self.name);
+    let name = get_ident(&self.name);
     let attribute = match self.is_public {
       false => emit_skip_serializing_attribute(),
       true => quote!(),
@@ -67,14 +111,16 @@ impl FieldProperty {
   }
 
   pub fn emit_initialization(&self) -> TokenStream {
-    let name = format_ident!("{}", self.name);
+    // let name = format_ident!("{}", self.name);
+    let name = get_ident(&self.name);
     let name_str = &self.name;
 
     quote!(#name: SchemaField::new(#name_str, SchemaFieldType::Property))
   }
 
   pub fn emit_initialization_with_origin(&self) -> TokenStream {
-    let name = format_ident!("{}", self.name);
+    // let name = format_ident!("{}", self.name);
+    let name = get_ident(&self.name);
     let name_str = &self.name;
 
     quote!(#name: SchemaField::with_origin(#name_str, SchemaFieldType::Property, origin.clone()))
@@ -96,7 +142,8 @@ pub struct FieldForeignNode {
 
 impl FieldForeignNode {
   fn emit_field(&self) -> TokenStream {
-    let name = format_ident!("{}", self.name);
+    // let name = format_ident!("{}", self.name);
+    let name = get_ident(&self.name);
     let attribute = match self.is_public {
       false => emit_skip_serializing_attribute(),
       true => quote!(),
@@ -109,21 +156,24 @@ impl FieldForeignNode {
   }
 
   pub fn emit_initialization(&self) -> TokenStream {
-    let name = format_ident!("{}", self.name);
+    // let name = format_ident!("{}", self.name);
+    let name = get_ident(&self.name);
     let name_str = &self.name;
 
     quote!(#name: SchemaField::new(#name_str, SchemaFieldType::Property))
   }
 
   pub fn emit_initialization_with_origin(&self) -> TokenStream {
-    let name = format_ident!("{}", self.name);
+    // let name = format_ident!("{}", self.name);
+    let name = get_ident(&self.name);
     let name_str = &self.name;
 
     quote!(#name: SchemaField::with_origin(#name_str, SchemaFieldType::Property, origin.clone()))
   }
 
   pub fn emit_foreign_field_function(&self) -> TokenStream {
-    let name = format_ident!("{}", self.name);
+    // let name = format_ident!("{}", self.name);
+    let name = get_ident(&self.name);
     let foreign_type = format_ident!("{}", self.foreign_type);
 
     quote!(

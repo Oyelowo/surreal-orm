@@ -20,3 +20,4 @@ lalrpop = "0.19.8"
 [dependencies]
 lalrpop-util = { version = "0.19.7", features = ["lexer"] }
 quote = "1.0"
+syn = {workspace = true }
