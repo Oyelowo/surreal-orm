@@ -8,6 +8,10 @@ members = [
     "lib-my-macros",
     "lib-my-macros/derive",
     "surrealdb-macros",
+    "surreal-simple-querybuilder",
+    "surreal-simple-querybuilder/model-proc-macro"
+    # "surreal-simple-querybuilder/surreal-simple-querybuilder-proc-macro"
+#
     # "derive",
 ]
 
@@ -22,6 +26,9 @@ documentation = "https://codebreather.com/oyelowo"
 [workspace.dependencies]
 lib-common = { path = "./lib-common" }
 lib-my-macros = { path = "./lib-my-macros" }
+surreal-simple-querybuilder =  {path = "./surreal-simple-querybuilder"}
+# surreal-simple-querybuilder = "0.4.0"
+
 # surrealdb = "1.0.0-beta.8"
 surrealdb = { git = "https://github.com/rushmorem/surrealdb", branch = "suppress-warnings" }
 # surrealdb-rs = { git = "https://github.com/rushmorem/surrealdb.rs", branch = "embedded-db", rev="36c243bbec716cd113c6b37b51ce04b6244ea166", features = [
@@ -29,7 +36,6 @@ surrealdb-rs = { git = "https://github.com/rushmorem/surrealdb.rs", rev = "afe62
     "mem",
     # "tikv",
 ] }
-surreal-simple-querybuilder = "0.4.0"
 poem = { version = "1.3.50", features = [
     "redis-session",
     "session",

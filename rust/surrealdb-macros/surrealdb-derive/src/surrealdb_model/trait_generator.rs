@@ -50,11 +50,11 @@ impl FromMeta for Rename {
     }
 }
 
-pub trait Edge {
-    const EDGE_RELATION: &'static str;
-    fn to(&self) -> ::proc_macro2::TokenStream;
-    fn from(&self) -> ::proc_macro2::TokenStream;
-}
+// pub trait Edge {
+//     const EDGE_RELATION: &'static str;
+//     fn to(&self) -> ::proc_macro2::TokenStream;
+//     fn from(&self) -> ::proc_macro2::TokenStream;
+// }
 
 #[derive(Debug, Clone)]
 pub struct Relate {
@@ -126,7 +126,7 @@ pub(crate) struct MyFieldReceiver {
 
     #[darling(default)]
     pub(crate) skip_serializing: bool,
-
+    
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
 
@@ -149,6 +149,9 @@ pub struct FieldsGetterOpts {
 
     #[darling(default)]
     rename_all: ::std::option::Option<Rename>,
+
+    #[darling(default)]
+    pub(crate) relation_name: ::std::option::Option<String>,
 }
 
 impl ToTokens for FieldsGetterOpts {
@@ -157,6 +160,7 @@ impl ToTokens for FieldsGetterOpts {
             ident: ref struct_name_ident,
             ref data,
             ref rename_all,
+            ref relation_name,
             ..
         } = *self;
 
@@ -166,9 +170,9 @@ impl ToTokens for FieldsGetterOpts {
 
         let ModelAttributesTokensDeriver {
            all_model_imports,
-           all_fields,
+           all_model_schema_fields,
            ..
-        } = ModelAttributesTokensDeriver::from_receiver_data(data, struct_level_casing);
+        } = ModelAttributesTokensDeriver::from_receiver_data(data, struct_level_casing, relation_name.to_owned());
 
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = get_crate_name(false);
@@ -179,7 +183,7 @@ impl ToTokens for FieldsGetterOpts {
                 
                 ::surreal_simple_querybuilder::prelude::model!(
                  #struct_name_ident {
-                    #( #all_fields) *
+                    #( #all_model_schema_fields) *
                 }
              );
             }

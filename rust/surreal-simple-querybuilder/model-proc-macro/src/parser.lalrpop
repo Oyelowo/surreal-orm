@@ -1,0 +1,95 @@
+
+use crate::ast::*;
+
+grammar();
+
+pub Model: Model = {
+  <name:Identifier> "{" <fields:CommaSeparatedFields> "}" => Model { name, fields }
+}
+
+// -----------------------------------------------------------------------------
+
+CommaSeparatedFields = TrailingComma<Field>;
+
+Field: Field = {
+  FieldProperty => Field::Property(<>),
+  FieldForeignNode => Field::ForeignNode(<>),
+  FieldRelation => Field::Relation(<>),
+  FieldForeignRelation => Field::Relation(<>)
+}
+
+FieldProperty: FieldProperty = {
+  <is_public:FieldEncapsulation> <name:Identifier> => FieldProperty { name, is_public }
+}
+
+FieldForeignNode: FieldForeignNode = {
+  <is_public:FieldEncapsulation> <name:Identifier> "<" <foreign_type:Identifier> ">" => FieldForeignNode { name, foreign_type, is_public }
+}
+
+FieldRelation: FieldRelation = {
+  <is_public:FieldEncapsulation> KeywordOutgoingEdge <name:Identifier> KeywordOutgoingEdge <foreign_type:Identifier> KeywordAs <alias:Identifier> =>
+    FieldRelation { name, foreign_type, alias, relation_type: FieldRelationType::OutgoingEdge, is_public }
+}
+
+FieldForeignRelation: FieldRelation = {
+  <is_public:FieldEncapsulation> KeywordIncomingEdge <name:Identifier> KeywordIncomingEdge <foreign_type:Identifier> KeywordAs <alias:Identifier> =>
+    FieldRelation { name, foreign_type, alias, relation_type: FieldRelationType::IncomingEdge, is_public }
+}
+
+FieldEncapsulation: bool = {
+  <is_public:KeywordPub?> => is_public.is_some()
+}
+
+// -----------------------------------------------------------------------------
+
+Identifier: String = {
+  IdentifierRegex => String::from(<>)
+}
+
+// -----------------------------------------------------------------------------
+
+/// A comma separated list of `T` with the possibility of a trailing comma
+TrailingComma<T>: Vec<T> = {
+  <mut v:(<T> ",")*> <e:T?> => match e {
+      None => v,
+      Some(e) => {
+          v.push(e);
+          v
+      }
+  }
+};
+
+// `match`: Declares the precedence of regular expressions
+// relative to one another when synthesizing
+// the lexer
+match {
+  // Ignore C++-style comments
+  r"//[^\n\r]*[\n\r]*" => {},
+  r"/\*[^\*]*[^/]*(\*/)[\n\r]*" => {},
+
+  // These items have highest precedence.
+  r"[0-9]+",
+  "as" => KeywordAs,
+  "->" => KeywordOutgoingEdge,
+  "<-" => KeywordIncomingEdge,
+  "pub" => KeywordPub,
+} else {
+  // These items have next highest precedence.
+
+  // Given an input like `123`, the number regex above
+  // will match; but otherwise, given something like
+  // `123foo` or `foo123`, this will match.
+  //
+  // Here, we also renamed the regex to the name `ID`, which we can
+  // use in the grammar itself.
+  r"\w+" => IdentifierRegex,
+
+  // Ignore whitespace
+  // You probably want this to have low precedence
+  r"\s*" => {},
+
+  // This `_` means "add in all the other strings and
+  // regular expressions in the grammer here" (e.g.,
+  // `"("`).
+  _
+} // you can have more `else` sections if you like
