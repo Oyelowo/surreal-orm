@@ -6,7 +6,7 @@ Email: oyelowooyedayo@gmail.com
 #![allow(dead_code)]
 
 use darling::{ast, util};
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
 
 use super::{
@@ -25,17 +25,18 @@ pub(crate) struct ModelAttributesTokensDeriver {
     pub all_original_field_names_normalised: Vec<String>,
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Debug)]
 enum EdgeOrientation {
     In,
     Out,
     None,
 }
 
-impl From<&TokenStream> for EdgeOrientation {
-    fn from(value: &TokenStream) -> Self {
-        match value.to_string().as_str() {
-            "in" => Self::In,
+impl From<String> for EdgeOrientation {
+    fn from(value: String) -> Self {
+        println!("Isele:{:?}", value.clone());
+        match value.as_str() {
+            "in" | "r#in" => Self::In,
             "out" => Self::Out,
             _ => Self::None,
         }
@@ -78,15 +79,17 @@ impl ModelAttributesTokensDeriver {
             },
         );
         let has_orig_dest_nodes = metas
-            .all_model_schema_fields
-            .iter()
+            .all_original_field_names_normalised
+            .clone()
+            .into_iter()
             .map(EdgeOrientation::from)
             .filter(|f| matches!(f, EdgeOrientation::In | EdgeOrientation::Out))
+            // .collect::<Vec<EdgeOrientation>>();
             .count()
             == 2;
-        println!("rel_name: {relation_name:?}.....has_orig_dest_nodes:{has_orig_dest_nodes}");
-        let is_valid_edge_model = relation_name.is_some() && has_orig_dest_nodes;
-        if is_valid_edge_model {
+        println!("rel_name: {relation_name:?}.....has_orig_dest_nodes:{has_orig_dest_nodes:?}");
+        let is_invalid_edge_model = relation_name.is_some() && !has_orig_dest_nodes;
+        if is_invalid_edge_model {
             panic!("in and out fields have to be specified with origin and destination nodes");
         }
         metas
@@ -152,8 +155,11 @@ impl ModelAttributesTokensDeriver {
         );
         let field_ident_normalised = format_ident!("{original_field_name_normalised}");
 
-        let xx = if original_field_name_normalised == "in".to_string() {
-            quote!(r#in)
+        let xx = if original_field_name_normalised.trim_start_matches("r#") == "in".to_string() {
+            // let xo = format_ident!("in");
+            let xo = syn::Ident::new_raw("in", Span::call_site());
+            let r#in = syn::Ident::new_raw("in", Span::call_site());
+            quote!(in)
         } else {
             quote!(#field_ident_normalised)
         };
