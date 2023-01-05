@@ -32,9 +32,8 @@ enum EdgeOrientation {
     None,
 }
 
-impl From<String> for EdgeOrientation {
-    fn from(value: String) -> Self {
-        println!("Isele:{:?}", value.clone());
+impl From<&String> for EdgeOrientation {
+    fn from(value: &String) -> Self {
         match value.as_str() {
             "in" | "r#in" => Self::In,
             "out" => Self::Out,
@@ -80,8 +79,7 @@ impl ModelAttributesTokensDeriver {
         );
         let has_orig_dest_nodes = metas
             .all_original_field_names_normalised
-            .clone()
-            .into_iter()
+            .iter()
             .map(EdgeOrientation::from)
             .filter(|f| matches!(f, EdgeOrientation::In | EdgeOrientation::Out))
             .count()
