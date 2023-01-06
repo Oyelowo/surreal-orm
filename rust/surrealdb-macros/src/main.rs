@@ -78,8 +78,6 @@ impl AccountManageProject {
 }
 #[test]
 fn test_account_manage_project_edge_name() {
-    type Modax = <AccountManageProject as Edge>::EdgeChecker;
-
     ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
     ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
     ::static_assertions::assert_fields!(Modax: manage);
@@ -88,7 +86,7 @@ fn test_account_manage_project_edge_name() {
 mod name {
     // add code here
 }
-// type Modax = <AccountManageProject as Edge>::EdgeChecker;
+type Modax = <AccountManageProject as Edge>::EdgeChecker;
 // ::static_assertions::assert_fields!(Modax: manage);
 // ::static_assertions::assert_type_eq_all!(
 //     <AccountManageProject as Edge>::EdgeChecker,

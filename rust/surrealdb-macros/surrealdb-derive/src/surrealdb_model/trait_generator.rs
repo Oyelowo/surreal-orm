@@ -1,14 +1,18 @@
-/* 
+/*
 Author: Oyelowo Oyedayo
 Email: oyelowooyedayo@gmail.com
 */
 
 #![allow(dead_code)]
 
-use super::{get_crate_name, parser::ModelAttributesTokensDeriver, casing::CaseString,};
+use super::{
+    casing::CaseString,
+    get_crate_name,
+    parser::{EdgeModelAttr, ModelAttributesTokensDeriver, ModelMetas},
+};
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
-use quote::{quote, format_ident};
+use quote::{format_ident, quote};
 use std::str::FromStr;
 
 use syn::{self, parse_macro_input};
@@ -33,7 +37,7 @@ impl FromMeta for Rename {
 
     fn from_list(items: &[syn::NestedMeta]) -> ::darling::Result<Self> {
         #[derive(FromMeta)]
-        struct FullRename { 
+        struct FullRename {
             serialize: String,
 
             #[darling(default)]
@@ -61,17 +65,16 @@ pub struct Relate {
     pub link: String,
     // #[darling(default)]
     pub edge: Option<String>,
-
 }
 //#[rename(se)]
 impl FromMeta for Relate {
     fn from_string(value: &str) -> darling::Result<Self> {
         Ok(Self {
             link: value.into(),
-            edge: None
+            edge: None,
         })
     }
-//TODO: Check to maybe remove cos I probably dont need this
+    //TODO: Check to maybe remove cos I probably dont need this
     fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
         // pub trait Edge {
         //     const edge_relation: &'static str;
@@ -82,21 +85,20 @@ impl FromMeta for Relate {
         #[derive(FromMeta)]
         struct FullRelate {
             edge: String,
-            link: String
+            link: String,
         }
 
         impl From<FullRelate> for Relate {
             fn from(v: FullRelate) -> Self {
-                let FullRelate {  link,edge, .. } = v;
-                Self { link, edge: Some(edge)}
+                let FullRelate { link, edge, .. } = v;
+                Self {
+                    link,
+                    edge: Some(edge),
+                }
             }
         }
         FullRelate::from_list(items).map(Relate::from)
     }
-
-
-
-  
 }
 
 #[derive(Debug, FromField)]
@@ -106,7 +108,7 @@ pub(crate) struct MyFieldReceiver {
     /// enum bodies, this can be `None`.
     pub(crate) ident: ::std::option::Option<syn::Ident>,
     /// This magic field name pulls the type from the input.
-    ty: syn::Type,
+    pub(crate) ty: syn::Type,
     attrs: Vec<syn::Attribute>,
 
     #[darling(default)]
@@ -115,18 +117,18 @@ pub(crate) struct MyFieldReceiver {
     // graph relation: e.g ->has->Account
     #[darling(default)]
     pub(crate) relate: ::std::option::Option<Relate>,
-    
+
     // reference singular: Foreign<Account>
     #[darling(default)]
     pub(crate) reference_one: ::std::option::Option<String>,
-    
+
     // reference plural: Foreign<Vec<Account>>
     #[darling(default)]
     pub(crate) reference_many: ::std::option::Option<String>,
 
     #[darling(default)]
     pub(crate) skip_serializing: bool,
-    
+
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
 
@@ -168,65 +170,129 @@ impl ToTokens for FieldsGetterOpts {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
 
-        let ModelAttributesTokensDeriver {
-           all_model_imports,
-           all_model_schema_fields,
-           ..
-        } = ModelAttributesTokensDeriver::from_receiver_data(data, struct_level_casing, relation_name.to_owned());
-
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = get_crate_name(false);
 
-        tokens.extend(quote! {
-            mod #schema_mod_name {
-                #( #all_model_imports) *
-                
-                ::surreal_simple_querybuilder::prelude::model!(
-                 #struct_name_ident {
-                    #( #all_model_schema_fields) *
-                }
-             );
-            }
+        // let ModelAttributesTokensDeriver {
+        //    all_model_imports,
+        //    all_model_schema_fields,
+        //    all_static_assertions,
+        //    all_schema_names_basic,
+        //    all_original_field_names_normalised,
+        //    ..
+        // } = ModelMetas::from_receiver_data(data, struct_level_casing, relation_name.to_owned(), struct_name_ident);
+        let get_basic = |x: ModelAttributesTokensDeriver, edge_checker_struct: TokenStream| {
+            let ModelAttributesTokensDeriver {
+                all_model_imports,
+                all_model_schema_fields,
+                all_static_assertions,
+                all_schema_names_basic,
+                all_original_field_names_normalised,
+                ..
+            } = x;
+            quote! {
+                        mod #schema_mod_name {
+                            #( #all_model_imports) *
 
-            impl #crate_name::SurrealdbModel for #struct_name_ident {
-                // e.g type Schema = account::schema::Account<0>;
-                type Schema<const T: usize> = #schema_mod_name::schema::#struct_name_ident<T>;
-                fn get_schema() -> Self::Schema<0> {
-                    #schema_mod_name::schema::#struct_name_ident::<0>::new()
-                }
-            }
-            // impl #struct_name_ident {
-            //     // type Schema = account::schema::Account<0>;
-            //     // type Schema = #schema_mod_name::schema::#my_struct<0>;
-            //     const SCHEMA: #schema_mod_name::schema::#struct_name_ident<0> = #schema_mod_name::schema::#struct_name_ident::<0>::new();
-            //     const fn get_schema() -> <Self as #crate_name::SurrealdbModel>::Schema<0> {
-            //         // project::schema::model
-            //         //  account::schema::Account<0>::new()
-            //         // e.g: account::schema::Account::<0>::new()
-            //         #schema_mod_name::schema::#struct_name_ident::<0>::new()
-            //     }
-            //     // fn own_schema(&self) -> #schema_type_alias_name<0> {
-            //     //     // project::schema::model
-            //     //     //  account::schema::Account<0>::new()
-            //     //     // e.g: account::schema::Account::<0>::new()
-            //     //     #schema_mod_name::schema::#my_struct::<0>::new()
-            //     // }
-            // }
+            #edge_checker_struct
 
-            impl ::surreal_simple_querybuilder::prelude::IntoKey<::std::string::String> for #struct_name_ident {
-                fn into_key<E>(&self) -> ::std::result::Result<String, E>
-                    where
-                        E: ::serde::ser::Error
-                    {
-                        self
-                        .id
-                        .as_ref()
-                        .map(::std::string::String::clone)
-                        .ok_or(::serde::ser::Error::custom("The project has no ID"))
+                            ::surreal_simple_querybuilder::prelude::model!(
+                             #struct_name_ident {
+                                #( #all_model_schema_fields) *
+                            }
+                         );
+                        }
+
+                        impl #crate_name::SurrealdbModel for #struct_name_ident {
+                            // e.g type Schema = account::schema::Account<0>;
+                            type Schema<const T: usize> = #schema_mod_name::schema::#struct_name_ident<T>;
+                            fn get_schema() -> Self::Schema<0> {
+                                #schema_mod_name::schema::#struct_name_ident::<0>::new()
+                            }
+                        }
+                        // impl #struct_name_ident {
+                        //     // type Schema = account::schema::Account<0>;
+                        //     // type Schema = #schema_mod_name::schema::#my_struct<0>;
+                        //     const SCHEMA: #schema_mod_name::schema::#struct_name_ident<0> = #schema_mod_name::schema::#struct_name_ident::<0>::new();
+                        //     const fn get_schema() -> <Self as #crate_name::SurrealdbModel>::Schema<0> {
+                        //         // project::schema::model
+                        //         //  account::schema::Account<0>::new()
+                        //         // e.g: account::schema::Account::<0>::new()
+                        //         #schema_mod_name::schema::#struct_name_ident::<0>::new()
+                        //     }
+                        //     // fn own_schema(&self) -> #schema_type_alias_name<0> {
+                        //     //     // project::schema::model
+                        //     //     //  account::schema::Account<0>::new()
+                        //     //     // e.g: account::schema::Account::<0>::new()
+                        //     //     #schema_mod_name::schema::#my_struct::<0>::new()
+                        //     // }
+                        // }
+
+                        impl ::surreal_simple_querybuilder::prelude::IntoKey<::std::string::String> for #struct_name_ident {
+                            fn into_key<E>(&self) -> ::std::result::Result<String, E>
+                                where
+                                    E: ::serde::ser::Error
+                                {
+                                    self
+                                    .id
+                                    .as_ref()
+                                    .map(::std::string::String::clone)
+                                    .ok_or(::serde::ser::Error::custom("The project has no ID"))
+                                }
+                        }
+                                        }
+        };
+        let kk = match ModelMetas::from_receiver_data(
+            data,
+            struct_level_casing,
+            relation_name.to_owned(),
+            struct_name_ident,
+        ) {
+            ModelMetas::NodeModel(x) => {
+                let xx = get_basic(x, quote!());
+                quote!(#xx)
+            }
+            ModelMetas::EdgeModel(y) => {
+                let relation_name_ident = relation_name
+                    .as_ref()
+                    .expect("Relation name must be provided");
+                let EdgeModelAttr {
+                    in_node_type,
+                    out_node_type,
+                    mode_attr,
+                } = y;
+                let edge_checker_struct = quote!(
+                    pub struct EdgeChecker {
+                        pub #relation_name_ident: String,
                     }
-            }
+                );
+                let mm = mode_attr.clone().all_static_assertions;
+                let xx = get_basic(mode_attr.clone(), edge_checker_struct);
 
-        });
+                let test_name = format_ident!("test_{}_edge_name", schema_mod_name.to_string());
+                quote!(
+                    #xx
+
+                    #[test]
+                    fn #test_name() {
+                        #( #mm ) *
+
+                        // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
+                        // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
+                        // ::static_assertions::assert_fields!(Modax: manage);
+                    }
+
+                    impl Edge for #struct_name_ident {
+                        type EdgeChecker = #schema_mod_name::EdgeChecker;
+                        type InNode = #in_node_type;
+
+                        type OutNode = #out_node_type;
+                    }
+                )
+            }
+        };
+
+        tokens.extend(kk);
     }
 }
 
