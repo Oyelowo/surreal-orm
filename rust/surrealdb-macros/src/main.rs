@@ -4,8 +4,6 @@
 #![allow(incomplete_features)]
 #![feature(inherent_associated_types)]
 #![feature(generic_const_exprs)]
-use _core::any::Any;
-use ko::EdgeChecker;
 use serde::{Deserialize, Serialize};
 // #![feature(inherent_associated_types)]
 // #![feature(const_mut_refs)]
@@ -16,7 +14,7 @@ use static_assertions::*;
 // const_assert!("oylelowo".as_str().len() > 3);
 // assert_fields!(Account_Manage_Project: r#in, out);
 
-use surrealdb_macros::SurrealdbModel;
+use surrealdb_macros::{Edge, SurrealdbModel};
 
 #[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
@@ -53,7 +51,8 @@ fn kl() {
 pub struct Project {
     id: Option<String>,
     title: String,
-    #[surrealdb(relate = "->run_by->Account")]
+    // #[surrealdb(relate = "->run_by->Account")]
+    #[surrealdb(relate(edge = "AccountManageproject", link = "->run_by->Account"))]
     account: ForeignVec<Account>,
 }
 
@@ -71,11 +70,11 @@ struct AccountManageProject {
     destination: String,
 }
 
-static NAME: &'static str = "manage";
+// static NAME: &'static str = "manage";
 // ::static_assertions::const_assert!(NAME == NAME);
-impl AccountManageProject {
-    const NAME: &'static str = "manage";
-}
+// impl AccountManageProject {
+//     const NAME: &'static str = "manage";
+// }
 #[test]
 fn test_account_manage_project_edge_name() {
     ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
@@ -99,12 +98,12 @@ mod ko {
     // ::static_assertions::assert_fields!(EdgeChecker: manage);
     // fn er() {}
 }
-impl Edge for AccountManageProject {
-    type EdgeChecker = ko::EdgeChecker;
-    type InNode = Account;
-
-    type OutNode = Project;
-}
+// impl Edge for AccountManageProject {
+//     type EdgeChecker = ko::EdgeChecker;
+//     type InNode = Account;
+//
+//     type OutNode = Project;
+// }
 
 fn xc() {
     // let _xxx = AccountManageProject::default();
@@ -150,7 +149,6 @@ fn xc() {
 //     }
 // }
 use surreal_simple_querybuilder::prelude::*;
-use surrealdb_macros::Edge;
 
 fn main() {
     let _xxx = AccountManageProject::default();
