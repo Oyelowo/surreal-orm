@@ -289,14 +289,16 @@ impl ModelAttributesTokensDeriver {
                     }
                     super::relations::EdgeDirection::InArrowLeft => (destination_node, struct_name),
                 };
+                let edge_checker_alias =
+                    format_ident!("EdgeChecker{edge_struct_ident}{edge_action}");
                 let relation_assertions = quote!(
                 // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
                 // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
                 // type EdgeCheckerAlias = <AccountManageProject as Edge>::EdgeChecker;
                 ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as Edge>::InNode, #in_node);
                 ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as Edge>::OutNode, #out_node);
-                type EdgeCheckerAlias = <#edge_struct_ident as Edge>::EdgeChecker;
-                ::static_assertions::assert_fields!(EdgeCheckerAlias: #edge_action);
+                type #edge_checker_alias  = <#edge_struct_ident as Edge>::EdgeChecker;
+                ::static_assertions::assert_fields!(#edge_checker_alias : #edge_action);
                                         );
                 /*
                  *

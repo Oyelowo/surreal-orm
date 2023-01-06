@@ -31,7 +31,7 @@ pub struct Account {
     email: String,
 
     // #[surrealdb(relate(edge="Account_Manage_Project", description="->manage->Account"))]
-    #[surrealdb(relate(edge = "AccountManageproject", link = "->runs->Project"))]
+    #[surrealdb(relate(edge = "AccountManageProject", link = "->manage->Project"))]
     managed_projects: ForeignVec<Project>,
 }
 
@@ -52,7 +52,7 @@ pub struct Project {
     id: Option<String>,
     title: String,
     // #[surrealdb(relate = "->run_by->Account")]
-    #[surrealdb(relate(edge = "AccountManageproject", link = "->run_by->Account"))]
+    #[surrealdb(relate(edge = "AccountManageProject", link = "<-manage<-Account"))]
     account: ForeignVec<Account>,
 }
 

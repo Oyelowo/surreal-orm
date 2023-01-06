@@ -193,14 +193,6 @@ impl ToTokens for FieldsGetterOpts {
         let edge_tokens = match relation_name {
             Some(relation) => {
 quote!(
-                    #[test]
-                    fn #test_name() {
-                        #( #all_static_assertions) *
-
-                        // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
-                        // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
-                        // ::static_assertions::assert_fields!(Modax: manage);
-                    }
 
                     impl #crate_name::Edge for #struct_name_ident {
                         type EdgeChecker = #schema_mod_name::EdgeChecker;
@@ -275,6 +267,14 @@ tokens.extend(quote!(
                                     .ok_or(::serde::ser::Error::custom("The project has no ID"))
                                 }
                         }
+                    #[test]
+                    fn #test_name() {
+                        #( #all_static_assertions) *
+
+                        // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
+                        // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
+                        // ::static_assertions::assert_fields!(Modax: manage);
+                    }
              #edge_tokens
 ));
         // let get_basic = |x: ModelAttributesTokensDeriver, edge_checker_struct: TokenStream| {

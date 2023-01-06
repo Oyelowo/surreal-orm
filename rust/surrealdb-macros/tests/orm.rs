@@ -1,12 +1,13 @@
 #![allow(incomplete_features)]
 #![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![feature(generic_const_exprs)]
 use serde::Deserialize;
 use serde::Serialize;
 
 use surreal_simple_querybuilder::prelude::*;
-use surrealdb_macros::SurrealdbModel;
+use surrealdb_macros::{Edge, SurrealdbModel};
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
 pub struct Account {
@@ -27,26 +28,22 @@ pub struct Account {
     // Account->manage->Project
     // Project<-manage<-Account
     // #[surrealdb(relate = "->manage->Project", skip_serializing)]
-    #[surrealdb(relate(edge = "", link = "->manage->Project"), skip_serializing)]
+    #[surrealdb(
+        relate(edge = "Account_Manage_Project", link = "->manage->Project"),
+        skip_serializing
+    )]
     managed_projects: ForeignVec<Project>,
 }
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
-// #[surrealdb(edge_relation = "manage")]
+#[surrealdb(relation_name = "manage")]
 pub struct Account_Manage_Project {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
-    // r#in: Account,
+    r#in: Account,
     out: Project,
     // when: Any,
     // destination: Any,
-}
-
-// if to().split(->).first() == (struct_name) and ending ===
-// description == ending(i.e remaining part of the string)
-impl Account_Manage_Project {
-    // fn to() {}
-    // fn from() {}
 }
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
@@ -55,10 +52,21 @@ pub struct Project {
     id: Option<String>,
     name: String,
 
-    #[surrealdb(relate = "->has->Release")]
+    // #[surrealdb(relate = "->has->Release")]
+    #[surrealdb(relate(edge = "ProjectHasRelease", link = "->has->Release"))]
     releases: ForeignVec<Release>,
-    #[surrealdb(relate = "<-manage<-Account")]
+    #[surrealdb(relate(edge = "Account_Manage_Project", link = "<-manage<-Account"))]
     authors: ForeignVec<Account>,
+}
+
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
+#[surrealdb(relation_name = "has")]
+pub struct ProjectHasRelease {
+    #[surrealdb(skip_serializing)]
+    id: Option<String>,
+    name: String,
+    r#in: Project,
+    out: Release,
 }
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
@@ -66,6 +74,7 @@ pub struct Release {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
     name: String,
+    // #[surrealdb(relate(edge = "ProjectHasRelease", link = "->has->Release"))]
 }
 
 use account::schema::model as account;
