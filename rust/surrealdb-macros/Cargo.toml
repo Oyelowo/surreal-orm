@@ -11,6 +11,7 @@ documentation = { workspace = true }
 [dependencies]
 surrealdb-derive = { path = "./surrealdb-derive" }
 surreal-simple-querybuilder = { workspace = true }
+# surreal-simple-querybuilder = "0.4.0"
 # hello-macro-derive = { workspace = true }
 # macro-derive = { workspace = true }
 syn = { workspace = true }

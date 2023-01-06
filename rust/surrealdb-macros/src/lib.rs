@@ -1,8 +1,11 @@
 pub trait Edge {
-    const EDGE_RELATION: &'static str;
-    fn to(&self) -> ::proc_macro2::TokenStream;
-    fn from(&self) -> ::proc_macro2::TokenStream;
-    fn km(&self) -> String;
+    type EdgeChecker;
+    type InNode;
+    type OutNode;
+    // const EDGE_RELATION: &'static str;
+    // fn to(&self) -> ::proc_macro2::TokenStream;
+    // fn from(&self) -> ::proc_macro2::TokenStream;
+    // fn km(&self) -> String;
 }
 
 // Re-export surrealdbmodel proc macro alongside the trait.

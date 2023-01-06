@@ -14,7 +14,7 @@ use static_assertions::*;
 // const_assert!("oylelowo".as_str().len() > 3);
 // assert_fields!(Account_Manage_Project: r#in, out);
 
-use surrealdb_macros::SurrealdbModel;
+use surrealdb_macros::{Edge, SurrealdbModel};
 
 #[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
@@ -31,7 +31,7 @@ pub struct Account {
     email: String,
 
     // #[surrealdb(relate(edge="Account_Manage_Project", description="->manage->Account"))]
-    #[surrealdb(relate(edge = "AccountManageproject", link = "->runs->Project"))]
+    #[surrealdb(relate(edge = "AccountManageProject", link = "->manage->Project"))]
     managed_projects: ForeignVec<Project>,
 }
 
@@ -51,7 +51,8 @@ fn kl() {
 pub struct Project {
     id: Option<String>,
     title: String,
-    #[surrealdb(relate = "->run_by->Account")]
+    // #[surrealdb(relate = "->run_by->Account")]
+    #[surrealdb(relate(edge = "AccountManageProject", link = "<-manage<-Account"))]
     account: ForeignVec<Account>,
 }
 
@@ -69,9 +70,105 @@ struct AccountManageProject {
     destination: String,
 }
 
+// static NAME: &'static str = "manage";
+// ::static_assertions::const_assert!(NAME == NAME);
+// impl AccountManageProject {
+//     const NAME: &'static str = "manage";
+// }
+#[test]
+fn test_account_manage_project_edge_name() {
+    ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
+    ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
+    ::static_assertions::assert_fields!(Modax: manage);
+}
+
+mod name {
+    // add code here
+}
+type Modax = <AccountManageProject as Edge>::EdgeChecker;
+// ::static_assertions::assert_fields!(Modax: manage);
+// ::static_assertions::assert_type_eq_all!(
+//     <AccountManageProject as Edge>::EdgeChecker,
+//     ko::EdgeChecker
+// );
+mod ko {
+    pub struct EdgeChecker {
+        pub manage: String,
+    }
+    // ::static_assertions::assert_fields!(EdgeChecker: manage);
+    // fn er() {}
+}
+// impl Edge for AccountManageProject {
+//     type EdgeChecker = ko::EdgeChecker;
+//     type InNode = Account;
+//
+//     type OutNode = Project;
+// }
+
+fn xc() {
+    // let _xxx = AccountManageProject::default();
+    // let x = xxx.from();
+    // println!("{x}");
+}
+
+// trait Edge {
+//     const edge_relation: &'static str;
+//     fn to(&self) -> ::proc_macro2::TokenStream;
+//     fn from(&self) -> ::proc_macro2::TokenStream;
+// }
+
+// if to().split(->).first() == (struct_name) and ending ===
+// description == ending(i.e remaining part of the string)
+// impl Edge for AccountManageProject {
+//     #[allow(non_upper_case_globals)]
+//     const EDGE_RELATION: &'static str = "manage";
+//     fn to(&self) -> ::proc_macro2::TokenStream {
+//         // Account::;
+//         // self.out
+//         // let In = self.r#in.own_schema().to_string();
+//         // let Out = self.out.own_schema().to_string();
+//         // let In = format_ident!("{In}");
+//         // let Out = format_ident!("{Out}");
+//         // let edge = format_ident!("{}", Self::EDGE_RELATION);
+//         // let xx = ::quote::quote!(#In->#edge->#Out);
+//         // xx
+//         todo!()
+//     }
+//     fn from(&self) -> ::proc_macro2::TokenStream {
+//         // let In = self.r#in.own_schema().to_string();
+//         // let Out = self.out.own_schema().to_string();
+//         // let In = format_ident!("{In}");
+//         // let Out = format_ident!("{Out}");
+//         // let edge = format_ident!("{}", Self::EDGE_RELATION);
+//         // let xx = ::quote::quote!(#Out<-#edge<-#In);
+//         // xx
+//         todo!()
+//     }
+//     fn km(&self) -> String {
+//         "dfoyelowo".to_string()
+//     }
+// }
+use surreal_simple_querybuilder::prelude::*;
+
+fn main() {
+    let _xxx = AccountManageProject::default();
+    // println!("to: {}", xxx.to());
+    // println!("from: {}", xxx.from());
+    Account::get_schema()
+        .managedProjects()
+        .title
+        .contains_none("values");
+}
+
 fn ki() {
     let _xx = AccountManageProject::get_schema().r#in;
-    let _xm = AccountManageProject::get_schema().when;
+    let _xm = AccountManageProject::get_schema()
+        .out()
+        .account()
+        .managedProjects()
+        .account()
+        .managedProjects()
+        .title;
     struct Nomax {
         in_: String,
     }
@@ -86,6 +183,7 @@ impl Edga for AccountManageProject {
 }
 type Kol = <AccountManageProject as Edga>::In;
 ::static_assertions::assert_type_eq_all!(Account, <AccountManageProject as Edga>::In);
+::static_assertions::assert_type_eq_all!(Project, <AccountManageProject as Edga>::Out);
 
 trait Edga {
     type In;
@@ -211,7 +309,7 @@ pub struct Projectt {
     id: Option<String>,
     title: String,
     // #[surrealdb(relate = "->run_by->Account")]
-    account: ForeignVec<Account>,
+    // account: ForeignVec<Account>,
 }
 
 pub trait Edga2 {
@@ -299,71 +397,4 @@ mod xama {
     const_assert!(FIVE * 2 == 10);
     // const kp: String = Account_Manage_Project::sama();
     pub type Kusa = Account;
-}
-impl AccountManageProject {
-    fn sama() -> String {
-        type Nama = Account;
-        assert_type_eq_all!(Account, Nama);
-        assert_type_eq_all!(xama::Kusa, Nama);
-        assert_type_eq_all!(xama::Kusa, Account);
-        // assert_type_eq_all!(xama::Kusa, String);
-        // assert_fields!(Account_Manage_Project: r#in, out);
-        "lowo".to_string()
-    }
-}
-
-fn xc() {
-    let _xxx = AccountManageProject::default();
-    // let x = xxx.from();
-    // println!("{x}");
-}
-
-// trait Edge {
-//     const edge_relation: &'static str;
-//     fn to(&self) -> ::proc_macro2::TokenStream;
-//     fn from(&self) -> ::proc_macro2::TokenStream;
-// }
-
-// if to().split(->).first() == (struct_name) and ending ===
-// description == ending(i.e remaining part of the string)
-impl Edge for AccountManageProject {
-    #[allow(non_upper_case_globals)]
-    const EDGE_RELATION: &'static str = "manage";
-    fn to(&self) -> ::proc_macro2::TokenStream {
-        // Account::;
-        // self.out
-        // let In = self.r#in.own_schema().to_string();
-        // let Out = self.out.own_schema().to_string();
-        // let In = format_ident!("{In}");
-        // let Out = format_ident!("{Out}");
-        // let edge = format_ident!("{}", Self::EDGE_RELATION);
-        // let xx = ::quote::quote!(#In->#edge->#Out);
-        // xx
-        todo!()
-    }
-    fn from(&self) -> ::proc_macro2::TokenStream {
-        // let In = self.r#in.own_schema().to_string();
-        // let Out = self.out.own_schema().to_string();
-        // let In = format_ident!("{In}");
-        // let Out = format_ident!("{Out}");
-        // let edge = format_ident!("{}", Self::EDGE_RELATION);
-        // let xx = ::quote::quote!(#Out<-#edge<-#In);
-        // xx
-        todo!()
-    }
-    fn km(&self) -> String {
-        "dfoyelowo".to_string()
-    }
-}
-use surreal_simple_querybuilder::prelude::*;
-use surrealdb_macros::Edge;
-
-fn main() {
-    let _xxx = AccountManageProject::default();
-    // println!("to: {}", xxx.to());
-    // println!("from: {}", xxx.from());
-    Account::get_schema()
-        .managedProjects()
-        .title
-        .contains_none("values");
 }
