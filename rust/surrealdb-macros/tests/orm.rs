@@ -3,13 +3,16 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![feature(generic_const_exprs)]
+
+use async_graphql::ComplexObject;
 use serde::Deserialize;
 use serde::Serialize;
-
+use async_graphql::SimpleObject;
 use surreal_simple_querybuilder::prelude::*;
 use surrealdb_macros::{Edge, SurrealdbModel};
 
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
+
+#[derive(SurrealdbModel, SimpleObject, Debug, Serialize, Deserialize, Default, Clone)]
 pub struct Account {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
@@ -20,19 +23,43 @@ pub struct Account {
 
     #[surrealdb(reference_one = "Account", skip_serializing)]
     // friend: Foreign<std::sync::Arc<Account>>,
-    friend: String,
+    #[graphql(skip)]
+    friend: ForeignVec<Account>,
+
+    // #[surrealdb(reference_one = "Account", skip_serializing)]
+    // // friend: Foreign<std::sync::Arc<Account>>,
+    // #[graphql(skip)]
+    // best_friend: String,
 
     #[surrealdb(skip_serializing)]
+    #[graphql(skip)]
     projects: ForeignVec<Project>,
-
-    // Account->manage->Project
-    // Project<-manage<-Account
-    // #[surrealdb(relate = "->manage->Project", skip_serializing)]
+    
     #[surrealdb(
         relate(edge = "Account_Manage_Project", link = "->manage->Project"),
-        skip_serializing
+        skip_serializing,
     )]
+    #[graphql(skip)]
     managed_projects: ForeignVec<Project>,
+}
+
+#[ComplexObject]
+impl Account {
+    // async fn friend(&self)  -> Account{
+    //     // self.friend.allow_value_serialize();
+    //     // self.projects.value().map(|x|x.to_vec()).unwrap_or_default()
+    //     // Self::get_schema().friend()
+    //     // Account::get_schema()
+    //     todo!()
+    // }
+    async fn projects(&self)  -> Vec<Project>{
+        self.projects.allow_value_serialize();
+        self.projects.value().map(|x|x.to_vec()).unwrap_or_default()
+    }
+    async fn projects_ids(&self)  -> Vec<String>{
+        self.projects.disallow_value_serialize();
+        self.projects.key().map(|x|x.to_vec()).unwrap_or_default()
+    }
 }
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
@@ -46,7 +73,7 @@ pub struct Account_Manage_Project {
     // destination: Any,
 }
 
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default, SimpleObject, Clone)]
 pub struct Project {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
@@ -54,9 +81,9 @@ pub struct Project {
 
     // #[surrealdb(relate = "->has->Release")]
     #[surrealdb(relate(edge = "ProjectHasRelease", link = "->has->Release"))]
-    releases: ForeignVec<Release>,
+    releases: Release,
     #[surrealdb(relate(edge = "Account_Manage_Project", link = "<-manage<-Account"))]
-    authors: ForeignVec<Account>,
+    authors: Account,
 }
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
@@ -69,7 +96,7 @@ pub struct ProjectHasRelease {
     out: Release,
 }
 
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default, SimpleObject, Clone)]
 pub struct Release {
     #[surrealdb(skip_serializing)]
     id: Option<String>,

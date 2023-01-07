@@ -273,11 +273,7 @@ impl ModelAttributesTokensDeriver {
                 // TODO: Make edge required.
                 let edge_struct_ident = format_ident!(
                     "{}",
-                    relation
-                        .clone()
-                        .edge
-                        .clone()
-                        .expect("Edge must be specified for relations")
+                    relation.edge.expect("Edge must be specified for relations")
                 );
                 // let xx = relation_attributes.edge_direction;
                 // let node_assertion = quote!(<AccountManageProject as Edge>::InNode, Account);
@@ -386,6 +382,7 @@ impl From<super::relations::NodeObject> for ModelMetadataBasic {
 
         // imports for specific model schema from the trait Generic Associated types e.g
         // type Account<const T: usize> = <super::Account as super::Account>::Schema<T>;
+        // TODO: Check uniqueness of imports
         let model_import = quote!(type #schema_name<const T:usize> =  <super::#schema_name as super::SurrealdbModel>::Schema<T>;);
 
         Self {
