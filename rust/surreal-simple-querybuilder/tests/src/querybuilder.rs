@@ -14,7 +14,6 @@ struct Account {
   projects: ForeignVec<Project>,
 }
 
-fn xxxx() {}
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 struct Project {
@@ -61,7 +60,7 @@ mod account {
     pub email,
     friend<Account>,
 
-    <-manage<-Project as managed_projects,
+    ->manage->Project as managed_projects,
   });
 }
 

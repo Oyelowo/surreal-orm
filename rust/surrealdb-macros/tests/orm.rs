@@ -21,15 +21,13 @@ pub struct Account {
     email: String,
 
     #[surrealdb(reference_one = "Account", skip_serializing)]
-    // friend: Foreign<std::sync::Arc<Account>>,
     #[graphql(skip)]
-    friend: ForeignVec<Account>,
+    friend: Box<Foreign<Account>>,
 
-    #[surrealdb(reference_one = "Account", skip_serializing)]
-    #[graphql(skip)]
-    nama: ForeignVec<Account>,
-
+    // #[surrealdb(reference_one = "Account", skip_serializing)]
     // #[graphql(skip)]
+    // nama: Box<Foreign<Account>>,
+
     // best_friend: String,
     #[surrealdb(skip_serializing)]
     #[graphql(skip)]
@@ -45,13 +43,14 @@ pub struct Account {
 
 #[ComplexObject]
 impl Account {
-    // async fn friend(&self)  -> Account{
-    //     // self.friend.allow_value_serialize();
-    //     // self.projects.value().map(|x|x.to_vec()).unwrap_or_default()
-    //     // Self::get_schema().friend()
-    //     // Account::get_schema()
-    //     todo!()
-    // }
+    async fn friend(&self) -> Account {
+        // self.friend.allow_value_serialize();
+        // self.projects.value().map(|x|x.to_vec()).unwrap_or_default()
+        // Self::get_schema().friend()
+        // Acc>ount::get_schema()
+        self.friend.allow_value_serialize();
+        self.friend.value().unwrap().to_owned()
+    }
     async fn projects(&self) -> Vec<Project> {
         self.projects.allow_value_serialize();
         self.projects
@@ -376,7 +375,7 @@ fn test_with_id_edge() {
         .as_named_label(&Account::get_schema().to_string())
         .with(&Account::get_schema().managed_projects.with_id("other_id"));
 
-    let query_two = account
+    let query_two = Account::get_schema()
         .with_id("an_id")
         .with(&Account::get_schema().managed_projects.with_id("other_id"));
 
