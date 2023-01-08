@@ -1,8 +1,8 @@
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::ops::DerefMut;
-use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::sync::Arc;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -153,12 +153,16 @@ where
 impl<V, K> KeySerializeControl for ForeignKey<V, K> {
   fn allow_value_serialize(&self) {
     // self.allow_value_serialize.replace(true);
-    self.allow_value_serialize.store(true, std::sync::atomic::Ordering::SeqCst)
+    self
+      .allow_value_serialize
+      .store(true, std::sync::atomic::Ordering::SeqCst)
     // self.allow_value_serialize.replace(true);
   }
-  
+
   fn disallow_value_serialize(&self) {
-    self.allow_value_serialize.store(false, std::sync::atomic::Ordering::SeqCst)
+    self
+      .allow_value_serialize
+      .store(false, std::sync::atomic::Ordering::SeqCst)
     // self.allow_value_serialize.replace(false);
   }
 }
@@ -173,7 +177,12 @@ where
   where
     S: serde::Serializer,
   {
-    match (&self.inner, self.allow_value_serialize.load(std::sync::atomic::Ordering::SeqCst)) {
+    match (
+      &self.inner,
+      self
+        .allow_value_serialize
+        .load(std::sync::atomic::Ordering::SeqCst),
+    ) {
       (LoadedValue::Loaded(v), false) => v.into_key()?.serialize(serializer),
       (inner, _) => inner.serialize(serializer),
     }

@@ -1,8 +1,8 @@
+pub(crate) mod casing;
 mod parser;
-mod trait_generator;
 pub(crate) mod relations;
 pub(crate) mod serialize_skipper;
-pub(crate) mod casing;
+mod trait_generator;
 
 use proc_macro2::{Span, TokenStream, TokenTree};
 use proc_macro_crate::{crate_name, FoundCrate};

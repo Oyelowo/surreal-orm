@@ -3,7 +3,7 @@ use serde::Serialize;
 use surreal_simple_querybuilder::prelude::*;
 
 #[derive(Debug, Serialize, Deserialize, Default)]
-#[serde(rename="camelCase")]
+#[serde(rename = "camelCase")]
 struct Account {
   id: Option<String>,
   handle: String,
@@ -14,9 +14,7 @@ struct Account {
   projects: ForeignVec<Project>,
 }
 
-fn xxxx() {
-
-}
+fn xxxx() {}
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 struct Project {

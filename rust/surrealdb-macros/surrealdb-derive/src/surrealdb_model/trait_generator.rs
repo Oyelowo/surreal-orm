@@ -54,7 +54,6 @@ impl FromMeta for Rename {
     }
 }
 
-
 #[derive(Debug, Clone)]
 pub struct Relate {
     pub link: String,
@@ -173,44 +172,48 @@ impl ToTokens for FieldsGetterOpts {
             struct_level_casing,
             struct_name_ident,
         );
-        let EdgeModelAttr{ in_node_type, out_node_type } = edge_metadata;
-        let all_model_imports = all_model_imports.into_iter().map(Into::into).collect::<Vec<TokenStream>>(); 
+        let EdgeModelAttr {
+            in_node_type,
+            out_node_type,
+        } = edge_metadata;
+        let all_model_imports = all_model_imports
+            .into_iter()
+            .map(Into::into)
+            .collect::<Vec<TokenStream>>();
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
-                
-        let edge_model_tokens = match relation_name  {
-            Some(relation)=> {
 
-                let relation_name_ident  = format_ident!("{relation}");
-                let mod_name_ident  = format_ident!("{struct_name_ident}{relation}_relation");
+        let edge_model_tokens = match relation_name {
+            Some(relation) => {
+                let relation_name_ident = format_ident!("{relation}");
+                let mod_name_ident = format_ident!("{struct_name_ident}{relation}_relation");
 
-                 match (in_node_type, out_node_type) {
-                 ( Some(in_node_type), Some(out_node_type))  => {
-                          quote!(
-                                pub mod #mod_name_ident { 
-                                    pub struct EdgeChecker {
-                                        pub #relation_name_ident: String,
-                                    }
-                                    
+                match (in_node_type, out_node_type) {
+                    (Some(in_node_type), Some(out_node_type)) => {
+                        quote!(
+                            pub mod #mod_name_ident {
+                                pub struct EdgeChecker {
+                                    pub #relation_name_ident: String,
                                 }
 
-                                impl #crate_name::Edge for #struct_name_ident {
-                                    type EdgeChecker = #mod_name_ident::EdgeChecker;
-                                    type InNode = #in_node_type;
-                                    type OutNode = #out_node_type;
-                                }
-                                
-                            )
-                 },
-                _ => panic!("`in` and `out` fields must be provided for the edge model struct.")
+                            }
+
+                            impl #crate_name::Edge for #struct_name_ident {
+                                type EdgeChecker = #mod_name_ident::EdgeChecker;
+                                type InNode = #in_node_type;
+                                type OutNode = #out_node_type;
+                            }
+
+                        )
+                    }
+                    _ => {
+                        panic!("`in` and `out` fields must be provided for the edge model struct.")
+                    }
+                }
             }
-              
-
-                },
             None => quote!(),
-            
         };
-        
-tokens.extend(quote!( 
+
+        tokens.extend(quote!( 
                         pub mod #schema_mod_name {
                             #( #all_model_imports) *
 
