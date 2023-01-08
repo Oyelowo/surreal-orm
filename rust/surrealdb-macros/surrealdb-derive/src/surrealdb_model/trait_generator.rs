@@ -54,11 +54,6 @@ impl FromMeta for Rename {
     }
 }
 
-// pub trait Edge {
-//     const EDGE_RELATION: &'static str;
-//     fn to(&self) -> ::proc_macro2::TokenStream;
-//     fn from(&self) -> ::proc_macro2::TokenStream;
-// }
 
 #[derive(Debug, Clone)]
 pub struct Relate {
@@ -76,12 +71,6 @@ impl FromMeta for Relate {
     }
     //TODO: Check to maybe remove cos I probably dont need this
     fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
-        // pub trait Edge {
-        //     const edge_relation: &'static str;
-        //     fn to(&self) -> ::proc_macro2::TokenStream;
-        //     fn from(&self) -> ::proc_macro2::TokenStream;
-        // }
-
         #[derive(FromMeta)]
         struct FullRelate {
             edge: String,
@@ -177,21 +166,19 @@ impl ToTokens for FieldsGetterOpts {
             all_model_imports,
             all_model_schema_fields,
             all_static_assertions,
-            // all_schema_names_basic,
-            // all_original_field_names_normalised,
             edge_metadata,
             ..
         } = ModelAttributesTokensDeriver::from_receiver_data(
             data,
             struct_level_casing,
-            relation_name.to_owned(),
             struct_name_ident,
         );
         let EdgeModelAttr{ in_node_type, out_node_type } = edge_metadata;
-   
-                let test_name = format_ident!("test_{}_edge_name", schema_mod_name.to_string());
+        let all_model_imports = all_model_imports.into_iter().map(Into::into).collect::<Vec<TokenStream>>(); 
+        let test_name = format_ident!("test_{schema_mod_name}_edge_name");
+                
         let edge_tokens = match relation_name {
-            Some(relation) => {
+            Some(_relation) => {
 quote!(
 
                     impl #crate_name::Edge for #struct_name_ident {
@@ -277,68 +264,6 @@ tokens.extend(quote!(
                     }
              #edge_tokens
 ));
-        // let get_basic = |x: ModelAttributesTokensDeriver, edge_checker_struct: TokenStream| {
-        //     let ModelAttributesTokensDeriver {
-        //         all_model_imports,
-        //         all_model_schema_fields,
-        //         all_static_assertions,
-        //         all_schema_names_basic,
-        //         all_original_field_names_normalised,
-        //         ..
-        //     } = x;
-        //                                }
-        // };
-        // let kk = match ModelMetas::from_receiver_data(
-        //     data,
-        //     struct_level_casing,
-        //     relation_name.to_owned(),
-        //     struct_name_ident,
-        // ) {
-        //     ModelMetas::NodeModel(x) => {
-        //         let xx = get_basic(x, quote!());
-        //         quote!(#xx)
-        //     }
-        //     ModelMetas::EdgeModel(y) => {
-        //         let relation_name_ident = relation_name
-        //             .as_ref()
-        //             .expect("Relation name must be provided");
-        //         let EdgeModelAttr {
-        //             in_node_type,
-        //             out_node_type,
-        //             mode_attr,
-        //         } = y;
-        //         let edge_checker_struct = quote!(
-        //             pub struct EdgeChecker {
-        //                 pub #relation_name_ident: String,
-        //             }
-        //         );
-        //         let mm = mode_attr.clone().all_static_assertions;
-        //         let xx = get_basic(mode_attr.clone(), edge_checker_struct);
-        //
-        //         let test_name = format_ident!("test_{}_edge_name", schema_mod_name.to_string());
-        //         quote!(
-        //             #xx
-        //
-        //             #[test]
-        //             fn #test_name() {
-        //                 #( #mm ) *
-        //
-        //                 // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
-        //                 // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
-        //                 // ::static_assertions::assert_fields!(Modax: manage);
-        //             }
-        //
-        //             impl Edge for #struct_name_ident {
-        //                 type EdgeChecker = #schema_mod_name::EdgeChecker;
-        //                 type InNode = #in_node_type;
-        //
-        //                 type OutNode = #out_node_type;
-        //             }
-        //         )
-        //     }
-        // };
-        //
-        // tokens.extend(kk);
     }
 }
 
