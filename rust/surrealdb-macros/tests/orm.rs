@@ -5,12 +5,11 @@
 #![feature(generic_const_exprs)]
 
 use async_graphql::ComplexObject;
+use async_graphql::SimpleObject;
 use serde::Deserialize;
 use serde::Serialize;
-use async_graphql::SimpleObject;
 use surreal_simple_querybuilder::prelude::*;
 use surrealdb_macros::{Edge, SurrealdbModel};
-
 
 #[derive(SurrealdbModel, SimpleObject, Debug, Serialize, Deserialize, Default, Clone)]
 pub struct Account {
@@ -26,18 +25,19 @@ pub struct Account {
     #[graphql(skip)]
     friend: ForeignVec<Account>,
 
-    // #[surrealdb(reference_one = "Account", skip_serializing)]
-    // // friend: Foreign<std::sync::Arc<Account>>,
+    #[surrealdb(reference_one = "Account", skip_serializing)]
+    #[graphql(skip)]
+    nama: ForeignVec<Account>,
+
     // #[graphql(skip)]
     // best_friend: String,
-
     #[surrealdb(skip_serializing)]
     #[graphql(skip)]
     projects: ForeignVec<Project>,
-    
+
     #[surrealdb(
         relate(edge = "Account_Manage_Project", link = "->manage->Project"),
-        skip_serializing,
+        skip_serializing
     )]
     #[graphql(skip)]
     managed_projects: ForeignVec<Project>,
@@ -52,13 +52,16 @@ impl Account {
     //     // Account::get_schema()
     //     todo!()
     // }
-    async fn projects(&self)  -> Vec<Project>{
+    async fn projects(&self) -> Vec<Project> {
         self.projects.allow_value_serialize();
-        self.projects.value().map(|x|x.to_vec()).unwrap_or_default()
+        self.projects
+            .value()
+            .map(|x| x.to_vec())
+            .unwrap_or_default()
     }
-    async fn projects_ids(&self)  -> Vec<String>{
+    async fn projects_ids(&self) -> Vec<String> {
         self.projects.disallow_value_serialize();
-        self.projects.key().map(|x|x.to_vec()).unwrap_or_default()
+        self.projects.key().map(|x| x.to_vec()).unwrap_or_default()
     }
 }
 

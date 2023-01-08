@@ -1,16 +1,21 @@
 use serde::Deserialize;
 use serde::Serialize;
-
 use surreal_simple_querybuilder::prelude::*;
 
 #[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename="camelCase")]
 struct Account {
   id: Option<String>,
   handle: String,
   password: String,
   email: String,
+  best_project: String,
 
   projects: ForeignVec<Project>,
+}
+
+fn xxxx() {
+
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
@@ -58,7 +63,7 @@ mod account {
     pub email,
     friend<Account>,
 
-    ->manage->Project as managed_projects,
+    <-manage<-Project as managed_projects,
   });
 }
 

@@ -1,7 +1,8 @@
-use std::cell::Cell;
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::ops::DerefMut;
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -78,20 +79,20 @@ use super::LoadedValue;
 /// **Note** that if you plan to use `ForeignKey<T, String>` (where the second generic
 /// type is a string), you can use the `Foreign<T>` type in the same module to
 /// shorten the declaration.
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 #[serde(from = "LoadedValue<V, K>")]
 pub struct ForeignKey<V, K> {
   inner: LoadedValue<V, K>,
 
   #[serde(skip)]
-  allow_value_serialize: Cell<bool>,
+  allow_value_serialize: Arc<AtomicBool>,
 }
 
 impl<V, K> Default for ForeignKey<V, K> {
   fn default() -> Self {
     Self {
       inner: Default::default(),
-      allow_value_serialize: Cell::new(false),
+      allow_value_serialize: Arc::new(AtomicBool::new(false)),
     }
   }
 }
@@ -151,11 +152,14 @@ where
 
 impl<V, K> KeySerializeControl for ForeignKey<V, K> {
   fn allow_value_serialize(&self) {
-    self.allow_value_serialize.replace(true);
+    // self.allow_value_serialize.replace(true);
+    self.allow_value_serialize.store(true, std::sync::atomic::Ordering::SeqCst)
+    // self.allow_value_serialize.replace(true);
   }
-
+  
   fn disallow_value_serialize(&self) {
-    self.allow_value_serialize.replace(false);
+    self.allow_value_serialize.store(false, std::sync::atomic::Ordering::SeqCst)
+    // self.allow_value_serialize.replace(false);
   }
 }
 
@@ -169,7 +173,7 @@ where
   where
     S: serde::Serializer,
   {
-    match (&self.inner, self.allow_value_serialize.take()) {
+    match (&self.inner, self.allow_value_serialize.load(std::sync::atomic::Ordering::SeqCst)) {
       (LoadedValue::Loaded(v), false) => v.into_key()?.serialize(serializer),
       (inner, _) => inner.serialize(serializer),
     }

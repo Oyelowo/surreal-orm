@@ -5,8 +5,10 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(dead_code)]
 
+use std::{collections::HashSet, hash::Hash};
+
 use darling::{ast, util};
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
 use super::{
@@ -16,10 +18,38 @@ use super::{
     trait_generator::MyFieldReceiver,
 };
 
+#[derive(Default, Clone)]
+pub(crate) struct ModelImport(TokenStream);
+
+impl From<TokenStream> for ModelImport {
+    fn from(value: TokenStream) -> Self {
+        Self(value)
+    }
+}
+
+impl From<ModelImport> for TokenStream {
+    fn from(value: ModelImport) -> Self {
+        value.0
+    }
+}
+impl PartialEq for ModelImport {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.to_string() == other.0.to_string()
+    }
+}
+impl Eq for ModelImport {}
+
+impl Hash for ModelImport {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.0.to_string().hash(state);
+    }
+}
+
 /// A struct that contains the `struct_ty_fields` and `struct_values_fields` vectors.
 #[derive(Default, Clone)]
 pub(crate) struct ModelAttributesTokensDeriver {
-    pub all_model_imports: Vec<TokenStream>,
+    // We need imports to be unique, hence the hashset
+    pub all_model_imports: HashSet<ModelImport>,
     pub all_schema_names_basic: Vec<TokenStream>,
     pub all_model_schema_fields: Vec<TokenStream>,
     pub all_static_assertions: Vec<TokenStream>,
@@ -31,13 +61,8 @@ pub(crate) struct ModelAttributesTokensDeriver {
 pub(crate) struct EdgeModelAttr {
     pub in_node_type: Option<TokenStream>,
     pub out_node_type: Option<TokenStream>,
-    // pub mode_attr: ModelAttributesTokensDeriver,
 }
-// pub(crate) enum ModelMetas {
-//     NodeModel(ModelAttributesTokensDeriver),
-//     EdgeModel(EdgeModelAttr),
-// }
-//
+
 #[derive(PartialEq, Eq, Debug)]
 enum EdgeOrientation {
     In,
@@ -65,7 +90,6 @@ impl ModelAttributesTokensDeriver {
     pub(crate) fn from_receiver_data(
         data: &ast::Data<util::Ignored, MyFieldReceiver>,
         struct_level_casing: Option<CaseString>,
-        relation_name: Option<String>,
         struct_name_ident: &syn::Ident,
     ) -> Self {
         let fields = data
@@ -87,100 +111,25 @@ impl ModelAttributesTokensDeriver {
 
                 acc.all_model_schema_fields.push(meta.model_schema_field);
 
-                acc.all_model_imports.push(meta.extra.model_import);
+                acc.all_model_imports.insert(meta.extra.model_import.into());
 
                 acc.all_schema_names_basic.push(meta.extra.schema_name);
-                // acc.all_original_field_names_normalised
-                //     .push(meta.original_field_name_normalised);
 
                 acc.all_static_assertions.push(meta.static_assertions);
-                let edge_orientation = EdgeOrientation::from(&meta.original_field_name_normalised);
-                let field_type = field_receiver.ty.clone();
-                match edge_orientation {
+
+                let field_type = &field_receiver.ty;
+                match EdgeOrientation::from(&meta.original_field_name_normalised) {
                     EdgeOrientation::In => {
-                        // in_node_type.push(quote!(#field_type ));
                         acc.edge_metadata.in_node_type = Some(quote!(#field_type));
                     }
                     EdgeOrientation::Out => {
-                        // out_node_type.push(quote!(#field_type));
                         acc.edge_metadata.out_node_type = Some(quote!(#field_type));
                     }
                     EdgeOrientation::None => {}
                 };
-                // EdgeOrientation::from(&meta.original_field_name_normalised);
                 acc
             },
         );
-        // let mut mode_metas = ModelAttributesTokensDeriver::default();
-        // let mut in_node_type = vec![];
-        // let mut out_node_type = vec![];
-        // fields
-        //     .clone()
-        //     .into_iter()
-        //     .enumerate()
-        //     .for_each(|(index, field_receiver)| {
-        //         let struct_level_casing = struct_level_casing.unwrap_or(CaseString::None);
-        //         let meta = Self::get_model_metadata(
-        //             field_receiver,
-        //             struct_level_casing,
-        //             index,
-        //             struct_name_ident,
-        //         );
-        //
-        //         mode_metas
-        //             .all_model_schema_fields
-        //             .push(meta.model_schema_field);
-        //
-        //         mode_metas.all_model_imports.push(meta.extra.model_import);
-        //         mode_metas
-        //             .all_static_assertions
-        //             .push(meta.static_assertions);
-        //         mode_metas
-        //             .all_schema_names_basic
-        //             .push(meta.extra.schema_name);
-        //         let edge_orientation = EdgeOrientation::from(&meta.original_field_name_normalised);
-        //         let field_type = field_receiver.ty.clone();
-        //         match edge_orientation {
-        //             EdgeOrientation::In => {
-        //                 in_node_type.push(quote!(#field_type ));
-        //             }
-        //             EdgeOrientation::Out => {
-        //                 out_node_type.push(quote!(#field_type));
-        //             }
-        //             EdgeOrientation::None => {}
-        //         }
-        //         mode_metas.all_original_field_names_normalised.clone();
-        //     });
-        // let xm = match relation_name {
-        //     Some(_) => {
-        //         let edd = EdgeModelAttr {
-        //             in_node_type: in_node_type
-        //                 .first()
-        //                 .expect("`in` origin node field must be defined")
-        //                 .to_owned(),
-        //             out_node_type: out_node_type
-        //                 .first()
-        //                 .expect("`out` destination node field must be defined")
-        //                 .to_owned(),
-        //             mode_attr: mode_metas,
-        //         };
-        //         Self::EdgeModel(edd)
-        //     }
-        //     None => Self::NodeModel(mode_metas),
-        // };
-        // xx.all_model_schema_fields
-        // let has_orig_dest_nodes = metas
-        //     .all_original_field_names_normalised
-        //     .iter()
-        //     .map(EdgeOrientation::from)
-        //     .filter(|f| matches!(f, EdgeOrientation::In | EdgeOrientation::Out))
-        //     .count()
-        //     == 2;
-        // let is_invalid_edge_model = relation_name.is_some() && !has_orig_dest_nodes;
-        // if is_invalid_edge_model {
-        //     panic!("in and out fields have to be specified with origin and destination nodes");
-        // }
-        // metas
         metas
     }
 
@@ -247,10 +196,6 @@ impl ModelAttributesTokensDeriver {
 
         let field_ident_normalised =
             if original_field_name_normalised.trim_start_matches("r#") == "in".to_string() {
-                // let xo = format_ident!("in");
-                // let xo = syn::Ident::new_raw("in", Span::call_site());
-                // let in_ident = syn::Ident::new("in", Span::call_site());
-                // quote!(#in_ident)
                 quote!(in)
             } else {
                 quote!(#field_ident_normalised)
@@ -268,14 +213,11 @@ impl ModelAttributesTokensDeriver {
                 let extra = ModelMetadataBasic::from(relation_attributes.node_object);
                 let struct_name = quote!(#struct_name_ident);
                 let schema_name_basic = &extra.schema_name;
-                // let destination_node_ident = format_ident!("{}", relation_attributes.node_object.to_string());
-                // let edge = relation.edge.unwrap();
                 // TODO: Make edge required.
                 let edge_struct_ident = format_ident!(
                     "{}",
                     relation.edge.expect("Edge must be specified for relations")
                 );
-                // let xx = relation_attributes.edge_direction;
                 // let node_assertion = quote!(<AccountManageProject as Edge>::InNode, Account);
                 let (in_node, out_node) = match relation_attributes.edge_direction {
                     // If OutArrowRight, the current struct should be InNode, and
@@ -382,7 +324,6 @@ impl From<super::relations::NodeObject> for ModelMetadataBasic {
 
         // imports for specific model schema from the trait Generic Associated types e.g
         // type Account<const T: usize> = <super::Account as super::Account>::Schema<T>;
-        // TODO: Check uniqueness of imports
         let model_import = quote!(type #schema_name<const T:usize> =  <super::#schema_name as super::SurrealdbModel>::Schema<T>;);
 
         Self {
