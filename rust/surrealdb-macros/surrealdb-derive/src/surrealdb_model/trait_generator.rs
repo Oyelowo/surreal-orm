@@ -177,38 +177,42 @@ impl ToTokens for FieldsGetterOpts {
         let all_model_imports = all_model_imports.into_iter().map(Into::into).collect::<Vec<TokenStream>>(); 
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
                 
-        let edge_tokens = match relation_name {
-            Some(_relation) => {
-quote!(
+        let edge_model_tokens = match relation_name  {
+            Some(relation)=> {
 
-                    impl #crate_name::Edge for #struct_name_ident {
-                        type EdgeChecker = #schema_mod_name::EdgeChecker;
-                        type InNode = #in_node_type;
+                let relation_name_ident  = format_ident!("{relation}");
+                let mod_name_ident  = format_ident!("{struct_name_ident}{relation}_relation");
 
-                        type OutNode = #out_node_type;
-                    }
-    )
+                 match (in_node_type, out_node_type) {
+                 ( Some(in_node_type), Some(out_node_type))  => {
+                          quote!(
+                                pub mod #mod_name_ident { 
+                                    pub struct EdgeChecker {
+                                        pub #relation_name_ident: String,
+                                    }
+                                    
+                                }
+
+                                impl #crate_name::Edge for #struct_name_ident {
+                                    type EdgeChecker = #mod_name_ident::EdgeChecker;
+                                    type InNode = #in_node_type;
+                                    type OutNode = #out_node_type;
+                                }
+                                
+                            )
+                 },
+                _ => panic!("`in` and `out` fields must be provided for the edge model struct.")
+            }
+              
 
                 },
             None => quote!(),
             
         };
-        let edge_checker_struct = match relation_name {
-            Some(relation) =>{
-     let relation_name_ident  = format_ident!("{relation}");
-                quote!(        
-                    pub struct EdgeChecker {
-                        pub #relation_name_ident: String,
-                    })
-                    },
-            None => quote!(),
-        };
+        
 tokens.extend(quote!( 
-                        mod #schema_mod_name {
+                        pub mod #schema_mod_name {
                             #( #all_model_imports) *
-
-                            
-            #edge_checker_struct
 
                             ::surreal_simple_querybuilder::prelude::model!(
                              #struct_name_ident {
@@ -254,15 +258,15 @@ tokens.extend(quote!(
                                     .ok_or(::serde::ser::Error::custom("The project has no ID"))
                                 }
                         }
-                    #[test]
-                    fn #test_name() {
-                        #( #all_static_assertions) *
+             #edge_model_tokens
+            #[test]
+            fn #test_name() {
+                #( #all_static_assertions) *
 
-                        // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
-                        // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
-                        // ::static_assertions::assert_fields!(Modax: manage);
-                    }
-             #edge_tokens
+                // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
+                // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
+                // ::static_assertions::assert_fields!(Modax: manage);
+            }
 ));
     }
 }
