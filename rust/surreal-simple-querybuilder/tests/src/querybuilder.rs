@@ -14,7 +14,6 @@ struct Account {
   projects: ForeignVec<Project>,
 }
 
-
 #[derive(Debug, Serialize, Deserialize, Default)]
 struct Project {
   id: Option<String>,

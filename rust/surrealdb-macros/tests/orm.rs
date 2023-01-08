@@ -24,9 +24,9 @@ pub struct Account {
     #[graphql(skip)]
     friend: Box<Foreign<Account>>,
 
-    // #[surrealdb(reference_one = "Account", skip_serializing)]
-    // #[graphql(skip)]
-    // nama: Box<Foreign<Account>>,
+    #[surrealdb(reference_one = "Account", skip_serializing)]
+    #[graphql(skip)]
+    teacher: Box<Foreign<Account>>,
 
     // best_friend: String,
     #[surrealdb(skip_serializing)]
@@ -43,14 +43,11 @@ pub struct Account {
 
 #[ComplexObject]
 impl Account {
-    async fn friend(&self) -> Account {
-        // self.friend.allow_value_serialize();
-        // self.projects.value().map(|x|x.to_vec()).unwrap_or_default()
-        // Self::get_schema().friend()
-        // Acc>ount::get_schema()
+    async fn friend(&self) -> Option<Account> {
         self.friend.allow_value_serialize();
-        self.friend.value().unwrap().to_owned()
+        self.friend.value().as_deref().cloned()
     }
+
     async fn projects(&self) -> Vec<Project> {
         self.projects.allow_value_serialize();
         self.projects
@@ -58,6 +55,7 @@ impl Account {
             .map(|x| x.to_vec())
             .unwrap_or_default()
     }
+
     async fn projects_ids(&self) -> Vec<String> {
         self.projects.disallow_value_serialize();
         self.projects.key().map(|x| x.to_vec()).unwrap_or_default()
