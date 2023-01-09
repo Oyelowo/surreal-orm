@@ -26,7 +26,7 @@ pub struct Account {
 
     #[surrealdb(reference_one = "Account", skip_serializing)]
     #[graphql(skip)]
-    teacher: Box<Foreign<Account>>,
+    teacher: ForeignWrapper<Account>,
 
     // best_friend: String,
     #[surrealdb(skip_serializing)]
@@ -59,6 +59,72 @@ impl Account {
     async fn projects_ids(&self) -> Vec<String> {
         self.projects.disallow_value_serialize();
         self.projects.key().map(|x| x.to_vec()).unwrap_or_default()
+    }
+    async fn teacher(&self) -> Option<Account> {
+        // let xx = self.teacher.allow_serialize_value();
+        let xx = self.teacher.disallow_serialize_value();
+        self.friend.value().as_deref().cloned()
+    }
+}
+
+#[derive(Debug, Default, Clone, Deserialize)]
+struct ForeignWrapper<T: Serialize>(Box<Foreign<T>>);
+
+impl<T: Serialize> Serialize for ForeignWrapper<T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+            let x = self.0.value().serialize(serializer);
+        // todo!()
+        x
+    }
+}
+// struct ForeignWrapper<T: Serialize>(Box<Foreign<T>>);
+// struct ForeignWrapper<T: Serialize>(Box<Foreign<T>>);
+
+impl<T: Serialize> IntoKey<String> for ForeignWrapper<T> {
+    fn into_key<E>(&self) -> Result<String, E>
+    where
+        E: serde::ser::Error,
+    {
+        let xx = self
+            .0
+            .key()
+            // .as_ref()
+            .map(String::clone)
+            .ok_or(serde::ser::Error::custom("The project has no ID"));
+        xx
+        // self.0
+        //   .id
+        //   .as_ref()
+        //   .map(String::clone)
+        //   .ok_or(serde::ser::Error::custom("The project has no ID"))
+    }
+}
+// impl<T: Serialize> IntoKey<String> for Box<Foreign<T>> {
+//     fn into_key<E>(&self) -> Result<String, E>
+//     where
+//         E: serde::ser::Error,
+//     {
+//         todo!()
+//     }
+// }
+
+// impl<T: Serialize> std::ops::Deref for ForeignWrapper<T> {
+//     type Target = Box<Foreign<T>>;
+
+//     fn deref(&self) -> &Self::Target {
+//         &self.0
+//     }
+// }
+
+impl<T: Serialize> ForeignWrapper<T> {
+    fn allow_serialize_value(&self) -> T {
+        todo!()
+    }
+
+    fn disallow_serialize_value(&self) -> String {
+        todo!()
     }
 }
 
@@ -107,10 +173,10 @@ pub struct Release {
 use account::schema::model as account;
 use project::schema::model as project;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct File {
     name: String,
-    author: Foreign<Account>,
+    author: ForeignWrapper<Account>,
 }
 
 #[test]

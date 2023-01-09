@@ -23,6 +23,12 @@ pub struct Account {
     handle: String,
     // #[surrealdb(rename = "nawao")]
     first_name: String,
+    #[surrealdb(reference_one = "Account", skip_serializing)]
+    best_friend: Box<Foreign<Account>>,
+
+    #[surrealdb(reference_one = "Account", skip_serializing)]
+    teacher: Box<Foreign<Account>>,
+
     #[surrealdb(rename = "lastName")]
     another_name: String,
     chess: String,
@@ -35,7 +41,20 @@ pub struct Account {
     managed_projects: ForeignVec<Project>,
 }
 
+struct ForeignWrapper<T>(Foreign<T>);
+
+impl<T> ForeignWrapper<T> {
+    fn allow_serialize_value() -> T {
+        todo!()
+    }
+
+    fn disallow_serialize_value() -> String {
+        todo!()
+    }
+}
+
 fn kl() {
+    // let xx = ForeignWrapper<Account>(Foreign::n)
     let _po = Account::get_schema()
         .managedProjects()
         .account()
@@ -43,7 +62,10 @@ fn kl() {
         .account()
         .managedProjects()
         .account()
-        .lastName;
+        .bestFriend()
+        .bestFriend()
+        .bestFriend()
+        .firstName;
 }
 
 #[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
