@@ -22,7 +22,7 @@ pub struct Account {
 
     #[surrealdb(reference_one = "Account", skip_serializing)]
     #[graphql(skip)]
-    friend: Box<Foreign<Account>>,
+    friend: ForeignWrapper<Account>,
 
     #[surrealdb(reference_one = "Account", skip_serializing)]
     #[graphql(skip)]
@@ -44,8 +44,8 @@ pub struct Account {
 #[ComplexObject]
 impl Account {
     async fn friend(&self) -> Option<Account> {
-        self.friend.allow_value_serialize();
-        self.friend.value().as_deref().cloned()
+        self.friend.clone().into_inner().allow_value_serialize();
+        self.friend.clone().into_inner().value().as_deref().cloned()
     }
 
     async fn projects(&self) -> Vec<Project> {
@@ -63,7 +63,7 @@ impl Account {
     async fn teacher(&self) -> Option<Account> {
         // let xx = self.teacher.allow_serialize_value();
         let xx = self.teacher.disallow_serialize_value();
-        self.friend.value().as_deref().cloned()
+        self.friend.clone().into_inner().value().as_deref().cloned()
     }
 }
 
@@ -101,22 +101,7 @@ impl<T: Serialize> IntoKey<String> for ForeignWrapper<T> {
         //   .ok_or(serde::ser::Error::custom("The project has no ID"))
     }
 }
-// impl<T: Serialize> IntoKey<String> for Box<Foreign<T>> {
-//     fn into_key<E>(&self) -> Result<String, E>
-//     where
-//         E: serde::ser::Error,
-//     {
-//         todo!()
-//     }
-// }
 
-// impl<T: Serialize> std::ops::Deref for ForeignWrapper<T> {
-//     type Target = Box<Foreign<T>>;
-
-//     fn deref(&self) -> &Self::Target {
-//         &self.0
-//     }
-// }
 
 impl<T: Serialize> ForeignWrapper<T> {
     fn into_inner(self) -> Foreign<T> {

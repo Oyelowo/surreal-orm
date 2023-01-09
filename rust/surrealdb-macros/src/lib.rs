@@ -16,3 +16,9 @@ pub trait SurrealdbModel {
     type Schema<const T: usize>;
     fn get_schema() -> Self::Schema<0>;
 }
+
+
+
+pub mod query {
+    pub use surreal_simple_querybuilder::prelude::*;
+}
