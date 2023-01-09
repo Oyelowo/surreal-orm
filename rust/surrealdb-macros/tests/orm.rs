@@ -119,6 +119,10 @@ impl<T: Serialize> IntoKey<String> for ForeignWrapper<T> {
 // }
 
 impl<T: Serialize> ForeignWrapper<T> {
+    fn into_inner(self) -> Foreign<T> {
+        // Box::new(self.0)
+        *self.0
+    }
     fn allow_serialize_value(&self) -> T {
         todo!()
     }
@@ -356,7 +360,7 @@ fn test_foreign_deserialize() {
     let file: File = serde_json::from_str(&loaded_author_json).unwrap();
 
     // confirm the `Foreign<Author>` contains a value
-    assert!(match &file.author.value() {
+    assert!(match &file.author.into_inner().value() {
         Some(acc) => acc.id == Some("Account:John".to_owned()),
         _ => false,
     });
@@ -366,7 +370,7 @@ fn test_foreign_deserialize() {
     let file: File = serde_json::from_str(&key_author_json).unwrap();
 
     // confirm the author field of the file is a Key with the account's ID
-    assert!(match file.author.key().as_deref() {
+    assert!(match file.author.into_inner().key().as_deref() {
         Some(key) => key == &"Account:John".to_owned(),
         _ => false,
     });
@@ -376,7 +380,7 @@ fn test_foreign_deserialize() {
     let file: File = serde_json::from_str(&unloaded_author_json).unwrap();
 
     // confirm the author field of the file is Unloaded
-    assert!(file.author.is_unloaded());
+    assert!(file.author.into_inner().is_unloaded());
 }
 
 /// Test that a model can have fields that reference the `Self` type.
