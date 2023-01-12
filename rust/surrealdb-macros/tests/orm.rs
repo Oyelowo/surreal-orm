@@ -41,11 +41,15 @@ pub struct Account {
     managed_projects: ForeignVec<Project>,
 }
 
+// struct RefOne<T>(T);
+// struct RefMany<T>(T);
+
 #[ComplexObject]
 impl Account {
     async fn friend(&self) -> Option<Account> {
-        self.friend.clone().into_inner().allow_value_serialize();
-        self.friend.clone().into_inner().value().as_deref().cloned()
+        // self.friend.clone().into_inner().allow_value_serialize();
+        // self.friend.clone().into_inner().value().as_deref().cloned()
+        Some(self.friend.clone().as_value())
     }
 
     async fn projects(&self) -> Vec<Project> {
@@ -62,7 +66,7 @@ impl Account {
     }
     async fn teacher(&self) -> Option<Account> {
         // let xx = self.teacher.allow_serialize_value();
-        let xx = self.teacher.disallow_serialize_value();
+        let xx = self.teacher.as_key();
         self.friend.clone().into_inner().value().as_deref().cloned()
     }
 }
@@ -73,8 +77,9 @@ struct ForeignWrapper<T: Serialize>(Box<Foreign<T>>);
 impl<T: Serialize> Serialize for ForeignWrapper<T> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer {
-            let x = self.0.value().serialize(serializer);
+        S: serde::Serializer,
+    {
+        let x = self.0.value().serialize(serializer);
         // todo!()
         x
     }
@@ -102,18 +107,25 @@ impl<T: Serialize> IntoKey<String> for ForeignWrapper<T> {
     }
 }
 
-
-impl<T: Serialize> ForeignWrapper<T> {
+impl<T: Serialize + Clone> ForeignWrapper<T> {
     fn into_inner(self) -> Foreign<T> {
         // Box::new(self.0)
         *self.0
     }
-    fn allow_serialize_value(&self) -> T {
-        todo!()
+    fn as_value(&self) -> T {
+        // self.friend.clone().into_inner().allow_value_serialize();
+        self.0.allow_value_serialize();
+        self.clone()
+            .into_inner()
+            .value()
+            .as_deref()
+            .cloned()
+            .unwrap()
     }
 
-    fn disallow_serialize_value(&self) -> String {
-        todo!()
+    fn as_key(&self) -> String {
+        self.0.disallow_value_serialize();
+        self.clone().into_inner().key().as_deref().cloned().unwrap()
     }
 }
 
