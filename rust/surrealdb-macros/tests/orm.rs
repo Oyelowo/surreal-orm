@@ -22,27 +22,31 @@ pub struct Account {
 
     #[surrealdb(reference_one = "Account", skip_serializing)]
     #[graphql(skip)]
-    friend: ForeignWrapper<Account>,
+    friend: RefOne<Account>,
 
     #[surrealdb(reference_one = "Account", skip_serializing)]
     #[graphql(skip)]
-    teacher: ForeignWrapper<Account>,
+    teacher: RefOne<Account>,
 
     // best_friend: String,
     #[surrealdb(skip_serializing)]
     #[graphql(skip)]
-    projects: ForeignVec<Project>,
+    // projects: ForeignVec<Project>,
+    projects: RefMany<Project>,
 
     #[surrealdb(
         relate(edge = "Account_Manage_Project", link = "->manage->Project"),
         skip_serializing
     )]
     #[graphql(skip)]
-    managed_projects: ForeignVec<Project>,
+    managed_projects: RefMany<Project>,
 }
 
 // struct RefOne<T>(T);
-// struct RefMany<T>(T);
+// struct RefOne<T>(T);
+
+// struct RefMany<T>(ForeignVec<T>);
+type RefMany<T> = ForeignVec<T>;
 
 #[ComplexObject]
 impl Account {
@@ -72,9 +76,9 @@ impl Account {
 }
 
 #[derive(Debug, Default, Clone, Deserialize)]
-struct ForeignWrapper<T: Serialize>(Box<Foreign<T>>);
+struct RefOne<T: Serialize>(Box<Foreign<T>>);
 
-impl<T: Serialize> Serialize for ForeignWrapper<T> {
+impl<T: Serialize> Serialize for RefOne<T> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -87,7 +91,7 @@ impl<T: Serialize> Serialize for ForeignWrapper<T> {
 // struct ForeignWrapper<T: Serialize>(Box<Foreign<T>>);
 // struct ForeignWrapper<T: Serialize>(Box<Foreign<T>>);
 
-impl<T: Serialize> IntoKey<String> for ForeignWrapper<T> {
+impl<T: Serialize> IntoKey<String> for RefOne<T> {
     fn into_key<E>(&self) -> Result<String, E>
     where
         E: serde::ser::Error,
@@ -107,7 +111,17 @@ impl<T: Serialize> IntoKey<String> for ForeignWrapper<T> {
     }
 }
 
-impl<T: Serialize + Clone> ForeignWrapper<T> {
+struct RefKey(String);
+
+impl<T: Serialize + Clone> RefOne<T> {
+    // fn new_value(value: T) -> Foreign<T> {
+    //     Foreign::new_value(value)
+    // }
+
+    fn new_value(value: T) -> Self {
+        Self(Foreign::new_value(value).into())
+    }
+
     fn into_inner(self) -> Foreign<T> {
         // Box::new(self.0)
         *self.0
@@ -177,7 +191,7 @@ use project::schema::model as project;
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct File {
     name: String,
-    author: ForeignWrapper<Account>,
+    author: RefOne<Account>,
 }
 
 #[test]
@@ -241,7 +255,7 @@ pub fn test_as_named_label() {
 #[test]
 pub fn test_foreign_serialize() {
     let f: Foreign<Account> = Foreign::new_key("Account:John".to_owned());
-
+    // let x = f.value().unwrap().friend.0.value();
     // Confirm a foreign key is serialized into a simple string
     assert_eq!(
         serde_json::Value::String("Account:John".to_owned()),
@@ -266,6 +280,10 @@ pub fn test_foreign_serialize_allowed() {
         id: Some("Account:John".to_owned()),
         ..Default::default()
     });
+    // let f: RefOne<Account> = RefOne::new_value(Account {
+    //     id: Some("Account:John".to_owned()),
+    //     ..Default::default()
+    // });
 
     // once called, the Foreign should deserialize even the Values without calling
     // IntoKeys
@@ -277,6 +295,7 @@ pub fn test_foreign_serialize_allowed() {
             ..Default::default()
         })
         .unwrap(),
+        // serde_json::to_string(&f).unwrap()
         serde_json::to_string(&f).unwrap()
     );
 }

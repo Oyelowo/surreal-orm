@@ -165,9 +165,7 @@ impl ToTokens for FieldsGetterOpts {
             all_model_imports,
             all_model_schema_fields,
             all_static_assertions,
-            edge_metadata,
-            ..
-        } = ModelAttributesTokensDeriver::from_receiver_data(
+            edge_metadata, .. } = ModelAttributesTokensDeriver::from_receiver_data(
             data,
             struct_level_casing,
             struct_name_ident,
