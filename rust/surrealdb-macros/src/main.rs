@@ -2,6 +2,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(incomplete_features)]
+#![allow(unused_imports)]
 #![feature(inherent_associated_types)]
 #![feature(generic_const_exprs)]
 use _core::ops::{Deref, DerefMut};

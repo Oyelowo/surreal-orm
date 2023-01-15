@@ -8,10 +8,14 @@ use async_graphql::ComplexObject;
 use async_graphql::SimpleObject;
 use serde::Deserialize;
 use serde::Serialize;
-use surreal_simple_querybuilder::prelude::*;
-use surrealdb_macros::{Edge, SurrealdbModel};
+use surrealdb_macros::links::LinkOne;
+use surrealdb_macros::query_builder::query;
+use surrealdb_macros::{
+    links::{LinkMany, LinkSelf, Relate},
+    Edge, SurrealdbModel,
+};
 
-#[derive(SurrealdbModel, SimpleObject, Debug, Serialize, Deserialize, Default, Clone)]
+#[derive(SurrealdbModel, SimpleObject, Debug, Serialize, Deserialize, Clone)]
 pub struct Account {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
@@ -20,33 +24,23 @@ pub struct Account {
     password: String,
     email: String,
 
-    #[surrealdb(reference_one = "Account", skip_serializing)]
-    #[graphql(skip)]
-    friend: RefOne<Account>,
+    #[surrealdb(link_self = "Account", skip_serializing)]
+    friend: LinkSelf<Account>,
 
-    #[surrealdb(reference_one = "Account", skip_serializing)]
-    #[graphql(skip)]
-    teacher: RefOne<Account>,
+    #[surrealdb(link_self = "Account", skip_serializing)]
+    teacher: LinkSelf<Account>,
 
     // best_friend: String,
     #[surrealdb(skip_serializing)]
     #[graphql(skip)]
-    // projects: ForeignVec<Project>,
-    projects: RefMany<Project>,
-
+    // projects: LinkMany<Project>,
     #[surrealdb(
         relate(edge = "Account_Manage_Project", link = "->manage->Project"),
         skip_serializing
     )]
     #[graphql(skip)]
-    managed_projects: RefMany<Project>,
+    managed_projects: Relate<Project>,
 }
-
-// struct RefOne<T>(T);
-// struct RefOne<T>(T);
-
-// struct RefMany<T>(ForeignVec<T>);
-type RefMany<T> = ForeignVec<T>;
 
 #[ComplexObject]
 impl Account {
@@ -75,86 +69,20 @@ impl Account {
     }
 }
 
-#[derive(Debug, Default, Clone, Deserialize)]
-struct RefOne<T: Serialize>(Box<Foreign<T>>);
-
-impl<T: Serialize> Serialize for RefOne<T> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let x = self.0.value().serialize(serializer);
-        // todo!()
-        x
-    }
-}
-// struct ForeignWrapper<T: Serialize>(Box<Foreign<T>>);
-// struct ForeignWrapper<T: Serialize>(Box<Foreign<T>>);
-
-impl<T: Serialize> IntoKey<String> for RefOne<T> {
-    fn into_key<E>(&self) -> Result<String, E>
-    where
-        E: serde::ser::Error,
-    {
-        let xx = self
-            .0
-            .key()
-            // .as_ref()
-            .map(String::clone)
-            .ok_or(serde::ser::Error::custom("The project has no ID"));
-        xx
-        // self.0
-        //   .id
-        //   .as_ref()
-        //   .map(String::clone)
-        //   .ok_or(serde::ser::Error::custom("The project has no ID"))
-    }
-}
-
-struct RefKey(String);
-
-impl<T: Serialize + Clone> RefOne<T> {
-    // fn new_value(value: T) -> Foreign<T> {
-    //     Foreign::new_value(value)
-    // }
-
-    fn new_value(value: T) -> Self {
-        Self(Foreign::new_value(value).into())
-    }
-
-    fn into_inner(self) -> Foreign<T> {
-        // Box::new(self.0)
-        *self.0
-    }
-    fn as_value(&self) -> T {
-        // self.friend.clone().into_inner().allow_value_serialize();
-        self.0.allow_value_serialize();
-        self.clone()
-            .into_inner()
-            .value()
-            .as_deref()
-            .cloned()
-            .unwrap()
-    }
-
-    fn as_key(&self) -> String {
-        self.0.disallow_value_serialize();
-        self.clone().into_inner().key().as_deref().cloned().unwrap()
-    }
-}
-
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize)]
 #[surrealdb(relation_name = "manage")]
 pub struct Account_Manage_Project {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
-    r#in: Account,
-    out: Project,
+    #[surrealdb(link_one = "Account", skip_serializing)]
+    r#in: LinkOne<Account>,
+    #[surrealdb(link_one = "Project", skip_serializing)]
+    out: LinkOne<Project>,
     // when: Any,
     // destination: Any,
 }
 
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default, SimpleObject, Clone)]
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize, SimpleObject, Clone)]
 pub struct Project {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
@@ -162,9 +90,9 @@ pub struct Project {
 
     // #[surrealdb(relate = "->has->Release")]
     #[surrealdb(relate(edge = "ProjectHasRelease", link = "->has->Release"))]
-    releases: Release,
+    releases: Relate<Release>,
     #[surrealdb(relate(edge = "Account_Manage_Project", link = "<-manage<-Account"))]
-    authors: Account,
+    authors: Relate<Account>,
 }
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
@@ -173,8 +101,10 @@ pub struct ProjectHasRelease {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
     name: String,
-    r#in: Project,
-    out: Release,
+    #[surrealdb(link_one = "Project", skip_serializing)]
+    r#in: LinkOne<Project>,
+    #[surrealdb(link_one = "Release", skip_serializing)]
+    out: LinkOne<Release>,
 }
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default, SimpleObject, Clone)]
@@ -188,15 +118,16 @@ pub struct Release {
 use account::schema::model as account;
 use project::schema::model as project;
 
-#[derive(Debug, Serialize, Deserialize, Default, Clone)]
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default, Clone)]
 pub struct File {
     name: String,
-    author: RefOne<Account>,
+    #[surrealdb(link_one = "Account", skip_serializing)]
+    author: LinkOne<Account>,
 }
 
 #[test]
 fn test_create_account_query() {
-    let query = QueryBuilder::new()
+    let query = query()
         .create(
             Account::get_schema()
                 .handle
@@ -214,7 +145,7 @@ fn test_create_account_query() {
 
 #[test]
 fn test_account_find_query() {
-    let query = QueryBuilder::new()
+    let query = query()
         .select("*")
         .from(account)
         .filter(Account::get_schema().email.equals_parameterized())

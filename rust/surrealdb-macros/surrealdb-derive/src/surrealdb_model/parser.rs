@@ -253,8 +253,8 @@ impl ModelAttributesTokensDeriver {
                 // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
                 // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
                 // type EdgeCheckerAlias = <AccountManageProject as Edge>::EdgeChecker;
-                ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as Edge>::InNode, #in_node);
-                ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as Edge>::OutNode, #out_node);
+                ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as #crate_name::Edge>::InNode, #in_node);
+                ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as #crate_name::Edge>::OutNode, #out_node);
                 type #edge_checker_alias  = <#edge_struct_ident as Edge>::EdgeChecker;
                 ::static_assertions::assert_fields!(#edge_checker_alias : #edge_action);
 

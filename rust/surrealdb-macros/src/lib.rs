@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 pub mod links;
 pub mod model_id;
 

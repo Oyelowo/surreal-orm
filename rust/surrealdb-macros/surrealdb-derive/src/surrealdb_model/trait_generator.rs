@@ -236,16 +236,6 @@ impl ToTokens for FieldsGetterOpts {
                             // fn get_key(&self) -> #crate_name::Id {#crate_name::Id(self.id.unwrap()) };
                             
                             fn get_key(&self) -> ::std::option::Option<String> {self.id.as_ref().map(::std::string::String::clone) } 
-                            // fn get_key<E>(&self) -> ::std::result::Result<String, E>
-                            //     where
-                            //         E: ::serde::ser::Error
-                            //     {
-                            //         self
-                            //         .id
-                            //         .as_ref()
-                            //         .map(::std::string::String::clone)
-                            //         .ok_or(::serde::ser::Error::custom("The model has no ID"))
-                            //     }
                         }
                         // impl #struct_name_ident {
                         //     // type Schema = account::schema::Account<0>;
@@ -265,18 +255,6 @@ impl ToTokens for FieldsGetterOpts {
                         //     // }
                         // }
 
-                        impl ::surreal_simple_querybuilder::prelude::IntoKey<::std::string::String> for #struct_name_ident {
-                            fn into_key<E>(&self) -> ::std::result::Result<String, E>
-                                where
-                                    E: ::serde::ser::Error
-                                {
-                                    self
-                                    .id
-                                    .as_ref()
-                                    .map(::std::string::String::clone)
-                                    .ok_or(::serde::ser::Error::custom("The project has no ID"))
-                                }
-                        }
              #edge_model_tokens
             #[test]
             fn #test_name() {
