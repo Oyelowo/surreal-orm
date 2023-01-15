@@ -183,7 +183,7 @@ where
         .allow_value_serialize
         .load(std::sync::atomic::Ordering::SeqCst),
     ) {
-      (LoadedValue::Loaded(v), false) => v.into_key()?.serialize(serializer),
+      // (LoadedValue::Loaded(v), false) => v.into_key()?.serialize(serializer),
       (inner, _) => inner.serialize(serializer),
     }
   }
