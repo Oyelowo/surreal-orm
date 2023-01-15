@@ -111,17 +111,6 @@ impl ModelAttributesTokensDeriver {
                     struct_name_ident,
                 );
 
-                let xxxx = field_receiver.clone().ty.clone();
-                // syn::Type::from("ere".to_string());
-                println!("##############START");
-                println!(
-                    "xxxxdarrrrr...struct{:?} \n field:{:?} \n type:->>>>>>>${:?}$<<<<<<<-",
-                    struct_name_ident.to_string(),
-                    field_receiver.clone().ident.clone().unwrap().to_string(),
-                    quote!(#xxxx).to_string()
-                );
-                println!("##############END");
-                // println!("xxxxdarrrrr...{:?}", field_receiver.);
                 acc.all_model_schema_fields.push(meta.model_schema_field);
 
                 acc.all_model_imports.insert(meta.extra.model_import.into());
@@ -135,6 +124,7 @@ impl ModelAttributesTokensDeriver {
                     .link_one
                     .as_ref()
                     .map(|ty_name| format_ident!("{ty_name}"));
+
                 match EdgeOrientation::from(&meta.original_field_name_normalised) {
                     EdgeOrientation::In => {
                         acc.edge_metadata.in_node_type = Some(quote!(#field_type_from_attr));
