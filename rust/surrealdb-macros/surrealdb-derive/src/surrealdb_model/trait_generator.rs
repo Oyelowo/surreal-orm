@@ -106,13 +106,17 @@ pub(crate) struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) relate: ::std::option::Option<Relate>,
 
-    // reference singular: Foreign<Account>
+    // reference singular: LinkOne<Account>
     #[darling(default)]
-    pub(crate) reference_one: ::std::option::Option<String>,
+    pub(crate) link_one: ::std::option::Option<String>,
 
-    // reference plural: Foreign<Vec<Account>>
+    // reference singular: LinkSelf<Account>
     #[darling(default)]
-    pub(crate) reference_many: ::std::option::Option<String>,
+    pub(crate) link_self: ::std::option::Option<String>,
+    
+    // reference plural: LinkMany<Account>
+    #[darling(default)]
+    pub(crate) link_many: ::std::option::Option<String>,
 
     #[darling(default)]
     pub(crate) skip_serializing: bool,

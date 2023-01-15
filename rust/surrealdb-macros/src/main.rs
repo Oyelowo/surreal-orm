@@ -21,7 +21,7 @@ use surrealdb::{
 // assert_fields!(Account_Manage_Project: r#in, out);
 
 use surrealdb_macros::{
-    links::{LinkMany, LinkOne},
+    links::{LinkMany, LinkOne, LinkSelf},
     model_id::SurIdComplex,
     query::{Foreign, ForeignVec, KeySerializeControl, QueryBuilder},
     Edge, SurrealdbModel,
@@ -36,10 +36,10 @@ pub struct Account {
     // #[surrealdb(rename = "nawao")]
     first_name: String,
     #[surrealdb(reference_one = "Account", skip_serializing)]
-    best_friend: Box<LinkOne<Account>>,
+    best_friend: LinkSelf<Account>,
 
     #[surrealdb(reference_one = "Account", skip_serializing)]
-    teacher: Box<LinkOne<Account>>,
+    teacher: LinkSelf<Account>,
 
     #[surrealdb(rename = "lastName")]
     another_name: String,
@@ -50,7 +50,7 @@ pub struct Account {
 
     // #[surrealdb(relate(edge="Account_Manage_Project", description="->manage->Account"))]
     #[surrealdb(relate(edge = "AccountManageProject", link = "->manage->Project"))]
-    managed_projects: ForeignVec<Project>,
+    managed_projects: LinkMany<Project>,
 }
 
 #[derive(SurrealdbModel, Serialize, Deserialize, Debug)]
@@ -70,7 +70,7 @@ struct AccountManageProject {
     id: Option<String>,
     #[surrealdb(reference_one = "Account", skip_serializing)]
     // #[serde(rename = "in")]
-    // _in: Ref<Account>,
+    // _in: LinkOne<Account>,
     r#in: LinkOne<Account>,
     #[surrealdb(reference_one = "Project", skip_serializing)]
     out: LinkOne<Project>,
