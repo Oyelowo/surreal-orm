@@ -257,6 +257,9 @@ impl ModelAttributesTokensDeriver {
                 ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as Edge>::OutNode, #out_node);
                 type #edge_checker_alias  = <#edge_struct_ident as Edge>::EdgeChecker;
                 ::static_assertions::assert_fields!(#edge_checker_alias : #edge_action);
+
+                // assert field type and attribute reference match
+                    ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::Relate<#schema_name_basic>);
                                         );
                 /*
                  *
@@ -318,7 +321,9 @@ impl ModelAttributesTokensDeriver {
                     // for accessing linked fields or all
                     model_schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
                     original_field_name_normalised,
-                    static_assertions: quote!(),
+                    static_assertions: quote!(
+                    ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::LinkMany<#schema_name_basic>);
+                                                                 ),
                     extra,
                 }
             }
