@@ -95,7 +95,7 @@ pub struct Student {
     id: Option<String>,
     first_name: String,
     #[surrealdb(reference_one = "Course", skip_serializing)]
-    course: Foreign<Course>,
+    course: Ref<Course>,
 }
 
 #[derive(SurrealdbModel, TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
@@ -106,6 +106,43 @@ pub struct Course {
     id: Option<String>,
     title: String,
 }
+
+mod ref_mod {
+    use super::*;
+
+    #[derive(Debug, Deserialize, Serialize, Clone)]
+    #[serde(untagged)]
+    enum Reference<V: SurrealdbModel> {
+        Id(String),
+        FetchedValue(V),
+        None,
+    }
+
+    impl<V: SurrealdbModel> Default for Reference<V> {
+        fn default() -> Self {
+            Self::None
+        }
+    }
+
+    #[derive(Debug, Deserialize, Serialize, Clone, Default)]
+    pub struct Ref<V: SurrealdbModel>(Reference<V>);
+
+    impl<V> Ref<V>
+    where
+        V: SurrealdbModel,
+    {
+        /// .
+        ///
+        /// # Panics
+        ///
+        /// Panics if .
+        pub fn from_model<M: SurrealdbModel>(model: M) -> Self {
+            let x = model.get_key();
+            Self(Reference::Id(x.unwrap()))
+        }
+    }
+}
+use ref_mod::Ref;
 
 static DB: Surreal<Db> = Surreal::init();
 
@@ -179,7 +216,8 @@ async fn main() -> Result<()> {
     // let cx: Course = DB.create(("Course", &*"meth")).content(&c).await.unwrap();
     println!("cssss.....{:?}", cx);
     // let cf: Foreign<Course> = Foreign::new_value(cx);
-    let cf: Foreign<_> = Foreign::new_key(cs.unwrap().id.unwrap());
+    let cf = Ref::from_model(cs.unwrap());
+    // let cf = Ref::Id(cs.unwrap().id.unwrap().into());
 
     // println!(
     //     "cours {}",
@@ -193,7 +231,7 @@ async fn main() -> Result<()> {
 
     let stud1: Student = DB.create("Student").content(&stu).await.unwrap();
     println!("stud1: stud1 {:?}", stud1);
-    stud1.course.allow_value_serialize();
+    // stud1.course.allow_value_serialize();
     println!(
         "stud1_serjson: stud1serj {}",
         serde_json::to_string(&stud1).unwrap()
@@ -208,7 +246,7 @@ async fn main() -> Result<()> {
     let sql_query = QueryBuilder::new()
         .select("*")
         .from(stud1.clone().id.unwrap())
-        .fetch("course")
+        .fetch(Student::get_schema().course.identifier)
         .build();
     println!("SQL {sql_query}");
     let mut sql_q_result = DB.query(sql_query).await.unwrap();
