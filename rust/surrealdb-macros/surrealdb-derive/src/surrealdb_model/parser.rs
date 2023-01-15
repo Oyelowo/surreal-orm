@@ -131,7 +131,7 @@ impl ModelAttributesTokensDeriver {
 
                 let field_type = &field_receiver.ty;
                 let field_type_from_attr = &field_receiver
-                    .reference_one
+                    .link_one
                     .as_ref()
                     .map(|ty_name| format_ident!("{ty_name}"));
                 match EdgeOrientation::from(&meta.original_field_name_normalised) {

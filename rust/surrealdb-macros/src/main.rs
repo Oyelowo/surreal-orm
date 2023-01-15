@@ -23,7 +23,7 @@ use surrealdb::{
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf},
     model_id::SurIdComplex,
-    query::{Foreign, ForeignVec, KeySerializeControl, QueryBuilder},
+    query_builder::query,
     Edge, SurrealdbModel,
 };
 use typed_builder::TypedBuilder;
@@ -35,10 +35,10 @@ pub struct Account {
     handle: String,
     // #[surrealdb(rename = "nawao")]
     first_name: String,
-    #[surrealdb(reference_one = "Account", skip_serializing)]
+    #[surrealdb(link_one = "Account", skip_serializing)]
     best_friend: LinkSelf<Account>,
 
-    #[surrealdb(reference_one = "Account", skip_serializing)]
+    #[surrealdb(link_self = "Account", skip_serializing)]
     teacher: LinkSelf<Account>,
 
     #[surrealdb(rename = "lastName")]
@@ -68,11 +68,11 @@ pub struct Project {
 #[surrealdb(relation_name = "manage")]
 struct AccountManageProject {
     id: Option<String>,
-    #[surrealdb(reference_one = "Account", skip_serializing)]
+    #[surrealdb(link_one = "Account", skip_serializing)]
     // #[serde(rename = "in")]
     // _in: LinkOne<Account>,
     r#in: LinkOne<Account>,
-    #[surrealdb(reference_one = "Project", skip_serializing)]
+    #[surrealdb(link_one = "Project", skip_serializing)]
     out: LinkOne<Project>,
     when: String,
     destination: String,
@@ -85,10 +85,10 @@ pub struct Student {
     #[builder(default, setter(strip_option))]
     id: Option<String>,
     first_name: String,
-    #[surrealdb(reference_one = "Course", skip_serializing)]
+    #[surrealdb(link_one = "Course", skip_serializing)]
     course: LinkOne<Course>,
 
-    #[surrealdb(reference_one = "Course", skip_serializing)]
+    #[surrealdb(link_one = "Course", skip_serializing)]
     #[serde(rename = "lowo")]
     all_semester_courses: LinkMany<Course>,
 }
@@ -167,9 +167,8 @@ async fn main() -> Result<()> {
         // .select(SurIdComplex(("Course".to_string(), cx.id.unwrap()).0))
         .await
         .unwrap();
-    let query = QueryBuilder::new();
 
-    let sql_query = query
+    let sql_query = query()
         .select("*")
         .from(stud_select.unwrap().clone().id.unwrap())
         // .from(stud1.clone().id.unwrap())

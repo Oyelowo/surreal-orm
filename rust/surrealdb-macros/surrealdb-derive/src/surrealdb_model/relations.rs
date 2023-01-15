@@ -16,13 +16,13 @@ impl From<&MyFieldReceiver> for RelationType {
                 ..
             } => RelationType::RelationGraph(relation.to_owned()),
             MyFieldReceiver {
-                reference_one: Some(ref_one),
+                link_one: Some(link_one),
                 ..
-            } => RelationType::ReferenceOne(ref_one.into()),
+            } => RelationType::ReferenceOne(link_one.into()),
             MyFieldReceiver {
-                reference_many: Some(ref_many),
+                link_many: Some(link_many),
                 ..
-            } => RelationType::ReferenceMany(ref_many.into()),
+            } => RelationType::ReferenceMany(link_many.into()),
             _ => RelationType::None,
         }
     }
