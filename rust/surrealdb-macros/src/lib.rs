@@ -1,3 +1,6 @@
+pub mod links;
+pub mod model_id;
+
 pub trait Edge {
     type EdgeChecker;
     type InNode;
@@ -15,4 +18,11 @@ pub use surrealdb_derive::SurrealdbModel;
 pub trait SurrealdbModel {
     type Schema<const T: usize>;
     fn get_schema() -> Self::Schema<0>;
+    // fn get_key(&self) -> Key;
+    fn get_key(&self) -> ::std::option::Option<String>;
+}
+pub struct Key(String);
+
+pub mod query {
+    pub use surreal_simple_querybuilder::prelude::*;
 }

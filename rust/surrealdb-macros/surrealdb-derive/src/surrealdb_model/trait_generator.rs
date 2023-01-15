@@ -165,9 +165,7 @@ impl ToTokens for FieldsGetterOpts {
             all_model_imports,
             all_model_schema_fields,
             all_static_assertions,
-            edge_metadata,
-            ..
-        } = ModelAttributesTokensDeriver::from_receiver_data(
+            edge_metadata, .. } = ModelAttributesTokensDeriver::from_receiver_data(
             data,
             struct_level_casing,
             struct_name_ident,
@@ -230,6 +228,20 @@ impl ToTokens for FieldsGetterOpts {
                             fn get_schema() -> Self::Schema<0> {
                                 #schema_mod_name::schema::#struct_name_ident::<0>::new()
                             }
+
+                            // fn get_key(&self) -> #crate_name::Id {#crate_name::Id(self.id.unwrap()) };
+                            
+                            fn get_key(&self) -> ::std::option::Option<String> {self.id.as_ref().map(::std::string::String::clone) } 
+                            // fn get_key<E>(&self) -> ::std::result::Result<String, E>
+                            //     where
+                            //         E: ::serde::ser::Error
+                            //     {
+                            //         self
+                            //         .id
+                            //         .as_ref()
+                            //         .map(::std::string::String::clone)
+                            //         .ok_or(::serde::ser::Error::custom("The model has no ID"))
+                            //     }
                         }
                         // impl #struct_name_ident {
                         //     // type Schema = account::schema::Account<0>;

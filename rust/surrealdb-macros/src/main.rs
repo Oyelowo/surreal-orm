@@ -4,25 +4,43 @@
 #![allow(incomplete_features)]
 #![feature(inherent_associated_types)]
 #![feature(generic_const_exprs)]
+use _core::ops::{Deref, DerefMut};
 use serde::{Deserialize, Serialize};
 // #![feature(inherent_associated_types)]
 // #![feature(const_mut_refs)]
 // use serde::{Deserialize, Serialize};
 // use surreal_simple_querybuilder::prelude::*;
 use static_assertions::*;
-
+use surrealdb::{
+    engine::local::{Db, Mem},
+    opt::IntoResource,
+    sql::Id,
+    Result, Surreal,
+};
 // const_assert!("oylelowo".as_str().len() > 3);
 // assert_fields!(Account_Manage_Project: r#in, out);
 
-use surrealdb_macros::{Edge, SurrealdbModel};
+use surrealdb_macros::{
+    links::{LinkMany, LinkOne},
+    model_id::SurIdComplex,
+    query::{Foreign, ForeignVec, KeySerializeControl, QueryBuilder},
+    Edge, SurrealdbModel,
+};
+use typed_builder::TypedBuilder;
 
-#[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
+#[derive(SurrealdbModel, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
 pub struct Account {
     id: Option<String>,
     handle: String,
     // #[surrealdb(rename = "nawao")]
     first_name: String,
+    #[surrealdb(reference_one = "Account", skip_serializing)]
+    best_friend: Box<LinkOne<Account>>,
+
+    #[surrealdb(reference_one = "Account", skip_serializing)]
+    teacher: Box<LinkOne<Account>>,
+
     #[surrealdb(rename = "lastName")]
     another_name: String,
     chess: String,
@@ -35,366 +53,150 @@ pub struct Account {
     managed_projects: ForeignVec<Project>,
 }
 
-fn kl() {
-    let _po = Account::get_schema()
-        .managedProjects()
-        .account()
-        .managedProjects()
-        .account()
-        .managedProjects()
-        .account()
-        .lastName;
-}
-
-#[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
+#[derive(SurrealdbModel, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
 pub struct Project {
     id: Option<String>,
     title: String,
-    // #[surrealdb(relate = "->run_by->Account")]
+    // #[surrealdbrelate = "->run_by->Account")]
     #[surrealdb(relate(edge = "AccountManageProject", link = "<-manage<-Account"))]
-    account: ForeignVec<Account>,
+    account: LinkOne<Account>,
 }
 
 // #[derive(Debug, Serialize, Deserialize, Default)]
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize)]
 #[surrealdb(relation_name = "manage")]
 struct AccountManageProject {
     id: Option<String>,
-    #[surrealdb(reference_one = "Account", skip_serializing, rename = "in")]
-    _in: Account,
-    // r#in: Account,
+    #[surrealdb(reference_one = "Account", skip_serializing)]
+    // #[serde(rename = "in")]
+    // _in: Ref<Account>,
+    r#in: LinkOne<Account>,
     #[surrealdb(reference_one = "Project", skip_serializing)]
-    out: Project,
+    out: LinkOne<Project>,
     when: String,
     destination: String,
 }
 
-// static NAME: &'static str = "manage";
-// ::static_assertions::const_assert!(NAME == NAME);
-// impl AccountManageProject {
-//     const NAME: &'static str = "manage";
-// }
-#[test]
-fn test_account_manage_project_edge_name() {
-    ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
-    ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
-    ::static_assertions::assert_fields!(Modax: manage);
-}
-
-mod name {
-    // add code here
-}
-type Modax = <AccountManageProject as Edge>::EdgeChecker;
-// ::static_assertions::assert_fields!(Modax: manage);
-// ::static_assertions::assert_type_eq_all!(
-//     <AccountManageProject as Edge>::EdgeChecker,
-//     ko::EdgeChecker
-// );
-mod ko {
-    pub struct EdgeChecker {
-        pub manage: String,
-    }
-    // ::static_assertions::assert_fields!(EdgeChecker: manage);
-    // fn er() {}
-}
-// impl Edge for AccountManageProject {
-//     type EdgeChecker = ko::EdgeChecker;
-//     type InNode = Account;
-//
-//     type OutNode = Project;
-// }
-
-fn xc() {
-    // let _xxx = AccountManageProject::default();
-    // let x = xxx.from();
-    // println!("{x}");
-}
-
-// trait Edge {
-//     const edge_relation: &'static str;
-//     fn to(&self) -> ::proc_macro2::TokenStream;
-//     fn from(&self) -> ::proc_macro2::TokenStream;
-// }
-
-// if to().split(->).first() == (struct_name) and ending ===
-// description == ending(i.e remaining part of the string)
-// impl Edge for AccountManageProject {
-//     #[allow(non_upper_case_globals)]
-//     const EDGE_RELATION: &'static str = "manage";
-//     fn to(&self) -> ::proc_macro2::TokenStream {
-//         // Account::;
-//         // self.out
-//         // let In = self.r#in.own_schema().to_string();
-//         // let Out = self.out.own_schema().to_string();
-//         // let In = format_ident!("{In}");
-//         // let Out = format_ident!("{Out}");
-//         // let edge = format_ident!("{}", Self::EDGE_RELATION);
-//         // let xx = ::quote::quote!(#In->#edge->#Out);
-//         // xx
-//         todo!()
-//     }
-//     fn from(&self) -> ::proc_macro2::TokenStream {
-//         // let In = self.r#in.own_schema().to_string();
-//         // let Out = self.out.own_schema().to_string();
-//         // let In = format_ident!("{In}");
-//         // let Out = format_ident!("{Out}");
-//         // let edge = format_ident!("{}", Self::EDGE_RELATION);
-//         // let xx = ::quote::quote!(#Out<-#edge<-#In);
-//         // xx
-//         todo!()
-//     }
-//     fn km(&self) -> String {
-//         "dfoyelowo".to_string()
-//     }
-// }
-use surreal_simple_querybuilder::prelude::*;
-
-fn main() {
-    let _xxx = AccountManageProject::default();
-    // println!("to: {}", xxx.to());
-    // println!("from: {}", xxx.from());
-    Account::get_schema()
-        .managedProjects()
-        .title
-        .contains_none("values");
-}
-
-fn ki() {
-    let _xx = AccountManageProject::get_schema().r#in;
-    let _xm = AccountManageProject::get_schema()
-        .out()
-        .account()
-        .managedProjects()
-        .account()
-        .managedProjects()
-        .title;
-    struct Nomax {
-        in_: String,
-    }
-    // let pp = Nomax {
-    //     in_: String::from("normal"),
-    // };
-}
-
-impl Edga for AccountManageProject {
-    type In = Account;
-    type Out = Project;
-}
-type Kol = <AccountManageProject as Edga>::In;
-::static_assertions::assert_type_eq_all!(Account, <AccountManageProject as Edga>::In);
-::static_assertions::assert_type_eq_all!(Project, <AccountManageProject as Edga>::Out);
-
-trait Edga {
-    type In;
-    type Out;
-}
-
-// #[surrealdb(rename_all = "camelCase")]
-pub struct Accountt {
+#[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Student {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     id: Option<String>,
-    handle: String,
-    // #[surrealdb(rename = "nawao")]
     first_name: String,
-    // #[surrealdb(rename = "lastName")]
-    another_name: String,
-    chess: String,
-    nice_poa: String,
+    #[surrealdb(reference_one = "Course", skip_serializing)]
+    course: LinkOne<Course>,
 
-    password: String,
-    email: String,
-
-    // #[surrealdb(relate(edge="Account_Manage_Project", description="->manage->Account"))]
-    // #[surrealdb(relate(edge = "Account_Manage_project", link = "->runs->Project"))]
-    projects: ForeignVec<Project>,
-}
-// impl Accountt {
-//     // type Schema = account::schema::Account<0>;
-//     // type Schema = #schema_mod_name::schema::#my_struct<0>;
-//     const SCHEMA: accountt::schema::Accountt<0> = accountt::schema::Accountt::<0>::new();
-//     const fn get_schema() -> accountt::schema::Accountt<0> {
-//         // project::schema::model
-//         //  account::schema::Account<0>::new()
-//         // e.g: account::schema::Account::<0>::new()
-//         accountt::schema::Accountt::<0>::new()
-//     }
-//     // fn own_schema(&self) -> #schema_type_alias_name<0> {
-//     //     // project::schema::model
-//     //     //  account::schema::Account<0>::new()
-//     //     // e.g: account::schema::Account::<0>::new()
-//     //     #schema_mod_name::schema::#my_struct::<0>::new()
-//     // }
-// }
-impl Edga2 for Accountt {
-    // type Schema = projectt::schema::Projectt<0>;
-    // type Schema = projectt::schema::Projectt<0>;
-    type Schema<const T: usize> = accountt::schema::Accountt<T>;
-
-    fn get_schema() -> Self::Schema<0> {
-        accountt::schema::Accountt::<0>::new()
-    }
-}
-fn cre() {
-    let _xx = Accountt::get_schema()
-        .managed_projects()
-        .manager()
-        .managed_projects()
-        .manager()
-        .managed_projects()
-        .manager()
-        .managed_projects()
-        .manager()
-        .managed_projects()
-        .email
-        .count();
-
-    let _pp = Projectt::get_schema()
-        .manager()
-        .managed_projects()
-        .manager()
-        .managed_projects()
-        .manager()
-        .managed_projects()
-        .manager()
-        .managed_projects()
-        .manager()
-        .first_name;
-    let _po = Accountt::get_schema()
-        .friend()
-        .managed_projects()
-        .manager()
-        .friend()
-        .managed_projects()
-        .manager()
-        .managed_projects;
-}
-mod accountt {
-    // mod xxx
-    // use super::projectt::schema::Projectt;
-    type Projectt<const T: usize> = <super::Projectt as super::Edga2>::Schema<T>;
-    // type Projectt = Mowa;
-    // use super::Mowa as Projectt;
-    // use super::Projectt;
-    // type Mowa = <Projectt as super::Edga2>::Schema;
-    use surreal_simple_querybuilder::prelude::*;
-
-    model!( Accountt {
-           pub id,
-        //    pub _in<Account>,
-           pub first_name,
-           pub email,
-       pub friend<Accountt>,
-           pub ->manage->Projectt as managed_projects,
-       }
-    );
+    #[surrealdb(reference_one = "Course", skip_serializing)]
+    #[serde(rename = "lowo")]
+    all_semester_courses: LinkMany<Course>,
 }
 
-mod projectt {
-    // use super::accountt::schema::Accountt;
-    type Accountt<const T: usize> = <super::Accountt as super::Edga2>::Schema<T>;
-    use surreal_simple_querybuilder::prelude::*;
-
-    model!( Projectt {
-           pub id,
-           pub first_name,
-           pub email,
-           pub <-run_by<-Accountt as manager
-       }
-    );
-}
-
-#[derive(Default, Serialize, Deserialize, Debug)]
-// #[surrealdb(rename_all = "camelCase")]
-pub struct Projectt {
+#[derive(SurrealdbModel, TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
+#[surrealdb(rename_all = "camelCase")]
+pub struct Course {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     id: Option<String>,
     title: String,
-    // #[surrealdb(relate = "->run_by->Account")]
-    // account: ForeignVec<Account>,
 }
 
-pub trait Edga2 {
-    type Schema<const T: usize>;
-    fn get_schema() -> Self::Schema<0>;
-}
-impl Edga2 for Projectt {
-    // type Schema = projectt::schema::Projectt<0>;
-    // type Schema = projectt::schema::Projectt<0>;
-    type Schema<const T: usize> = projectt::schema::Projectt<T>;
-    fn get_schema() -> Self::Schema<0> {
-        // project::schema::model
-        //  account::schema::Account<0>::new()
-        // e.g: account::schema::Account::<0>::new()
-        projectt::schema::Projectt::<0>::new()
-    }
-}
-// type Mowa<const T: usize> = Projectt::Schema<T>;
-// type Mowa<const T: usize> = <Projectt as Edga2>::Schema<T>;
+::static_assertions::assert_type_eq_all!(LinkOne<Course>, LinkOne<Course>);
 
-// impl Projectt {
-//     type Schema<const T: usize> = projectt::schema::Projectt<T>;
-//     // type Schema = projectt::schema::Projectt<0>;
-//     // type Schema = #schema_mod_name::schema::#my_struct<0>;
-//     const SCHEMA: projectt::schema::Projectt<0> = projectt::schema::Projectt::<0>::new();
-//     const fn get_schema() -> projectt::schema::Projectt<0> {
-//         // project::schema::model
-//
-//         //  account::schema::Account<0>::new()
-//         // e.g: account::schema::Account::<0>::new()
-//         projectt::schema::Projectt::<0>::new()
-//     }
-//     // fn own_schema(&self) -> #schema_type_alias_name<0> {
-//     //     // project::schema::model
-//     //     //  account::schema::Account<0>::new()
-//     //     // e.g: account::schema::Account::<0>::new()
-//     //     #schema_mod_name::schema::#my_struct::<0>::new()
-//     // }
-// }
-fn protext() {
-    let _xxx = Projectt::get_schema()
-        .manager()
-        .managed_projects()
-        .manager();
-}
-mod xama {
-    use super::Account;
-    use super::Project;
+// use ref_mod::Ref;
+// use ref_mod::{LinkMany, Ref as Mana};
 
-    mod edges_types {
-        type In = super::Account;
-        type Out = super::Project;
-    }
+static DB: Surreal<Db> = Surreal::init();
 
-    mod nodes_checker {
-        pub struct In {
-            Account: super::Account,
-        }
-        pub struct Out {
-            Project: super::Project,
-        }
-    }
-    ::static_assertions::assert_type_eq_all!(Project, self::Project);
-    // use std::any::Any;
+#[tokio::main]
+async fn main() -> Result<()> {
+    DB.connect::<Mem>(()).await?;
+    DB.use_ns("namespace").use_db("database").await?;
 
-    // use crate::Account_Manage_Project;
-    use static_assertions::{const_assert, const_assert_eq};
+    let c = Course::builder()
+        // .id(Some("Course:math".into()))
+        .title("Calculuse".into())
+        .build();
+    let cx: Course = DB.create("Course").content(&c).await.unwrap();
+    println!("cxxxx.....{:?}", cx);
+    let id = Id::from("Course:math");
+    // let idr = id.to_raw();
 
-    const_assert_eq!(false, false);
+    let cs: Option<Course> = DB
+        .select(SurIdComplex::from_string(cx.clone().id.unwrap()))
+        // .select(SurIdComplex(("Course".to_string(), cx.id.unwrap()).0))
+        .await
+        .unwrap();
 
-    struct In {
-        Account: super::Account,
-    }
-    struct Out {
-        Project: super::Project,
-    }
-    ::static_assertions::assert_fields!(In: Account);
-    const Nama: &'static str = "tr";
-    const xx: &'static str = "tr";
+    // let cx: Course = DB.create(("Course", &*"meth")).content(&c).await.unwrap();
+    println!("cssss.....{:?}", cx);
+    // let cf: Foreign<Course> = Foreign::new_value(cx);
+    // let cf = Ref::from_model(cs.clone().unwrap());
+    // let cf1 = Ref::from_model(cs.clone().unwrap());
+    // let cf2 = Ref::from_model(cs.unwrap());
+    // let cf = Ref::Id(cs.unwrap().id.unwrap().into());
+    let cfake = Course::builder()
+        .id("Course:math".into())
+        .title("Calculuse".into())
+        .build();
 
-    // const_assert!(xx == Nama);
+    // println!(
+    //     "cours {}",
+    //     serde_json::to_string(&cf.value().unwrap().id).unwrap()
+    // );
 
-    const FIVE: usize = 5;
+    let cxx = cs.as_ref().unwrap();
+    // let cxx = &cs.unwrap();
+    let stu = Student::builder()
+        .first_name("dayo".into())
+        .course(cxx.into())
+        .all_semester_courses(vec![cxx.into(), cxx.into(), cfake.into()])
+        .build();
 
-    const_assert!(FIVE * 2 == 10);
-    // const kp: String = Account_Manage_Project::sama();
-    pub type Kusa = Account;
+    let stud1: Student = DB.create("Student").content(&stu).await.unwrap();
+    println!("stud1: stud1 {:?}", stud1);
+    // stud1.course.allow_value_serialize();
+    println!(
+        "stud1_serjson: stud1serj {}",
+        serde_json::to_string(&stud1).unwrap()
+    );
+
+    let stud_select: Option<Student> = DB
+        .select(SurIdComplex::from_string(stud1.clone().id.unwrap()))
+        // .select(SurIdComplex(("Course".to_string(), cx.id.unwrap()).0))
+        .await
+        .unwrap();
+    let query = QueryBuilder::new();
+
+    let sql_query = query
+        .select("*")
+        .from(stud_select.unwrap().clone().id.unwrap())
+        // .from(stud1.clone().id.unwrap())
+        .fetch_many(&[
+            Student::get_schema().course.identifier,
+            Student::get_schema().lowo.identifier,
+            // "allSemesterCourses",
+        ])
+        .build();
+    println!("SQL {sql_query}");
+    let mut sql_q_result = DB.query(sql_query).await.unwrap();
+    let sql_q: Option<Student> = sql_q_result.take(0)?;
+
+    let mmm = sql_q.clone().unwrap().clone().course.value();
+    println!("sqllll {:?}", sql_q);
+    // println!("studselect1: studselect1 {:?}", stud_select);
+    // sql_q
+    //     .clone()
+    //     .unwrap()
+    //     .clone()
+    //     .course
+    //     .allow_value_serialize();
+    // stud_select.clone().unwrap().course.allow_value_serialize();
+    println!(
+        "stud SELECT_serjson: rj {}",
+        serde_json::to_string(&sql_q).unwrap()
+    );
+    Ok(())
+    // cxxxx.....Course { id: Some("Course:ygz4r9w68lls6e9k8fo5"), title: "Calculuse" }
 }

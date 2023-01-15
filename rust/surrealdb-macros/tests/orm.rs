@@ -21,37 +21,41 @@ pub struct Account {
     email: String,
 
     #[surrealdb(reference_one = "Account", skip_serializing)]
-    // friend: Foreign<std::sync::Arc<Account>>,
     #[graphql(skip)]
-    friend: ForeignVec<Account>,
+    friend: RefOne<Account>,
 
     #[surrealdb(reference_one = "Account", skip_serializing)]
     #[graphql(skip)]
-    nama: ForeignVec<Account>,
+    teacher: RefOne<Account>,
 
-    // #[graphql(skip)]
     // best_friend: String,
     #[surrealdb(skip_serializing)]
     #[graphql(skip)]
-    projects: ForeignVec<Project>,
+    // projects: ForeignVec<Project>,
+    projects: RefMany<Project>,
 
     #[surrealdb(
         relate(edge = "Account_Manage_Project", link = "->manage->Project"),
         skip_serializing
     )]
     #[graphql(skip)]
-    managed_projects: ForeignVec<Project>,
+    managed_projects: RefMany<Project>,
 }
+
+// struct RefOne<T>(T);
+// struct RefOne<T>(T);
+
+// struct RefMany<T>(ForeignVec<T>);
+type RefMany<T> = ForeignVec<T>;
 
 #[ComplexObject]
 impl Account {
-    // async fn friend(&self)  -> Account{
-    //     // self.friend.allow_value_serialize();
-    //     // self.projects.value().map(|x|x.to_vec()).unwrap_or_default()
-    //     // Self::get_schema().friend()
-    //     // Account::get_schema()
-    //     todo!()
-    // }
+    async fn friend(&self) -> Option<Account> {
+        // self.friend.clone().into_inner().allow_value_serialize();
+        // self.friend.clone().into_inner().value().as_deref().cloned()
+        Some(self.friend.clone().as_value())
+    }
+
     async fn projects(&self) -> Vec<Project> {
         self.projects.allow_value_serialize();
         self.projects
@@ -59,9 +63,83 @@ impl Account {
             .map(|x| x.to_vec())
             .unwrap_or_default()
     }
+
     async fn projects_ids(&self) -> Vec<String> {
         self.projects.disallow_value_serialize();
         self.projects.key().map(|x| x.to_vec()).unwrap_or_default()
+    }
+    async fn teacher(&self) -> Option<Account> {
+        // let xx = self.teacher.allow_serialize_value();
+        let xx = self.teacher.as_key();
+        self.friend.clone().into_inner().value().as_deref().cloned()
+    }
+}
+
+#[derive(Debug, Default, Clone, Deserialize)]
+struct RefOne<T: Serialize>(Box<Foreign<T>>);
+
+impl<T: Serialize> Serialize for RefOne<T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let x = self.0.value().serialize(serializer);
+        // todo!()
+        x
+    }
+}
+// struct ForeignWrapper<T: Serialize>(Box<Foreign<T>>);
+// struct ForeignWrapper<T: Serialize>(Box<Foreign<T>>);
+
+impl<T: Serialize> IntoKey<String> for RefOne<T> {
+    fn into_key<E>(&self) -> Result<String, E>
+    where
+        E: serde::ser::Error,
+    {
+        let xx = self
+            .0
+            .key()
+            // .as_ref()
+            .map(String::clone)
+            .ok_or(serde::ser::Error::custom("The project has no ID"));
+        xx
+        // self.0
+        //   .id
+        //   .as_ref()
+        //   .map(String::clone)
+        //   .ok_or(serde::ser::Error::custom("The project has no ID"))
+    }
+}
+
+struct RefKey(String);
+
+impl<T: Serialize + Clone> RefOne<T> {
+    // fn new_value(value: T) -> Foreign<T> {
+    //     Foreign::new_value(value)
+    // }
+
+    fn new_value(value: T) -> Self {
+        Self(Foreign::new_value(value).into())
+    }
+
+    fn into_inner(self) -> Foreign<T> {
+        // Box::new(self.0)
+        *self.0
+    }
+    fn as_value(&self) -> T {
+        // self.friend.clone().into_inner().allow_value_serialize();
+        self.0.allow_value_serialize();
+        self.clone()
+            .into_inner()
+            .value()
+            .as_deref()
+            .cloned()
+            .unwrap()
+    }
+
+    fn as_key(&self) -> String {
+        self.0.disallow_value_serialize();
+        self.clone().into_inner().key().as_deref().cloned().unwrap()
     }
 }
 
@@ -110,10 +188,10 @@ pub struct Release {
 use account::schema::model as account;
 use project::schema::model as project;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct File {
     name: String,
-    author: Foreign<Account>,
+    author: RefOne<Account>,
 }
 
 #[test]
@@ -177,7 +255,7 @@ pub fn test_as_named_label() {
 #[test]
 pub fn test_foreign_serialize() {
     let f: Foreign<Account> = Foreign::new_key("Account:John".to_owned());
-
+    // let x = f.value().unwrap().friend.0.value();
     // Confirm a foreign key is serialized into a simple string
     assert_eq!(
         serde_json::Value::String("Account:John".to_owned()),
@@ -202,6 +280,10 @@ pub fn test_foreign_serialize_allowed() {
         id: Some("Account:John".to_owned()),
         ..Default::default()
     });
+    // let f: RefOne<Account> = RefOne::new_value(Account {
+    //     id: Some("Account:John".to_owned()),
+    //     ..Default::default()
+    // });
 
     // once called, the Foreign should deserialize even the Values without calling
     // IntoKeys
@@ -213,6 +295,7 @@ pub fn test_foreign_serialize_allowed() {
             ..Default::default()
         })
         .unwrap(),
+        // serde_json::to_string(&f).unwrap()
         serde_json::to_string(&f).unwrap()
     );
 }
@@ -293,7 +376,7 @@ fn test_foreign_deserialize() {
     let file: File = serde_json::from_str(&loaded_author_json).unwrap();
 
     // confirm the `Foreign<Author>` contains a value
-    assert!(match &file.author.value() {
+    assert!(match &file.author.into_inner().value() {
         Some(acc) => acc.id == Some("Account:John".to_owned()),
         _ => false,
     });
@@ -303,7 +386,7 @@ fn test_foreign_deserialize() {
     let file: File = serde_json::from_str(&key_author_json).unwrap();
 
     // confirm the author field of the file is a Key with the account's ID
-    assert!(match file.author.key().as_deref() {
+    assert!(match file.author.into_inner().key().as_deref() {
         Some(key) => key == &"Account:John".to_owned(),
         _ => false,
     });
@@ -313,7 +396,7 @@ fn test_foreign_deserialize() {
     let file: File = serde_json::from_str(&unloaded_author_json).unwrap();
 
     // confirm the author field of the file is Unloaded
-    assert!(file.author.is_unloaded());
+    assert!(file.author.into_inner().is_unloaded());
 }
 
 /// Test that a model can have fields that reference the `Self` type.
@@ -376,7 +459,7 @@ fn test_with_id_edge() {
         .as_named_label(&Account::get_schema().to_string())
         .with(&Account::get_schema().managed_projects.with_id("other_id"));
 
-    let query_two = account
+    let query_two = Account::get_schema()
         .with_id("an_id")
         .with(&Account::get_schema().managed_projects.with_id("other_id"));
 
