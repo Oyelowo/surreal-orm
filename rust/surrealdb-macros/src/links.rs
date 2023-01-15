@@ -20,6 +20,11 @@ enum Reference<V: SurrealdbModel> {
 pub struct LinkOne<V: SurrealdbModel>(Reference<V>);
 
 pub type LinkMany<V> = Vec<LinkOne<V>>;
+pub type Relate<V> = Vec<LinkOne<V>>;
+
+// Use boxing to break reference cycle
+pub type LinkSelf<V> = Box<LinkOne<V>>;
+// pub type LinkSelf<V> = LinkOne<Box<V>>;
 
 impl<V: SurrealdbModel> From<V> for LinkOne<V> {
     fn from(model: V) -> Self {
@@ -55,7 +60,21 @@ where
         ))
     }
 
-    pub fn value(self) -> Option<V> {
+    pub fn id(&self) -> Option<&String> {
+        match &self.0 {
+            Reference::Id(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn value_ref(&self) -> Option<&V> {
+        match &self.0 {
+            Reference::FetchedValue(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn value_owned(self) -> Option<V> {
         match self.0 {
             Reference::FetchedValue(v) => Some(v),
             _ => None,

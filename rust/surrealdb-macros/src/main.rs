@@ -2,6 +2,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(incomplete_features)]
+#![allow(unused_imports)]
 #![feature(inherent_associated_types)]
 #![feature(generic_const_exprs)]
 use _core::ops::{Deref, DerefMut};
@@ -21,9 +22,9 @@ use surrealdb::{
 // assert_fields!(Account_Manage_Project: r#in, out);
 
 use surrealdb_macros::{
-    links::{LinkMany, LinkOne},
+    links::{LinkMany, LinkOne, LinkSelf, Relate},
     model_id::SurIdComplex,
-    query::{Foreign, ForeignVec, KeySerializeControl, QueryBuilder},
+    query_builder::query,
     Edge, SurrealdbModel,
 };
 use typed_builder::TypedBuilder;
@@ -35,11 +36,11 @@ pub struct Account {
     handle: String,
     // #[surrealdb(rename = "nawao")]
     first_name: String,
-    #[surrealdb(reference_one = "Account", skip_serializing)]
-    best_friend: Box<LinkOne<Account>>,
+    #[surrealdb(link_self = "Account", skip_serializing)]
+    best_friend: LinkSelf<Account>,
 
-    #[surrealdb(reference_one = "Account", skip_serializing)]
-    teacher: Box<LinkOne<Account>>,
+    #[surrealdb(link_self = "Account", skip_serializing)]
+    teacher: LinkSelf<Account>,
 
     #[surrealdb(rename = "lastName")]
     another_name: String,
@@ -50,7 +51,7 @@ pub struct Account {
 
     // #[surrealdb(relate(edge="Account_Manage_Project", description="->manage->Account"))]
     #[surrealdb(relate(edge = "AccountManageProject", link = "->manage->Project"))]
-    managed_projects: ForeignVec<Project>,
+    managed_projects: Relate<Project>,
 }
 
 #[derive(SurrealdbModel, Serialize, Deserialize, Debug)]
@@ -60,7 +61,7 @@ pub struct Project {
     title: String,
     // #[surrealdbrelate = "->run_by->Account")]
     #[surrealdb(relate(edge = "AccountManageProject", link = "<-manage<-Account"))]
-    account: LinkOne<Account>,
+    account: Relate<Account>,
 }
 
 // #[derive(Debug, Serialize, Deserialize, Default)]
@@ -68,11 +69,11 @@ pub struct Project {
 #[surrealdb(relation_name = "manage")]
 struct AccountManageProject {
     id: Option<String>,
-    #[surrealdb(reference_one = "Account", skip_serializing)]
+    #[surrealdb(link_one = "Account", skip_serializing)]
     // #[serde(rename = "in")]
-    // _in: Ref<Account>,
+    // _in: LinkOne<Account>,
     r#in: LinkOne<Account>,
-    #[surrealdb(reference_one = "Project", skip_serializing)]
+    #[surrealdb(link_one = "Project", skip_serializing)]
     out: LinkOne<Project>,
     when: String,
     destination: String,
@@ -85,10 +86,11 @@ pub struct Student {
     #[builder(default, setter(strip_option))]
     id: Option<String>,
     first_name: String,
-    #[surrealdb(reference_one = "Course", skip_serializing)]
+
+    #[surrealdb(link_one = "Course", skip_serializing)]
     course: LinkOne<Course>,
 
-    #[surrealdb(reference_one = "Course", skip_serializing)]
+    #[surrealdb(link_many = "Course", skip_serializing)]
     #[serde(rename = "lowo")]
     all_semester_courses: LinkMany<Course>,
 }
@@ -167,9 +169,8 @@ async fn main() -> Result<()> {
         // .select(SurIdComplex(("Course".to_string(), cx.id.unwrap()).0))
         .await
         .unwrap();
-    let query = QueryBuilder::new();
 
-    let sql_query = query
+    let sql_query = query()
         .select("*")
         .from(stud_select.unwrap().clone().id.unwrap())
         // .from(stud1.clone().id.unwrap())

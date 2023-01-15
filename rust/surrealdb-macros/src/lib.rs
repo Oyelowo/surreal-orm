@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 pub mod links;
 pub mod model_id;
 
@@ -23,6 +25,12 @@ pub trait SurrealdbModel {
 }
 pub struct Key(String);
 
-pub mod query {
-    pub use surreal_simple_querybuilder::prelude::*;
+pub mod query_builder {
+    use surreal_simple_querybuilder::prelude as query_builder;
+
+    pub fn query() -> query_builder::QueryBuilder<'static> {
+        query_builder::QueryBuilder::new()
+    }
+
+    pub use query_builder::{model, NodeBuilder, SchemaField, SchemaFieldType, ToNodeBuilder};
 }

@@ -13,6 +13,7 @@ use quote::{format_ident, quote};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
+    get_crate_name,
     relations::{RelateAttribute, RelationType},
     serialize_skipper::SkipSerializing,
     trait_generator::MyFieldReceiver,
@@ -110,17 +111,6 @@ impl ModelAttributesTokensDeriver {
                     struct_name_ident,
                 );
 
-                let xxxx = field_receiver.clone().ty.clone();
-                // syn::Type::from("ere".to_string());
-                println!("##############START");
-                println!(
-                    "xxxxdarrrrr...struct{:?} \n field:{:?} \n type:->>>>>>>${:?}$<<<<<<<-",
-                    struct_name_ident.to_string(),
-                    field_receiver.clone().ident.clone().unwrap().to_string(),
-                    quote!(#xxxx).to_string()
-                );
-                println!("##############END");
-                // println!("xxxxdarrrrr...{:?}", field_receiver.);
                 acc.all_model_schema_fields.push(meta.model_schema_field);
 
                 acc.all_model_imports.insert(meta.extra.model_import.into());
@@ -131,9 +121,10 @@ impl ModelAttributesTokensDeriver {
 
                 let field_type = &field_receiver.ty;
                 let field_type_from_attr = &field_receiver
-                    .reference_one
+                    .link_one
                     .as_ref()
                     .map(|ty_name| format_ident!("{ty_name}"));
+
                 match EdgeOrientation::from(&meta.original_field_name_normalised) {
                     EdgeOrientation::In => {
                         acc.edge_metadata.in_node_type = Some(quote!(#field_type_from_attr));
@@ -194,6 +185,8 @@ impl ModelAttributesTokensDeriver {
         struct_name_ident: &syn::Ident,
     ) -> ModelMedataTokenStream {
         let field_ident = Self::get_field_identifier_name(&field_receiver, index);
+        let field_type = &field_receiver.ty;
+        let crate_name = get_crate_name(false);
         let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
 
         // pub determines whether the field will be serialized or not during creation/update
@@ -220,7 +213,7 @@ impl ModelAttributesTokensDeriver {
         let relationship = RelationType::from(field_receiver);
 
         match relationship {
-            RelationType::RelationGraph(relation) => {
+            RelationType::Relate(relation) => {
                 let relation_attributes = RelateAttribute::from(relation.clone());
 
                 let arrow_direction = TokenStream::from(relation_attributes.edge_direction);
@@ -250,10 +243,13 @@ impl ModelAttributesTokensDeriver {
                 // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
                 // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
                 // type EdgeCheckerAlias = <AccountManageProject as Edge>::EdgeChecker;
-                ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as Edge>::InNode, #in_node);
-                ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as Edge>::OutNode, #out_node);
+                ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as #crate_name::Edge>::InNode, #in_node);
+                ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as #crate_name::Edge>::OutNode, #out_node);
                 type #edge_checker_alias  = <#edge_struct_ident as Edge>::EdgeChecker;
                 ::static_assertions::assert_fields!(#edge_checker_alias : #edge_action);
+
+                // assert field type and attribute reference match
+                    ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::Relate<#schema_name_basic>);
                                         );
                 /*
                  *
@@ -271,7 +267,7 @@ impl ModelAttributesTokensDeriver {
                     extra,
                 }
             }
-            RelationType::ReferenceOne(node_object) => {
+            RelationType::LinkOne(node_object) => {
                 let extra = ModelMetadataBasic::from(node_object);
                 let schema_name_basic = &extra.schema_name;
 
@@ -279,20 +275,45 @@ impl ModelAttributesTokensDeriver {
                     // friend<User>
                     model_schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
                     original_field_name_normalised,
-                    static_assertions: quote!(),
+                    static_assertions: quote!(
+                     ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::LinkOne<#schema_name_basic>);
+                    ),
                     extra,
                 }
             }
-            RelationType::ReferenceMany(node_object) => {
+            RelationType::LinkSelf(node_object) => {
+                let extra = ModelMetadataBasic::from(node_object);
+                let schema_name_basic = &extra.schema_name;
+
+                // if schema_name_basic.to_string() != struct_name_ident.to_string() {
+                //     panic!("linkself has to refer to same struct")
+                // }
+                // ::static_assertions::assert_type_eq_all!(LinkOne<Course>, LinkOne<Course>);
+                ModelMedataTokenStream {
+                    // friend<User>
+                    model_schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
+                    original_field_name_normalised,
+                    static_assertions: quote!(
+                     ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::LinkSelf<#schema_name_basic>);
+                     ::static_assertions::assert_type_eq_all!(#struct_name_ident,  #schema_name_basic);
+                    ),
+                    extra,
+                }
+            }
+            RelationType::LinkMany(node_object) => {
                 let extra = ModelMetadataBasic::from(node_object);
                 let schema_name_basic = &extra.schema_name;
 
                 ModelMedataTokenStream {
                     // friend<Vec<User>>
                     // TODO: Confirm/Or fix this on the querybuilder side this.
-                    model_schema_field: quote!(#visibility #field_ident_normalised<Vec<#schema_name_basic>>,),
+                    // TODO: Semi-updated. It seems linkmany and link one both use same mechanisms
+                    // for accessing linked fields or all
+                    model_schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
                     original_field_name_normalised,
-                    static_assertions: quote!(),
+                    static_assertions: quote!(
+                    ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::LinkMany<#schema_name_basic>);
+                                                                 ),
                     extra,
                 }
             }
