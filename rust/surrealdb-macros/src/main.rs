@@ -88,7 +88,7 @@ struct AccountManageProject {
 }
 
 #[derive(SurrealdbModel, TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
-#[surrealdb(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase")]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -96,6 +96,10 @@ pub struct Student {
     first_name: String,
     #[surrealdb(reference_one = "Course", skip_serializing)]
     course: Ref<Course>,
+
+    #[surrealdb(reference_one = "Course", skip_serializing)]
+    #[serde(rename = "lowo")]
+    all_semester_courses: Vec<Ref<Course>>,
 }
 
 #[derive(SurrealdbModel, TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
@@ -113,8 +117,8 @@ mod ref_mod {
     #[derive(Debug, Deserialize, Serialize, Clone)]
     #[serde(untagged)]
     enum Reference<V: SurrealdbModel> {
-        Id(String),
         FetchedValue(V),
+        Id(String),
         None,
     }
 
@@ -127,6 +131,24 @@ mod ref_mod {
     #[derive(Debug, Deserialize, Serialize, Clone, Default)]
     pub struct Ref<V: SurrealdbModel>(Reference<V>);
 
+    impl<V: SurrealdbModel> From<V> for Ref<V> {
+        fn from(model: V) -> Self {
+            let x = model.get_key();
+            Self(Reference::Id(
+                x.expect("Id not found. Make sure Id exists for this model"),
+            ))
+        }
+    }
+
+    impl<V: SurrealdbModel> From<&V> for Ref<V> {
+        fn from(model: &V) -> Self {
+            let x = model.get_key();
+            Self(Reference::Id(
+                x.expect("Id not found. Make sure Id exists for this model"),
+            ))
+        }
+    }
+
     impl<V> Ref<V>
     where
         V: SurrealdbModel,
@@ -136,9 +158,18 @@ mod ref_mod {
         /// # Panics
         ///
         /// Panics if .
-        pub fn from_model<M: SurrealdbModel>(model: M) -> Self {
+        pub fn from_model(model: impl SurrealdbModel) -> Self {
             let x = model.get_key();
-            Self(Reference::Id(x.unwrap()))
+            Self(Reference::Id(
+                x.expect("Id not found. Make sure Id exists for this model"),
+            ))
+        }
+
+        pub fn value(self) -> Option<V> {
+            match self.0 {
+                Reference::FetchedValue(v) => Some(v),
+                _ => None,
+            }
         }
     }
 }
@@ -207,6 +238,7 @@ async fn main() -> Result<()> {
     println!("cxxxx.....{:?}", cx);
     let id = Id::from("Course:math");
     // let idr = id.to_raw();
+
     let cs: Option<Course> = DB
         .select(SurIdComplex::from_string(cx.clone().id.unwrap()))
         // .select(SurIdComplex(("Course".to_string(), cx.id.unwrap()).0))
@@ -216,17 +248,26 @@ async fn main() -> Result<()> {
     // let cx: Course = DB.create(("Course", &*"meth")).content(&c).await.unwrap();
     println!("cssss.....{:?}", cx);
     // let cf: Foreign<Course> = Foreign::new_value(cx);
-    let cf = Ref::from_model(cs.unwrap());
+    // let cf = Ref::from_model(cs.clone().unwrap());
+    // let cf1 = Ref::from_model(cs.clone().unwrap());
+    // let cf2 = Ref::from_model(cs.unwrap());
     // let cf = Ref::Id(cs.unwrap().id.unwrap().into());
+    let cfake = Course::builder()
+        .id("Course:math".into())
+        .title("Calculuse".into())
+        .build();
 
     // println!(
     //     "cours {}",
     //     serde_json::to_string(&cf.value().unwrap().id).unwrap()
     // );
 
+    let cxx = cs.as_ref().unwrap();
+    // let cxx = &cs.unwrap();
     let stu = Student::builder()
         .first_name("dayo".into())
-        .course(cf)
+        .course(cxx.into())
+        .all_semester_courses(vec![cxx.into(), cxx.into(), cfake.into()])
         .build();
 
     let stud1: Student = DB.create("Student").content(&stu).await.unwrap();
@@ -242,16 +283,23 @@ async fn main() -> Result<()> {
         // .select(SurIdComplex(("Course".to_string(), cx.id.unwrap()).0))
         .await
         .unwrap();
+    let query = QueryBuilder::new();
 
-    let sql_query = QueryBuilder::new()
+    let sql_query = query
         .select("*")
-        .from(stud1.clone().id.unwrap())
-        .fetch(Student::get_schema().course.identifier)
+        .from(stud_select.unwrap().clone().id.unwrap())
+        // .from(stud1.clone().id.unwrap())
+        .fetch_many(&[
+            Student::get_schema().course.identifier,
+            Student::get_schema().lowo.identifier,
+            // "allSemesterCourses",
+        ])
         .build();
     println!("SQL {sql_query}");
     let mut sql_q_result = DB.query(sql_query).await.unwrap();
     let sql_q: Option<Student> = sql_q_result.take(0)?;
 
+    let mmm = sql_q.clone().unwrap().clone().course.value();
     println!("sqllll {:?}", sql_q);
     // println!("studselect1: studselect1 {:?}", stud_select);
     // sql_q
