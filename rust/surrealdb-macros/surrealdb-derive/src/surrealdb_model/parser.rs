@@ -220,7 +220,7 @@ impl ModelAttributesTokensDeriver {
         let relationship = RelationType::from(field_receiver);
 
         match relationship {
-            RelationType::RelationGraph(relation) => {
+            RelationType::Relate(relation) => {
                 let relation_attributes = RelateAttribute::from(relation.clone());
 
                 let arrow_direction = TokenStream::from(relation_attributes.edge_direction);
@@ -271,10 +271,11 @@ impl ModelAttributesTokensDeriver {
                     extra,
                 }
             }
-            RelationType::ReferenceOne(node_object) => {
+            RelationType::LinkOne(node_object) => {
                 let extra = ModelMetadataBasic::from(node_object);
                 let schema_name_basic = &extra.schema_name;
 
+                // ::static_assertions::assert_type_eq_all!(LinkOne<Course>, LinkOne<Course>);
                 ModelMedataTokenStream {
                     // friend<User>
                     model_schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
@@ -283,7 +284,20 @@ impl ModelAttributesTokensDeriver {
                     extra,
                 }
             }
-            RelationType::ReferenceMany(node_object) => {
+            RelationType::LinkSelf(node_object) => {
+                let extra = ModelMetadataBasic::from(node_object);
+                let schema_name_basic = &extra.schema_name;
+
+                // ::static_assertions::assert_type_eq_all!(LinkOne<Course>, LinkOne<Course>);
+                ModelMedataTokenStream {
+                    // friend<User>
+                    model_schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
+                    original_field_name_normalised,
+                    static_assertions: quote!(),
+                    extra,
+                }
+            }
+            RelationType::LinkMany(node_object) => {
                 let extra = ModelMetadataBasic::from(node_object);
                 let schema_name_basic = &extra.schema_name;
 

@@ -21,7 +21,7 @@ use surrealdb::{
 // assert_fields!(Account_Manage_Project: r#in, out);
 
 use surrealdb_macros::{
-    links::{LinkMany, LinkOne, LinkSelf},
+    links::{LinkMany, LinkOne, LinkSelf, Relate},
     model_id::SurIdComplex,
     query_builder::query,
     Edge, SurrealdbModel,
@@ -50,7 +50,7 @@ pub struct Account {
 
     // #[surrealdb(relate(edge="Account_Manage_Project", description="->manage->Account"))]
     #[surrealdb(relate(edge = "AccountManageProject", link = "->manage->Project"))]
-    managed_projects: LinkMany<Project>,
+    managed_projects: Relate<Project>,
 }
 
 #[derive(SurrealdbModel, Serialize, Deserialize, Debug)]
@@ -60,7 +60,7 @@ pub struct Project {
     title: String,
     // #[surrealdbrelate = "->run_by->Account")]
     #[surrealdb(relate(edge = "AccountManageProject", link = "<-manage<-Account"))]
-    account: LinkOne<Account>,
+    account: Relate<Account>,
 }
 
 // #[derive(Debug, Serialize, Deserialize, Default)]

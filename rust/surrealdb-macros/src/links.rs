@@ -20,6 +20,7 @@ enum Reference<V: SurrealdbModel> {
 pub struct LinkOne<V: SurrealdbModel>(Reference<V>);
 
 pub type LinkMany<V> = Vec<LinkOne<V>>;
+pub type Relate<V> = Vec<LinkOne<V>>;
 
 // Use boxing to break reference cycle
 pub type LinkSelf<V> = Box<LinkOne<V>>;

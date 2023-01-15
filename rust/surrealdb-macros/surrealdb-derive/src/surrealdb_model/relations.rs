@@ -2,9 +2,11 @@ use super::trait_generator::{MyFieldReceiver, Relate};
 
 #[derive(Debug, Clone)]
 pub(crate) enum RelationType {
-    RelationGraph(Relate),
-    ReferenceOne(NodeObject),
-    ReferenceMany(NodeObject),
+    // ->studies->Course
+    Relate(Relate),
+    LinkOne(NodeObject),
+    LinkSelf(NodeObject),
+    LinkMany(NodeObject),
     None,
 }
 
@@ -14,15 +16,19 @@ impl From<&MyFieldReceiver> for RelationType {
             MyFieldReceiver {
                 relate: Some(relation),
                 ..
-            } => RelationType::RelationGraph(relation.to_owned()),
+            } => RelationType::Relate(relation.to_owned()),
             MyFieldReceiver {
                 link_one: Some(link_one),
                 ..
-            } => RelationType::ReferenceOne(link_one.into()),
+            } => RelationType::LinkOne(link_one.into()),
+            MyFieldReceiver {
+                link_self: Some(link_self),
+                ..
+            } => RelationType::LinkSelf(link_self.into()),
             MyFieldReceiver {
                 link_many: Some(link_many),
                 ..
-            } => RelationType::ReferenceMany(link_many.into()),
+            } => RelationType::LinkMany(link_many.into()),
             _ => RelationType::None,
         }
     }
