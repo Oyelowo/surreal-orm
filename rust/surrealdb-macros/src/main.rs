@@ -35,7 +35,7 @@ pub struct Account {
     handle: String,
     // #[surrealdb(rename = "nawao")]
     first_name: String,
-    #[surrealdb(link_one = "Account", skip_serializing)]
+    #[surrealdb(link_self = "Account", skip_serializing)]
     best_friend: LinkSelf<Account>,
 
     #[surrealdb(link_self = "Account", skip_serializing)]
@@ -85,10 +85,11 @@ pub struct Student {
     #[builder(default, setter(strip_option))]
     id: Option<String>,
     first_name: String,
+
     #[surrealdb(link_one = "Course", skip_serializing)]
     course: LinkOne<Course>,
 
-    #[surrealdb(link_one = "Course", skip_serializing)]
+    #[surrealdb(link_many = "Course", skip_serializing)]
     #[serde(rename = "lowo")]
     all_semester_courses: LinkMany<Course>,
 }

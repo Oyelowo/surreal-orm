@@ -13,6 +13,7 @@ use quote::{format_ident, quote};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
+    get_crate_name,
     relations::{RelateAttribute, RelationType},
     serialize_skipper::SkipSerializing,
     trait_generator::MyFieldReceiver,
@@ -194,6 +195,8 @@ impl ModelAttributesTokensDeriver {
         struct_name_ident: &syn::Ident,
     ) -> ModelMedataTokenStream {
         let field_ident = Self::get_field_identifier_name(&field_receiver, index);
+        let field_type = &field_receiver.ty;
+        let crate_name = get_crate_name(false);
         let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
 
         // pub determines whether the field will be serialized or not during creation/update
@@ -275,12 +278,13 @@ impl ModelAttributesTokensDeriver {
                 let extra = ModelMetadataBasic::from(node_object);
                 let schema_name_basic = &extra.schema_name;
 
-                // ::static_assertions::assert_type_eq_all!(LinkOne<Course>, LinkOne<Course>);
                 ModelMedataTokenStream {
                     // friend<User>
                     model_schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
                     original_field_name_normalised,
-                    static_assertions: quote!(),
+                    static_assertions: quote!(
+                     ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::LinkOne<#schema_name_basic>);
+                    ),
                     extra,
                 }
             }
@@ -288,12 +292,18 @@ impl ModelAttributesTokensDeriver {
                 let extra = ModelMetadataBasic::from(node_object);
                 let schema_name_basic = &extra.schema_name;
 
+                // if schema_name_basic.to_string() != struct_name_ident.to_string() {
+                //     panic!("linkself has to refer to same struct")
+                // }
                 // ::static_assertions::assert_type_eq_all!(LinkOne<Course>, LinkOne<Course>);
                 ModelMedataTokenStream {
                     // friend<User>
                     model_schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
                     original_field_name_normalised,
-                    static_assertions: quote!(),
+                    static_assertions: quote!(
+                     ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::LinkSelf<#schema_name_basic>);
+                     ::static_assertions::assert_type_eq_all!(#struct_name_ident,  #schema_name_basic);
+                    ),
                     extra,
                 }
             }
@@ -304,7 +314,9 @@ impl ModelAttributesTokensDeriver {
                 ModelMedataTokenStream {
                     // friend<Vec<User>>
                     // TODO: Confirm/Or fix this on the querybuilder side this.
-                    model_schema_field: quote!(#visibility #field_ident_normalised<Vec<#schema_name_basic>>,),
+                    // TODO: Semi-updated. It seems linkmany and link one both use same mechanisms
+                    // for accessing linked fields or all
+                    model_schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
                     original_field_name_normalised,
                     static_assertions: quote!(),
                     extra,
