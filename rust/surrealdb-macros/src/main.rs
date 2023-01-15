@@ -21,12 +21,14 @@ use surrealdb::{
 // assert_fields!(Account_Manage_Project: r#in, out);
 
 use surrealdb_macros::{
+    links::{LinkMany, LinkOne},
+    model_id::SurIdComplex,
     query::{Foreign, ForeignVec, KeySerializeControl, QueryBuilder},
     Edge, SurrealdbModel,
 };
 use typed_builder::TypedBuilder;
 
-#[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
+#[derive(SurrealdbModel, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
 pub struct Account {
     id: Option<String>,
@@ -34,10 +36,10 @@ pub struct Account {
     // #[surrealdb(rename = "nawao")]
     first_name: String,
     #[surrealdb(reference_one = "Account", skip_serializing)]
-    best_friend: Box<Foreign<Account>>,
+    best_friend: Box<LinkOne<Account>>,
 
     #[surrealdb(reference_one = "Account", skip_serializing)]
-    teacher: Box<Foreign<Account>>,
+    teacher: Box<LinkOne<Account>>,
 
     #[surrealdb(rename = "lastName")]
     another_name: String,
@@ -51,43 +53,32 @@ pub struct Account {
     managed_projects: ForeignVec<Project>,
 }
 
-struct ForeignWrapper<T>(Foreign<T>);
-
-impl<T> ForeignWrapper<T> {
-    fn allow_serialize_value() -> T {
-        todo!()
-    }
-
-    fn disallow_serialize_value() -> String {
-        todo!()
-    }
-}
-
-#[derive(SurrealdbModel, Default, Serialize, Deserialize, Debug)]
+#[derive(SurrealdbModel, Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
 pub struct Project {
     id: Option<String>,
     title: String,
     // #[surrealdbrelate = "->run_by->Account")]
     #[surrealdb(relate(edge = "AccountManageProject", link = "<-manage<-Account"))]
-    account: ForeignVec<Account>,
+    account: LinkOne<Account>,
 }
 
 // #[derive(Debug, Serialize, Deserialize, Default)]
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize)]
 #[surrealdb(relation_name = "manage")]
 struct AccountManageProject {
     id: Option<String>,
-    #[surrealdb(reference_one = "Account", skip_serializing, rename = "in")]
-    _in: Account,
-    // r#in: Account,
+    #[surrealdb(reference_one = "Account", skip_serializing)]
+    // #[serde(rename = "in")]
+    // _in: Ref<Account>,
+    r#in: LinkOne<Account>,
     #[surrealdb(reference_one = "Project", skip_serializing)]
-    out: Project,
+    out: LinkOne<Project>,
     when: String,
     destination: String,
 }
 
-#[derive(SurrealdbModel, TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -95,11 +86,11 @@ pub struct Student {
     id: Option<String>,
     first_name: String,
     #[surrealdb(reference_one = "Course", skip_serializing)]
-    course: Ref<Course>,
+    course: LinkOne<Course>,
 
     #[surrealdb(reference_one = "Course", skip_serializing)]
     #[serde(rename = "lowo")]
-    all_semester_courses: Vec<Ref<Course>>,
+    all_semester_courses: LinkMany<Course>,
 }
 
 #[derive(SurrealdbModel, TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
@@ -111,119 +102,12 @@ pub struct Course {
     title: String,
 }
 
-mod ref_mod {
-    use super::*;
+::static_assertions::assert_type_eq_all!(LinkOne<Course>, LinkOne<Course>);
 
-    #[derive(Debug, Deserialize, Serialize, Clone)]
-    #[serde(untagged)]
-    enum Reference<V: SurrealdbModel> {
-        FetchedValue(V),
-        Id(String),
-        None,
-    }
-
-    impl<V: SurrealdbModel> Default for Reference<V> {
-        fn default() -> Self {
-            Self::None
-        }
-    }
-
-    #[derive(Debug, Deserialize, Serialize, Clone, Default)]
-    pub struct Ref<V: SurrealdbModel>(Reference<V>);
-
-    impl<V: SurrealdbModel> From<V> for Ref<V> {
-        fn from(model: V) -> Self {
-            let x = model.get_key();
-            Self(Reference::Id(
-                x.expect("Id not found. Make sure Id exists for this model"),
-            ))
-        }
-    }
-
-    impl<V: SurrealdbModel> From<&V> for Ref<V> {
-        fn from(model: &V) -> Self {
-            let x = model.get_key();
-            Self(Reference::Id(
-                x.expect("Id not found. Make sure Id exists for this model"),
-            ))
-        }
-    }
-
-    impl<V> Ref<V>
-    where
-        V: SurrealdbModel,
-    {
-        /// .
-        ///
-        /// # Panics
-        ///
-        /// Panics if .
-        pub fn from_model(model: impl SurrealdbModel) -> Self {
-            let x = model.get_key();
-            Self(Reference::Id(
-                x.expect("Id not found. Make sure Id exists for this model"),
-            ))
-        }
-
-        pub fn value(self) -> Option<V> {
-            match self.0 {
-                Reference::FetchedValue(v) => Some(v),
-                _ => None,
-            }
-        }
-    }
-}
-use ref_mod::Ref;
+// use ref_mod::Ref;
+// use ref_mod::{LinkMany, Ref as Mana};
 
 static DB: Surreal<Db> = Surreal::init();
-
-struct SurId(String);
-struct SurIdComplex((String, String));
-
-impl SurIdComplex {
-    fn id(self) -> (String, String) {
-        self.0
-    }
-    fn from_string(str: String) -> (String, String) {
-        Self::from(str).0
-    }
-}
-
-impl From<SurIdComplex> for (String, String) {
-    fn from(value: SurIdComplex) -> Self {
-        value.0
-    }
-}
-
-impl DerefMut for SurIdComplex {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-impl Deref for SurIdComplex {
-    type Target = (String, String);
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl From<String> for SurIdComplex {
-    fn from(value: String) -> Self {
-        let mut spl = value.split(':');
-        match (spl.next(), spl.next(), spl.next()) {
-            (Some(table), Some(id), None) => Self((table.into(), id.into())),
-            _ => panic!(),
-        }
-    }
-}
-
-// impl IntoResource for SurId {
-//     fn into_resource(self) -> Result<surrealdb::opt::Resource> {
-//         todo!()
-//     }
-// }
 
 #[tokio::main]
 async fn main() -> Result<()> {

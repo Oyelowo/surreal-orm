@@ -1,3 +1,6 @@
+pub mod links;
+pub mod model_id;
+
 pub trait Edge {
     type EdgeChecker;
     type InNode;
@@ -23,4 +26,3 @@ pub struct Key(String);
 pub mod query {
     pub use surreal_simple_querybuilder::prelude::*;
 }
-
