@@ -60,7 +60,21 @@ where
         ))
     }
 
-    pub fn value(self) -> Option<V> {
+    pub fn id(&self) -> Option<&String> {
+        match &self.0 {
+            Reference::Id(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn value_ref(&self) -> Option<&V> {
+        match &self.0 {
+            Reference::FetchedValue(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn value_owned(self) -> Option<V> {
         match self.0 {
             Reference::FetchedValue(v) => Some(v),
             _ => None,

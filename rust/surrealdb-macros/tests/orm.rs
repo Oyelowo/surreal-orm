@@ -25,15 +25,17 @@ pub struct Account {
     email: String,
 
     #[surrealdb(link_self = "Account", skip_serializing)]
+    #[graphql(skip)]
     friend: LinkSelf<Account>,
 
+    #[graphql(skip)]
     #[surrealdb(link_self = "Account", skip_serializing)]
     teacher: LinkSelf<Account>,
 
-    // best_friend: String,
-    #[surrealdb(skip_serializing)]
     #[graphql(skip)]
-    // projects: LinkMany<Project>,
+    #[surrealdb(link_many = "Project", skip_serializing)]
+    favourite_projects: LinkMany<Project>,
+
     #[surrealdb(
         relate(edge = "Account_Manage_Project", link = "->manage->Project"),
         skip_serializing
@@ -44,28 +46,22 @@ pub struct Account {
 
 #[ComplexObject]
 impl Account {
-    async fn friend(&self) -> Option<Account> {
-        // self.friend.clone().into_inner().allow_value_serialize();
-        // self.friend.clone().into_inner().value().as_deref().cloned()
-        Some(self.friend.clone().as_value())
+    async fn friend(&self) -> Option<&Account> {
+        self.friend.value_ref()
     }
 
-    async fn projects(&self) -> Vec<Project> {
-        self.projects.allow_value_serialize();
-        self.projects
-            .value()
-            .map(|x| x.to_vec())
-            .unwrap_or_default()
+    async fn projects(&self) -> Vec<Option<&Project>> {
+        self.favourite_projects
+            .iter()
+            .map(|x| x.value_ref())
+            .collect()
     }
 
-    async fn projects_ids(&self) -> Vec<String> {
-        self.projects.disallow_value_serialize();
-        self.projects.key().map(|x| x.to_vec()).unwrap_or_default()
+    async fn projects_ids(&self) -> Vec<Option<&String>> {
+        self.favourite_projects.iter().map(|x| x.id()).collect()
     }
-    async fn teacher(&self) -> Option<Account> {
-        // let xx = self.teacher.allow_serialize_value();
-        let xx = self.teacher.as_key();
-        self.friend.clone().into_inner().value().as_deref().cloned()
+    async fn teacher(&self) -> Option<&Account> {
+        self.teacher.value_ref()
     }
 }
 
@@ -89,13 +85,15 @@ pub struct Project {
     name: String,
 
     // #[surrealdb(relate = "->has->Release")]
+    #[graphql(skip)]
     #[surrealdb(relate(edge = "ProjectHasRelease", link = "->has->Release"))]
     releases: Relate<Release>,
     #[surrealdb(relate(edge = "Account_Manage_Project", link = "<-manage<-Account"))]
+    #[graphql(skip)]
     authors: Relate<Account>,
 }
 
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default)]
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize)]
 #[surrealdb(relation_name = "has")]
 pub struct ProjectHasRelease {
     #[surrealdb(skip_serializing)]
@@ -118,8 +116,9 @@ pub struct Release {
 use account::schema::model as account;
 use project::schema::model as project;
 
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Default, Clone)]
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Clone)]
 pub struct File {
+    id: Option<String>,
     name: String,
     #[surrealdb(link_one = "Account", skip_serializing)]
     author: LinkOne<Account>,
