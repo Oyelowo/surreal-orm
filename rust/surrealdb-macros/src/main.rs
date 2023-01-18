@@ -391,5 +391,4 @@ mod schema {
 #[tokio::main]
 async fn main() {
     schema::nama();
-    "".to_string();
 }
