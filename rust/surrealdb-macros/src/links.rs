@@ -38,9 +38,13 @@ impl<V: SurrealdbModel> From<V> for LinkOne<V> {
 impl<V: SurrealdbModel> From<&V> for LinkOne<V> {
     fn from(model: &V) -> Self {
         let x = model.get_key();
-        Self(Reference::Id(
-            x.expect("Id not found. Make sure Id exists for this model"),
-        ))
+        match x {
+            Some(x) => Self(Reference::Id(x)),
+            None => Self(Reference::Null),
+        }
+        // Self(Reference::Id(
+        //     x.expect("Id not found. Make sure Id exists for this model"),
+        // ))
     }
 }
 
