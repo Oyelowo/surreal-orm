@@ -274,23 +274,6 @@ mod schema {
     // let x = DbField("lowo".into());
     struct Foreign {}
     // For e.g: ->writes->Book as field_name_as_alias_default
-    #[derive(Debug, Default)]
-    struct Relate {
-        // field_name_as_alias_default
-        alias_default: String,
-
-        // writes
-        edge_name: String,
-
-        // ->writes
-        edge_with_start_arrow: String,
-
-        // writes->
-        edge_with_end_arrow: String,
-
-        // ->writes->
-        edge_with_both_arrows: String,
-    }
 
     enum Clause {
         All,
@@ -428,8 +411,8 @@ mod schema {
     struct Blog {
         id: String,
         intro: String,
-        poster: Relate,
-        comments: Relate,
+        poster: String,
+        comments: String,
         store: String,
     }
 
@@ -438,8 +421,8 @@ mod schema {
         id: String,
         title: String,
         // <-writes<-Student
-        writer: Relate,
-        chapters: Relate,
+        writer: String,
+        chapters: String,
         store: String,
     }
 
