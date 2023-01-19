@@ -301,31 +301,67 @@ mod schema {
 
     #[derive(Debug, Default)]
     struct Student {
+        // id: String
         id: String,
-        foreign: String,
-        book_written: Relate,
-        store: String,
+        // name: String
+        name: String,
+        // ->writes->book
+        book_written: String,
+        // ->writes->blog
+        blog_written: String,
+        // ->drinks->water
+        drunk_water: String,
+        // ->drinks->juice
+        drunk_juice: String,
+        ___________store: String,
+    }
+
+    impl Student {
+        fn traverse() -> Self {
+            Self {
+                id: "id".into(),
+                name: "foreign".into(),
+                blog_written: "blog_written".into(),
+                book_written: "book_written".into(),
+                drunk_water: "drunk_water".into(),
+                drunk_juice: "drunk_juice".into(),
+                ___________store: "".to_string(),
+            }
+        }
+
+        fn writes__(&self, cond: Clause) -> Student__Writes {
+            let mut xx = Student__Writes::default();
+            xx.__________store.push_str(self.___________store.as_str());
+            let pp = get_clause(cond, "writes");
+            xx.__________store
+                .push_str(format!("->writes{pp}->").as_str());
+            xx
+        }
     }
 
     #[derive(Debug, Default)]
-    struct Writes {
+    struct Student__Writes {
         id: String,
+        r#in: String,
+        out: String,
         time_written: String,
-        store: String,
+        __________store: String,
     }
 
-    impl Writes {
+    impl Student__Writes {
         fn new() -> Self {
             Self {
-                id: "".into(),
-                time_written: "".into(),
-                store: "".into(),
+                id: "id".into(),
+                r#in: "in".into(),
+                out: "out".into(),
+                time_written: "time_written".into(),
+                __________store: "".into(),
             }
         }
 
         fn book(&self, cond: Clause) -> Book {
             let mut xx = Book::default();
-            xx.store.push_str(self.store.as_str());
+            xx.store.push_str(self.__________store.as_str());
             let pp = get_clause(cond, "book");
             xx.store.push_str(format!("book{pp}").as_str());
             xx
@@ -333,7 +369,23 @@ mod schema {
 
         fn blog(&self, cond: Clause) -> Blog {
             let mut xx = Blog::default();
-            xx.store.push_str(self.store.as_str());
+            xx.store.push_str(self.__________store.as_str());
+            let pp = get_clause(cond, "blog");
+            xx.store.push_str(format!("blog{pp}").as_str());
+            xx
+        }
+
+        fn water(&self, cond: Clause) -> Blog {
+            let mut xx = Blog::default();
+            xx.store.push_str(self.__________store.as_str());
+            let pp = get_clause(cond, "blog");
+            xx.store.push_str(format!("blog{pp}").as_str());
+
+            xx
+        }
+        fn juice(&self, cond: Clause) -> Blog {
+            let mut xx = Blog::default();
+            xx.store.push_str(self.__________store.as_str());
             let pp = get_clause(cond, "blog");
             xx.store.push_str(format!("blog{pp}").as_str());
             xx
@@ -372,47 +424,6 @@ mod schema {
         }
     }
 
-    impl Student {
-        fn new() -> Self {
-            Self {
-                id: "id".into(),
-                foreign: "foreign".into(),
-                book_written: Relate::default(),
-                store: "".to_string(),
-            }
-        }
-
-        fn __writes__(&self, cond: Clause) -> Writes {
-            let mut xx = Writes::default();
-            xx.store.push_str(self.store.as_str());
-            let pp = get_clause(cond, "writes");
-            xx.store.push_str(format!("->writes{pp}->").as_str());
-            xx
-        }
-
-        fn book_written(&mut self) -> Book {
-            self.store.push_str("->writes->Book");
-            let mut xx = Book::default();
-            xx.store.push_str(self.store.as_str());
-            // xx.store.push_str("Book");
-            // Book::default()
-            xx
-        }
-
-        fn book_written_cond(&mut self, cond: Cond) -> Book {
-            // self.store.push_str("->writes->Book");
-            let mut xx = Book::default();
-            xx.store.push_str(self.store.as_str());
-            // xx.store.push_str("Book");
-            xx.store
-                .push_str(format!("->writes->Book[{cond}]").as_str());
-            // xx.store.push_str("[]");
-            // xx.store.push_str("[]");
-            // Book::default()
-            xx
-        }
-    }
-
     #[derive(Debug, Default)]
     struct Blog {
         id: String,
@@ -426,27 +437,51 @@ mod schema {
     struct Book {
         id: String,
         title: String,
+        // <-writes<-Student
         writer: Relate,
         chapters: Relate,
         store: String,
     }
 
-    impl Book {
-        fn writer(&mut self) -> Student {
-            self.store.push_str("<-writes<-Student");
+    #[derive(Debug, Default)]
+    struct Book__Writes {
+        id: String,
+        time_written: String,
+        store: String,
+    }
+
+    impl Book__Writes {
+        fn new() -> Self {
+            Self {
+                id: "".into(),
+                time_written: "".into(),
+                store: "".into(),
+            }
+        }
+
+        fn student(&self, cond: Clause) -> Student {
             let mut xx = Student::default();
-            xx.store.push_str(self.store.as_str());
-            // xx.store.push_str("Student:id");
-            // Book::default()
+            xx.___________store.push_str(self.store.as_str());
+            let pp = get_clause(cond, "student");
+            xx.___________store
+                .push_str(format!("student{pp}").as_str());
             xx
         }
 
-        fn chapters(&mut self) -> Chapters {
-            self.store.push_str("->has->Chapter");
-            let mut xx = Chapters::default();
+        // fn blog(&self, cond: Clause) -> Blog {
+        //     let mut xx = Blog::default();
+        //     xx.store.push_str(self.store.as_str());
+        //     let pp = get_clause(cond, "blog");
+        //     xx.store.push_str(format!("blog{pp}").as_str());
+        //     xx
+        // }
+    }
+    impl Book {
+        fn __writes(&self, cond: Clause) -> Book__Writes {
+            let mut xx = Book__Writes::default();
             xx.store.push_str(self.store.as_str());
-            // xx.store.push_str("Chapter:id");
-            // Book::default()
+            let pp = get_clause(cond, "writes");
+            xx.store.push_str(format!("<-writes{pp}<-").as_str());
             xx
         }
     }
@@ -468,19 +503,23 @@ mod schema {
         //     .writer();
         // println!("rela...{:?}", rela.store);
 
-        let rela = Student::new()
-            .__writes__(Clause::Where(
+        let rela = Student::traverse()
+            .writes__(Clause::Where(
                 query()
                     .and_where("pages > 5")
                     .and("time_done = yesterday")
                     .build(),
             ))
-            .book(Clause::Id("book:akkaka".into()));
+            .book(Clause::Id("book:akkaka".into()))
+            .__writes(Clause::All)
+            .student(Clause::Id("student:lowo".into()))
+            .writes__(Clause::All)
+            .book(Clause::All);
 
         println!("rela...{:?}", rela.store);
 
-        let rela = Student::new()
-            .__writes__(Clause::Where(
+        let rela = Student::traverse()
+            .writes__(Clause::Where(
                 query()
                     .and_where("pages > 5")
                     .and("time_done = yesterday")
@@ -489,14 +528,6 @@ mod schema {
             .blog(Clause::Id("blog:akkaka".into()));
 
         println!("rela...{:?}", rela.store);
-        let cycle = Student::new()
-            .book_written()
-            .writer()
-            .book_written()
-            .writer();
-        // println!("rela...{:?}", cycle);
-
-        // let rela = Student::new().book_written().chapters();
     }
 }
 // impl Book {
