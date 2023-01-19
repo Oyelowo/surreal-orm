@@ -282,7 +282,10 @@ mod schema {
         Id(String),
     }
     mod student_schema {
-        use super::{blog_schema::Blog, book_schema::Book, Clause, *};
+        use super::{
+            blog_schema::Blog, book_schema::Book, juice_schema::Juice, water_schema::Water, Clause,
+            *,
+        };
 
         #[derive(Debug, Default)]
         pub struct Student {
@@ -323,13 +326,16 @@ mod schema {
                 xx
             }
 
-            pub fn drinks__(&self, cond: Clause) -> Writes {
-                let mut xx = Writes::default();
+            pub fn drinks__(&self, cond: Clause) -> Drinks {
+                let mut xx = Drinks::default();
                 xx.__________store.push_str(self.___________store.as_str());
                 let pp = get_clause(cond, "drinks");
                 xx.__________store
                     .push_str(format!("->drinks{pp}->").as_str());
                 xx
+            }
+            pub fn done(self) -> String {
+                self.___________store.clone()
             }
         }
 
@@ -363,25 +369,55 @@ mod schema {
 
             pub fn blog(&self, cond: Clause) -> Blog {
                 let mut xx = Blog::default();
-                xx.store.push_str(self.__________store.as_str());
+                xx.______________store
+                    .push_str(self.__________store.as_str());
                 let pp = get_clause(cond, "blog");
-                xx.store.push_str(format!("blog{pp}").as_str());
-                xx
-            }
-
-            pub fn water(&self, cond: Clause) -> Blog {
-                let mut xx = Blog::default();
-                xx.store.push_str(self.__________store.as_str());
-                let pp = get_clause(cond, "blog");
-                xx.store.push_str(format!("blog{pp}").as_str());
+                xx.______________store
+                    .push_str(format!("blog{pp}").as_str());
 
                 xx
             }
-            pub fn juice(&self, cond: Clause) -> Blog {
-                let mut xx = Blog::default();
-                xx.store.push_str(self.__________store.as_str());
-                let pp = get_clause(cond, "blog");
-                xx.store.push_str(format!("blog{pp}").as_str());
+        }
+
+        #[derive(Debug, Default)]
+        pub struct Drinks {
+            id: String,
+            r#in: String,
+            out: String,
+            rate: String,
+            __________store: String,
+        }
+
+        impl Drinks {
+            pub fn new() -> Self {
+                Self {
+                    id: "id".into(),
+                    r#in: "in".into(),
+                    out: "out".into(),
+                    rate: "time_written".into(),
+                    __________store: "".into(),
+                }
+            }
+
+            pub fn water(&self, cond: Clause) -> Water {
+                let mut xx = Water::default();
+                xx.______________store
+                    .push_str(self.__________store.as_str());
+                let pp = get_clause(cond, "water");
+                xx.______________store
+                    .push_str(format!("water{pp}").as_str());
+
+                xx
+            }
+            pub fn juice(&self, cond: Clause) -> Juice {
+                let mut xx = Juice::default();
+                xx.______________store
+                    .push_str(self.__________store.as_str());
+                let pp = get_clause(cond, "juice");
+                xx.______________store
+                    .push_str(format!("juice{pp}").as_str());
+                xx.flavor.push_str(xx.______________store.as_str());
+                xx.flavor.push_str(".flavor");
                 xx
             }
         }
@@ -424,7 +460,31 @@ mod schema {
             intro: String,
             poster: String,
             comments: String,
-            pub store: String,
+            pub ______________store: String,
+        }
+    }
+    mod water_schema {
+        #[derive(Debug, Default)]
+        pub struct Water {
+            id: String,
+            source: String,
+            river: String,
+            pub ______________store: String,
+        }
+    }
+    mod juice_schema {
+        #[derive(Debug, Default)]
+        pub struct Juice {
+            pub id: String,
+            pub maker: String,
+            pub flavor: String,
+            pub ______________store: String,
+        }
+
+        impl Juice {
+            pub fn done(self) -> String {
+                self.______________store
+            }
         }
     }
     mod book_schema {
@@ -444,7 +504,7 @@ mod schema {
         pub struct Writes {
             id: String,
             time_written: String,
-            store: String,
+            ___________store: String,
         }
 
         impl Writes {
@@ -452,13 +512,13 @@ mod schema {
                 Self {
                     id: "".into(),
                     time_written: "".into(),
-                    store: "".into(),
+                    ___________store: "".into(),
                 }
             }
 
             pub fn student(&self, cond: Clause) -> Student {
                 let mut xx = Student::default();
-                xx.___________store.push_str(self.store.as_str());
+                xx.___________store.push_str(self.___________store.as_str());
                 let pp = get_clause(cond, "student");
                 xx.___________store
                     .push_str(format!("student{pp}").as_str());
@@ -477,10 +537,15 @@ mod schema {
             /// .
             pub fn __writes(&self, cond: Clause) -> Writes {
                 let mut xx = Writes::default();
-                xx.store.push_str(self.__________store.as_str());
+                xx.___________store.push_str(self.__________store.as_str());
                 let pp = get_clause(cond, "writes");
-                xx.store.push_str(format!("<-writes{pp}<-").as_str());
+                xx.___________store
+                    .push_str(format!("<-writes{pp}<-").as_str());
                 xx
+            }
+
+            pub fn done(self) -> String {
+                self.__________store.clone()
             }
         }
     }
@@ -492,7 +557,7 @@ mod schema {
         struct Chapters {
             id: DbField,
             verse: DbField,
-            store: String,
+            __________store: String,
             // writer: Relate,
         }
     }
@@ -516,9 +581,17 @@ mod schema {
             .__writes(Clause::All)
             .student(Clause::Id("student:lowo".into()))
             .writes__(Clause::All)
-            .book(Clause::All);
+            .book(Clause::All)
+            .__writes(Clause::All)
+            .student(Clause::All)
+            // .done();
+            .drinks__(Clause::All)
+            .juice(Clause::All)
+            .flavor;
+        // .done();
+        // .done();
 
-        println!("rela...{:?}", rela.__________store);
+        println!("rela...{:?}", rela);
 
         let rela = student_schema::Student::traverse()
             .writes__(Clause::Where(
@@ -529,7 +602,7 @@ mod schema {
             ))
             .blog(Clause::Id("blog:akkaka".into()));
 
-        println!("rela...{:?}", rela.store);
+        println!("rela...{:?}", rela.______________store);
     }
 }
 // impl Book {
