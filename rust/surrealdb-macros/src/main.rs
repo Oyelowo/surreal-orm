@@ -275,107 +275,118 @@ mod schema {
     struct Foreign {}
     // For e.g: ->writes->Book as field_name_as_alias_default
 
-    enum Clause {
+    pub enum Clause {
         All,
         Where(String),
         // Change to SurId
         Id(String),
     }
+    mod student_schema {
+        use super::{blog_schema::Blog, book_schema::Book, Clause, *};
 
-    #[derive(Debug, Default)]
-    struct Student {
-        // id: String
-        id: String,
-        // name: String
-        name: String,
-        // ->writes->book
-        book_written: String,
-        // ->writes->blog
-        blog_written: String,
-        // ->drinks->water
-        drunk_water: String,
-        // ->drinks->juice
-        drunk_juice: String,
-        ___________store: String,
-    }
+        #[derive(Debug, Default)]
+        pub struct Student {
+            // id: String
+            id: String,
+            // name: String
+            name: String,
+            // ->writes->book
+            book_written: String,
+            // ->writes->blog
+            blog_written: String,
+            // ->drinks->water
+            drunk_water: String,
+            // ->drinks->juice
+            drunk_juice: String,
+            pub ___________store: String,
+        }
 
-    impl Student {
-        fn traverse() -> Self {
-            Self {
-                id: "id".into(),
-                name: "foreign".into(),
-                blog_written: "blog_written".into(),
-                book_written: "book_written".into(),
-                drunk_water: "drunk_water".into(),
-                drunk_juice: "drunk_juice".into(),
-                ___________store: "".to_string(),
+        impl Student {
+            pub fn traverse() -> Self {
+                Self {
+                    id: "id".into(),
+                    name: "foreign".into(),
+                    blog_written: "blog_written".into(),
+                    book_written: "book_written".into(),
+                    drunk_water: "drunk_water".into(),
+                    drunk_juice: "drunk_juice".into(),
+                    ___________store: "".to_string(),
+                }
+            }
+
+            pub fn writes__(&self, cond: Clause) -> Writes {
+                let mut xx = Writes::default();
+                xx.__________store.push_str(self.___________store.as_str());
+                let pp = get_clause(cond, "writes");
+                xx.__________store
+                    .push_str(format!("->writes{pp}->").as_str());
+                xx
+            }
+
+            pub fn drinks__(&self, cond: Clause) -> Writes {
+                let mut xx = Writes::default();
+                xx.__________store.push_str(self.___________store.as_str());
+                let pp = get_clause(cond, "drinks");
+                xx.__________store
+                    .push_str(format!("->drinks{pp}->").as_str());
+                xx
             }
         }
 
-        fn writes__(&self, cond: Clause) -> Student__Writes {
-            let mut xx = Student__Writes::default();
-            xx.__________store.push_str(self.___________store.as_str());
-            let pp = get_clause(cond, "writes");
-            xx.__________store
-                .push_str(format!("->writes{pp}->").as_str());
-            xx
+        #[derive(Debug, Default)]
+        pub struct Writes {
+            id: String,
+            r#in: String,
+            out: String,
+            time_written: String,
+            __________store: String,
         }
-    }
 
-    #[derive(Debug, Default)]
-    struct Student__Writes {
-        id: String,
-        r#in: String,
-        out: String,
-        time_written: String,
-        __________store: String,
-    }
+        impl Writes {
+            pub fn new() -> Self {
+                Self {
+                    id: "id".into(),
+                    r#in: "in".into(),
+                    out: "out".into(),
+                    time_written: "time_written".into(),
+                    __________store: "".into(),
+                }
+            }
 
-    impl Student__Writes {
-        fn new() -> Self {
-            Self {
-                id: "id".into(),
-                r#in: "in".into(),
-                out: "out".into(),
-                time_written: "time_written".into(),
-                __________store: "".into(),
+            pub fn book(&self, cond: Clause) -> Book {
+                let mut xx = Book::default();
+                xx.__________store.push_str(self.__________store.as_str());
+                let pp = get_clause(cond, "book");
+                xx.__________store.push_str(format!("book{pp}").as_str());
+                xx
+            }
+
+            pub fn blog(&self, cond: Clause) -> Blog {
+                let mut xx = Blog::default();
+                xx.store.push_str(self.__________store.as_str());
+                let pp = get_clause(cond, "blog");
+                xx.store.push_str(format!("blog{pp}").as_str());
+                xx
+            }
+
+            pub fn water(&self, cond: Clause) -> Blog {
+                let mut xx = Blog::default();
+                xx.store.push_str(self.__________store.as_str());
+                let pp = get_clause(cond, "blog");
+                xx.store.push_str(format!("blog{pp}").as_str());
+
+                xx
+            }
+            pub fn juice(&self, cond: Clause) -> Blog {
+                let mut xx = Blog::default();
+                xx.store.push_str(self.__________store.as_str());
+                let pp = get_clause(cond, "blog");
+                xx.store.push_str(format!("blog{pp}").as_str());
+                xx
             }
         }
-
-        fn book(&self, cond: Clause) -> Book {
-            let mut xx = Book::default();
-            xx.store.push_str(self.__________store.as_str());
-            let pp = get_clause(cond, "book");
-            xx.store.push_str(format!("book{pp}").as_str());
-            xx
-        }
-
-        fn blog(&self, cond: Clause) -> Blog {
-            let mut xx = Blog::default();
-            xx.store.push_str(self.__________store.as_str());
-            let pp = get_clause(cond, "blog");
-            xx.store.push_str(format!("blog{pp}").as_str());
-            xx
-        }
-
-        fn water(&self, cond: Clause) -> Blog {
-            let mut xx = Blog::default();
-            xx.store.push_str(self.__________store.as_str());
-            let pp = get_clause(cond, "blog");
-            xx.store.push_str(format!("blog{pp}").as_str());
-
-            xx
-        }
-        fn juice(&self, cond: Clause) -> Blog {
-            let mut xx = Blog::default();
-            xx.store.push_str(self.__________store.as_str());
-            let pp = get_clause(cond, "blog");
-            xx.store.push_str(format!("blog{pp}").as_str());
-            xx
-        }
     }
-
-    fn get_clause(cond: Clause, table_name: &'static str) -> String {
+    pub fn get_clause(cond: Clause, table_name: &'static str) -> String {
         let pp = match cond {
             Clause::All => "".into(),
             Clause::Where(where_clause) => {
@@ -406,77 +417,85 @@ mod schema {
             f.write_fmt(format_args!("{}", self.0))
         }
     }
-
-    #[derive(Debug, Default)]
-    struct Blog {
-        id: String,
-        intro: String,
-        poster: String,
-        comments: String,
-        store: String,
+    mod blog_schema {
+        #[derive(Debug, Default)]
+        pub struct Blog {
+            id: String,
+            intro: String,
+            poster: String,
+            comments: String,
+            pub store: String,
+        }
     }
+    mod book_schema {
+        use super::{blog_schema::Blog, student_schema::Student, Clause, *};
 
-    #[derive(Debug, Default)]
-    struct Book {
-        id: String,
-        title: String,
-        // <-writes<-Student
-        writer: String,
-        chapters: String,
-        store: String,
-    }
+        #[derive(Debug, Default)]
+        pub struct Book {
+            id: String,
+            title: String,
+            // <-writes<-Student
+            writer: String,
+            chapters: String,
+            pub __________store: String,
+        }
 
-    #[derive(Debug, Default)]
-    struct Book__Writes {
-        id: String,
-        time_written: String,
-        store: String,
-    }
+        #[derive(Debug, Default)]
+        pub struct Writes {
+            id: String,
+            time_written: String,
+            store: String,
+        }
 
-    impl Book__Writes {
-        fn new() -> Self {
-            Self {
-                id: "".into(),
-                time_written: "".into(),
-                store: "".into(),
+        impl Writes {
+            pub fn new() -> Self {
+                Self {
+                    id: "".into(),
+                    time_written: "".into(),
+                    store: "".into(),
+                }
+            }
+
+            pub fn student(&self, cond: Clause) -> Student {
+                let mut xx = Student::default();
+                xx.___________store.push_str(self.store.as_str());
+                let pp = get_clause(cond, "student");
+                xx.___________store
+                    .push_str(format!("student{pp}").as_str());
+                xx
+            }
+
+            // fn blog(&self, cond: Clause) -> Blog {
+            //     let mut xx = Blog::default();
+            //     xx.store.push_str(self.store.as_str());
+            //     let pp = get_clause(cond, "blog");
+            //     xx.store.push_str(format!("blog{pp}").as_str());
+            //     xx
+            // }
+        }
+        impl Book {
+            /// .
+            pub fn __writes(&self, cond: Clause) -> Writes {
+                let mut xx = Writes::default();
+                xx.store.push_str(self.__________store.as_str());
+                let pp = get_clause(cond, "writes");
+                xx.store.push_str(format!("<-writes{pp}<-").as_str());
+                xx
             }
         }
-
-        fn student(&self, cond: Clause) -> Student {
-            let mut xx = Student::default();
-            xx.___________store.push_str(self.store.as_str());
-            let pp = get_clause(cond, "student");
-            xx.___________store
-                .push_str(format!("student{pp}").as_str());
-            xx
-        }
-
-        // fn blog(&self, cond: Clause) -> Blog {
-        //     let mut xx = Blog::default();
-        //     xx.store.push_str(self.store.as_str());
-        //     let pp = get_clause(cond, "blog");
-        //     xx.store.push_str(format!("blog{pp}").as_str());
-        //     xx
-        // }
     }
-    impl Book {
-        fn __writes(&self, cond: Clause) -> Book__Writes {
-            let mut xx = Book__Writes::default();
-            xx.store.push_str(self.store.as_str());
-            let pp = get_clause(cond, "writes");
-            xx.store.push_str(format!("<-writes{pp}<-").as_str());
-            xx
+
+    mod chapters_schema {
+        use super::DbField;
+
+        #[derive(Debug, Default)]
+        struct Chapters {
+            id: DbField,
+            verse: DbField,
+            store: String,
+            // writer: Relate,
         }
     }
-
-    #[derive(Debug, Default)]
-    struct Chapters {
-        id: DbField,
-        verse: DbField,
-        store: String,
-        // writer: Relate,
-    }
-
     pub fn nama() {
         // Student::new().book_written().chapters().verse
         // DbField("df".into())
@@ -486,7 +505,7 @@ mod schema {
         //     .writer();
         // println!("rela...{:?}", rela.store);
 
-        let rela = Student::traverse()
+        let rela = student_schema::Student::traverse()
             .writes__(Clause::Where(
                 query()
                     .and_where("pages > 5")
@@ -499,9 +518,9 @@ mod schema {
             .writes__(Clause::All)
             .book(Clause::All);
 
-        println!("rela...{:?}", rela.store);
+        println!("rela...{:?}", rela.__________store);
 
-        let rela = Student::traverse()
+        let rela = student_schema::Student::traverse()
             .writes__(Clause::Where(
                 query()
                     .and_where("pages > 5")
