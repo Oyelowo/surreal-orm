@@ -255,8 +255,9 @@ async fn idea_main1() -> Result<()> {
 }
 mod schema {
     use std::fmt::Display;
-    use surrealdb_macros::node_builder::{
-        NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2,
+    use surrealdb_macros::{
+        node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
+        query_builder::query,
     };
 
     #[derive(Debug, Default)]
@@ -290,12 +291,85 @@ mod schema {
         // ->writes->
         edge_with_both_arrows: String,
     }
+
+    enum Clause {
+        All,
+        Where(String),
+        // Change to SurId
+        Id(String),
+    }
+
     #[derive(Debug, Default)]
     struct Student {
         id: String,
         foreign: String,
         book_written: Relate,
         store: String,
+    }
+
+    #[derive(Debug, Default)]
+    struct Writes {
+        id: String,
+        time_written: String,
+        store: String,
+    }
+
+    impl Writes {
+        fn new() -> Self {
+            Self {
+                id: "".into(),
+                time_written: "".into(),
+                store: "".into(),
+            }
+        }
+
+        fn book(&self, cond: Clause) -> Book {
+            let mut xx = Book::default();
+            xx.store.push_str(self.store.as_str());
+            let pp = get_clause(cond, "book");
+            xx.store.push_str(format!("book{pp}").as_str());
+            xx
+        }
+
+        fn blog(&self, cond: Clause) -> Blog {
+            let mut xx = Blog::default();
+            xx.store.push_str(self.store.as_str());
+            let pp = get_clause(cond, "blog");
+            xx.store.push_str(format!("blog{pp}").as_str());
+            xx
+        }
+    }
+
+    fn get_clause(cond: Clause, table_name: &'static str) -> String {
+        let pp = match cond {
+            Clause::All => "".into(),
+            Clause::Where(where_clause) => {
+                if !where_clause.to_lowercase().starts_with("where") {
+                    panic!("Invalid where clause, must start with `WHERE`")
+                }
+                format!("[{where_clause}]")
+            }
+            Clause::Id(id) => {
+                if !id
+                    .to_lowercase()
+                    .starts_with(format!("{table_name}:").as_str())
+                {
+                    // let xx = format!("invalid id {id}. Id does not belong to table {table_name}")
+                    //     .as_str();
+                    panic!("invalid id {id}. Id does not belong to table {table_name}")
+                }
+                format!("[WHERE id = {id}]")
+            }
+        };
+        pp
+    }
+
+    struct Cond(String);
+
+    impl ::std::fmt::Display for Cond {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.write_fmt(format_args!("{}", self.0))
+        }
     }
 
     impl Student {
@@ -308,14 +382,44 @@ mod schema {
             }
         }
 
+        fn __writes__(&self, cond: Clause) -> Writes {
+            let mut xx = Writes::default();
+            xx.store.push_str(self.store.as_str());
+            let pp = get_clause(cond, "writes");
+            xx.store.push_str(format!("->writes{pp}->").as_str());
+            xx
+        }
+
         fn book_written(&mut self) -> Book {
             self.store.push_str("->writes->Book");
             let mut xx = Book::default();
             xx.store.push_str(self.store.as_str());
-            xx.store.push_str("Book");
+            // xx.store.push_str("Book");
             // Book::default()
             xx
         }
+
+        fn book_written_cond(&mut self, cond: Cond) -> Book {
+            // self.store.push_str("->writes->Book");
+            let mut xx = Book::default();
+            xx.store.push_str(self.store.as_str());
+            // xx.store.push_str("Book");
+            xx.store
+                .push_str(format!("->writes->Book[{cond}]").as_str());
+            // xx.store.push_str("[]");
+            // xx.store.push_str("[]");
+            // Book::default()
+            xx
+        }
+    }
+
+    #[derive(Debug, Default)]
+    struct Blog {
+        id: String,
+        intro: String,
+        poster: Relate,
+        comments: Relate,
+        store: String,
     }
 
     #[derive(Debug, Default)]
@@ -332,7 +436,7 @@ mod schema {
             self.store.push_str("<-writes<-Student");
             let mut xx = Student::default();
             xx.store.push_str(self.store.as_str());
-            xx.store.push_str("Student:id");
+            // xx.store.push_str("Student:id");
             // Book::default()
             xx
         }
@@ -341,7 +445,7 @@ mod schema {
             self.store.push_str("->has->Chapter");
             let mut xx = Chapters::default();
             xx.store.push_str(self.store.as_str());
-            xx.store.push_str("Chapter:id");
+            // xx.store.push_str("Chapter:id");
             // Book::default()
             xx
         }
@@ -359,15 +463,39 @@ mod schema {
         // Student::new().book_written().chapters().verse
         // DbField("df".into())
         // "".contains_not()
-        let rela = Student::new().book_written().chapters();
-        println!("rela...{:?}", rela);
+        // let rela = Student::new()
+        //     .book_written_cond(Cond("WHERE pages > 5".into()))
+        //     .writer();
+        // println!("rela...{:?}", rela.store);
 
+        let rela = Student::new()
+            .__writes__(Clause::Where(
+                query()
+                    .and_where("pages > 5")
+                    .and("time_done = yesterday")
+                    .build(),
+            ))
+            .book(Clause::Id("book:akkaka".into()));
+
+        println!("rela...{:?}", rela.store);
+
+        let rela = Student::new()
+            .__writes__(Clause::Where(
+                query()
+                    .and_where("pages > 5")
+                    .and("time_done = yesterday")
+                    .build(),
+            ))
+            .blog(Clause::Id("blog:akkaka".into()));
+
+        println!("rela...{:?}", rela.store);
         let cycle = Student::new()
             .book_written()
             .writer()
             .book_written()
             .writer();
-        println!("rela...{:?}", cycle);
+        // println!("rela...{:?}", cycle);
+
         // let rela = Student::new().book_written().chapters();
     }
 }
@@ -390,5 +518,99 @@ mod schema {
 
 #[tokio::main]
 async fn main() {
+    // let xx =S
     schema::nama();
 }
+
+// LET $from = (SELECT users FROM company:surrealdb);
+// LET $devs = (SELECT * FROM user WHERE tags CONTAINS 'developer');
+// RELATE $from->like->$devs SET time.connected = time::now();
+// struct Company {
+//   users: LinkMany<User>
+// }
+//
+// struct User {
+//     tags: Vec<String>,
+//     company: LinkOne<Company>,
+//     companies: LinkMany<Company>,
+// }
+// RELATE User[where company.id == company:surrealdb]->like->User[where tags contains 'developer']
+//
+//
+/* #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Student {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    id: Option<String>,
+    first_name: String,
+
+    #[surrealdb(link_one = "Course", skip_serializing)]
+    course: LinkOne<Course>,
+
+    #[surrealdb(link_many = "Course", skip_serializing)]
+    #[serde(rename = "lowo")]
+    all_semester_courses: LinkMany<Course>,
+
+    #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
+    written_blogs: Relate<Blog>,
+} */
+// Account::with_id(SuId(""))
+
+/*
+========RELATE===========
+ * -- Add a graph edge between two specific records
+RELATE user:tobie->write->article:surreal SET time.written = time::now();
+
+-- Add a graph edge between multiple specific users and devs
+LET $from = (SELECT users FROM company:surrealdb);
+LET $devs = (SELECT * FROM user WHERE tags CONTAINS 'developer');
+RELATE $from->like->$devs SET time.connected = time::now();/
+
+RELATE user:tobie->write->article:surreal CONTENT {
+    source: 'Apple notes',
+    tags: ['notes', 'markdown'],
+    time: {
+        written: time::now(),
+    },
+};
+
+========SELECT===========
+-- Select a remote field from connected out graph edges
+SELECT ->like->friend.name AS friends FROM person:tobie;
+
+
+-- Conditional filtering based on graph edges
+SELECT * FROM profile WHERE count(->experience->organisation) > 3;
+
+SELECT * FROM person WHERE ->knows->person->(knows WHERE influencer = true) TIMEOUT 5s;
+PREFERRED: SELECT * FROM person WHERE ->knows[WHERE influencer = true]->person
+
+#[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+struct Person {
+    #[surrealdb(relate(edge = "PersonKnowsPerson", link = "->knows->Person"))]
+   known_persons: Relate<Person>
+}
+
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize)]
+#[surrealdb(relation_name = "knows")]
+struct PersonKnowsPerson {
+    id: Option<String>,
+    #[surrealdb(link_one = "Person", skip_serializing)]
+    r#in: LinkOne<Person>,
+    #[surrealdb(link_one = "Person", skip_serializing)]
+    out: LinkOne<Person>,
+    influencer: bool,
+}
+
+SELECT ->purchased->product<-purchased<-person->purchased->product FROM person:tobie PARALLEL;
+
+
+========DELETE===========
+// DELETE person WHERE ->knows->person->(knows WHERE influencer = false) TIMEOUT 5s;
+
+========UPDATE===========
+// UPDATE person SET important = true WHERE ->knows->person->(knows WHERE influencer = true) TIMEOUT 5s;
+// PREFERRED: UPDATE person SET important = true WHERE ->knows->person[WHERE influencer = true] TIMEOUT 5s;
+*/
