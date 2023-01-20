@@ -1,4 +1,3 @@
-struct SurId(String);
 pub struct SurIdComplex((String, String));
 
 // impl From<String> for SurIdComplex {

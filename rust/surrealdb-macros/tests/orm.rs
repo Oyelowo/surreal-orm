@@ -394,5 +394,6 @@ fn test_with_id_edge() {
         .with(&Account::get_schema().managed_projects.with_id("other_id"));
 
     assert_eq!("Account:an_id->manage->Project:other_id", query_two);
+
     assert_eq!(query_one, query_two);
 }

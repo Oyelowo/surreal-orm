@@ -168,6 +168,7 @@ impl ToTokens for FieldsGetterOpts {
         let ModelAttributesTokensDeriver {
             all_model_imports,
             all_model_schema_fields,
+            all_serialized_field_names_normalised,
             all_static_assertions,
             edge_metadata, .. } = ModelAttributesTokensDeriver::from_receiver_data(
             data,
@@ -214,7 +215,12 @@ impl ToTokens for FieldsGetterOpts {
             }
             None => quote!(),
         };
-
+let field_names_ident = format_ident!("{struct_name_ident}DbFields");
+        // let field_names_struct = quote!(
+                                 // struct  #field_names_ident {
+                                 //     #( #all_serialized_field_names_normalised ) : String, *
+                                 // }
+                                 // );
         tokens.extend(quote!( 
                         pub mod #schema_mod_name {
                             #( #all_model_imports) *
@@ -225,6 +231,8 @@ impl ToTokens for FieldsGetterOpts {
                             }
                          );
                         }
+
+                        // #field_names_struct
 
                         impl #crate_name::SurrealdbModel for #struct_name_ident {
                             // e.g type Schema = account::schema::Account<0>;

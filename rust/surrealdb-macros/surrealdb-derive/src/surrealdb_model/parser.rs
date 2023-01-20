@@ -54,7 +54,7 @@ pub(crate) struct ModelAttributesTokensDeriver {
     pub all_schema_names_basic: Vec<TokenStream>,
     pub all_model_schema_fields: Vec<TokenStream>,
     pub all_static_assertions: Vec<TokenStream>,
-    pub all_original_field_names_normalised: Vec<String>,
+    pub all_serialized_field_names_normalised: Vec<String>,
     pub edge_metadata: EdgeModelAttr,
 }
 
@@ -99,7 +99,6 @@ impl ModelAttributesTokensDeriver {
             .expect("Should never be enum")
             .fields;
 
-        println!("xxx");
         let metas = fields.into_iter().enumerate().fold(
             ModelAttributesTokensDeriver::default(),
             |mut acc, (index, field_receiver)| {
@@ -116,6 +115,9 @@ impl ModelAttributesTokensDeriver {
                 acc.all_model_imports.insert(meta.extra.model_import.into());
 
                 acc.all_schema_names_basic.push(meta.extra.schema_name);
+
+                acc.all_serialized_field_names_normalised
+                    .push(meta.original_field_name_normalised.clone());
 
                 acc.all_static_assertions.push(meta.static_assertions);
 
@@ -258,8 +260,9 @@ impl ModelAttributesTokensDeriver {
                     pub ->takes->Course as enrolled_courses, // This is what we want
                   })
                 */
-                // e.g: ->has->Account
-                let field = quote!(#visibility #arrow_direction #edge_action #arrow_direction #schema_name_basic as #field_ident_normalised,);
+                // e.g: ->has->Account as field_name
+                let field = quote!(#arrow_direction #edge_action #arrow_direction #schema_name_basic as #field_ident_normalised,);
+                // let field = quote!(#visibility #arrow_direction #edge_action #arrow_direction #schema_name_basic as #field_ident_normalised,);
                 ModelMedataTokenStream {
                     model_schema_field: quote!(#field),
                     original_field_name_normalised,

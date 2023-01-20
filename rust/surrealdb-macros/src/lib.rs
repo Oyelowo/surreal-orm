@@ -2,6 +2,7 @@
 
 pub mod links;
 pub mod model_id;
+pub mod node_builder;
 
 pub trait Edge {
     type EdgeChecker;
@@ -32,5 +33,6 @@ pub mod query_builder {
         query_builder::QueryBuilder::new()
     }
 
+    // pub use query_builder::*;
     pub use query_builder::{model, NodeBuilder, SchemaField, SchemaFieldType, ToNodeBuilder};
 }
