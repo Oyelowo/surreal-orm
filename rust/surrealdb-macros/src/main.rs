@@ -254,7 +254,7 @@ async fn idea_main1() -> Result<()> {
     Ok(())
 }
 mod schema {
-    use std::fmt::Display;
+    use std::fmt::{Debug, Display};
     use surrealdb_macros::{
         node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
         query_builder::query,
@@ -263,11 +263,38 @@ mod schema {
     #[derive(Debug, Default)]
     pub struct DbField(String);
 
-    impl Display for DbField {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            todo!()
+    impl DbField {
+        pub fn push_str(&mut self, string: &str) {
+            self.0.push_str(string)
+        }
+
+        pub fn __done__(self) -> String {
+            self.0
         }
     }
+
+    impl From<&str> for DbField {
+        fn from(value: &str) -> Self {
+            Self(value.into())
+        }
+    }
+    impl From<DbField> for String {
+        fn from(value: DbField) -> Self {
+            value.0
+        }
+    }
+
+    impl Display for DbField {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.write_fmt(format_args!("{}", self.0))
+        }
+    }
+
+    /* impl std::fmt::Debug for DbField {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.write_fmt(format_args!("{}", self.0))
+        }
+    } */
 
     impl ToNodeBuilder2 for DbField {}
 
@@ -276,7 +303,7 @@ mod schema {
     // For e.g: ->writes->Book as field_name_as_alias_default
 
     pub enum Clause {
-        All,
+        None,
         Where(String),
         // Change to SurId
         Id(String),
@@ -290,18 +317,31 @@ mod schema {
         #[derive(Debug, Default)]
         pub struct Student {
             // id: String
-            id: String,
+            pub id: DbField,
             // name: String
-            name: String,
+            pub name: DbField,
+            // favorite_course_mate: Student
+            // favorite_course_mate: Student,
+            // favorite_book: Book
+            pub favorite_book: DbField,
             // ->writes->book
-            book_written: String,
+            pub book_written: DbField,
             // ->writes->blog
-            blog_written: String,
+            pub blog_written: DbField,
             // ->drinks->water
-            drunk_water: String,
+            pub drunk_water: DbField,
             // ->drinks->juice
-            drunk_juice: String,
+            pub drunk_juice: DbField,
             pub ___________store: String,
+        }
+
+        #[derive(Debug, Default)]
+        pub struct Nothing(pub String);
+
+        impl Nothing {
+            fn favorite_book(&self) {
+                todo!()
+            }
         }
 
         impl Student {
@@ -309,6 +349,7 @@ mod schema {
                 Self {
                     id: "id".into(),
                     name: "foreign".into(),
+                    favorite_book: "favorite_book".into(),
                     blog_written: "blog_written".into(),
                     book_written: "book_written".into(),
                     drunk_water: "drunk_water".into(),
@@ -334,7 +375,22 @@ mod schema {
                     .push_str(format!("->drinks{pp}->").as_str());
                 xx
             }
-            pub fn done(self) -> String {
+
+            pub fn favorite_book(&self, clause: Clause) -> Book {
+                let mut xx = Book::default();
+                xx.__________store.push_str(self.___________store.as_str());
+                xx.title.0.push_str(self.___________store.as_str());
+                let pp = get_clause(clause, "book");
+                // xx.title.push_str("lxxtitle");
+                xx.__________store
+                    .push_str(format!("favorite_book{pp}").as_str());
+                xx.title
+                    .0
+                    .push_str(format!("favorite_book{pp}.title").as_str());
+                xx
+            }
+
+            pub fn __done__(self) -> String {
                 self.___________store.clone()
             }
         }
@@ -363,7 +419,9 @@ mod schema {
                 let mut xx = Book::default();
                 xx.__________store.push_str(self.__________store.as_str());
                 let pp = get_clause(clause, "book");
+
                 xx.__________store.push_str(format!("book{pp}").as_str());
+
                 xx
             }
 
@@ -427,7 +485,7 @@ mod schema {
     }
     pub fn get_clause(clause: Clause, table_name: &'static str) -> String {
         let pp = match clause {
-            Clause::All => "".into(),
+            Clause::None => "".into(),
             Clause::Where(where_clause) => {
                 if !where_clause.to_lowercase().starts_with("where") {
                     panic!("Invalid where clause, must start with `WHERE`")
@@ -457,35 +515,41 @@ mod schema {
         }
     }
     mod blog_schema {
+        use super::DbField;
+
         #[derive(Debug, Default)]
         pub struct Blog {
-            id: String,
-            intro: String,
-            poster: String,
-            comments: String,
+            pub id: DbField,
+            pub intro: DbField,
+            pub poster: DbField,
+            pub comments: DbField,
             pub ______________store: String,
         }
     }
     mod water_schema {
+        use super::DbField;
+
         #[derive(Debug, Default)]
         pub struct Water {
-            id: String,
-            source: String,
-            river: String,
+            pub id: DbField,
+            pub source: DbField,
+            pub river: DbField,
             pub ______________store: String,
         }
     }
     mod juice_schema {
+        use super::DbField;
+
         #[derive(Debug, Default)]
         pub struct Juice {
-            pub id: String,
-            pub maker: String,
-            pub flavor: String,
+            pub id: DbField,
+            pub maker: DbField,
+            pub flavor: DbField,
             pub ______________store: String,
         }
 
         impl Juice {
-            pub fn done(self) -> String {
+            pub fn __done__(self) -> String {
                 self.______________store
             }
         }
@@ -495,11 +559,12 @@ mod schema {
 
         #[derive(Debug, Default)]
         pub struct Book {
-            id: String,
-            title: String,
+            pub id: DbField,
+            pub title: DbField,
+            pub page_count: DbField,
             // <-writes<-Student
-            writer: String,
-            chapters: String,
+            pub writer: DbField,
+            chapters: DbField,
             pub __________store: String,
         }
 
@@ -547,7 +612,7 @@ mod schema {
                 xx
             }
 
-            pub fn done(self) -> String {
+            pub fn __done__(self) -> String {
                 self.__________store.clone()
             }
         }
@@ -581,16 +646,17 @@ mod schema {
                     .build(),
             ))
             .book(Clause::Id("book:akkaka".into()))
-            .__writes(Clause::All)
+            .__writes(Clause::None)
             .student(Clause::Id("student:lowo".into()))
-            .writes__(Clause::All)
-            .book(Clause::All)
-            .__writes(Clause::All)
-            .student(Clause::All)
+            .writes__(Clause::None)
+            .book(Clause::None)
+            .__writes(Clause::None)
+            .student(Clause::None)
             // .done();
-            .drinks__(Clause::All)
-            .juice(Clause::All)
-            .maker;
+            .drinks__(Clause::None)
+            .juice(Clause::None)
+            .__done__();
+        // .maker;
         // .done();
         // .done();
 
@@ -606,6 +672,15 @@ mod schema {
             .blog(Clause::Id("blog:akkaka".into()));
 
         println!("rela...{:?}", rela.______________store);
+
+        // Student.favorite_book.title
+        let rela = student_schema::Student::traverse()
+            .favorite_book(Clause::Id("book:janta".into()))
+            .title;
+        // .__done__();
+        // .title;
+
+        println!("rela...{}", rela);
     }
 }
 // impl Book {
