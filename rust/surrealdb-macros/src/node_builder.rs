@@ -181,7 +181,7 @@ pub trait ToNodeBuilder<T: Display = Self>: Display {
     ///
     /// assert_eq!("account->manage->project AS account_projects", s);
     /// ```
-    fn as_alias(&self, alias: &str) -> String {
+    fn as_alias(&self, alias: impl std::fmt::Display) -> String {
         format!("{self} AS {alias}")
     }
 

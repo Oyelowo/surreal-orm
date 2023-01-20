@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
+#![allow(non_camel_case_types)]
 #![allow(incomplete_features)]
 #![allow(unused_imports)]
 #![feature(inherent_associated_types)]
@@ -260,6 +261,8 @@ mod schema {
         query_builder::query,
     };
 
+    use crate::schema::{book_schema::Book, student_schema::StudentEnum};
+
     #[derive(Debug, Default)]
     pub struct DbField(String);
 
@@ -273,6 +276,11 @@ mod schema {
         }
     }
 
+    impl From<String> for DbField {
+        fn from(value: String) -> Self {
+            Self(value.into())
+        }
+    }
     impl From<&str> for DbField {
         fn from(value: &str) -> Self {
             Self(value.into())
@@ -344,6 +352,25 @@ mod schema {
             }
         }
 
+        #[derive(Debug)]
+        pub enum StudentEnum {
+            book_written,
+            blog_written,
+            drunk_water,
+            drunk_juice,
+        }
+
+        impl Display for StudentEnum {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                match self {
+                    StudentEnum::book_written => f.write_str("book_written"),
+                    StudentEnum::blog_written => f.write_str("blog_written "),
+                    StudentEnum::drunk_water => f.write_str("drunk_water "),
+                    StudentEnum::drunk_juice => f.write_str("drunk_juice "),
+                }
+            }
+        }
+
         impl Student {
             pub fn traverse() -> Self {
                 Self {
@@ -390,8 +417,8 @@ mod schema {
                 xx
             }
 
-            pub fn __done__(self) -> String {
-                self.___________store.clone()
+            pub fn __done__(self) -> DbField {
+                self.___________store.clone().into()
             }
         }
 
@@ -433,6 +460,8 @@ mod schema {
                 xx.______________store
                     .push_str(format!("blog{pp}").as_str());
 
+                xx.intro.push_str(xx.______________store.as_str());
+                xx.intro.push_str(".intro");
                 xx
             }
         }
@@ -515,7 +544,13 @@ mod schema {
         }
     }
     mod blog_schema {
+        use std::fmt::Display;
+
         use super::DbField;
+        use surrealdb_macros::{
+            node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
+            query_builder::query,
+        };
 
         #[derive(Debug, Default)]
         pub struct Blog {
@@ -525,6 +560,16 @@ mod schema {
             pub comments: DbField,
             pub ______________store: String,
         }
+
+        impl Display for Blog {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.write_fmt(format_args!("{}", self.______________store))
+            }
+        }
+
+        /* impl ToNodeBuilder2 for Blog {
+            // add code here
+        } */
     }
     mod water_schema {
         use super::DbField;
@@ -669,9 +714,17 @@ mod schema {
                     .and("time_done = yesterday")
                     .build(),
             ))
-            .blog(Clause::Id("blog:akkaka".into()));
+            .book(Clause::Id("book:akkaka".into()))
+            .__writes(Clause::None)
+            .student(Clause::None)
+            .__done__()
+            .as_alias(StudentEnum::book_written);
+        // .blog(Clause::Id("blog:akkaka".into()));
+        // .as_alias(Blog)
+        // .intro
+        // .__as__("dfdf");
 
-        println!("rela...{:?}", rela.______________store);
+        println!("rela...{}", rela);
 
         // Student.favorite_book.title
         let rela = student_schema::Student::traverse()
@@ -681,6 +734,8 @@ mod schema {
         // .title;
 
         println!("rela...{}", rela);
+
+        println!("rela...{}", StudentEnum::book_written);
     }
 }
 // impl Book {
