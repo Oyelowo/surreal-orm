@@ -317,19 +317,19 @@ mod schema {
                 }
             }
 
-            pub fn writes__(&self, cond: Clause) -> Writes {
+            pub fn writes__(&self, clause: Clause) -> Writes {
                 let mut xx = Writes::default();
                 xx.__________store.push_str(self.___________store.as_str());
-                let pp = get_clause(cond, "writes");
+                let pp = get_clause(clause, "writes");
                 xx.__________store
                     .push_str(format!("->writes{pp}->").as_str());
                 xx
             }
 
-            pub fn drinks__(&self, cond: Clause) -> Drinks {
+            pub fn drinks__(&self, clause: Clause) -> Drinks {
                 let mut xx = Drinks::default();
                 xx.__________store.push_str(self.___________store.as_str());
-                let pp = get_clause(cond, "drinks");
+                let pp = get_clause(clause, "drinks");
                 xx.__________store
                     .push_str(format!("->drinks{pp}->").as_str());
                 xx
@@ -359,19 +359,19 @@ mod schema {
                 }
             }
 
-            pub fn book(&self, cond: Clause) -> Book {
+            pub fn book(&self, clause: Clause) -> Book {
                 let mut xx = Book::default();
                 xx.__________store.push_str(self.__________store.as_str());
-                let pp = get_clause(cond, "book");
+                let pp = get_clause(clause, "book");
                 xx.__________store.push_str(format!("book{pp}").as_str());
                 xx
             }
 
-            pub fn blog(&self, cond: Clause) -> Blog {
+            pub fn blog(&self, clause: Clause) -> Blog {
                 let mut xx = Blog::default();
                 xx.______________store
                     .push_str(self.__________store.as_str());
-                let pp = get_clause(cond, "blog");
+                let pp = get_clause(clause, "blog");
                 xx.______________store
                     .push_str(format!("blog{pp}").as_str());
 
@@ -399,31 +399,34 @@ mod schema {
                 }
             }
 
-            pub fn water(&self, cond: Clause) -> Water {
+            pub fn water(&self, clause: Clause) -> Water {
                 let mut xx = Water::default();
                 xx.______________store
                     .push_str(self.__________store.as_str());
-                let pp = get_clause(cond, "water");
+                let pp = get_clause(clause, "water");
                 xx.______________store
                     .push_str(format!("water{pp}").as_str());
 
                 xx
             }
-            pub fn juice(&self, cond: Clause) -> Juice {
+            pub fn juice(&self, clause: Clause) -> Juice {
                 let mut xx = Juice::default();
                 xx.______________store
                     .push_str(self.__________store.as_str());
-                let pp = get_clause(cond, "juice");
+                let pp = get_clause(clause, "juice");
                 xx.______________store
                     .push_str(format!("juice{pp}").as_str());
+
                 xx.flavor.push_str(xx.______________store.as_str());
                 xx.flavor.push_str(".flavor");
+                xx.maker.push_str(xx.______________store.as_str());
+                xx.maker.push_str(".maker");
                 xx
             }
         }
     }
-    pub fn get_clause(cond: Clause, table_name: &'static str) -> String {
-        let pp = match cond {
+    pub fn get_clause(clause: Clause, table_name: &'static str) -> String {
+        let pp = match clause {
             Clause::All => "".into(),
             Clause::Where(where_clause) => {
                 if !where_clause.to_lowercase().starts_with("where") {
@@ -516,10 +519,10 @@ mod schema {
                 }
             }
 
-            pub fn student(&self, cond: Clause) -> Student {
+            pub fn student(&self, clause: Clause) -> Student {
                 let mut xx = Student::default();
                 xx.___________store.push_str(self.___________store.as_str());
-                let pp = get_clause(cond, "student");
+                let pp = get_clause(clause, "student");
                 xx.___________store
                     .push_str(format!("student{pp}").as_str());
                 xx
@@ -535,10 +538,10 @@ mod schema {
         }
         impl Book {
             /// .
-            pub fn __writes(&self, cond: Clause) -> Writes {
+            pub fn __writes(&self, clause: Clause) -> Writes {
                 let mut xx = Writes::default();
                 xx.___________store.push_str(self.__________store.as_str());
-                let pp = get_clause(cond, "writes");
+                let pp = get_clause(clause, "writes");
                 xx.___________store
                     .push_str(format!("<-writes{pp}<-").as_str());
                 xx
@@ -587,7 +590,7 @@ mod schema {
             // .done();
             .drinks__(Clause::All)
             .juice(Clause::All)
-            .flavor;
+            .maker;
         // .done();
         // .done();
 
