@@ -261,7 +261,10 @@ mod schema {
         query_builder::query,
     };
 
-    use crate::schema::{book_schema::Book, student_schema::StudentEnum};
+    use crate::schema::{
+        book_schema::Book,
+        student_schema::{Student, StudentEnum},
+    };
 
     #[derive(Debug, Default)]
     pub struct DbField(String);
@@ -271,8 +274,9 @@ mod schema {
             self.0.push_str(string)
         }
 
-        pub fn __done__(self) -> String {
-            self.0
+        pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
+            // let xx = self.___________store;
+            format!("{self} AS {alias}")
         }
     }
 
@@ -343,6 +347,12 @@ mod schema {
             pub ___________store: String,
         }
 
+        impl Display for Student {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.write_fmt(format_args!("{}", self.___________store))
+            }
+        }
+
         #[derive(Debug, Default)]
         pub struct Nothing(pub String);
 
@@ -372,6 +382,8 @@ mod schema {
         }
 
         impl Student {
+            pub const book_written: &'static str = "book_written";
+            pub type Aliases = StudentEnum;
             pub fn traverse() -> Self {
                 Self {
                     id: "id".into(),
@@ -419,6 +431,30 @@ mod schema {
 
             pub fn __done__(self) -> DbField {
                 self.___________store.clone().into()
+            }
+
+            // Aliases
+            pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
+                // let xx = self.___________store;
+                format!("{self} AS {alias}")
+            }
+            /// Returns the   as book written   of this [`Student`].
+            /// AS book_written
+            pub fn __as_book_written__(&self) -> String {
+                // let xx = self.___________store;
+                format!("{self} AS book_written")
+            }
+            pub fn __as_blog_written__(&self) -> String {
+                // let xx = self.___________store;
+                format!("{self} AS blog_written")
+            }
+            pub fn __as_drunk_juice__(&self) -> String {
+                // let xx = self.___________store;
+                format!("{self} AS drunk_juice")
+            }
+            pub fn __as_drunk_water__(&self) -> String {
+                // let xx = self.___________store;
+                format!("{self} AS drunk_water")
             }
         }
 
@@ -635,6 +671,8 @@ mod schema {
                 let pp = get_clause(clause, "student");
                 xx.___________store
                     .push_str(format!("student{pp}").as_str());
+                xx.drunk_water.push_str(xx.___________store.as_str());
+                xx.drunk_water.push_str(".drunk_water");
                 xx
             }
 
@@ -697,7 +735,6 @@ mod schema {
             .book(Clause::None)
             .__writes(Clause::None)
             .student(Clause::None)
-            // .done();
             .drinks__(Clause::None)
             .juice(Clause::None)
             .__done__();
@@ -715,10 +752,11 @@ mod schema {
                     .build(),
             ))
             .book(Clause::Id("book:akkaka".into()))
-            .__writes(Clause::None)
+            .__writes(Clause::Id("writes:pram".into()))
             .student(Clause::None)
-            .__done__()
-            .as_alias(StudentEnum::book_written);
+            .drunk_water
+            .__as__("wara");
+        // .__as__(Student::book_written);
         // .blog(Clause::Id("blog:akkaka".into()));
         // .as_alias(Blog)
         // .intro
