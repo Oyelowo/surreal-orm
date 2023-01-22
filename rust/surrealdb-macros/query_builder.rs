@@ -40,4 +40,27 @@ fn name() {
      // Alternatively, automatically extract the field name from e.g user.age.greater_than(..), by
      // displaying user.age and replace ., -> with underscore
      // DbField.greater_than(value)(self.to_string().repalce(".", "_").replace("->", "_"),replace(" ", "_"))
+     //
+     //
+     // 
+  /// LOWO note: separate and_group into and().bracketed(|q| Qbuilder);
+  /// ```
+  /// let query = query()
+  ///   .select("*")
+  ///   .from("user")
+  ///   .where_(name.contains("John") // This will automatically handle the quoting and sanitization
+  ///   .and()
+  ///   .bracketed(|q| {
+  ///    // alternative q.literal().or().literal("") ?
+  ///    q.statement("name contains 'Doe'")
+  ///     .or("...")
+  ///    })
+  ///   .build();
+  /// 
+  /// 
+  /// 
+  /// 
+  /// 
+  /// 
+  /// ```
 }
