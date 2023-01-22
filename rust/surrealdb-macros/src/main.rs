@@ -322,8 +322,8 @@ mod schema {
     }
     mod student_schema {
         use super::{
-            blog_schema::Blog, book_schema::Book, juice_schema::Juice, water_schema::Water, Clause,
-            *,
+            blog_schema::Blog, book_schema::Book, juice_schema::Juice, water_schema::Water,
+            writes_schema::Writes, Clause, *,
         };
 
         #[derive(Debug, Default)]
@@ -459,50 +459,6 @@ mod schema {
         }
 
         #[derive(Debug, Default)]
-        pub struct Writes {
-            id: String,
-            r#in: String,
-            out: String,
-            time_written: String,
-            __________store: String,
-        }
-
-        impl Writes {
-            pub fn new() -> Self {
-                Self {
-                    id: "id".into(),
-                    r#in: "in".into(),
-                    out: "out".into(),
-                    time_written: "time_written".into(),
-                    __________store: "".into(),
-                }
-            }
-
-            pub fn book(&self, clause: Clause) -> Book {
-                let mut xx = Book::default();
-                xx.__________store.push_str(self.__________store.as_str());
-                let pp = get_clause(clause, "book");
-
-                xx.__________store.push_str(format!("book{pp}").as_str());
-
-                xx
-            }
-
-            pub fn blog(&self, clause: Clause) -> Blog {
-                let mut xx = Blog::default();
-                xx.______________store
-                    .push_str(self.__________store.as_str());
-                let pp = get_clause(clause, "blog");
-                xx.______________store
-                    .push_str(format!("blog{pp}").as_str());
-
-                xx.intro.push_str(xx.______________store.as_str());
-                xx.intro.push_str(".intro");
-                xx
-            }
-        }
-
-        #[derive(Debug, Default)]
         pub struct Drinks {
             pub id: String,
             pub r#in: String,
@@ -572,6 +528,73 @@ mod schema {
         pp
     }
 
+    mod writes_schema {
+        use super::{
+            blog_schema::Blog, book_schema::Book, get_clause, student_schema::Student, Clause,
+            DbField,
+        };
+
+        #[derive(Debug, Default)]
+        pub struct Writes {
+            id: DbField,
+            // Student, User
+            r#in: DbField,
+            // Book, Blog
+            pub out: DbField,
+            pub time_written: DbField,
+            pub when: DbField,
+            pub pattern: DbField,
+            pub __________store: String,
+        }
+
+        impl Writes {
+            pub fn new() -> Self {
+                Self {
+                    id: "id".into(),
+                    r#in: "in".into(),
+                    out: "out".into(),
+                    when: "when".into(),
+                    pattern: "pattern".into(),
+                    time_written: "time_written".into(),
+                    __________store: "".into(),
+                }
+            }
+
+            pub fn student(&self, clause: Clause) -> Student {
+                let mut xx = Student::default();
+                xx.___________store.push_str(self.__________store.as_str());
+                let pp = get_clause(clause, "student");
+                xx.___________store
+                    .push_str(format!("student{pp}").as_str());
+                xx.drunk_water.push_str(xx.___________store.as_str());
+                xx.drunk_water.push_str(".drunk_water");
+                xx
+            }
+
+            pub fn book(&self, clause: Clause) -> Book {
+                let mut xx = Book::default();
+                xx.__________store.push_str(self.__________store.as_str());
+                let pp = get_clause(clause, "book");
+
+                xx.__________store.push_str(format!("book{pp}").as_str());
+
+                xx
+            }
+
+            pub fn blog(&self, clause: Clause) -> Blog {
+                let mut xx = Blog::default();
+                xx.______________store
+                    .push_str(self.__________store.as_str());
+                let pp = get_clause(clause, "blog");
+                xx.______________store
+                    .push_str(format!("blog{pp}").as_str());
+
+                xx.intro.push_str(xx.______________store.as_str());
+                xx.intro.push_str(".intro");
+                xx
+            }
+        }
+    }
     struct Cond(String);
 
     impl ::std::fmt::Display for Cond {
@@ -636,7 +659,7 @@ mod schema {
         }
     }
     mod book_schema {
-        use super::{blog_schema::Blog, student_schema::Student, Clause, *};
+        use super::{blog_schema::Blog, student_schema::Student, writes_schema::Writes, Clause, *};
 
         #[derive(Debug, Default)]
         pub struct Book {
@@ -649,48 +672,13 @@ mod schema {
             pub __________store: String,
         }
 
-        #[derive(Debug, Default)]
-        pub struct Writes {
-            id: String,
-            time_written: String,
-            ___________store: String,
-        }
-
-        impl Writes {
-            pub fn new() -> Self {
-                Self {
-                    id: "".into(),
-                    time_written: "".into(),
-                    ___________store: "".into(),
-                }
-            }
-
-            pub fn student(&self, clause: Clause) -> Student {
-                let mut xx = Student::default();
-                xx.___________store.push_str(self.___________store.as_str());
-                let pp = get_clause(clause, "student");
-                xx.___________store
-                    .push_str(format!("student{pp}").as_str());
-                xx.drunk_water.push_str(xx.___________store.as_str());
-                xx.drunk_water.push_str(".drunk_water");
-                xx
-            }
-
-            // fn blog(&self, cond: Clause) -> Blog {
-            //     let mut xx = Blog::default();
-            //     xx.store.push_str(self.store.as_str());
-            //     let pp = get_clause(cond, "blog");
-            //     xx.store.push_str(format!("blog{pp}").as_str());
-            //     xx
-            // }
-        }
         impl Book {
             /// .
             pub fn __writes(&self, clause: Clause) -> Writes {
                 let mut xx = Writes::default();
-                xx.___________store.push_str(self.__________store.as_str());
+                xx.__________store.push_str(self.__________store.as_str());
                 let pp = get_clause(clause, "writes");
-                xx.___________store
+                xx.__________store
                     .push_str(format!("<-writes{pp}<-").as_str());
                 xx
             }
