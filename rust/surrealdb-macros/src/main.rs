@@ -504,10 +504,10 @@ mod schema {
 
         #[derive(Debug, Default)]
         pub struct Drinks {
-            id: String,
-            r#in: String,
-            out: String,
-            rate: String,
+            pub id: String,
+            pub r#in: String,
+            pub out: String,
+            pub rate: String,
             __________store: String,
         }
 
