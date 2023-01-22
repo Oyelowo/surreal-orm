@@ -816,6 +816,51 @@ mod schema {
 async fn main() {
     // let xx =S
     schema::nama();
+
+    pub struct Tests<In: Serialize, Out: Serialize> {
+        id: String,
+        _in: In,
+        out: Out,
+        time_written: String,
+    }
+    // mod xx {
+    #[derive(Serialize)]
+    struct UserTests(String);
+
+    type TimoChecker = Tests<UserTests, UserTests>;
+    trait Fighter {
+        type In;
+    }
+
+    #[derive(Serialize)]
+    struct Lowo;
+
+    #[derive(Serialize)]
+    struct Dayo;
+    type LowoTestsDayo = Tests<Lowo, Dayo>;
+
+    impl Fighter for LowoTestsDayo {
+        type In = Lowo;
+    }
+    ::static_assertions::assert_type_eq_all!(Lowo, <LowoTestsDayo as Fighter>::In);
+
+    type Timo = Tests<UserTests, UserTests>;
+    impl Timo {
+        fn do_it(&self) {
+            println!("holla");
+        }
+    }
+    // }
+
+    #[derive(Serialize)]
+    struct PersonTests(String);
+
+    type Mana = Tests<PersonTests, PersonTests>;
+    impl Mana {
+        fn do_it(&self) {
+            println!("holla");
+        }
+    }
 }
 
 // LET $from = (SELECT users FROM company:surrealdb);

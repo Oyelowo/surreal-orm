@@ -48,9 +48,9 @@ pub struct Account {
 pub struct Account_Manage_Project {
     #[surrealdb(skip_serializing)]
     id: Option<String>,
-    #[surrealdb(link_one = "Account", skip_serializing)]
+    // #[surrealdb(link_one = "Account", skip_serializing)]
     r#in: LinkOne<Account>,
-    #[surrealdb(link_one = "Project", skip_serializing)]
+    // #[surrealdb(link_one = "Project", skip_serializing)]
     out: LinkOne<Project>,
     // when: Any,
     // destination: Any,
@@ -91,8 +91,6 @@ pub struct Release {
     // #[surrealdb(relate(edge = "ProjectHasRelease", link = "->has->Release"))]
 }
 
-
-
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Clone)]
 pub struct File {
     id: Option<String>,
@@ -101,10 +99,9 @@ pub struct File {
     author: LinkOne<Account>,
 }
 
-
 use account::schema::model as account;
 use project::schema::model as project;
-/* 
+/*
 #[test]
 fn test_create_account_query() {
     let query = query()
@@ -379,3 +376,4 @@ fn test_with_id_edge() {
     assert_eq!(query_one, query_two);
 }
  */
+

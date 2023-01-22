@@ -122,18 +122,19 @@ impl ModelAttributesTokensDeriver {
                 acc.all_static_assertions.push(meta.static_assertions);
 
                 let field_type = &field_receiver.ty;
-                let field_type_from_attr = &field_receiver
-                    .link_one
-                    .as_ref()
-                    .map(|ty_name| format_ident!("{ty_name}"));
+                // let field_type_from_attr = &field_receiver
+                //     .link_one
+                //     .as_ref()
+                //     .map(|ty_name| format_ident!("{ty_name}"));
 
                 match EdgeOrientation::from(&meta.original_field_name_normalised) {
                     EdgeOrientation::In => {
-                        acc.edge_metadata.in_node_type = Some(quote!(#field_type_from_attr));
                         // acc.edge_metadata.in_node_type = Some(quote!(#field_type_from_attr));
+                        acc.edge_metadata.in_node_type = Some(quote!(#field_type));
                     }
                     EdgeOrientation::Out => {
-                        acc.edge_metadata.out_node_type = Some(quote!(#field_type_from_attr));
+                        // acc.edge_metadata.out_node_type = Some(quote!(#field_type_from_attr));
+                        acc.edge_metadata.out_node_type = Some(quote!(#field_type));
                     }
                     EdgeOrientation::None => {}
                 };
@@ -245,8 +246,8 @@ impl ModelAttributesTokensDeriver {
                 // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
                 // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
                 // type EdgeCheckerAlias = <AccountManageProject as Edge>::EdgeChecker;
-                ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as #crate_name::Edge>::InNode, #in_node);
-                ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as #crate_name::Edge>::OutNode, #out_node);
+                ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as #crate_name::Edge>::InNode, #crate_name::links::LinkOne<#in_node>);
+                ::static_assertions::assert_type_eq_all!(<#edge_struct_ident as #crate_name::Edge>::OutNode, #crate_name::links::LinkOne<#out_node>);
                 type #edge_checker_alias  = <#edge_struct_ident as Edge>::EdgeChecker;
                 ::static_assertions::assert_fields!(#edge_checker_alias : #edge_action);
 
