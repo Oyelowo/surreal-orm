@@ -1,0 +1,24 @@
+[
+  {
+    "time": "156.583µs",
+    "status": "OK",
+    "result": [
+      { "id": "person:7db1px7a0ct8ftq2lz04" },
+      { "id": "person:dayo", "loves": "Toronto" },
+      {
+        "company": "SurrealDB",
+        "id": "person:jaime",
+        "name": "Jaime",
+        "skills": ["Python", "java", "JavaScript"]
+      },
+      { "id": "person:lowo", "loves": "Canada" },
+      { "id": "person:sam", "star": true },
+      {
+        "company": "SurrealDB",
+        "id": "person:tobie",
+        "name": "Tobie",
+        "skills": ["Rust", "Go", "JavaScript"]
+      }
+    ]
+  }
+]

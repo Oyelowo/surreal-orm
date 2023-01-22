@@ -1,0 +1,25 @@
+[
+  {
+    "time": "1.228208ms",
+    "status": "OK",
+    "result": [
+      {
+        "company": "SurrealDB",
+        "id": "person:jaime",
+        "known_folks": ["person:tobie"],
+        "name": "Jaime",
+        "skills": ["Python", "java", "JavaScript"]
+      },
+      {
+        "id": "person:lowo",
+        "known_folks": [
+          "person:dayo",
+          "person:dayo",
+          "person:dayo",
+          "person:dayo"
+        ],
+        "loves": "Canada"
+      }
+    ]
+  }
+]
