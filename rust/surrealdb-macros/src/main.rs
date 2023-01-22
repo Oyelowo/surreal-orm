@@ -397,13 +397,21 @@ mod schema {
                 }
             }
 
-            pub fn writes__(&self, clause: Clause) -> Writes {
-                let mut xx = Writes::default();
-                xx.__________store.push_str(self.___________store.as_str());
-                let pp = get_clause(clause, "writes");
-                xx.__________store
-                    .push_str(format!("->writes{pp}->").as_str());
+            pub fn __________update_connection(store: &String, clause: Clause) -> Student {
+                let mut xx = Student::default();
+                let connection = format!("{}student{}", store, get_clause(clause, "student"));
+
+                xx.___________store.push_str(connection.as_str());
+
+                xx.drunk_water
+                    .push_str(format!("{}.drunk_water", xx.___________store).as_str());
+                xx.favorite_book
+                    .push_str(format!("{}.favorite_book", xx.___________store).as_str());
                 xx
+            }
+
+            pub fn writes__(&self, clause: Clause) -> Writes {
+                Writes::__________update_edge_right(&self.___________store, clause)
             }
 
             pub fn drinks__(&self, clause: Clause) -> Drinks {
@@ -561,14 +569,7 @@ mod schema {
             }
 
             pub fn student(&self, clause: Clause) -> Student {
-                let mut xx = Student::default();
-                xx.___________store.push_str(self.__________store.as_str());
-                let pp = get_clause(clause, "student");
-                xx.___________store
-                    .push_str(format!("student{pp}").as_str());
-                xx.drunk_water.push_str(xx.___________store.as_str());
-                xx.drunk_water.push_str(".drunk_water");
-                xx
+                Student::__________update_connection(&self.__________store, clause)
             }
 
             pub fn book(&self, clause: Clause) -> Book {
@@ -591,6 +592,36 @@ mod schema {
 
                 xx.intro.push_str(xx.______________store.as_str());
                 xx.intro.push_str(".intro");
+                xx
+            }
+
+            pub fn __________update_edge_right(store: &String, clause: Clause) -> Writes {
+                let mut xx = Writes::default();
+                let connection = format!(
+                    "{}->writes{}->",
+                    store.as_str(),
+                    get_clause(clause, "writes")
+                );
+
+                xx.__________store.push_str(connection.as_str());
+
+                xx.time_written
+                    .push_str(format!("{}.time_written", xx.__________store).as_str());
+                xx.pattern
+                    .push_str(format!("{}.pattern", xx.__________store).as_str());
+                xx
+            }
+
+            pub fn __________update_edge_left(store: &String, clause: Clause) -> Writes {
+                let mut xx = Writes::default();
+                let connection = format!("{}<-writes{}<-", store, get_clause(clause, "writes"));
+
+                xx.__________store.push_str(connection.as_str());
+
+                xx.time_written
+                    .push_str(format!("{}.time_written", xx.__________store).as_str());
+                xx.pattern
+                    .push_str(format!("{}.pattern", xx.__________store).as_str());
                 xx
             }
         }
@@ -675,12 +706,7 @@ mod schema {
         impl Book {
             /// .
             pub fn __writes(&self, clause: Clause) -> Writes {
-                let mut xx = Writes::default();
-                xx.__________store.push_str(self.__________store.as_str());
-                let pp = get_clause(clause, "writes");
-                xx.__________store
-                    .push_str(format!("<-writes{pp}<-").as_str());
-                xx
+                Writes::__________update_edge_left(&self.__________store, clause)
             }
 
             pub fn __done__(self) -> String {
