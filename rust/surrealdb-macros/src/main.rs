@@ -605,10 +605,11 @@ mod schema {
 
                 xx.__________store.push_str(connection.as_str());
 
+                let store_without_end_arrow = xx.__________store.trim_end_matches("->");
                 xx.time_written
-                    .push_str(format!("{}.time_written", xx.__________store).as_str());
+                    .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
                 xx.pattern
-                    .push_str(format!("{}.pattern", xx.__________store).as_str());
+                    .push_str(format!("{}.pattern", store_without_end_arrow).as_str());
                 xx
             }
 
@@ -618,10 +619,12 @@ mod schema {
 
                 xx.__________store.push_str(connection.as_str());
 
+                let store_without_end_arrow = xx.__________store.trim_end_matches("<-");
+
                 xx.time_written
-                    .push_str(format!("{}.time_written", xx.__________store).as_str());
+                    .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
                 xx.pattern
-                    .push_str(format!("{}.pattern", xx.__________store).as_str());
+                    .push_str(format!("{}.pattern", store_without_end_arrow).as_str());
                 xx
             }
         }
@@ -767,9 +770,11 @@ mod schema {
             ))
             .book(Clause::Id("book:akkaka".into()))
             .__writes(Clause::Id("writes:pram".into()))
-            .student(Clause::None)
-            .drunk_water
-            .__as__("wara");
+            .time_written
+            .__as__("xxx");
+        // .student(Clause::None)
+        // .drunk_water
+        // .__as__("wara");
         // .__as__(Student::book_written);
         // .blog(Clause::Id("blog:akkaka".into()));
         // .as_alias(Blog)
