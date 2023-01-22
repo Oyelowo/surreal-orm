@@ -255,6 +255,7 @@ async fn idea_main1() -> Result<()> {
     Ok(())
 }
 mod schema {
+    use serde::Serialize;
     use std::fmt::{Debug, Display};
     use surrealdb_macros::{
         node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
@@ -266,7 +267,7 @@ mod schema {
         student_schema::{Student, StudentEnum},
     };
 
-    #[derive(Debug, Default)]
+    #[derive(Serialize, Debug, Default)]
     pub struct DbField(String);
 
     impl DbField {
@@ -328,7 +329,7 @@ mod schema {
             /* writes_schema::Writes, */ Clause, *,
         };
 
-        #[derive(Debug, Default)]
+        #[derive(Debug, Serialize, Default)]
         pub struct Student {
             // id: String
             pub id: DbField,
@@ -358,7 +359,7 @@ mod schema {
         #[derive(Serialize, Default)]
         pub struct StudentWrites(String);
 
-        type Writes = super::writes_schema::Writes<StudentWrites, StudentWrites>;
+        type Writes = super::writes_schema::Writes<Student>;
 
         impl Writes {
             pub fn book(&self, clause: Clause) -> Book {
@@ -571,7 +572,7 @@ mod schema {
         };
 
         #[derive(Debug, Default)]
-        pub struct Writes<In: Serialize + Default, Out: Serialize + Default> {
+        pub struct Writes<Model: Serialize + Default> {
             id: DbField,
             // Student, User
             r#in: DbField,
@@ -581,11 +582,11 @@ mod schema {
             pub when: DbField,
             pub pattern: DbField,
             pub __________store: String,
-            ___________inner: PhantomData<In>,
-            ___________outer: PhantomData<Out>,
+            ___________model: PhantomData<Model>,
+            // ___________outer: PhantomData<Out>,
         }
 
-        impl<In: Serialize + Default, Out: Serialize + Default> Writes<In, Out> {
+        impl<Model: Serialize + Default> Writes<Model> {
             pub fn new() -> Self {
                 Self {
                     id: "id".into(),
@@ -595,8 +596,8 @@ mod schema {
                     pattern: "pattern".into(),
                     time_written: "time_written".into(),
                     __________store: "".into(),
-                    ___________inner: PhantomData,
-                    ___________outer: PhantomData,
+                    ___________model: PhantomData,
+                    // ___________outer: PhantomData,
                 }
             }
 
@@ -604,8 +605,8 @@ mod schema {
                 // writes_store: &String,
                 store: &String,
                 clause: Clause,
-            ) -> Writes<In, Out> {
-                let mut xx = Writes::<In, Out>::default();
+            ) -> Writes<Model> {
+                let mut xx = Writes::<Model>::default();
                 let connection = format!(
                     "{}->writes{}->",
                     store.as_str(),
@@ -621,9 +622,9 @@ mod schema {
                 xx
             }
 
-            pub fn __________update_edge_left(store: &String, clause: Clause) -> Writes<In, Out> {
+            pub fn __________update_edge_left(store: &String, clause: Clause) -> Writes<Model> {
                 // let mut xx = Writes::default();
-                let mut xx = Writes::<In, Out>::default();
+                let mut xx = Writes::<Model>::default();
                 let connection = format!("{}<-writes{}<-", store, get_clause(clause, "writes"));
 
                 xx.__________store.push_str(connection.as_str());
@@ -708,7 +709,7 @@ mod schema {
             blog_schema::Blog, student_schema::Student, /* writes_schema::Writes, */ Clause, *,
         };
 
-        #[derive(Debug, Default)]
+        #[derive(Serialize, Debug, Default)]
         pub struct Book {
             pub id: DbField,
             pub title: DbField,
@@ -719,15 +720,16 @@ mod schema {
             pub __________store: String,
         }
 
-        #[derive(Serialize, Default)]
-        pub struct WritesBook(String);
+        // #[derive(Serialize, Default)]
+        // pub struct WritesBook(String);
 
-        type Writes = super::writes_schema::Writes<WritesBook, WritesBook>;
+        type Writes = super::writes_schema::Writes<Book>;
         impl Writes {
             pub fn student(&self, clause: Clause) -> Student {
                 Student::__________update_connection(&self.__________store, clause)
             }
         }
+
         impl Book {
             /// .
             pub fn __writes(&self, clause: Clause) -> Writes {
