@@ -321,9 +321,11 @@ mod schema {
         Id(String),
     }
     mod student_schema {
+        use serde::Serialize;
+
         use super::{
             blog_schema::Blog, book_schema::Book, juice_schema::Juice, water_schema::Water,
-            writes_schema::Writes, Clause, *,
+            /* writes_schema::Writes, */ Clause, *,
         };
 
         #[derive(Debug, Default)]
@@ -353,12 +355,33 @@ mod schema {
             }
         }
 
-        #[derive(Debug, Default)]
-        pub struct Nothing(pub String);
+        #[derive(Serialize, Default)]
+        pub struct StudentWrites(String);
 
-        impl Nothing {
-            fn favorite_book(&self) {
-                todo!()
+        type Writes = super::writes_schema::Writes<StudentWrites, StudentWrites>;
+
+        impl Writes {
+            pub fn book(&self, clause: Clause) -> Book {
+                let mut xx = Book::default();
+                xx.__________store.push_str(self.__________store.as_str());
+                let pp = get_clause(clause, "book");
+
+                xx.__________store.push_str(format!("book{pp}").as_str());
+
+                xx
+            }
+
+            pub fn blog(&self, clause: Clause) -> Blog {
+                let mut xx = Blog::default();
+                xx.______________store
+                    .push_str(self.__________store.as_str());
+                let pp = get_clause(clause, "blog");
+                xx.______________store
+                    .push_str(format!("blog{pp}").as_str());
+
+                xx.intro.push_str(xx.______________store.as_str());
+                xx.intro.push_str(".intro");
+                xx
             }
         }
 
@@ -411,7 +434,8 @@ mod schema {
             }
 
             pub fn writes__(&self, clause: Clause) -> Writes {
-                Writes::__________update_edge_right(&self.___________store, clause)
+                let xx = Writes::__________update_edge_right(&self.___________store, clause);
+                xx
             }
 
             pub fn drinks__(&self, clause: Clause) -> Drinks {
@@ -537,13 +561,17 @@ mod schema {
     }
 
     mod writes_schema {
+        use std::marker::PhantomData;
+
+        use serde::Serialize;
+
         use super::{
             blog_schema::Blog, book_schema::Book, get_clause, student_schema::Student, Clause,
             DbField,
         };
 
         #[derive(Debug, Default)]
-        pub struct Writes {
+        pub struct Writes<In: Serialize + Default, Out: Serialize + Default> {
             id: DbField,
             // Student, User
             r#in: DbField,
@@ -553,9 +581,11 @@ mod schema {
             pub when: DbField,
             pub pattern: DbField,
             pub __________store: String,
+            ___________inner: PhantomData<In>,
+            ___________outer: PhantomData<Out>,
         }
 
-        impl Writes {
+        impl<In: Serialize + Default, Out: Serialize + Default> Writes<In, Out> {
             pub fn new() -> Self {
                 Self {
                     id: "id".into(),
@@ -565,44 +595,22 @@ mod schema {
                     pattern: "pattern".into(),
                     time_written: "time_written".into(),
                     __________store: "".into(),
+                    ___________inner: PhantomData,
+                    ___________outer: PhantomData,
                 }
             }
 
-            pub fn student(&self, clause: Clause) -> Student {
-                Student::__________update_connection(&self.__________store, clause)
-            }
-
-            pub fn book(&self, clause: Clause) -> Book {
-                let mut xx = Book::default();
-                xx.__________store.push_str(self.__________store.as_str());
-                let pp = get_clause(clause, "book");
-
-                xx.__________store.push_str(format!("book{pp}").as_str());
-
-                xx
-            }
-
-            pub fn blog(&self, clause: Clause) -> Blog {
-                let mut xx = Blog::default();
-                xx.______________store
-                    .push_str(self.__________store.as_str());
-                let pp = get_clause(clause, "blog");
-                xx.______________store
-                    .push_str(format!("blog{pp}").as_str());
-
-                xx.intro.push_str(xx.______________store.as_str());
-                xx.intro.push_str(".intro");
-                xx
-            }
-
-            pub fn __________update_edge_right(store: &String, clause: Clause) -> Writes {
-                let mut xx = Writes::default();
+            pub fn __________update_edge_right(
+                // writes_store: &String,
+                store: &String,
+                clause: Clause,
+            ) -> Writes<In, Out> {
+                let mut xx = Writes::<In, Out>::default();
                 let connection = format!(
                     "{}->writes{}->",
                     store.as_str(),
                     get_clause(clause, "writes")
                 );
-
                 xx.__________store.push_str(connection.as_str());
 
                 let store_without_end_arrow = xx.__________store.trim_end_matches("->");
@@ -613,8 +621,9 @@ mod schema {
                 xx
             }
 
-            pub fn __________update_edge_left(store: &String, clause: Clause) -> Writes {
-                let mut xx = Writes::default();
+            pub fn __________update_edge_left(store: &String, clause: Clause) -> Writes<In, Out> {
+                // let mut xx = Writes::default();
+                let mut xx = Writes::<In, Out>::default();
                 let connection = format!("{}<-writes{}<-", store, get_clause(clause, "writes"));
 
                 xx.__________store.push_str(connection.as_str());
@@ -693,7 +702,11 @@ mod schema {
         }
     }
     mod book_schema {
-        use super::{blog_schema::Blog, student_schema::Student, writes_schema::Writes, Clause, *};
+        use serde::Serialize;
+
+        use super::{
+            blog_schema::Blog, student_schema::Student, /* writes_schema::Writes, */ Clause, *,
+        };
 
         #[derive(Debug, Default)]
         pub struct Book {
@@ -706,6 +719,15 @@ mod schema {
             pub __________store: String,
         }
 
+        #[derive(Serialize, Default)]
+        pub struct WritesBook(String);
+
+        type Writes = super::writes_schema::Writes<WritesBook, WritesBook>;
+        impl Writes {
+            pub fn student(&self, clause: Clause) -> Student {
+                Student::__________update_connection(&self.__________store, clause)
+            }
+        }
         impl Book {
             /// .
             pub fn __writes(&self, clause: Clause) -> Writes {
@@ -816,53 +838,58 @@ mod schema {
 async fn main() {
     // let xx =S
     schema::nama();
-
-    pub struct Tests<In: Serialize, Out: Serialize> {
-        id: String,
-        _in: In,
-        out: Out,
-        time_written: String,
-    }
-    // mod xx {
-    #[derive(Serialize)]
-    struct UserTests(String);
-
-    type TimoChecker = Tests<UserTests, UserTests>;
-    trait Fighter {
-        type In;
-    }
-
-    #[derive(Serialize)]
-    struct Lowo;
-
-    #[derive(Serialize)]
-    struct Dayo;
-    type LowoTestsDayo = Tests<Lowo, Dayo>;
-
-    impl Fighter for LowoTestsDayo {
-        type In = Lowo;
-    }
-    ::static_assertions::assert_type_eq_all!(Lowo, <LowoTestsDayo as Fighter>::In);
-
-    type Timo = Tests<UserTests, UserTests>;
-    impl Timo {
-        fn do_it(&self) {
-            println!("holla");
-        }
-    }
-    // }
-
-    #[derive(Serialize)]
-    struct PersonTests(String);
-
-    type Mana = Tests<PersonTests, PersonTests>;
-    impl Mana {
-        fn do_it(&self) {
-            println!("holla");
-        }
-    }
 }
 
+pub struct Tests<In: Serialize, Out: Serialize> {
+    id: String,
+    _in: In,
+    out: Out,
+    time_written: String,
+}
+
+impl<In: Serialize, Out: Serialize> Tests<In, Out> {
+    pub fn mki(&self) {}
+}
+
+// mod xx {
+#[derive(Serialize)]
+struct UserTests(String);
+
+type TimoChecker = Tests<UserTests, UserTests>;
+trait Fighter {
+    type In;
+}
+
+#[derive(Serialize)]
+struct Lowo;
+
+#[derive(Serialize)]
+struct Dayo;
+type LowoTestsDayo = Tests<Lowo, Dayo>;
+
+impl Fighter for LowoTestsDayo {
+    type In = Lowo;
+}
+::static_assertions::assert_type_eq_all!(Lowo, <LowoTestsDayo as Fighter>::In);
+
+type Timo = Tests<UserTests, UserTests>;
+impl Timo {
+    fn do_it(&self) {
+        // Tim();
+        println!("holla");
+    }
+}
+// }
+
+#[derive(Serialize)]
+struct PersonTests(String);
+
+type Mana = Tests<PersonTests, PersonTests>;
+impl Mana {
+    fn do_it(&self) {
+        println!("holla");
+    }
+}
 // LET $from = (SELECT users FROM company:surrealdb);
 // LET $devs = (SELECT * FROM user WHERE tags CONTAINS 'developer');
 // RELATE $from->like->$devs SET time.connected = time::now();
