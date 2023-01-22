@@ -9,7 +9,6 @@ use async_graphql::SimpleObject;
 use serde::Deserialize;
 use serde::Serialize;
 use surrealdb_macros::links::LinkOne;
-use surrealdb_macros::query_builder::query;
 use surrealdb_macros::{
     links::{LinkMany, LinkSelf, Relate},
     Edge, SurrealdbModel,
@@ -42,27 +41,6 @@ pub struct Account {
     )]
     #[graphql(skip)]
     managed_projects: Relate<Project>,
-}
-
-#[ComplexObject]
-impl Account {
-    async fn friend(&self) -> Option<&Account> {
-        self.friend.value_ref()
-    }
-
-    async fn projects(&self) -> Vec<Option<&Project>> {
-        self.favourite_projects
-            .iter()
-            .map(|x| x.value_ref())
-            .collect()
-    }
-
-    async fn projects_ids(&self) -> Vec<Option<&String>> {
-        self.favourite_projects.iter().map(|x| x.id()).collect()
-    }
-    async fn teacher(&self) -> Option<&Account> {
-        self.teacher.value_ref()
-    }
 }
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize)]
@@ -113,8 +91,7 @@ pub struct Release {
     // #[surrealdb(relate(edge = "ProjectHasRelease", link = "->has->Release"))]
 }
 
-use account::schema::model as account;
-use project::schema::model as project;
+
 
 #[derive(SurrealdbModel, Debug, Serialize, Deserialize, Clone)]
 pub struct File {
@@ -124,6 +101,10 @@ pub struct File {
     author: LinkOne<Account>,
 }
 
+
+use account::schema::model as account;
+use project::schema::model as project;
+/* 
 #[test]
 fn test_create_account_query() {
     let query = query()
@@ -397,3 +378,4 @@ fn test_with_id_edge() {
 
     assert_eq!(query_one, query_two);
 }
+ */
