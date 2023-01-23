@@ -575,6 +575,13 @@ mod schema {
         pub struct Writes<Model: Serialize + Default> {
             id: DbField,
             // Student, User
+            // Even though it's possible to have full object when in and out are loaded,
+            // in practise, we almost never want to do this, since edges are rarely
+            // accessed directly but only via nodes and they are more like bridges
+            // between two nodes. So, we make that trade-off of only allowing DbField
+            // - which is just a surrealdb id , for both in and out nodes.
+            // Still, we can get access to in and out nodes via the origin and destination nodes
+            // e.g User->Eats->Food. We can get User and Food without accessing Eats directly.
             r#in: DbField,
             // Book, Blog
             pub out: DbField,
