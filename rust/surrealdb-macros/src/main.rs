@@ -354,9 +354,6 @@ mod schema {
             }
         }
 
-        #[derive(Serialize, Default)]
-        pub struct StudentWrites(String);
-
         type Writes = super::writes_schema::Writes<Student>;
 
         impl Writes {
@@ -406,6 +403,23 @@ mod schema {
         impl Student {
             pub const book_written: &'static str = "book_written";
             pub type Aliases = StudentEnum;
+
+            pub fn __with_id__(id: impl std::fmt::Display) -> Self {
+                let mut stud_model = Self::traverse();
+                stud_model
+                    .___________store
+                    .push_str(id.to_string().as_str());
+                stud_model
+            }
+
+            pub fn __with__(db_name: impl std::fmt::Display) -> Self {
+                let mut stud_model = Self::traverse();
+                stud_model
+                    .___________store
+                    .push_str(db_name.to_string().as_str());
+                stud_model
+            }
+
             pub fn traverse() -> Self {
                 Self {
                     id: "id".into(),
@@ -729,6 +743,11 @@ mod schema {
             pub __________store: String,
         }
 
+        impl Display for Book {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.write_fmt(format_args!("{}", self.__________store))
+            }
+        }
         // #[derive(Serialize, Default)]
         // pub struct WritesBook(String);
 
@@ -740,6 +759,26 @@ mod schema {
         }
 
         impl Book {
+            pub fn traverse() -> Self {
+                Self {
+                    __________store: "".to_string(),
+                    ..Default::default()
+                }
+            }
+
+            pub fn __with__(db_name: impl std::fmt::Display) -> Self {
+                let mut stud_model = Self::traverse();
+                stud_model
+                    .__________store
+                    .push_str(db_name.to_string().as_str());
+                stud_model
+            }
+
+            pub fn __with_id__(mut self, id: impl std::fmt::Display) -> Self {
+                // TODO: Remove prefix book, so that its not bookBook:lowo
+                self.__________store.push_str(id.to_string().as_str());
+                self
+            }
             /// .
             pub fn __writes(&self, clause: Clause) -> Writes {
                 Writes::__________update_edge_left(&self.__________store, clause)
@@ -817,12 +856,14 @@ mod schema {
         let rela = student_schema::Student::traverse()
             .favorite_book(Clause::Id("book:janta".into()))
             .title;
-        // .__done__();
-        // .title;
-
         println!("rela...{}", rela);
 
-        println!("rela...{}", StudentEnum::book_written);
+        // println!("rela...{}", StudentEnum::book_written);
+        let rela = student_schema::Student::__with_id__("Student:lowo")
+            .writes__(Clause::None)
+            .book(Clause::None)
+            .__with_id__("Book:maow");
+        println!("rela...{}", rela);
     }
 }
 // impl Book {
