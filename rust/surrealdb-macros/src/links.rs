@@ -4,7 +4,7 @@ use super::*;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
-enum Reference<V: SurrealdbModel> {
+enum Reference<V /* : SurrealdbModel */> {
     FetchedValue(V),
     Id(String),
     Null,
@@ -17,7 +17,7 @@ enum Reference<V: SurrealdbModel> {
 // }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct LinkOne<V: SurrealdbModel>(Reference<V>);
+pub struct LinkOne<V /* : SurrealdbModel */>(Reference<V>);
 
 pub type LinkMany<V> = Vec<LinkOne<V>>;
 pub type Relate<V> = Vec<LinkOne<V>>;

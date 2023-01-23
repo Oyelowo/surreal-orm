@@ -32,7 +32,57 @@ use surrealdb_macros::{
 };
 use typed_builder::TypedBuilder;
 
-#[derive(/* SurrealdbModel,  */ TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbModel, Serialize, Deserialize, Debug)]
+#[surrealdb(rename_all = "camelCase")]
+pub struct Account {
+    id: Option<String>,
+    handle: String,
+    // #[surrealdb(rename = "nawao")]
+    first_name: String,
+    #[surrealdb(link_self = "Account", skip_serializing)]
+    best_friend: LinkSelf<Account>,
+
+    #[surrealdb(link_self = "Account", skip_serializing)]
+    teacher: LinkSelf<Account>,
+
+    #[surrealdb(rename = "lastName")]
+    another_name: String,
+    chess: String,
+    nice_poa: String,
+    password: String,
+    email: String,
+
+    // #[surrealdb(relate(edge="Account_Manage_Project", description="->manage->Account"))]
+    #[surrealdb(relate(edge = "AccountManageProject", link = "->manage->Project"))]
+    managed_projects: Relate<Project>,
+}
+
+#[derive(SurrealdbModel, Serialize, Deserialize, Debug)]
+#[surrealdb(rename_all = "camelCase")]
+pub struct Project {
+    id: Option<String>,
+    title: String,
+    // #[surrealdbrelate = "->run_by->Account")]
+    #[surrealdb(relate(edge = "AccountManageProject", link = "<-manage<-Account"))]
+    account: Relate<Account>,
+}
+
+// #[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize)]
+#[surrealdb(relation_name = "manage")]
+struct AccountManageProject {
+    id: Option<String>,
+    #[surrealdb(link_one = "Account", skip_serializing)]
+    // #[serde(rename = "in")]
+    // _in: LinkOne<Account>,
+    r#in: LinkOne<Account>,
+    #[surrealdb(link_one = "Project", skip_serializing)]
+    out: LinkOne<Project>,
+    when: String,
+    destination: String,
+}
+
+#[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -40,114 +90,39 @@ pub struct Student {
     id: Option<String>,
     first_name: String,
 
-    // #[surrealdb(link_one = "Course", skip_serializing)]
-    course: LinkOne<Book>,
+    #[surrealdb(link_one = "Course", skip_serializing)]
+    course: LinkOne<Course>,
 
-    // #[surrealdb(link_many = "Course", skip_serializing)]
+    #[surrealdb(link_many = "Course", skip_serializing)]
     #[serde(rename = "lowo")]
-    all_semester_courses: LinkMany<Book>,
+    all_semester_courses: LinkMany<Course>,
 
-    // #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
+    #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
     written_blogs: Relate<Blog>,
 }
-trait SurrealdbNode {
-    type Schema;
-    fn get_schema() -> Self::Schema;
-}
 
-impl SurrealdbNode for Student {
-    type Schema = schema::student_schema::Student;
-    fn get_schema() -> Self::Schema {
-        let xx = schema::student_schema::Student::new();
-        xx
+impl Student {
+    fn relate_writes_blog() -> String {
+        Student::get_schema()
+            .writtenBlogs
+            .as_alias(Student::get_schema().writtenBlogs().to_string().as_str())
     }
 }
 
-impl SurrealdbNode for Blog {
-    type Schema = schema::blog_schema::Blog;
-    fn get_schema() -> Self::Schema {
-        let xx = schema::blog_schema::Blog::new();
-        xx
-    }
-}
-fn erer() {
-    let mm = Student::get_schema()
-        .__with_id__("dfdf")
-        .writes__(schema::Clause::None)
-        .book(schema::Clause::None)
-        .__writes(schema::Clause::None)
-        .student(schema::Clause::None);
-}
-impl SurrealdbNode for Book {
-    type Schema = schema::book_schema::Book;
-    fn get_schema() -> Self::Schema {
-        let xx = schema::book_schema::Book::new();
-        xx
-    }
-}
-
-type StudentWritesBlog = Writes<Student, Blog>;
-type StudentWritesCourse = Writes<Student, Book>;
-::static_assertions::assert_type_eq_all!(
-    <StudentWritesBlog as SurrealdbEdge>::TableName,
-    <StudentWritesCourse as SurrealdbEdge>::TableName
-);
-/* fn efre(ss: StudentWritesBlog) {
-    ss.
-} */
-
-trait SurrealdbEdge {
-    type In;
-    type Out;
-    type TableName;
-}
-
-#[derive(/* SurrealdbModel, */ Debug, Serialize, Deserialize, Clone)]
-// #[surrealdb(relation_name = "writes")]
-struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Clone)]
+#[surrealdb(relation_name = "writes")]
+struct StudentWritesBlog {
     id: Option<String>,
-    // #[surrealdb(link_one = "Student")]
-    r#in: LinkOne<In>,
-    // #[surrealdb(link_one = "Blog")]
-    out: LinkOne<Out>,
+    #[surrealdb(link_one = "Student")]
+    r#in: LinkOne<Student>,
+    #[surrealdb(link_one = "Blog")]
+    out: LinkOne<Blog>,
     when: String,
     destination: String,
 }
 
-fn rerej() {
-    const Nama: &'static str = "Writes";
-    /* ::static_assertions::const_assert!(Nama == Nama); */
-    // Writes<I>
-}
-impl<In: SurrealdbNode, Out: SurrealdbNode> Writes<In, Out> {
-    // const Nama: &'static str = "Writes";
-}
-
-struct WritesTableNameStaticChecker {
-    Writes: String,
-}
-
-type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableName;
-static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
-
-static_assertions::assert_fields!(WritesTableNameStaticChecker: Writes);
-
-type StudentWritesBlogInNode = <StudentWritesBlog as SurrealdbEdge>::In;
-static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
-
-type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealdbEdge>::Out;
-static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
-
-// static_assertions::assert_impl_any!(StudentWritesBlog::default(), SurrealdbEdge);
-
-impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
-    type In = In;
-    type Out = Out;
-    type TableName = WritesTableNameStaticChecker;
-}
-
-#[derive(/* SurrealdbModel, */ TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
-/* #[surrealdb(rename_all = "camelCase")] */
+#[derive(SurrealdbModel, TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
+#[surrealdb(rename_all = "camelCase")]
 pub struct Blog {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -157,23 +132,129 @@ pub struct Blog {
     content: String,
 }
 
-#[derive(/* SurrealdbModel, */ TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
-/* #[surrealdb(rename_all = "camelCase")] */
-pub struct Book {
+#[derive(SurrealdbModel, TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
+#[surrealdb(rename_all = "camelCase")]
+pub struct Course {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     id: Option<String>,
     title: String,
 }
 
-::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
+::static_assertions::assert_type_eq_all!(LinkOne<Course>, LinkOne<Course>);
 
 // use ref_mod::Ref;
 // use ref_mod::{LinkMany, Ref as Mana};
 
 static DB: Surreal<Db> = Surreal::init();
 
-pub mod schema {
+#[tokio::main]
+async fn idea_main1() -> Result<()> {
+    let xx = Blog {
+        id: None,
+        title: "lowo".to_string(),
+        content: "nama".to_string(),
+    };
+    println!("mowo {}", serde_json::to_string(&xx).unwrap());
+
+    let m = query()
+        .select(Student::relate_writes_blog())
+        // .select(Student::get_schema().writtenBlogs.as_alias("writtenBlogs"))
+        .from(Student::get_schema())
+        .build();
+
+    println!("moam {}", m);
+    // DB.connect::<Mem>(()).await?;
+    // DB.use_ns("namespace").use_db("database").await?;
+    //
+    // let c = Course::builder()
+    //     // .id(Some("Course:math".into()))
+    //     .title("Calculuse".into())
+    //     .build();
+    // let cx: Course = DB.create("Course").content(&c).await.unwrap();
+    // println!("cxxxx.....{:?}", cx);
+    // let id = Id::from("Course:math");
+    // // let idr = id.to_raw();
+    //
+    // let cs: Option<Course> = DB
+    //     .select(SurIdComplex::from_string(cx.clone().id.unwrap()))
+    //     // .select(SurIdComplex(("Course".to_string(), cx.id.unwrap()).0))
+    //     .await
+    //     .unwrap();
+    //
+    // // let cx: Course = DB.create(("Course", &*"meth")).content(&c).await.unwrap();
+    // println!("cssss.....{:?}", cx);
+    // // let cf: Foreign<Course> = Foreign::new_value(cx);
+    // // let cf = Ref::from_model(cs.clone().unwrap());
+    // // let cf1 = Ref::from_model(cs.clone().unwrap());
+    // // let cf2 = Ref::from_model(cs.unwrap());
+    // // let cf = Ref::Id(cs.unwrap().id.unwrap().into());
+    // let cfake = Course::builder()
+    //     .id("Course:math".into())
+    //     .title("Calculuse".into())
+    //     .build();
+    //
+    // // println!(
+    // //     "cours {}",
+    // //     serde_json::to_string(&cf.value().unwrap().id).unwrap()
+    // // );
+    //
+    // let cxx = cs.as_ref().unwrap();
+    // // let cxx = &cs.unwrap();
+    // let stu = Student::builder()
+    //     .first_name("dayo".into())
+    //     .course(cxx.into())
+    //     .all_semester_courses(vec![cxx.into(), cxx.into(), cfake.into()])
+    //     .build();
+    //
+    // let stud1: Student = DB.create("Student").content(&stu).await.unwrap();
+    // println!("stud1: stud1 {:?}", stud1);
+    // // stud1.course.allow_value_serialize();
+    // println!(
+    //     "stud1_serjson: stud1serj {}",
+    //     serde_json::to_string(&stud1).unwrap()
+    // );
+    //
+    // let stud_select: Option<Student> = DB
+    //     .select(SurIdComplex::from_string(stud1.clone().id.unwrap()))
+    //     // .select(SurIdComplex(("Course".to_string(), cx.id.unwrap()).0))
+    //     .await
+    //     .unwrap();
+    //
+    // let sql_query = query()
+    //     .select("*")
+    //     .from(stud_select.unwrap().clone().id.unwrap())
+    //     // .from(stud1.clone().id.unwrap())
+    //     .fetch_many(&[
+    //         Student::get_schema().course.identifier,
+    //         Student::get_schema().lowo.identifier,
+    //         // "allSemesterCourses",
+    //     ])
+    //     .build();
+    // println!("SQL {sql_query}");
+    // let mut sql_q_result = DB.query(sql_query).await.unwrap();
+    // let sql_q: Option<Student> = sql_q_result.take(0)?;
+    //
+    // let mmm = sql_q.clone().unwrap().clone().course.value_ref();
+    // println!("sqllll {:?}", sql_q);
+    // // println!("studselect1: studselect1 {:?}", stud_select);
+    // // sql_q
+    // //     .clone()
+    // //     .unwrap()
+    // //     .clone()
+    // //     .course
+    // //     .allow_value_serialize();
+    // // stud_select.clone().unwrap().course.allow_value_serialize();
+    // println!(
+    //     "stud SELECT_serjson: rj {}",
+    //     serde_json::to_string(&sql_q).unwrap()
+    // );
+    //
+    // println!("relate...{}", Student::get_schema().firstName);
+    // // cxxxx.....Course { id: Some("Course:ygz4r9w68lls6e9k8fo5"), title: "Calculuse" }
+    Ok(())
+}
+mod schema {
     use serde::Serialize;
     use std::fmt::{Debug, Display};
     use surrealdb_macros::{
@@ -240,7 +321,7 @@ pub mod schema {
         // Change to SurId
         Id(String),
     }
-    pub mod student_schema {
+    mod student_schema {
         use serde::Serialize;
 
         use super::{
@@ -323,28 +404,23 @@ pub mod schema {
             pub const book_written: &'static str = "book_written";
             pub type Aliases = StudentEnum;
 
-            pub fn __with_id__(mut self, id: impl std::fmt::Display) -> Self {
-                // TODO: Remove prefix book, so that its not bookBook:lowo
-                self.___________store.push_str(id.to_string().as_str());
-                self
+            pub fn __with_id__(id: impl std::fmt::Display) -> Self {
+                let mut stud_model = Self::traverse();
+                stud_model
+                    .___________store
+                    .push_str(id.to_string().as_str());
+                stud_model
             }
-            // pub fn __with_id__(id: impl std::fmt::Display) -> Self {
-            //     let mut stud_model = Self::new();
-            //     stud_model
-            //         .___________store
-            //         .push_str(id.to_string().as_str());
-            //     stud_model
-            // }
 
             pub fn __with__(db_name: impl std::fmt::Display) -> Self {
-                let mut stud_model = Self::new();
+                let mut stud_model = Self::traverse();
                 stud_model
                     .___________store
                     .push_str(db_name.to_string().as_str());
                 stud_model
             }
 
-            pub fn new() -> Student {
+            pub fn traverse() -> Self {
                 Self {
                     id: "id".into(),
                     name: "foreign".into(),
@@ -585,8 +661,7 @@ pub mod schema {
             f.write_fmt(format_args!("{}", self.0))
         }
     }
-
-    pub mod blog_schema {
+    mod blog_schema {
         use std::fmt::Display;
 
         use super::DbField;
@@ -602,19 +677,6 @@ pub mod schema {
             pub poster: DbField,
             pub comments: DbField,
             pub ______________store: String,
-        }
-
-        impl Blog {
-            pub fn new() -> Self {
-                Self {
-                    ______________store: "".to_string(),
-                    id: "id".into(),
-                    intro: "intro".into(),
-                    poster: "poster".into(),
-                    comments: "comments".into(),
-                    ..Default::default()
-                }
-            }
         }
 
         impl Display for Blog {
@@ -663,8 +725,7 @@ pub mod schema {
             }
         }
     }
-
-    pub mod book_schema {
+    mod book_schema {
         use serde::Serialize;
         use surrealdb_macros::SurrealdbModel;
 
@@ -699,32 +760,27 @@ pub mod schema {
         }
 
         impl Book {
-            pub fn new() -> Self {
+            pub fn traverse() -> Self {
                 Self {
                     __________store: "".to_string(),
                     ..Default::default()
                 }
             }
 
-            // pub fn __with__(db_name: impl std::fmt::Display) -> Self {
-            //     let mut stud_model = Self::new();
-            //     stud_model
-            //         .__________store
-            //         .push_str(db_name.to_string().as_str());
-            //     stud_model
-            // }
+            pub fn __with__(db_name: impl std::fmt::Display) -> Self {
+                let mut stud_model = Self::traverse();
+                stud_model
+                    .__________store
+                    .push_str(db_name.to_string().as_str());
+                stud_model
+            }
 
             pub fn __with_id__(mut self, id: impl std::fmt::Display) -> Self {
                 // TODO: Remove prefix book, so that its not bookBook:lowo
                 self.__________store.push_str(id.to_string().as_str());
                 self
             }
-            // pub fn __with_id__(mut self, id: impl std::fmt::Display) -> Self {
-            //     // TODO: Remove prefix book, so that its not bookBook:lowo
-            //     self.__________store.push_str(id.to_string().as_str());
-            //     self
-            // }
-            // /// .
+            /// .
             pub fn __writes(&self, clause: Clause) -> Writes {
                 Writes::__________update_edge_left(&self.__________store, clause)
             }
@@ -755,7 +811,7 @@ pub mod schema {
         //     .writer();
         // println!("rela...{:?}", rela.store);
 
-        let rela = student_schema::Student::new()
+        let rela = student_schema::Student::traverse()
             .writes__(Clause::Where(
                 query()
                     .and_where("pages > 5")
@@ -775,7 +831,7 @@ pub mod schema {
 
         println!("rela...{:?}", rela);
 
-        let rela = student_schema::Student::new()
+        let rela = student_schema::Student::traverse()
             .writes__(Clause::Where(
                 query()
                     .and_where("pages > 5")
@@ -798,7 +854,7 @@ pub mod schema {
         println!("rela...{}", rela);
 
         // Student.favorite_book.title
-        let rela = student_schema::Student::new()
+        let rela = student_schema::Student::traverse()
             .favorite_book(Clause::Id("book:janta".into()))
             .title;
         println!("rela...{}", rela);
