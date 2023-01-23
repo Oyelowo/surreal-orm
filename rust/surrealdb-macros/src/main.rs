@@ -331,9 +331,7 @@ mod schema {
 
         #[derive(Debug, Serialize, Default)]
         pub struct Student {
-            // id: String
             pub id: DbField,
-            // name: String
             pub name: DbField,
             // favorite_course_mate: Student
             // favorite_course_mate: Student,
@@ -365,7 +363,7 @@ mod schema {
             pub fn book(&self, clause: Clause) -> Book {
                 let mut xx = Book::default();
                 xx.__________store.push_str(self.__________store.as_str());
-                let pp = get_clause(clause, "book");
+                let pp = format_clause(clause, "book");
 
                 xx.__________store.push_str(format!("book{pp}").as_str());
 
@@ -376,7 +374,7 @@ mod schema {
                 let mut xx = Blog::default();
                 xx.______________store
                     .push_str(self.__________store.as_str());
-                let pp = get_clause(clause, "blog");
+                let pp = format_clause(clause, "blog");
                 xx.______________store
                     .push_str(format!("blog{pp}").as_str());
 
@@ -423,7 +421,7 @@ mod schema {
 
             pub fn __________update_connection(store: &String, clause: Clause) -> Student {
                 let mut xx = Student::default();
-                let connection = format!("{}student{}", store, get_clause(clause, "student"));
+                let connection = format!("{}student{}", store, format_clause(clause, "student"));
 
                 xx.___________store.push_str(connection.as_str());
 
@@ -442,7 +440,7 @@ mod schema {
             pub fn drinks__(&self, clause: Clause) -> Drinks {
                 let mut xx = Drinks::default();
                 xx.__________store.push_str(self.___________store.as_str());
-                let pp = get_clause(clause, "drinks");
+                let pp = format_clause(clause, "drinks");
                 xx.__________store
                     .push_str(format!("->drinks{pp}->").as_str());
                 xx
@@ -452,7 +450,7 @@ mod schema {
                 let mut xx = Book::default();
                 xx.__________store.push_str(self.___________store.as_str());
                 xx.title.0.push_str(self.___________store.as_str());
-                let pp = get_clause(clause, "book");
+                let pp = format_clause(clause, "book");
                 // xx.title.push_str("lxxtitle");
                 xx.__________store
                     .push_str(format!("favorite_book{pp}").as_str());
@@ -460,10 +458,6 @@ mod schema {
                     .0
                     .push_str(format!("favorite_book{pp}.title").as_str());
                 xx
-            }
-
-            pub fn __done__(self) -> DbField {
-                self.___________store.clone().into()
             }
 
             // Aliases
@@ -515,7 +509,7 @@ mod schema {
                 let mut xx = Water::default();
                 xx.______________store
                     .push_str(self.__________store.as_str());
-                let pp = get_clause(clause, "water");
+                let pp = format_clause(clause, "water");
                 xx.______________store
                     .push_str(format!("water{pp}").as_str());
 
@@ -525,7 +519,7 @@ mod schema {
                 let mut xx = Juice::default();
                 xx.______________store
                     .push_str(self.__________store.as_str());
-                let pp = get_clause(clause, "juice");
+                let pp = format_clause(clause, "juice");
                 xx.______________store
                     .push_str(format!("juice{pp}").as_str());
 
@@ -537,7 +531,7 @@ mod schema {
             }
         }
     }
-    pub fn get_clause(clause: Clause, table_name: &'static str) -> String {
+    pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
         let pp = match clause {
             Clause::None => "".into(),
             Clause::Where(where_clause) => {
@@ -567,7 +561,7 @@ mod schema {
         use serde::Serialize;
 
         use super::{
-            blog_schema::Blog, book_schema::Book, get_clause, student_schema::Student, Clause,
+            blog_schema::Blog, book_schema::Book, format_clause, student_schema::Student, Clause,
             DbField,
         };
 
@@ -617,7 +611,7 @@ mod schema {
                 let connection = format!(
                     "{}->writes{}->",
                     store.as_str(),
-                    get_clause(clause, "writes")
+                    format_clause(clause, "writes")
                 );
                 xx.__________store.push_str(connection.as_str());
 
@@ -632,7 +626,7 @@ mod schema {
             pub fn __________update_edge_left(store: &String, clause: Clause) -> Writes<Model> {
                 // let mut xx = Writes::default();
                 let mut xx = Writes::<Model>::default();
-                let connection = format!("{}<-writes{}<-", store, get_clause(clause, "writes"));
+                let connection = format!("{}<-writes{}<-", store, format_clause(clause, "writes"));
 
                 xx.__________store.push_str(connection.as_str());
 
@@ -693,6 +687,8 @@ mod schema {
         }
     }
     mod juice_schema {
+        use std::fmt::Display;
+
         use super::DbField;
 
         #[derive(Debug, Default)]
@@ -703,9 +699,15 @@ mod schema {
             pub ______________store: String,
         }
 
+        impl Display for Juice {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.write_fmt(format_args!("{}", self.______________store))
+            }
+        }
+
         impl Juice {
-            pub fn __done__(self) -> String {
-                self.______________store
+            pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
+                format!("{self} AS {alias}")
             }
         }
     }
@@ -785,10 +787,7 @@ mod schema {
             .student(Clause::None)
             .drinks__(Clause::None)
             .juice(Clause::None)
-            .__done__();
-        // .maker;
-        // .done();
-        // .done();
+            .__as__("kula");
 
         println!("rela...{:?}", rela);
 
