@@ -50,7 +50,7 @@ impl Hash for ModelImport {
 #[derive(Default, Clone)]
 pub(crate) struct ModelAttributesTokensDeriver {
     // We need imports to be unique, hence the hashset
-    pub all_model_imports: HashSet<ModelImport>,
+    pub all_schema_imports: HashSet<ModelImport>,
     pub all_schema_names_basic: Vec<TokenStream>,
     pub all_model_schema_fields: Vec<TokenStream>,
     pub all_static_assertions: Vec<TokenStream>,

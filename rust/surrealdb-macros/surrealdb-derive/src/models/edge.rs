@@ -1,4 +1,6 @@
 
+
+
 /*
 Author: Oyelowo Oyedayo
 Email: oyelowooyedayo@gmail.com
@@ -6,11 +8,17 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(dead_code)]
 
-use super::{
-    casing::CaseString,
-    get_crate_name,
-    parser::{EdgeModelAttr, ModelAttributesTokensDeriver},
-};
+
+// pub(crate) mod casing;
+// mod parser;
+// pub(crate) mod relations;
+// pub(crate) mod serialize_skipper;
+// mod trait_generator;
+// use super:{
+//     casing::CaseString,
+//     get_crate_name,
+//     parser::{EdgeModelAttr, ModelAttributesTokensDeriver},
+// };
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -164,7 +172,7 @@ impl ToTokens for FieldsGetterOpts {
         });
 
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
-        let crate_name = get_crate_name(false);
+        let crate_name = super::get_crate_name(false);
 
         let ModelAttributesTokensDeriver {
             all_model_imports,
@@ -186,86 +194,101 @@ impl ToTokens for FieldsGetterOpts {
             .collect::<Vec<TokenStream>>();
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
 
-        let edge_model_tokens = match relation_name {
-            Some(relation) => {
-                let relation_name_ident = format_ident!("{relation}");
-                let mod_name_ident = format_ident!("{struct_name_ident}{relation}_relation");
+let field_names_ident = format_ident!("{struct_name_ident}DbFields");
 
-                match (in_node_type, out_node_type) {
-                    (Some(in_node_type), Some(out_node_type)) => {
-                        quote!(
-                            pub mod #mod_name_ident {
-                                pub struct EdgeChecker {
-                                    pub #relation_name_ident: String,
-                                }
+        tokens.extend(quote!( 
+                        
+                impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
+                    type In = In;
+                    type Out = Out;
+                    type TableNameChecker = WritesTableNameStaticChecker;
 
-                            }
+                    // type Schema = writes_schema::Writes;
+                    //
+                    // fn get_schema() -> Self::Schema {
+                    //     todo!()
+                    // }
+                    // fn get_key(&self) -> ::std::option::Option<String> {self.id.as_ref().map(::std::string::String::clone) } 
+                }
 
-                            impl #crate_name::Edge for #struct_name_ident {
-                                type EdgeChecker = #mod_name_ident::EdgeChecker;
-                                type InNode = #in_node_type;
-                                type OutNode = #out_node_type;
-                            }
+                use writes_schema::Writes as WritesSchema;
 
-                        )
+                pub mod writes_schema {
+                    use std::marker::PhantomData;
+
+                    use serde::Serialize;
+
+                    use super::{
+                        blog_schema::Blog, book_schema::Book, format_clause, student_schema::Student, Clause,
+                        DbField, EdgeDirection,
+                    };
+
+                    #[derive(Debug, Default)]
+                    pub struct Writes<Model: Serialize + Default> {
+                        id: DbField,
+                        // Student, User
+                        // Even though it's possible to have full object when in and out are loaded,
+                        // in practise, we almost never want to do this, since edges are rarely
+                        // accessed directly but only via nodes and they are more like bridges
+                        // between two nodes. So, we make that trade-off of only allowing DbField
+                        // - which is just a surrealdb id , for both in and out nodes.
+                        // Still, we can get access to in and out nodes via the origin and destination nodes
+                        // e.g User->Eats->Food. We can get User and Food without accessing Eats directly.
+                        r#in: DbField,
+                        // Book, Blog
+                        pub out: DbField,
+                        pub time_written: DbField,
+                        pub when: DbField,
+                        pub pattern: DbField,
+                        pub __________store: String,
+                        ___________model: PhantomData<Model>,
+                        // ___________outer: PhantomData<Out>,
                     }
-                    _ => {
-                        panic!("`in` and `out` fields must be provided for the edge model struct.")
+
+                    impl<Model: ::serde::Serialize + Default> Writes<Model> {
+                        pub fn new() -> Self {
+                            Self {
+                                id: "id".into(),
+                                r#in: "in".into(),
+                                out: "out".into(),
+                                when: "when".into(),
+                                pattern: "pattern".into(),
+                                time_written: "time_written".into(),
+                                __________store: "".into(),
+                                ___________model: PhantomData,
+                                // ___________outer: PhantomData,
+                            }
+                        }
+
+                        pub fn __________update_edge(
+                            // writes_store: &String,
+                            store: &String,
+                            clause: Clause,
+                            arrow_direction: EdgeDirection,
+                        ) -> Writes<Model> {
+                            // let arrow = arrow_direction;
+                            let mut xx = Writes::<Model>::default();
+                            // e.g ExistingConnection->writes[WHERE id = "person:lowo"]->
+                            // note: clause could also be empty
+                            let current_edge = format!(
+                                "{}{arrow_direction}writes{arrow_direction}{}",
+                                store.as_str(),
+                                format_clause(clause, "writes")
+                            );
+                            xx.__________store.push_str(current_edge.as_str());
+
+                            let store_without_end_arrow = xx
+                                .__________store
+                                .trim_end_matches(arrow_direction.to_string().as_str());
+                            xx.time_written
+                                .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
+                            xx.pattern
+                                .push_str(format!("{}.pattern", store_without_end_arrow).as_str());
+                            xx
+                        }
                     }
                 }
-            }
-            None => quote!(),
-        };
-let field_names_ident = format_ident!("{struct_name_ident}DbFields");
-        // let field_names_struct = quote!(
-                                 // struct  #field_names_ident {
-                                 //     #( #all_serialized_field_names_normalised ) : String, *
-                                 // }
-                                 // );
-        tokens.extend(quote!( 
-                        pub mod #schema_mod_name {
-                            #( #all_model_imports) *
-
-                            ::surreal_simple_querybuilder::prelude::model!(
-                             #struct_name_ident {
-                                #( #all_model_schema_fields) *
-                            }
-                         );
-                        }
-
-                        // #field_names_struct
-
-                        impl #crate_name::SurrealdbModel for #struct_name_ident {
-                            // e.g type Schema = account::schema::Account<0>;
-                            type Schema<const T: usize> = #schema_mod_name::schema::#struct_name_ident<T>;
-                            fn get_schema() -> Self::Schema<0> {
-                                #schema_mod_name::schema::#struct_name_ident::<0>::new()
-                            }
-
-                            // fn get_key(&self) -> #crate_name::Id {#crate_name::Id(self.id.unwrap()) };
-                            
-                            fn get_key(&self) -> ::std::option::Option<String> {self.id.as_ref().map(::std::string::String::clone) } 
-                        }
-                        // impl #struct_name_ident {
-                        //     // type Schema = account::schema::Account<0>;
-                        //     // type Schema = #schema_mod_name::schema::#my_struct<0>;
-                        //     const SCHEMA: #schema_mod_name::schema::#struct_name_ident<0> = #schema_mod_name::schema::#struct_name_ident::<0>::new();
-                        //     const fn get_schema() -> <Self as #crate_name::SurrealdbModel>::Schema<0> {
-                        //         // project::schema::model
-                        //         //  account::schema::Account<0>::new()
-                        //         // e.g: account::schema::Account::<0>::new()
-                        //         #schema_mod_name::schema::#struct_name_ident::<0>::new()
-                        //     }
-                        //     // fn own_schema(&self) -> #schema_type_alias_name<0> {
-                        //     //     // project::schema::model
-                        //     //     //  account::schema::Account<0>::new()
-                        //     //     // e.g: account::schema::Account::<0>::new()
-                        //     //     #schema_mod_name::schema::#my_struct::<0>::new()
-                        //     // }
-                        // }
-
-             #edge_model_tokens
-            #[test]
+                
             fn #test_name() {
                 #( #all_static_assertions) *
 

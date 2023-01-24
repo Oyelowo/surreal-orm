@@ -20,6 +20,7 @@ use surrealdb::{
     sql::Id,
     Result, Surreal,
 };
+use surrealdb_derive::SurrealdbEdge;
 // const_assert!("oylelowo".as_str().len() > 3);
 // assert_fields!(Account_Manage_Project: r#in, out);
 
@@ -33,7 +34,7 @@ use surrealdb_macros::{
 };
 use typed_builder::TypedBuilder;
 
-#[derive(/* SurrealdbModel,  */ TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -244,10 +245,6 @@ pub mod student_schema {
         }
     }
 }
-trait SurrealdbNode {
-    type Schema;
-    fn get_schema() -> Self::Schema;
-}
 
 impl SurrealdbNode for Student {
     type Schema = student_schema::Student;
@@ -290,7 +287,7 @@ type StudentWritesBook = Writes<Student, Book>;
     ss.
 } */
 
-#[derive(/* SurrealdbModel, */ Debug, Serialize, Deserialize, Clone)]
+#[derive(SurrealdbEdge, Debug, Serialize, Deserialize, Clone)]
 // #[surrealdb(relation_name = "writes")]
 struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     id: Option<String>,
@@ -302,95 +299,6 @@ struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     destination: String,
 }
 
-impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
-    type In = In;
-    type Out = Out;
-    type TableNameChecker = WritesTableNameStaticChecker;
-
-    // type Schema = writes_schema::Writes;
-    //
-    // fn get_schema() -> Self::Schema {
-    //     todo!()
-    // }
-}
-
-use writes_schema::Writes as WritesSchema;
-
-pub mod writes_schema {
-    use std::marker::PhantomData;
-
-    use serde::Serialize;
-
-    use super::{
-        blog_schema::Blog, book_schema::Book, format_clause, student_schema::Student, Clause,
-        DbField, EdgeDirection,
-    };
-
-    #[derive(Debug, Default)]
-    pub struct Writes<Model: Serialize + Default> {
-        id: DbField,
-        // Student, User
-        // Even though it's possible to have full object when in and out are loaded,
-        // in practise, we almost never want to do this, since edges are rarely
-        // accessed directly but only via nodes and they are more like bridges
-        // between two nodes. So, we make that trade-off of only allowing DbField
-        // - which is just a surrealdb id , for both in and out nodes.
-        // Still, we can get access to in and out nodes via the origin and destination nodes
-        // e.g User->Eats->Food. We can get User and Food without accessing Eats directly.
-        r#in: DbField,
-        // Book, Blog
-        pub out: DbField,
-        pub time_written: DbField,
-        pub when: DbField,
-        pub pattern: DbField,
-        pub __________store: String,
-        ___________model: PhantomData<Model>,
-        // ___________outer: PhantomData<Out>,
-    }
-
-    impl<Model: Serialize + Default> Writes<Model> {
-        pub fn new() -> Self {
-            Self {
-                id: "id".into(),
-                r#in: "in".into(),
-                out: "out".into(),
-                when: "when".into(),
-                pattern: "pattern".into(),
-                time_written: "time_written".into(),
-                __________store: "".into(),
-                ___________model: PhantomData,
-                // ___________outer: PhantomData,
-            }
-        }
-
-        pub fn __________update_edge(
-            // writes_store: &String,
-            store: &String,
-            clause: Clause,
-            arrow_direction: EdgeDirection,
-        ) -> Writes<Model> {
-            // let arrow = arrow_direction;
-            let mut xx = Writes::<Model>::default();
-            // e.g ExistingConnection->writes[WHERE id = "person:lowo"]->
-            // note: clause could also be empty
-            let connection = format!(
-                "{}{arrow_direction}writes{arrow_direction}{}",
-                store.as_str(),
-                format_clause(clause, "writes")
-            );
-            xx.__________store.push_str(connection.as_str());
-
-            let store_without_end_arrow = xx
-                .__________store
-                .trim_end_matches(arrow_direction.to_string().as_str());
-            xx.time_written
-                .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
-            xx.pattern
-                .push_str(format!("{}.pattern", store_without_end_arrow).as_str());
-            xx
-        }
-    }
-}
 fn rerej() {
     // const Nama: &'static str = "Writes";
     /* ::static_assertions::const_assert!(Nama == Nama); */
@@ -455,60 +363,9 @@ static DB: Surreal<Db> = Surreal::init();
 
 // pub mod schema {
 
-#[derive(Serialize, Debug, Default)]
-pub struct DbField(String);
-
-impl DbField {
-    pub fn push_str(&mut self, string: &str) {
-        self.0.push_str(string)
-    }
-
-    pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
-        // let xx = self.___________store;
-        format!("{self} AS {alias}")
-    }
-}
-
-impl From<String> for DbField {
-    fn from(value: String) -> Self {
-        Self(value.into())
-    }
-}
-impl From<&str> for DbField {
-    fn from(value: &str) -> Self {
-        Self(value.into())
-    }
-}
-impl From<DbField> for String {
-    fn from(value: DbField) -> Self {
-        value.0
-    }
-}
-
-impl Display for DbField {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.0))
-    }
-}
-
-/* impl std::fmt::Debug for DbField {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.0))
-    }
-} */
-
-impl ToNodeBuilder2 for DbField {}
-
 // let x = DbField("lowo".into());
-struct Foreign {}
 // For e.g: ->writes->Book as field_name_as_alias_default
 
-pub enum Clause {
-    None,
-    Where(String),
-    // Change to SurId
-    Id(String),
-}
 pub mod drinks_schema {
     use crate::{format_clause, juice_schema::Juice, water_schema::Water, Clause};
 
@@ -558,29 +415,6 @@ pub mod drinks_schema {
         }
     }
 }
-pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
-    let pp = match clause {
-        Clause::None => "".into(),
-        Clause::Where(where_clause) => {
-            if !where_clause.to_lowercase().starts_with("where") {
-                panic!("Invalid where clause, must start with `WHERE`")
-            }
-            format!("[{where_clause}]")
-        }
-        Clause::Id(id) => {
-            if !id
-                .to_lowercase()
-                .starts_with(format!("{table_name}:").as_str())
-            {
-                // let xx = format!("invalid id {id}. Id does not belong to table {table_name}")
-                //     .as_str();
-                panic!("invalid id {id}. Id does not belong to table {table_name}")
-            }
-            format!("[WHERE id = {id}]")
-        }
-    };
-    pp
-}
 
 #[derive(Debug, Clone, Copy)]
 pub enum EdgeDirection {
@@ -603,14 +437,6 @@ impl From<EdgeDirection> for String {
             EdgeDirection::OutArrowRight => "->".into(),
             EdgeDirection::InArrowLeft => "<-".into(),
         }
-    }
-}
-
-struct Cond(String);
-
-impl ::std::fmt::Display for Cond {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.0))
     }
 }
 
