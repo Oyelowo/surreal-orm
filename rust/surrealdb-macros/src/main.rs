@@ -87,10 +87,10 @@ impl SurrealdbNode for Book {
 }
 
 type StudentWritesBlog = Writes<Student, Blog>;
-type StudentWritesCourse = Writes<Student, Book>;
+type StudentWritesBook = Writes<Student, Book>;
 ::static_assertions::assert_type_eq_all!(
     <StudentWritesBlog as SurrealdbEdge>::TableName,
-    <StudentWritesCourse as SurrealdbEdge>::TableName
+    <StudentWritesBook as SurrealdbEdge>::TableName
 );
 /* fn efre(ss: StudentWritesBlog) {
     ss.
@@ -153,11 +153,16 @@ macro_rules! assert_type_implements_traits {
         };
     };
 }
-// static_assertions::assert_impl_any!(StudentWritesBlog::default(), SurrealdbEdge);
+
 #[test]
 fn assert_impl_traits() {
     assert_type_implements_traits!(StudentWritesBlog; SurrealdbEdge);
-    assert_type_implements_traits!(StudentWritesCourse; SurrealdbEdge);
+    assert_type_implements_traits!(Student; SurrealdbNode);
+    assert_type_implements_traits!(Blog; SurrealdbNode);
+
+    assert_type_implements_traits!(StudentWritesBook; SurrealdbEdge);
+    assert_type_implements_traits!(Student; SurrealdbNode);
+    assert_type_implements_traits!(Book; SurrealdbNode);
 }
 
 impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
