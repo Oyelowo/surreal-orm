@@ -87,7 +87,8 @@ pub mod student_schema {
         }
     }
 
-    type Writes = super::writes_schema::Writes<Student>;
+    // type Writes = super::writes_schema::Writes<Student>;
+    type Writes = super::WritesSchema<Student>;
 
     impl Writes {
         pub fn book(&self, clause: Clause) -> Book {
@@ -535,6 +536,8 @@ impl From<EdgeDirection> for String {
         }
     }
 }
+
+use writes_schema::Writes as WritesSchema;
 
 pub mod writes_schema {
     use std::marker::PhantomData;
