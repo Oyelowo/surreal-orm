@@ -138,31 +138,16 @@ static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
 type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealdbEdge>::Out;
 static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
 
-/// Macro for checking if type implements trait
-#[macro_export]
-macro_rules! assert_type_implements_traits {
-    ($type_to_check:ty; $trait_it_implements:ident) => {
-        const _: fn() = || {
-            fn test_it(_arg: impl $trait_it_implements) {}
-            fn build_typw_to_check(arg: $type_to_check) -> $type_to_check {
-                arg
-            }
-            fn cross_check(arg: $type_to_check) {
-                test_it(build_typw_to_check(arg))
-            }
-        };
-    };
-}
 
 #[test]
 fn assert_impl_traits() {
-    assert_type_implements_traits!(StudentWritesBlog; SurrealdbEdge);
-    assert_type_implements_traits!(Student; SurrealdbNode);
-    assert_type_implements_traits!(Blog; SurrealdbNode);
+    ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealdbEdge);
+    ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
+    ::static_assertions::assert_impl_one!(Blog: SurrealdbNode);
 
-    assert_type_implements_traits!(StudentWritesBook; SurrealdbEdge);
-    assert_type_implements_traits!(Student; SurrealdbNode);
-    assert_type_implements_traits!(Book; SurrealdbNode);
+    ::static_assertions::assert_impl_one!(StudentWritesBook: SurrealdbEdge);
+    ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
+    ::static_assertions::assert_impl_one!(Book: SurrealdbNode);
 }
 
 impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
