@@ -377,7 +377,11 @@ pub mod schema {
             }
 
             pub fn writes__(&self, clause: Clause) -> Writes {
-                let xx = Writes::__________update_edge_right(&self.___________store, clause);
+                let xx = Writes::__________update_edge(
+                    &self.___________store,
+                    clause,
+                    EdgeDirection::OutArrowRight,
+                );
                 xx
             }
 
@@ -499,14 +503,38 @@ pub mod schema {
         pp
     }
 
-    mod writes_schema {
+    #[derive(Debug, Clone, Copy)]
+    pub enum EdgeDirection {
+        OutArrowRight,
+        InArrowLeft,
+    }
+
+    impl std::fmt::Display for EdgeDirection {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            let arrow_direction = match self {
+                EdgeDirection::OutArrowRight => "->",
+                EdgeDirection::InArrowLeft => "<-",
+            };
+            f.write_str(arrow_direction)
+        }
+    }
+    impl From<EdgeDirection> for String {
+        fn from(direction: EdgeDirection) -> Self {
+            match direction {
+                EdgeDirection::OutArrowRight => "->".into(),
+                EdgeDirection::InArrowLeft => "<-".into(),
+            }
+        }
+    }
+
+    pub mod writes_schema {
         use std::marker::PhantomData;
 
         use serde::Serialize;
 
         use super::{
             blog_schema::Blog, book_schema::Book, format_clause, student_schema::Student, Clause,
-            DbField,
+            DbField, EdgeDirection,
         };
 
         #[derive(Debug, Default)]
@@ -546,36 +574,26 @@ pub mod schema {
                 }
             }
 
-            pub fn __________update_edge_right(
+            pub fn __________update_edge(
                 // writes_store: &String,
                 store: &String,
                 clause: Clause,
+                arrow_direction: EdgeDirection,
             ) -> Writes<Model> {
+                // let arrow = arrow_direction;
                 let mut xx = Writes::<Model>::default();
+                // e.g ExistingConnection->writes[WHERE id = "person:lowo"]->
+                // note: clause could also be empty
                 let connection = format!(
-                    "{}->writes{}->",
+                    "{}{arrow_direction}writes{arrow_direction}{}",
                     store.as_str(),
                     format_clause(clause, "writes")
                 );
                 xx.__________store.push_str(connection.as_str());
 
-                let store_without_end_arrow = xx.__________store.trim_end_matches("->");
-                xx.time_written
-                    .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
-                xx.pattern
-                    .push_str(format!("{}.pattern", store_without_end_arrow).as_str());
-                xx
-            }
-
-            pub fn __________update_edge_left(store: &String, clause: Clause) -> Writes<Model> {
-                // let mut xx = Writes::default();
-                let mut xx = Writes::<Model>::default();
-                let connection = format!("{}<-writes{}<-", store, format_clause(clause, "writes"));
-
-                xx.__________store.push_str(connection.as_str());
-
-                let store_without_end_arrow = xx.__________store.trim_end_matches("<-");
-
+                let store_without_end_arrow = xx
+                    .__________store
+                    .trim_end_matches(arrow_direction.to_string().as_str());
                 xx.time_written
                     .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
                 xx.pattern
@@ -732,7 +750,11 @@ pub mod schema {
             // }
             // /// .
             pub fn __writes(&self, clause: Clause) -> Writes {
-                Writes::__________update_edge_left(&self.__________store, clause)
+                Writes::__________update_edge(
+                    &self.__________store,
+                    clause,
+                    EdgeDirection::InArrowLeft,
+                )
             }
 
             pub fn __done__(self) -> String {
