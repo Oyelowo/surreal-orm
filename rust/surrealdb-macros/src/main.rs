@@ -40,10 +40,10 @@ pub struct Student {
     id: Option<String>,
     first_name: String,
 
-    // #[surrealdb(link_one = "Course", skip_serializing)]
+    // #[surrealdb(link_one = "Book", skip_serializing)]
     course: LinkOne<Book>,
 
-    // #[surrealdb(link_many = "Course", skip_serializing)]
+    // #[surrealdb(link_many = "Book", skip_serializing)]
     #[serde(rename = "lowo")]
     all_semester_courses: LinkMany<Book>,
 
@@ -89,8 +89,8 @@ impl SurrealdbNode for Book {
 type StudentWritesBlog = Writes<Student, Blog>;
 type StudentWritesBook = Writes<Student, Book>;
 ::static_assertions::assert_type_eq_all!(
-    <StudentWritesBlog as SurrealdbEdge>::TableName,
-    <StudentWritesBook as SurrealdbEdge>::TableName
+    <StudentWritesBlog as SurrealdbEdge>::TableNameChecker,
+    <StudentWritesBook as SurrealdbEdge>::TableNameChecker
 );
 /* fn efre(ss: StudentWritesBlog) {
     ss.
@@ -99,7 +99,7 @@ type StudentWritesBook = Writes<Student, Book>;
 trait SurrealdbEdge {
     type In;
     type Out;
-    type TableName;
+    type TableNameChecker;
 }
 
 #[derive(/* SurrealdbModel, */ Debug, Serialize, Deserialize, Clone)]
@@ -114,8 +114,14 @@ struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     destination: String,
 }
 
+impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
+    type In = In;
+    type Out = Out;
+    type TableNameChecker = WritesTableNameStaticChecker;
+}
+
 fn rerej() {
-    const Nama: &'static str = "Writes";
+    // const Nama: &'static str = "Writes";
     /* ::static_assertions::const_assert!(Nama == Nama); */
     // Writes<I>
 }
@@ -127,7 +133,7 @@ struct WritesTableNameStaticChecker {
     Writes: String,
 }
 
-type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableName;
+type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
 static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
 
 static_assertions::assert_fields!(WritesTableNameStaticChecker: Writes);
@@ -138,7 +144,6 @@ static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
 type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealdbEdge>::Out;
 static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
 
-
 #[test]
 fn assert_impl_traits() {
     ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealdbEdge);
@@ -148,12 +153,6 @@ fn assert_impl_traits() {
     ::static_assertions::assert_impl_one!(StudentWritesBook: SurrealdbEdge);
     ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
     ::static_assertions::assert_impl_one!(Book: SurrealdbNode);
-}
-
-impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
-    type In = In;
-    type Out = Out;
-    type TableName = WritesTableNameStaticChecker;
 }
 
 #[derive(/* SurrealdbModel, */ TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
