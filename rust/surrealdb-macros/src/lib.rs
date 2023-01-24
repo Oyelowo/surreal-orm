@@ -4,6 +4,90 @@ pub mod links;
 pub mod model_id;
 pub mod node_builder;
 
+trait SurrealdbNode {
+    type Schema;
+    fn get_schema() -> Self::Schema;
+}
+
+trait SurrealdbEdge {
+    type In;
+    type Out;
+    type TableNameChecker;
+}
+
+#[derive(serde::Serialize, Debug, Default)]
+pub struct DbField(String);
+
+impl DbField {
+    pub fn push_str(&mut self, string: &str) {
+        self.0.push_str(string)
+    }
+
+    pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
+        // let xx = self.___________store;
+        format!("{self} AS {alias}")
+    }
+}
+
+impl From<String> for DbField {
+    fn from(value: String) -> Self {
+        Self(value.into())
+    }
+}
+impl From<&str> for DbField {
+    fn from(value: &str) -> Self {
+        Self(value.into())
+    }
+}
+impl From<DbField> for String {
+    fn from(value: DbField) -> Self {
+        value.0
+    }
+}
+
+impl std::fmt::Display for DbField {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}", self.0))
+    }
+}
+
+/* impl std::fmt::Debug for DbField {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}", self.0))
+    }
+} */
+
+pub enum Clause {
+    None,
+    Where(String),
+    // Change to SurId
+    Id(String),
+}
+
+pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
+    match clause {
+        Clause::None => "".into(),
+        Clause::Where(where_clause) => {
+            if !where_clause.to_lowercase().starts_with("where") {
+                panic!("Invalid where clause, must start with `WHERE`")
+            }
+            format!("[{where_clause}]")
+        }
+        Clause::Id(id) => {
+            if !id
+                .to_lowercase()
+                .starts_with(format!("{table_name}:").as_str())
+            {
+                // let xx = format!("invalid id {id}. Id does not belong to table {table_name}")
+                //     .as_str();
+                panic!("invalid id {id}. Id does not belong to table {table_name}")
+            }
+            format!("[WHERE id = {id}]")
+        }
+    }
+}
+
+///////////////////
 pub trait Edge {
     type EdgeChecker;
     type InNode;
