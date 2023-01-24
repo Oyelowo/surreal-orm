@@ -51,196 +51,11 @@ pub struct Student {
     // #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
     written_blogs: Relate<Blog>,
 }
-trait SurrealdbNode {
-    type Schema;
-    fn get_schema() -> Self::Schema;
-}
 
-impl SurrealdbNode for Student {
-    type Schema = student_schema::Student;
-
-    fn get_schema() -> Self::Schema {
-        student_schema::Student::new()
-    }
-}
-
-impl SurrealdbNode for Blog {
-    type Schema = blog_schema::Blog;
-
-    fn get_schema() -> Self::Schema {
-        blog_schema::Blog::new()
-    }
-}
-fn erer() {
-    let mm = Student::get_schema()
-        .__with_id__("dfdf")
-        .writes__(Clause::None)
-        .book(Clause::None)
-        .__writes(Clause::None)
-        .student(Clause::None);
-}
-impl SurrealdbNode for Book {
-    type Schema = book_schema::Book;
-    fn get_schema() -> Self::Schema {
-        let xx = book_schema::Book::new();
-        xx
-    }
-}
-
-type StudentWritesBlog = Writes<Student, Blog>;
-type StudentWritesBook = Writes<Student, Book>;
-::static_assertions::assert_type_eq_all!(
-    <StudentWritesBlog as SurrealdbEdge>::TableNameChecker,
-    <StudentWritesBook as SurrealdbEdge>::TableNameChecker
-);
-/* fn efre(ss: StudentWritesBlog) {
-    ss.
-} */
-
-trait SurrealdbEdge {
-    type In;
-    type Out;
-    type TableNameChecker;
-}
-
-#[derive(/* SurrealdbModel, */ Debug, Serialize, Deserialize, Clone)]
-// #[surrealdb(relation_name = "writes")]
-struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
-    id: Option<String>,
-    // #[surrealdb(link_one = "Student")]
-    r#in: LinkOne<In>,
-    // #[surrealdb(link_one = "Blog")]
-    out: LinkOne<Out>,
-    when: String,
-    destination: String,
-}
-
-impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
-    type In = In;
-    type Out = Out;
-    type TableNameChecker = WritesTableNameStaticChecker;
-}
-
-fn rerej() {
-    // const Nama: &'static str = "Writes";
-    /* ::static_assertions::const_assert!(Nama == Nama); */
-    // Writes<I>
-}
-impl<In: SurrealdbNode, Out: SurrealdbNode> Writes<In, Out> {
-    // const Nama: &'static str = "Writes";
-}
-
-struct WritesTableNameStaticChecker {
-    Writes: String,
-}
-
-type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
-static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
-
-static_assertions::assert_fields!(WritesTableNameStaticChecker: Writes);
-
-type StudentWritesBlogInNode = <StudentWritesBlog as SurrealdbEdge>::In;
-static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
-
-type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealdbEdge>::Out;
-static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
-
-#[test]
-fn assert_impl_traits() {
-    ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealdbEdge);
-    ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
-    ::static_assertions::assert_impl_one!(Blog: SurrealdbNode);
-
-    ::static_assertions::assert_impl_one!(StudentWritesBook: SurrealdbEdge);
-    ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
-    ::static_assertions::assert_impl_one!(Book: SurrealdbNode);
-}
-
-#[derive(/* SurrealdbModel, */ TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
-/* #[surrealdb(rename_all = "camelCase")] */
-pub struct Blog {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
-    id: Option<String>,
-    title: String,
-    #[serde(skip_serializing)]
-    content: String,
-}
-
-#[derive(/* SurrealdbModel, */ TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
-/* #[surrealdb(rename_all = "camelCase")] */
-pub struct Book {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
-    id: Option<String>,
-    title: String,
-}
-
-::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
-
-// use ref_mod::Ref;
-// use ref_mod::{LinkMany, Ref as Mana};
-
-static DB: Surreal<Db> = Surreal::init();
-
-// pub mod schema {
-
-#[derive(Serialize, Debug, Default)]
-pub struct DbField(String);
-
-impl DbField {
-    pub fn push_str(&mut self, string: &str) {
-        self.0.push_str(string)
-    }
-
-    pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
-        // let xx = self.___________store;
-        format!("{self} AS {alias}")
-    }
-}
-
-impl From<String> for DbField {
-    fn from(value: String) -> Self {
-        Self(value.into())
-    }
-}
-impl From<&str> for DbField {
-    fn from(value: &str) -> Self {
-        Self(value.into())
-    }
-}
-impl From<DbField> for String {
-    fn from(value: DbField) -> Self {
-        value.0
-    }
-}
-
-impl Display for DbField {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.0))
-    }
-}
-
-/* impl std::fmt::Debug for DbField {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.0))
-    }
-} */
-
-impl ToNodeBuilder2 for DbField {}
-
-// let x = DbField("lowo".into());
-struct Foreign {}
-// For e.g: ->writes->Book as field_name_as_alias_default
-
-pub enum Clause {
-    None,
-    Where(String),
-    // Change to SurId
-    Id(String),
-}
 pub mod student_schema {
     use serde::Serialize;
+
+    use crate::drinks_schema::Drinks;
 
     use super::{
         blog_schema::Blog, book_schema::Book, juice_schema::Juice, water_schema::Water,
@@ -284,7 +99,9 @@ pub mod student_schema {
 
             xx
         }
+    }
 
+    impl Writes {
         pub fn blog(&self, clause: Clause) -> Blog {
             let mut xx = Blog::default();
             xx.______________store
@@ -425,6 +242,205 @@ pub mod student_schema {
             format!("{self} AS drunk_water")
         }
     }
+}
+trait SurrealdbNode {
+    type Schema;
+    fn get_schema() -> Self::Schema;
+}
+
+impl SurrealdbNode for Student {
+    type Schema = student_schema::Student;
+
+    fn get_schema() -> Self::Schema {
+        student_schema::Student::new()
+    }
+}
+
+impl SurrealdbNode for Blog {
+    type Schema = blog_schema::Blog;
+
+    fn get_schema() -> Self::Schema {
+        blog_schema::Blog::new()
+    }
+}
+fn erer() {
+    let mm = Student::get_schema()
+        .__with_id__("dfdf")
+        .writes__(Clause::None)
+        .book(Clause::None)
+        .__writes(Clause::None)
+        .student(Clause::None);
+}
+impl SurrealdbNode for Book {
+    type Schema = book_schema::Book;
+    fn get_schema() -> Self::Schema {
+        let xx = book_schema::Book::new();
+        xx
+    }
+}
+
+type StudentWritesBlog = Writes<Student, Blog>;
+type StudentWritesBook = Writes<Student, Book>;
+::static_assertions::assert_type_eq_all!(
+    <StudentWritesBlog as SurrealdbEdge>::TableNameChecker,
+    <StudentWritesBook as SurrealdbEdge>::TableNameChecker
+);
+/* fn efre(ss: StudentWritesBlog) {
+    ss.
+} */
+
+trait SurrealdbEdge {
+    type In;
+    type Out;
+    type TableNameChecker;
+    // type Schema;
+    // fn get_schema() -> Self::Schema;
+}
+
+#[derive(/* SurrealdbModel, */ Debug, Serialize, Deserialize, Clone)]
+// #[surrealdb(relation_name = "writes")]
+struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
+    id: Option<String>,
+    // #[surrealdb(link_one = "Student")]
+    r#in: LinkOne<In>,
+    // #[surrealdb(link_one = "Blog")]
+    out: LinkOne<Out>,
+    when: String,
+    destination: String,
+}
+
+impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
+    type In = In;
+    type Out = Out;
+    type TableNameChecker = WritesTableNameStaticChecker;
+
+    // type Schema = writes_schema::Writes;
+    //
+    // fn get_schema() -> Self::Schema {
+    //     todo!()
+    // }
+}
+
+fn rerej() {
+    // const Nama: &'static str = "Writes";
+    /* ::static_assertions::const_assert!(Nama == Nama); */
+    // Writes<I>
+}
+impl<In: SurrealdbNode, Out: SurrealdbNode> Writes<In, Out> {
+    // const Nama: &'static str = "Writes";
+}
+
+struct WritesTableNameStaticChecker {
+    Writes: String,
+}
+
+type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
+static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
+
+static_assertions::assert_fields!(WritesTableNameStaticChecker: Writes);
+
+type StudentWritesBlogInNode = <StudentWritesBlog as SurrealdbEdge>::In;
+static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
+
+type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealdbEdge>::Out;
+static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
+
+#[test]
+fn assert_impl_traits() {
+    ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealdbEdge);
+    ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
+    ::static_assertions::assert_impl_one!(Blog: SurrealdbNode);
+
+    ::static_assertions::assert_impl_one!(StudentWritesBook: SurrealdbEdge);
+    ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
+    ::static_assertions::assert_impl_one!(Book: SurrealdbNode);
+}
+
+#[derive(/* SurrealdbModel, */ TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
+/* #[surrealdb(rename_all = "camelCase")] */
+pub struct Blog {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    id: Option<String>,
+    title: String,
+    #[serde(skip_serializing)]
+    content: String,
+}
+
+#[derive(/* SurrealdbModel, */ TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
+/* #[surrealdb(rename_all = "camelCase")] */
+pub struct Book {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    id: Option<String>,
+    title: String,
+}
+
+::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
+
+// use ref_mod::Ref;
+// use ref_mod::{LinkMany, Ref as Mana};
+
+static DB: Surreal<Db> = Surreal::init();
+
+// pub mod schema {
+
+#[derive(Serialize, Debug, Default)]
+pub struct DbField(String);
+
+impl DbField {
+    pub fn push_str(&mut self, string: &str) {
+        self.0.push_str(string)
+    }
+
+    pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
+        // let xx = self.___________store;
+        format!("{self} AS {alias}")
+    }
+}
+
+impl From<String> for DbField {
+    fn from(value: String) -> Self {
+        Self(value.into())
+    }
+}
+impl From<&str> for DbField {
+    fn from(value: &str) -> Self {
+        Self(value.into())
+    }
+}
+impl From<DbField> for String {
+    fn from(value: DbField) -> Self {
+        value.0
+    }
+}
+
+impl Display for DbField {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}", self.0))
+    }
+}
+
+/* impl std::fmt::Debug for DbField {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}", self.0))
+    }
+} */
+
+impl ToNodeBuilder2 for DbField {}
+
+// let x = DbField("lowo".into());
+struct Foreign {}
+// For e.g: ->writes->Book as field_name_as_alias_default
+
+pub enum Clause {
+    None,
+    Where(String),
+    // Change to SurId
+    Id(String),
+}
+pub mod drinks_schema {
+    use crate::{format_clause, juice_schema::Juice, water_schema::Water, Clause};
 
     #[derive(Debug, Default)]
     pub struct Drinks {
@@ -432,7 +448,7 @@ pub mod student_schema {
         pub r#in: String,
         pub out: String,
         pub rate: String,
-        __________store: String,
+        pub __________store: String,
     }
 
     impl Drinks {
