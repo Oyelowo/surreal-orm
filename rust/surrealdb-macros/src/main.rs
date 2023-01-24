@@ -57,17 +57,17 @@ trait SurrealdbNode {
 
 impl SurrealdbNode for Student {
     type Schema = schema::student_schema::Student;
+
     fn get_schema() -> Self::Schema {
-        let xx = schema::student_schema::Student::new();
-        xx
+        schema::student_schema::Student::new()
     }
 }
 
 impl SurrealdbNode for Blog {
     type Schema = schema::blog_schema::Blog;
+
     fn get_schema() -> Self::Schema {
-        let xx = schema::blog_schema::Blog::new();
-        xx
+        schema::blog_schema::Blog::new()
     }
 }
 fn erer() {
@@ -138,7 +138,27 @@ static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
 type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealdbEdge>::Out;
 static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
 
+/// Macro for checking if type implements trait
+#[macro_export]
+macro_rules! assert_type_implements_traits {
+    ($type_to_check:ty; $trait_it_implements:ident) => {
+        const _: fn() = || {
+            fn test_it(_arg: impl $trait_it_implements) {}
+            fn build_typw_to_check(arg: $type_to_check) -> $type_to_check {
+                arg
+            }
+            fn cross_check(arg: $type_to_check) {
+                test_it(build_typw_to_check(arg))
+            }
+        };
+    };
+}
 // static_assertions::assert_impl_any!(StudentWritesBlog::default(), SurrealdbEdge);
+#[test]
+fn assert_impl_traits() {
+    assert_type_implements_traits!(StudentWritesBlog; SurrealdbEdge);
+    assert_type_implements_traits!(StudentWritesCourse; SurrealdbEdge);
+}
 
 impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
     type In = In;
@@ -181,10 +201,7 @@ pub mod schema {
         query_builder::query,
     };
 
-    use crate::schema::{
-        book_schema::Book,
-        student_schema::{Student, StudentEnum},
-    };
+    use crate::schema::book_schema::Book;
 
     #[derive(Serialize, Debug, Default)]
     pub struct DbField(String);
@@ -735,7 +752,7 @@ pub mod schema {
         }
     }
 
-    mod chapters_schema {
+    pub mod chapters_schema {
         use super::DbField;
 
         #[derive(Debug, Default)]
@@ -746,70 +763,73 @@ pub mod schema {
             // writer: Relate,
         }
     }
-    pub fn nama() {
-        // Student::new().book_written().chapters().verse
-        // DbField("df".into())
-        // "".contains_not()
-        // let rela = Student::new()
-        //     .book_written_cond(Cond("WHERE pages > 5".into()))
-        //     .writer();
-        // println!("rela...{:?}", rela.store);
+}
+use schema::*;
 
-        let rela = student_schema::Student::new()
-            .writes__(Clause::Where(
-                query()
-                    .and_where("pages > 5")
-                    .and("time_done = yesterday")
-                    .build(),
-            ))
-            .book(Clause::Id("book:akkaka".into()))
-            .__writes(Clause::None)
-            .student(Clause::Id("student:lowo".into()))
-            .writes__(Clause::None)
-            .book(Clause::None)
-            .__writes(Clause::None)
-            .student(Clause::None)
-            .drinks__(Clause::None)
-            .juice(Clause::None)
-            .__as__("kula");
+pub fn nama() {
+    // Student::new().book_written().chapters().verse
+    // DbField("df".into())
+    // "".contains_not()
+    // let rela = Student::new()
+    //     .book_written_cond(Cond("WHERE pages > 5".into()))
+    //     .writer();
+    // println!("rela...{:?}", rela.store);
 
-        println!("rela...{:?}", rela);
+    let rela = student_schema::Student::new()
+        .writes__(Clause::Where(
+            query()
+                .and_where("pages > 5")
+                .and("time_done = yesterday")
+                .build(),
+        ))
+        .book(Clause::Id("book:akkaka".into()))
+        .__writes(Clause::None)
+        .student(Clause::Id("student:lowo".into()))
+        .writes__(Clause::None)
+        .book(Clause::None)
+        .__writes(Clause::None)
+        .student(Clause::None)
+        .drinks__(Clause::None)
+        .juice(Clause::None)
+        .__as__("kula");
 
-        let rela = student_schema::Student::new()
-            .writes__(Clause::Where(
-                query()
-                    .and_where("pages > 5")
-                    .and("time_done = yesterday")
-                    .build(),
-            ))
-            .book(Clause::Id("book:akkaka".into()))
-            .__writes(Clause::Id("writes:pram".into()))
-            .time_written
-            .__as__("xxx");
-        // .student(Clause::None)
-        // .drunk_water
-        // .__as__("wara");
-        // .__as__(Student::book_written);
-        // .blog(Clause::Id("blog:akkaka".into()));
-        // .as_alias(Blog)
-        // .intro
-        // .__as__("dfdf");
+    println!("rela...{:?}", rela);
 
-        println!("rela...{}", rela);
+    let rela = student_schema::Student::new()
+        .writes__(Clause::Where(
+            query()
+                .and_where("pages > 5")
+                .and("time_done = yesterday")
+                .build(),
+        ))
+        .book(Clause::Id("book:akkaka".into()))
+        .__writes(Clause::Id("writes:pram".into()))
+        .time_written
+        .__as__("xxx");
+    // .student(Clause::None)
+    // .drunk_water
+    // .__as__("wara");
+    // .__as__(Student::book_written);
+    // .blog(Clause::Id("blog:akkaka".into()));
+    // .as_alias(Blog)
+    // .intro
+    // .__as__("dfdf");
 
-        // Student.favorite_book.title
-        let rela = student_schema::Student::new()
-            .favorite_book(Clause::Id("book:janta".into()))
-            .title;
-        println!("rela...{}", rela);
+    println!("rela...{}", rela);
 
-        // println!("rela...{}", StudentEnum::book_written);
-        let rela = student_schema::Student::__with_id__("Student:lowo")
-            .writes__(Clause::None)
-            .book(Clause::None)
-            .__with_id__("Book:maow");
-        println!("rela...{}", rela);
-    }
+    // Student.favorite_book.title
+    let rela = student_schema::Student::new()
+        .favorite_book(Clause::Id("book:janta".into()))
+        .title;
+    println!("rela...{}", rela);
+
+    // println!("rela...{}", StudentEnum::book_written);
+    let rela = Student::get_schema()
+        .__with_id__("Student:lowo")
+        .writes__(Clause::None)
+        .book(Clause::None)
+        .__with_id__("Book:maow");
+    println!("rela...{}", rela);
 }
 // impl Book {
 //     fn writer(&self) -> Student {
@@ -831,7 +851,7 @@ pub mod schema {
 #[tokio::main]
 async fn main() {
     // let xx =S
-    schema::nama();
+    nama();
 }
 
 pub struct Tests<In: Serialize, Out: Serialize> {
