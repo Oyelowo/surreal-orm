@@ -8,7 +8,7 @@ Email: oyelowooyedayo@gmail.com
 use std::{collections::HashSet, hash::Hash};
 
 use darling::{ast, util};
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
 
 use super::{
@@ -48,7 +48,7 @@ impl Hash for ModelImport {
 
 /// A struct that contains the `struct_ty_fields` and `struct_values_fields` vectors.
 #[derive(Default, Clone)]
-pub(crate) struct ModelAttributesTokensDeriver {
+pub(crate) struct SchemaFieldsProperties {
     // Generated example: pub timeWritten: DbField,
     // key(normalized_field_name)-value(DbField) e.g pub out: DbField, of field name and DbField type
     // to build up struct for generating fields of a Schema of the SurrealdbEdge
@@ -60,7 +60,7 @@ pub(crate) struct ModelAttributesTokensDeriver {
     //                pub out: Dbfield,
     //                pub timeWritten: Dbfield,
     //          }
-    pub all_schema_struct_fields_types_kv: Vec<TokenStream>,
+    pub schema_struct_fields_types_kv: TokenStream,
 
     // Generated example: pub timeWritten: "timeWritten".into(),
     // This is used to build the actual instance of the model during intialization e,g out:
@@ -74,115 +74,49 @@ pub(crate) struct ModelAttributesTokensDeriver {
     //     out: "out".into(),
     //     timeWritten: "timeWritten".into(),
     // }
-    pub all_schema_struct_fields_names_kv: Vec<TokenStream>,
+    pub schema_struct_fields_names_kv: TokenStream,
 
     // Field names after taking into consideration
     // serde serialized renaming or casings
     // i.e time_written => timeWritten if serde camelizes
-    pub all_serialized_field_names_normalised: Vec<String>,
+    pub serialized_field_names_normalised: String,
 
     // Generated example:
     // type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
     // static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
     // Perform all necessary static checks
-    pub all_static_assertions: Vec<TokenStream>,
+    pub static_assertions: TokenStream,
 
     // Generated example: type Book = <super::Book as SurrealdbNode>::Schema;
     // We need imports to be unique, hence the hashset
     // Used when you use a SurrealdbNode in field e.g: best_student: LinkOne<Student>,
     // e.g: type Book = <super::Book as SurrealdbNode>::Schema;
-    pub all_referenced_foreign_nodes_imports: HashSet<ModelImport>,
+    pub referenced_foreign_nodes_imports: HashSet<ModelImport>,
 
     // so that we can do e.g ->writes[WHERE id = "writes:1"].field_name
     // self_instance.normalized_field_name.push_str(format!("{}.normalized_field_name", store_without_end_arrow).as_str());
-    pub all_fields_connection_to_struct: Vec<TokenStream>,
+    pub fields_connection_to_struct: TokenStream,
 
     // Generated Example for e.g field with best_student: line!()<Student>
     // pub fn best_student(&self, clause: Clause) -> Student {
     //     Student::__________update_connection(&self.__________store, clause)
     // }
-    pub all_fields_with_record_links_method: Vec<TokenStream>,
+    pub fields_with_record_links_method: TokenStream,
 }
 
-impl ModelAttributesTokensDeriver {
+struct EdgeModelMetadata {
+    field_receiver: MyFieldReceiver,
+    struct_level_casing: CaseString,
+    struct_name_ident: syn::Ident,
+}
+
+impl From<EdgeModelMetadata> for SchemaFieldsProperties {
     /// Constructs a `FieldsNames` struct from the given `data` and `struct_level_casing`.
     ///
     /// # Arguments
     ///
     /// * `data` - An `ast::Data` struct containing field receivers.
     /// * `struct_level_casing` - An optional `CaseString` representing the casing to be applied to the fields.
-    pub(crate) fn from_receiver_data(
-        data: &ast::Data<util::Ignored, MyFieldReceiver>,
-        struct_level_casing: Option<CaseString>,
-        struct_name_ident: &syn::Ident,
-    ) -> Self {
-        let fields = data
-            .as_ref()
-            .take_struct()
-            .expect("Should never be enum")
-            .fields;
-
-        let metas = fields.into_iter().enumerate().fold(
-            ModelAttributesTokensDeriver::default(),
-            |mut acc, (index, field_receiver)| {
-                let struct_level_casing = struct_level_casing.unwrap_or(CaseString::None);
-                let meta = Self::get_model_metadata(
-                    field_receiver,
-                    struct_level_casing,
-                    index,
-                    struct_name_ident,
-                );
-
-                acc.all_model_schema_fields.push(meta.schema_field);
-
-                acc.all_model_imports
-                    .insert(meta.extra.schema_import.into());
-
-                acc.all_schema_struct_fields_types_kv
-                    .push(meta.extra.schema_struct_name);
-
-                acc.all_serialized_field_names_normalised
-                    .push(meta.original_field_name_normalised.clone());
-
-                acc.all_static_assertions.push(meta.static_assertions);
-
-                let field_type = &field_receiver.ty;
-                // let field_type_from_attr = &field_receiver
-                //     .link_one
-                //     .as_ref()
-                //     .map(|ty_name| format_ident!("{ty_name}"));
-
-                acc
-            },
-        );
-        metas
-    }
-
-    /// Returns a `TokenStream` representing the field identifier for the given `field_receiver` and `index`.
-    ///
-    /// If the `field_receiver` has a named field, it returns a `TokenStream` representing that name.
-    /// Otherwise, it returns a `TokenStream` representing the `index`.
-    ///
-    /// This function works with both named and indexed fields.
-    ///
-    /// # Arguments
-    ///
-    /// * `field_receiver` - A field receiver containing field information.
-    /// * `index` - The index of the field.
-    fn get_field_identifier_name(field_receiver: &MyFieldReceiver, index: usize) -> TokenStream {
-        // This works with named or indexed fields, so we'll fall back to the index so we can
-        // write the output as a key-value pair.
-        // The index is rarely necessary since our models are usually not tuple struct
-        // but leaving it as is anyways.
-        field_receiver.ident.as_ref().map_or_else(
-            || {
-                let index_ident = ::syn::Index::from(index);
-                quote!(#index_ident)
-            },
-            |name_ident| quote!(#name_ident),
-        )
-    }
-
     /// Ident format is the name used in the code
     /// e.g
     /// ```
@@ -195,65 +129,61 @@ impl ModelAttributesTokensDeriver {
     /// except in the case of kebab-case serialized format in which case we fallback
     /// to the original ident format as written exactly in the code except when a user
     /// uses rename attribute on a specific field, in which case that takes precedence.
-    fn get_model_metadata(
-        field_receiver: &MyFieldReceiver,
-        struct_level_casing: CaseString,
-        index: usize,
-        struct_name_ident: &syn::Ident,
-    ) -> ModelMedataTokenStream {
-        let field_ident = Self::get_field_identifier_name(&field_receiver, index);
-        let field_type = &field_receiver.ty;
+    fn from(value: EdgeModelMetadata) -> Self {
+        let field_ident = value.field_receiver.ident.unwrap();
+        let field_type = &value.field_receiver.ty;
         let crate_name = get_crate_name(false);
         let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
 
         // pub determines whether the field will be serialized or not during creation/update
-        let visibility: TokenStream = SkipSerializing(field_receiver.skip_serializing).into();
+        let visibility: TokenStream = SkipSerializing(value.field_receiver.skip_serializing).into();
 
         let field_ident_cased = FieldIdentCased::from(FieldIdentUnCased {
             uncased_field_name,
-            casing: struct_level_casing,
+            casing: value.struct_level_casing,
         });
 
         // get the field's proper serialized format. Renaming should take precedence
-        let original_field_name_normalised = field_receiver.rename.as_ref().map_or_else(
+        let original_field_name_normalised = value.field_receiver.rename.as_ref().map_or_else(
             || field_ident_cased.into(),
             |renamed| renamed.clone().serialize,
         );
         let field_ident_normalised = format_ident!("{original_field_name_normalised}");
 
-        let field_ident_normalised =
-            if original_field_name_normalised.trim_start_matches("r#") == "in".to_string() {
-                quote!(in)
-            } else {
-                quote!(#field_ident_normalised)
-            };
-        let field_ident_normalised_str = field_ident_normalised.to_string();
-        let relationship = RelationType::from(field_receiver);
+        let relationship = RelationType::from(&value.field_receiver);
         // pub time_written: DbField,
-        let schema_struct_field_kv = quote!(pub #field_ident_normalised: #crate_name::DbField,);
+        let schema_struct_fields_types_kv =
+            quote!(pub #field_ident_normalised: #crate_name::DbField);
 
-        // time_written: "time_written".into(),
-        let schema_instance_field_kv =
-            quote!(#field_ident_normalised: #field_ident_normalised_str.into(),);
+        let field_ident_normalised_as_str =
+            if original_field_name_normalised.trim_start_matches("r#") == "in".to_string() {
+                "in".into()
+            } else {
+                field_ident_normalised.to_string()
+            };
+        // timeWritten: "timeWritten".into(),
+        let schema_struct_fields_names_kv =
+            quote!(#field_ident_normalised: #field_ident_normalised_as_str.into());
         // TODO: Abstract variable name-store_without_end_arrow- within quote token stream into a variable and reference
         // it
         let connection_with_field_appended = quote!(
         xx.time_written
             .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
             );
+
         match relationship {
             RelationType::LinkOne(node_object) => {
                 let extra = ReferencedNodeMeta::from(node_object);
                 let schema_name_basic = &extra.schema_struct_name;
 
-                ModelMedataTokenStream {
-                    // friend<User>
-                    schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
-                    original_field_name_normalised,
-                    static_assertions: quote!(
-                     ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::LinkOne<#schema_name_basic>);
-                    ),
-                    extra,
+                Self {
+                    schema_struct_fields_types_kv,
+                    schema_struct_fields_names_kv,
+                    serialized_field_names_normalised: field_ident_normalised_as_str,
+                    static_assertions: quote!(),
+                    referenced_foreign_nodes_imports: todo!(),
+                    fields_connection_to_struct: todo!(),
+                    fields_with_record_links_method: todo!(),
                 }
             }
             RelationType::LinkSelf(node_object) => {
@@ -264,7 +194,7 @@ impl ModelAttributesTokensDeriver {
                 //     panic!("linkself has to refer to same struct")
                 // }
                 // ::static_assertions::assert_type_eq_all!(LinkOne<Course>, LinkOne<Course>);
-                ModelMedataTokenStream {
+                Self {
                     // friend<User>
                     schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
                     original_field_name_normalised,
@@ -272,14 +202,14 @@ impl ModelAttributesTokensDeriver {
                      ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::LinkSelf<#schema_name_basic>);
                      ::static_assertions::assert_type_eq_all!(#struct_name_ident,  #schema_name_basic);
                     ),
-                    extra,
+                    referenced_node_meta: extra,
                 }
             }
             RelationType::LinkMany(node_object) => {
                 let extra = ReferencedNodeMeta::from(node_object);
                 let schema_name_basic = &extra.schema_struct_name;
 
-                ModelMedataTokenStream {
+                Self {
                     // friend<Vec<User>>
                     // TODO: Confirm/Or fix this on the querybuilder side this.
                     // TODO: Semi-updated. It seems linkmany and link one both use same mechanisms
@@ -289,52 +219,29 @@ impl ModelAttributesTokensDeriver {
                     static_assertions: quote!(
                     ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::LinkMany<#schema_name_basic>);
                                                                  ),
-                    extra,
+                    referenced_node_meta: extra,
                 }
             }
             RelationType::None => {
-                ModelMedataTokenStream {
+                Self {
                     // email,
                     schema_field: quote!(#visibility #field_ident_normalised,),
                     original_field_name_normalised,
                     static_assertions: quote!(),
-                    extra: ReferencedNodeMeta::default(),
+                    referenced_node_meta: ReferencedNodeMeta::default(),
                 }
             }
         }
     }
 }
 
-/*
-mod account {
-    // Project is schema name, ProjectSchema is schema alias
-    use super::ProjectSchema as Project;   //  import
-    use super::SchemaSchema as Schema;      // import
-    model!(Account {
-        field1,  // field
-        field2   // field
-        field_with_reference<Project>,  // field
-        ->manages->School as managed_school  //field
-    })
-}
-*/
-
-struct FieldProps {
-    normalized_name: &'static str,
-    type_related: Option<TokenStream>,
-}
-struct ModelMedataTokenStream {
-    // field_props: FieldProps,
-    schema_field: TokenStream,
-    original_field_name_normalised: String,
-    static_assertions: TokenStream,
-    extra: ReferencedNodeMeta,
-}
-
 #[derive(Default)]
 struct ReferencedNodeMeta {
+    // pub referenced_foreign_nodes_imports: HashSet<ModelImport>,
     schema_import: TokenStream,
-    schema_struct_name: TokenStream,
+    // When a field references another model as Link, we want to generate a method for that
+    // to be able to access the foreign fields
+    generated_method: TokenStream,
 }
 
 impl From<super::relations::NodeName> for ReferencedNodeMeta {
@@ -351,8 +258,23 @@ impl From<super::relations::NodeName> for ReferencedNodeMeta {
 
         Self {
             schema_import,
-            schema_struct_name: quote!(#schema_name),
+            generated_method: todo!(),
         }
     }
 }
-// test hunk save
+
+fn get_ident(name: &String) -> syn::Ident {
+    // let xx = match FieldName::from(name) {
+    //   FieldName::Keyword(x) => syn::Ident::new_raw(x.into(), Span::call_site()),
+    //   FieldName::Others(o) => syn::Ident::new(o.as_str(), Span::call_site()),
+    // };
+    // if name == &"in".to_string() {
+
+    if vec!["in", "r#in"].contains(&name.as_str()) {
+        syn::Ident::new_raw(name.trim_start_matches("r#"), Span::call_site())
+    // } else if name == "r#in" {
+    // syn::Ident::new("in", Span::call_site())
+    } else {
+        syn::Ident::new(name.as_str(), Span::call_site())
+    }
+}
