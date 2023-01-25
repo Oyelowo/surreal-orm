@@ -49,7 +49,8 @@ impl Hash for ModelImport {
 /// A struct that contains the `struct_ty_fields` and `struct_values_fields` vectors.
 #[derive(Default, Clone)]
 pub(crate) struct ModelAttributesTokensDeriver {
-    // key(normalized_field_name)-value(DbField) e.g pub out: Field, of field name and DbField type
+    // Generated example: pub timeWritten: DbField,
+    // key(normalized_field_name)-value(DbField) e.g pub out: DbField, of field name and DbField type
     // to build up struct for generating fields of a Schema of the SurrealdbEdge
     // The full thing can look like:
     //     #[derive(Debug, Default)]
@@ -57,10 +58,11 @@ pub(crate) struct ModelAttributesTokensDeriver {
     //                pub id: Dbfield,
     //                pub r#in: Dbfield,
     //                pub out: Dbfield,
-    //                pub time_written: Dbfield,
+    //                pub timeWritten: Dbfield,
     //          }
     pub all_schema_struct_fields_types_kv: Vec<TokenStream>,
 
+    // Generated example: pub timeWritten: "timeWritten".into(),
     // This is used to build the actual instance of the model during intialization e,g out:
     // "out".into()
     // The full thing can look like and the fields should be in normalized form:
@@ -76,50 +78,30 @@ pub(crate) struct ModelAttributesTokensDeriver {
 
     // Field names after taking into consideration
     // serde serialized renaming or casings
+    // i.e time_written => timeWritten if serde camelizes
     pub all_serialized_field_names_normalised: Vec<String>,
 
+    // Generated example:
+    // type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
+    // static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
     // Perform all necessary static checks
     pub all_static_assertions: Vec<TokenStream>,
 
+    // Generated example: type Book = <super::Book as SurrealdbNode>::Schema;
     // We need imports to be unique, hence the hashset
     // Used when you use a SurrealdbNode in field e.g: best_student: LinkOne<Student>,
     // e.g: type Book = <super::Book as SurrealdbNode>::Schema;
     pub all_referenced_foreign_nodes_imports: HashSet<ModelImport>,
 
-    //
     // so that we can do e.g ->writes[WHERE id = "writes:1"].field_name
     // self_instance.normalized_field_name.push_str(format!("{}.normalized_field_name", store_without_end_arrow).as_str());
     pub all_fields_connection_to_struct: Vec<TokenStream>,
 
-    // e.g for best_student: LinkOne<Student>
+    // Generated Example for e.g field with best_student: line!()<Student>
     // pub fn best_student(&self, clause: Clause) -> Student {
     //     Student::__________update_connection(&self.__________store, clause)
     // }
     pub all_fields_with_record_links_method: Vec<TokenStream>,
-    pub edge_metadata: EdgeModelAttr,
-}
-
-#[derive(Clone, Default)]
-pub(crate) struct EdgeModelAttr {
-    pub in_node_type: Option<TokenStream>,
-    pub out_node_type: Option<TokenStream>,
-}
-
-#[derive(PartialEq, Eq, Debug)]
-enum EdgeOrientation {
-    In,
-    Out,
-    None,
-}
-
-impl From<&String> for EdgeOrientation {
-    fn from(value: &String) -> Self {
-        match value.as_str() {
-            "in" | "r#in" => Self::In,
-            "out" => Self::Out,
-            _ => Self::None,
-        }
-    }
 }
 
 impl ModelAttributesTokensDeriver {
@@ -170,17 +152,6 @@ impl ModelAttributesTokensDeriver {
                 //     .as_ref()
                 //     .map(|ty_name| format_ident!("{ty_name}"));
 
-                match EdgeOrientation::from(&meta.original_field_name_normalised) {
-                    EdgeOrientation::In => {
-                        // acc.edge_metadata.in_node_type = Some(quote!(#field_type_from_attr));
-                        acc.edge_metadata.in_node_type = Some(quote!(#field_type));
-                    }
-                    EdgeOrientation::Out => {
-                        // acc.edge_metadata.out_node_type = Some(quote!(#field_type_from_attr));
-                        acc.edge_metadata.out_node_type = Some(quote!(#field_type));
-                    }
-                    EdgeOrientation::None => {}
-                };
                 acc
             },
         );
