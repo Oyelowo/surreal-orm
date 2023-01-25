@@ -9,7 +9,7 @@ Email: oyelowooyedayo@gmail.com
 use super::{
     casing::CaseString,
     get_crate_name,
-    parser::{EdgeModelAttr, ModelAttributesTokensDeriver},
+    edge_parser::{EdgeModelAttr, ModelAttributesTokensDeriver},
 };
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;

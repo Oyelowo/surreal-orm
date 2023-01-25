@@ -111,10 +111,6 @@ pub(crate) struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) rename: ::std::option::Option<Rename>,
 
-    // graph relation: e.g ->has->Account
-    #[darling(default)]
-    pub(crate) relate: ::std::option::Option<Relate>,
-
     // reference singular: LinkOne<Account>
     #[darling(default)]
     pub(crate) link_one: ::std::option::Option<String>,
@@ -201,7 +197,7 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
                 impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
                     type In = In;
                     type Out = Out;
-                    type TableNameChecker = WritesTableNameStaticChecker;
+                    type TableNameChecker = writes_schema::WritesTableNameStaticChecker;
 
                     // type Schema = writes_schema::Writes;
                     //
@@ -212,20 +208,24 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
                 }
 
                 use writes_schema::Writes as WritesSchema;
-
                 pub mod writes_schema {
-                    use std::marker::PhantomData;
+                    
+                    pub struct WritesTableNameStaticChecker {
+                        Writes: String,
+                    }
 
-                    use serde::Serialize;
+                    // use super::{
+                    //     blog_schema::Blog, book_schema::Book, format_clause, student_schema::Student, Clause,
+                    //     DbField, EdgeDirection,
+                    // };
 
-                    use super::{
-                        blog_schema::Blog, book_schema::Book, format_clause, student_schema::Student, Clause,
-                        DbField, EdgeDirection,
-                    };
+                    use #crate_name::{DbField, EdgeDirection, format_clause};
+                    type Book = <super::Book as SurrealdbNode>::Schema;
+                    type Student = <super::Student as SurrealdbNode>::Schema;
 
-                    #[derive(Debug, Default)]
-                    pub struct Writes<Model: Serialize + Default> {
-                        id: DbField,
+                        #[derive(Debug, Default)]
+                        pub struct Writes<Model: ::serde::Serialize + Default> {
+                            id: DbField,
                         // Student, User
                         // Even though it's possible to have full object when in and out are loaded,
                         // in practise, we almost never want to do this, since edges are rarely
@@ -241,7 +241,7 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
                         pub when: DbField,
                         pub pattern: DbField,
                         pub __________store: String,
-                        ___________model: PhantomData<Model>,
+                        ___________model: ::std::marker::PhantomData<Model>,
                         // ___________outer: PhantomData<Out>,
                     }
 
@@ -255,7 +255,7 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
                                 pattern: "pattern".into(),
                                 time_written: "time_written".into(),
                                 __________store: "".into(),
-                                ___________model: PhantomData,
+                                ___________model: ::std::marker::PhantomData,
                                 // ___________outer: PhantomData,
                             }
                         }
@@ -285,6 +285,10 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
                             xx.pattern
                                 .push_str(format!("{}.pattern", store_without_end_arrow).as_str());
                             xx
+                        }
+                        
+                        pub fn student(&self, clause: Clause) -> Student {
+                            Student::__________update_connection(&self.__________store, clause)
                         }
                     }
                 }

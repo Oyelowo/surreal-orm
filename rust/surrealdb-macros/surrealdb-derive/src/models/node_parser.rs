@@ -221,9 +221,9 @@ impl ModelAttributesTokensDeriver {
 
                 let arrow_direction = TokenStream::from(relation_attributes.edge_direction);
 
-                let edge_action = TokenStream::from(relation_attributes.edge_action);
-                let destination_node = TokenStream::from(relation_attributes.node_object.clone());
-                let extra = ModelMetadataBasic::from(relation_attributes.node_object);
+                let edge_action = TokenStream::from(relation_attributes.edge_name);
+                let destination_node = TokenStream::from(relation_attributes.node_name.clone());
+                let extra = ModelMetadataBasic::from(relation_attributes.node_name);
                 let struct_name = quote!(#struct_name_ident);
                 let schema_name_basic = &extra.schema_name;
                 // TODO: Make edge required.
@@ -360,8 +360,8 @@ struct ModelMetadataBasic {
     schema_name: TokenStream,
 }
 
-impl From<super::relations::NodeObject> for ModelMetadataBasic {
-    fn from(node_object: super::relations::NodeObject) -> Self {
+impl From<super::relations::NodeName> for ModelMetadataBasic {
+    fn from(node_object: super::relations::NodeName) -> Self {
         let schema_name = format_ident!("{node_object}");
 
         // imports for specific model schema from the trait Generic Associated types e.g

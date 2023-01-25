@@ -20,7 +20,6 @@ use surrealdb::{
     sql::Id,
     Result, Surreal,
 };
-use surrealdb_derive::SurrealdbEdge;
 // const_assert!("oylelowo".as_str().len() > 3);
 // assert_fields!(Account_Manage_Project: r#in, out);
 
@@ -287,7 +286,7 @@ type StudentWritesBook = Writes<Student, Book>;
     ss.
 } */
 
-#[derive(SurrealdbEdge, Debug, Serialize, Deserialize, Clone)]
+#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Clone)]
 // #[surrealdb(relation_name = "writes")]
 struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     id: Option<String>,
@@ -299,6 +298,97 @@ struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     destination: String,
 }
 
+impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
+    type In = In;
+    type Out = Out;
+    type TableNameChecker = WritesTableNameStaticChecker;
+
+    // type Schema = writes_schema::Writes;
+    //
+    // fn get_schema() -> Self::Schema {
+    //     todo!()
+    // }
+}
+
+use writes_schema::Writes as WritesSchema;
+
+pub mod writes_schema {
+    use std::marker::PhantomData;
+
+    use serde::Serialize;
+    use surrealdb_macros::SurrealdbNode;
+
+    type Book = <super::Book as SurrealdbNode>::Schema;
+    use super::{
+        blog_schema::Blog, /* book_schema::Book, */ format_clause, student_schema::Student,
+        Clause, DbField, EdgeDirection,
+    };
+
+    #[derive(Debug, Default)]
+    pub struct Writes<Model: Serialize + Default> {
+        id: DbField,
+        // Student, User
+        // Even though it's possible to have full object when in and out are loaded,
+        // in practise, we almost never want to do this, since edges are rarely
+        // accessed directly but only via nodes and they are more like bridges
+        // between two nodes. So, we make that trade-off of only allowing DbField
+        // - which is just a surrealdb id , for both in and out nodes.
+        // Still, we can get access to in and out nodes via the origin and destination nodes
+        // e.g User->Eats->Food. We can get User and Food without accessing Eats directly.
+        r#in: DbField,
+        // Book, Blog
+        pub out: DbField,
+        pub time_written: DbField,
+        pub when: DbField,
+        pub pattern: DbField,
+        pub __________store: String,
+        ___________model: PhantomData<Model>,
+        // ___________outer: PhantomData<Out>,
+    }
+
+    impl<Model: Serialize + Default> Writes<Model> {
+        pub fn new() -> Self {
+            Self {
+                id: "id".into(),
+                r#in: "in".into(),
+                out: "out".into(),
+                when: "when".into(),
+                pattern: "pattern".into(),
+                time_written: "time_written".into(),
+                __________store: "".into(),
+                ___________model: PhantomData,
+                // ___________outer: PhantomData,
+            }
+        }
+
+        pub fn __________update_edge(
+            // writes_store: &String,
+            store: &String,
+            clause: Clause,
+            arrow_direction: EdgeDirection,
+        ) -> Writes<Model> {
+            // let arrow = arrow_direction;
+            let mut xx = Writes::<Model>::default();
+            // e.g ExistingConnection->writes[WHERE id = "person:lowo"]->
+            // note: clause could also be empty
+            let connection = format!(
+                "{}{arrow_direction}writes{arrow_direction}{}",
+                store.as_str(),
+                format_clause(clause, "writes")
+            );
+            xx.__________store.push_str(connection.as_str());
+
+            let store_without_end_arrow = xx
+                .__________store
+                .trim_end_matches(arrow_direction.to_string().as_str());
+            xx.time_written
+                .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
+            xx.pattern
+                .push_str(format!("{}.pattern", store_without_end_arrow).as_str());
+            xx
+        }
+    }
+}
 fn rerej() {
     // const Nama: &'static str = "Writes";
     /* ::static_assertions::const_assert!(Nama == Nama); */
