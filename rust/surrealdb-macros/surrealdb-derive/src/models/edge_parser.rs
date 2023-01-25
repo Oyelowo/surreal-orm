@@ -87,21 +87,12 @@ pub(crate) struct SchemaFieldsProperties {
     // Perform all necessary static checks
     pub static_assertions: TokenStream,
 
-    // Generated example: type Book = <super::Book as SurrealdbNode>::Schema;
-    // We need imports to be unique, hence the hashset
-    // Used when you use a SurrealdbNode in field e.g: best_student: LinkOne<Student>,
-    // e.g: type Book = <super::Book as SurrealdbNode>::Schema;
-    pub referenced_foreign_nodes_imports: HashSet<ModelImport>,
+    // Metadata about a field that is a record link
+    pub referenced_node_meta: ReferencedNodeMeta,
 
     // so that we can do e.g ->writes[WHERE id = "writes:1"].field_name
     // self_instance.normalized_field_name.push_str(format!("{}.normalized_field_name", store_without_end_arrow).as_str());
-    pub fields_connection_to_struct: TokenStream,
-
-    // Generated Example for e.g field with best_student: line!()<Student>
-    // pub fn best_student(&self, clause: Clause) -> Student {
-    //     Student::__________update_connection(&self.__________store, clause)
-    // }
-    pub fields_with_record_links_method: TokenStream,
+    pub connection_with_field_appended: TokenStream,
 }
 
 struct EdgeModelMetadata {
@@ -136,7 +127,7 @@ impl From<EdgeModelMetadata> for SchemaFieldsProperties {
         let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
 
         // pub determines whether the field will be serialized or not during creation/update
-        let visibility: TokenStream = SkipSerializing(value.field_receiver.skip_serializing).into();
+        // let visibility: TokenStream = SkipSerializing(value.field_receiver.skip_serializing).into();
 
         let field_ident_cased = FieldIdentCased::from(FieldIdentUnCased {
             uncased_field_name,
@@ -166,86 +157,56 @@ impl From<EdgeModelMetadata> for SchemaFieldsProperties {
             quote!(#field_ident_normalised: #field_ident_normalised_as_str.into());
         // TODO: Abstract variable name-store_without_end_arrow- within quote token stream into a variable and reference
         // it
+        // let field_ident_normalised_as_str_ident = format_ident!("{field_ident_normalised_as_str}");
         let connection_with_field_appended = quote!(
-        xx.time_written
-            .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
+        schema_instance.#field_ident_normalised
+            .push_str(format!("{}.{}", store_without_end_arrow, #field_ident_normalised_as_str).as_str());
             );
 
-        match relationship {
+        let referenced_node_meta = match relationship {
             RelationType::LinkOne(node_object) => {
-                let extra = ReferencedNodeMeta::from(node_object);
-                let schema_name_basic = &extra.schema_struct_name;
-
-                Self {
-                    schema_struct_fields_types_kv,
-                    schema_struct_fields_names_kv,
-                    serialized_field_names_normalised: field_ident_normalised_as_str,
-                    static_assertions: quote!(),
-                    referenced_foreign_nodes_imports: todo!(),
-                    fields_connection_to_struct: todo!(),
-                    fields_with_record_links_method: todo!(),
-                }
+                ReferencedNodeMeta::from_ref_node_meta(node_object, field_ident_normalised)
             }
             RelationType::LinkSelf(node_object) => {
-                let extra = ReferencedNodeMeta::from(node_object);
-                let schema_name_basic = &extra.schema_struct_name;
-
-                // if schema_name_basic.to_string() != struct_name_ident.to_string() {
-                //     panic!("linkself has to refer to same struct")
-                // }
-                // ::static_assertions::assert_type_eq_all!(LinkOne<Course>, LinkOne<Course>);
-                Self {
-                    // friend<User>
-                    schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
-                    original_field_name_normalised,
-                    static_assertions: quote!(
-                     ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::LinkSelf<#schema_name_basic>);
-                     ::static_assertions::assert_type_eq_all!(#struct_name_ident,  #schema_name_basic);
-                    ),
-                    referenced_node_meta: extra,
-                }
+                ReferencedNodeMeta::from_ref_node_meta(node_object, field_ident_normalised)
             }
             RelationType::LinkMany(node_object) => {
-                let extra = ReferencedNodeMeta::from(node_object);
-                let schema_name_basic = &extra.schema_struct_name;
-
-                Self {
-                    // friend<Vec<User>>
-                    // TODO: Confirm/Or fix this on the querybuilder side this.
-                    // TODO: Semi-updated. It seems linkmany and link one both use same mechanisms
-                    // for accessing linked fields or all
-                    schema_field: quote!(#visibility #field_ident_normalised<#schema_name_basic>,),
-                    original_field_name_normalised,
-                    static_assertions: quote!(
-                    ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::LinkMany<#schema_name_basic>);
-                                                                 ),
-                    referenced_node_meta: extra,
-                }
+                ReferencedNodeMeta::from_ref_node_meta(node_object, field_ident_normalised)
             }
-            RelationType::None => {
-                Self {
-                    // email,
-                    schema_field: quote!(#visibility #field_ident_normalised,),
-                    original_field_name_normalised,
-                    static_assertions: quote!(),
-                    referenced_node_meta: ReferencedNodeMeta::default(),
-                }
-            }
+            RelationType::None => ReferencedNodeMeta::default(),
+        };
+        Self {
+            schema_struct_fields_types_kv,
+            schema_struct_fields_names_kv,
+            serialized_field_names_normalised: field_ident_normalised_as_str,
+            static_assertions: quote!(),
+            referenced_node_meta,
+            connection_with_field_appended,
         }
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct ReferencedNodeMeta {
-    // pub referenced_foreign_nodes_imports: HashSet<ModelImport>,
+    // Generated example: type Book = <super::Book as SurrealdbNode>::Schema;
+    // We need imports to be unique, hence the hashset
+    // Used when you use a SurrealdbNode in field e.g: best_student: LinkOne<Student>,
+    // e.g: type Book = <super::Book as SurrealdbNode>::Schema;
     schema_import: TokenStream,
     // When a field references another model as Link, we want to generate a method for that
     // to be able to access the foreign fields
-    generated_method: TokenStream,
+    // Generated Example for e.g field with best_student: line!()<Student>
+    // pub fn best_student(&self, clause: Clause) -> Student {
+    //     Student::__________update_connection(&self.__________store, clause)
+    // }
+    field_record_link_method: TokenStream,
 }
 
-impl From<super::relations::NodeName> for ReferencedNodeMeta {
-    fn from(node_name: super::relations::NodeName) -> Self {
+impl ReferencedNodeMeta {
+    fn from_ref_node_meta(
+        node_name: super::relations::NodeName,
+        normalized_field_name: ::syn::Ident,
+    ) -> ReferencedNodeMeta {
         let schema_name = format_ident!("{node_name}");
 
         let crate_name = get_crate_name(false);
@@ -258,11 +219,17 @@ impl From<super::relations::NodeName> for ReferencedNodeMeta {
 
         Self {
             schema_import,
-            generated_method: todo!(),
+            // pub fn fav_student(&self, clause: Clause) -> Student {
+            //     Student::__________update_connection(&self.__________store, clause)
+            // }
+            field_record_link_method: quote!(
+                pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
+                    #schema_name:__________update_connection(&self.__________store, clause)
+                }
+            ),
         }
     }
 }
-
 fn get_ident(name: &String) -> syn::Ident {
     // let xx = match FieldName::from(name) {
     //   FieldName::Keyword(x) => syn::Ident::new_raw(x.into(), Span::call_site()),

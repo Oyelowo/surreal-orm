@@ -267,7 +267,7 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
                             arrow_direction: EdgeDirection,
                         ) -> Writes<Model> {
                             // let arrow = arrow_direction;
-                            let mut xx = Writes::<Model>::default();
+                            let mut schema_instance = Writes::<Model>::default();
                             // e.g ExistingConnection->writes[WHERE id = "person:lowo"]->
                             // note: clause could also be empty
                             let current_edge = format!(
@@ -275,16 +275,16 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
                                 store.as_str(),
                                 format_clause(clause, "writes")
                             );
-                            xx.__________store.push_str(current_edge.as_str());
+                            schema_instance.__________store.push_str(current_edge.as_str());
 
-                            let store_without_end_arrow = xx
+                            let store_without_end_arrow = schema_instance
                                 .__________store
                                 .trim_end_matches(arrow_direction.to_string().as_str());
-                            xx.time_written
+                            schema_instance.time_written
                                 .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
-                            xx.pattern
+                            schema_instance.pattern
                                 .push_str(format!("{}.pattern", store_without_end_arrow).as_str());
-                            xx
+                            schema_instance
                         }
                         
                         pub fn student(&self, clause: Clause) -> Student {
