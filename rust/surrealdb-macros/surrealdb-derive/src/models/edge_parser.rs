@@ -5,7 +5,7 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(dead_code)]
 
-use std::{collections::HashSet, hash::Hash};
+use std::{hash::Hash};
 
 use darling::{ast, util};
 use proc_macro2::{Span, TokenStream};
@@ -58,7 +58,7 @@ pub(crate) struct SchemaFieldsProperties {
     ///                pub out: Dbfield,
     ///                pub timeWritten: Dbfield,
     ///          }
-    pub schema_struct_fields_types_kv: HashSet<FieldTokenStream>,
+    pub schema_struct_fields_types_kv: Vec<TokenStream>,
 
     /// Generated example: pub timeWritten: "timeWritten".into(),
     /// This is used to build the actual instance of the model during intialization e,g out:
@@ -72,35 +72,35 @@ pub(crate) struct SchemaFieldsProperties {
     ///     out: "out".into(),
     ///     timeWritten: "timeWritten".into(),
     /// }
-    pub schema_struct_fields_names_kv: HashSet<FieldTokenStream>,
+    pub schema_struct_fields_names_kv: Vec<TokenStream>,
 
     /// Field names after taking into consideration
     /// serde serialized renaming or casings
     /// i.e time_written => timeWritten if serde camelizes
-    pub serialized_field_names_normalised: HashSet<String>,
+    pub serialized_field_names_normalised: Vec<String>,
 
     /// Generated example:
     /// type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
     /// static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
     /// Perform all necessary static checks
-    pub static_assertions: HashSet<FieldTokenStream>,
+    pub static_assertions: Vec<TokenStream>,
 
     /// Generated example: type Book = <super::Book as SurrealdbNode>::Schema;
     /// We need imports to be unique, hence the hashset
     /// Used when you use a SurrealdbNode in field e.g: best_student: LinkOne<Student>,
     /// e.g: type Book = <super::Book as SurrealdbNode>::Schema;
-    pub referenced_node_schema_import: HashSet<FieldTokenStream>,
+    pub referenced_node_schema_import: Vec<TokenStream>,
     /// When a field references another model as Link, we want to generate a method for that
     /// to be able to access the foreign fields
     /// Generated Example for e.g field with best_student: line!()<Student>
     /// pub fn best_student(&self, clause: Clause) -> Student {
     ///     Student::__________update_connection(&self.__________store, clause)
     /// }
-    pub referenced_field_record_link_method: HashSet<FieldTokenStream>,
+    pub referenced_field_record_link_method: Vec<TokenStream>,
 
     /// so that we can do e.g ->writes[WHERE id = "writes:1"].field_name
     /// self_instance.normalized_field_name.push_str(format!("{}.normalized_field_name", store_without_end_arrow).as_str());
-    pub connection_with_field_appended: HashSet<FieldTokenStream>,
+    pub connection_with_field_appended: Vec<TokenStream>,
 }
 
 impl SchemaFieldsProperties {
@@ -153,28 +153,28 @@ impl SchemaFieldsProperties {
                     RelationType::None => ReferencedNodeMeta::default(),
                 };
                 
-                acc.static_assertions.insert(quote!().into());
+                acc.static_assertions.push(FieldTokenStream(quote!()).into());
 
                 acc.schema_struct_fields_types_kv
-                    .insert(quote!(pub #field_ident_normalised: #crate_name::DbField).into());
+                    .push(quote!(pub #field_ident_normalised: #crate_name::DbField).into());
 
                 acc.schema_struct_fields_names_kv
-                    .insert(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into()).into());
+                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into()).into());
 
                 acc.serialized_field_names_normalised
-                    .insert(field_ident_normalised_as_str);
+                    .push(field_ident_normalised_as_str);
 
                 acc.connection_with_field_appended
-                    .insert(quote!(
+                    .push(quote!(
                                schema_instance.#field_ident_normalised
                                      .push_str(format!("{}.{}", store_without_end_arrow, #field_ident_normalised_as_str).as_str());
                     ).into());
 
                 acc.referenced_node_schema_import
-                    .insert(referenced_node_meta.schema_import.into());
+                    .push(referenced_node_meta.schema_import.into());
 
                 acc.referenced_field_record_link_method
-                    .insert(referenced_node_meta.field_record_link_method.into());
+                    .push(referenced_node_meta.field_record_link_method.into());
 
                 acc
             });
