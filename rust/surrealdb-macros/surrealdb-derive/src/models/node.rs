@@ -1,6 +1,7 @@
 
 
 
+
 /*
 Author: Oyelowo Oyedayo
 Email: oyelowooyedayo@gmail.com
@@ -215,81 +216,78 @@ impl ToTokens for FieldsGetterOpts {
                 #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
                 written_blogs: Relate<Blog>,
             }
+            
+            impl #crate_name::SurrealdbNode for #struct_name_ident {
+                type Schema = #module_name::#struct_name_ident;
 
-            pub mod student_schema {
-                use serde::Serialize;
+                fn get_schema() -> Self::Schema {
+                    #module_name::#struct_name_ident::new()
+                }
+            }
+
+            pub mod #module_name {
+                use ::serde::Serialize;
 
                 use crate::drinks_schema::Drinks;
-
+                type Book = <super::Book as SurrealdbNode>::Schema;
+                
                 use super::{
                     blog_schema::Blog, book_schema::Book, juice_schema::Juice, water_schema::Water,
                     /* writes_schema::Writes, */ Clause, *,
                 };
 
                 #[derive(Debug, Serialize, Default)]
-                pub struct Student {
+                pub struct #struct_name_ident {
                     // pub id: DbField,
                    #( #schema_struct_fields_types_kv), *
                     pub ___________store: String,
                 }
 
-                impl Display for Student {
+                
+                impl Display for #struct_name_ident {
                     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                         f.write_fmt(format_args!("{}", self.___________store))
                     }
                 }
 
                 // type Writes = super::writes_schema::Writes<Student>;
-                type Writes = super::WritesSchema<Student>;
+                type Writes = super::WritesSchema<#struct_name_ident>;
 
                 impl Writes {
-                    pub fn book(&self, clause: Clause) -> Book {
-                        let mut xx = Book::default();
-                        xx.__________store.push_str(self.__________store.as_str());
-                        let pp = format_clause(clause, "book");
-
-                        xx.__________store.push_str(format!("book{pp}").as_str());
-
-                        xx
+                    pub fn book(&self, clause: #crate_name::Clause) -> Book {
+                        Book::__________update_connection(&self.__________store, clause)
                     }
                 }
 
                 impl Writes {
-                    pub fn blog(&self, clause: Clause) -> Blog {
-                        let mut xx = Blog::default();
-                        xx.______________store
-                            .push_str(self.__________store.as_str());
-                        let pp = format_clause(clause, "blog");
-                        xx.______________store
-                            .push_str(format!("blog{pp}").as_str());
-
-                        xx.intro.push_str(xx.______________store.as_str());
-                        xx.intro.push_str(".intro");
-                        xx
+                    pub fn blog(&self, clause: #crate_name::Clause) -> Blog {
+                        Blog::__________update_connection(&self.__________store, clause)
                     }
                 }
 
                 impl #struct_name_ident {
-                    pub fn __with_id__(mut self, id: impl std::fmt::Display) -> Self {
-                        // TODO: Remove prefix book, so that its not bookBook:lowo
-                        self.___________store.push_str(id.to_string().as_str());
-                        self
-                    }
-                    
-                    pub fn __with__(db_name: impl std::fmt::Display) -> Self {
-                        let mut self_model = Self::new();
-                        self_model
-                            .___________store
-                            .push_str(db_name.to_string().as_str());
-                        self_model
-                    }
-
                     pub fn new() -> Self {
                         Self {
                             // id: "id".into(),
                            #( #schema_struct_fields_names_kv), *
                             ___________store: "".to_string(),
                         }
+                    }
+
+                    // TODO: Change id to be SurrealdbCoplexId wrapper struct
+                    pub fn __with_id__(mut self, id: impl std::fmt::Display) -> Self {
+                        // TODO: Remove prefix book, so that its not bookBook:lowo
+                        self.___________store.push_str(id.to_string().as_str());
+                        self
+                    }
+                    
+                    // TODO: let this take a query object which it can build
+                    pub fn __with__(db_name: impl std::fmt::Display) -> Self {
+                        let mut self_model = Self::new();
+                        self_model
+                            .___________store
+                            .push_str(db_name.to_string().as_str());
+                        self_model
                     }
 
                     pub fn __________update_connection(store: &String, clause: Clause) -> Self {
@@ -323,17 +321,7 @@ impl ToTokens for FieldsGetterOpts {
                     }
 
                     pub fn favorite_book(&self, clause: Clause) -> Book {
-                        let mut xx = Book::default();
-                        xx.__________store.push_str(self.___________store.as_str());
-                        xx.title.0.push_str(self.___________store.as_str());
-                        let pp = format_clause(clause, "book");
-                        // xx.title.push_str("lxxtitle");
-                        xx.__________store
-                            .push_str(format!("favorite_book{pp}").as_str());
-                        xx.title
-                            .0
-                            .push_str(format!("favorite_book{pp}.title").as_str());
-                        xx
+                        Book::__________update_connection(&self.__________store, clause)
                     }
 
                     // Aliases
@@ -341,6 +329,7 @@ impl ToTokens for FieldsGetterOpts {
                         // let xx = self.___________store;
                         format!("{self} AS {alias}")
                     }
+                    /// These are for aliasing Relate<T> fields 
                     /// Returns the   as book written   of this [`Student`].
                     /// AS book_written
                     pub fn __as_book_written__(&self) -> String {
@@ -362,13 +351,6 @@ impl ToTokens for FieldsGetterOpts {
                 }
             }
 
-            impl SurrealdbNode for Student {
-                type Schema = student_schema::Student;
-
-                fn get_schema() -> Self::Schema {
-                    student_schema::Student::new()
-                }
-            }
                 
             fn #test_name() {
                 #( #static_assertions); *
