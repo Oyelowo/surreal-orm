@@ -169,6 +169,7 @@ impl ToTokens for FieldsGetterOpts {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
 
+        let struct_name_ident_as_str =struct_name_ident.to_string().as_str();
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 
@@ -241,7 +242,7 @@ impl ToTokens for FieldsGetterOpts {
                         // ___________outer: PhantomData<Out>,
                     }
 
-                    impl<Model: ::serde::Serialize + Default> Writes<Model> {
+                    impl<Model: ::serde::Serialize + Default> #struct_name_ident<Model> {
                         pub fn new() -> Self {
                             Self {
                                #( #schema_struct_fields_names_kv), *
@@ -252,20 +253,18 @@ impl ToTokens for FieldsGetterOpts {
                         }
 
                         pub fn __________update_edge(
-                            // writes_store: &String,
                             store: &::std::string::String,
                             clause: #crate_name::Clause,
                             arrow_direction: #crate_name::EdgeDirection,
-                        ) -> Writes<Model> {
-                            // let arrow = arrow_direction;
-                            let mut schema_instance = Writes::<Model>::default();
+                        ) -> Self<Model> {
+                            let mut schema_instance = Self::<Model>::default();
                             // e.g ExistingConnection->writes[WHERE id = "person:lowo"]->
                             // note: clause could also be empty
                             let current_edge = format!(
                                 "{}{arrow_direction}{}{arrow_direction}{}",
                                 store.as_str(),
                                 #struct_name_ident,
-                                format_clause(clause, "writes")
+                                format_clause(clause, #struct_name_ident_as_str)
                             );
                             schema_instance.__________store.push_str(current_edge.as_str());
 
