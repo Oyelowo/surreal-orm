@@ -9,7 +9,7 @@ Email: oyelowooyedayo@gmail.com
 use super::{
     casing::CaseString,
     get_crate_name,
-    edge_parser::{EdgeModelAttr, SchemaFieldsProperties},
+    edge_parser::{EdgeModelAttr, SchemaFieldsProperties, AllSchemaFieldsProperties},
 };
 use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
@@ -171,7 +171,7 @@ impl ToTokens for FieldsGetterOpts {
             all_model_schema_fields,
             all_serialized_field_names_normalised,
             all_static_assertions,
-            edge_metadata, .. } = SchemaFieldsProperties::from_receiver_data(
+            edge_metadata, .. } = AllSchemaFieldsProperties::from_receiver_data(
             data,
             struct_level_casing,
             struct_name_ident,

@@ -20,32 +20,133 @@ use super::{
 };
 
 #[derive(Default, Clone)]
-pub(crate) struct ModelImport(TokenStream);
+pub(crate) struct FieldTokenStream(TokenStream);
 
-impl From<TokenStream> for ModelImport {
+impl From<TokenStream> for FieldTokenStream {
     fn from(value: TokenStream) -> Self {
         Self(value)
     }
 }
 
-impl From<ModelImport> for TokenStream {
-    fn from(value: ModelImport) -> Self {
+impl From<FieldTokenStream> for TokenStream {
+    fn from(value: FieldTokenStream) -> Self {
         value.0
     }
 }
-impl PartialEq for ModelImport {
+impl PartialEq for FieldTokenStream {
     fn eq(&self, other: &Self) -> bool {
         self.0.to_string() == other.0.to_string()
     }
 }
-impl Eq for ModelImport {}
+impl Eq for FieldTokenStream {}
 
-impl Hash for ModelImport {
+impl Hash for FieldTokenStream {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.0.to_string().hash(state);
     }
 }
 
+#[derive(Default, Clone)]
+pub(crate) struct AllSchemaFieldsProperties {
+    /// Generated example: pub timeWritten: DbField,
+    /// key(normalized_field_name)-value(DbField) e.g pub out: DbField, of field name and DbField type
+    /// to build up struct for generating fields of a Schema of the SurrealdbEdge
+    /// The full thing can look like:
+    ///     #[derive(Debug, Default)]
+    ///     pub struct Writes<Model: ::serde::Serialize + Default> {
+    ///                pub id: Dbfield,
+    ///                pub r#in: Dbfield,
+    ///                pub out: Dbfield,
+    ///                pub timeWritten: Dbfield,
+    ///          }
+    pub schema_struct_fields_types_kv: HashSet<FieldTokenStream>,
+
+    /// Generated example: pub timeWritten: "timeWritten".into(),
+    /// This is used to build the actual instance of the model during intialization e,g out:
+    /// "out".into()
+    /// The full thing can look like and the fields should be in normalized form:
+    /// i.e time_written => timeWritten if serde camelizes
+    //
+    /// Self {
+    ///     id: "id".into(),
+    ///     r#in: "in".into(),
+    ///     out: "out".into(),
+    ///     timeWritten: "timeWritten".into(),
+    /// }
+    pub schema_struct_fields_names_kv: HashSet<FieldTokenStream>,
+
+    /// Field names after taking into consideration
+    /// serde serialized renaming or casings
+    /// i.e time_written => timeWritten if serde camelizes
+    pub serialized_field_names_normalised: HashSet<String>,
+
+    /// Generated example:
+    /// type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
+    /// static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
+    /// Perform all necessary static checks
+    pub static_assertions: HashSet<FieldTokenStream>,
+
+    /// Generated example: type Book = <super::Book as SurrealdbNode>::Schema;
+    /// We need imports to be unique, hence the hashset
+    /// Used when you use a SurrealdbNode in field e.g: best_student: LinkOne<Student>,
+    /// e.g: type Book = <super::Book as SurrealdbNode>::Schema;
+    pub referenced_node_schema_import: HashSet<FieldTokenStream>,
+    /// When a field references another model as Link, we want to generate a method for that
+    /// to be able to access the foreign fields
+    /// Generated Example for e.g field with best_student: line!()<Student>
+    /// pub fn best_student(&self, clause: Clause) -> Student {
+    ///     Student::__________update_connection(&self.__________store, clause)
+    /// }
+    pub referenced_field_record_link_method: HashSet<FieldTokenStream>,
+
+    /// so that we can do e.g ->writes[WHERE id = "writes:1"].field_name
+    /// self_instance.normalized_field_name.push_str(format!("{}.normalized_field_name", store_without_end_arrow).as_str());
+    pub connection_with_field_appended: HashSet<FieldTokenStream>,
+}
+
+impl AllSchemaFieldsProperties {
+    fn from_field_receiver(
+        data: ast::Data<util::Ignored, MyFieldReceiver>,
+        struct_level_casing: Option<CaseString>,
+        struct_name_ident: syn::Ident,
+    ) {
+        let fields = data
+            // .as_ref()
+            .take_struct()
+            .expect("Should never be enum")
+            .fields
+            .into_iter()
+            .fold(Self::default(), |acc, val| {
+                let props = SchemaFieldsProperties::from(EdgeModelMetadata {
+                    field_receiver: val,
+                    struct_level_casing,
+                    struct_name_ident,
+                });
+
+                acc.static_assertions.insert(props.static_assertions.into());
+
+                acc.schema_struct_fields_types_kv
+                    .insert(props.schema_struct_fields_types_kv.into());
+
+                acc.schema_struct_fields_names_kv
+                    .insert(props.schema_struct_fields_names_kv.into());
+
+                acc.serialized_field_names_normalised
+                    .insert(props.serialized_field_names_normalised.into());
+
+                acc.connection_with_field_appended
+                    .insert(props.connection_with_field_appended.into());
+
+                acc.referenced_node_schema_import
+                    .insert(props.referenced_node_meta.schema_import.into());
+
+                acc.referenced_field_record_link_method
+                    .insert(props.referenced_node_meta.field_record_link_method.into());
+
+                acc
+            });
+    }
+}
 /// A struct that contains the `struct_ty_fields` and `struct_values_fields` vectors.
 #[derive(Default, Clone)]
 pub(crate) struct SchemaFieldsProperties {
