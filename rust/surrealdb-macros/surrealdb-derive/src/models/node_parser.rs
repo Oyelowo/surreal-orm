@@ -13,7 +13,7 @@ use quote::{format_ident, quote};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
-    edge::MyFieldReceiver,
+    node::MyFieldReceiver,
     get_crate_name,
     relations::RelationType,
 };

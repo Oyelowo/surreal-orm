@@ -26,7 +26,7 @@ use std::str::FromStr;
 
 use syn::{self, parse_macro_input};
 
-use super::{edge_parser::SchemaFieldsProperties, casing::CaseString};
+use super::{node_parser::SchemaFieldsProperties, casing::CaseString};
 
 #[derive(Debug, Clone)]
 pub struct Rename {
@@ -308,7 +308,7 @@ impl ToTokens for FieldsGetterOpts {
                         let xx = Writes::__________update_edge(
                             &self.___________store,
                             clause,
-                            EdgeDirection::OutArrowRight,
+                            #crate_name::EdgeDirection::OutArrowRight,
                         );
                         xx
                     }
