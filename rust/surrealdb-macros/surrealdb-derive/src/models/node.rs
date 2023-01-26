@@ -116,6 +116,10 @@ pub(crate) struct MyFieldReceiver {
 
     // reference singular: LinkOne<Account>
     #[darling(default)]
+    pub(crate) relate: ::std::option::Option<Relate>,
+    
+    // reference singular: LinkOne<Account>
+    #[darling(default)]
     pub(crate) link_one: ::std::option::Option<String>,
 
     // reference singular: LinkSelf<Account>
@@ -170,7 +174,8 @@ impl ToTokens for FieldsGetterOpts {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
         
-        let struct_name_ident_as_str = struct_name_ident.to_string().as_str();
+        let binding = struct_name_ident.to_string();
+        let struct_name_ident_as_str = binding.as_str();
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 

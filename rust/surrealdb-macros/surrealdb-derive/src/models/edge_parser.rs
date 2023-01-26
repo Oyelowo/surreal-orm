@@ -109,19 +109,19 @@ impl SchemaFieldsProperties {
     /// # Panics
     ///
     /// Panics if .
-    pub fn from_receiver_data(
+    pub(crate) fn from_receiver_data(
         data: &ast::Data<util::Ignored, MyFieldReceiver>,
         struct_level_casing: Option<CaseString>,
         struct_name_ident: &syn::Ident,
     ) -> Self {
         let fields = data
-            // .as_ref()
+            .as_ref()
             .take_struct()
             .expect("Should never be enum")
             .fields
             .into_iter()
-            .fold(Self::default(), |acc, field_receiver| {
-                let field_ident = field_receiver.ident.unwrap();
+            .fold(Self::default(), |mut acc,  field_receiver| {
+                let field_ident = field_receiver.ident.as_ref().unwrap();
                 let field_type = &field_receiver.ty;
                 let crate_name = get_crate_name(false);
                 let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
@@ -131,14 +131,14 @@ impl SchemaFieldsProperties {
                 });
 
                 // get the field's proper serialized format. Renaming should take precedence
-                let original_field_name_normalised = field_receiver.rename.as_ref().map_or_else(
+                let original_field_name_normalised = &field_receiver.rename.as_ref().map_or_else(
                     || field_ident_cased.into(),
                     |renamed| renamed.clone().serialize,
                 );
-                let field_ident_normalised = format_ident!("{original_field_name_normalised}");
-                let relationship = RelationType::from(&field_receiver);
+                let ref field_ident_normalised = format_ident!("{original_field_name_normalised}");
+                let relationship = RelationType::from(field_receiver);
 
-                let field_ident_normalised_as_str =
+                let ref field_ident_normalised_as_str =
                     if original_field_name_normalised.trim_start_matches("r#") == "in".to_string() {
                         "in".into()
                     } else {
@@ -147,13 +147,13 @@ impl SchemaFieldsProperties {
 
                 let referenced_node_meta = match relationship {
                     RelationType::LinkOne(node_object) => {
-                        ReferencedNodeMeta::from_ref_node_meta(node_object, field_ident_normalised)
+                        ReferencedNodeMeta::from_ref_node_meta(&node_object, field_ident_normalised)
                     }
                     RelationType::LinkSelf(node_object) => {
-                        ReferencedNodeMeta::from_ref_node_meta(node_object, field_ident_normalised)
+                        ReferencedNodeMeta::from_ref_node_meta(&node_object, field_ident_normalised)
                     }
                     RelationType::LinkMany(node_object) => {
-                        ReferencedNodeMeta::from_ref_node_meta(node_object, field_ident_normalised)
+                        ReferencedNodeMeta::from_ref_node_meta(&node_object, field_ident_normalised)
                     }
                     RelationType::None => ReferencedNodeMeta::default(),
                 };
@@ -167,7 +167,7 @@ impl SchemaFieldsProperties {
                     .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into()).into());
 
                 acc.serialized_field_names_normalised
-                    .push(field_ident_normalised_as_str);
+                    .push(field_ident_normalised_as_str.to_owned());
 
                 acc.connection_with_field_appended
                     .push(quote!(
@@ -196,8 +196,8 @@ struct ReferencedNodeMeta {
 
 impl ReferencedNodeMeta {
     fn from_ref_node_meta(
-        node_name: super::relations::NodeName,
-        normalized_field_name: ::syn::Ident,
+        node_name: &super::edge_relations::NodeName,
+        normalized_field_name: &::syn::Ident,
     ) -> ReferencedNodeMeta {
         let schema_name = format_ident!("{node_name}");
         let crate_name = get_crate_name(false);

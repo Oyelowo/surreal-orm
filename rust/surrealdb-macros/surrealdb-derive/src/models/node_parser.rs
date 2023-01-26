@@ -84,8 +84,21 @@ pub struct SchemaFieldsProperties {
 
     /// Generated example:
     /// ```
+    /// // For relate field
     /// type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
-    /// static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
+    /// ::static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
+    ///
+    /// type StudentWritesBlogInNode = <StudentWritesBlog as SurrealdbEdge>::In;
+    /// ::static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
+    ///
+    /// type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealdbEdge>::Out;
+    /// ::static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
+    ///
+    /// 
+    /// ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealdbEdge);
+    /// ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
+    /// ::static_assertions::assert_impl_one!(Blog: SurrealdbNode);
+    /// ::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
     /// ```
     /// Perform all necessary static checks
     pub static_assertions: Vec<TokenStream>,
@@ -176,19 +189,19 @@ impl SchemaFieldsProperties {
     /// # Panics
     ///
     /// Panics if .
-    pub fn from_receiver_data(
+    pub(crate) fn from_receiver_data(
         data: &ast::Data<util::Ignored, MyFieldReceiver>,
         struct_level_casing: Option<CaseString>,
         struct_name_ident: &syn::Ident,
     ) -> Self {
         let fields = data
-            // .as_ref()
+            .as_ref()
             .take_struct()
             .expect("Should never be enum")
             .fields
             .into_iter()
-            .fold(Self::default(), |acc, field_receiver| {
-                let field_ident = field_receiver.ident.unwrap();
+            .fold(Self::default(), |mut acc, field_receiver| {
+                let field_ident = field_receiver.ident.as_ref().unwrap();
                 let field_type = &field_receiver.ty;
                 let crate_name = get_crate_name(false);
                 let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
@@ -202,10 +215,10 @@ impl SchemaFieldsProperties {
                     || field_ident_cased.into(),
                     |renamed| renamed.clone().serialize,
                 );
-                let field_ident_normalised = format_ident!("{original_field_name_normalised}");
-                let relationship = RelationType::from(&field_receiver);
+                let ref field_ident_normalised = format_ident!("{original_field_name_normalised}");
+                let relationship = RelationType::from(field_receiver);
 
-                let field_ident_normalised_as_str =
+                let ref field_ident_normalised_as_str =
                     if original_field_name_normalised.trim_start_matches("r#") == "in".to_string() {
                         "in".into()
                     } else {
@@ -217,69 +230,97 @@ impl SchemaFieldsProperties {
                         let relation_attributes = RelateAttribute::from(relation.clone());
                         let arrow_direction = TokenStream::from(relation_attributes.edge_direction);
                         let edge_name = TokenStream::from(relation_attributes.edge_name);
-                        let destination_node = TokenStream::from(relation_attributes.node_name.clone());
+                        let ref destination_node = TokenStream::from(relation_attributes.node_name.clone());
                         // let extra = ReferencedNodeMeta::from_ref_node_meta(relation_attributes.node_name, field_ident_normalised);
                         //
-                        acc.relate_node_alias_method;
-                        let struct_name = quote!(#struct_name_ident);
-                        let schema_name_basic = &extra.schema_name;
-                        acc.relate_node_alias_method.push(todo!());
-                        acc.relate_edge_schema_struct_alias_impl.push(todo!());
-                        acc.relate_edge_schema_method_connection.push(todo!());
+                        // let destination_node = relation_attributes.node_name ;
+                        let ref struct_name = quote!(#struct_name_ident);
+                        // let schema_name_basic = &extra.schema_name;
+                        let field_name_as_alias = format_ident!("__as_{field_ident_normalised_as_str}__");
+                        
+                        acc.relate_node_alias_method.push(quote!(
+                                    pub fn #field_name_as_alias(&self) -> String {
+                                        format!("{self} AS {}", #field_ident_normalised_as_str)
+                                    })
+                            );
+
+                        acc.relate_edge_schema_struct_alias_impl.push(quote!(
+                                    impl #edge_name {
+                                        // Could potantially make the method name all small letters
+                                        // or just use exactly as the table name is written
+                                        pub fn #destination_node(&self, clause: #crate_name::Clause) -> #destination_node {
+                                           #destination_node::__________update_connection(&self.__________store, clause)
+                                        }
+                                    })
+                                );
+                        
+
+                        let edge_method_name_with_direction = match relation_attributes.edge_direction {
+                            super::node_relations::EdgeDirection::OutArrowRight => format_ident!("{edge_name}__"),
+                            super::node_relations::EdgeDirection::InArrowLeft => format_ident!("__{edge_name}"),
+                        };
+                        
+                        acc.relate_edge_schema_method_connection.push(quote!(
+                                    pub fn #edge_method_name_with_direction(&self, clause: #crate_name::Clause) -> #edge_name {
+                                        #edge_name::__________update_edge(
+                                            &self.___________store,
+                                            clause,
+                                            #crate_name::EdgeDirection::OutArrowRight,
+                                        )
+                                    }
+                                )
+                            );
+                        
                         // e.g from Writes<In, Out> (Writes<Student, Book>) generics, we can create StudentWritesBook
-                        let edge_alias_specific = format_ident!(
-                            "{}",
-                            relation.edge.expect("Edge must be specified for relations")
-                        );
-                        // let node_assertion = quote!(<AccountManageProject as Edge>::InNode, Account);
+                        let edge_alias_specific = format_ident!("{}", relation.edge.as_ref().expect("Edge must be specified for relations"));
+                        // type StudentWritesBlogInNode = <StudentWritesBlog as SurrealdbEdge>::In;
                         let (in_node, out_node) = match relation_attributes.edge_direction {
                             // If OutArrowRight, the current struct should be InNode, and
                             // OutNode in "->edge_action->OutNode", should be OutNode
-                            super::relations::EdgeDirection::OutArrowRight => {
+                            super::node_relations::EdgeDirection::OutArrowRight => {
                                 (struct_name, destination_node)
                             }
-                            super::relations::EdgeDirection::InArrowLeft => (destination_node, struct_name),
+                            super::node_relations::EdgeDirection::InArrowLeft => (destination_node, struct_name),
                         };
-                        let edge_checker_alias =
-                            format_ident!("EdgeChecker{edge_struct_ident}{edge_action}");
-                        let relation_assertions = quote!(
-                        // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
-                        // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
-                        // type EdgeCheckerAlias = <AccountManageProject as Edge>::EdgeChecker;
-                        ::static_assertions::assert_type_eq_all!(<#edge_alias_specific as #crate_name::Edge>::InNode, #crate_name::links::LinkOne<#in_node>);
-                        ::static_assertions::assert_type_eq_all!(<#edge_alias_specific as #crate_name::Edge>::OutNode, #crate_name::links::LinkOne<#out_node>);
-                        type #edge_checker_alias  = <#edge_alias_specific as Edge>::EdgeChecker;
-                        ::static_assertions::assert_fields!(#edge_checker_alias : #edge_name);
+                        
+                        let relation_alias_struct_renamed = format_ident!("{}TableName", edge_alias_specific);
+                        let relation_alias_struct_in_node = format_ident!("{}InNode", edge_alias_specific);
+                        let relation_alias_struct_out_node = format_ident!("{}OutNode", edge_alias_specific);
+                        
+                        acc.static_assertions.push(quote!(
+                                type #relation_alias_struct_renamed = <#edge_alias_specific as #crate_name::SurrealdbEdge>::TableNameChecker;
+                                ::static_assertions::assert_fields!(#relation_alias_struct_renamed: #edge_name);
 
-                        // assert field type and attribute reference match
-                            ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::Relate<#schema_name_basic>);
-                                                );
-                        relate
-                        /*
-                         *
-                        // This can the access the alias
-                          model!(Student {
-                            pub ->takes->Course as enrolled_courses, // This is what we want
-                          })
-                        */
-                        // e.g: ->has->Account as field_name
-                        let field = quote!(#arrow_direction #edge_name #arrow_direction #schema_name_basic as #field_ident_normalised,);
-                        // let field = quote!(#visibility #arrow_direction #edge_action #arrow_direction #schema_name_basic as #field_ident_normalised,);
-                        ModelMedataTokenStream {
-                            model_schema_field: quote!(#field),
-                            original_field_name_normalised,
-                            static_assertions: relation_assertions,
-                            extra,
-                        }
+                                // ::static_assertions::assert_type_eq_all!(<StudentWritesBook as SurrealdbEdge>::In, Student);
+                                // ::static_assertions::assert_type_eq_all!(<StudentWritesBook as SurrealdbEdge>::Out, Book);
+                                // type EdgeCheckerAlias = <AccountManageProject as Edge>::EdgeChecker;
+                                type #relation_alias_struct_in_node = <#edge_alias_specific as #crate_name::SurrealdbEdge>::In;
+                                ::static_assertions::assert_type_eq_all!(#relation_alias_struct_in_node, #in_node);
+
+                                type #relation_alias_struct_out_node = <#edge_alias_specific as #crate_name::SurrealdbEdge>::Out;
+                                ::static_assertions::assert_type_eq_all!(#relation_alias_struct_out_node, #out_node);
+
+                                ::static_assertions::assert_impl_one!(#edge_alias_specific: #crate_name::SurrealdbEdge);
+                                ::static_assertions::assert_impl_one!(#in_node: #crate_name::SurrealdbNode);
+                                ::static_assertions::assert_impl_one!(#out_node: #crate_name::SurrealdbNode);
+                                
+                                // assert field type and attribute reference match
+                                // e.g Relate<Book> should match from attribute link = "->Writes->Book"
+                                ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::Relate<#destination_node>);
+                            )
+                        );
+
+                            ReferencedNodeMeta::from_relate(relation)
+                                
                     },
                     RelationType::LinkOne(node_object) => {
-                        ReferencedNodeMeta::from_record_link(node_object, field_ident_normalised)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised)
                     }
                     RelationType::LinkSelf(node_object) => {
-                        ReferencedNodeMeta::from_record_link(node_object, field_ident_normalised)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised)
                     }
                     RelationType::LinkMany(node_object) => {
-                        ReferencedNodeMeta::from_record_link(node_object, field_ident_normalised)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised)
                     }
                     RelationType::None => ReferencedNodeMeta::default(),
                 };
@@ -293,7 +334,7 @@ impl SchemaFieldsProperties {
                     .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into()).into());
 
                 acc.serialized_field_names_normalised
-                    .push(field_ident_normalised_as_str);
+                    .push(field_ident_normalised_as_str.to_owned());
 
                 acc.connection_with_field_appended
                     .push(quote!(
@@ -316,19 +357,19 @@ impl SchemaFieldsProperties {
 #[derive(Default, Clone)]
 struct ReferencedNodeMeta {
     destination_node_schema_import: TokenStream,
-    record_link_default_alias_as_method: Option<TokenStream>,
+    record_link_default_alias_as_method: TokenStream,
     destination_node_type_validator: TokenStream,
 }
 
 impl ReferencedNodeMeta {
-    fn from_relate(relate: Relate) {
+    fn from_relate(relate: Relate)->Self {
         todo!()
     }
     
     fn from_record_link(
-        node_name: super::node_relations::NodeName,
-        normalized_field_name: ::syn::Ident,
-    ) -> ReferencedNodeMeta {
+        node_name: &super::node_relations::NodeName,
+        normalized_field_name: &::syn::Ident,
+    ) -> Self {
         let schema_name = format_ident!("{node_name}");
         let crate_name = get_crate_name(false);
         
@@ -341,11 +382,11 @@ impl ReferencedNodeMeta {
                     
             destination_node_type_validator: quote!(::static_assertions::assert_impl_one!(#schema_name: #crate_name::SurrealdbNode)),
             
-            record_link_default_alias_as_method: Some(quote!(
+            record_link_default_alias_as_method: quote!(
                         pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
                             #schema_name:__________update_connection(&self.__________store, clause)
                         }
-                    )),
+                    ),
         }
     }
 }
