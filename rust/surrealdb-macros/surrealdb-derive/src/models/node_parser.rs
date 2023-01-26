@@ -89,17 +89,62 @@ pub struct SchemaFieldsProperties {
     /// We need imports to be unique, hence the hashset
     /// Used when you use a SurrealdbNode in field e.g: best_student: LinkOne<Student>,
     /// e.g: type Book = <super::Book as SurrealdbNode>::Schema;
-    pub referenced_node_schema_import: Vec<TokenStream>,
+    pub referenced_node_schema_imports: Vec<TokenStream>,
+
+    /// Generated example: type Writes = super::writes_schema::Writes<Student>;
+    /// The above is generated if a Student struct field uses "->Writes->Book". 
+    /// Must be unique to prevent collision because it's possible for an edge to be
+    /// reused.
+    pub referenced_edge_schema_struct_alias: Vec<TokenStream>,
+
+    /// Generated example:
+    ///impl Writes {
+    ///     pub fn book(&self, clause: #crate_name::Clause) -> Book {
+    ///         Book::__________update_connection(&self.__________store, clause)
+    ///     }
+    /// }
+    /// This helps to connect present origin node struct to destination node
+    /// and it the edge itself is a struct here. This allows us to give more
+    /// specific autocompletion when user accesses available destination node 
+    /// from a specific edge from an origin struct.
+    /// e.g Student::get_schema().writes__().book();
+    /// This allows us to do `.book()` as shown above
+    pub relate_edge_schema_struct_alias_impl: Vec<TokenStream>,
+    
+    /// Genearated example:
+    /// pub fn writes__(&self, clause: Clause) -> Writes {
+    ///     Writes::__________update_edge(
+    ///         &self.___________store,
+    ///         clause,
+    ///         #crate_name::EdgeDirection::OutArrowRight,
+    ///     )
+    /// }
+    ///  This is used within the current origin node struct e.g Student implementation
+    /// e.g Student::get_schema().writes__(); 
+    /// it can be writes__ or __writes depending on the arrow direction
+    pub relate_edge_schema_method_connection: Vec<TokenStream>,
+
+    /// This is used to alias a relation and uses the field name as default
+    /// alias with which a relation can deserialized into
+    /// Generated example:
+    /// pub fn __as_book_written__(&self) -> String {
+    ///     format!("{self} AS book_written")
+    /// }    
+    /// The above can be used for e.g ->Writes->Book as book_written
+    pub relate_node_alias_method: Vec<TokenStream>,
+    
     /// When a field references another model as Link, we want to generate a method for that
     /// to be able to access the foreign fields
     /// Generated Example for e.g field with best_student: line!()<Student>
     /// pub fn best_student(&self, clause: Clause) -> Student {
     ///     Student::__________update_connection(&self.__________store, clause)
     /// }
-    pub referenced_field_record_link_method: Vec<TokenStream>,
-
+    pub record_link_fields_methods: Vec<TokenStream>,
+    
+    
     /// so that we can do e.g ->writes[WHERE id = "writes:1"].field_name
     /// self_instance.normalized_field_name.push_str(format!("{}.normalized_field_name", store_without_end_arrow).as_str());
+    /// This generates a function that is usually called by other Nodes/Structs
     pub connection_with_field_appended: Vec<TokenStream>,
 }
 
@@ -175,10 +220,10 @@ impl SchemaFieldsProperties {
                                      .push_str(format!("{}.{}", store_without_end_arrow, #field_ident_normalised_as_str).as_str());
                     ).into());
 
-                acc.referenced_node_schema_import
+                acc.referenced_node_schema_imports
                     .push(referenced_node_meta.schema_import.into());
 
-                acc.referenced_field_record_link_method
+                acc.record_link_fields_methods
                     .push(referenced_node_meta.field_record_link_method.into());
 
                 acc

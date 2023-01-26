@@ -1,9 +1,10 @@
 pub(crate) mod casing;
 pub(crate) mod edge;
 mod edge_parser;
+pub(crate) mod edge_relations;
 pub(crate) mod node;
 mod node_parser;
-pub(crate) mod relations;
+pub(crate) mod node_relations;
 pub(crate) mod serialize_skipper;
 
 use proc_macro2::{Span, TokenStream, TokenTree};

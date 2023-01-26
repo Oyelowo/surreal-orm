@@ -1,6 +1,5 @@
 use super::edge::{MyFieldReceiver, Relate};
 
-// Edges can't have relation because they're the connectors
 #[derive(Debug, Clone)]
 pub(crate) enum RelationType {
     LinkOne(NodeName),

@@ -15,7 +15,7 @@ use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     edge::MyFieldReceiver,
     get_crate_name,
-    relations::RelationType,
+    edge_relations::RelationType,
 };
 
 #[derive(Default, Clone)]

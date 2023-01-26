@@ -179,8 +179,8 @@ impl ToTokens for FieldsGetterOpts {
             schema_struct_fields_names_kv,
             serialized_field_names_normalised,
             static_assertions,
-            referenced_node_schema_import,
-            referenced_field_record_link_method,
+            referenced_node_schema_imports: referenced_node_schema_import,
+            record_link_fields_methods: referenced_field_record_link_method,
             connection_with_field_appended,
         }: SchemaFieldsProperties  = SchemaFieldsProperties::from_receiver_data(
             data,
@@ -231,10 +231,10 @@ impl ToTokens for FieldsGetterOpts {
                 use crate::drinks_schema::Drinks;
                 type Book = <super::Book as SurrealdbNode>::Schema;
                 
-                use super::{
-                    blog_schema::Blog, book_schema::Book, juice_schema::Juice, water_schema::Water,
-                    /* writes_schema::Writes, */ Clause, *,
-                };
+                // use super::{
+                //     blog_schema::Blog, book_schema::Book, juice_schema::Juice, water_schema::Water,
+                //     /* writes_schema::Writes, */ Clause, *,
+                // };
 
                 #[derive(Debug, Serialize, Default)]
                 pub struct #struct_name_ident {
@@ -245,23 +245,8 @@ impl ToTokens for FieldsGetterOpts {
 
                 
                 impl Display for #struct_name_ident {
-                    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                         f.write_fmt(format_args!("{}", self.___________store))
-                    }
-                }
-
-                // type Writes = super::writes_schema::Writes<Student>;
-                type Writes = super::WritesSchema<#struct_name_ident>;
-
-                impl Writes {
-                    pub fn book(&self, clause: #crate_name::Clause) -> Book {
-                        Book::__________update_connection(&self.__________store, clause)
-                    }
-                }
-
-                impl Writes {
-                    pub fn blog(&self, clause: #crate_name::Clause) -> Blog {
-                        Blog::__________update_connection(&self.__________store, clause)
                     }
                 }
 
@@ -290,7 +275,7 @@ impl ToTokens for FieldsGetterOpts {
                         self_model
                     }
 
-                    pub fn __________update_connection(store: &String, clause: Clause) -> Self {
+                    pub fn __________update_connection(store: &String, clause: #crate_name::Clause) -> Self {
                         let mut xx = Self::default();
                         let connection = format!("{}{}{}", store, #struct_name_ident_as_str, format_clause(clause, #struct_name_ident_as_str));
 
@@ -303,21 +288,19 @@ impl ToTokens for FieldsGetterOpts {
                     }
 
                     pub fn writes__(&self, clause: Clause) -> Writes {
-                        let xx = Writes::__________update_edge(
+                        Writes::__________update_edge(
                             &self.___________store,
                             clause,
                             #crate_name::EdgeDirection::OutArrowRight,
-                        );
-                        xx
+                        )
                     }
 
                     pub fn drinks__(&self, clause: Clause) -> Drinks {
-                        let mut xx = Drinks::default();
-                        xx.__________store.push_str(self.___________store.as_str());
-                        let pp = format_clause(clause, "drinks");
-                        xx.__________store
-                            .push_str(format!("->drinks{pp}->").as_str());
-                        xx
+                        Drinks::__________update_edge(
+                            &self.___________store,
+                            clause,
+                            #crate_name::EdgeDirection::OutArrowRight,
+                        )
                     }
 
                     pub fn favorite_book(&self, clause: Clause) -> Book {
@@ -349,6 +332,22 @@ impl ToTokens for FieldsGetterOpts {
                         format!("{self} AS drunk_water")
                     }
                 }
+                
+                // type Writes = super::writes_schema::Writes<Student>;
+                type Writes = super::WritesSchema<#struct_name_ident>;
+
+                impl Writes {
+                    pub fn book(&self, clause: #crate_name::Clause) -> Book {
+                        Book::__________update_connection(&self.__________store, clause)
+                    }
+                }
+
+                impl Writes {
+                    pub fn blog(&self, clause: #crate_name::Clause) -> Blog {
+                        Blog::__________update_connection(&self.__________store, clause)
+                    }
+                }
+
             }
 
                 
