@@ -342,8 +342,8 @@ impl ToTokens for FieldsGetterOpts {
                     }
                 }
                 
-                // type Writes = super::writes_schema::Writes<Student>;
-                type Writes = super::WritesSchema<#struct_name_ident>;
+                type Writes = super::writes::Writes<Student>;
+                // type Writes = super::WritesSchema<#struct_name_ident>;
 
                 impl Writes {
                     pub fn book(&self, clause: #crate_name::Clause) -> Book {

@@ -386,7 +386,7 @@ impl ReferencedNodeMeta {
                 
                 record_link_default_alias_as_method: quote!(), 
 
-                destination_node_type_validator: todo!(),
+                destination_node_type_validator: quote!(),
             }
     }
     
