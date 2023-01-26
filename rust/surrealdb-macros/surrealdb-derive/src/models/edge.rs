@@ -170,7 +170,7 @@ impl ToTokens for FieldsGetterOpts {
         });
 
         let binding = struct_name_ident.to_string();
-        let struct_name_ident_as_str =binding.as_str();
+        let struct_name_ident_as_str = binding.as_str();
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 

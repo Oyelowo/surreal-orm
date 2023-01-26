@@ -120,13 +120,7 @@ pub struct SchemaFieldsProperties {
     /// Must be unique to prevent collision because it's possible for an edge to be
     /// reused.
     pub referenced_edge_schema_struct_alias: Vec<TokenStream>,
-    
-    
-    /// edge schema struct aliased type import
-    /// ```
-    /// type Writes = super::writes::Writes<Student>;
-    /// ```
-    pub relate_edge_struct_type_alias : Vec<TokenStream>,
+
     /// Generated example:
     /// ```
     ///impl Writes {
@@ -250,13 +244,6 @@ impl SchemaFieldsProperties {
                                     })
                             );
 
-                        // e.g type Writes = super::WritesSchema<#struct_name_ident>;
-                        // TODO: remove or reuse if makes sense: let edge_schema = format_ident!("{edge_name}Schema");
-                        let edge_module_name = format_ident!("{}", edge_name.to_string().to_lowercase());
-                        acc.relate_edge_struct_type_alias.push(quote!(
-                            type #edge_name = super::#edge_module_name::#edge_name<#struct_name_ident>;
-                        ));
-                        
                         acc.relate_edge_schema_struct_alias_impl.push(quote!(
                                     impl #edge_name {
                                         // Could potantially make the method name all small letters
@@ -323,7 +310,7 @@ impl SchemaFieldsProperties {
                             )
                         );
 
-                            ReferencedNodeMeta::from_relate(relation, destination_node)
+                            ReferencedNodeMeta::from_relate(relation)
                                 
                     },
                     RelationType::LinkOne(node_object) => {
@@ -375,19 +362,12 @@ struct ReferencedNodeMeta {
 }
 
 impl ReferencedNodeMeta {
-    fn from_relate(relate: Relate, destination_node: &TokenStream)->Self {
+    fn from_relate(relate: Relate)->Self {
         let crate_name = get_crate_name(false);
-        // let destination_node_schema_import = quote!();
-        // let schema_name = relate
-            Self{ 
-                destination_node_schema_import:  quote!(
-                        type #destination_node = <super::#destination_node as #crate_name::SurrealdbNode>::Schema;
-                    ), 
-                
-                record_link_default_alias_as_method: quote!(), 
-
-                destination_node_type_validator: todo!(),
-            }
+        let destination_node_schema_import = quote!();
+            Self{ destination_node_schema_import:  quote!(
+                        type #schema_name = <super::#schema_name as #crate_name::SurrealdbNode>::Schema;
+                    ), record_link_default_alias_as_method: quote!(), destination_node_type_validator: todo!() }
     }
     
     fn from_record_link(
