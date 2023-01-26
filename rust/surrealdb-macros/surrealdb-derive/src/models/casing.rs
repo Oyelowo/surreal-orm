@@ -33,20 +33,12 @@ pub(crate) enum CaseString {
 
     #[strum(serialize = "SCREAMING-KEBAB-CASE")]
     ScreamingKebab,
-
-    None,
-}
-
-impl Default for CaseString {
-    fn default() -> Self {
-        CaseString::None
-    }
 }
 
 #[derive(Debug, Clone)]
 pub(crate) struct FieldIdentUnCased {
     pub(crate) uncased_field_name: String,
-    pub(crate) casing: CaseString,
+    pub(crate) casing: Option<CaseString>,
 }
 
 #[derive(Debug, Clone)]
@@ -77,17 +69,19 @@ impl From<FieldIdentUnCased> for FieldIdentCased {
         };
 
         match field_uncased.casing {
-            CaseString::None => field_uncased.uncased_field_name,
-            CaseString::Camel => convert_field_identifier(convert_case::Case::Camel),
-            CaseString::Snake => convert_field_identifier(convert_case::Case::Snake),
-            CaseString::Pascal => convert_field_identifier(convert_case::Case::Pascal),
-            CaseString::Lower => convert_field_identifier(convert_case::Case::Lower),
-            CaseString::Upper => convert_field_identifier(convert_case::Case::Upper),
-            CaseString::ScreamingSnake => {
+            None => field_uncased.uncased_field_name,
+            Some(CaseString::Camel) => convert_field_identifier(convert_case::Case::Camel),
+            Some(CaseString::Snake) => convert_field_identifier(convert_case::Case::Snake),
+            Some(CaseString::Pascal) => convert_field_identifier(convert_case::Case::Pascal),
+            Some(CaseString::Lower) => convert_field_identifier(convert_case::Case::Lower),
+            Some(CaseString::Upper) => convert_field_identifier(convert_case::Case::Upper),
+            Some(CaseString::ScreamingSnake) => {
                 convert_field_identifier(convert_case::Case::ScreamingSnake)
             }
-            CaseString::Kebab => convert_field_identifier(convert_case::Case::Kebab),
-            CaseString::ScreamingKebab => convert_field_identifier(convert_case::Case::UpperKebab),
+            Some(CaseString::Kebab) => convert_field_identifier(convert_case::Case::Kebab),
+            Some(CaseString::ScreamingKebab) => {
+                convert_field_identifier(convert_case::Case::UpperKebab)
+            }
         }
         .into()
     }

@@ -46,7 +46,7 @@ impl Hash for FieldTokenStream {
 }
 
 #[derive(Default, Clone)]
-pub(crate) struct SchemaFieldsProperties {
+pub struct SchemaFieldsProperties {
     /// Generated example: pub timeWritten: DbField,
     /// key(normalized_field_name)-value(DbField) e.g pub out: DbField, of field name and DbField type
     /// to build up struct for generating fields of a Schema of the SurrealdbEdge
@@ -104,10 +104,15 @@ pub(crate) struct SchemaFieldsProperties {
 }
 
 impl SchemaFieldsProperties {
-    fn from_field_receiver(
-        data: ast::Data<util::Ignored, MyFieldReceiver>,
-        struct_level_casing: CaseString,
-        struct_name_ident: syn::Ident,
+    /// .
+    ///
+    /// # Panics
+    ///
+    /// Panics if .
+    pub fn from_receiver_data(
+        data: &ast::Data<util::Ignored, MyFieldReceiver>,
+        struct_level_casing: Option<CaseString>,
+        struct_name_ident: &syn::Ident,
     ) -> Self {
         let fields = data
             // .as_ref()
@@ -153,7 +158,7 @@ impl SchemaFieldsProperties {
                     RelationType::None => ReferencedNodeMeta::default(),
                 };
                 
-                acc.static_assertions.push(FieldTokenStream(quote!()).into());
+                acc.static_assertions.push(referenced_node_meta.node_type_check);
 
                 acc.schema_struct_fields_types_kv
                     .push(quote!(pub #field_ident_normalised: #crate_name::DbField).into());
@@ -186,6 +191,7 @@ impl SchemaFieldsProperties {
 struct ReferencedNodeMeta {
     schema_import: TokenStream,
     field_record_link_method: TokenStream,
+    node_type_check: TokenStream,
 }
 
 impl ReferencedNodeMeta {
@@ -202,8 +208,10 @@ impl ReferencedNodeMeta {
             type #schema_name = <super::#schema_name as #crate_name::SurrealdbNode>::Schema;
         );
 
+        let model_checks = quote!(::static_assertions::assert_impl_one!(#schema_name: #crate_name::SurrealdbNode));
         Self {
             schema_import,
+            node_type_check: model_checks,
             field_record_link_method: quote!(
                 pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
                     #schema_name:__________update_connection(&self.__________store, clause)

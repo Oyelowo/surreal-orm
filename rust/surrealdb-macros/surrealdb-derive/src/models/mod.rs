@@ -5,12 +5,10 @@ pub(crate) mod node;
 mod node_parser;
 pub(crate) mod relations;
 pub(crate) mod serialize_skipper;
-mod trait_generator;
 
 use proc_macro2::{Span, TokenStream, TokenTree};
 use proc_macro_crate::{crate_name, FoundCrate};
 use quote::quote;
-pub use trait_generator::generate_fields_getter_trait;
 
 use syn::{self, Ident};
 

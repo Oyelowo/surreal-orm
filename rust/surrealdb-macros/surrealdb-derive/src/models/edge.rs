@@ -26,6 +26,8 @@ use std::str::FromStr;
 
 use syn::{self, parse_macro_input};
 
+use super::{edge_parser::SchemaFieldsProperties, casing::CaseString};
+
 #[derive(Debug, Clone)]
 pub struct Rename {
     pub(crate) serialize: String,
@@ -170,34 +172,34 @@ impl ToTokens for FieldsGetterOpts {
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 
-        let ModelAttributesTokensDeriver {
-            all_model_imports,
-            all_model_schema_fields,
-            all_serialized_field_names_normalised,
-            all_static_assertions,
-            edge_metadata, .. } = ModelAttributesTokensDeriver::from_receiver_data(
+        let SchemaFieldsProperties {
+            schema_struct_fields_types_kv,
+            schema_struct_fields_names_kv,
+            serialized_field_names_normalised,
+            static_assertions,
+            referenced_node_schema_import,
+            referenced_field_record_link_method,
+            connection_with_field_appended,
+        }: SchemaFieldsProperties  = SchemaFieldsProperties::from_receiver_data(
             data,
             struct_level_casing,
             struct_name_ident,
         );
-        let EdgeModelAttr {
-            in_node_type,
-            out_node_type,
-        } = edge_metadata;
-        let all_model_imports = all_model_imports
-            .into_iter()
-            .map(Into::into)
-            .collect::<Vec<TokenStream>>();
+        // schema_struct_fields_names_kv.dedup_by(same_bucket)
+
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
 
-let field_names_ident = format_ident!("{struct_name_ident}DbFields");
-
+        let field_names_ident = format_ident!("{struct_name_ident}DbFields");
+        let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
+        
+        let schema_alias = format_ident!("{}Schema", struct_name_ident.to_string().to_lowercase());
+        
         tokens.extend(quote!( 
                         
-                impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
+                impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbEdge for #struct_name_ident<In, Out> {
                     type In = In;
                     type Out = Out;
-                    type TableNameChecker = writes_schema::WritesTableNameStaticChecker;
+                    type TableNameChecker = #module_name::TableNameStaticChecker;
 
                     // type Schema = writes_schema::Writes;
                     //
@@ -207,11 +209,11 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
                     // fn get_key(&self) -> ::std::option::Option<String> {self.id.as_ref().map(::std::string::String::clone) } 
                 }
 
-                use writes_schema::Writes as WritesSchema;
-                pub mod writes_schema {
+                use #module_name::#struct_name_ident as #schema_alias;
+                pub mod #module_name {
                     
-                    pub struct WritesTableNameStaticChecker {
-                        Writes: String,
+                    pub struct TableNameStaticChecker {
+                        #struct_name_ident: String,
                     }
 
                     // use super::{
@@ -220,13 +222,12 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
                     // };
 
                     use #crate_name::{DbField, EdgeDirection, format_clause};
-                    type Book = <super::Book as SurrealdbNode>::Schema;
-                    type Student = <super::Student as SurrealdbNode>::Schema;
+                    // type Book = <super::Book as SurrealdbNode>::Schema;
+                    // type Student = <super::Student as SurrealdbNode>::Schema;
+                    #( #referenced_node_schema_import); *
 
-                        #[derive(Debug, Default)]
-                        pub struct Writes<Model: ::serde::Serialize + Default> {
-                            id: DbField,
-                        // Student, User
+                    #[derive(Debug, Default)]
+                        pub struct #struct_name_ident<Model: ::serde::Serialize + Default> {
                         // Even though it's possible to have full object when in and out are loaded,
                         // in practise, we almost never want to do this, since edges are rarely
                         // accessed directly but only via nodes and they are more like bridges
@@ -234,12 +235,7 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
                         // - which is just a surrealdb id , for both in and out nodes.
                         // Still, we can get access to in and out nodes via the origin and destination nodes
                         // e.g User->Eats->Food. We can get User and Food without accessing Eats directly.
-                        r#in: DbField,
-                        // Book, Blog
-                        pub out: DbField,
-                        pub time_written: DbField,
-                        pub when: DbField,
-                        pub pattern: DbField,
+                       #( #schema_struct_fields_types_kv), *
                         pub __________store: String,
                         ___________model: ::std::marker::PhantomData<Model>,
                         // ___________outer: PhantomData<Out>,
@@ -248,12 +244,7 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
                     impl<Model: ::serde::Serialize + Default> Writes<Model> {
                         pub fn new() -> Self {
                             Self {
-                                id: "id".into(),
-                                r#in: "in".into(),
-                                out: "out".into(),
-                                when: "when".into(),
-                                pattern: "pattern".into(),
-                                time_written: "time_written".into(),
+                               #( #schema_struct_fields_names_kv), *
                                 __________store: "".into(),
                                 ___________model: ::std::marker::PhantomData,
                                 // ___________outer: PhantomData,
@@ -262,17 +253,18 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
 
                         pub fn __________update_edge(
                             // writes_store: &String,
-                            store: &String,
-                            clause: Clause,
-                            arrow_direction: EdgeDirection,
+                            store: &::std::string::String,
+                            clause: #crate_name::Clause,
+                            arrow_direction: #crate_name::EdgeDirection,
                         ) -> Writes<Model> {
                             // let arrow = arrow_direction;
                             let mut schema_instance = Writes::<Model>::default();
                             // e.g ExistingConnection->writes[WHERE id = "person:lowo"]->
                             // note: clause could also be empty
                             let current_edge = format!(
-                                "{}{arrow_direction}writes{arrow_direction}{}",
+                                "{}{arrow_direction}{}{arrow_direction}{}",
                                 store.as_str(),
+                                #struct_name_ident,
                                 format_clause(clause, "writes")
                             );
                             schema_instance.__________store.push_str(current_edge.as_str());
@@ -280,24 +272,26 @@ let field_names_ident = format_ident!("{struct_name_ident}DbFields");
                             let store_without_end_arrow = schema_instance
                                 .__________store
                                 .trim_end_matches(arrow_direction.to_string().as_str());
-                            schema_instance.time_written
-                                .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
-                            schema_instance.pattern
-                                .push_str(format!("{}.pattern", store_without_end_arrow).as_str());
+
+                            // schema_instance.time_written
+                            //     .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
+                            #( #connection_with_field_appended); *
+                            
                             schema_instance
                         }
                         
-                        pub fn student(&self, clause: Clause) -> Student {
-                            Student::__________update_connection(&self.__________store, clause)
-                        }
+                        // pub fn student(&self, clause: Clause) -> Student {
+                        //     Student::__________update_connection(&self.__________store, clause)
+                        // }
+                            #( #referenced_field_record_link_method) *
                     }
                 }
                 
             fn #test_name() {
-                #( #all_static_assertions) *
+                #( #static_assertions); *
 
-                // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
-                // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
+            // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
+            // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
                 // ::static_assertions::assert_fields!(Modax: manage);
             }
 ));
