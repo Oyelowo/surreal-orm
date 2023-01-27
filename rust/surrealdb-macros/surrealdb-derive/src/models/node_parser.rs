@@ -135,7 +135,7 @@ pub struct SchemaFieldsProperties {
     /// ```
     ///impl Writes {
     ///     pub fn book(&self, clause: #crate_name::Clause) -> Book {
-    ///         Book::__________update_connection(&self.__________store, clause)
+    ///         Book::__________update_edge(&self.__________update_connection, clause)
     ///     }
     /// }
     /// ```
@@ -150,8 +150,8 @@ pub struct SchemaFieldsProperties {
     /// Genearated example:
     /// ```
     /// pub fn writes__(&self, clause: Clause) -> Writes {
-    ///     Writes::__________update_edge(
-    ///         &self.___________store,
+    ///     Writes::___________graph_traversal_string(
+    ///         &self.___________graph_traversal_string,
     ///         clause,
     ///         #crate_name::EdgeDirection::OutArrowRight,
     ///     )
@@ -178,7 +178,7 @@ pub struct SchemaFieldsProperties {
     /// Generated Example for e.g field with best_student: <Student>
     /// ```
     /// pub fn best_student(&self, clause: Clause) -> Student {
-    ///     Student::__________update_connection(&self.__________store, clause)
+    ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, clause)
     /// }
     /// ```
     pub record_link_fields_methods: Vec<TokenStream>,
@@ -186,7 +186,7 @@ pub struct SchemaFieldsProperties {
     
     /// This generates a function that is usually called by other Nodes/Structs
     /// self_instance.drunk_water
-    /// .push_str(format!("{}.drunk_water", xx.___________store).as_str());
+    /// .push_str(format!("{}.drunk_water", xx.___________graph_traversal_string).as_str());
     /// 
     /// so that we can do e.g
     /// ```
@@ -252,7 +252,7 @@ impl SchemaFieldsProperties {
                     } else {
                         field_ident_normalised.to_string()
                     };
-                let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string: ___________store, schema_instance } = macro_variables;
+                let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance } = macro_variables;
                 
                 let referenced_node_meta = match relationship {
                     RelationType::Relate(relation) => {
@@ -284,7 +284,7 @@ impl SchemaFieldsProperties {
                                         // Could potantially make the method name all small letters
                                         // or just use exactly as the table name is written
                                         pub fn #destination_node(&self, clause: #crate_name::Clause) -> #destination_node {
-                                           #destination_node::#__________connect_to_graph_traversal_string(&self.#___________store, clause)
+                                           #destination_node::#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause)
                                         }
                                     })
                                 );
@@ -298,7 +298,7 @@ impl SchemaFieldsProperties {
                         acc.relate_edge_schema_method_connection.push(quote!(
                                     pub fn #edge_method_name_with_direction(&self, clause: #crate_name::Clause) -> #edge_name {
                                         #edge_name::#__________connect_to_graph_traversal_string(
-                                            &self.#___________store,
+                                            &self.#___________graph_traversal_string,
                                             clause,
                                             #crate_name::EdgeDirection::OutArrowRight,
                                         )
@@ -374,7 +374,7 @@ impl SchemaFieldsProperties {
                 acc.connection_with_field_appended
                     .push(quote!(
                                #schema_instance.#field_ident_normalised
-                                     .push_str(format!("{}.{}", #schema_instance.#___________store, #field_ident_normalised_as_str).as_str());
+                                     .push_str(format!("{}.{}", #schema_instance.#___________graph_traversal_string, #field_ident_normalised_as_str).as_str());
                     ));
 
                 acc.imports_referenced_node_schema
@@ -417,7 +417,7 @@ impl ReferencedNodeMeta {
         normalized_field_name: &::syn::Ident,
         macro_variables: &MacroVariables
     ) -> Self {
-        let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string: ___________store, .. } = macro_variables;
+        let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, .. } = macro_variables;
         let schema_name = format_ident!("{node_name}");
         let crate_name = get_crate_name(false);
         
@@ -432,7 +432,7 @@ impl ReferencedNodeMeta {
             
             record_link_default_alias_as_method: quote!(
                         pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
-                            #schema_name:#__________connect_to_graph_traversal_string(&self.#___________store, clause)
+                            #schema_name:#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause)
                         }
                     ),
         }
