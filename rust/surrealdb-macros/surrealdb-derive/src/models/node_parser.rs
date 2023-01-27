@@ -345,10 +345,10 @@ impl SchemaFieldsProperties {
                 acc.static_assertions.push(referenced_node_meta.destination_node_type_validator);
 
                 acc.schema_struct_fields_types_kv
-                    .push(quote!(pub #field_ident_normalised: #crate_name::DbField).into());
+                    .push(quote!(pub #field_ident_normalised: #crate_name::DbField, ));
 
                 acc.schema_struct_fields_names_kv
-                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into()).into());
+                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
 
                 acc.serialized_field_names_normalised
                     .push(field_ident_normalised_as_str.to_owned());
@@ -357,7 +357,7 @@ impl SchemaFieldsProperties {
                     .push(quote!(
                                schema_instance.#field_ident_normalised
                                      .push_str(format!("{}.{}", store_without_end_arrow, #field_ident_normalised_as_str).as_str());
-                    ).into());
+                    ));
 
                 acc.imports_referenced_node_schema
                     .push(referenced_node_meta.destination_node_schema_import.into());
@@ -408,7 +408,7 @@ impl ReferencedNodeMeta {
                         type #schema_name = <super::#schema_name as #crate_name::SurrealdbNode>::Schema;
                     ),
                     
-            destination_node_type_validator: quote!(::static_assertions::assert_impl_one!(#schema_name: #crate_name::SurrealdbNode)),
+            destination_node_type_validator: quote!(::static_assertions::assert_impl_one!(#schema_name: #crate_name::SurrealdbNode);),
             
             record_link_default_alias_as_method: quote!(
                         pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {

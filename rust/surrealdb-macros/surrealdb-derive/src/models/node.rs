@@ -207,8 +207,6 @@ impl ToTokens for FieldsGetterOpts {
         
         let schema_alias = format_ident!("{}Schema", struct_name_ident.to_string().to_lowercase());
         
-        tokens.extend(quote!( 
-                        
             // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
             // #[serde(rename_all = "camelCase")]
             // pub struct Student {
@@ -227,6 +225,7 @@ impl ToTokens for FieldsGetterOpts {
             //     #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
             //     written_blogs: Relate<Blog>,
             // }
+        tokens.extend(quote!( 
             
             // Model's Schema SurrealdbNode implementation
             impl #crate_name::SurrealdbNode for #struct_name_ident {
@@ -242,13 +241,13 @@ impl ToTokens for FieldsGetterOpts {
 
                 // Alternative old consideration: use super::book_schema::Book;
                 // type Book = < super::Book as SurrealdbNode>::Schema;
-               #( #imports_referenced_node_schema); *
+               #( #imports_referenced_node_schema) *
                 
 
                 // Build struct for Schema for node. e.g struct Student {id: DbField, ...}
                 #[derive(Debug, Serialize, Default)]
                 pub struct #struct_name_ident {
-                   #( #schema_struct_fields_types_kv), *
+                   #( #schema_struct_fields_types_kv) *
                     // Use for storing graph paths. Should probably rename
                     pub ___________store: ::std::string::String,
                 }
@@ -268,7 +267,7 @@ impl ToTokens for FieldsGetterOpts {
                         // both the field name and field value. e.g firstName: "firstName".into(),
                         Self {
                             // id: "id".into(),
-                           #( #schema_struct_fields_names_kv), *
+                           #( #schema_struct_fields_names_kv) *
                             ___________store: "".to_string(),
                         }
                     }
@@ -300,7 +299,7 @@ impl ToTokens for FieldsGetterOpts {
 
                         // self_instance.drunk_water
                             // .push_str(format!("{}.drunk_water", self_instance.___________store).as_str());
-                        #( #connection_with_field_appended); *
+                        #( #connection_with_field_appended) *
                         self_instance
                     }
 
@@ -342,7 +341,7 @@ impl ToTokens for FieldsGetterOpts {
                 // still consiering either of the two approaches below
                 // type Writes = super::writes::Writes<Student>;
                 // type Writes = super::WritesSchema<#struct_name_ident>;
-                    #( #relate_edge_struct_type_alias); *
+                    #( #relate_edge_struct_type_alias) *
 
                 // Generates implementation for edge to allow access to destination node
                 // It's okay in rust to have multiple separate impl Struct. So, we can generate
@@ -374,7 +373,7 @@ impl ToTokens for FieldsGetterOpts {
                 // ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
                 // ::static_assertions::assert_impl_one!(Blog: SurrealdbNode);
                 // ::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
-                #( #static_assertions); *
+                #( #static_assertions) *
             }
 ));
     }
