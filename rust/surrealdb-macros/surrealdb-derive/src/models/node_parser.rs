@@ -210,9 +210,8 @@ impl SchemaFieldsProperties {
                 let field_ident = field_receiver.ident.as_ref().unwrap();
                 let field_type = &field_receiver.ty;
                 let crate_name = get_crate_name(false);
-                let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
                 let field_ident_cased = FieldIdentCased::from(FieldIdentUnCased {
-                    uncased_field_name,
+                    uncased_field_name: field_ident.to_string(),
                     casing: struct_level_casing,
                 });
 

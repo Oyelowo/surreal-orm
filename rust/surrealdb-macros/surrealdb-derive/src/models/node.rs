@@ -191,6 +191,7 @@ impl ToTokens for FieldsGetterOpts {
             relate_node_alias_method,
             referenced_node_schema_imports,
             record_link_fields_methods,
+            relate_edge_struct_type_alias,
         }: SchemaFieldsProperties  = SchemaFieldsProperties::from_receiver_data(
             data,
             struct_level_casing,
@@ -201,30 +202,31 @@ impl ToTokens for FieldsGetterOpts {
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
 
         let field_names_ident = format_ident!("{struct_name_ident}DbFields");
-        let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
+        let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
+        // let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         
         let schema_alias = format_ident!("{}Schema", struct_name_ident.to_string().to_lowercase());
         
         tokens.extend(quote!( 
                         
-            #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
-            #[serde(rename_all = "camelCase")]
-            pub struct Student {
-                #[serde(skip_serializing_if = "Option::is_none")]
-                #[builder(default, setter(strip_option))]
-                id: Option<String>,
-                first_name: String,
-
-                #[surrealdb(link_one = "Book", skip_serializing)]
-                course: LinkOne<Book>,
-
-                #[surrealdb(link_many = "Book", skip_serializing)]
-                #[serde(rename = "lowo")]
-                all_semester_courses: LinkMany<Book>,
-
-                #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
-                written_blogs: Relate<Blog>,
-            }
+            // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+            // #[serde(rename_all = "camelCase")]
+            // pub struct Student {
+            //     #[serde(skip_serializing_if = "Option::is_none")]
+            //     #[builder(default, setter(strip_option))]
+            //     id: Option<String>,
+            //     first_name: String,
+            //
+            //     #[surrealdb(link_one = "Book", skip_serializing)]
+            //     course: LinkOne<Book>,
+            //
+            //     #[surrealdb(link_many = "Book", skip_serializing)]
+            //     #[serde(rename = "lowo")]
+            //     all_semester_courses: LinkMany<Book>,
+            //
+            //     #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
+            //     written_blogs: Relate<Blog>,
+            // }
             
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;

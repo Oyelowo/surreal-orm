@@ -59,7 +59,7 @@ impl std::fmt::Display for DbField {
     }
 } */
 
-impl ToNodeBuilder2 for DbField {}
+// impl ToNodeBuilder2 for DbField {}
 
 pub enum Clause {
     None,
