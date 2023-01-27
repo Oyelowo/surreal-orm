@@ -226,8 +226,6 @@ impl ToTokens for FieldsGetterOpts {
             //     written_blogs: Relate<Blog>,
             // }
         tokens.extend(quote!( 
-            
-            // Model's Schema SurrealdbNode implementation
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;
 
@@ -236,7 +234,6 @@ impl ToTokens for FieldsGetterOpts {
                 }
                 
                 fn get_key(&self) -> ::std::option::Option<String>{
-                    // TODO: Dont clone
                     self.id.clone()
                 }
             }
@@ -244,22 +241,16 @@ impl ToTokens for FieldsGetterOpts {
             pub mod #module_name {
                 use ::serde::Serialize;
 
-                // Alternative old consideration: use super::book_schema::Book;
-                // type Book = < super::Book as SurrealdbNode>::Schema;
                #( #imports_referenced_node_schema) *
                 
 
-                // Build struct for Schema for node. e.g struct Student {id: DbField, ...}
                 #[derive(Debug, Serialize, Default)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
-                    // Use for storing graph paths. Should probably rename
                     pub ___________store: ::std::string::String,
                 }
 
                 
-                // Displays a schema as it's current path in the graph
-                // e.g Student->Writes->Book or simple Student
                 impl ::std::fmt::Display for #struct_name_ident {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                         f.write_fmt(format_args!("{}", self.___________store))
@@ -268,24 +259,17 @@ impl ToTokens for FieldsGetterOpts {
 
                 impl #struct_name_ident {
                     pub fn new() -> Self {
-                        // Actually instatiate the schema with the normalized fields as
-                        // both the field name and field value. e.g firstName: "firstName".into(),
                         Self {
-                            // id: "id".into(),
                            #( #schema_struct_fields_names_kv) *
                             ___________store: "".to_string(),
                         }
                     }
 
-                    // TODO: Change id to be SurrealdbCoplexId wrapper struct
                     pub fn __with_id__(mut self, id: impl ::std::fmt::Display) -> Self {
-                        // TODO: Remove prefix book, so that its not bookBook:lowo
                         self.___________store.push_str(id.to_string().as_str());
                         self
                     }
                     
-                    // TODO: let this take a query object which it can build
-                    // Potentially rename to __with_query__
                     pub fn __with__(db_name: impl ::std::fmt::Display) -> Self {
                         let mut schema_instance = Self::new();
                         schema_instance
@@ -296,88 +280,34 @@ impl ToTokens for FieldsGetterOpts {
 
                     pub fn __________update_connection(store: &::std::string::String, clause: #crate_name::Clause) -> Self {
                         let mut schema_instance = Self::default();
-                        // let connection = format!("{}student{}", store, format_clause(clause, "student"));
                         let connection = format!("{}{}{}", store, #struct_name_ident_as_str, #crate_name::format_clause(clause, #struct_name_ident_as_str));
 
-                        // TODO: Make schema_instance ident into a variable which can also be passed
-                        // to SchemaFieldsProperties Generator/transoforer in node_parser.rs
                         schema_instance.___________store.push_str(connection.as_str());
 
-                        // schema_instance.drunk_water
-                            // .push_str(format!("{}.drunk_water", schema_instance.___________store).as_str());
                         #( #connection_with_field_appended) *
                         schema_instance
                     }
 
-                    // edge with dunda(__) before or after the edge_name depending on the
-                    // direction
-                    // pub fn writes__(&self, clause: #crate_name::Clause) -> Writes {
-                    //     Writes::__________update_edge(
-                    //         &self.___________store,
-                    //         clause,
-                    //         #crate_name::EdgeDirection::OutArrowRight,
-                    //     )
-                    // }
-                    //
                     #( #relate_edge_schema_method_connection) *
-
-
-                    // Generated method to access record links fields
-                    // pub fn favorite_book(&self, clause: Clause) -> Book {
-                    //     Book::__________update_connection(&self.__________store, clause)
-                    // }
-                    #( #record_link_fields_methods) *
                     
-                    // Aliases
+                    #( #record_link_fields_methods) *
+
+
                     pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {
                         format!("{} AS {}", self, alias)
                     }
-                    /// These are for aliasing Relate<T> fields 
-                    /// Returns the   as book written   of this [`Student`].
-                    /// AS book_written
-                    // pub fn __as_book_written__(&self) -> String {
-                    //     format!("{self} AS book_written")
-                    // }
+                    
                     #( #relate_node_alias_method) *
                 }
                 
-                // Used for importing and aliasing edge schema. The generic 
-                // represents the current SurrealdbNode e.g Student
-                // still consiering either of the two approaches below
-                // type Writes = super::writes::Writes<Student>;
-                // type Writes = super::WritesSchema<#struct_name_ident>;
-                    #( #relate_edge_struct_type_alias) *
+                #( #relate_edge_struct_type_alias) *
 
-                // Generates implementation for edge to allow access to destination node
-                // It's okay in rust to have multiple separate impl Struct. So, we can generate
-                // for each edge->node separately without extra dedup logic
-                // impl Writes {
-                //     pub fn book(&self, clause: #crate_name::Clause) -> Book {
-                //         Book::__________update_connection(&self.__________store, clause)
-                //     }
-                // }
                 #( #relate_edge_schema_struct_alias_impl) *
                 
             }
 
                 
             fn #test_name() {
-                // Static assertions to validate properties at compile time e.g
-                // type StudentWritesBlogTableName = <StudentWritesBlog as
-                // SurrealdbEdge>::TableNameChecker;
-                // ::static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
-                //
-                // type StudentWritesBlogInNode = <StudentWritesBlog as SurrealdbEdge>::In;
-                // ::static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
-                //
-                // type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealdbEdge>::Out;
-                // ::static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
-                //
-                // 
-                // ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealdbEdge);
-                // ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
-                // ::static_assertions::assert_impl_one!(Blog: SurrealdbNode);
-                // ::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
                 #( #static_assertions) *
             }
 ));

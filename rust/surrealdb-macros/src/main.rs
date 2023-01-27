@@ -24,19 +24,20 @@ use surrealdb_macros::{
     model_id::SurIdComplex,
     node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
     query_builder::{query, ToNodeBuilder},
-    /* SurrealdbEdge, */ SurrealdbNode,
+    Clause, /* SurrealdbEdge, */ SurrealdbNode,
 };
 use typed_builder::TypedBuilder;
 
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Student {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[builder(default, setter(strip_option))]
     id: Option<String>,
     first_name: String,
     last_name: String,
-    // fav_book: LinkOne<Book>,
+    #[surrealdb(link_one = "Book", skip_serializing)]
+    fav_book: LinkOne<Book>,
     // // #[surrealdb(link_one = "Book", skip_serializing)]
     // course: LinkOne<Book>,
     // #[surrealdb(link_many = "Book", skip_serializing)]
@@ -47,14 +48,14 @@ pub struct Student {
     // written_blogs: Relate<Blog>,
 }
 
-// #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
-// #[serde(rename_all = "camelCase")]
-// pub struct Book {
-//     #[serde(skip_serializing_if = "Option::is_none")]
-//     #[builder(default, setter(strip_option))]
-//     id: Option<String>,
-//     title: String,
-// }
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Book {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    id: Option<String>,
+    title: String,
+}
 // fn fmt(f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
 //     // f.write_fmt(format_args!("{}", self.___________store))
 //     todo!()
@@ -68,11 +69,11 @@ fn main() {
         id: None,
         first_name: "".into(),
         last_name: "".into(),
-        // fav_book: LinkOne::from_model(Book::default()),
+        fav_book: LinkOne::from_model(Book::default()),
     };
     // xx.get_key()
-    // Student::get_schema()
-    Student::get_schema().__with_id__("student:3434").lastName;
+    Student::get_schema().favBook(Clause::All);
+    // Student::get_schema().__with_id__("student:3434").lastName;
     // Student::get_schema().__with_id__("student:3434");
 }
 // #[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]

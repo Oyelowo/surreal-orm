@@ -62,7 +62,7 @@ impl std::fmt::Display for DbField {
 // impl ToNodeBuilder2 for DbField {}
 
 pub enum Clause {
-    None,
+    All,
     Where(String),
     // Change to SurId
     Id(String),
@@ -70,7 +70,7 @@ pub enum Clause {
 
 pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
     match clause {
-        Clause::None => "".into(),
+        Clause::All => "".into(),
         Clause::Where(where_clause) => {
             if !where_clause.to_lowercase().starts_with("where") {
                 panic!("Invalid where clause, must start with `WHERE`")
