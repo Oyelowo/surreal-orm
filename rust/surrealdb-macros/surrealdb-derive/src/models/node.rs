@@ -236,7 +236,8 @@ impl ToTokens for FieldsGetterOpts {
                 }
                 
                 fn get_key(&self) -> ::std::option::Option<String>{
-                    self.id
+                    // TODO: Dont clone
+                    self.id.clone()
                 }
             }
 
@@ -286,11 +287,11 @@ impl ToTokens for FieldsGetterOpts {
                     // TODO: let this take a query object which it can build
                     // Potentially rename to __with_query__
                     pub fn __with__(db_name: impl ::std::fmt::Display) -> Self {
-                        let mut self_model = Self::new();
-                        self_model
+                        let mut schema_instance = Self::new();
+                        schema_instance
                             .___________store
                             .push_str(db_name.to_string().as_str());
-                        self_model
+                        schema_instance
                     }
 
                     pub fn __________update_connection(store: &::std::string::String, clause: #crate_name::Clause) -> Self {

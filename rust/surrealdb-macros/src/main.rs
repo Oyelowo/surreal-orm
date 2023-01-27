@@ -36,7 +36,8 @@ pub struct Student {
     id: Option<String>,
     first_name: String,
     last_name: String,
-    // #[surrealdb(link_one = "Book", skip_serializing)]
+    // fav_book: LinkOne<Book>,
+    // // #[surrealdb(link_one = "Book", skip_serializing)]
     // course: LinkOne<Book>,
     // #[surrealdb(link_many = "Book", skip_serializing)]
     // #[serde(rename = "lowo")]
@@ -46,6 +47,18 @@ pub struct Student {
     // written_blogs: Relate<Blog>,
 }
 
+// #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+// #[serde(rename_all = "camelCase")]
+// pub struct Book {
+//     #[serde(skip_serializing_if = "Option::is_none")]
+//     #[builder(default, setter(strip_option))]
+//     id: Option<String>,
+//     title: String,
+// }
+// fn fmt(f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+//     // f.write_fmt(format_args!("{}", self.___________store))
+//     todo!()
+// }
 // struct Nama {}
 // mod nama {}
 fn main() {
@@ -55,10 +68,12 @@ fn main() {
         id: None,
         first_name: "".into(),
         last_name: "".into(),
+        // fav_book: LinkOne::from_model(Book::default()),
     };
     // xx.get_key()
     // Student::get_schema()
-    // Student::get_schema()
+    Student::get_schema().__with_id__("student:3434").lastName;
+    // Student::get_schema().__with_id__("student:3434");
 }
 // #[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
 // // #[surrealdb(relation_name = "writes")]
