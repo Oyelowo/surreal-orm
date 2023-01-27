@@ -315,14 +315,14 @@ impl ToTokens for FieldsGetterOpts {
                     //     )
                     // }
                     //
-                    #( #relate_edge_schema_method_connection); *
+                    #( #relate_edge_schema_method_connection) *
 
 
                     // Generated method to access record links fields
                     // pub fn favorite_book(&self, clause: Clause) -> Book {
                     //     Book::__________update_connection(&self.__________store, clause)
                     // }
-                    #( #record_link_fields_methods); *
+                    #( #record_link_fields_methods) *
                     
                     // Aliases
                     pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {
@@ -335,7 +335,7 @@ impl ToTokens for FieldsGetterOpts {
                     // pub fn __as_book_written__(&self) -> String {
                     //     format!("{self} AS book_written")
                     // }
-                    #( #relate_node_alias_method); *
+                    #( #relate_node_alias_method) *
                 }
                 
                 // Used for importing and aliasing edge schema. The generic 
@@ -345,41 +345,37 @@ impl ToTokens for FieldsGetterOpts {
                 // type Writes = super::WritesSchema<#struct_name_ident>;
                     #( #relate_edge_struct_type_alias); *
 
-                impl Writes {
-                    pub fn book(&self, clause: #crate_name::Clause) -> Book {
-                        Book::__________update_connection(&self.__________store, clause)
-                    }
-                }
-
-                impl Writes {
-                    pub fn blog(&self, clause: #crate_name::Clause) -> Blog {
-                        Blog::__________update_connection(&self.__________store, clause)
-                    }
-                }
-
+                // Generates implementation for edge to allow access to destination node
+                // It's okay in rust to have multiple separate impl Struct. So, we can generate
+                // for each edge->node separately without extra dedup logic
+                // impl Writes {
+                //     pub fn book(&self, clause: #crate_name::Clause) -> Book {
+                //         Book::__________update_connection(&self.__________store, clause)
+                //     }
+                // }
+                #( #relate_edge_schema_struct_alias_impl) *
+                
             }
 
                 
             fn #test_name() {
+                // Static assertions to validate properties at compile time e.g
+                // type StudentWritesBlogTableName = <StudentWritesBlog as
+                // SurrealdbEdge>::TableNameChecker;
+                // ::static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
+                //
+                // type StudentWritesBlogInNode = <StudentWritesBlog as SurrealdbEdge>::In;
+                // ::static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
+                //
+                // type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealdbEdge>::Out;
+                // ::static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
+                //
+                // 
+                // ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealdbEdge);
+                // ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
+                // ::static_assertions::assert_impl_one!(Blog: SurrealdbNode);
+                // ::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
                 #( #static_assertions); *
-
-            type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
-            ::static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
-
-            type StudentWritesBlogInNode = <StudentWritesBlog as SurrealdbEdge>::In;
-            ::static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
-
-            type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealdbEdge>::Out;
-            ::static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
-
-            
-            ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealdbEdge);
-            ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
-            ::static_assertions::assert_impl_one!(Blog: SurrealdbNode);
-            ::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
-            // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::InNode, Account);
-            // ::static_assertions::assert_type_eq_all!(<AccountManageProject as Edge>::OutNode, Project);
-                // ::static_assertions::assert_fields!(Modax: manage);
             }
 ));
     }
