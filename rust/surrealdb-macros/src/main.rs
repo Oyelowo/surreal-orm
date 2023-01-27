@@ -7,6 +7,7 @@
 #![feature(inherent_associated_types)]
 #![feature(generic_const_exprs)]
 
+use darling::ToTokens;
 use serde::{Deserialize, Serialize};
 use static_assertions::*;
 use surrealdb::{
@@ -27,7 +28,9 @@ use surrealdb_macros::{
 };
 use typed_builder::TypedBuilder;
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(
+    SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, ::std::default::Default,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -44,7 +47,15 @@ pub struct Student {
     // written_blogs: Relate<Blog>,
 }
 fn main() {
-    ::std::string::String
+    // ::std::string::String::std::k
+    // ::std::default::Default
+    let xx = Student {
+        id: None,
+        first_name: "".into(),
+    };
+    // xx.get_key()
+    // Student::get_schema()
+    // Student::get_schema()
 }
 // #[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
 // // #[surrealdb(relation_name = "writes")]

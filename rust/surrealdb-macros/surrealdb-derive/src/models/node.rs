@@ -292,8 +292,7 @@ impl ToTokens for FieldsGetterOpts {
 
                     pub fn __________update_connection(store: &::std::string::String, clause: #crate_name::Clause) -> Self {
                         let mut self_instance = Self::default();
-                        let connection = format!("{}{}{}", store, #struct_name_ident_as_str, #cr
-                                                 ::format_clause(clause, #struct_name_ident_as_str));
+                        let connection = format!("{}{}{}", store, #struct_name_ident_as_str, #crate_name::format_clause(clause, #struct_name_ident_as_str));
 
                         // TODO: Make self_instance ident into a variable which can also be passed
                         // to SchemaFieldsProperties Generator/transoforer in node_parser.rs
