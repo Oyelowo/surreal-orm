@@ -7,12 +7,7 @@
 #![feature(inherent_associated_types)]
 #![feature(generic_const_exprs)]
 
-use _core::ops::{Deref, DerefMut};
 use serde::{Deserialize, Serialize};
-// #![feature(inherent_associated_types)]
-// #![feature(const_mut_refs)]
-// use serde::{Deserialize, Serialize};
-// use surreal_simple_querybuilder::prelude::*;
 use static_assertions::*;
 use surrealdb::{
     engine::local::{Db, Mem},
@@ -20,8 +15,7 @@ use surrealdb::{
     sql::Id,
     Result, Surreal,
 };
-// const_assert!("oylelowo".as_str().len() > 3);
-// assert_fields!(Account_Manage_Project: r#in, out);
+use surrealdb_derive::SurrealdbNode;
 
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
@@ -33,7 +27,7 @@ use surrealdb_macros::{
 };
 use typed_builder::TypedBuilder;
 
-#[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -41,390 +35,35 @@ pub struct Student {
     id: Option<String>,
     first_name: String,
 
-    // #[surrealdb(link_one = "Book", skip_serializing)]
+    #[surrealdb(link_one = "Book", skip_serializing)]
     course: LinkOne<Book>,
 
-    // #[surrealdb(link_many = "Book", skip_serializing)]
+    #[surrealdb(link_many = "Book", skip_serializing)]
     #[serde(rename = "lowo")]
     all_semester_courses: LinkMany<Book>,
 
-    // #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
+    #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
     written_blogs: Relate<Blog>,
 }
 
-pub mod student_schema {
-    use serde::Serialize;
-
-    use crate::drinks_schema::Drinks;
-
-    use super::{
-        blog_schema::Blog, book_schema::Book, juice_schema::Juice, water_schema::Water,
-        /* writes_schema::Writes, */ Clause, *,
-    };
-
-    #[derive(Debug, Serialize, Default)]
-    pub struct Student {
-        pub id: DbField,
-        pub name: DbField,
-        // favorite_course_mate: Student
-        // favorite_course_mate: Student,
-        // favorite_book: Book
-        pub favorite_book: DbField,
-        // ->writes->book
-        pub book_written: DbField,
-        // ->writes->blog
-        pub blog_written: DbField,
-        // ->drinks->water
-        pub drunk_water: DbField,
-        // ->drinks->juice
-        pub drunk_juice: DbField,
-        pub ___________store: String,
-    }
-
-    impl Display for Student {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            f.write_fmt(format_args!("{}", self.___________store))
-        }
-    }
-
-    // type Writes = super::writes_schema::Writes<Student>;
-    type Writes = super::WritesSchema<Student>;
-
-    impl Writes {
-        pub fn book(&self, clause: Clause) -> Book {
-            let mut xx = Book::default();
-            xx.__________store.push_str(self.__________store.as_str());
-            let pp = format_clause(clause, "book");
-
-            xx.__________store.push_str(format!("book{pp}").as_str());
-
-            xx
-        }
-    }
-
-    impl Writes {
-        pub fn blog(&self, clause: Clause) -> Blog {
-            let mut xx = Blog::default();
-            xx.______________store
-                .push_str(self.__________store.as_str());
-            let pp = format_clause(clause, "blog");
-            xx.______________store
-                .push_str(format!("blog{pp}").as_str());
-
-            xx.intro.push_str(xx.______________store.as_str());
-            xx.intro.push_str(".intro");
-            xx
-        }
-    }
-
-    #[derive(Debug)]
-    pub enum StudentEnum {
-        book_written,
-        blog_written,
-        drunk_water,
-        drunk_juice,
-    }
-
-    impl Display for StudentEnum {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            match self {
-                StudentEnum::book_written => f.write_str("book_written"),
-                StudentEnum::blog_written => f.write_str("blog_written "),
-                StudentEnum::drunk_water => f.write_str("drunk_water "),
-                StudentEnum::drunk_juice => f.write_str("drunk_juice "),
-            }
-        }
-    }
-
-    impl Student {
-        pub const book_written: &'static str = "book_written";
-        pub type Aliases = StudentEnum;
-
-        pub fn __with_id__(mut self, id: impl std::fmt::Display) -> Self {
-            // TODO: Remove prefix book, so that its not bookBook:lowo
-            self.___________store.push_str(id.to_string().as_str());
-            self
-        }
-        // pub fn __with_id__(id: impl std::fmt::Display) -> Self {
-        //     let mut stud_model = Self::new();
-        //     stud_model
-        //         .___________store
-        //         .push_str(id.to_string().as_str());
-        //     stud_model
-        // }
-
-        pub fn __with__(db_name: impl std::fmt::Display) -> Self {
-            let mut stud_model = Self::new();
-            stud_model
-                .___________store
-                .push_str(db_name.to_string().as_str());
-            stud_model
-        }
-
-        pub fn new() -> Student {
-            Self {
-                id: "id".into(),
-                name: "foreign".into(),
-                favorite_book: "favorite_book".into(),
-                blog_written: "blog_written".into(),
-                book_written: "book_written".into(),
-                drunk_water: "drunk_water".into(),
-                drunk_juice: "drunk_juice".into(),
-                ___________store: "".to_string(),
-            }
-        }
-
-        pub fn __________update_connection(store: &String, clause: Clause) -> Student {
-            let mut xx = Student::default();
-            let connection = format!("{}student{}", store, format_clause(clause, "student"));
-
-            xx.___________store.push_str(connection.as_str());
-
-            xx.drunk_water
-                .push_str(format!("{}.drunk_water", xx.___________store).as_str());
-            xx.favorite_book
-                .push_str(format!("{}.favorite_book", xx.___________store).as_str());
-            xx
-        }
-
-        pub fn writes__(&self, clause: Clause) -> Writes {
-            let xx = Writes::__________update_edge(
-                &self.___________store,
-                clause,
-                EdgeDirection::OutArrowRight,
-            );
-            xx
-        }
-
-        pub fn drinks__(&self, clause: Clause) -> Drinks {
-            let mut xx = Drinks::default();
-            xx.__________store.push_str(self.___________store.as_str());
-            let pp = format_clause(clause, "drinks");
-            xx.__________store
-                .push_str(format!("->drinks{pp}->").as_str());
-            xx
-        }
-
-        pub fn favorite_book(&self, clause: Clause) -> Book {
-            let mut xx = Book::default();
-            xx.__________store.push_str(self.___________store.as_str());
-            xx.title.0.push_str(self.___________store.as_str());
-            let pp = format_clause(clause, "book");
-            // xx.title.push_str("lxxtitle");
-            xx.__________store
-                .push_str(format!("favorite_book{pp}").as_str());
-            xx.title
-                .0
-                .push_str(format!("favorite_book{pp}.title").as_str());
-            xx
-        }
-
-        // Aliases
-        pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
-            // let xx = self.___________store;
-            format!("{self} AS {alias}")
-        }
-        /// Returns the   as book written   of this [`Student`].
-        /// AS book_written
-        pub fn __as_book_written__(&self) -> String {
-            // let xx = self.___________store;
-            format!("{self} AS book_written")
-        }
-        pub fn __as_blog_written__(&self) -> String {
-            // let xx = self.___________store;
-            format!("{self} AS blog_written")
-        }
-        pub fn __as_drunk_juice__(&self) -> String {
-            // let xx = self.___________store;
-            format!("{self} AS drunk_juice")
-        }
-        pub fn __as_drunk_water__(&self) -> String {
-            // let xx = self.___________store;
-            format!("{self} AS drunk_water")
-        }
-    }
-}
-
-impl SurrealdbNode for Student {
-    type Schema = student_schema::Student;
-
-    fn get_schema() -> Self::Schema {
-        student_schema::Student::new()
-    }
-}
-
-impl SurrealdbNode for Blog {
-    type Schema = blog_schema::Blog;
-
-    fn get_schema() -> Self::Schema {
-        blog_schema::Blog::new()
-    }
-}
-fn erer() {
-    let mm = Student::get_schema()
-        .__with_id__("dfdf")
-        .writes__(Clause::None)
-        .book(Clause::None)
-        .__writes(Clause::None)
-        .student(Clause::None);
-}
-impl SurrealdbNode for Book {
-    type Schema = book_schema::Book;
-    fn get_schema() -> Self::Schema {
-        let xx = book_schema::Book::new();
-        xx
-    }
-}
-
-type StudentWritesBlog = Writes<Student, Blog>;
-type StudentWritesBook = Writes<Student, Book>;
-::static_assertions::assert_type_eq_all!(
-    <StudentWritesBlog as SurrealdbEdge>::TableNameChecker,
-    <StudentWritesBook as SurrealdbEdge>::TableNameChecker
-);
-/* fn efre(ss: StudentWritesBlog) {
-    ss.
-} */
-
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Clone)]
+#[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
 // #[surrealdb(relation_name = "writes")]
 struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     id: Option<String>,
-    // #[surrealdb(link_one = "Student")]
+    #[surrealdb(link_one = "Student")]
     r#in: LinkOne<In>,
-    // #[surrealdb(link_one = "Blog")]
+
+    #[surrealdb(link_one = "Blog")]
     out: LinkOne<Out>,
     when: String,
     destination: String,
 }
 
-impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
-    type In = In;
-    type Out = Out;
-    type TableNameChecker = WritesTableNameStaticChecker;
+// impl<In: SurrealdbNode, Out: SurrealdbNode> Writes<In, Out> {
+//     // const Nama: &'static str = "Writes";
+// }
 
-    // type Schema = writes_schema::Writes;
-    //
-    // fn get_schema() -> Self::Schema {
-    //     todo!()
-    // }
-}
-
-use writes_schema::Writes as WritesSchema;
-
-pub mod writes_schema {
-    use std::marker::PhantomData;
-
-    use serde::Serialize;
-    use surrealdb_macros::SurrealdbNode;
-
-    type Book = <super::Book as SurrealdbNode>::Schema;
-    use super::{
-        blog_schema::Blog, /* book_schema::Book, */ format_clause, student_schema::Student,
-        Clause, DbField, EdgeDirection,
-    };
-
-    #[derive(Debug, Default)]
-    pub struct Writes<Model: Serialize + Default> {
-        id: DbField,
-        // Student, User
-        // Even though it's possible to have full object when in and out are loaded,
-        // in practise, we almost never want to do this, since edges are rarely
-        // accessed directly but only via nodes and they are more like bridges
-        // between two nodes. So, we make that trade-off of only allowing DbField
-        // - which is just a surrealdb id , for both in and out nodes.
-        // Still, we can get access to in and out nodes via the origin and destination nodes
-        // e.g User->Eats->Food. We can get User and Food without accessing Eats directly.
-        r#in: DbField,
-        // Book, Blog
-        pub out: DbField,
-        pub time_written: DbField,
-        pub when: DbField,
-        pub pattern: DbField,
-        pub __________store: String,
-        ___________model: PhantomData<Model>,
-        // ___________outer: PhantomData<Out>,
-    }
-
-    impl<Model: Serialize + Default> Writes<Model> {
-        pub fn new() -> Self {
-            Self {
-                id: "id".into(),
-                r#in: "in".into(),
-                out: "out".into(),
-                when: "when".into(),
-                pattern: "pattern".into(),
-                time_written: "time_written".into(),
-                __________store: "".into(),
-                ___________model: PhantomData,
-                // ___________outer: PhantomData,
-            }
-        }
-
-        pub fn __________update_edge(
-            // writes_store: &String,
-            store: &String,
-            clause: Clause,
-            arrow_direction: EdgeDirection,
-        ) -> Writes<Model> {
-            // let arrow = arrow_direction;
-            let mut xx = Writes::<Model>::default();
-            // e.g ExistingConnection->writes[WHERE id = "person:lowo"]->
-            // note: clause could also be empty
-            let connection = format!(
-                "{}{arrow_direction}writes{arrow_direction}{}",
-                store.as_str(),
-                format_clause(clause, "writes")
-            );
-            xx.__________store.push_str(connection.as_str());
-
-            let store_without_end_arrow = xx
-                .__________store
-                .trim_end_matches(arrow_direction.to_string().as_str());
-            xx.time_written
-                .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
-            xx.pattern
-                .push_str(format!("{}.pattern", store_without_end_arrow).as_str());
-            xx
-        }
-    }
-}
-fn rerej() {
-    // const Nama: &'static str = "Writes";
-    /* ::static_assertions::const_assert!(Nama == Nama); */
-    // Writes<I>
-}
-impl<In: SurrealdbNode, Out: SurrealdbNode> Writes<In, Out> {
-    // const Nama: &'static str = "Writes";
-}
-
-struct WritesTableNameStaticChecker {
-    Writes: String,
-}
-
-static_assertions::assert_fields!(WritesTableNameStaticChecker: Writes);
-
-type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
-static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
-
-type StudentWritesBlogInNode = <StudentWritesBlog as SurrealdbEdge>::In;
-static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
-
-type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealdbEdge>::Out;
-static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
-
-#[test]
-fn assert_impl_traits() {
-    ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealdbEdge);
-    ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
-    ::static_assertions::assert_impl_one!(Blog: SurrealdbNode);
-
-    ::static_assertions::assert_impl_one!(StudentWritesBook: SurrealdbEdge);
-    ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
-    ::static_assertions::assert_impl_one!(Book: SurrealdbNode);
-}
-
-#[derive(/* SurrealdbModel, */ TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbNode, TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
 /* #[surrealdb(rename_all = "camelCase")] */
 pub struct Blog {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -435,7 +74,7 @@ pub struct Blog {
     content: String,
 }
 
-#[derive(/* SurrealdbModel, */ TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbNode, TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
 /* #[surrealdb(rename_all = "camelCase")] */
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -444,229 +83,7 @@ pub struct Book {
     title: String,
 }
 
-::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
-
-// use ref_mod::Ref;
-// use ref_mod::{LinkMany, Ref as Mana};
-
 static DB: Surreal<Db> = Surreal::init();
-
-// pub mod schema {
-
-// let x = DbField("lowo".into());
-// For e.g: ->writes->Book as field_name_as_alias_default
-
-pub mod drinks_schema {
-    use crate::{format_clause, juice_schema::Juice, water_schema::Water, Clause};
-
-    #[derive(Debug, Default)]
-    pub struct Drinks {
-        pub id: String,
-        pub r#in: String,
-        pub out: String,
-        pub rate: String,
-        pub __________store: String,
-    }
-
-    impl Drinks {
-        pub fn new() -> Self {
-            Self {
-                id: "id".into(),
-                r#in: "in".into(),
-                out: "out".into(),
-                rate: "time_written".into(),
-                __________store: "".into(),
-            }
-        }
-
-        pub fn water(&self, clause: Clause) -> Water {
-            let mut xx = Water::default();
-            xx.______________store
-                .push_str(self.__________store.as_str());
-            let pp = format_clause(clause, "water");
-            xx.______________store
-                .push_str(format!("water{pp}").as_str());
-
-            xx
-        }
-        pub fn juice(&self, clause: Clause) -> Juice {
-            let mut xx = Juice::default();
-            xx.______________store
-                .push_str(self.__________store.as_str());
-            let pp = format_clause(clause, "juice");
-            xx.______________store
-                .push_str(format!("juice{pp}").as_str());
-
-            xx.flavor.push_str(xx.______________store.as_str());
-            xx.flavor.push_str(".flavor");
-            xx.maker.push_str(xx.______________store.as_str());
-            xx.maker.push_str(".maker");
-            xx
-        }
-    }
-}
-
-pub mod blog_schema {
-    use std::fmt::Display;
-
-    use super::DbField;
-    use surrealdb_macros::{
-        node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
-        query_builder::query,
-    };
-
-    #[derive(Debug, Default)]
-    pub struct Blog {
-        pub id: DbField,
-        pub intro: DbField,
-        pub poster: DbField,
-        pub comments: DbField,
-        pub ______________store: String,
-    }
-
-    impl Blog {
-        pub fn new() -> Self {
-            Self {
-                ______________store: "".to_string(),
-                id: "id".into(),
-                intro: "intro".into(),
-                poster: "poster".into(),
-                comments: "comments".into(),
-                ..Default::default()
-            }
-        }
-    }
-
-    impl Display for Blog {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            f.write_fmt(format_args!("{}", self.______________store))
-        }
-    }
-
-    /* impl ToNodeBuilder2 for Blog {
-        // add code here
-    } */
-}
-mod water_schema {
-    use super::DbField;
-
-    #[derive(Debug, Default)]
-    pub struct Water {
-        pub id: DbField,
-        pub source: DbField,
-        pub river: DbField,
-        pub ______________store: String,
-    }
-}
-mod juice_schema {
-    use std::fmt::Display;
-
-    use super::DbField;
-
-    #[derive(Debug, Default)]
-    pub struct Juice {
-        pub id: DbField,
-        pub maker: DbField,
-        pub flavor: DbField,
-        pub ______________store: String,
-    }
-
-    impl Display for Juice {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            f.write_fmt(format_args!("{}", self.______________store))
-        }
-    }
-
-    impl Juice {
-        pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
-            format!("{self} AS {alias}")
-        }
-    }
-}
-
-pub mod book_schema {
-    use serde::Serialize;
-    use surrealdb_macros::SurrealdbModel;
-
-    use super::{
-        blog_schema::Blog, student_schema::Student, /* writes_schema::Writes, */ Clause, *,
-    };
-
-    #[derive(Serialize, Debug, Default)]
-    pub struct Book {
-        pub id: DbField,
-        pub title: DbField,
-        pub page_count: DbField,
-        // <-writes<-Student
-        pub writer: DbField,
-        chapters: DbField,
-        pub __________store: String,
-    }
-
-    impl Display for Book {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            f.write_fmt(format_args!("{}", self.__________store))
-        }
-    }
-    // #[derive(Serialize, Default)]
-    // pub struct WritesBook(String);
-
-    type Writes = super::writes_schema::Writes<Book>;
-    impl Writes {
-        pub fn student(&self, clause: Clause) -> Student {
-            Student::__________update_connection(&self.__________store, clause)
-        }
-    }
-
-    impl Book {
-        pub fn new() -> Self {
-            Self {
-                __________store: "".to_string(),
-                ..Default::default()
-            }
-        }
-
-        // pub fn __with__(db_name: impl std::fmt::Display) -> Self {
-        //     let mut stud_model = Self::new();
-        //     stud_model
-        //         .__________store
-        //         .push_str(db_name.to_string().as_str());
-        //     stud_model
-        // }
-
-        pub fn __with_id__(mut self, id: impl std::fmt::Display) -> Self {
-            // TODO: Remove prefix book, so that its not bookBook:lowo
-            self.__________store.push_str(id.to_string().as_str());
-            self
-        }
-        // pub fn __with_id__(mut self, id: impl std::fmt::Display) -> Self {
-        //     // TODO: Remove prefix book, so that its not bookBook:lowo
-        //     self.__________store.push_str(id.to_string().as_str());
-        //     self
-        // }
-        // /// .
-        pub fn __writes(&self, clause: Clause) -> Writes {
-            Writes::__________update_edge(&self.__________store, clause, EdgeDirection::InArrowLeft)
-        }
-
-        pub fn __done__(self) -> String {
-            self.__________store.clone()
-        }
-    }
-}
-
-pub mod chapters_schema {
-    use super::DbField;
-
-    #[derive(Debug, Default)]
-    struct Chapters {
-        id: DbField,
-        verse: DbField,
-        __________store: String,
-        // writer: Relate,
-    }
-}
-// }
 
 pub fn nama() {
     // Student::new().book_written().chapters().verse
@@ -756,56 +173,6 @@ async fn main() {
     nama();
 }
 
-pub struct Tests<In: Serialize, Out: Serialize> {
-    id: String,
-    _in: In,
-    out: Out,
-    time_written: String,
-}
-
-impl<In: Serialize, Out: Serialize> Tests<In, Out> {
-    pub fn mki(&self) {}
-}
-
-// mod xx {
-#[derive(Serialize)]
-struct UserTests(String);
-
-type TimoChecker = Tests<UserTests, UserTests>;
-trait Fighter {
-    type In;
-}
-
-#[derive(Serialize)]
-struct Lowo;
-
-#[derive(Serialize)]
-struct Dayo;
-type LowoTestsDayo = Tests<Lowo, Dayo>;
-
-impl Fighter for LowoTestsDayo {
-    type In = Lowo;
-}
-::static_assertions::assert_type_eq_all!(Lowo, <LowoTestsDayo as Fighter>::In);
-
-type Timo = Tests<UserTests, UserTests>;
-impl Timo {
-    fn do_it(&self) {
-        // Tim();
-        println!("holla");
-    }
-}
-// }
-
-#[derive(Serialize)]
-struct PersonTests(String);
-
-type Mana = Tests<PersonTests, PersonTests>;
-impl Mana {
-    fn do_it(&self) {
-        println!("holla");
-    }
-}
 // LET $from = (SELECT users FROM company:surrealdb);
 // LET $devs = (SELECT * FROM user WHERE tags CONTAINS 'developer');
 // RELATE $from->like->$devs SET time.connected = time::now();
