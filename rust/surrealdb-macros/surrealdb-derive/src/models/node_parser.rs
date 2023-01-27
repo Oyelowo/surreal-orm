@@ -356,7 +356,7 @@ impl SchemaFieldsProperties {
                 acc.connection_with_field_appended
                     .push(quote!(
                                schema_instance.#field_ident_normalised
-                                     .push_str(format!("{}.{}", store_without_end_arrow, #field_ident_normalised_as_str).as_str());
+                                     .push_str(format!("{}.{}", schema_instance.___________store, #field_ident_normalised_as_str).as_str());
                     ));
 
                 acc.imports_referenced_node_schema

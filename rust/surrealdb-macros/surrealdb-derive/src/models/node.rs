@@ -290,17 +290,18 @@ impl ToTokens for FieldsGetterOpts {
                     }
 
                     pub fn __________update_connection(store: &::std::string::String, clause: #crate_name::Clause) -> Self {
-                        let mut self_instance = Self::default();
+                        let mut schema_instance = Self::default();
+                        // let connection = format!("{}student{}", store, format_clause(clause, "student"));
                         let connection = format!("{}{}{}", store, #struct_name_ident_as_str, #crate_name::format_clause(clause, #struct_name_ident_as_str));
 
-                        // TODO: Make self_instance ident into a variable which can also be passed
+                        // TODO: Make schema_instance ident into a variable which can also be passed
                         // to SchemaFieldsProperties Generator/transoforer in node_parser.rs
-                        self_instance.___________store.push_str(connection.as_str());
+                        schema_instance.___________store.push_str(connection.as_str());
 
-                        // self_instance.drunk_water
-                            // .push_str(format!("{}.drunk_water", self_instance.___________store).as_str());
+                        // schema_instance.drunk_water
+                            // .push_str(format!("{}.drunk_water", schema_instance.___________store).as_str());
                         #( #connection_with_field_appended) *
-                        self_instance
+                        schema_instance
                     }
 
                     // edge with dunda(__) before or after the edge_name depending on the
