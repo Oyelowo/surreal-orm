@@ -191,7 +191,7 @@ impl ToTokens for FieldsGetterOpts {
             serialized_field_names_normalised,
             static_assertions,
             imports_referenced_node_schema,
-            referenced_edge_schema_struct_alias,
+            // referenced_edge_schema_struct_alias,
             relate_edge_struct_type_alias,
             relate_edge_schema_struct_alias_impl,
             relate_edge_schema_method_connection,
@@ -294,8 +294,9 @@ impl ToTokens for FieldsGetterOpts {
 
                     #( #relate_edge_schema_method_connection) *
                     
+                    #( #record_link_fields_methods) *
 
-
+                    
                     pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {
                         format!("{} AS {}", self, alias)
                     }
@@ -303,6 +304,7 @@ impl ToTokens for FieldsGetterOpts {
                     #( #relate_node_alias_method) *
                 }
                 
+            referenced_edge_schema_struct_alias,
                 #( #relate_edge_struct_type_alias) *
 
                 #( #relate_edge_schema_struct_alias_impl) *

@@ -119,7 +119,8 @@ pub struct SchemaFieldsProperties {
     /// The above is generated if a Student struct field uses "->Writes->Book". 
     /// Must be unique to prevent collision because it's possible for an edge to be
     /// reused.
-    pub referenced_edge_schema_struct_alias: Vec<TokenStream>,
+    // NOTE: Replaced with relate_edge_struct_type_alias. Remove
+    // pub referenced_edge_schema_struct_alias: Vec<TokenStream>,
     
     
     /// Used for importing and aliasing edge schema used in present SurrealdbNode. 
