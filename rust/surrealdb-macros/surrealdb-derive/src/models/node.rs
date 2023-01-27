@@ -234,6 +234,10 @@ impl ToTokens for FieldsGetterOpts {
                 fn get_schema() -> Self::Schema {
                     #module_name::#struct_name_ident::new()
                 }
+                
+                fn get_key(&self) -> ::std::option::Option<String>{
+                    self.id
+                }
             }
 
             pub mod #module_name {
@@ -325,8 +329,7 @@ impl ToTokens for FieldsGetterOpts {
                     
                     // Aliases
                     pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {
-                        // let xx = self.___________store;
-                        format!("{self} AS {alias}")
+                        format!("{} AS {}", self, alias)
                     }
                     /// These are for aliasing Relate<T> fields 
                     /// Returns the   as book written   of this [`Student`].
