@@ -195,6 +195,23 @@ pub struct SchemaFieldsProperties {
     pub connection_with_field_appended: Vec<TokenStream>,
 }
 
+pub struct MacroVariables<'a> {
+    /// This joins present model to the currently built graph.
+    /// e.g Account->likes->Book.name
+    /// For SurrealdbNode, this is usually just concatenating dot and the model fields i.e
+    /// Mode.fieldname1, Model.fieldname2
+    /// For edges, it usually surrounds the SurrealdbEdge with arrows e.g ->writes-> or <-writes<-
+    /// Overall, this helps us do the graph traversal
+    pub __________connect_to_graph_traversal_string: &'a syn::Ident,
+    pub ___________graph_traversal_string: &'a syn::Ident,
+    pub schema_instance: &'a syn::Ident,
+}
+pub struct SchemaPropertiesArgs<'a> {
+    pub macro_variables: &'a MacroVariables<'a>,
+    pub data: &'a ast::Data<util::Ignored, MyFieldReceiver>,
+    pub struct_level_casing: Option<CaseString>,
+    pub struct_name_ident: &'a syn::Ident,
+}
 impl SchemaFieldsProperties {
     /// .
     ///
@@ -202,10 +219,10 @@ impl SchemaFieldsProperties {
     ///
     /// Panics if .
     pub(crate) fn from_receiver_data(
-        data: &ast::Data<util::Ignored, MyFieldReceiver>,
-        struct_level_casing: Option<CaseString>,
-        struct_name_ident: &syn::Ident,
+        args : SchemaPropertiesArgs
     ) -> Self {
+        let SchemaPropertiesArgs { macro_variables, data, struct_level_casing, struct_name_ident }= args;
+        
         let fields = data
             .as_ref()
             .take_struct()
@@ -235,7 +252,8 @@ impl SchemaFieldsProperties {
                     } else {
                         field_ident_normalised.to_string()
                     };
-
+                let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string: ___________store, schema_instance } = macro_variables;
+                
                 let referenced_node_meta = match relationship {
                     RelationType::Relate(relation) => {
                         let relation_attributes = RelateAttribute::from(relation.clone());
@@ -266,7 +284,7 @@ impl SchemaFieldsProperties {
                                         // Could potantially make the method name all small letters
                                         // or just use exactly as the table name is written
                                         pub fn #destination_node(&self, clause: #crate_name::Clause) -> #destination_node {
-                                           #destination_node::__________update_connection(&self.__________store, clause)
+                                           #destination_node::#__________connect_to_graph_traversal_string(&self.#___________store, clause)
                                         }
                                     })
                                 );
@@ -279,8 +297,8 @@ impl SchemaFieldsProperties {
                         
                         acc.relate_edge_schema_method_connection.push(quote!(
                                     pub fn #edge_method_name_with_direction(&self, clause: #crate_name::Clause) -> #edge_name {
-                                        #edge_name::__________update_edge(
-                                            &self.___________store,
+                                        #edge_name::#__________connect_to_graph_traversal_string(
+                                            &self.#___________store,
                                             clause,
                                             #crate_name::EdgeDirection::OutArrowRight,
                                         )
@@ -331,13 +349,13 @@ impl SchemaFieldsProperties {
                                 
                     },
                     RelationType::LinkOne(node_object) => {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, macro_variables)
                     }
                     RelationType::LinkSelf(node_object) => {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, macro_variables)
                     }
                     RelationType::LinkMany(node_object) => {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, macro_variables)
                     }
                     RelationType::None => ReferencedNodeMeta::default(),
                 };
@@ -355,8 +373,8 @@ impl SchemaFieldsProperties {
 
                 acc.connection_with_field_appended
                     .push(quote!(
-                               schema_instance.#field_ident_normalised
-                                     .push_str(format!("{}.{}", schema_instance.___________store, #field_ident_normalised_as_str).as_str());
+                               #schema_instance.#field_ident_normalised
+                                     .push_str(format!("{}.{}", #schema_instance.#___________store, #field_ident_normalised_as_str).as_str());
                     ));
 
                 acc.imports_referenced_node_schema
@@ -397,7 +415,9 @@ impl ReferencedNodeMeta {
     fn from_record_link(
         node_name: &super::node_relations::NodeName,
         normalized_field_name: &::syn::Ident,
+        macro_variables: &MacroVariables
     ) -> Self {
+        let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string: ___________store, .. } = macro_variables;
         let schema_name = format_ident!("{node_name}");
         let crate_name = get_crate_name(false);
         
@@ -412,7 +432,7 @@ impl ReferencedNodeMeta {
             
             record_link_default_alias_as_method: quote!(
                         pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
-                            #schema_name:__________update_connection(&self.__________store, clause)
+                            #schema_name:#__________connect_to_graph_traversal_string(&self.#___________store, clause)
                         }
                     ),
         }

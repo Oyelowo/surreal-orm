@@ -27,7 +27,7 @@ use std::str::FromStr;
 
 use syn::{self, parse_macro_input};
 
-use super::{node_parser::SchemaFieldsProperties, casing::CaseString};
+use super::{node_parser::{SchemaFieldsProperties, SchemaPropertiesArgs, MacroVariables}, casing::CaseString};
 
 #[derive(Debug, Clone)]
 pub struct Rename {
@@ -103,7 +103,7 @@ impl FromMeta for Relate {
 
 #[derive(Debug, FromField)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
-pub(crate) struct MyFieldReceiver {
+pub struct MyFieldReceiver {
     /// Get the ident of the field. For fields in tuple or newtype structs or
     /// enum bodies, this can be `None`.
     pub(crate) ident: ::std::option::Option<syn::Ident>,
@@ -179,23 +179,27 @@ impl ToTokens for FieldsGetterOpts {
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 
+        let ref __________connect_to_graph_traversal_string = format_ident!("__________connect_to_graph_traversal_string");
+        let ref ___________graph_traversal_string = format_ident!("___________store");
+        let ref schema_instance = format_ident!("schema_instance");
+        let macro_variables = MacroVariables{ __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance };
+        let mm = SchemaPropertiesArgs{ macro_variables: todo!(), data, struct_level_casing, struct_name_ident };
+
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             serialized_field_names_normalised,
             static_assertions,
-            connection_with_field_appended,
+            imports_referenced_node_schema,
             referenced_edge_schema_struct_alias,
+            relate_edge_struct_type_alias,
             relate_edge_schema_struct_alias_impl,
             relate_edge_schema_method_connection,
             relate_node_alias_method,
-            imports_referenced_node_schema,
             record_link_fields_methods,
-            relate_edge_struct_type_alias,
+            connection_with_field_appended,
         }: SchemaFieldsProperties  = SchemaFieldsProperties::from_receiver_data(
-            data,
-            struct_level_casing,
-            struct_name_ident,
+            mm,
         );
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
 
@@ -247,13 +251,13 @@ impl ToTokens for FieldsGetterOpts {
                 #[derive(Debug, Serialize, Default)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
-                    pub ___________store: ::std::string::String,
+                    pub #___________graph_traversal_string: ::std::string::String,
                 }
 
                 
                 impl ::std::fmt::Display for #struct_name_ident {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-                        f.write_fmt(format_args!("{}", self.___________store))
+                        f.write_fmt(format_args!("{}", self.#___________graph_traversal_string))
                     }
                 }
 
@@ -261,36 +265,35 @@ impl ToTokens for FieldsGetterOpts {
                     pub fn new() -> Self {
                         Self {
                            #( #schema_struct_fields_names_kv) *
-                            ___________store: "".to_string(),
+                            #___________graph_traversal_string: "".to_string(),
                         }
                     }
 
                     pub fn __with_id__(mut self, id: impl ::std::fmt::Display) -> Self {
-                        self.___________store.push_str(id.to_string().as_str());
+                        self.#___________graph_traversal_string.push_str(id.to_string().as_str());
                         self
                     }
                     
                     pub fn __with__(db_name: impl ::std::fmt::Display) -> Self {
-                        let mut schema_instance = Self::new();
-                        schema_instance
-                            .___________store
+                        let mut #schema_instance = Self::new();
+                        #schema_instance
+                            .#___________graph_traversal_string
                             .push_str(db_name.to_string().as_str());
-                        schema_instance
+                        #schema_instance
                     }
 
-                    pub fn __________update_connection(store: &::std::string::String, clause: #crate_name::Clause) -> Self {
-                        let mut schema_instance = Self::default();
+                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, clause: #crate_name::Clause) -> Self {
+                        let mut #schema_instance = Self::default();
                         let connection = format!("{}{}{}", store, #struct_name_ident_as_str, #crate_name::format_clause(clause, #struct_name_ident_as_str));
 
-                        schema_instance.___________store.push_str(connection.as_str());
+                        #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
 
                         #( #connection_with_field_appended) *
-                        schema_instance
+                        #schema_instance
                     }
 
                     #( #relate_edge_schema_method_connection) *
                     
-                    #( #record_link_fields_methods) *
 
 
                     pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {

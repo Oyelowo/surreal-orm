@@ -28,7 +28,7 @@ use surrealdb_macros::{
 };
 use typed_builder::TypedBuilder;
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Student {
     // #[serde(skip_serializing_if = "Option::is_none")]
@@ -36,8 +36,8 @@ pub struct Student {
     id: Option<String>,
     first_name: String,
     last_name: String,
-    #[surrealdb(link_one = "Book", skip_serializing)]
-    fav_book: LinkOne<Book>,
+    // #[surrealdb(link_one = "Book", skip_serializing)]
+    // fav_book: LinkOne<Book>,
     // // #[surrealdb(link_one = "Book", skip_serializing)]
     // course: LinkOne<Book>,
     // #[surrealdb(link_many = "Book", skip_serializing)]
@@ -69,10 +69,15 @@ fn main() {
         id: None,
         first_name: "".into(),
         last_name: "".into(),
-        fav_book: LinkOne::from_model(Book::default()),
+        // fav_book: LinkOne::from_model(Book::default()),
     };
     // xx.get_key()
-    Student::get_schema().favBook(Clause::All);
+    // Student::get_schema().favBook(Clause::All);
+    let xx = Student::get_schema()
+        .__with_id__("Student:lowo")
+        .firstName
+        .__as__("eee");
+    println!("dfmoaef --- {xx}");
     // Student::get_schema().__with_id__("student:3434").lastName;
     // Student::get_schema().__with_id__("student:3434");
 }
