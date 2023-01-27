@@ -150,7 +150,7 @@ pub struct SchemaFieldsProperties {
     /// Genearated example:
     /// ```
     /// pub fn writes__(&self, clause: Clause) -> Writes {
-    ///     Writes::___________graph_traversal_string(
+    ///     Writes::__________connect_to_graph_traversal_string(
     ///         &self.___________graph_traversal_string,
     ///         clause,
     ///         #crate_name::EdgeDirection::OutArrowRight,
