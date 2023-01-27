@@ -108,9 +108,9 @@ pub struct SchemaFieldsProperties {
     /// type Book = <super::Book as SurrealdbNode>::Schema;
     /// ```
     /// We need imports to be unique, hence the hashset
-    /// Used when you use a SurrealdbNode in field e.g: best_student: LinkOne<Student>,
+    /// Used when you use a SurrealdbNode in field e.g: favourite_book: LinkOne<Book>,
     /// e.g: type Book = <super::Book as SurrealdbNode>::Schema;
-    pub referenced_node_schema_imports: Vec<TokenStream>,
+    pub imports_referenced_node_schema: Vec<TokenStream>,
 
     /// Generated example: 
     /// ```
@@ -122,7 +122,11 @@ pub struct SchemaFieldsProperties {
     pub referenced_edge_schema_struct_alias: Vec<TokenStream>,
     
     
-    /// edge schema struct aliased type import
+    /// Used for importing and aliasing edge schema used in present SurrealdbNode. 
+    /// The generic represents the current SurrealdbNode e.g Student
+    /// Note: Still considering either of the two options 
+    /// type Writes = super::writes::Writes<Student>;
+    /// type Writes = super::WritesSchema<#struct_name_ident>;
     /// ```
     /// type Writes = super::writes::Writes<Student>;
     /// ```
@@ -171,7 +175,7 @@ pub struct SchemaFieldsProperties {
     
     /// When a field references another model as Link, we want to generate a method for that
     /// to be able to access the foreign fields
-    /// Generated Example for e.g field with best_student: line!()<Student>
+    /// Generated Example for e.g field with best_student: <Student>
     /// ```
     /// pub fn best_student(&self, clause: Clause) -> Student {
     ///     Student::__________update_connection(&self.__________store, clause)
@@ -180,12 +184,14 @@ pub struct SchemaFieldsProperties {
     pub record_link_fields_methods: Vec<TokenStream>,
     
     
+    /// This generates a function that is usually called by other Nodes/Structs
+    /// self_instance.drunk_water
+    /// .push_str(format!("{}.drunk_water", xx.___________store).as_str());
+    /// 
     /// so that we can do e.g
     /// ```
-    /// ->writes[WHERE id = "writes:1"].field_name
-    /// self_instance.normalized_field_name.push_str(format!("{}.normalized_field_name", store_without_end_arrow).as_str());
+    /// Student.field_name
     /// ```
-    /// This generates a function that is usually called by other Nodes/Structs
     pub connection_with_field_appended: Vec<TokenStream>,
 }
 
@@ -251,8 +257,7 @@ impl SchemaFieldsProperties {
 
                         // e.g type Writes = super::WritesSchema<#struct_name_ident>;
                         // TODO: remove or reuse if makes sense: let edge_schema = format_ident!("{edge_name}Schema");
-                        let edge_module_name = format_ident!("{}", edge_name.to_string().to_lowercase());
-                        acc.relate_edge_struct_type_alias.push(quote!(
+                        let edge_module_name = format_ident!("{}", edge_name.to_string().to_lowercase()); acc.relate_edge_struct_type_alias.push(quote!(
                             type #edge_name = super::#edge_module_name::#edge_name<#struct_name_ident>;
                         ));
                         
@@ -354,7 +359,7 @@ impl SchemaFieldsProperties {
                                      .push_str(format!("{}.{}", store_without_end_arrow, #field_ident_normalised_as_str).as_str());
                     ).into());
 
-                acc.referenced_node_schema_imports
+                acc.imports_referenced_node_schema
                     .push(referenced_node_meta.destination_node_schema_import.into());
 
                 acc.record_link_fields_methods

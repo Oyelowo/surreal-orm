@@ -189,7 +189,7 @@ impl ToTokens for FieldsGetterOpts {
             relate_edge_schema_struct_alias_impl,
             relate_edge_schema_method_connection,
             relate_node_alias_method,
-            referenced_node_schema_imports,
+            imports_referenced_node_schema,
             record_link_fields_methods,
             relate_edge_struct_type_alias,
         }: SchemaFieldsProperties  = SchemaFieldsProperties::from_receiver_data(
@@ -228,6 +228,7 @@ impl ToTokens for FieldsGetterOpts {
             //     written_blogs: Relate<Blog>,
             // }
             
+            // Model's Schema SurrealdbNode implementation
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;
 
@@ -239,30 +240,32 @@ impl ToTokens for FieldsGetterOpts {
             pub mod #module_name {
                 use ::serde::Serialize;
 
-                use crate::drinks_schema::Drinks;
-                type Book = <super::Book as SurrealdbNode>::Schema;
+                // Alternative old consideration: use super::book_schema::Book;
+                // type Book = < super::Book as SurrealdbNode>::Schema;
+               #( #imports_referenced_node_schema); *
                 
-                // use super::{
-                //     blog_schema::Blog, book_schema::Book, juice_schema::Juice, water_schema::Water,
-                //     /* writes_schema::Writes, */ Clause, *,
-                // };
 
+                // Build struct for Schema for node. e.g struct Student {id: DbField, ...}
                 #[derive(Debug, Serialize, Default)]
                 pub struct #struct_name_ident {
-                    // pub id: DbField,
                    #( #schema_struct_fields_types_kv), *
-                    pub ___________store: String,
+                    // Use for storing graph paths. Should probably rename
+                    pub ___________store: ::std::string::String,
                 }
 
                 
-                impl Display for #struct_name_ident {
-                    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                // Displays a schema as it's current path in the graph
+                // e.g Student->Writes->Book or simple Student
+                impl ::std::fmt::Display for #struct_name_ident {
+                    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                         f.write_fmt(format_args!("{}", self.___________store))
                     }
                 }
 
                 impl #struct_name_ident {
                     pub fn new() -> Self {
+                        // Actually instatiate the schema with the normalized fields as
+                        // both the field name and field value. e.g firstName: "firstName".into(),
                         Self {
                             // id: "id".into(),
                            #( #schema_struct_fields_names_kv), *
@@ -271,14 +274,15 @@ impl ToTokens for FieldsGetterOpts {
                     }
 
                     // TODO: Change id to be SurrealdbCoplexId wrapper struct
-                    pub fn __with_id__(mut self, id: impl std::fmt::Display) -> Self {
+                    pub fn __with_id__(mut self, id: impl ::std::fmt::Display) -> Self {
                         // TODO: Remove prefix book, so that its not bookBook:lowo
                         self.___________store.push_str(id.to_string().as_str());
                         self
                     }
                     
                     // TODO: let this take a query object which it can build
-                    pub fn __with__(db_name: impl std::fmt::Display) -> Self {
+                    // Potentially rename to __with_query__
+                    pub fn __with__(db_name: impl ::std::fmt::Display) -> Self {
                         let mut self_model = Self::new();
                         self_model
                             .___________store
@@ -286,66 +290,60 @@ impl ToTokens for FieldsGetterOpts {
                         self_model
                     }
 
-                    pub fn __________update_connection(store: &String, clause: #crate_name::Clause) -> Self {
-                        let mut xx = Self::default();
-                        let connection = format!("{}{}{}", store, #struct_name_ident_as_str, format_clause(clause, #struct_name_ident_as_str));
+                    pub fn __________update_connection(store: &::std::string::String, clause: #crate_name::Clause) -> Self {
+                        let mut self_instance = Self::default();
+                        let connection = format!("{}{}{}", store, #struct_name_ident_as_str, #cr
+                                                 ::format_clause(clause, #struct_name_ident_as_str));
 
-                        xx.___________store.push_str(connection.as_str());
+                        // TODO: Make self_instance ident into a variable which can also be passed
+                        // to SchemaFieldsProperties Generator/transoforer in node_parser.rs
+                        self_instance.___________store.push_str(connection.as_str());
 
-                        // xx.drunk_water
-                            // .push_str(format!("{}.drunk_water", xx.___________store).as_str());
+                        // self_instance.drunk_water
+                            // .push_str(format!("{}.drunk_water", self_instance.___________store).as_str());
                         #( #connection_with_field_appended); *
-                        xx
+                        self_instance
                     }
 
-                    pub fn writes__(&self, clause: Clause) -> Writes {
-                        Writes::__________update_edge(
-                            &self.___________store,
-                            clause,
-                            #crate_name::EdgeDirection::OutArrowRight,
-                        )
-                    }
+                    // edge with dunda(__) before or after the edge_name depending on the
+                    // direction
+                    // pub fn writes__(&self, clause: #crate_name::Clause) -> Writes {
+                    //     Writes::__________update_edge(
+                    //         &self.___________store,
+                    //         clause,
+                    //         #crate_name::EdgeDirection::OutArrowRight,
+                    //     )
+                    // }
+                    //
+                    #( #relate_edge_schema_method_connection); *
 
-                    pub fn drinks__(&self, clause: Clause) -> Drinks {
-                        Drinks::__________update_edge(
-                            &self.___________store,
-                            clause,
-                            #crate_name::EdgeDirection::OutArrowRight,
-                        )
-                    }
 
-                    pub fn favorite_book(&self, clause: Clause) -> Book {
-                        Book::__________update_connection(&self.__________store, clause)
-                    }
-
+                    // Generated method to access record links fields
+                    // pub fn favorite_book(&self, clause: Clause) -> Book {
+                    //     Book::__________update_connection(&self.__________store, clause)
+                    // }
+                    #( #record_link_fields_methods); *
+                    
                     // Aliases
-                    pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
+                    pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {
                         // let xx = self.___________store;
                         format!("{self} AS {alias}")
                     }
                     /// These are for aliasing Relate<T> fields 
                     /// Returns the   as book written   of this [`Student`].
                     /// AS book_written
-                    pub fn __as_book_written__(&self) -> String {
-                        // let xx = self.___________store;
-                        format!("{self} AS book_written")
-                    }
-                    pub fn __as_blog_written__(&self) -> String {
-                        // let xx = self.___________store;
-                        format!("{self} AS blog_written")
-                    }
-                    pub fn __as_drunk_juice__(&self) -> String {
-                        // let xx = self.___________store;
-                        format!("{self} AS drunk_juice")
-                    }
-                    pub fn __as_drunk_water__(&self) -> String {
-                        // let xx = self.___________store;
-                        format!("{self} AS drunk_water")
-                    }
+                    // pub fn __as_book_written__(&self) -> String {
+                    //     format!("{self} AS book_written")
+                    // }
+                    #( #relate_node_alias_method); *
                 }
                 
-                type Writes = super::writes::Writes<Student>;
+                // Used for importing and aliasing edge schema. The generic 
+                // represents the current SurrealdbNode e.g Student
+                // still consiering either of the two approaches below
+                // type Writes = super::writes::Writes<Student>;
                 // type Writes = super::WritesSchema<#struct_name_ident>;
+                    #( #relate_edge_struct_type_alias); *
 
                 impl Writes {
                     pub fn book(&self, clause: #crate_name::Clause) -> Book {
