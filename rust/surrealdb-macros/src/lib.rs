@@ -59,7 +59,7 @@ impl std::fmt::Display for DbField {
     }
 } */
 
-// impl ToNodeBuilder2 for DbField {}
+impl surreal_simple_querybuilder::prelude::ToNodeBuilder for DbField {}
 
 pub enum Clause {
     All,

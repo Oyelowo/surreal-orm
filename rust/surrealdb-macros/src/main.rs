@@ -28,17 +28,6 @@ use surrealdb_macros::{
 };
 use typed_builder::TypedBuilder;
 
-/* struct Lowo {
-    name: String,
-    id: String,
-}
-
-fn nama() {
-    let xx = Lowo {
-        name: "".into(),
-        id: "dr".into(),
-    };
-} */
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Student {
@@ -47,8 +36,9 @@ pub struct Student {
     id: Option<String>,
     first_name: String,
     last_name: String,
-    // #[surrealdb(link_one = "Book", skip_serializing)]
-    // fav_book: LinkOne<Book>,
+
+    #[surrealdb(link_one = "Book", skip_serializing)]
+    fav_book: LinkOne<Book>,
     // // #[surrealdb(link_one = "Book", skip_serializing)]
     // course: LinkOne<Book>,
     // #[surrealdb(link_many = "Book", skip_serializing)]
@@ -76,13 +66,28 @@ pub struct Book {
 fn main() {
     // ::std::string::String::std::k
     // ::std::default::Default
+    let book = Book {
+        id: Some("book1".into()),
+        title: "ere".into(),
+    };
+
     let xx = Student {
         id: None,
         first_name: "".into(),
         last_name: "".into(),
-        // fav_book: LinkOne::from_model(Book::default()),
+        fav_book: LinkOne::from_model(book),
     };
+
     // xx.get_key()
+    let x1 = Student::get_schema().firstName.__as__("lowo");
+    println!("x1 --- {x1}");
+
+    let x2 = Student::get_schema()
+        .favBook(Clause::All)
+        .title
+        .__as__("ererj");
+    println!("x2 --- {x2}");
+
     // Student::get_schema().favBook(Clause::All);
     let xx = Student::get_schema()
         .__with_id__("Student:lowo")
