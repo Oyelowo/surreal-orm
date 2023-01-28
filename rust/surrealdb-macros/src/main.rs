@@ -82,6 +82,13 @@ fn main() {
     let x1 = Student::get_schema().firstName.__as__("lowo");
     println!("x1 --- {x1}");
 
+    Student::get_schema()
+        .favBook(Clause::Where(
+            query().select("Student").from("Student").build(),
+        ))
+        .title
+        .contains_one("bee");
+
     let x2 = Student::get_schema()
         .favBook(Clause::All)
         .title
