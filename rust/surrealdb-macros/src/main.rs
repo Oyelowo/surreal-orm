@@ -45,9 +45,8 @@ pub struct Student {
     // #[surrealdb(link_many = "Book", skip_serializing)]
     // #[serde(rename = "lowo")]
     // all_semester_courses: LinkMany<Book>,
-
-    // #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
-    // written_blogs: Relate<Blog>,
+    #[surrealdb(relate(edge = "StudentWritesBook", link = "->Writes->Book"))]
+    written_blogs: Relate<Book>,
 }
 
 /* fn ewer() {
@@ -104,6 +103,7 @@ fn main() {
         first_name: "".into(),
         last_name: "".into(),
         fav_book: LinkOne::from_model(book),
+        written_blogs: Default::default(),
     };
 
     let x = xx.clone().get_key();
@@ -122,6 +122,8 @@ fn main() {
         ))
         .title
         .contains_one("bee");
+
+    let xx = Student::get_schema().Writes__(Clause::All);
     println!("bee --- {bee}");
 
     let x2 = Student::get_schema()

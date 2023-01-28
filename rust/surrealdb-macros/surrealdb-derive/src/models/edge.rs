@@ -225,7 +225,7 @@ impl ToTokens for FieldsGetterOpts {
                 pub mod #module_name {
                     
                     pub struct TableNameStaticChecker {
-                        #struct_name_ident: String,
+                        pub #struct_name_ident: String,
                     }
 
                 

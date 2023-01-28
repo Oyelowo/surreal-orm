@@ -190,7 +190,7 @@ impl ToTokens for FieldsGetterOpts {
             schema_struct_fields_names_kv,
             serialized_field_names_normalised,
             static_assertions,
-            imports_referenced_node_schema,
+            ref mut imports_referenced_node_schema,
             // referenced_edge_schema_struct_alias,
             relate_edge_schema_struct_type_alias,
             relate_edge_schema_struct_type_alias_impl,
@@ -201,6 +201,7 @@ impl ToTokens for FieldsGetterOpts {
         }: SchemaFieldsProperties  = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
         );
+        imports_referenced_node_schema.dedup_by(|a,b| a.to_string() == b.to_string());
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
 
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
