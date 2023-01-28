@@ -183,14 +183,14 @@ impl ToTokens for FieldsGetterOpts {
         let ref ___________graph_traversal_string = format_ident!("___________graph_traversal_string");
         let ref schema_instance = format_ident!("schema_instance");
         let ref macro_variables = MacroVariables{ __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance };
-        let mm = SchemaPropertiesArgs{ macro_variables, data, struct_level_casing, struct_name_ident };
+        let schema_props_args = SchemaPropertiesArgs{ macro_variables, data, struct_level_casing, struct_name_ident };
 
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             serialized_field_names_normalised,
             static_assertions,
-            imports_referenced_node_schema,
+            ref mut imports_referenced_node_schema,
             // referenced_edge_schema_struct_alias,
             relate_edge_schema_struct_type_alias,
             relate_edge_schema_struct_type_alias_impl,
@@ -199,8 +199,9 @@ impl ToTokens for FieldsGetterOpts {
             record_link_fields_methods,
             connection_with_field_appended,
         }: SchemaFieldsProperties  = SchemaFieldsProperties::from_receiver_data(
-            mm,
+            schema_props_args,
         );
+        imports_referenced_node_schema.dedup_by(|a,b| a.to_string() == b.to_string());
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
 
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
@@ -237,8 +238,8 @@ impl ToTokens for FieldsGetterOpts {
                     #module_name::#struct_name_ident::new()
                 }
                 
-                fn get_key(&self) -> ::std::option::Option<String>{
-                    self.id.clone()
+                fn get_key(&self) -> ::std::option::Option<&String>{
+                    self.id.as_ref()
                 }
             }
 
@@ -251,7 +252,7 @@ impl ToTokens for FieldsGetterOpts {
                 #[derive(Debug, Serialize, Default)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
-                    pub #___________graph_traversal_string: ::std::string::String,
+                    pub(crate) #___________graph_traversal_string: ::std::string::String,
                 }
 
                 

@@ -7,14 +7,17 @@ pub mod node_builder;
 pub trait SurrealdbNode {
     type Schema;
     fn get_schema() -> Self::Schema;
-    fn get_key(&self) -> ::std::option::Option<String>;
+    fn get_key(&self) -> ::std::option::Option<&String>;
 }
 
 pub trait SurrealdbEdge {
     type In;
     type Out;
     type TableNameChecker;
-    fn get_key(&self) -> ::std::option::Option<String>;
+    type Schema;
+
+    fn get_schema() -> Self::Schema;
+    fn get_key(&self) -> ::std::option::Option<&String>;
 }
 
 #[derive(serde::Serialize, Debug, Default)]
@@ -26,7 +29,6 @@ impl DbField {
     }
 
     pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
-        // let xx = self.___________store;
         format!("{self} AS {alias}")
     }
 }
@@ -114,28 +116,6 @@ impl From<EdgeDirection> for String {
         }
     }
 }
-///////////////////
-// pub trait Edge {
-//     type EdgeChecker;
-//     type InNode;
-//     type OutNode;
-//     // const EDGE_RELATION: &'static str;
-//     // fn to(&self) -> ::proc_macro2::TokenStream;
-//     // fn from(&self) -> ::proc_macro2::TokenStream;
-//     // fn km(&self) -> String;
-// }
-
-// Re-export surrealdbmodel proc macro alongside the trait.
-// With this, users dont have to import both the derive macro and trait
-// themselves. They can just simple `use surrealdb_macros::SurrealdbModel`
-// pub use surrealdb_derive::SurrealdbModel;
-// pub trait SurrealdbModel {
-//     type Schema<const T: usize>;
-//     fn get_schema() -> Self::Schema<0>;
-//     // fn get_key(&self) -> Key;
-//     fn get_key(&self) -> ::std::option::Option<String>;
-// }
-// pub struct Key(String);
 
 pub mod query_builder {
     use surreal_simple_querybuilder::prelude as query_builder;

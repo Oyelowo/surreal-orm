@@ -639,18 +639,23 @@ mod schema {
 
             pub fn __________update_edge_left(store: &String, clause: Clause) -> Writes<Model> {
                 // let mut xx = Writes::default();
-                let mut xx = Writes::<Model>::default();
+                let mut schema_instance = Writes::<Model>::default();
                 let connection = format!("{}<-writes{}<-", store, format_clause(clause, "writes"));
 
-                xx.__________store.push_str(connection.as_str());
+                schema_instance
+                    .__________store
+                    .push_str(connection.as_str());
 
-                let store_without_end_arrow = xx.__________store.trim_end_matches("<-");
+                let store_without_end_arrow =
+                    schema_instance.__________store.trim_end_matches("<-");
 
-                xx.time_written
+                schema_instance
+                    .time_written
                     .push_str(format!("{}.time_written", store_without_end_arrow).as_str());
-                xx.pattern
+                schema_instance
+                    .pattern
                     .push_str(format!("{}.pattern", store_without_end_arrow).as_str());
-                xx
+                schema_instance
             }
         }
     }

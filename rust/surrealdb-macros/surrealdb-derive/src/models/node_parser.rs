@@ -270,14 +270,15 @@ impl SchemaFieldsProperties {
                         
                         acc.relate_node_alias_method.push(quote!(
                                     pub fn #field_name_as_alias(&self) -> String {
-                                        format!("{self} AS {}", #field_ident_normalised_as_str)
+                                        format!("{} AS {}", self, #field_ident_normalised_as_str)
                                     })
                             );
 
                         // e.g type Writes = super::WritesSchema<#struct_name_ident>;
                         // TODO: remove or reuse if makes sense: let edge_schema = format_ident!("{edge_name}Schema");
-                        let edge_module_name = format_ident!("{}", edge_name.to_string().to_lowercase()); acc.relate_edge_schema_struct_type_alias.push(quote!(
-                            type #edge_name = super::#edge_module_name::#edge_name<#struct_name_ident>;
+                        let edge_schema_alias_name = format_ident!("{}Schema", edge_name.to_string().to_lowercase());
+                        acc.relate_edge_schema_struct_type_alias.push(quote!(
+                            type #edge_name = super::#edge_schema_alias_name<#struct_name_ident>;
                         ));
                         
                         acc.relate_edge_schema_struct_type_alias_impl.push(quote!(
@@ -433,7 +434,8 @@ impl ReferencedNodeMeta {
             
             record_link_default_alias_as_method: quote!(
                         pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
-                            #schema_name::#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause) }
+                            #schema_name::#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause)
+                        }
                     ),
         }
     }

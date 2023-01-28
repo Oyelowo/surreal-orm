@@ -16,7 +16,7 @@ use surrealdb::{
     sql::Id,
     Result, Surreal,
 };
-use surrealdb_derive::SurrealdbNode;
+use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
@@ -24,7 +24,7 @@ use surrealdb_macros::{
     model_id::SurIdComplex,
     node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
     query_builder::{query, ToNodeBuilder},
-    Clause, /* SurrealdbEdge, */ SurrealdbNode,
+    Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
 };
 use typed_builder::TypedBuilder;
 
@@ -38,18 +38,44 @@ pub struct Student {
     last_name: String,
 
     #[surrealdb(link_one = "Book", skip_serializing)]
+    #[serde(rename = "lowo_na")]
     fav_book: LinkOne<Book>,
     // // #[surrealdb(link_one = "Book", skip_serializing)]
     // course: LinkOne<Book>,
     // #[surrealdb(link_many = "Book", skip_serializing)]
     // #[serde(rename = "lowo")]
     // all_semester_courses: LinkMany<Book>,
-
-    // #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
-    // written_blogs: Relate<Blog>,
+    #[surrealdb(relate(edge = "StudentWritesBook", link = "->Writes->Book"))]
+    written_blogs: Relate<Book>,
 }
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone /* , Default */)]
+/* fn ewer() {
+    struct Nama<T> {}
+
+    impl<T> Nama<T> {
+        fn new() -> Self {
+            Self::<T>new();
+            Self {}
+        }
+    }
+} */
+// #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    id: Option<String>,
+
+    // #[surrealdb(link_one = "Book", skip_serializing)]
+    r#in: In,
+    out: Out,
+    time_written: String,
+}
+
+type StudentWritesBook = Writes<Student, Book>;
+
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -57,6 +83,7 @@ pub struct Book {
     id: Option<String>,
     title: String,
 }
+// ::static_assertions::assert_fields!(Book; id);
 // fn fmt(f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
 //     // f.write_fmt(format_args!("{}", self.___________store))
 //     todo!()
@@ -76,21 +103,39 @@ fn main() {
         first_name: "".into(),
         last_name: "".into(),
         fav_book: LinkOne::from_model(book),
+        written_blogs: Default::default(),
     };
+
+    let x = xx.clone().get_key();
+    let cc = xx.clone().get_key();
+    println!("areore:{xx:?}");
 
     // xx.get_key()
     let x1 = Student::get_schema().firstName.__as__("lowo");
     println!("x1 --- {x1}");
 
-    Student::get_schema()
-        .favBook(Clause::Where(
-            query().select("Student").from("Student").build(),
+    let bee = Student::get_schema()
+        .lowo_na(Clause::Where(
+            query()
+                .and_where(Student::get_schema().lastName.equals("lowo"))
+                .build(),
         ))
         .title
         .contains_one("bee");
 
+    let xx = Student::get_schema()
+        .Writes__(Clause::All)
+        .Book(Clause::Where(
+            query()
+                .and_where(Student::get_schema().lastName.contains_one("Dayo"))
+                .build(),
+        ))
+        .title
+        .__as__("meorm");
+    println!("xx --- {xx}");
+
     let x2 = Student::get_schema()
-        .favBook(Clause::All)
+        .lowo_na(Clause::All)
         .title
         .__as__("ererj");
     println!("x2 --- {x2}");
