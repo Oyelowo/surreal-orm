@@ -138,8 +138,11 @@ pub struct MacroVariables<'a> {
     pub __________connect_to_graph_traversal_string: &'a syn::Ident,
     pub ___________graph_traversal_string: &'a syn::Ident,
     pub schema_instance: &'a syn::Ident,
-    // Mainly used in edge to remove the end arrow for field access e.g ->Writes.time_written
-    pub schema_instance_trimmed: &'a syn::Ident,
+    // Mainly used in edge schema to remove the start and end arrows for field access e.g
+    // when we have "->writes->", we may want writes.time_written in case we want to access
+    // a field on an edge itself because at the end of the day, an edge is a model or table
+    // in the database itself
+    pub schema_instance_edge_arrow_trimmed: &'a syn::Ident,
 }
 
 pub struct SchemaPropertiesArgs<'a> {
@@ -159,7 +162,7 @@ impl SchemaFieldsProperties {
         args : SchemaPropertiesArgs
     ) -> Self {
         let SchemaPropertiesArgs { macro_variables, data, struct_level_casing, struct_name_ident } = args;
-        let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance, schema_instance_trimmed } = macro_variables;
+        let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance, schema_instance_edge_arrow_trimmed } = macro_variables;
         
         let fields = data
             .as_ref()
@@ -219,7 +222,7 @@ impl SchemaFieldsProperties {
                 acc.connection_with_field_appended
                     .push(quote!(
                                #schema_instance.#field_ident_normalised
-                                     .push_str(format!("{}.{}", #schema_instance_trimmed, #field_ident_normalised_as_str).as_str());
+                                     .push_str(format!("{}.{}", #schema_instance_edge_arrow_trimmed, #field_ident_normalised_as_str).as_str());
                     ).into());
 
                 acc.imports_referenced_node_schema

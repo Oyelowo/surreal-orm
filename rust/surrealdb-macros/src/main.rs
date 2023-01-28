@@ -72,7 +72,9 @@ fn main() {
         id: Some("book1".into()),
         title: "ere".into(),
     };
-
+    let xxx = "->ererer->".to_string();
+    let nama = xxx.replace("->", "");
+    println!("Hello, world! name {}", nama);
     let xx = Student {
         id: None,
         first_name: "".into(),

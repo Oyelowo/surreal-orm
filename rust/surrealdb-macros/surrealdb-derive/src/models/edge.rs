@@ -178,9 +178,9 @@ impl ToTokens for FieldsGetterOpts {
         let ref ___________graph_traversal_string = format_ident!("___________graph_traversal_string");
         let ref ___________model = format_ident!("___________model");
         let ref schema_instance = format_ident!("schema_instance");
-        let ref schema_instance_trimmed = format_ident!("schema_instance_trimmed");
+        let ref schema_instance_edge_arrow_trimmed = format_ident!("schema_instance_trimmed");
         
-        let ref macro_variables = MacroVariables{ __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance, schema_instance_trimmed };
+        let ref macro_variables = MacroVariables{ __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance, schema_instance_edge_arrow_trimmed };
         let schema_props_args = SchemaPropertiesArgs{ macro_variables, data, struct_level_casing, struct_name_ident };
 
         let SchemaFieldsProperties {
@@ -244,18 +244,18 @@ impl ToTokens for FieldsGetterOpts {
                             arrow_direction: #crate_name::EdgeDirection,
                         ) -> Self<Model> {
                             let mut schema_instance = Self::<Model>::default();
-                            let current_edge = format!(
+                            let schema_edge_str_with_arrow = format!(
                                 "{}{arrow_direction}{}{arrow_direction}{}",
                                 store.as_str(),
                                 #struct_name_ident,
                                 #crate_name::format_clause(clause, #struct_name_ident_as_str)
                             );
                             
-                            #schema_instance.#___________graph_traversal_string.push_str(current_edge.as_str());
+                            #schema_instance.#___________graph_traversal_string.push_str(schema_edge_str_with_arrow.as_str());
 
-                            let #schema_instance_trimmed = #schema_instance
+                            let #schema_instance_edge_arrow_trimmed = #schema_instance
                                 .#___________graph_traversal_string
-                                .trim_end_matches(arrow_direction.to_string().as_str());
+                                .replace(arrow_direction.to_string().as_str(), "");
 
                             #( #connection_with_field_appended) *
                             

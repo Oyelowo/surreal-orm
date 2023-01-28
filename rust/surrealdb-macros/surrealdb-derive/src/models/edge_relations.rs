@@ -1,7 +1,8 @@
-use super::edge::{MyFieldReceiver, Relate};
+use super::node::{MyFieldReceiver, Relate};
 
 #[derive(Debug, Clone)]
 pub(crate) enum RelationType {
+    Relate(Relate),
     LinkOne(NodeName),
     LinkSelf(NodeName),
     LinkMany(NodeName),
@@ -11,6 +12,10 @@ pub(crate) enum RelationType {
 impl From<&MyFieldReceiver> for RelationType {
     fn from(field_receiver: &MyFieldReceiver) -> Self {
         match field_receiver {
+            MyFieldReceiver {
+                relate: Some(relation),
+                ..
+            } => RelationType::Relate(relation.to_owned()),
             MyFieldReceiver {
                 link_one: Some(link_one),
                 ..
