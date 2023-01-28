@@ -76,39 +76,6 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
 
 type StudentWritesBook = Writes<Student, Book>;
 
-/* pub struct Mana {}
-
-impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
-    type In = In;
-
-    type Out = Out;
-
-    type TableNameChecker = Mana;
-
-    fn get_key(&self) -> std::option::Option<&String> {
-        todo!()
-    }
-
-    type Schema = Book;
-
-    fn get_schema() -> Self::Schema {
-        todo!()
-    }
-}
-::static_assertions::assert_impl_one!(Mono: SurrealdbEdge);
-
-fn erer() {
-    let xx = Mono::get_schema();
-    let xx = Mono {
-        id: todo!(),
-        r#in: todo!(),
-        out: todo!(),
-        time_written: todo!(),
-    };
-    xx.get_key();
-    ::static_assertions::assert_impl_one!(<Mono as SurrealdbEdge>::In: SurrealdbNode);
-} */
-
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Book {
@@ -131,9 +98,7 @@ fn main() {
         id: Some("book1".into()),
         title: "ere".into(),
     };
-    let xxx = "->ererer->".to_string();
-    let nama = xxx.replace("->", "");
-    println!("Hello, world! name {}", nama);
+
     let xx = Student {
         id: None,
         first_name: "".into(),
@@ -149,12 +114,15 @@ fn main() {
     let x1 = Student::get_schema().firstName.__as__("lowo");
     println!("x1 --- {x1}");
 
-    Student::get_schema()
+    let bee = Student::get_schema()
         .lowo_na(Clause::Where(
-            query().select("Student").from("Student").build(),
+            query()
+                .and_where(Student::get_schema().lastName.equals("lowo"))
+                .build(),
         ))
         .title
         .contains_one("bee");
+    println!("bee --- {bee}");
 
     let x2 = Student::get_schema()
         .lowo_na(Clause::All)
