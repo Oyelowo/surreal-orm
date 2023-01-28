@@ -13,9 +13,9 @@ use quote::{format_ident, quote};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
-    edge::MyFieldReceiver,
+    node::MyFieldReceiver,
     get_crate_name,
-    edge_relations::RelationType,
+    node_relations::RelationType, node::Relate,
 };
 
 #[derive(Default, Clone)]
@@ -51,6 +51,7 @@ pub struct SchemaFieldsProperties {
     /// key(normalized_field_name)-value(DbField) e.g pub out: DbField, of field name and DbField type
     /// to build up struct for generating fields of a Schema of the SurrealdbEdge
     /// The full thing can look like:
+    /// ```
     ///     #[derive(Debug, Default)]
     ///     pub struct Writes<Model: ::serde::Serialize + Default> {
     ///                pub id: Dbfield,
@@ -58,6 +59,7 @@ pub struct SchemaFieldsProperties {
     ///                pub out: Dbfield,
     ///                pub timeWritten: Dbfield,
     ///          }
+    /// ```
     pub schema_struct_fields_types_kv: Vec<TokenStream>,
 
     /// Generated example: pub timeWritten: "timeWritten".into(),
@@ -65,13 +67,14 @@ pub struct SchemaFieldsProperties {
     /// "out".into()
     /// The full thing can look like and the fields should be in normalized form:
     /// i.e time_written => timeWritten if serde camelizes
-    //
+    /// ```
     /// Self {
     ///     id: "id".into(),
     ///     r#in: "in".into(),
     ///     out: "out".into(),
     ///     timeWritten: "timeWritten".into(),
     /// }
+    /// ```
     pub schema_struct_fields_names_kv: Vec<TokenStream>,
 
     /// Field names after taking into consideration
@@ -80,27 +83,68 @@ pub struct SchemaFieldsProperties {
     pub serialized_field_names_normalised: Vec<String>,
 
     /// Generated example:
+    /// ```
+    /// // For relate field
     /// type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
-    /// static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
+    /// ::static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
+    ///
+    /// ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealdbEdge);
+    /// ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
+    /// ::static_assertions::assert_impl_one!(Blog: SurrealdbNode);
+    /// ::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
+    /// ```
     /// Perform all necessary static checks
     pub static_assertions: Vec<TokenStream>,
 
-    /// Generated example: type Book = <super::Book as SurrealdbNode>::Schema;
+    /// Generated example: 
+    /// ```
+    /// type Book = <super::Book as SurrealdbNode>::Schema;
+    /// ```
     /// We need imports to be unique, hence the hashset
-    /// Used when you use a SurrealdbNode in field e.g: best_student: LinkOne<Student>,
+    /// Used when you use a SurrealdbNode in field e.g: favourite_book: LinkOne<Book>,
     /// e.g: type Book = <super::Book as SurrealdbNode>::Schema;
-    pub referenced_node_schema_import: Vec<TokenStream>,
+    pub imports_referenced_node_schema: Vec<TokenStream>,
+
+    
     /// When a field references another model as Link, we want to generate a method for that
     /// to be able to access the foreign fields
-    /// Generated Example for e.g field with best_student: line!()<Student>
+    /// Generated Example for e.g field with best_student: <Student>
+    /// ```
     /// pub fn best_student(&self, clause: Clause) -> Student {
-    ///     Student::__________update_connection(&self.__________store, clause)
+    ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, clause)
     /// }
-    pub referenced_field_record_link_method: Vec<TokenStream>,
-
-    /// so that we can do e.g ->writes[WHERE id = "writes:1"].field_name
-    /// self_instance.normalized_field_name.push_str(format!("{}.normalized_field_name", store_without_end_arrow).as_str());
+    /// ```
+    pub record_link_fields_methods: Vec<TokenStream>,
+    
+    
+    /// This generates a function that is usually called by other Nodes/Structs
+    /// self_instance.drunk_water
+    /// .push_str(format!("{}.drunk_water", xx.___________graph_traversal_string).as_str());
+    /// 
+    /// so that we can do e.g
+    /// ```
+    /// Student.field_name
+    /// ```
     pub connection_with_field_appended: Vec<TokenStream>,
+}
+
+pub struct MacroVariables<'a> {
+    /// This joins present model to the currently built graph.
+    /// e.g Account->likes->Book.name
+    /// For SurrealdbNode, this is usually just concatenating dot and the model fields i.e
+    /// Mode.fieldname1, Model.fieldname2
+    /// For edges, it usually surrounds the SurrealdbEdge with arrows e.g ->writes-> or <-writes<-
+    /// Overall, this helps us do the graph traversal
+    pub __________connect_to_graph_traversal_string: &'a syn::Ident,
+    pub ___________graph_traversal_string: &'a syn::Ident,
+    pub schema_instance: &'a syn::Ident,
+}
+
+pub struct SchemaPropertiesArgs<'a> {
+    pub macro_variables: &'a MacroVariables<'a>,
+    pub data: &'a ast::Data<util::Ignored, MyFieldReceiver>,
+    pub struct_level_casing: Option<CaseString>,
+    pub struct_name_ident: &'a syn::Ident,
 }
 
 impl SchemaFieldsProperties {
@@ -110,10 +154,11 @@ impl SchemaFieldsProperties {
     ///
     /// Panics if .
     pub(crate) fn from_receiver_data(
-        data: &ast::Data<util::Ignored, MyFieldReceiver>,
-        struct_level_casing: Option<CaseString>,
-        struct_name_ident: &syn::Ident,
+        args : SchemaPropertiesArgs
     ) -> Self {
+        let SchemaPropertiesArgs { macro_variables, data, struct_level_casing, struct_name_ident } = args;
+        let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance } = macro_variables;
+        
         let fields = data
             .as_ref()
             .take_struct()
@@ -147,18 +192,18 @@ impl SchemaFieldsProperties {
 
                 let referenced_node_meta = match relationship {
                     RelationType::LinkOne(node_object) => {
-                        ReferencedNodeMeta::from_ref_node_meta(&node_object, field_ident_normalised)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, macro_variables)
                     }
                     RelationType::LinkSelf(node_object) => {
-                        ReferencedNodeMeta::from_ref_node_meta(&node_object, field_ident_normalised)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, macro_variables)
                     }
                     RelationType::LinkMany(node_object) => {
-                        ReferencedNodeMeta::from_ref_node_meta(&node_object, field_ident_normalised)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, macro_variables)
                     }
-                    RelationType::None => ReferencedNodeMeta::default(),
+                    RelationType::None | RelationType::Relate(_) => ReferencedNodeMeta::default(),
                 };
                 
-                acc.static_assertions.push(referenced_node_meta.node_type_check);
+                acc.static_assertions.push(referenced_node_meta.destination_node_type_validator);
 
                 acc.schema_struct_fields_types_kv
                     .push(quote!(pub #field_ident_normalised: #crate_name::DbField).into());
@@ -171,15 +216,15 @@ impl SchemaFieldsProperties {
 
                 acc.connection_with_field_appended
                     .push(quote!(
-                               schema_instance.#field_ident_normalised
-                                     .push_str(format!("{}.{}", store_without_end_arrow, #field_ident_normalised_as_str).as_str());
+                               #schema_instance.#field_ident_normalised
+                                     .push_str(format!("{}.{}", #schema_instance.#___________graph_traversal_string, #field_ident_normalised_as_str).as_str());
                     ).into());
 
-                acc.referenced_node_schema_import
-                    .push(referenced_node_meta.schema_import.into());
+                acc.imports_referenced_node_schema
+                    .push(referenced_node_meta.destination_node_schema_import.into());
 
-                acc.referenced_field_record_link_method
-                    .push(referenced_node_meta.field_record_link_method.into());
+                acc.record_link_fields_methods
+                    .push(referenced_node_meta.record_link_default_alias_as_method.into());
 
                 acc
             });
@@ -189,34 +234,49 @@ impl SchemaFieldsProperties {
 
 #[derive(Default, Clone)]
 struct ReferencedNodeMeta {
-    schema_import: TokenStream,
-    field_record_link_method: TokenStream,
-    node_type_check: TokenStream,
+    destination_node_schema_import: TokenStream,
+    record_link_default_alias_as_method: TokenStream,
+    destination_node_type_validator: TokenStream,
 }
 
 impl ReferencedNodeMeta {
-    fn from_ref_node_meta(
-        node_name: &super::edge_relations::NodeName,
+    fn from_relate(relate: Relate, destination_node: &TokenStream)->Self {
+        let crate_name = get_crate_name(false);
+        // let destination_node_schema_import = quote!();
+        // let schema_name = relate
+            Self{ 
+                destination_node_schema_import:  quote!(
+                        type #destination_node = <super::#destination_node as #crate_name::SurrealdbNode>::Schema;
+                    ), 
+                
+                record_link_default_alias_as_method: quote!(), 
+
+                destination_node_type_validator: quote!(),
+            }
+    }
+    
+    fn from_record_link(
+        node_name: &super::node_relations::NodeName,
         normalized_field_name: &::syn::Ident,
-    ) -> ReferencedNodeMeta {
+        macro_variables: &MacroVariables
+    ) -> Self {
+        let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, .. } = macro_variables;
         let schema_name = format_ident!("{node_name}");
         let crate_name = get_crate_name(false);
         
-        // imports for specific schema from the trait Generic Associated types e.g
-        // type Book = <super::Book as SurrealdbNode>::Schema;
-        let schema_import = quote!(
-            type #schema_name = <super::#schema_name as #crate_name::SurrealdbNode>::Schema;
-        );
-
-        let model_checks = quote!(::static_assertions::assert_impl_one!(#schema_name: #crate_name::SurrealdbNode));
         Self {
-            schema_import,
-            node_type_check: model_checks,
-            field_record_link_method: quote!(
-                pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
-                    #schema_name:__________update_connection(&self.__________store, clause)
-                }
-            ),
+            // imports for specific schema from the trait Generic Associated types e.g
+            // type Book = <super::Book as SurrealdbNode>::Schema;
+            destination_node_schema_import: quote!(
+                        type #schema_name = <super::#schema_name as #crate_name::SurrealdbNode>::Schema;
+                    ),
+                    
+            destination_node_type_validator: quote!(::static_assertions::assert_impl_one!(#schema_name: #crate_name::SurrealdbNode);),
+            
+            record_link_default_alias_as_method: quote!(
+                        pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
+                            #schema_name::#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause) }
+                    ),
         }
     }
 }

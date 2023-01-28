@@ -433,7 +433,8 @@ impl ReferencedNodeMeta {
             
             record_link_default_alias_as_method: quote!(
                         pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
-                            #schema_name::#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause) }
+                            #schema_name::#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause)
+                        }
                     ),
         }
     }
