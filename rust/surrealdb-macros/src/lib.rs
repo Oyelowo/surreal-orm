@@ -7,14 +7,14 @@ pub mod node_builder;
 pub trait SurrealdbNode {
     type Schema;
     fn get_schema() -> Self::Schema;
-    fn get_key(&self) -> ::std::option::Option<String>;
+    fn get_key(&self) -> ::std::option::Option<&String>;
 }
 
 pub trait SurrealdbEdge {
     type In;
     type Out;
     type TableNameChecker;
-    fn get_key(&self) -> ::std::option::Option<String>;
+    fn get_key(&self) -> ::std::option::Option<&String>;
 }
 
 #[derive(serde::Serialize, Debug, Default)]

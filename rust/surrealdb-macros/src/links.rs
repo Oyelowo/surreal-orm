@@ -4,7 +4,7 @@ use super::*;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
-enum Reference<V /* : SurrealdbModel */> {
+enum Reference<V: SurrealdbNode> {
     FetchedValue(V),
     Id(String),
     Null,
@@ -18,29 +18,28 @@ enum Reference<V /* : SurrealdbModel */> {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct LinkOne<V: SurrealdbNode>(Reference<V>);
-// pub struct LinkOne<V /* : SurrealdbModel */>(Reference<V>);
 
 pub type LinkMany<V> = Vec<LinkOne<V>>;
 pub type Relate<V> = Vec<LinkOne<V>>;
 
 // Use boxing to break reference cycle
 pub type LinkSelf<V> = Box<LinkOne<V>>;
-// pub type LinkSelf<V> = LinkOne<Box<V>>;
 
-impl<V: SurrealdbNode + SurrealdbNode> From<V> for LinkOne<V> {
+impl<V: SurrealdbNode> From<V> for LinkOne<V> {
     fn from(model: V) -> Self {
         let x = model.get_key();
         Self(Reference::Id(
-            x.expect("Id not found. Make sure Id exists for this model"),
+            x.expect("Id not found. Make sure Id exists for this model")
+                .to_owned(),
         ))
     }
 }
 
-impl<V: SurrealdbNode + SurrealdbNode> From<&V> for LinkOne<V> {
+impl<V: SurrealdbNode> From<&V> for LinkOne<V> {
     fn from(model: &V) -> Self {
-        let x = model.get_key();
+        let x = model.clone().get_key();
         match x {
-            Some(x) => Self(Reference::Id(x)),
+            Some(x) => Self(Reference::Id(x.to_owned())),
             None => Self(Reference::Null),
         }
         // Self(Reference::Id(
@@ -61,7 +60,8 @@ where
     pub fn from_model(model: impl SurrealdbNode) -> Self {
         let x = model.get_key();
         Self(Reference::Id(
-            x.expect("Id not found. Make sure Id exists for this model"),
+            x.expect("Id not found. Make sure Id exists for this model")
+                .to_owned(),
         ))
     }
 

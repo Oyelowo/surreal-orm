@@ -38,6 +38,7 @@ pub struct Student {
     last_name: String,
 
     #[surrealdb(link_one = "Book", skip_serializing)]
+    #[serde(rename = "lowo_na")]
     fav_book: LinkOne<Book>,
     // // #[surrealdb(link_one = "Book", skip_serializing)]
     // course: LinkOne<Book>,
@@ -78,19 +79,23 @@ fn main() {
         fav_book: LinkOne::from_model(book),
     };
 
+    let x = xx.clone().get_key();
+    let cc = xx.get_key();
+    println!("areore:{xx:?}");
+
     // xx.get_key()
     let x1 = Student::get_schema().firstName.__as__("lowo");
     println!("x1 --- {x1}");
 
     Student::get_schema()
-        .favBook(Clause::Where(
+        .lowo_na(Clause::Where(
             query().select("Student").from("Student").build(),
         ))
         .title
         .contains_one("bee");
 
     let x2 = Student::get_schema()
-        .favBook(Clause::All)
+        .lowo_na(Clause::All)
         .title
         .__as__("ererj");
     println!("x2 --- {x2}");
