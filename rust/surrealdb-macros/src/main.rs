@@ -58,6 +58,7 @@ pub struct Book {
     id: Option<String>,
     title: String,
 }
+// ::static_assertions::assert_fields!(Book; id);
 // fn fmt(f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
 //     // f.write_fmt(format_args!("{}", self.___________store))
 //     todo!()

@@ -183,7 +183,7 @@ impl ToTokens for FieldsGetterOpts {
         let ref ___________graph_traversal_string = format_ident!("___________graph_traversal_string");
         let ref schema_instance = format_ident!("schema_instance");
         let ref macro_variables = MacroVariables{ __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance };
-        let mm = SchemaPropertiesArgs{ macro_variables, data, struct_level_casing, struct_name_ident };
+        let schema_props_args = SchemaPropertiesArgs{ macro_variables, data, struct_level_casing, struct_name_ident };
 
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
@@ -199,7 +199,7 @@ impl ToTokens for FieldsGetterOpts {
             record_link_fields_methods,
             connection_with_field_appended,
         }: SchemaFieldsProperties  = SchemaFieldsProperties::from_receiver_data(
-            mm,
+            schema_props_args,
         );
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
 
