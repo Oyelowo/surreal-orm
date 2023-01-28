@@ -237,8 +237,8 @@ impl ToTokens for FieldsGetterOpts {
                     #module_name::#struct_name_ident::new()
                 }
                 
-                fn get_key(&self) -> &::std::option::Option<String>{
-                    self.id
+                fn get_key(&self) -> ::std::option::Option<&String>{
+                    self.id.as_ref()
                 }
             }
 

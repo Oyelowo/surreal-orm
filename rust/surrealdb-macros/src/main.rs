@@ -80,7 +80,7 @@ fn main() {
     };
 
     let x = xx.clone().get_key();
-    let cc = xx.get_key();
+    let cc = xx.clone().get_key();
     println!("areore:{xx:?}");
 
     // xx.get_key()
