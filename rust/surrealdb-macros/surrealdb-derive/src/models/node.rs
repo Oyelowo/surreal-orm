@@ -252,7 +252,7 @@ impl ToTokens for FieldsGetterOpts {
                 #[derive(Debug, Serialize, Default)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
-                    pub #___________graph_traversal_string: ::std::string::String,
+                    pub(crate) #___________graph_traversal_string: ::std::string::String,
                 }
 
                 

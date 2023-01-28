@@ -123,8 +123,16 @@ fn main() {
         .title
         .contains_one("bee");
 
-    let xx = Student::get_schema().Writes__(Clause::All);
-    println!("bee --- {bee}");
+    let xx = Student::get_schema()
+        .Writes__(Clause::All)
+        .Book(Clause::Where(
+            query()
+                .and_where(Student::get_schema().lastName.contains_one("Dayo"))
+                .build(),
+        ))
+        .title
+        .__as__("meorm");
+    println!("xx --- {xx}");
 
     let x2 = Student::get_schema()
         .lowo_na(Clause::All)
