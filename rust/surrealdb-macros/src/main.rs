@@ -28,6 +28,17 @@ use surrealdb_macros::{
 };
 use typed_builder::TypedBuilder;
 
+/* struct Lowo {
+    name: String,
+    id: String,
+}
+
+fn nama() {
+    let xx = Lowo {
+        name: "".into(),
+        id: "dr".into(),
+    };
+} */
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Student {
@@ -48,7 +59,7 @@ pub struct Student {
     // written_blogs: Relate<Blog>,
 }
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone /* , Default */)]
 #[serde(rename_all = "camelCase")]
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -182,8 +182,8 @@ impl ToTokens for FieldsGetterOpts {
         let ref __________connect_to_graph_traversal_string = format_ident!("__________connect_to_graph_traversal_string");
         let ref ___________graph_traversal_string = format_ident!("___________store");
         let ref schema_instance = format_ident!("schema_instance");
-        let macro_variables = MacroVariables{ __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance };
-        let mm = SchemaPropertiesArgs{ macro_variables: todo!(), data, struct_level_casing, struct_name_ident };
+        let ref macro_variables = MacroVariables{ __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance };
+        let mm = SchemaPropertiesArgs{ macro_variables, data, struct_level_casing, struct_name_ident };
 
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
@@ -192,8 +192,8 @@ impl ToTokens for FieldsGetterOpts {
             static_assertions,
             imports_referenced_node_schema,
             // referenced_edge_schema_struct_alias,
-            relate_edge_struct_type_alias,
-            relate_edge_schema_struct_alias_impl,
+            relate_edge_schema_struct_type_alias,
+            relate_edge_schema_struct_type_alias_impl,
             relate_edge_schema_method_connection,
             relate_node_alias_method,
             record_link_fields_methods,
@@ -304,10 +304,9 @@ impl ToTokens for FieldsGetterOpts {
                     #( #relate_node_alias_method) *
                 }
                 
-            referenced_edge_schema_struct_alias,
-                #( #relate_edge_struct_type_alias) *
+                #( #relate_edge_schema_struct_type_alias) *
 
-                #( #relate_edge_schema_struct_alias_impl) *
+                #( #relate_edge_schema_struct_type_alias_impl) *
                 
             }
 

@@ -131,7 +131,7 @@ pub struct SchemaFieldsProperties {
     /// ```
     /// type Writes = super::writes::Writes<Student>;
     /// ```
-    pub relate_edge_struct_type_alias : Vec<TokenStream>,
+    pub relate_edge_schema_struct_type_alias : Vec<TokenStream>,
     /// Generated example:
     /// ```
     ///impl Writes {
@@ -146,7 +146,7 @@ pub struct SchemaFieldsProperties {
     /// from a specific edge from an origin struct.
     /// e.g Student::get_schema().writes__().book();
     /// This allows us to do `.book()` as shown above
-    pub relate_edge_schema_struct_alias_impl: Vec<TokenStream>,
+    pub relate_edge_schema_struct_type_alias_impl: Vec<TokenStream>,
     
     /// Genearated example:
     /// ```
@@ -276,11 +276,11 @@ impl SchemaFieldsProperties {
 
                         // e.g type Writes = super::WritesSchema<#struct_name_ident>;
                         // TODO: remove or reuse if makes sense: let edge_schema = format_ident!("{edge_name}Schema");
-                        let edge_module_name = format_ident!("{}", edge_name.to_string().to_lowercase()); acc.relate_edge_struct_type_alias.push(quote!(
+                        let edge_module_name = format_ident!("{}", edge_name.to_string().to_lowercase()); acc.relate_edge_schema_struct_type_alias.push(quote!(
                             type #edge_name = super::#edge_module_name::#edge_name<#struct_name_ident>;
                         ));
                         
-                        acc.relate_edge_schema_struct_alias_impl.push(quote!(
+                        acc.relate_edge_schema_struct_type_alias_impl.push(quote!(
                                     impl #edge_name {
                                         // Could potantially make the method name all small letters
                                         // or just use exactly as the table name is written
