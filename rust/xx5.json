@@ -1,0 +1,16 @@
+[{
+  "time": "744.375µs",
+  "status": "OK",
+  "result": [
+    {
+      "id": "person:lowo",
+      "known_persons": [
+        "person:dayo",
+        "person:dayo",
+        "person:dayo",
+        "person:dayo"
+      ],
+      "loves": "Canada"
+    }
+  ]
+}]

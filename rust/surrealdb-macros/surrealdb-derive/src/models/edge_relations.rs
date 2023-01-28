@@ -1,22 +1,16 @@
-use super::trait_generator::{MyFieldReceiver, Relate};
+use super::edge::{MyFieldReceiver, Relate};
 
 #[derive(Debug, Clone)]
 pub(crate) enum RelationType {
-    // ->studies->Course
-    Relate(Relate),
-    LinkOne(NodeObject),
-    LinkSelf(NodeObject),
-    LinkMany(NodeObject),
+    LinkOne(NodeName),
+    LinkSelf(NodeName),
+    LinkMany(NodeName),
     None,
 }
 
 impl From<&MyFieldReceiver> for RelationType {
     fn from(field_receiver: &MyFieldReceiver) -> Self {
         match field_receiver {
-            MyFieldReceiver {
-                relate: Some(relation),
-                ..
-            } => RelationType::Relate(relation.to_owned()),
             MyFieldReceiver {
                 link_one: Some(link_one),
                 ..
@@ -85,40 +79,40 @@ impl From<EdgeAction> for TokenStream {
 */
 
 #[derive(Debug, Clone)]
-pub(crate) struct EdgeAction(String);
-wrapper_struct_to_ident!(EdgeAction);
+pub(crate) struct EdgeName(String);
+wrapper_struct_to_ident!(EdgeName);
 
 #[derive(Debug, Clone)]
-pub(crate) struct NodeObject(String);
+pub(crate) struct NodeName(String);
 
-impl From<&String> for NodeObject {
+impl From<&String> for NodeName {
     fn from(value: &String) -> Self {
         Self(value.into())
     }
 }
-impl From<NodeObject> for String {
-    fn from(value: NodeObject) -> Self {
+impl From<NodeName> for String {
+    fn from(value: NodeName) -> Self {
         value.0
     }
 }
-wrapper_struct_to_ident!(NodeObject);
+wrapper_struct_to_ident!(NodeName);
 
 #[derive(Debug, Clone)]
 pub(crate) struct RelateAttribute {
     pub(crate) edge_direction: EdgeDirection,
-    pub(crate) edge_action: EdgeAction,
-    pub(crate) node_object: NodeObject,
+    pub(crate) edge_name: EdgeName,
+    pub(crate) node_name: NodeName,
 }
 
 impl From<RelateAttribute> for ::proc_macro2::TokenStream {
     fn from(relate_attrs: RelateAttribute) -> Self {
         let edge_direction = ::proc_macro2::TokenStream::from(relate_attrs.edge_direction);
-        let edge_action = ::proc_macro2::TokenStream::from(relate_attrs.edge_action);
-        let node_object = ::proc_macro2::TokenStream::from(relate_attrs.node_object);
+        let edge_name = ::proc_macro2::TokenStream::from(relate_attrs.edge_name);
+        let node_name = ::proc_macro2::TokenStream::from(relate_attrs.node_name);
         // ->action->NodeObject
         // <-action<-NodeObject
         // e.g ->manages->Project
-        ::quote::quote!(#edge_direction #edge_action #node_object)
+        ::quote::quote!(#edge_direction #edge_name #node_name)
     }
 }
 
@@ -156,7 +150,7 @@ impl From<Relate> for RelateAttribute {
         let (edge_action, node_object) =
             match (substrings.next(), substrings.next(), substrings.next()) {
                 (Some(action), Some(node_obj), None) => {
-                    (EdgeAction(action.into()), NodeObject(node_obj.into()))
+                    (EdgeName(action.into()), NodeName(node_obj.into()))
                 }
                 _ => panic!(
                     "too many actions or object, {}",
@@ -165,8 +159,8 @@ impl From<Relate> for RelateAttribute {
             };
 
         Self {
-            node_object,
-            edge_action,
+            node_name: node_object,
+            edge_name: edge_action,
             edge_direction,
         }
     }

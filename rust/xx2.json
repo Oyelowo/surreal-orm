@@ -1,0 +1,34 @@
+[
+  {
+    "time": "953.458µs",
+    "status": "OK",
+    "result": [
+      { "id": "person:7db1px7a0ct8ftq2lz04", "known_folks": [] },
+      { "id": "person:dayo", "known_folks": [], "loves": "Toronto" },
+      {
+        "company": "SurrealDB",
+        "id": "person:jaime",
+        "known_folks": ["person:tobie"],
+        "name": "Jaime",
+        "skills": ["Python", "java", "JavaScript"]
+      },
+      {
+        "id": "person:lowo",
+        "known_folks": [
+          "person:dayo",
+          "person:dayo",
+          "person:dayo",
+          "person:dayo"
+        ],
+        "loves": "Canada"
+      },
+      {
+        "company": "SurrealDB",
+        "id": "person:tobie",
+        "known_folks": [],
+        "name": "Tobie",
+        "skills": ["Rust", "Go", "JavaScript"]
+      }
+    ]
+  }
+]

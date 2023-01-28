@@ -6,9 +6,14 @@ Email: oyelowooyedayo@gmail.com
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
-mod surrealdb_model;
+mod models;
 
-#[proc_macro_derive(SurrealdbModel, attributes(surrealdb))]
-pub fn surreal_model_trait_derive(input: TokenStream) -> TokenStream {
-    surrealdb_model::generate_fields_getter_trait(input)
+#[proc_macro_derive(SurrealdbNode, attributes(surrealdb))]
+pub fn surreal_node_trait_derive(input: TokenStream) -> TokenStream {
+    models::node::generate_fields_getter_trait(input)
+}
+
+#[proc_macro_derive(SurrealdbEdge, attributes(surrealdb))]
+pub fn surreal_edge_trait_derive(input: TokenStream) -> TokenStream {
+    models::edge::generate_fields_getter_trait(input)
 }

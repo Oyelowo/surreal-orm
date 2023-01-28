@@ -1,0 +1,34 @@
+[
+  {
+    "time": "67.333µs",
+    "status": "OK",
+    "result": [
+      {
+        "id": "knows:8secdlsqz00lhwdh60to",
+        "in": "person:jaime",
+        "out": "person:tobie"
+      },
+      {
+        "id": "knows:h2vul3ew29bal5ufvu0h",
+        "in": "person:lowo",
+        "out": "person:dayo"
+      },
+      {
+        "id": "knows:w9eaxpbh5ucflg4p2nsx",
+        "in": "person:lowo",
+        "influencer": true,
+        "out": "person:dayo"
+      },
+      {
+        "id": "knows:x83u8hjg59kyovv91mr8",
+        "in": "person:lowo",
+        "out": "person:dayo"
+      },
+      {
+        "id": "knows:xfopdw6ikd80miwtx1g7",
+        "in": "person:lowo",
+        "out": "person:dayo"
+      }
+    ]
+  }
+]

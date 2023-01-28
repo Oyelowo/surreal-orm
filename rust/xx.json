@@ -1,0 +1,34 @@
+[
+  {
+    "time": "814.583µs",
+    "status": "OK",
+    "result": [
+      { "id": "person:7db1px7a0ct8ftq2lz04", "nama": [] },
+      { "id": "person:dayo", "loves": "Toronto", "nama": [] },
+      {
+        "company": "SurrealDB",
+        "id": "person:jaime",
+        "nama": [],
+        "name": "Jaime",
+        "skills": ["Python", "java", "JavaScript"]
+      },
+      {
+        "id": "person:lowo",
+        "loves": "Canada",
+        "nama": [
+          { "id": "person:dayo", "loves": "Toronto" },
+          { "id": "person:dayo", "loves": "Toronto" },
+          { "id": "person:dayo", "loves": "Toronto" },
+          { "id": "person:dayo", "loves": "Toronto" }
+        ]
+      },
+      {
+        "company": "SurrealDB",
+        "id": "person:tobie",
+        "nama": [],
+        "name": "Tobie",
+        "skills": ["Rust", "Go", "JavaScript"]
+      }
+    ]
+  }
+]
