@@ -190,7 +190,7 @@ impl SchemaFieldsProperties {
 
                 let (ref field_ident_normalised,  field_ident_normalised_as_str) =
                     if original_field_name_normalised.trim_start_matches("r#") == "in".to_string() {
-                        (syn::Ident::new_raw("in", Span::call_site()) , "in".to_string())
+                        (format_ident!("in_") , "in".to_string())
                     } else {
                         (field_ident_normalised.to_owned(), field_ident_normalised.to_string() )
                         
