@@ -14,6 +14,9 @@ pub trait SurrealdbEdge {
     type In;
     type Out;
     type TableNameChecker;
+    type Schema;
+
+    fn get_schema() -> Self::Schema;
     fn get_key(&self) -> ::std::option::Option<&String>;
 }
 
@@ -26,7 +29,6 @@ impl DbField {
     }
 
     pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
-        // let xx = self.___________store;
         format!("{self} AS {alias}")
     }
 }

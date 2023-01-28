@@ -211,10 +211,10 @@ impl SchemaFieldsProperties {
                 acc.static_assertions.push(referenced_node_meta.destination_node_type_validator);
 
                 acc.schema_struct_fields_types_kv
-                    .push(quote!(pub #field_ident_normalised: #crate_name::DbField).into());
+                    .push(quote!(pub #field_ident_normalised: #crate_name::DbField, ));
 
                 acc.schema_struct_fields_names_kv
-                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into()).into());
+                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(), ));
 
                 acc.serialized_field_names_normalised
                     .push(field_ident_normalised_as_str.to_owned());

@@ -180,8 +180,8 @@ impl ToTokens for FieldsGetterOpts {
         let ref schema_instance = format_ident!("schema_instance");
         let ref schema_instance_edge_arrow_trimmed = format_ident!("schema_instance_trimmed");
         
-        let ref macro_variables = MacroVariables{ __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance, schema_instance_edge_arrow_trimmed };
-        let schema_props_args = SchemaPropertiesArgs{ macro_variables, data, struct_level_casing, struct_name_ident };
+        let ref macro_variables = MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance, schema_instance_edge_arrow_trimmed };
+        let schema_props_args = SchemaPropertiesArgs { macro_variables, data, struct_level_casing, struct_name_ident };
 
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
@@ -210,8 +210,17 @@ impl ToTokens for FieldsGetterOpts {
                     type In = In;
                     type Out = Out;
                     type TableNameChecker = #module_name::TableNameStaticChecker;
-                }
+                    type Schema = #module_name::#struct_name_ident<String>;
 
+                    fn get_schema() -> Self::Schema {
+                        #module_name::#struct_name_ident::new()
+                    }
+                    
+                    fn get_key(&self) -> ::std::option::Option<&String>{
+                        self.id.as_ref()
+                    }
+                }
+                
                 use #module_name::#struct_name_ident as #schema_alias;
                 pub mod #module_name {
                     
@@ -220,19 +229,20 @@ impl ToTokens for FieldsGetterOpts {
                     }
 
                     use #crate_name::{DbField, EdgeDirection, format_clause};
-                    #( #imports_referenced_node_schema); *
+                
+                    #( #imports_referenced_node_schema) *
 
-                    #[derive(Debug, Serialize, Default)]
+                    #[derive(Debug, ::serde::Serialize, Default)]
                         pub struct #struct_name_ident<Model: ::serde::Serialize + Default> {
-                       #( #schema_struct_fields_types_kv), *
-                        pub #___________graph_traversal_string: ::std::string::String,
-                        #___________model: ::std::marker::PhantomData<Model>,
-                    }
+                           #( #schema_struct_fields_types_kv) *
+                            pub #___________graph_traversal_string: ::std::string::String,
+                            #___________model: ::std::marker::PhantomData<Model>,
+                        }
 
                     impl<Model: ::serde::Serialize + Default> #struct_name_ident<Model> {
                         pub fn new() -> Self {
                             Self {
-                               #( #schema_struct_fields_names_kv), *
+                               #( #schema_struct_fields_names_kv) *
                                 pub #___________graph_traversal_string: ::std::string::String,
                                 #___________model: ::std::marker::PhantomData,
                             }
@@ -245,9 +255,11 @@ impl ToTokens for FieldsGetterOpts {
                         ) -> Self<Model> {
                             let mut schema_instance = Self::<Model>::default();
                             let schema_edge_str_with_arrow = format!(
-                                "{}{arrow_direction}{}{arrow_direction}{}",
+                                "{}{}{}{}{}",
                                 store.as_str(),
+                                arrow_direction,
                                 #struct_name_ident,
+                                arrow_direction,
                                 #crate_name::format_clause(clause, #struct_name_ident_as_str)
                             );
                             
@@ -267,7 +279,7 @@ impl ToTokens for FieldsGetterOpts {
                 }
                 
             fn #test_name() {
-                #( #static_assertions); *
+                #( #static_assertions) *
             }
         ));
     }

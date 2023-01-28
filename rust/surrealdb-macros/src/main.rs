@@ -16,7 +16,7 @@ use surrealdb::{
     sql::Id,
     Result, Surreal,
 };
-use surrealdb_derive::SurrealdbNode;
+use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
@@ -24,7 +24,7 @@ use surrealdb_macros::{
     model_id::SurIdComplex,
     node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
     query_builder::{query, ToNodeBuilder},
-    Clause, /* SurrealdbEdge, */ SurrealdbNode,
+    Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
 };
 use typed_builder::TypedBuilder;
 
@@ -50,7 +50,54 @@ pub struct Student {
     // written_blogs: Relate<Blog>,
 }
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone /* , Default */)]
+// #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    id: Option<String>,
+    r#in: In,
+    out: Out,
+    time_written: String,
+}
+
+type StudentWritesBook = Writes<Student, Book>;
+
+/* pub struct Mana {}
+
+impl<In: SurrealdbNode, Out: SurrealdbNode> SurrealdbEdge for Writes<In, Out> {
+    type In = In;
+
+    type Out = Out;
+
+    type TableNameChecker = Mana;
+
+    fn get_key(&self) -> std::option::Option<&String> {
+        todo!()
+    }
+
+    type Schema = Book;
+
+    fn get_schema() -> Self::Schema {
+        todo!()
+    }
+}
+::static_assertions::assert_impl_one!(Mono: SurrealdbEdge);
+
+fn erer() {
+    let xx = Mono::get_schema();
+    let xx = Mono {
+        id: todo!(),
+        r#in: todo!(),
+        out: todo!(),
+        time_written: todo!(),
+    };
+    xx.get_key();
+    ::static_assertions::assert_impl_one!(<Mono as SurrealdbEdge>::In: SurrealdbNode);
+} */
+
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
