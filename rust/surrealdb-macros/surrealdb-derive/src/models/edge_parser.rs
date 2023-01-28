@@ -188,11 +188,12 @@ impl SchemaFieldsProperties {
                 let ref field_ident_normalised = format_ident!("{original_field_name_normalised}");
                 let relationship = RelationType::from(field_receiver);
 
-                let ref field_ident_normalised_as_str =
+                let (ref field_ident_normalised,  field_ident_normalised_as_str) =
                     if original_field_name_normalised.trim_start_matches("r#") == "in".to_string() {
-                        "in".into()
+                        (syn::Ident::new_raw("in", Span::call_site()) , "in".to_string())
                     } else {
-                        field_ident_normalised.to_string()
+                        (field_ident_normalised.to_owned(), field_ident_normalised.to_string() )
+                        
                     };
 
                 let referenced_node_meta = match relationship {
@@ -245,10 +246,8 @@ struct ReferencedNodeMeta {
 }
 
 impl ReferencedNodeMeta {
-    fn from_relate(relate: Relate, destination_node: &TokenStream)->Self {
+    fn from_relate(relate: Relate, destination_node: &TokenStream) -> Self {
         let crate_name = get_crate_name(false);
-        // let destination_node_schema_import = quote!();
-        // let schema_name = relate
             Self{ 
                 destination_node_schema_import:  quote!(
                         type #destination_node = <super::#destination_node as #crate_name::SurrealdbNode>::Schema;

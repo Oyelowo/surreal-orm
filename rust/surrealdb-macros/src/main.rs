@@ -50,6 +50,16 @@ pub struct Student {
     // written_blogs: Relate<Blog>,
 }
 
+/* fn ewer() {
+    struct Nama<T> {}
+
+    impl<T> Nama<T> {
+        fn new() -> Self {
+            Self::<T>new();
+            Self {}
+        }
+    }
+} */
 // #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -57,6 +67,8 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     id: Option<String>,
+
+    // #[surrealdb(link_one = "Book", skip_serializing)]
     r#in: In,
     out: Out,
     time_written: String,

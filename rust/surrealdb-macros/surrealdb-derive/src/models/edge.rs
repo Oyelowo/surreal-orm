@@ -199,7 +199,7 @@ impl ToTokens for FieldsGetterOpts {
 
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
 
-        let field_names_ident = format_ident!("{struct_name_ident}DbFields");
+        // let field_names_ident = format_ident!("{struct_name_ident}DbFields");
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         
         let schema_alias = format_ident!("{}Schema", struct_name_ident.to_string().to_lowercase());
@@ -228,7 +228,6 @@ impl ToTokens for FieldsGetterOpts {
                         #struct_name_ident: String,
                     }
 
-                    use #crate_name::{DbField, EdgeDirection, format_clause};
                 
                     #( #imports_referenced_node_schema) *
 
@@ -243,7 +242,7 @@ impl ToTokens for FieldsGetterOpts {
                         pub fn new() -> Self {
                             Self {
                                #( #schema_struct_fields_names_kv) *
-                                pub #___________graph_traversal_string: ::std::string::String,
+                                #___________graph_traversal_string: "".into(),
                                 #___________model: ::std::marker::PhantomData,
                             }
                         }
@@ -252,13 +251,13 @@ impl ToTokens for FieldsGetterOpts {
                             store: &::std::string::String,
                             clause: #crate_name::Clause,
                             arrow_direction: #crate_name::EdgeDirection,
-                        ) -> Self<Model> {
-                            let mut schema_instance = Self::<Model>::default();
+                        ) -> Self {
+                            let mut schema_instance = Self::default();
                             let schema_edge_str_with_arrow = format!(
                                 "{}{}{}{}{}",
                                 store.as_str(),
                                 arrow_direction,
-                                #struct_name_ident,
+                                #struct_name_ident_as_str,
                                 arrow_direction,
                                 #crate_name::format_clause(clause, #struct_name_ident_as_str)
                             );
