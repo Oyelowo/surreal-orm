@@ -15,14 +15,9 @@ surrealdb= { workspace = true }
 tokio= { workspace = true }
 
 async-graphql = { workspace = true }
-# surreal-simple-querybuilder = "0.4.0"
-# hello-macro-derive = { workspace = true }
-# macro-derive = { workspace = true }
 syn = { workspace = true }
 quote = { workspace = true }
 proc-macro2 = { workspace = true }
-# syn = { version = { workspace = true }
-# quote = { workspace = true }
 # Inflector = { workspace = true }
 # proc-macro-crate = { workspace = true }
 darling = { workspace = true }
@@ -36,6 +31,8 @@ bevy_reflect = { workspace = true  }
 # thiserror = { workspace = true }
 # proc-macro2-diagnostics = { workspace = true }
 
+
+test-case = { workspace = true  }
 # [lib]
 # proc-macro = true
 # crate_type = ["proc-macro"]
