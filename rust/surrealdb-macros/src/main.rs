@@ -2,12 +2,8 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
-#![allow(incomplete_features)]
 #![allow(unused_imports)]
-#![feature(inherent_associated_types)]
-#![feature(generic_const_exprs)]
 
-use darling::ToTokens;
 use serde::{Deserialize, Serialize};
 use static_assertions::*;
 use surrealdb::{

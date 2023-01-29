@@ -8,11 +8,6 @@ members = [
     "lib-my-macros",
     "lib-my-macros/derive",
     "surrealdb-macros",
-    "surreal-simple-querybuilder",
-    "surreal-simple-querybuilder/model-proc-macro",
-    # "surreal-simple-querybuilder/surreal-simple-querybuilder-proc-macro"
-    #
-    # "derive",
 ]
 
 [workspace.package]
@@ -26,10 +21,7 @@ documentation = "https://codebreather.com/oyelowo"
 [workspace.dependencies]
 lib-common = { path = "./lib-common" }
 lib-my-macros = { path = "./lib-my-macros" }
-surreal-simple-querybuilder = { path = "./surreal-simple-querybuilder" }
-# surreal-simple-querybuilder = "0.4.0"
 
-# surrealdb = "1.0.0-beta.8"
 surrealdb = { git = "https://github.com/surrealdb/surrealdb", branch = "main", features = [
     "protocol-ws",
     "protocol-http",
@@ -177,3 +169,5 @@ strum_macros = "0.24"
 pretty_assertions = "1.3.0"
 tokio-test = "0.4.2"
 wiremock = "0.5.15"
+test-case = "2.2.2"
+
