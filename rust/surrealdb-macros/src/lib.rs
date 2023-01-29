@@ -82,7 +82,7 @@ pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
         }
         Clause::Id(id) => {
             if !id
-                .to_lowercase()
+                // .to_lowercase()
                 .starts_with(format!("{table_name}:").as_str())
             {
                 // let xx = format!("invalid id {id}. Id does not belong to table {table_name}")

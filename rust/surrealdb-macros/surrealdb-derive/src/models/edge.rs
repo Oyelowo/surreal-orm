@@ -258,8 +258,8 @@ impl ToTokens for FieldsGetterOpts {
                                 store.as_str(),
                                 arrow_direction,
                                 #struct_name_ident_as_str,
+                                #crate_name::format_clause(clause, #struct_name_ident_as_str),
                                 arrow_direction,
-                                #crate_name::format_clause(clause, #struct_name_ident_as_str)
                             );
                             
                             #schema_instance.#___________graph_traversal_string.push_str(schema_edge_str_with_arrow.as_str());

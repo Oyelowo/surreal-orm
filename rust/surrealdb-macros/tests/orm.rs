@@ -46,16 +46,6 @@ pub struct Student {
     written_blogs: Relate<Book>,
 }
 
-/* fn ewer() {
-    struct Nama<T> {}
-
-    impl<T> Nama<T> {
-        fn new() -> Self {
-            Self::<T>new();
-            Self {}
-        }
-    }
-} */
 // #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -65,7 +55,8 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     id: Option<String>,
 
     // #[surrealdb(link_one = "Book", skip_serializing)]
-    r#in: In,
+    #[serde(rename = "in")]
+    _in: In,
     out: Out,
     time_written: String,
 }
@@ -79,18 +70,84 @@ pub struct Book {
     #[builder(default, setter(strip_option))]
     id: Option<String>,
     title: String,
+    content: String,
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use surrealdb_macros::DbField;
     use test_case::test_case;
 
-    #[test_case(-2, -4 ; "when both operands are negative")]
-    #[test_case(2,  4  ; "when both operands are positive")]
-    #[test_case(4,  2  ; "when operands are swapped")]
-    fn multiplication_tests(x: i8, y: i8) {
-        let actual = (x * y).abs();
+    #[test]
+    fn multiplication_tests1() {
+        let x = Student::get_schema().firstName;
+        assert_eq!(x.to_string(), "firstName".to_string())
+    }
 
-        assert_eq!(8, actual)
+    #[test]
+    fn multiplication_tests2() {
+        let x = Student::get_schema()
+            .Writes__(Clause::All)
+            .Book(Clause::All)
+            .title;
+
+        assert_eq!(x.to_string(), "->Writes->Book.title".to_string())
+    }
+
+    #[test]
+    fn multiplication_tests3() {
+        let x = Student::get_schema()
+            .Writes__(Clause::Where(
+                query()
+                    .and_where(Student::get_schema().firstName.contains_one("lowo"))
+                    .build(),
+            ))
+            .Book(Clause::All)
+            .content;
+
+        assert_eq!(
+            x.to_string(),
+            "->Writes[WHERE firstName CONTAINS lowo]->Book.content".to_string()
+        )
+    }
+
+    #[test]
+    fn multiplication_tests4() {
+        let x = Student::get_schema()
+            .Writes__(Clause::Where(
+                query()
+                    .and_where(Student::get_schema().firstName.contains_one("lowo"))
+                    .build(),
+            ))
+            .Book(Clause::Where(
+                query()
+                    .and_where(Book::get_schema().content.equals("Oyelowo in Uranus"))
+                    .build(),
+            ))
+            .content;
+
+        assert_eq!(
+            x.to_string(),
+            "->Writes[WHERE firstName CONTAINS lowo]->Book[WHERE content = Oyelowo in Uranus].content".to_string()
+        )
+    }
+
+    #[test]
+    fn multiplication_tests5() {
+        let x = Student::get_schema()
+            .Writes__(Clause::Where(
+                query()
+                    .and_where(Student::get_schema().firstName.contains_one("lowo"))
+                    .build(),
+            ))
+            .Book(Clause::Id("Book:oyelowo".into()))
+            .content;
+
+        assert_eq!(
+            x.to_string(),
+            "->Writes[WHERE firstName CONTAINS lowo]->Book[WHERE id = Book:oyelowo].content"
+                .to_string()
+        )
     }
 }
