@@ -135,7 +135,11 @@ impl From<RelateAttribute> for ::proc_macro2::TokenStream {
 //     }
 // }
 
-// impl From<Relation> for RelateAttribute {
+//
+// Get the metadata from such string(e.g: ->Writes->Book). Where:
+// Node = Book
+// Edge = Writes
+// Direction = ->
 impl From<Relate> for RelateAttribute {
     fn from(relation: Relate) -> Self {
         let right_arrow_count = relation.link.matches("->").count();

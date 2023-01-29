@@ -73,6 +73,15 @@ pub struct Book {
     content: String,
 }
 
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Blog {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    id: Option<String>,
+    title: String,
+    content: String,
+}
 #[cfg(test)]
 mod tests {
     use super::*;
