@@ -1,3 +1,4 @@
+pub(crate) mod attributes;
 pub(crate) mod casing;
 pub(crate) mod edge;
 mod edge_parser;
