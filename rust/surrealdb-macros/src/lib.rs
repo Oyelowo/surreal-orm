@@ -3,6 +3,7 @@
 pub mod links;
 pub mod model_id;
 pub mod node_builder;
+pub mod qbuilder;
 
 pub trait SurrealdbNode {
     type Schema;
@@ -61,7 +62,7 @@ impl std::fmt::Display for DbField {
     }
 } */
 
-impl surreal_simple_querybuilder::prelude::ToNodeBuilder for DbField {}
+impl query_builder::ToNodeBuilder for DbField {}
 
 pub enum Clause {
     All,
@@ -118,12 +119,10 @@ impl From<EdgeDirection> for String {
 }
 
 pub mod query_builder {
-    use surreal_simple_querybuilder::prelude as query_builder;
 
-    pub fn query() -> query_builder::QueryBuilder<'static> {
-        query_builder::QueryBuilder::new()
+    pub fn query() -> super::qbuilder::QueryBuilder<'static> {
+        super::qbuilder::QueryBuilder::new()
     }
 
-    // pub use query_builder::*;
-    pub use query_builder::{model, NodeBuilder, SchemaField, SchemaFieldType, ToNodeBuilder};
+    pub use super::node_builder::{NodeBuilder, ToNodeBuilder};
 }
