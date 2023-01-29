@@ -35,3 +35,5 @@ test-case = { workspace = true  }
 # [lib]
 # proc-macro = true
 # crate_type = ["proc-macro"]
+[lib]
+doctest = false
