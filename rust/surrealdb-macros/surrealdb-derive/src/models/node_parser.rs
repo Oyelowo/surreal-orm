@@ -5,7 +5,7 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(dead_code)]
 
-use std::{hash::Hash};
+use std::hash::Hash;
 
 use darling::{ast, util};
 use proc_macro2::{Span, TokenStream};
@@ -15,7 +15,7 @@ use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     node::{MyFieldReceiver, Relate},
     get_crate_name,
-    node_relations::{RelationType, RelateAttribute},
+     relations::{EdgeDirection, NodeName,RelationType, RelateAttribute},
 };
 
 #[derive(Default, Clone)]
@@ -293,8 +293,8 @@ impl SchemaFieldsProperties {
                         
 
                         let edge_method_name_with_direction = match relation_attributes.edge_direction {
-                            super::node_relations::EdgeDirection::OutArrowRight => format_ident!("{edge_name}__"),
-                            super::node_relations::EdgeDirection::InArrowLeft => format_ident!("__{edge_name}"),
+                            EdgeDirection::OutArrowRight => format_ident!("{edge_name}__"),
+                            EdgeDirection::InArrowLeft => format_ident!("__{edge_name}"),
                         };
                         
                         acc.relate_edge_schema_method_connection.push(quote!(
@@ -314,10 +314,10 @@ impl SchemaFieldsProperties {
                         let (in_node, out_node) = match relation_attributes.edge_direction {
                             // If OutArrowRight, the current struct should be InNode, and
                             // OutNode in "->edge_action->OutNode", should be OutNode
-                            super::node_relations::EdgeDirection::OutArrowRight => {
+                            EdgeDirection::OutArrowRight => {
                                 (struct_name, destination_node)
                             }
-                            super::node_relations::EdgeDirection::InArrowLeft => (destination_node, struct_name),
+                            EdgeDirection::InArrowLeft => (destination_node, struct_name),
                         };
                         
                         let relation_alias_struct_renamed = format_ident!("{}TableName", edge_alias_specific);
@@ -415,7 +415,7 @@ impl ReferencedNodeMeta {
     }
     
     fn from_record_link(
-        node_name: &super::node_relations::NodeName,
+        node_name: &NodeName,
         normalized_field_name: &::syn::Ident,
         macro_variables: &MacroVariables
     ) -> Self {

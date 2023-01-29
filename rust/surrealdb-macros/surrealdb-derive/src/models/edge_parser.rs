@@ -5,7 +5,7 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(dead_code)]
 
-use std::{hash::Hash};
+use std::hash::Hash;
 
 use darling::{ast, util};
 use proc_macro2::{Span, TokenStream};
@@ -15,7 +15,7 @@ use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     node::MyFieldReceiver,
     get_crate_name,
-    node_relations::RelationType, node::Relate,
+    relations::{RelationType, NodeName}, node::Relate,
 };
 
 #[derive(Default, Clone)]
@@ -260,7 +260,7 @@ impl ReferencedNodeMeta {
     }
     
     fn from_record_link(
-        node_name: &super::node_relations::NodeName,
+        node_name: &NodeName,
         normalized_field_name: &::syn::Ident,
         macro_variables: &MacroVariables
     ) -> Self {
