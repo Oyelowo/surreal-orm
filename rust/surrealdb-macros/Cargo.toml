@@ -10,7 +10,6 @@ documentation = { workspace = true }
 
 [dependencies]
 surrealdb-derive = { path = "./surrealdb-derive" }
-surreal-simple-querybuilder = { workspace = true }
 surrealdb= { workspace = true }
 tokio= { workspace = true }
 
