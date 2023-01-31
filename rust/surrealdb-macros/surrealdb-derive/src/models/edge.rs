@@ -19,14 +19,14 @@ Email: oyelowooyedayo@gmail.com
 //     get_crate_name,
 //     parser::{EdgeModelAttr, ModelAttributesTokensDeriver},
 // };
-use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
+use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::str::FromStr;
 
 use syn::{self, parse_macro_input};
 
-use super::{edge_parser::{SchemaFieldsProperties, MacroVariables, SchemaPropertiesArgs}, casing::CaseString, node::MyFieldReceiver, attributes::Rename};
+use super::{edge_parser::{SchemaFieldsProperties, MacroVariables, SchemaPropertiesArgs}, casing::CaseString,  attributes::{Rename, MyFieldReceiver}};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]

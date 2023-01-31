@@ -1,4 +1,7 @@
-use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
+use darling::{
+    ast::{self, Data},
+    util, FromDeriveInput, FromField, FromMeta, ToTokens,
+};
 
 #[derive(Debug, Clone)]
 pub struct Rename {
@@ -117,15 +120,15 @@ pub struct MyFieldReceiver {
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
 pub struct FieldsGetterOpts {
-    ident: syn::Ident,
-    attrs: Vec<syn::Attribute>,
-    generics: syn::Generics,
+    pub(crate) ident: syn::Ident,
+    pub(crate) attrs: Vec<syn::Attribute>,
+    pub(crate) generics: syn::Generics,
     /// Receives the body of the struct or enum. We don't care about
     /// struct fields because we previously told darling we only accept structs.
-    data: ast::Data<util::Ignored, self::MyFieldReceiver>,
+    pub data: Data<util::Ignored, self::MyFieldReceiver>,
 
     #[darling(default)]
-    rename_all: ::std::option::Option<Rename>,
+    pub(crate) rename_all: ::std::option::Option<Rename>,
 
     #[darling(default)]
     pub(crate) relation_name: ::std::option::Option<String>,

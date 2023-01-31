@@ -18,8 +18,7 @@ use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     model_id::SurIdComplex,
-    node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
-    query_builder::{query, ToNodeBuilder},
+    query_builder::{query, NodeBuilder, ToNodeBuilder},
     Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
 };
 use typed_builder::TypedBuilder;

@@ -1,4 +1,4 @@
-use super::node::{MyFieldReceiver, Relate};
+use super::attributes::{MyFieldReceiver, Relate};
 
 #[derive(Debug, Clone)]
 pub(crate) enum RelationType {

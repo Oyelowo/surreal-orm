@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use darling::ToTokens;
+use darling::{ToTokens, FromDeriveInput};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::str::FromStr;

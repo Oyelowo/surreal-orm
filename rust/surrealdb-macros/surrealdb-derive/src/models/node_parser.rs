@@ -13,9 +13,8 @@ use quote::{format_ident, quote};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
-    node::{MyFieldReceiver, Relate},
     get_crate_name,
-     relations::{EdgeDirection, NodeName,RelationType, RelateAttribute},
+     relations::{EdgeDirection, NodeName,RelationType, RelateAttribute}, attributes::{MyFieldReceiver, Relate},
 };
 
 #[derive(Default, Clone)]
