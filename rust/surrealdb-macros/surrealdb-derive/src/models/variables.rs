@@ -37,17 +37,3 @@ impl VariablesModelMacro {
         }
     }
 }
-
-// pub struct VariablesNodeMacro {
-//     model_vars: VariablesModelMacro,
-// }
-//
-// pub struct VariablesEdgeMacro {
-//     model_vars: VariablesModelMacro,
-//     ___________model: syn::Ident,
-//     // Mainly used in edge schema to remove the start and end arrows for field access e.g
-//     // when we have "->writes->", we may want writes.time_written in case we want to access
-//     // a field on an edge itself because at the end of the day, an edge is a model or table
-//     // in the database itself
-//     pub schema_instance_edge_arrow_trimmed: syn::Ident,
-// }
