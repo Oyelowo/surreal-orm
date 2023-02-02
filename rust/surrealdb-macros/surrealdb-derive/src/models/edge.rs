@@ -140,7 +140,7 @@ impl ToTokens for FieldsGetterOpts {
                         pub fn #__________connect_to_graph_traversal_string(
                             store: &::std::string::String,
                             clause: #crate_name::Clause,
-                            arrow_direction: #crate_name::EdgeDirection,
+                            arrow_direction: &str,
                         ) -> Self {
                             let mut schema_instance = Self::default();
                             let schema_edge_str_with_arrow = format!(
@@ -156,7 +156,7 @@ impl ToTokens for FieldsGetterOpts {
 
                             let #schema_instance_edge_arrow_trimmed = #schema_instance
                                 .#___________graph_traversal_string
-                                .replace(arrow_direction.to_string().as_str(), "");
+                                .replace(arrow_direction, "");
 
                             #( #connection_with_field_appended) *
                             

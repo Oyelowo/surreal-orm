@@ -49,6 +49,15 @@ impl From<EdgeDirection> for ::proc_macro2::TokenStream {
     }
 }
 
+impl From<EdgeDirection> for &str {
+    fn from(direction: EdgeDirection) -> Self {
+        match direction {
+            EdgeDirection::OutArrowRight => "->",
+            EdgeDirection::InArrowLeft => "<-",
+        }
+    }
+}
+
 impl From<EdgeDirection> for String {
     fn from(direction: EdgeDirection) -> Self {
         match direction {

@@ -257,7 +257,7 @@ impl SchemaFieldsProperties {
                 let referenced_node_meta = match relationship {
                     RelationType::Relate(relation) => {
                         let relation_attributes = RelateAttribute::from(relation.clone());
-                        let arrow_direction = TokenStream::from(relation_attributes.edge_direction);
+                        let arrow_direction = String::from(relation_attributes.edge_direction);
                         let edge_name = TokenStream::from(relation_attributes.edge_name);
                         let ref destination_node = TokenStream::from(relation_attributes.node_name.clone());
                         // let extra = ReferencedNodeMeta::from_ref_node_meta(relation_attributes.node_name, field_ident_normalised);
@@ -301,7 +301,7 @@ impl SchemaFieldsProperties {
                                         #edge_name::#__________connect_to_graph_traversal_string(
                                             &self.#___________graph_traversal_string,
                                             clause,
-                                            #crate_name::EdgeDirection::OutArrowRight,
+                                            #arrow_direction,
                                         )
                                     }
                                 )
