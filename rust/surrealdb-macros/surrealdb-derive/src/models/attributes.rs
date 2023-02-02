@@ -2,6 +2,16 @@ use darling::{
     ast::{self, Data},
     util, FromDeriveInput, FromField, FromMeta, ToTokens,
 };
+use proc_macro2::TokenStream;
+use syn::Ident;
+
+use super::{
+    casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
+    get_crate_name,
+    relations::NodeName,
+    variables::VariablesModelMacro,
+};
+use quote::{format_ident, quote};
 
 #[derive(Debug, Clone)]
 pub struct Rename {
@@ -132,4 +142,98 @@ pub struct FieldsGetterOpts {
 
     #[darling(default)]
     pub(crate) relation_name: ::std::option::Option<String>,
+}
+
+#[derive(Default, Clone)]
+pub(crate) struct ReferencedNodeMeta {
+    pub(crate) destination_node_schema_import: TokenStream,
+    pub(crate) record_link_default_alias_as_method: TokenStream,
+    pub(crate) destination_node_type_validator: TokenStream,
+}
+
+impl ReferencedNodeMeta {
+    pub(crate) fn from_relate(relate: Relate, destination_node: &TokenStream) -> Self {
+        let crate_name = get_crate_name(false);
+        // let destination_node_schema_import = quote!();
+        // let schema_name = relate
+        Self {
+            destination_node_schema_import: quote!(
+                type #destination_node = <super::#destination_node as #crate_name::SurrealdbNode>::Schema;
+            ),
+
+            record_link_default_alias_as_method: quote!(),
+
+            destination_node_type_validator: quote!(),
+        }
+    }
+
+    pub(crate) fn from_record_link(
+        node_name: &NodeName,
+        normalized_field_name: &::syn::Ident,
+    ) -> Self {
+        let VariablesModelMacro {
+            __________connect_to_graph_traversal_string,
+            ___________graph_traversal_string,
+            ..
+        } = VariablesModelMacro::new();
+
+        let schema_name = format_ident!("{node_name}");
+        let crate_name = get_crate_name(false);
+
+        Self {
+            // imports for specific schema from the trait Generic Associated types e.g
+            // type Book = <super::Book as SurrealdbNode>::Schema;
+            destination_node_schema_import: quote!(
+                type #schema_name = <super::#schema_name as #crate_name::SurrealdbNode>::Schema;
+            ),
+
+            destination_node_type_validator: quote!(::static_assertions::assert_impl_one!(#schema_name: #crate_name::SurrealdbNode);),
+
+            record_link_default_alias_as_method: quote!(
+                pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
+                    #schema_name::#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause)
+                }
+            ),
+        }
+    }
+}
+
+pub(crate) struct NormalisedField {
+    pub(crate) field_ident_normalised: Ident,
+    pub(crate) field_ident_normalised_as_str: String,
+}
+
+impl NormalisedField {
+    pub(crate) fn from_receiever(
+        field_receiver: &MyFieldReceiver,
+        struct_level_casing: Option<CaseString>,
+    ) -> Self {
+        let field_ident = field_receiver.ident.as_ref().unwrap();
+
+        let field_ident_cased = FieldIdentCased::from(FieldIdentUnCased {
+            uncased_field_name: field_ident.to_string(),
+            casing: struct_level_casing,
+        });
+
+        // get the field's proper serialized format. Renaming should take precedence
+        let original_field_name_normalised = &field_receiver.rename.as_ref().map_or_else(
+            || field_ident_cased.into(),
+            |renamed| renamed.clone().serialize,
+        );
+        let ref field_ident_normalised = format_ident!("{original_field_name_normalised}");
+
+        let (field_ident_normalised, field_ident_normalised_as_str) =
+            if original_field_name_normalised.trim_start_matches("r#") == "in".to_string() {
+                (format_ident!("in_"), "in".to_string())
+            } else {
+                (
+                    field_ident_normalised.to_owned(),
+                    field_ident_normalised.to_string(),
+                )
+            };
+        Self {
+            field_ident_normalised,
+            field_ident_normalised_as_str,
+        }
+    }
 }

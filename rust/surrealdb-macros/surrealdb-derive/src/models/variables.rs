@@ -1,4 +1,5 @@
 use quote::format_ident;
+use syn::Ident;
 
 pub(crate) struct VariablesModelMacro {
     /// This joins present model to the currently built graph.
@@ -35,5 +36,9 @@ impl VariablesModelMacro {
             ___________model,
             schema_instance_edge_arrow_trimmed,
         }
+    }
+
+    pub fn get_schema_alias(schema_name: &Ident) -> Ident {
+        format_ident!("{schema_name}Schema")
     }
 }

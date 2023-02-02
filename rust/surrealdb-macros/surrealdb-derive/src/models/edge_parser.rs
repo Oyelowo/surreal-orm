@@ -14,7 +14,7 @@ use quote::{format_ident, quote};
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     get_crate_name,
-    relations::{RelationType, NodeName}, attributes::{MyFieldReceiver, Relate}, variables::VariablesModelMacro 
+    relations::{RelationType, NodeName}, attributes::{MyFieldReceiver, Relate, ReferencedNodeMeta, NormalisedField}, variables::VariablesModelMacro 
 };
 
 #[derive(Default, Clone)]
@@ -158,30 +158,13 @@ impl SchemaFieldsProperties {
             .fields
             .into_iter()
             .fold(Self::default(), |mut acc,  field_receiver| {
-                let field_ident = field_receiver.ident.as_ref().unwrap();
-                let field_type = &field_receiver.ty;
                 let crate_name = get_crate_name(false);
-                let uncased_field_name = ::std::string::ToString::to_string(&field_ident);
-                let field_ident_cased = FieldIdentCased::from(FieldIdentUnCased {
-                    uncased_field_name,
-                    casing: struct_level_casing,
-                });
-
-                // get the field's proper serialized format. Renaming should take precedence
-                let original_field_name_normalised = &field_receiver.rename.as_ref().map_or_else(
-                    || field_ident_cased.into(),
-                    |renamed| renamed.clone().serialize,
-                );
-                let ref field_ident_normalised = format_ident!("{original_field_name_normalised}");
                 let relationship = RelationType::from(field_receiver);
+                let NormalisedField { 
+                         ref field_ident_normalised,
+                         ref field_ident_normalised_as_str
+                } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
 
-                let (ref field_ident_normalised,  field_ident_normalised_as_str) =
-                    if original_field_name_normalised.trim_start_matches("r#") == "in".to_string() {
-                        (format_ident!("in_") , "in".to_string())
-                    } else {
-                        (field_ident_normalised.to_owned(), field_ident_normalised.to_string() )
-                        
-                    };
 
                 let referenced_node_meta = match relationship {
                     RelationType::LinkOne(node_object) => {
@@ -198,6 +181,11 @@ impl SchemaFieldsProperties {
                 
                 acc.static_assertions.push(referenced_node_meta.destination_node_type_validator);
 
+                acc.imports_referenced_node_schema
+                    .push(referenced_node_meta.destination_node_schema_import.into());
+
+                acc.record_link_fields_methods
+                    .push(referenced_node_meta.record_link_default_alias_as_method.into());
                 acc.schema_struct_fields_types_kv
                     .push(quote!(pub #field_ident_normalised: #crate_name::DbField, ));
 
@@ -213,11 +201,6 @@ impl SchemaFieldsProperties {
                                      .push_str(format!("{}.{}", #schema_instance_edge_arrow_trimmed, #field_ident_normalised_as_str).as_str());
                     ).into());
 
-                acc.imports_referenced_node_schema
-                    .push(referenced_node_meta.destination_node_schema_import.into());
-
-                acc.record_link_fields_methods
-                    .push(referenced_node_meta.record_link_default_alias_as_method.into());
 
                 acc
             });
@@ -225,59 +208,3 @@ impl SchemaFieldsProperties {
     }
 }
 
-#[derive(Default, Clone)]
-struct ReferencedNodeMeta {
-    destination_node_schema_import: TokenStream,
-    record_link_default_alias_as_method: TokenStream,
-    destination_node_type_validator: TokenStream,
-}
-
-impl ReferencedNodeMeta {
-    fn from_relate(relate: Relate, destination_node: &TokenStream) -> Self {
-        let crate_name = get_crate_name(false);
-            Self{ 
-                destination_node_schema_import:  quote!(
-                        type #destination_node = <super::#destination_node as #crate_name::SurrealdbNode>::Schema;
-                    ), 
-                
-                record_link_default_alias_as_method: quote!(), 
-
-                destination_node_type_validator: quote!(),
-            }
-    }
-    
-    fn from_record_link(
-        node_name: &NodeName,
-        normalized_field_name: &::syn::Ident,
-    ) -> Self {
-        let VariablesModelMacro { 
-            __________connect_to_graph_traversal_string,
-            ___________graph_traversal_string, .. 
-        } = VariablesModelMacro::new();
-        let schema_name = format_ident!("{node_name}");
-        let crate_name = get_crate_name(false);
-        
-        Self {
-            // imports for specific schema from the trait Generic Associated types e.g
-            // type Book = <super::Book as SurrealdbNode>::Schema;
-            destination_node_schema_import: quote!(
-                        type #schema_name = <super::#schema_name as #crate_name::SurrealdbNode>::Schema;
-                    ),
-                    
-            destination_node_type_validator: quote!(::static_assertions::assert_impl_one!(#schema_name: #crate_name::SurrealdbNode);),
-            
-            record_link_default_alias_as_method: quote!(
-                        pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
-                            #schema_name::#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause) }
-                    ),
-        }
-    }
-}
-
-fn get_ident(name: &String) -> syn::Ident {
-    if vec!["in", "r#in"].contains(&name.as_str()) {
-        syn::Ident::new_raw(name.trim_start_matches("r#"), Span::call_site())
-    } else {
-        syn::Ident::new(name.as_str(), Span::call_site())
-    }
-}

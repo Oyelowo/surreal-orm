@@ -73,7 +73,7 @@ impl ToTokens for FieldsGetterOpts {
             // referenced_edge_schema_struct_alias,
             record_link_fields_methods,
             connection_with_field_appended,
-        }: SchemaFieldsProperties  = SchemaFieldsProperties::from_receiver_data(
+        } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
         );
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
@@ -83,7 +83,7 @@ impl ToTokens for FieldsGetterOpts {
         // let field_names_ident = format_ident!("{struct_name_ident}DbFields");
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         
-        let schema_alias = format_ident!("{}Schema", struct_name_ident.to_string().to_lowercase());
+        let schema_alias = VariablesModelMacro::get_schema_alias(struct_name_ident);
         
         tokens.extend(quote!( 
                         
