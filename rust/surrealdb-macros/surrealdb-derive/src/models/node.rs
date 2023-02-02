@@ -9,7 +9,8 @@ use syn::{self, parse_macro_input};
 
 use super::{
     casing::CaseString,
-    node_parser::{MacroVariables, SchemaFieldsProperties, SchemaPropertiesArgs}, attributes::FieldsGetterOpts,
+    node_parser::{ SchemaFieldsProperties, SchemaPropertiesArgs}, attributes::FieldsGetterOpts,
+    variables::VariablesModelMacro
 };
 
 
@@ -40,11 +41,12 @@ impl ToTokens for FieldsGetterOpts {
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 
-        let ref __________connect_to_graph_traversal_string = format_ident!("__________connect_to_graph_traversal_string");
-        let ref ___________graph_traversal_string = format_ident!("___________graph_traversal_string");
-        let ref schema_instance = format_ident!("schema_instance");
-        let ref macro_variables = MacroVariables{ __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance };
-        let schema_props_args = SchemaPropertiesArgs{ macro_variables, data, struct_level_casing, struct_name_ident };
+        let  VariablesModelMacro { 
+            __________connect_to_graph_traversal_string, 
+            ___________graph_traversal_string,
+            schema_instance, .. 
+        } = VariablesModelMacro::new();
+        let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident };
 
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,

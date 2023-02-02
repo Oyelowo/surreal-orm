@@ -9,6 +9,16 @@ Email: oyelowooyedayo@gmail.com
 #![allow(dead_code)]
 
 
+
+use std::{sync::Mutex, collections::HashMap};
+use once_cell::sync::Lazy;
+
+static GLOBAL_DATA: Lazy<Mutex<HashMap<i32, String>>> = Lazy::new(|| {
+    let mut m = HashMap::new();
+    m.insert(13, "Spica".to_string());
+    m.insert(74, "Hoyten".to_string());
+    Mutex::new(m)
+});
 // pub(crate) mod casing;
 // mod parser;
 // pub(crate) mod relations;
@@ -26,7 +36,7 @@ use std::str::FromStr;
 
 use syn::{self, parse_macro_input};
 
-use super::{edge_parser::{SchemaFieldsProperties, MacroVariables, SchemaPropertiesArgs}, casing::CaseString,  attributes::{Rename, MyFieldReceiver}};
+use super::{edge_parser::{SchemaFieldsProperties,  SchemaPropertiesArgs},  casing::CaseString,  attributes::{Rename, MyFieldReceiver}, variables::VariablesModelMacro};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
@@ -64,14 +74,15 @@ impl ToTokens for FieldsGetterOpts {
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 
-        let ref __________connect_to_graph_traversal_string = format_ident!("__________connect_to_graph_traversal_string");
-        let ref ___________graph_traversal_string = format_ident!("___________graph_traversal_string");
-        let ref ___________model = format_ident!("___________model");
-        let ref schema_instance = format_ident!("schema_instance");
-        let ref schema_instance_edge_arrow_trimmed = format_ident!("schema_instance_trimmed");
         
-        let ref macro_variables = MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance, schema_instance_edge_arrow_trimmed };
-        let schema_props_args = SchemaPropertiesArgs { macro_variables, data, struct_level_casing, struct_name_ident };
+        let  VariablesModelMacro { 
+            __________connect_to_graph_traversal_string, 
+            ___________graph_traversal_string,
+            ___________model,
+            schema_instance_edge_arrow_trimmed,
+            schema_instance, .. 
+        } = VariablesModelMacro::new();
+        let schema_props_args = SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident };
 
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,

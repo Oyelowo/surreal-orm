@@ -5,6 +5,7 @@ mod edge_parser;
 pub(crate) mod node;
 mod node_parser;
 pub(crate) mod relations;
+pub(crate) mod variables;
 
 use proc_macro2::{Span, TokenStream, TokenTree};
 use proc_macro_crate::{crate_name, FoundCrate};

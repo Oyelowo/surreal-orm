@@ -14,7 +14,7 @@ use quote::{format_ident, quote};
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     get_crate_name,
-    relations::{RelationType, NodeName}, attributes::{MyFieldReceiver, Relate} 
+    relations::{RelationType, NodeName}, attributes::{MyFieldReceiver, Relate}, variables::VariablesModelMacro 
 };
 
 #[derive(Default, Clone)]
@@ -127,25 +127,8 @@ pub struct SchemaFieldsProperties {
     pub connection_with_field_appended: Vec<TokenStream>,
 }
 
-pub struct MacroVariables<'a> {
-    /// This joins present model to the currently built graph.
-    /// e.g Account->likes->Book.name
-    /// For SurrealdbNode, this is usually just concatenating dot and the model fields i.e
-    /// Mode.fieldname1, Model.fieldname2
-    /// For edges, it usually surrounds the SurrealdbEdge with arrows e.g ->writes-> or <-writes<-
-    /// Overall, this helps us do the graph traversal
-    pub __________connect_to_graph_traversal_string: &'a syn::Ident,
-    pub ___________graph_traversal_string: &'a syn::Ident,
-    pub schema_instance: &'a syn::Ident,
-    // Mainly used in edge schema to remove the start and end arrows for field access e.g
-    // when we have "->writes->", we may want writes.time_written in case we want to access
-    // a field on an edge itself because at the end of the day, an edge is a model or table
-    // in the database itself
-    pub schema_instance_edge_arrow_trimmed: &'a syn::Ident,
-}
 
 pub struct SchemaPropertiesArgs<'a> {
-    pub macro_variables: &'a MacroVariables<'a>,
     pub data: &'a ast::Data<util::Ignored, MyFieldReceiver>,
     pub struct_level_casing: Option<CaseString>,
     pub struct_name_ident: &'a syn::Ident,
@@ -160,8 +143,13 @@ impl SchemaFieldsProperties {
     pub(crate) fn from_receiver_data(
         args : SchemaPropertiesArgs
     ) -> Self {
-        let SchemaPropertiesArgs { macro_variables, data, struct_level_casing, struct_name_ident } = args;
-        let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance, schema_instance_edge_arrow_trimmed } = macro_variables;
+        let SchemaPropertiesArgs { data, struct_level_casing, struct_name_ident } = args;
+        let  VariablesModelMacro {
+            __________connect_to_graph_traversal_string,
+            ___________graph_traversal_string,
+            schema_instance,
+            schema_instance_edge_arrow_trimmed, ..
+        } = VariablesModelMacro::new();
         
         let fields = data
             .as_ref()
@@ -197,13 +185,13 @@ impl SchemaFieldsProperties {
 
                 let referenced_node_meta = match relationship {
                     RelationType::LinkOne(node_object) => {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, macro_variables)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised)
                     }
                     RelationType::LinkSelf(node_object) => {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, macro_variables)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised)
                     }
                     RelationType::LinkMany(node_object) => {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, macro_variables)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised)
                     }
                     RelationType::None | RelationType::Relate(_) => ReferencedNodeMeta::default(),
                 };
@@ -261,9 +249,11 @@ impl ReferencedNodeMeta {
     fn from_record_link(
         node_name: &NodeName,
         normalized_field_name: &::syn::Ident,
-        macro_variables: &MacroVariables
     ) -> Self {
-        let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, .. } = macro_variables;
+        let VariablesModelMacro { 
+            __________connect_to_graph_traversal_string,
+            ___________graph_traversal_string, .. 
+        } = VariablesModelMacro::new();
         let schema_name = format_ident!("{node_name}");
         let crate_name = get_crate_name(false);
         
