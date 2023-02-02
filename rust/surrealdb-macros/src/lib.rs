@@ -94,30 +94,6 @@ pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum EdgeDirection {
-    OutArrowRight,
-    InArrowLeft,
-}
-
-impl std::fmt::Display for EdgeDirection {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let arrow_direction = match self {
-            EdgeDirection::OutArrowRight => "->",
-            EdgeDirection::InArrowLeft => "<-",
-        };
-        f.write_str(arrow_direction)
-    }
-}
-impl From<EdgeDirection> for String {
-    fn from(direction: EdgeDirection) -> Self {
-        match direction {
-            EdgeDirection::OutArrowRight => "->".into(),
-            EdgeDirection::InArrowLeft => "<-".into(),
-        }
-    }
-}
-
 pub mod query_builder {
 
     pub fn query() -> super::qbuilder::QueryBuilder<'static> {
