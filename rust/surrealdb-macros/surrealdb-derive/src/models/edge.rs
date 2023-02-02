@@ -9,26 +9,6 @@ Email: oyelowooyedayo@gmail.com
 #![allow(dead_code)]
 
 
-
-use std::{sync::Mutex, collections::HashMap};
-use once_cell::sync::Lazy;
-
-static GLOBAL_DATA: Lazy<Mutex<HashMap<i32, String>>> = Lazy::new(|| {
-    let mut m = HashMap::new();
-    m.insert(13, "Spica".to_string());
-    m.insert(74, "Hoyten".to_string());
-    Mutex::new(m)
-});
-// pub(crate) mod casing;
-// mod parser;
-// pub(crate) mod relations;
-// pub(crate) mod serialize_skipper;
-// mod trait_generator;
-// use super:{
-//     casing::CaseString,
-//     get_crate_name,
-//     parser::{EdgeModelAttr, ModelAttributesTokensDeriver},
-// };
 use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
