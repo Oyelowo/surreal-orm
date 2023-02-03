@@ -16,7 +16,7 @@ use std::str::FromStr;
 
 use syn::{self, parse_macro_input};
 
-use super::{edge_parser::{SchemaFieldsProperties,  SchemaPropertiesArgs},  casing::CaseString,  attributes::{Rename, MyFieldReceiver}, variables::VariablesModelMacro, node_parser::ModelProps};
+use super::{parser::{SchemaFieldsProperties,  SchemaPropertiesArgs},  casing::CaseString,  attributes::{Rename, MyFieldReceiver}, variables::VariablesModelMacro};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
@@ -64,17 +64,18 @@ impl ToTokens for FieldsGetterOpts {
         } = VariablesModelMacro::new();
         let schema_props_args = SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident };
 
-        let ModelProps {
+        let SchemaFieldsProperties {
                 schema_struct_fields_types_kv,
                 schema_struct_fields_names_kv,
                 serialized_field_names_normalised,
                 static_assertions,
-                ref mut imports_referenced_node_schema,
+                mut imports_referenced_node_schema,
                 connection_with_field_appended,
-                record_link_fields_methods
+                record_link_fields_methods,
+                ..
         } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
-        ).model_props;
+        );
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
 
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");

@@ -9,7 +9,7 @@ use syn::{self, parse_macro_input};
 
 use super::{
     casing::CaseString,
-    node_parser::{ SchemaFieldsProperties, SchemaPropertiesArgs, ModelProps}, attributes::FieldsGetterOpts,
+    parser::{ SchemaFieldsProperties, SchemaPropertiesArgs, ModelProps}, attributes::FieldsGetterOpts,
     variables::VariablesModelMacro
 };
 
@@ -49,24 +49,20 @@ impl ToTokens for FieldsGetterOpts {
         let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident };
 
         let SchemaFieldsProperties {
-                mut model_props,
                 relate_edge_schema_struct_type_alias,
                 relate_edge_schema_struct_type_alias_impl,
                 relate_edge_schema_method_connection,
                 relate_node_alias_method,
-        } = SchemaFieldsProperties::from_receiver_data(
-            schema_props_args,
-        );
-        
-        let ModelProps {
                 schema_struct_fields_types_kv,
                 schema_struct_fields_names_kv,
                 serialized_field_names_normalised,
                 static_assertions,
-                ref mut imports_referenced_node_schema,
+                mut imports_referenced_node_schema,
                 connection_with_field_appended,
-                record_link_fields_methods
-        } = model_props;
+                record_link_fields_methods,
+        } = SchemaFieldsProperties::from_receiver_data(
+            schema_props_args,
+        );
         
         imports_referenced_node_schema.dedup_by(|a,
                                                 b| a.to_string() == b.to_string());

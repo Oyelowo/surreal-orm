@@ -1,9 +1,8 @@
 pub(crate) mod attributes;
 pub(crate) mod casing;
 pub(crate) mod edge;
-mod edge_parser;
 pub(crate) mod node;
-mod node_parser;
+pub(crate) mod parser;
 pub(crate) mod relations;
 pub(crate) mod variables;
 
