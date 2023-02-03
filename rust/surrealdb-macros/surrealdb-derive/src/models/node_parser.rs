@@ -18,9 +18,8 @@ use super::{
      relations::{EdgeDirection, NodeName,RelationType, RelateAttribute}, attributes::{MyFieldReceiver, Relate, ReferencedNodeMeta, NormalisedField}, variables::VariablesModelMacro,
 };
 
-
 #[derive(Default, Clone)]
-pub struct SchemaFieldsProperties {
+pub struct ModelProps{
     /// Generated example: pub timeWritten: DbField,
     /// key(normalized_field_name)-value(DbField) e.g pub out: DbField, of field name and DbField type
     /// to build up struct for generating fields of a Schema of the SurrealdbEdge
@@ -85,7 +84,31 @@ pub struct SchemaFieldsProperties {
     /// Used when you use a SurrealdbNode in field e.g: favourite_book: LinkOne<Book>,
     /// e.g: type Book = <super::Book as SurrealdbNode>::Schema;
     pub imports_referenced_node_schema: Vec<TokenStream>,
+    
+    /// This generates a function that is usually called by other Nodes/Structs
+    /// self_instance.drunk_water
+    /// .push_str(format!("{}.drunk_water", xx.___________graph_traversal_string).as_str());
+    /// 
+    /// so that we can do e.g
+    /// ```
+    /// Student.field_name
+    /// ```
+    pub connection_with_field_appended: Vec<TokenStream>,
+    
+    /// When a field references another model as Link, we want to generate a method for that
+    /// to be able to access the foreign fields
+    /// Generated Example for e.g field with best_student: <Student>
+    /// ```
+    /// pub fn best_student(&self, clause: Clause) -> Student {
+    ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, clause)
+    /// }
+    /// ```
+    pub record_link_fields_methods: Vec<TokenStream>,
+}
 
+#[derive(Default, Clone)]
+pub struct SchemaFieldsProperties {
+    pub(crate) model_props: ModelProps,
     /// Generated example: 
     /// ```
     /// type Writes = super::writes_schema::Writes<Student>;
@@ -148,26 +171,6 @@ pub struct SchemaFieldsProperties {
     /// The above can be used for e.g ->Writes->Book as book_written
     pub relate_node_alias_method: Vec<TokenStream>,
     
-    /// When a field references another model as Link, we want to generate a method for that
-    /// to be able to access the foreign fields
-    /// Generated Example for e.g field with best_student: <Student>
-    /// ```
-    /// pub fn best_student(&self, clause: Clause) -> Student {
-    ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, clause)
-    /// }
-    /// ```
-    pub record_link_fields_methods: Vec<TokenStream>,
-    
-    
-    /// This generates a function that is usually called by other Nodes/Structs
-    /// self_instance.drunk_water
-    /// .push_str(format!("{}.drunk_water", xx.___________graph_traversal_string).as_str());
-    /// 
-    /// so that we can do e.g
-    /// ```
-    /// Student.field_name
-    /// ```
-    pub connection_with_field_appended: Vec<TokenStream>,
 }
 
 
@@ -193,7 +196,7 @@ impl SchemaFieldsProperties {
             .expect("Should never be enum")
             .fields
             .into_iter()
-            .fold(Self::default(), |mut acc, field_receiver| {
+            .fold(Self::default(), |mut store, field_receiver| {
                 let field_type = &field_receiver.ty;
                 let crate_name = get_crate_name(false);
                 let relationship = RelationType::from(field_receiver);
@@ -221,7 +224,7 @@ impl SchemaFieldsProperties {
                         // let schema_name_basic = &extra.schema_name;
                         let field_name_as_alias = format_ident!("__as_{field_ident_normalised_as_str}__");
                         
-                        acc.relate_node_alias_method.push(quote!(
+                        store.relate_node_alias_method.push(quote!(
                                     pub fn #field_name_as_alias(&self) -> String {
                                         format!("{} AS {}", self, #field_ident_normalised_as_str)
                                     })
@@ -230,11 +233,11 @@ impl SchemaFieldsProperties {
                         // e.g type Writes = super::WritesSchema<#struct_name_ident>;
                         let edge_schema_alias_name = VariablesModelMacro::get_schema_alias(&format_ident!("{edge_name}"));
                         
-                        acc.relate_edge_schema_struct_type_alias.push(quote!(
+                        store.relate_edge_schema_struct_type_alias.push(quote!(
                             type #edge_name = super::#edge_schema_alias_name<#struct_name_ident>;
                         ));
                         
-                        acc.relate_edge_schema_struct_type_alias_impl.push(quote!(
+                        store.relate_edge_schema_struct_type_alias_impl.push(quote!(
                                     impl #edge_name {
                                         // Could potantially make the method name all small letters
                                         // or just use exactly as the table name is written
@@ -250,7 +253,7 @@ impl SchemaFieldsProperties {
                             EdgeDirection::InArrowLeft => format_ident!("__{edge_name}"),
                         };
                         
-                        acc.relate_edge_schema_method_connection.push(quote!(
+                        store.relate_edge_schema_method_connection.push(quote!(
                                     pub fn #edge_method_name_with_direction(&self, clause: #crate_name::Clause) -> #edge_name {
                                         #edge_name::#__________connect_to_graph_traversal_string(
                                             &self.#___________graph_traversal_string,
@@ -277,7 +280,7 @@ impl SchemaFieldsProperties {
                         let relation_alias_struct_in_node = format_ident!("{}InNode", edge_alias_specific);
                         let relation_alias_struct_out_node = format_ident!("{}OutNode", edge_alias_specific);
                         
-                        acc.static_assertions.push(quote!(
+                        store.model_props.static_assertions.push(quote!(
                                 type #relation_alias_struct_renamed = <#edge_alias_specific as #crate_name::SurrealdbEdge>::TableNameChecker;
                                 ::static_assertions::assert_fields!(#relation_alias_struct_renamed: #edge_name);
 
@@ -315,32 +318,32 @@ impl SchemaFieldsProperties {
                     RelationType::None => ReferencedNodeMeta::default(),
                 };
                 
-                acc.static_assertions.push(referenced_node_meta.destination_node_type_validator);
-
-                acc.schema_struct_fields_types_kv
+                store.model_props.static_assertions.push(referenced_node_meta.destination_node_type_validator);
+  
+                store.model_props.schema_struct_fields_types_kv
                     .push(quote!(pub #field_ident_normalised: #crate_name::DbField, ));
-
-                acc.schema_struct_fields_names_kv
+  
+                store.model_props.schema_struct_fields_names_kv
                     .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
 
-                acc.serialized_field_names_normalised
+                store.model_props.serialized_field_names_normalised
                     .push(field_ident_normalised_as_str.to_owned());
 
-                acc.connection_with_field_appended
+                store.model_props.connection_with_field_appended
                     .push(quote!(
                                #schema_instance.#field_ident_normalised
                                      .push_str(format!("{}.{}", #schema_instance.#___________graph_traversal_string, #field_ident_normalised_as_str).as_str());
                     ));
-
-                acc.imports_referenced_node_schema
+  
+                store.model_props.imports_referenced_node_schema
                     .push(referenced_node_meta.destination_node_schema_import.into());
 
-                acc.record_link_fields_methods
+                store.model_props.record_link_fields_methods
                     .push(referenced_node_meta.record_link_default_alias_as_method.into());
 
-                acc
+                store 
             });
     fields
     }
-}
+} 
 

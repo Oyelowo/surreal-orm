@@ -14,7 +14,7 @@ use quote::{format_ident, quote};
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     get_crate_name,
-    relations::{RelationType, NodeName}, attributes::{MyFieldReceiver, Relate, ReferencedNodeMeta, NormalisedField}, variables::VariablesModelMacro 
+    relations::{RelationType, NodeName}, attributes::{MyFieldReceiver, Relate, ReferencedNodeMeta, NormalisedField}, variables::VariablesModelMacro, node_parser::ModelProps 
 };
 
 #[derive(Default, Clone)]
@@ -46,85 +46,7 @@ impl Hash for FieldTokenStream {
 
 #[derive(Default, Clone)]
 pub struct SchemaFieldsProperties {
-    /// Generated example: pub timeWritten: DbField,
-    /// key(normalized_field_name)-value(DbField) e.g pub out: DbField, of field name and DbField type
-    /// to build up struct for generating fields of a Schema of the SurrealdbEdge
-    /// The full thing can look like:
-    /// ```
-    ///     #[derive(Debug, Default)]
-    ///     pub struct Writes<Model: ::serde::Serialize + Default> {
-    ///                pub id: Dbfield,
-    ///                pub r#in: Dbfield,
-    ///                pub out: Dbfield,
-    ///                pub timeWritten: Dbfield,
-    ///          }
-    /// ```
-    pub schema_struct_fields_types_kv: Vec<TokenStream>,
-
-    /// Generated example: pub timeWritten: "timeWritten".into(),
-    /// This is used to build the actual instance of the model during intialization e,g out:
-    /// "out".into()
-    /// The full thing can look like and the fields should be in normalized form:
-    /// i.e time_written => timeWritten if serde camelizes
-    /// ```
-    /// Self {
-    ///     id: "id".into(),
-    ///     r#in: "in".into(),
-    ///     out: "out".into(),
-    ///     timeWritten: "timeWritten".into(),
-    /// }
-    /// ```
-    pub schema_struct_fields_names_kv: Vec<TokenStream>,
-
-    /// Field names after taking into consideration
-    /// serde serialized renaming or casings
-    /// i.e time_written => timeWritten if serde camelizes
-    pub serialized_field_names_normalised: Vec<String>,
-
-    /// Generated example:
-    /// ```
-    /// // For relate field
-    /// type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
-    /// ::static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
-    ///
-    /// ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealdbEdge);
-    /// ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
-    /// ::static_assertions::assert_impl_one!(Blog: SurrealdbNode);
-    /// ::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
-    /// ```
-    /// Perform all necessary static checks
-    pub static_assertions: Vec<TokenStream>,
-
-    /// Generated example: 
-    /// ```
-    /// type Book = <super::Book as SurrealdbNode>::Schema;
-    /// ```
-    /// We need imports to be unique, hence the hashset
-    /// Used when you use a SurrealdbNode in field e.g: favourite_book: LinkOne<Book>,
-    /// e.g: type Book = <super::Book as SurrealdbNode>::Schema;
-    pub imports_referenced_node_schema: Vec<TokenStream>,
-
-    
-    /// When a field references another model as Link, we want to generate a method for that
-    /// to be able to access the foreign fields
-    /// Generated Example for e.g field with best_student: <Student>
-    /// ```
-    /// pub fn best_student(&self, clause: Clause) -> Student {
-    ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, clause)
-    /// }
-    /// ```
-    pub record_link_fields_methods: Vec<TokenStream>,
-    
-    
-    /// This generates a function that is usually called by other Nodes/Structs
-    /// self_instance.drunk_water
-    /// .push_str(format!("{}.drunk_water", xx.___________graph_traversal_string).as_str());
-    /// 
-    /// so that we can do e.g
-    /// ```
-    /// Student.field_name
-    /// ```
-    pub connection_with_field_appended: Vec<TokenStream>,
+    pub(crate) model_props: ModelProps,
 }
 
 
@@ -157,7 +79,7 @@ impl SchemaFieldsProperties {
             .expect("Should never be enum")
             .fields
             .into_iter()
-            .fold(Self::default(), |mut acc,  field_receiver| {
+            .fold(Self::default(), |mut store,  field_receiver| {
                 let crate_name = get_crate_name(false);
                 let relationship = RelationType::from(field_receiver);
                 let NormalisedField { 
@@ -179,30 +101,30 @@ impl SchemaFieldsProperties {
                     RelationType::None | RelationType::Relate(_) => ReferencedNodeMeta::default(),
                 };
                 
-                acc.static_assertions.push(referenced_node_meta.destination_node_type_validator);
+                store.model_props.static_assertions.push(referenced_node_meta.destination_node_type_validator);
 
-                acc.imports_referenced_node_schema
+                store.model_props.imports_referenced_node_schema
                     .push(referenced_node_meta.destination_node_schema_import.into());
 
-                acc.record_link_fields_methods
+                store.model_props.record_link_fields_methods
                     .push(referenced_node_meta.record_link_default_alias_as_method.into());
-                acc.schema_struct_fields_types_kv
+                store.model_props.schema_struct_fields_types_kv
                     .push(quote!(pub #field_ident_normalised: #crate_name::DbField, ));
 
-                acc.schema_struct_fields_names_kv
+                store.model_props.schema_struct_fields_names_kv
                     .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(), ));
 
-                acc.serialized_field_names_normalised
+                store.model_props.serialized_field_names_normalised
                     .push(field_ident_normalised_as_str.to_owned());
 
-                acc.connection_with_field_appended
+                store.model_props.connection_with_field_appended
                     .push(quote!(
                                #schema_instance.#field_ident_normalised
                                      .push_str(format!("{}.{}", #schema_instance_edge_arrow_trimmed, #field_ident_normalised_as_str).as_str());
                     ).into());
 
 
-                acc
+                store
             });
     fields
     }
