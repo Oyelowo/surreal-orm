@@ -319,6 +319,11 @@ impl SchemaFieldsProperties {
                 };
                 
                 store.model_props.static_assertions.push(referenced_node_meta.destination_node_type_validator);
+                store.model_props.imports_referenced_node_schema
+                    .push(referenced_node_meta.destination_node_schema_import.into());
+
+                store.model_props.record_link_fields_methods
+                    .push(referenced_node_meta.record_link_default_alias_as_method.into());
   
                 store.model_props.schema_struct_fields_types_kv
                     .push(quote!(pub #field_ident_normalised: #crate_name::DbField, ));
@@ -332,14 +337,8 @@ impl SchemaFieldsProperties {
                 store.model_props.connection_with_field_appended
                     .push(quote!(
                                #schema_instance.#field_ident_normalised
-                                     .push_str(format!("{}.{}", #schema_instance.#___________graph_traversal_string, #field_ident_normalised_as_str).as_str());
-                    ));
+                                     .push_str(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str).as_str());));
   
-                store.model_props.imports_referenced_node_schema
-                    .push(referenced_node_meta.destination_node_schema_import.into());
-
-                store.model_props.record_link_fields_methods
-                    .push(referenced_node_meta.record_link_default_alias_as_method.into());
 
                 store 
             });

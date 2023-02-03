@@ -120,7 +120,7 @@ impl SchemaFieldsProperties {
                 store.model_props.connection_with_field_appended
                     .push(quote!(
                                #schema_instance.#field_ident_normalised
-                                     .push_str(format!("{}.{}", #schema_instance_edge_arrow_trimmed, #field_ident_normalised_as_str).as_str());
+                                     .push_str(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str).as_str());
                     ).into());
 
 

@@ -144,7 +144,7 @@ impl ToTokens for FieldsGetterOpts {
                             
                             #schema_instance.#___________graph_traversal_string.push_str(schema_edge_str_with_arrow.as_str());
 
-                            let #schema_instance_edge_arrow_trimmed = #schema_instance
+                            let #___________graph_traversal_string = &#schema_instance
                                 .#___________graph_traversal_string
                                 .replace(arrow_direction, "");
 

@@ -156,7 +156,8 @@ impl ToTokens for FieldsGetterOpts {
                         let connection = format!("{}{}{}", store, #struct_name_ident_as_str, #crate_name::format_clause(clause, #struct_name_ident_as_str));
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
-
+                        let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
+                        
                         #( #connection_with_field_appended) *
                         #schema_instance
                     }
