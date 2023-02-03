@@ -113,11 +113,11 @@ impl ToTokens for FieldsGetterOpts {
                     #( #imports_referenced_node_schema) *
 
                     #[derive(Debug, ::serde::Serialize, Default)]
-                        pub struct #struct_name_ident<Model: ::serde::Serialize + Default> {
-                           #( #schema_struct_fields_types_kv) *
-                            pub #___________graph_traversal_string: ::std::string::String,
-                            #___________model: ::std::marker::PhantomData<Model>,
-                        }
+                    pub struct #struct_name_ident<Model: ::serde::Serialize + Default> {
+                       #( #schema_struct_fields_types_kv) *
+                        pub #___________graph_traversal_string: ::std::string::String,
+                        #___________model: ::std::marker::PhantomData<Model>,
+                    }
 
                     impl<Model: ::serde::Serialize + Default> #struct_name_ident<Model> {
                         pub fn new() -> Self {
