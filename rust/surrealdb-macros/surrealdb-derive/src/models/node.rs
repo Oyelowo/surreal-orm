@@ -9,7 +9,7 @@ use syn::{self, parse_macro_input};
 
 use super::{
     casing::CaseString,
-    parser::{ SchemaFieldsProperties, SchemaPropertiesArgs, ModelProps}, attributes::FieldsGetterOpts,
+    parser::{ SchemaFieldsProperties, SchemaPropertiesArgs}, attributes::FieldsGetterOpts,
     variables::VariablesModelMacro
 };
 
@@ -98,7 +98,7 @@ impl ToTokens for FieldsGetterOpts {
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;
 
-                fn get_schema() -> Self::Schema {
+                fn schema() -> Self::Schema {
                     #module_name::#struct_name_ident::new()
                 }
                 

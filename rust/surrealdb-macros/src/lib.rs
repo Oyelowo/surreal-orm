@@ -1,5 +1,7 @@
 #![allow(unused_imports)]
 
+use qbuilder::QueryBuilder;
+
 pub mod links;
 pub mod model_id;
 pub mod node_builder;
@@ -7,7 +9,7 @@ pub mod qbuilder;
 
 pub trait SurrealdbNode {
     type Schema;
-    fn get_schema() -> Self::Schema;
+    fn schema() -> Self::Schema;
     fn get_key(&self) -> ::std::option::Option<&String>;
 }
 
@@ -17,7 +19,7 @@ pub trait SurrealdbEdge {
     type TableNameChecker;
     type Schema;
 
-    fn get_schema() -> Self::Schema;
+    fn schema() -> Self::Schema;
     fn get_key(&self) -> ::std::option::Option<&String>;
 }
 
@@ -64,9 +66,9 @@ impl std::fmt::Display for DbField {
 
 impl query_builder::ToNodeBuilder for DbField {}
 
-pub enum Clause {
+pub enum Clause<'a> {
     All,
-    Where(String),
+    Where(QueryBuilder<'a>),
     // Change to SurId
     Id(String),
 }
@@ -75,6 +77,7 @@ pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
     match clause {
         Clause::All => "".into(),
         Clause::Where(where_clause) => {
+            let where_clause = where_clause.build();
             if !where_clause.to_lowercase().starts_with("where") {
                 panic!("Invalid where clause, must start with `WHERE`")
             }

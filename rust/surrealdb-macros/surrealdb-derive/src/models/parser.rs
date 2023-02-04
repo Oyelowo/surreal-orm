@@ -18,93 +18,6 @@ use super::{
      relations::{EdgeDirection, NodeName,RelationType, RelateAttribute}, attributes::{MyFieldReceiver, Relate, ReferencedNodeMeta, NormalisedField}, variables::VariablesModelMacro,
 };
 
-#[derive(Default, Clone)]
-pub struct ModelProps{
-    /// Generated example: pub timeWritten: DbField,
-    /// key(normalized_field_name)-value(DbField) e.g pub out: DbField, of field name and DbField type
-    /// to build up struct for generating fields of a Schema of the SurrealdbEdge
-    /// The full thing can look like:
-    /// ```
-    ///     #[derive(Debug, Default)]
-    ///     pub struct Writes<Model: ::serde::Serialize + Default> {
-    ///                pub id: Dbfield,
-    ///                pub r#in: Dbfield,
-    ///                pub out: Dbfield,
-    ///                pub timeWritten: Dbfield,
-    ///          }
-    /// ```
-    pub schema_struct_fields_types_kv: Vec<TokenStream>,
-
-    /// Generated example: pub timeWritten: "timeWritten".into(),
-    /// This is used to build the actual instance of the model during intialization e,g out:
-    /// "out".into()
-    /// The full thing can look like and the fields should be in normalized form:
-    /// i.e time_written => timeWritten if serde camelizes
-    /// ```
-    /// Self {
-    ///     id: "id".into(),
-    ///     r#in: "in".into(),
-    ///     out: "out".into(),
-    ///     timeWritten: "timeWritten".into(),
-    /// }
-    /// ```
-    pub schema_struct_fields_names_kv: Vec<TokenStream>,
-
-    /// Field names after taking into consideration
-    /// serde serialized renaming or casings
-    /// i.e time_written => timeWritten if serde camelizes
-    pub serialized_field_names_normalised: Vec<String>,
-
-    /// Generated example:
-    /// ```
-    /// // For relate field
-    /// type StudentWritesBlogTableName = <StudentWritesBlog as SurrealdbEdge>::TableNameChecker;
-    /// ::static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
-    ///
-    /// type StudentWritesBlogInNode = <StudentWritesBlog as SurrealdbEdge>::In;
-    /// ::static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
-    ///
-    /// type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealdbEdge>::Out;
-    /// ::static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
-    ///
-    /// 
-    /// ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealdbEdge);
-    /// ::static_assertions::assert_impl_one!(Student: SurrealdbNode);
-    /// ::static_assertions::assert_impl_one!(Blog: SurrealdbNode);
-    /// ::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
-    /// ```
-    /// Perform all necessary static checks
-    pub static_assertions: Vec<TokenStream>,
-
-    /// Generated example: 
-    /// ```
-    /// type Book = <super::Book as SurrealdbNode>::Schema;
-    /// ```
-    /// We need imports to be unique, hence the hashset
-    /// Used when you use a SurrealdbNode in field e.g: favourite_book: LinkOne<Book>,
-    /// e.g: type Book = <super::Book as SurrealdbNode>::Schema;
-    pub imports_referenced_node_schema: Vec<TokenStream>,
-    
-    /// This generates a function that is usually called by other Nodes/Structs
-    /// self_instance.drunk_water
-    /// .push_str(format!("{}.drunk_water", xx.___________graph_traversal_string).as_str());
-    /// 
-    /// so that we can do e.g
-    /// ```
-    /// Student.field_name
-    /// ```
-    pub connection_with_field_appended: Vec<TokenStream>,
-    
-    /// When a field references another model as Link, we want to generate a method for that
-    /// to be able to access the foreign fields
-    /// Generated Example for e.g field with best_student: <Student>
-    /// ```
-    /// pub fn best_student(&self, clause: Clause) -> Student {
-    ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, clause)
-    /// }
-    /// ```
-    pub record_link_fields_methods: Vec<TokenStream>,
-}
 
 #[derive(Default, Clone)]
 pub struct SchemaFieldsProperties {
@@ -224,7 +137,7 @@ pub struct SchemaFieldsProperties {
     /// and it the edge itself is a struct here. This allows us to give more
     /// specific autocompletion when user accesses available destination node 
     /// from a specific edge from an origin struct.
-    /// e.g Student::get_schema().writes__().book();
+    /// e.g Student::schema().writes__().book();
     /// This allows us to do `.book()` as shown above
     pub relate_edge_schema_struct_type_alias_impl: Vec<TokenStream>,
     
@@ -307,8 +220,9 @@ impl SchemaFieldsProperties {
                         // let schema_name_basic = &extra.schema_name;
                         let field_name_as_alias = format_ident!("__as_{field_ident_normalised_as_str}__");
                         
+                        // TODO: Check ===> this should probably be only: AS <the deserialized name format>
                         store.relate_node_alias_method.push(quote!(
-                                    pub fn #field_name_as_alias(&self) -> String {
+                                    pub fn #field_name_as_alias(&self) -> ::std::string::String {
                                         format!("{} AS {}", self, #field_ident_normalised_as_str)
                                     })
                             );

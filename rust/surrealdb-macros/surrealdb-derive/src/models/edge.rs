@@ -93,7 +93,7 @@ impl ToTokens for FieldsGetterOpts {
                     type TableNameChecker = #module_name::TableNameStaticChecker;
                     type Schema = #module_name::#struct_name_ident<String>;
 
-                    fn get_schema() -> Self::Schema {
+                    fn schema() -> Self::Schema {
                         #module_name::#struct_name_ident::new()
                     }
                     

@@ -238,7 +238,7 @@ impl<'a> QueryBuilder<'a> {
     }
 
     /// An alias for `QueryBuilder::filter`
-    pub fn and_where<T: Into<CowSegment<'a>>>(self, condition: T) -> Self {
+    pub fn where_<T: Into<CowSegment<'a>>>(self, condition: T) -> Self {
         self.filter(condition)
     }
 
