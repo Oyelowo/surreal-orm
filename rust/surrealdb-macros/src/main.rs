@@ -17,7 +17,7 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
-    model_id::SurIdComplex,
+    model_id::SurId,
     query_builder::{query, NodeBuilder, ToNodeBuilder},
     Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
 };
@@ -111,7 +111,7 @@ fn main() {
 
     let bee = Student::schema()
         .lowo_na(Clause::Where(
-            query().and_where(Student::schema().lastName.equals("lowo")),
+            query().where_(Student::schema().lastName.equals("lowo")),
         ))
         .title
         .contains_one("bee");
@@ -119,7 +119,7 @@ fn main() {
     let xx = Student::schema()
         .Writes__(Clause::All)
         .Book(Clause::Where(
-            query().and_where(Student::schema().lastName.contains_one("Dayo")),
+            query().where_(Student::schema().lastName.contains_one("Dayo")),
         ))
         .title
         .__as__("meorm");

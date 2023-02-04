@@ -17,7 +17,7 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
-    model_id::SurIdComplex,
+    model_id::SurId,
     node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
     query_builder::{query, ToNodeBuilder},
     Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
@@ -98,10 +98,13 @@ mod tests {
     fn multiplication_tests2() {
         let x = Student::schema()
             .Writes__(Clause::All)
-            .Book(Clause::All)
+            .Book(Clause::Id(SurId::from("Book:blaze")))
             .title;
 
-        assert_eq!(x.to_string(), "->Writes->Book.title".to_string())
+        assert_eq!(
+            x.to_string(),
+            "->Writes->Book[WHERE id = Book:blaze].title".to_string()
+        )
     }
 
     #[test]
@@ -142,7 +145,7 @@ mod tests {
             .Writes__(Clause::Where(
                 query().where_(Student::schema().firstName.contains_one("lowo")),
             ))
-            .Book(Clause::Id("Book:oyelowo".into()))
+            .Book(Clause::Id(SurId::from("Book:oyelowo")))
             .content;
 
         assert_eq!(

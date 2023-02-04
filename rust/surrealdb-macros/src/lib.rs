@@ -1,5 +1,6 @@
 #![allow(unused_imports)]
 
+use model_id::SurId;
 use qbuilder::QueryBuilder;
 
 pub mod links;
@@ -70,7 +71,7 @@ pub enum Clause<'a> {
     All,
     Where(QueryBuilder<'a>),
     // Change to SurId
-    Id(String),
+    Id(SurId),
 }
 
 pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
@@ -85,6 +86,7 @@ pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
         }
         Clause::Id(id) => {
             if !id
+                .to_string()
                 // .to_lowercase()
                 .starts_with(format!("{table_name}:").as_str())
             {
