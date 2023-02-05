@@ -115,14 +115,14 @@ mod tests {
     fn multiplication_tests3() {
         let x = Student::schema()
             .Writes__(Clause::Where(
-                query().where_(Student::schema().firstName.contains_one("lowo")),
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
             .Book(Clause::All)
             .content;
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE firstName CONTAINS lowo]->Book.content".to_string()
+            "->Writes[WHERE timeWritten = 12:00]->Book.content".to_string()
         )
     }
 
@@ -166,14 +166,14 @@ mod tests {
     fn multiplication_tests5() {
         let x = Student::schema()
             .Writes__(Clause::Where(
-                query().where_(Student::schema().firstName.contains_one("lowo")),
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
             .Book(Clause::Id(SurId::try_from("Book:oyelowo").unwrap()))
             .content;
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE firstName CONTAINS lowo]->Book[WHERE id = Book:oyelowo].content"
+            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE id = Book:oyelowo].content"
                 .to_string()
         )
     }
@@ -198,14 +198,14 @@ mod tests {
     fn multiplication_tests7() {
         let x = Student::schema()
             .Writes__(Clause::Where(
-                query().where_(Student::schema().firstName.contains_one("lowo")),
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
             .Book(Clause::Id("Book:oyelowo".try_into().unwrap()))
             .__as__("real_deal");
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE firstName CONTAINS lowo]->Book[WHERE id = Book:oyelowo] AS real_deal"
+            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE id = Book:oyelowo] AS real_deal"
                 .to_string()
         )
     }
