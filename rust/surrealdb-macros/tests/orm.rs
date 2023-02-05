@@ -28,20 +28,23 @@ use typed_builder::TypedBuilder;
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Student {
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // #[builder(default, setter(strip_option))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     id: Option<String>,
     first_name: String,
     last_name: String,
 
     #[surrealdb(link_one = "Book", skip_serializing)]
-    #[serde(rename = "lowo_na")]
+    #[serde(rename = "unoBook")]
     fav_book: LinkOne<Book>,
-    // // #[surrealdb(link_one = "Book", skip_serializing)]
-    // course: LinkOne<Book>,
-    // #[surrealdb(link_many = "Book", skip_serializing)]
-    // #[serde(rename = "lowo")]
-    // all_semester_courses: LinkMany<Book>,
+
+    #[surrealdb(link_one = "Book", skip_serializing)]
+    course: LinkOne<Book>,
+
+    #[surrealdb(link_many = "Book", skip_serializing)]
+    #[serde(rename = "semCoures")]
+    all_semester_courses: LinkMany<Book>,
+
     #[surrealdb(relate(edge = "StudentWritesBook", link = "->Writes->Book"))]
     written_books: Relate<Book>,
 }
@@ -98,7 +101,7 @@ mod tests {
     fn multiplication_tests2() {
         let x = Student::schema()
             .Writes__(Clause::All)
-            .Book(Clause::Id(SurId::from("Book:blaze")))
+            .Book(Clause::Id(SurId::try_from("Book:blaze").unwrap()))
             .title;
 
         assert_eq!(
@@ -145,7 +148,7 @@ mod tests {
             .Writes__(Clause::Where(
                 query().where_(Student::schema().firstName.contains_one("lowo")),
             ))
-            .Book(Clause::Id(SurId::from("Book:oyelowo")))
+            .Book(Clause::Id(SurId::try_from("Book:oyelowo").unwrap()))
             .content;
 
         assert_eq!(
@@ -161,7 +164,7 @@ mod tests {
             .Writes__(Clause::Where(
                 query().where_(Student::schema().firstName.contains_one("lowo")),
             ))
-            .Book(Clause::Id("Book:oyelowo".into()))
+            .Book(Clause::Id("Book:oyelowo".try_into().unwrap()))
             .__as__(Student::schema().writtenBooks);
 
         assert_eq!(
@@ -177,7 +180,7 @@ mod tests {
             .Writes__(Clause::Where(
                 query().where_(Student::schema().firstName.contains_one("lowo")),
             ))
-            .Book(Clause::Id("Book:oyelowo".into()))
+            .Book(Clause::Id("Book:oyelowo".try_into().unwrap()))
             .__as__("real_deal");
 
         assert_eq!(

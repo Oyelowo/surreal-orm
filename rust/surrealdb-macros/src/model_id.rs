@@ -44,16 +44,38 @@ impl From<SurId> for (String, String) {
         value.0
     }
 }
+use thiserror::Error;
 
-impl From<&str> for SurId {
-    fn from(value: &str) -> Self {
+#[derive(Error, Debug)]
+pub enum SurrealdbOrmError {
+    #[error("the id - `{0}` - you have provided is invalid or belongs to another table. Surrealdb Is should be in format: <table_name:column>")]
+    InvalidId(String),
+    // #[error("invalid header (expected {expected:?}, found {found:?})")]
+    // InvalidHeader { expected: String, found: String },
+    // #[error("unknown data store error")]
+    // Unknown,
+}
+impl TryFrom<&str> for SurId {
+    type Error = SurrealdbOrmError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
         let mut spl = value.split(':');
         match (spl.next(), spl.next(), spl.next()) {
-            (Some(table), Some(id), None) => Self((table.into(), id.into())),
-            _ => panic!(),
+            (Some(table), Some(id), None) => Ok(Self((table.into(), id.into()))),
+            _ => Err(SurrealdbOrmError::InvalidId(value.to_string())),
         }
     }
 }
+
+// impl From<&str> for SurId {
+//     fn from(value: &str) -> Self {
+//         let mut spl = value.split(':');
+//         match (spl.next(), spl.next(), spl.next()) {
+//             (Some(table), Some(id), None) => Self((table.into(), id.into())),
+//             _ => panic!(),
+//         }
+//     }
+// }
 
 impl From<String> for SurId {
     fn from(value: String) -> Self {
