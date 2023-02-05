@@ -1,4 +1,4 @@
-use super::node::{MyFieldReceiver, Relate};
+use super::attributes::{MyFieldReceiver, Relate};
 
 #[derive(Debug, Clone)]
 pub(crate) enum RelationType {
@@ -45,6 +45,15 @@ impl From<EdgeDirection> for ::proc_macro2::TokenStream {
         match direction {
             EdgeDirection::OutArrowRight => quote::quote!(->),
             EdgeDirection::InArrowLeft => quote::quote!(<-),
+        }
+    }
+}
+
+impl From<EdgeDirection> for &str {
+    fn from(direction: EdgeDirection) -> Self {
+        match direction {
+            EdgeDirection::OutArrowRight => "->",
+            EdgeDirection::InArrowLeft => "<-",
         }
     }
 }

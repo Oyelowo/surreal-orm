@@ -5,45 +5,19 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(dead_code)]
 
-use std::{hash::Hash};
+use std::hash::Hash;
 
 use darling::{ast, util};
 use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
+use syn::Ident;
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
-    node::{MyFieldReceiver, Relate},
     get_crate_name,
-    node_relations::{RelationType, RelateAttribute},
+     relations::{EdgeDirection, NodeName,RelationType, RelateAttribute}, attributes::{MyFieldReceiver, Relate, ReferencedNodeMeta, NormalisedField}, variables::VariablesModelMacro,
 };
 
-#[derive(Default, Clone)]
-pub(crate) struct FieldTokenStream(TokenStream);
-
-impl From<TokenStream> for FieldTokenStream {
-    fn from(value: TokenStream) -> Self {
-        Self(value)
-    }
-}
-
-impl From<FieldTokenStream> for TokenStream {
-    fn from(value: FieldTokenStream) -> Self {
-        value.0
-    }
-}
-impl PartialEq for FieldTokenStream {
-    fn eq(&self, other: &Self) -> bool {
-        self.0.to_string() == other.0.to_string()
-    }
-}
-impl Eq for FieldTokenStream {}
-
-impl Hash for FieldTokenStream {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.0.to_string().hash(state);
-    }
-}
 
 #[derive(Default, Clone)]
 pub struct SchemaFieldsProperties {
@@ -111,7 +85,26 @@ pub struct SchemaFieldsProperties {
     /// Used when you use a SurrealdbNode in field e.g: favourite_book: LinkOne<Book>,
     /// e.g: type Book = <super::Book as SurrealdbNode>::Schema;
     pub imports_referenced_node_schema: Vec<TokenStream>,
-
+    
+    /// This generates a function that is usually called by other Nodes/Structs
+    /// self_instance.drunk_water
+    /// .push_str(format!("{}.drunk_water", xx.___________graph_traversal_string).as_str());
+    /// 
+    /// so that we can do e.g
+    /// ```
+    /// Student.field_name
+    /// ```
+    pub connection_with_field_appended: Vec<TokenStream>,
+    
+    /// When a field references another model as Link, we want to generate a method for that
+    /// to be able to access the foreign fields
+    /// Generated Example for e.g field with best_student: <Student>
+    /// ```
+    /// pub fn best_student(&self, clause: Clause) -> Student {
+    ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, clause)
+    /// }
+    /// ```
+    pub record_link_fields_methods: Vec<TokenStream>,
     /// Generated example: 
     /// ```
     /// type Writes = super::writes_schema::Writes<Student>;
@@ -144,7 +137,7 @@ pub struct SchemaFieldsProperties {
     /// and it the edge itself is a struct here. This allows us to give more
     /// specific autocompletion when user accesses available destination node 
     /// from a specific edge from an origin struct.
-    /// e.g Student::get_schema().writes__().book();
+    /// e.g Student::schema().writes__().book();
     /// This allows us to do `.book()` as shown above
     pub relate_edge_schema_struct_type_alias_impl: Vec<TokenStream>,
     
@@ -174,41 +167,10 @@ pub struct SchemaFieldsProperties {
     /// The above can be used for e.g ->Writes->Book as book_written
     pub relate_node_alias_method: Vec<TokenStream>,
     
-    /// When a field references another model as Link, we want to generate a method for that
-    /// to be able to access the foreign fields
-    /// Generated Example for e.g field with best_student: <Student>
-    /// ```
-    /// pub fn best_student(&self, clause: Clause) -> Student {
-    ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, clause)
-    /// }
-    /// ```
-    pub record_link_fields_methods: Vec<TokenStream>,
-    
-    
-    /// This generates a function that is usually called by other Nodes/Structs
-    /// self_instance.drunk_water
-    /// .push_str(format!("{}.drunk_water", xx.___________graph_traversal_string).as_str());
-    /// 
-    /// so that we can do e.g
-    /// ```
-    /// Student.field_name
-    /// ```
-    pub connection_with_field_appended: Vec<TokenStream>,
 }
 
-pub struct MacroVariables<'a> {
-    /// This joins present model to the currently built graph.
-    /// e.g Account->likes->Book.name
-    /// For SurrealdbNode, this is usually just concatenating dot and the model fields i.e
-    /// Mode.fieldname1, Model.fieldname2
-    /// For edges, it usually surrounds the SurrealdbEdge with arrows e.g ->writes-> or <-writes<-
-    /// Overall, this helps us do the graph traversal
-    pub __________connect_to_graph_traversal_string: &'a syn::Ident,
-    pub ___________graph_traversal_string: &'a syn::Ident,
-    pub schema_instance: &'a syn::Ident,
-}
+
 pub struct SchemaPropertiesArgs<'a> {
-    pub macro_variables: &'a MacroVariables<'a>,
     pub data: &'a ast::Data<util::Ignored, MyFieldReceiver>,
     pub struct_level_casing: Option<CaseString>,
     pub struct_name_ident: &'a syn::Ident,
@@ -222,7 +184,7 @@ impl SchemaFieldsProperties {
     pub(crate) fn from_receiver_data(
         args : SchemaPropertiesArgs
     ) -> Self {
-        let SchemaPropertiesArgs { macro_variables, data, struct_level_casing, struct_name_ident }= args;
+        let SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident }= args;
         
         let fields = data
             .as_ref()
@@ -230,35 +192,26 @@ impl SchemaFieldsProperties {
             .expect("Should never be enum")
             .fields
             .into_iter()
-            .fold(Self::default(), |mut acc, field_receiver| {
-                let field_ident = field_receiver.ident.as_ref().unwrap();
+            .fold(Self::default(), |mut store, field_receiver| {
                 let field_type = &field_receiver.ty;
                 let crate_name = get_crate_name(false);
-                let field_ident_cased = FieldIdentCased::from(FieldIdentUnCased {
-                    uncased_field_name: field_ident.to_string(),
-                    casing: struct_level_casing,
-                });
-
-                // get the field's proper serialized format. Renaming should take precedence
-                let original_field_name_normalised = field_receiver.rename.as_ref().map_or_else(
-                    || field_ident_cased.into(),
-                    |renamed| renamed.clone().serialize,
-                );
-                let ref field_ident_normalised = format_ident!("{original_field_name_normalised}");
                 let relationship = RelationType::from(field_receiver);
-
-                let ref field_ident_normalised_as_str =
-                    if original_field_name_normalised.trim_start_matches("r#") == "in".to_string() {
-                        "in".into()
-                    } else {
-                        field_ident_normalised.to_string()
-                    };
-                let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance } = macro_variables;
+                let NormalisedField { 
+                         ref field_ident_normalised,
+                         ref field_ident_normalised_as_str
+                } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
+                
+                // println!("ddLAKALAK----Struct Name{}{:?}", struct_name_ident, field_receiver.ident.clone());
+                let VariablesModelMacro { 
+                    __________connect_to_graph_traversal_string, 
+                    ___________graph_traversal_string, 
+                    schema_instance, .. 
+                } = VariablesModelMacro::new();
                 
                 let referenced_node_meta = match relationship {
                     RelationType::Relate(relation) => {
                         let relation_attributes = RelateAttribute::from(relation.clone());
-                        let arrow_direction = TokenStream::from(relation_attributes.edge_direction);
+                        let arrow_direction = String::from(relation_attributes.edge_direction);
                         let edge_name = TokenStream::from(relation_attributes.edge_name);
                         let ref destination_node = TokenStream::from(relation_attributes.node_name.clone());
                         // let extra = ReferencedNodeMeta::from_ref_node_meta(relation_attributes.node_name, field_ident_normalised);
@@ -268,20 +221,21 @@ impl SchemaFieldsProperties {
                         // let schema_name_basic = &extra.schema_name;
                         let field_name_as_alias = format_ident!("__as_{field_ident_normalised_as_str}__");
                         
-                        acc.relate_node_alias_method.push(quote!(
-                                    pub fn #field_name_as_alias(&self) -> String {
+                        // TODO: Check ===> this should probably be only: AS <the deserialized name format>
+                        store.relate_node_alias_method.push(quote!(
+                                    pub fn #field_name_as_alias(&self) -> ::std::string::String {
                                         format!("{} AS {}", self, #field_ident_normalised_as_str)
                                     })
                             );
 
                         // e.g type Writes = super::WritesSchema<#struct_name_ident>;
-                        // TODO: remove or reuse if makes sense: let edge_schema = format_ident!("{edge_name}Schema");
-                        let edge_schema_alias_name = format_ident!("{}Schema", edge_name.to_string().to_lowercase());
-                        acc.relate_edge_schema_struct_type_alias.push(quote!(
+                        let edge_schema_alias_name = VariablesModelMacro::get_schema_alias(&format_ident!("{edge_name}"));
+                        
+                        store.relate_edge_schema_struct_type_alias.push(quote!(
                             type #edge_name = super::#edge_schema_alias_name<#struct_name_ident>;
                         ));
                         
-                        acc.relate_edge_schema_struct_type_alias_impl.push(quote!(
+                        store.relate_edge_schema_struct_type_alias_impl.push(quote!(
                                     impl #edge_name {
                                         // Could potantially make the method name all small letters
                                         // or just use exactly as the table name is written
@@ -293,16 +247,16 @@ impl SchemaFieldsProperties {
                         
 
                         let edge_method_name_with_direction = match relation_attributes.edge_direction {
-                            super::node_relations::EdgeDirection::OutArrowRight => format_ident!("{edge_name}__"),
-                            super::node_relations::EdgeDirection::InArrowLeft => format_ident!("__{edge_name}"),
+                            EdgeDirection::OutArrowRight => format_ident!("{edge_name}__"),
+                            EdgeDirection::InArrowLeft => format_ident!("__{edge_name}"),
                         };
                         
-                        acc.relate_edge_schema_method_connection.push(quote!(
+                        store.relate_edge_schema_method_connection.push(quote!(
                                     pub fn #edge_method_name_with_direction(&self, clause: #crate_name::Clause) -> #edge_name {
                                         #edge_name::#__________connect_to_graph_traversal_string(
                                             &self.#___________graph_traversal_string,
                                             clause,
-                                            #crate_name::EdgeDirection::OutArrowRight,
+                                            #arrow_direction,
                                         )
                                     }
                                 )
@@ -314,17 +268,17 @@ impl SchemaFieldsProperties {
                         let (in_node, out_node) = match relation_attributes.edge_direction {
                             // If OutArrowRight, the current struct should be InNode, and
                             // OutNode in "->edge_action->OutNode", should be OutNode
-                            super::node_relations::EdgeDirection::OutArrowRight => {
+                            EdgeDirection::OutArrowRight => {
                                 (struct_name, destination_node)
                             }
-                            super::node_relations::EdgeDirection::InArrowLeft => (destination_node, struct_name),
+                            EdgeDirection::InArrowLeft => (destination_node, struct_name),
                         };
                         
                         let relation_alias_struct_renamed = format_ident!("{}TableName", edge_alias_specific);
                         let relation_alias_struct_in_node = format_ident!("{}InNode", edge_alias_specific);
                         let relation_alias_struct_out_node = format_ident!("{}OutNode", edge_alias_specific);
                         
-                        acc.static_assertions.push(quote!(
+                        store.static_assertions.push(quote!(
                                 type #relation_alias_struct_renamed = <#edge_alias_specific as #crate_name::SurrealdbEdge>::TableNameChecker;
                                 ::static_assertions::assert_fields!(#relation_alias_struct_renamed: #edge_name);
 
@@ -351,100 +305,42 @@ impl SchemaFieldsProperties {
                                 
                     },
                     RelationType::LinkOne(node_object) => {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, macro_variables)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised) 
                     }
                     RelationType::LinkSelf(node_object) => {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, macro_variables)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised) 
                     }
                     RelationType::LinkMany(node_object) => {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, macro_variables)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised) 
                     }
                     RelationType::None => ReferencedNodeMeta::default(),
                 };
                 
-                acc.static_assertions.push(referenced_node_meta.destination_node_type_validator);
-
-                acc.schema_struct_fields_types_kv
-                    .push(quote!(pub #field_ident_normalised: #crate_name::DbField, ));
-
-                acc.schema_struct_fields_names_kv
-                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
-
-                acc.serialized_field_names_normalised
-                    .push(field_ident_normalised_as_str.to_owned());
-
-                acc.connection_with_field_appended
-                    .push(quote!(
-                               #schema_instance.#field_ident_normalised
-                                     .push_str(format!("{}.{}", #schema_instance.#___________graph_traversal_string, #field_ident_normalised_as_str).as_str());
-                    ));
-
-                acc.imports_referenced_node_schema
+                store.static_assertions.push(referenced_node_meta.destination_node_type_validator);
+                store.imports_referenced_node_schema
                     .push(referenced_node_meta.destination_node_schema_import.into());
 
-                acc.record_link_fields_methods
+                store.record_link_fields_methods
                     .push(referenced_node_meta.record_link_default_alias_as_method.into());
+  
+                store.schema_struct_fields_types_kv
+                    .push(quote!(pub #field_ident_normalised: #crate_name::DbField, ));
+  
+                store.schema_struct_fields_names_kv
+                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
 
-                acc
+                store.serialized_field_names_normalised
+                    .push(field_ident_normalised_as_str.to_owned());
+
+                store.connection_with_field_appended
+                    .push(quote!(
+                               #schema_instance.#field_ident_normalised
+                                     .push_str(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str).as_str());));
+  
+
+                store 
             });
     fields
     }
-}
+} 
 
-#[derive(Default, Clone)]
-struct ReferencedNodeMeta {
-    destination_node_schema_import: TokenStream,
-    record_link_default_alias_as_method: TokenStream,
-    destination_node_type_validator: TokenStream,
-}
-
-impl ReferencedNodeMeta {
-    fn from_relate(relate: Relate, destination_node: &TokenStream)->Self {
-        let crate_name = get_crate_name(false);
-        // let destination_node_schema_import = quote!();
-        // let schema_name = relate
-            Self{ 
-                destination_node_schema_import:  quote!(
-                        type #destination_node = <super::#destination_node as #crate_name::SurrealdbNode>::Schema;
-                    ), 
-                
-                record_link_default_alias_as_method: quote!(), 
-
-                destination_node_type_validator: quote!(),
-            }
-    }
-    
-    fn from_record_link(
-        node_name: &super::node_relations::NodeName,
-        normalized_field_name: &::syn::Ident,
-        macro_variables: &MacroVariables
-    ) -> Self {
-        let MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, .. } = macro_variables;
-        let schema_name = format_ident!("{node_name}");
-        let crate_name = get_crate_name(false);
-        
-        Self {
-            // imports for specific schema from the trait Generic Associated types e.g
-            // type Book = <super::Book as SurrealdbNode>::Schema;
-            destination_node_schema_import: quote!(
-                        type #schema_name = <super::#schema_name as #crate_name::SurrealdbNode>::Schema;
-                    ),
-                    
-            destination_node_type_validator: quote!(::static_assertions::assert_impl_one!(#schema_name: #crate_name::SurrealdbNode);),
-            
-            record_link_default_alias_as_method: quote!(
-                        pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
-                            #schema_name::#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause)
-                        }
-                    ),
-        }
-    }
-}
-
-fn get_ident(name: &String) -> syn::Ident {
-    if vec!["in", "r#in"].contains(&name.as_str()) {
-        syn::Ident::new_raw(name.trim_start_matches("r#"), Span::call_site())
-    } else {
-        syn::Ident::new(name.as_str(), Span::call_site())
-    }
-}

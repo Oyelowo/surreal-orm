@@ -17,7 +17,7 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
-    model_id::SurIdComplex,
+    model_id::SurId,
     node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
     query_builder::{query, ToNodeBuilder},
     Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
@@ -28,22 +28,25 @@ use typed_builder::TypedBuilder;
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Student {
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // #[builder(default, setter(strip_option))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     id: Option<String>,
     first_name: String,
     last_name: String,
 
     #[surrealdb(link_one = "Book", skip_serializing)]
-    #[serde(rename = "lowo_na")]
+    #[serde(rename = "unoBook")]
     fav_book: LinkOne<Book>,
-    // // #[surrealdb(link_one = "Book", skip_serializing)]
-    // course: LinkOne<Book>,
-    // #[surrealdb(link_many = "Book", skip_serializing)]
-    // #[serde(rename = "lowo")]
-    // all_semester_courses: LinkMany<Book>,
+
+    #[surrealdb(link_one = "Book", skip_serializing)]
+    course: LinkOne<Book>,
+
+    #[surrealdb(link_many = "Book", skip_serializing)]
+    #[serde(rename = "semCoures")]
+    all_semester_courses: LinkMany<Book>,
+
     #[surrealdb(relate(edge = "StudentWritesBook", link = "->Writes->Book"))]
-    written_blogs: Relate<Book>,
+    written_books: Relate<Book>,
 }
 
 // #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
@@ -57,6 +60,7 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     // #[surrealdb(link_one = "Book", skip_serializing)]
     #[serde(rename = "in")]
     _in: In,
+    // r#in: In,
     out: Out,
     time_written: String,
 }
@@ -73,6 +77,15 @@ pub struct Book {
     content: String,
 }
 
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Blog {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    id: Option<String>,
+    title: String,
+    content: String,
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -81,72 +94,118 @@ mod tests {
 
     #[test]
     fn multiplication_tests1() {
-        let x = Student::get_schema().firstName;
+        let x = Student::schema().firstName;
         assert_eq!(x.to_string(), "firstName".to_string())
     }
 
     #[test]
     fn multiplication_tests2() {
-        let x = Student::get_schema()
+        let x = Student::schema()
             .Writes__(Clause::All)
-            .Book(Clause::All)
+            .Book(Clause::Id(SurId::try_from("Book:blaze").unwrap()))
             .title;
 
-        assert_eq!(x.to_string(), "->Writes->Book.title".to_string())
+        assert_eq!(
+            x.to_string(),
+            "->Writes->Book[WHERE id = Book:blaze].title".to_string()
+        )
     }
 
     #[test]
     fn multiplication_tests3() {
-        let x = Student::get_schema()
+        let x = Student::schema()
             .Writes__(Clause::Where(
-                query()
-                    .and_where(Student::get_schema().firstName.contains_one("lowo"))
-                    .build(),
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
             .Book(Clause::All)
             .content;
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE firstName CONTAINS lowo]->Book.content".to_string()
+            "->Writes[WHERE timeWritten = 12:00]->Book.content".to_string()
+        )
+    }
+
+    #[test]
+    fn multiplication_tests4_with_alias() {
+        let x = Student::schema()
+            .Writes__(Clause::Where(
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
+            ))
+            .Book(Clause::Where(query().where_(
+                Book::schema().content.contains_one("Oyelowo in Uranus"),
+            )))
+            .__as__(Student::schema().writtenBooks);
+
+        assert_eq!(
+            x.to_string(),
+            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE content CONTAINS Oyelowo in Uranus] AS writtenBooks"
+                .to_string()
         )
     }
 
     #[test]
     fn multiplication_tests4() {
-        let x = Student::get_schema()
+        let x = Student::schema()
             .Writes__(Clause::Where(
-                query()
-                    .and_where(Student::get_schema().firstName.contains_one("lowo"))
-                    .build(),
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .Book(Clause::Where(
-                query()
-                    .and_where(Book::get_schema().content.equals("Oyelowo in Uranus"))
-                    .build(),
-            ))
+            .Book(Clause::Where(query().where_(
+                Book::schema().content.contains_one("Oyelowo in Uranus"),
+            )))
             .content;
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE firstName CONTAINS lowo]->Book[WHERE content = Oyelowo in Uranus].content".to_string()
+            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE content CONTAINS Oyelowo in Uranus].content"
+                .to_string()
         )
     }
 
     #[test]
     fn multiplication_tests5() {
-        let x = Student::get_schema()
+        let x = Student::schema()
             .Writes__(Clause::Where(
-                query()
-                    .and_where(Student::get_schema().firstName.contains_one("lowo"))
-                    .build(),
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .Book(Clause::Id("Book:oyelowo".into()))
+            .Book(Clause::Id(SurId::try_from("Book:oyelowo").unwrap()))
             .content;
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE firstName CONTAINS lowo]->Book[WHERE id = Book:oyelowo].content"
+            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE id = Book:oyelowo].content"
+                .to_string()
+        )
+    }
+
+    #[test]
+    fn multiplication_tests6() {
+        let x = Student::schema()
+            .Writes__(Clause::Where(
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
+            ))
+            .Book(Clause::Id("Book:oyelowo".try_into().unwrap()))
+            .__as__(Student::schema().writtenBooks);
+
+        assert_eq!(
+            x.to_string(),
+            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE id = Book:oyelowo] AS writtenBooks"
+                .to_string()
+        )
+    }
+
+    #[test]
+    fn multiplication_tests7() {
+        let x = Student::schema()
+            .Writes__(Clause::Where(
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
+            ))
+            .Book(Clause::Id("Book:oyelowo".try_into().unwrap()))
+            .__as__("real_deal");
+
+        assert_eq!(
+            x.to_string(),
+            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE id = Book:oyelowo] AS real_deal"
                 .to_string()
         )
     }

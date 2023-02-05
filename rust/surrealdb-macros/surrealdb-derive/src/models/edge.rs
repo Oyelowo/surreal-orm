@@ -9,134 +9,14 @@ Email: oyelowooyedayo@gmail.com
 #![allow(dead_code)]
 
 
-// pub(crate) mod casing;
-// mod parser;
-// pub(crate) mod relations;
-// pub(crate) mod serialize_skipper;
-// mod trait_generator;
-// use super:{
-//     casing::CaseString,
-//     get_crate_name,
-//     parser::{EdgeModelAttr, ModelAttributesTokensDeriver},
-// };
-use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
+use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::str::FromStr;
 
 use syn::{self, parse_macro_input};
 
-use super::{edge_parser::{SchemaFieldsProperties, MacroVariables, SchemaPropertiesArgs}, casing::CaseString, node::MyFieldReceiver};
-
-#[derive(Debug, Clone)]
-pub struct Rename {
-    pub(crate) serialize: String,
-}
-
-/// This enables us to handle potentially nested values i.e
-///   #[serde(rename = "simple_name")]
-///    or
-///   #[serde(rename(serialize = "age"))]
-///  #[serde(rename(serialize = "ser_name_nested", deserialize = "deser_name_nested"))]
-/// However, We dont care about deserialized name from serde, so we just ignore that.
-impl FromMeta for Rename {
-    fn from_string(value: &str) -> ::darling::Result<Self> {
-        Ok(Self {
-            serialize: value.into(),
-        })
-    }
-
-    fn from_list(items: &[syn::NestedMeta]) -> ::darling::Result<Self> {
-        #[derive(FromMeta)]
-        struct FullRename {
-            serialize: String,
-
-            #[darling(default)]
-            deserialize: util::Ignored, // Ignore deserialize since we only care about the serialized string
-        }
-
-        impl From<FullRename> for Rename {
-            fn from(v: FullRename) -> Self {
-                let FullRename { serialize, .. } = v;
-                Self { serialize }
-            }
-        }
-        FullRename::from_list(items).map(Rename::from)
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Relate {
-    pub link: String,
-    // #[darling(default)]
-    pub edge: Option<String>,
-}
-//#[rename(se)]
-impl FromMeta for Relate {
-    fn from_string(value: &str) -> darling::Result<Self> {
-        Ok(Self {
-            link: value.into(),
-            edge: None,
-        })
-    }
-    //TODO: Check to maybe remove cos I probably dont need this
-    fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
-        #[derive(FromMeta)]
-        struct FullRelate {
-            edge: String,
-            link: String,
-        }
-
-        impl From<FullRelate> for Relate {
-            fn from(v: FullRelate) -> Self {
-                let FullRelate { link, edge, .. } = v;
-                Self {
-                    link,
-                    edge: Some(edge),
-                }
-            }
-        }
-        FullRelate::from_list(items).map(Relate::from)
-    }
-}
-
-/* #[derive(Debug, FromField)]
-#[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
-pub(crate) struct MyFieldReceiver {
-    /// Get the ident of the field. For fields in tuple or newtype structs or
-    /// enum bodies, this can be `None`.
-    pub(crate) ident: ::std::option::Option<syn::Ident>,
-    /// This magic field name pulls the type from the input.
-    pub(crate) ty: syn::Type,
-    attrs: Vec<syn::Attribute>,
-
-    #[darling(default)]
-    pub(crate) rename: ::std::option::Option<Rename>,
-
-    // reference singular: LinkOne<Account>
-    #[darling(default)]
-    pub(crate) link_one: ::std::option::Option<String>,
-
-    // reference singular: LinkSelf<Account>
-    #[darling(default)]
-    pub(crate) link_self: ::std::option::Option<String>,
-    
-    // reference plural: LinkMany<Account>
-    #[darling(default)]
-    pub(crate) link_many: ::std::option::Option<String>,
-
-    #[darling(default)]
-    pub(crate) skip_serializing: bool,
-
-    #[darling(default)]
-    skip_serializing_if: ::darling::util::Ignored,
-
-    #[darling(default)]
-    with: ::darling::util::Ignored,
-
-    #[darling(default)]
-    default: ::darling::util::Ignored,
-} */
+use super::{parser::{SchemaFieldsProperties,  SchemaPropertiesArgs},  casing::CaseString,  attributes::{Rename, MyFieldReceiver}, variables::VariablesModelMacro};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
@@ -174,27 +54,34 @@ impl ToTokens for FieldsGetterOpts {
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 
-        let ref __________connect_to_graph_traversal_string = format_ident!("__________connect_to_graph_traversal_string");
-        let ref ___________graph_traversal_string = format_ident!("___________graph_traversal_string");
-        let ref ___________model = format_ident!("___________model");
-        let ref schema_instance = format_ident!("schema_instance");
-        let ref schema_instance_edge_arrow_trimmed = format_ident!("schema_instance_trimmed");
         
-        let ref macro_variables = MacroVariables { __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance, schema_instance_edge_arrow_trimmed };
-        let schema_props_args = SchemaPropertiesArgs { macro_variables, data, struct_level_casing, struct_name_ident };
+        let  VariablesModelMacro { 
+            __________connect_to_graph_traversal_string, 
+            ___________graph_traversal_string,
+            ___________model,
+            schema_instance_edge_arrow_trimmed,
+            schema_instance, .. 
+        } = VariablesModelMacro::new();
+        let schema_props_args = SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident };
 
         let SchemaFieldsProperties {
-            schema_struct_fields_types_kv,
-            schema_struct_fields_names_kv,
-            serialized_field_names_normalised,
-            static_assertions,
-            imports_referenced_node_schema,
-            // referenced_edge_schema_struct_alias,
-            record_link_fields_methods,
-            connection_with_field_appended,
-        }: SchemaFieldsProperties  = SchemaFieldsProperties::from_receiver_data(
+                schema_struct_fields_types_kv,
+                schema_struct_fields_names_kv,
+                serialized_field_names_normalised,
+                static_assertions,
+                mut imports_referenced_node_schema,
+                connection_with_field_appended,
+                record_link_fields_methods,
+                ..
+        } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
         );
+        // if serialized_field_names_normalised.conta("")
+            if !serialized_field_names_normalised.contains(&"in".into()) || !serialized_field_names_normalised.contains(&"out".into()) {
+               panic!("Vector does not contain both 'in' and 'out'");
+            }
+        imports_referenced_node_schema.dedup_by(|a,
+                                                b| a.to_string() == b.to_string());
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
 
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
@@ -202,7 +89,7 @@ impl ToTokens for FieldsGetterOpts {
         // let field_names_ident = format_ident!("{struct_name_ident}DbFields");
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         
-        let schema_alias = format_ident!("{}Schema", struct_name_ident.to_string().to_lowercase());
+        let schema_alias = VariablesModelMacro::get_schema_alias(struct_name_ident);
         
         tokens.extend(quote!( 
                         
@@ -212,7 +99,7 @@ impl ToTokens for FieldsGetterOpts {
                     type TableNameChecker = #module_name::TableNameStaticChecker;
                     type Schema = #module_name::#struct_name_ident<String>;
 
-                    fn get_schema() -> Self::Schema {
+                    fn schema() -> Self::Schema {
                         #module_name::#struct_name_ident::new()
                     }
                     
@@ -232,11 +119,11 @@ impl ToTokens for FieldsGetterOpts {
                     #( #imports_referenced_node_schema) *
 
                     #[derive(Debug, ::serde::Serialize, Default)]
-                        pub struct #struct_name_ident<Model: ::serde::Serialize + Default> {
-                           #( #schema_struct_fields_types_kv) *
-                            pub #___________graph_traversal_string: ::std::string::String,
-                            #___________model: ::std::marker::PhantomData<Model>,
-                        }
+                    pub struct #struct_name_ident<Model: ::serde::Serialize + Default> {
+                       #( #schema_struct_fields_types_kv) *
+                        pub #___________graph_traversal_string: ::std::string::String,
+                        #___________model: ::std::marker::PhantomData<Model>,
+                    }
 
                     impl<Model: ::serde::Serialize + Default> #struct_name_ident<Model> {
                         pub fn new() -> Self {
@@ -250,7 +137,7 @@ impl ToTokens for FieldsGetterOpts {
                         pub fn #__________connect_to_graph_traversal_string(
                             store: &::std::string::String,
                             clause: #crate_name::Clause,
-                            arrow_direction: #crate_name::EdgeDirection,
+                            arrow_direction: &str,
                         ) -> Self {
                             let mut schema_instance = Self::default();
                             let schema_edge_str_with_arrow = format!(
@@ -264,9 +151,9 @@ impl ToTokens for FieldsGetterOpts {
                             
                             #schema_instance.#___________graph_traversal_string.push_str(schema_edge_str_with_arrow.as_str());
 
-                            let #schema_instance_edge_arrow_trimmed = #schema_instance
+                            let #___________graph_traversal_string = &#schema_instance
                                 .#___________graph_traversal_string
-                                .replace(arrow_direction.to_string().as_str(), "");
+                                .replace(arrow_direction, "");
 
                             #( #connection_with_field_appended) *
                             

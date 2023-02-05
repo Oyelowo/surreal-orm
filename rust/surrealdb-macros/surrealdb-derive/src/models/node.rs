@@ -1,4 +1,17 @@
+#![allow(dead_code)]
 
+use darling::{ToTokens, FromDeriveInput};
+use proc_macro2::TokenStream;
+use quote::{format_ident, quote};
+use std::str::FromStr;
+
+use syn::{self, parse_macro_input};
+
+use super::{
+    casing::CaseString,
+    parser::{ SchemaFieldsProperties, SchemaPropertiesArgs}, attributes::FieldsGetterOpts,
+    variables::VariablesModelMacro
+};
 
 
 
@@ -7,158 +20,7 @@ Author: Oyelowo Oyedayo
 Email: oyelowooyedayo@gmail.com
 */
 
-#![allow(dead_code)]
 
-
-// pub(crate) mod casing;
-// mod parser;
-// pub(crate) mod relations;
-// pub(crate) mod serialize_skipper;
-// mod trait_generator;
-// use super:{
-//     casing::CaseString,
-//     get_crate_name,
-//     parser::{EdgeModelAttr, ModelAttributesTokensDeriver},
-// };
-use darling::{ast, util, FromDeriveInput, FromField, FromMeta, ToTokens};
-use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
-use std::str::FromStr;
-
-use syn::{self, parse_macro_input};
-
-use super::{node_parser::{SchemaFieldsProperties, SchemaPropertiesArgs, MacroVariables}, casing::CaseString};
-
-#[derive(Debug, Clone)]
-pub struct Rename {
-    pub(crate) serialize: String,
-}
-
-/// This enables us to handle potentially nested values i.e
-///   #[serde(rename = "simple_name")]
-///    or
-///   #[serde(rename(serialize = "age"))]
-///  #[serde(rename(serialize = "ser_name_nested", deserialize = "deser_name_nested"))]
-/// However, We dont care about deserialized name from serde, so we just ignore that.
-impl FromMeta for Rename {
-    fn from_string(value: &str) -> ::darling::Result<Self> {
-        Ok(Self {
-            serialize: value.into(),
-        })
-    }
-
-    fn from_list(items: &[syn::NestedMeta]) -> ::darling::Result<Self> {
-        #[derive(FromMeta)]
-        struct FullRename {
-            serialize: String,
-
-            #[darling(default)]
-            deserialize: util::Ignored, // Ignore deserialize since we only care about the serialized string
-        }
-
-        impl From<FullRename> for Rename {
-            fn from(v: FullRename) -> Self {
-                let FullRename { serialize, .. } = v;
-                Self { serialize }
-            }
-        }
-        FullRename::from_list(items).map(Rename::from)
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Relate {
-    pub link: String,
-    // #[darling(default)]
-    pub edge: Option<String>,
-}
-//#[rename(se)]
-impl FromMeta for Relate {
-    fn from_string(value: &str) -> darling::Result<Self> {
-        Ok(Self {
-            link: value.into(),
-            edge: None,
-        })
-    }
-    //TODO: Check to maybe remove cos I probably dont need this
-    fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
-        #[derive(FromMeta)]
-        struct FullRelate {
-            edge: String,
-            link: String,
-        }
-
-        impl From<FullRelate> for Relate {
-            fn from(v: FullRelate) -> Self {
-                let FullRelate { link, edge, .. } = v;
-                Self {
-                    link,
-                    edge: Some(edge),
-                }
-            }
-        }
-        FullRelate::from_list(items).map(Relate::from)
-    }
-}
-
-#[derive(Debug, FromField)]
-#[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
-pub struct MyFieldReceiver {
-    /// Get the ident of the field. For fields in tuple or newtype structs or
-    /// enum bodies, this can be `None`.
-    pub(crate) ident: ::std::option::Option<syn::Ident>,
-    /// This magic field name pulls the type from the input.
-    pub(crate) ty: syn::Type,
-    attrs: Vec<syn::Attribute>,
-
-    #[darling(default)]
-    pub(crate) rename: ::std::option::Option<Rename>,
-
-    // reference singular: LinkOne<Account>
-    #[darling(default)]
-    pub(crate) relate: ::std::option::Option<Relate>,
-    
-    // reference singular: LinkOne<Account>
-    #[darling(default)]
-    pub(crate) link_one: ::std::option::Option<String>,
-
-    // reference singular: LinkSelf<Account>
-    #[darling(default)]
-    pub(crate) link_self: ::std::option::Option<String>,
-    
-    // reference plural: LinkMany<Account>
-    #[darling(default)]
-    pub(crate) link_many: ::std::option::Option<String>,
-
-    #[darling(default)]
-    pub(crate) skip_serializing: bool,
-
-    #[darling(default)]
-    skip_serializing_if: ::darling::util::Ignored,
-
-    #[darling(default)]
-    with: ::darling::util::Ignored,
-
-    #[darling(default)]
-    default: ::darling::util::Ignored,
-}
-
-#[derive(Debug, FromDeriveInput)]
-#[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
-pub struct FieldsGetterOpts {
-    ident: syn::Ident,
-    attrs: Vec<syn::Attribute>,
-    generics: syn::Generics,
-    /// Receives the body of the struct or enum. We don't care about
-    /// struct fields because we previously told darling we only accept structs.
-    data: ast::Data<util::Ignored, self::MyFieldReceiver>,
-
-    #[darling(default)]
-    rename_all: ::std::option::Option<Rename>,
-
-    #[darling(default)]
-    pub(crate) relation_name: ::std::option::Option<String>,
-}
 
 impl ToTokens for FieldsGetterOpts {
     fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -179,29 +41,31 @@ impl ToTokens for FieldsGetterOpts {
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 
-        let ref __________connect_to_graph_traversal_string = format_ident!("__________connect_to_graph_traversal_string");
-        let ref ___________graph_traversal_string = format_ident!("___________graph_traversal_string");
-        let ref schema_instance = format_ident!("schema_instance");
-        let ref macro_variables = MacroVariables{ __________connect_to_graph_traversal_string, ___________graph_traversal_string, schema_instance };
-        let schema_props_args = SchemaPropertiesArgs{ macro_variables, data, struct_level_casing, struct_name_ident };
+        let  VariablesModelMacro { 
+            __________connect_to_graph_traversal_string, 
+            ___________graph_traversal_string,
+            schema_instance, .. 
+        } = VariablesModelMacro::new();
+        let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident };
 
         let SchemaFieldsProperties {
-            schema_struct_fields_types_kv,
-            schema_struct_fields_names_kv,
-            serialized_field_names_normalised,
-            static_assertions,
-            ref mut imports_referenced_node_schema,
-            // referenced_edge_schema_struct_alias,
-            relate_edge_schema_struct_type_alias,
-            relate_edge_schema_struct_type_alias_impl,
-            relate_edge_schema_method_connection,
-            relate_node_alias_method,
-            record_link_fields_methods,
-            connection_with_field_appended,
-        }: SchemaFieldsProperties  = SchemaFieldsProperties::from_receiver_data(
+                relate_edge_schema_struct_type_alias,
+                relate_edge_schema_struct_type_alias_impl,
+                relate_edge_schema_method_connection,
+                relate_node_alias_method,
+                schema_struct_fields_types_kv,
+                schema_struct_fields_names_kv,
+                serialized_field_names_normalised,
+                static_assertions,
+                mut imports_referenced_node_schema,
+                connection_with_field_appended,
+                record_link_fields_methods,
+        } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
         );
-        imports_referenced_node_schema.dedup_by(|a,b| a.to_string() == b.to_string());
+        
+        imports_referenced_node_schema.dedup_by(|a,
+                                                b| a.to_string() == b.to_string());
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
 
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
@@ -234,7 +98,7 @@ impl ToTokens for FieldsGetterOpts {
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;
 
-                fn get_schema() -> Self::Schema {
+                fn schema() -> Self::Schema {
                     #module_name::#struct_name_ident::new()
                 }
                 
@@ -288,7 +152,8 @@ impl ToTokens for FieldsGetterOpts {
                         let connection = format!("{}{}{}", store, #struct_name_ident_as_str, #crate_name::format_clause(clause, #struct_name_ident_as_str));
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
-
+                        let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
+                        
                         #( #connection_with_field_appended) *
                         #schema_instance
                     }

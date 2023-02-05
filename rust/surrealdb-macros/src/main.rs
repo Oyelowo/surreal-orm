@@ -17,9 +17,8 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
-    model_id::SurIdComplex,
-    node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
-    query_builder::{query, ToNodeBuilder},
+    model_id::SurId,
+    query_builder::{query, NodeBuilder, ToNodeBuilder},
     Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
 };
 use typed_builder::TypedBuilder;
@@ -107,46 +106,38 @@ fn main() {
     println!("areore:{xx:?}");
 
     // xx.get_key()
-    let x1 = Student::get_schema().firstName.__as__("lowo");
+    let x1 = Student::schema().firstName.__as__("lowo");
     println!("x1 --- {x1}");
 
-    let bee = Student::get_schema()
+    let bee = Student::schema()
         .lowo_na(Clause::Where(
-            query()
-                .and_where(Student::get_schema().lastName.equals("lowo"))
-                .build(),
+            query().where_(Student::schema().lastName.equals("lowo")),
         ))
         .title
         .contains_one("bee");
 
-    let xx = Student::get_schema()
+    let xx = Student::schema()
         .Writes__(Clause::All)
         .Book(Clause::Where(
-            query()
-                .and_where(Student::get_schema().lastName.contains_one("Dayo"))
-                .build(),
+            query().where_(Student::schema().lastName.contains_one("Dayo")),
         ))
         .title
         .__as__("meorm");
     println!("xx --- {xx}");
 
-    let x2 = Student::get_schema()
-        .lowo_na(Clause::All)
-        .title
-        .__as__("ererj");
+    let x2 = Student::schema();
     println!("x2 --- {x2}");
 
-    // Student::get_schema().favBook(Clause::All);
-    let xx = Student::get_schema()
-        .__with_id__("Student:lowo")
-        .firstName
-        .__as__("eee");
+    // Student::schema().favBook(Clause::All);
+    let xx = Student::schema().__with_id__("Student:lowo");
+    // Student::schema().favBook(Clause::All);
+    let xx = Student::schema();
     println!("dfmoaef --- {xx}");
-    // Student::get_schema().__with_id__("student:3434").lastName;
-    // Student::get_schema().__with_id__("student:3434");
+    // Student::schema().__with_id__("student:3434").lastName;
+    // Student::schema().__with_id__("student:3434");
 }
-// #[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
-// // #[surrealdb(relation_name = "writes")]
+// Student::schema().__with_id__("student:3434").lastName;
+// Student::schema().__with_id__("student:3434");
 // struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
 //     id: Option<String>,
 //     #[surrealdb(link_one = "Student")]
@@ -242,10 +233,10 @@ fn main() {
 //     println!("rela...{}", rela);
 //
 //     // println!("rela...{}", StudentEnum::book_written);
-//     let rela = Student::get_schema()
+//     let rela = Student::schema()
 //         .__with_id__("Student:lowo")
 //         .writes__(Clause::None)
-//         .book(Clause::None)
+//     let rela = Student::schema()
 //         .__with_id__("Book:maow");
 //     println!("rela...{}", rela);
 // }
