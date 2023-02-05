@@ -60,6 +60,7 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     // #[surrealdb(link_one = "Book", skip_serializing)]
     #[serde(rename = "in")]
     _in: In,
+    // r#in: In,
     out: Out,
     time_written: String,
 }
@@ -126,19 +127,38 @@ mod tests {
     }
 
     #[test]
+    fn multiplication_tests4_with_alias() {
+        let x = Student::schema()
+            .Writes__(Clause::Where(
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
+            ))
+            .Book(Clause::Where(query().where_(
+                Book::schema().content.contains_one("Oyelowo in Uranus"),
+            )))
+            .__as__(Student::schema().writtenBooks);
+
+        assert_eq!(
+            x.to_string(),
+            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE content CONTAINS Oyelowo in Uranus] AS writtenBooks"
+                .to_string()
+        )
+    }
+
+    #[test]
     fn multiplication_tests4() {
         let x = Student::schema()
             .Writes__(Clause::Where(
-                query().where_(Student::schema().firstName.contains_one("lowo")),
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .Book(Clause::Where(
-                query().where_(Book::schema().content.equals("Oyelowo in Uranus")),
-            ))
+            .Book(Clause::Where(query().where_(
+                Book::schema().content.contains_one("Oyelowo in Uranus"),
+            )))
             .content;
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE firstName CONTAINS lowo]->Book[WHERE content = Oyelowo in Uranus].content".to_string()
+            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE content CONTAINS Oyelowo in Uranus].content"
+                .to_string()
         )
     }
 
@@ -162,14 +182,14 @@ mod tests {
     fn multiplication_tests6() {
         let x = Student::schema()
             .Writes__(Clause::Where(
-                query().where_(Student::schema().firstName.contains_one("lowo")),
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
             .Book(Clause::Id("Book:oyelowo".try_into().unwrap()))
             .__as__(Student::schema().writtenBooks);
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE firstName CONTAINS lowo]->Book[WHERE id = Book:oyelowo] AS writtenBooks"
+            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE id = Book:oyelowo] AS writtenBooks"
                 .to_string()
         )
     }

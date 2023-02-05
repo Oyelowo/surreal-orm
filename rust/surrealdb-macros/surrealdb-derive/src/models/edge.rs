@@ -76,6 +76,10 @@ impl ToTokens for FieldsGetterOpts {
         } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
         );
+        // if serialized_field_names_normalised.conta("")
+            if !serialized_field_names_normalised.contains(&"in".into()) || !serialized_field_names_normalised.contains(&"out".into()) {
+               panic!("Vector does not contain both 'in' and 'out'");
+            }
         imports_referenced_node_schema.dedup_by(|a,
                                                 b| a.to_string() == b.to_string());
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
