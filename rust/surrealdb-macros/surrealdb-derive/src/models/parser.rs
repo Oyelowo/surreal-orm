@@ -201,7 +201,7 @@ impl SchemaFieldsProperties {
                          ref field_ident_normalised_as_str
                 } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
                 
-                println!("ddLAKALAK----Struct Name{}{:?}", struct_name_ident, field_receiver.ident.clone());
+                // println!("ddLAKALAK----Struct Name{}{:?}", struct_name_ident, field_receiver.ident.clone());
                 let VariablesModelMacro { 
                     __________connect_to_graph_traversal_string, 
                     ___________graph_traversal_string, 
