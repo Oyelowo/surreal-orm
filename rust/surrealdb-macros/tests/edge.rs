@@ -364,6 +364,16 @@ pub mod book {
 }
 fn test_book_edge_name() {}
 
+pub mod bookxx {
+    pub struct TableNameStaticChecker {
+        pub book: String,
+    }
+}
+
+trait Mana {
+    type TableMameChecker;
+}
+
 impl Mana for Book {
     type TableMameChecker = bookxx::TableNameStaticChecker;
 }
@@ -372,20 +382,28 @@ type StudentWritesBook__In = <StudentWritesBook as surrealdb_macros::SurrealdbEd
 type StudentWritesBook__Out = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
 
 type OutBookTableNameChecker = <StudentWritesBook__Out as Mana>::TableMameChecker;
+
 fn eerer() {
-    StudentWritesBook__In::schema();
-    unimplemented!();
+    StudentWritesBook__In::schema()
+        .Writes__(Clause::All)
+        .Book(Clause::All)
+        .title;
+
+    StudentWritesBook__Out::schema().title;
+    Writes__::default().olbook(Clause::All).title;
 }
 ::static_assertions::assert_fields!(OutBookTableNameChecker: book);
 
 // type Book = <Book as surrealdb_macros::SurrealdbNode>::Schema;
 type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
 // <Student>
-type BookMa = <Book as surrealdb_macros::SurrealdbNode>::Schema;
+// type BookMa = <Book as surrealdb_macros::SurrealdbNode>::Schema;
+type BookMa = <StudentWritesBook__Out as surrealdb_macros::SurrealdbNode>::Schema;
 
 trait WriteOutTrait {
     fn olbook(&self, clause: Clause) -> BookMa;
 }
+
 impl WriteOutTrait for Writes__ {
     fn olbook(&self, clause: Clause) -> BookMa {
         // BookMa::__________connect_to_graph_traversal_string
@@ -395,6 +413,7 @@ impl WriteOutTrait for Writes__ {
         )
     }
 }
+// [{ action: "writes__", direction: "right", out: ["book"] }]
 // fn writes() -> StudentWritesBookTableNameSchema {
 //     StudentWritesBookTableNameSchema::__________connect_to_graph_traversal_string
 // }
@@ -406,15 +425,6 @@ type StudentWritesBookTableNameChecker = <StudentWritesBook as SurrealdbEdge>::T
 ::static_assertions::assert_type_eq_all!(StudentWritesBook__Out, Book);
 ::static_assertions::assert_type_eq_all!(Relate<StudentWritesBook__Out>, Relate<Book>);
 
-trait Mana {
-    type TableMameChecker;
-}
-
 type BookTableNameChecker = <Book as Mana>::TableMameChecker;
 ::static_assertions::assert_fields!(BookTableNameChecker: book);
-pub mod bookxx {
-    pub struct TableNameStaticChecker {
-        pub book: String,
-    }
-}
 fn fdfd() {}
