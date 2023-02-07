@@ -170,7 +170,7 @@ struct NodeEdgeMetadata {
 }
 
 #[derive(Default, Clone)]
-pub struct SchemaFieldsProperties<'a> {
+pub struct SchemaFieldsProperties {
     /// Generated example: pub timeWritten: DbField,
     /// key(normalized_field_name)-value(DbField) e.g pub out: DbField, of field name and DbField type
     /// to build up struct for generating fields of a Schema of the SurrealdbEdge
@@ -328,7 +328,7 @@ pub struct SchemaPropertiesArgs<'a> {
     pub struct_level_casing: Option<CaseString>,
     pub struct_name_ident: &'a syn::Ident,
 }
-impl<'a> SchemaFieldsProperties<'a> {
+impl SchemaFieldsProperties {
     /// .
     ///
     /// # Panics
@@ -502,7 +502,7 @@ impl<'a> SchemaFieldsProperties<'a> {
 type EdgeNameWithDirectionIndicator = String;
 
 #[derive(Default, Clone)]
-struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
+pub struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
 
 impl NodeEdgeMetadataStore {
       fn update(&mut self, relation_attributes: RelateAttribute, relation: Relate) ->&Self{
