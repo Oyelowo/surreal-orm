@@ -170,7 +170,7 @@ struct NodeEdgeMetadata {
 }
 
 #[derive(Default, Clone)]
-pub struct SchemaFieldsProperties {
+pub struct SchemaFieldsProperties<'a> {
     /// Generated example: pub timeWritten: DbField,
     /// key(normalized_field_name)-value(DbField) e.g pub out: DbField, of field name and DbField type
     /// to build up struct for generating fields of a Schema of the SurrealdbEdge
@@ -328,7 +328,7 @@ pub struct SchemaPropertiesArgs<'a> {
     pub struct_level_casing: Option<CaseString>,
     pub struct_name_ident: &'a syn::Ident,
 }
-impl SchemaFieldsProperties {
+impl<'a> SchemaFieldsProperties<'a> {
     /// .
     ///
     /// # Panics
@@ -365,7 +365,7 @@ impl SchemaFieldsProperties {
                     RelationType::Relate(relation) => {
                         let relation_attributes = RelateAttribute::from(relation.clone());
                         let arrow_direction = String::from(relation_attributes.edge_direction);
-                        let edge_name = TokenStream::from(relation_attributes.edge_name);
+                        let edge_name = TokenStream::from(relation_attributes.clone().edge_name);
                         let ref destination_node = TokenStream::from(relation_attributes.node_name.clone());
                         // let extra = ReferencedNodeMeta::from_ref_node_meta(relation_attributes.node_name, field_ident_normalised);
                         //
@@ -399,7 +399,8 @@ impl SchemaFieldsProperties {
                                 );
                         
 
-                        let edge_method_name_with_direction = match relation_attributes.edge_direction {
+                        let edge_method_name_with_direction = match relation_attributes.clone()
+                            .edge_direction {
                             EdgeDirection::OutArrowRight => format_ident!("{edge_name}__"),
                             EdgeDirection::InArrowLeft => format_ident!("__{edge_name}"),
                         };
@@ -418,7 +419,7 @@ impl SchemaFieldsProperties {
                         // e.g from Writes<In, Out> (Writes<Student, Book>) generics, we can create StudentWritesBook
                         let edge_alias_specific = format_ident!("{}", relation.edge.as_ref().expect("Edge must be specified for relations"));
                         // type StudentWritesBlogInNode = <StudentWritesBlog as SurrealdbEdge>::In;
-                        let (in_node, out_node) = match relation_attributes.edge_direction {
+                        let (in_node, out_node) = match relation_attributes.clone().edge_direction {
                             // If OutArrowRight, the current struct should be InNode, and
                             // OutNode in "->edge_action->OutNode", should be OutNode
                             EdgeDirection::OutArrowRight => {
@@ -454,7 +455,7 @@ impl SchemaFieldsProperties {
                             )
                         );
 
-                            store.node_edge_metadata.update(relation_attributes, relation);
+                            store.node_edge_metadata.update(relation_attributes.clone(), relation.clone());
                             ReferencedNodeMeta::from_relate(relation, destination_node)
                                 
                     },
@@ -504,78 +505,82 @@ type EdgeNameWithDirectionIndicator = String;
 struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
 
 impl NodeEdgeMetadataStore {
-  fn update(&self, relation_attributes: RelateAttribute, relation: Relate) ->&Self{
-    let connection_model = format_ident!("{}", relation.link);
-    let relation_attributes = RelateAttribute::from(relation.clone());
-    let arrow_direction = String::from(relation_attributes.edge_direction);
-    let edge_name = TokenStream::from(relation_attributes.edge_name);
-    let ref destination_node = TokenStream::from(relation_attributes.node_name.clone());
-    // The dunder "__" suffix/prefix determines the arrow direction. Suffixed dunder indicates
-    // Outgoing arrow right while prefixed implies incoming arrow left
-    let crate_name = get_crate_name(false);
-    let edge_name_with_direction_title_case = convert_case::Converter::new().to_case(convert_case::Case::Title).convert(edge_name.to_string());
-    let edge_name_with_direction_indicator = match relation_attributes.edge_direction {
-        EdgeDirection::OutArrowRight => format!("{edge_name}__"),
-        EdgeDirection::InArrowLeft => format!("__{edge_name}"),
-    };
-    let destination_node_title_case = convert_case::Converter::new().to_case(convert_case::Case::Title).convert(destination_node.to_string());
-    let destination_node_model = format_ident!("{destination_node}Model");
-    
-    let VariablesModelMacro { 
-        __________connect_to_graph_traversal_string, 
-        ___________graph_traversal_string, 
-        schema_instance, .. 
-    } = VariablesModelMacro::new();
-    // Within edge generics, there is usually In and Out associated types, this is used to access
-    // those
-    let in_or_out = match relation_attributes.edge_direction {
-        EdgeDirection::OutArrowRight => format_ident!("Out"),
-        EdgeDirection::InArrowLeft => format_ident!("In"),
-    };
-    let foreign_node_schema_one = quote!(
-                        type #destination_node_model = <#connection_model as surrealdb_macros::SurrealdbEdge>::#in_or_out;
-                        type #destination_node = <#destination_node_model as surrealdb_macros::SurrealdbNode>::Schema;
-                        );
-    
-    let edge_to_nodes_trait_method_one =  quote!(fn #destination_node(&self, clause: #crate_name::Clause) -> #destination_node_title_case;);
-    
-    let edge_to_nodes_trait_methods_impl_one =  quote!(
-                            fn #destination_node(&self, clause: #crate_name::Clause) -> #destination_node_title_case {
-                                #destination_node_title_case::#__________connect_to_graph_traversal_string(
-                                            &self.#___________graph_traversal_string,
-                                            clause,
-                                )
-                            }
-                        );
-    
-    let nn = NodeEdgeMetadata {
-              edge_name_with_direction_indicator,  // Closing braces
-              connection_model: relation.link, 
-              action: relation_attributes.edge_name.to_string(), 
-              direction: relation_attributes.edge_direction, 
-              action_type_alias: quote!( type #edge_name_with_direction_title_case = <#connection_model as #crate_name::SurrealdbEdge>::Schema; ), 
-              foreign_node_schema: vec![foreign_node_schema_one], 
-              edge_to_nodes_trait_method: vec![
-                        edge_to_nodes_trait_method_one
-              ], 
-              edge_to_nodes_trait_methods_impl: vec![
-                        edge_to_nodes_trait_methods_impl_one 
-                ],
-    };
-//     let values = match map.entry(key) {
-//     Entry::Occupied(o) => o.into_mut(),
-//     Entry::Vacant(v) => v.insert(default),
-// };
-    let xx = self.0.entry(edge_name_with_direction_indicator).and_modify(|x| {
-        // x.direction = EdgeDirection::OutArrowRight;
-        x.foreign_node_schema.push(foreign_node_schema_one);
-        x.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one);
-        x.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one);
-    }).or_insert(nn);
-        // xx
-        self
-  }     
-    fn complete_token(&self) -> TokenStream{
+      fn update(&mut self, relation_attributes: RelateAttribute, relation: Relate) ->&Self{
+            let connection_model = format_ident!("{}", relation.link);
+            // let relation_attributes = RelateAttribute::from(relation.clone());
+            let arrow_direction = String::from(relation_attributes.edge_direction);
+            let edge_name = TokenStream::from(&relation_attributes.edge_name);
+            let ref destination_node = TokenStream::from(relation_attributes.node_name.clone());
+            // The dunder "__" suffix/prefix determines the arrow direction. Suffixed dunder indicates
+            // Outgoing arrow right while prefixed implies incoming arrow left
+            let crate_name = get_crate_name(false);
+            let edge_name_with_direction_title_case = convert_case::Converter::new().to_case(convert_case::Case::Title).convert(edge_name.to_string());
+            
+            let ref edge_direction = relation_attributes.edge_direction;
+            let ref edge_name_with_direction_indicator =|| match edge_direction {
+                EdgeDirection::OutArrowRight => format!("{edge_name}__"),
+                EdgeDirection::InArrowLeft => format!("__{edge_name}"),
+            };
+            let destination_node_title_case = convert_case::Converter::new().to_case(convert_case::Case::Title).convert(destination_node.to_string());
+            let destination_node_model = format_ident!("{destination_node}Model");
+            
+            let VariablesModelMacro { 
+                __________connect_to_graph_traversal_string, 
+                ___________graph_traversal_string, 
+                schema_instance, .. 
+            } = VariablesModelMacro::new();
+            // Within edge generics, there is usually In and Out associated types, this is used to access
+            // those
+            let in_or_out = match edge_direction {
+                EdgeDirection::OutArrowRight => format_ident!("Out"),
+                EdgeDirection::InArrowLeft => format_ident!("In"),
+            };
+            let foreign_node_schema_one = || quote!(
+                                type #destination_node_model = <#connection_model as surrealdb_macros::SurrealdbEdge>::#in_or_out;
+                                type #destination_node = <#destination_node_model as surrealdb_macros::SurrealdbNode>::Schema;
+                                );
+            
+            let edge_to_nodes_trait_method_one = ||  quote!(fn #destination_node(&self, clause: #crate_name::Clause) -> #destination_node_title_case;);
+            
+            let edge_to_nodes_trait_methods_impl_one = || quote!(
+                                    fn #destination_node(&self, clause: #crate_name::Clause) -> #destination_node_title_case {
+                                        #destination_node_title_case::#__________connect_to_graph_traversal_string(
+                                                    &self.#___________graph_traversal_string,
+                                                    clause,
+                                        )
+                                    }
+                                );
+            
+            let nn = NodeEdgeMetadata {
+                      edge_name_with_direction_indicator: edge_name_with_direction_indicator() ,  // Closing braces
+                      connection_model: relation.link, 
+                      action: relation_attributes.edge_name.clone().to_string(), 
+                      direction: edge_direction.clone(), 
+                      action_type_alias: quote!( type #edge_name_with_direction_title_case = <#connection_model as #crate_name::SurrealdbEdge>::Schema; ), 
+                      foreign_node_schema: vec![foreign_node_schema_one()], 
+                      edge_to_nodes_trait_method: vec![
+                                edge_to_nodes_trait_method_one()
+                      ], 
+                      edge_to_nodes_trait_methods_impl: vec![
+                                edge_to_nodes_trait_methods_impl_one() 
+                        ],
+            };
+        //     let values = match map.entry(key) {
+        //     Entry::Occupied(o) => o.into_mut(),
+        //     Entry::Vacant(v) => v.insert(default),
+        // };
+             self.0.entry(edge_name_with_direction_indicator()).and_modify(|x| {
+                // x.direction = EdgeDirection::OutArrowRight;
+                x.foreign_node_schema.push(foreign_node_schema_one());
+                x.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one());
+                x.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one());
+            }).or_insert(nn);
+                // xx
+                self
+      }     
+
+  
+    pub(crate) fn generate_token_stream(&self) -> TokenStream{
         let node_edge_token_streams = self.0.values().map(|value| {
             let edge_name_with_direction_indicator = format!("{}", value.edge_name_with_direction_indicator );
             let edge_trait_name = format_ident!("{edge_name_with_direction_indicator}Trait");

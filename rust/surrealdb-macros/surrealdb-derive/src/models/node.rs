@@ -60,10 +60,11 @@ impl ToTokens for FieldsGetterOpts {
                 mut imports_referenced_node_schema,
                 connection_with_field_appended,
                 record_link_fields_methods,
+            node_edge_metadata,
         } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
         );
-        
+       let node_edge_metadata = node_edge_metadata.generate_token_stream() ; 
         imports_referenced_node_schema.dedup_by(|a,
                                                 b| a.to_string() == b.to_string());
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
@@ -174,6 +175,7 @@ impl ToTokens for FieldsGetterOpts {
 
                 #( #relate_edge_schema_struct_type_alias_impl) *
                 
+                #node_edge_metadata
             }
 
                 

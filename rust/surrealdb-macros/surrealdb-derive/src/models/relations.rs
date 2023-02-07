@@ -69,6 +69,13 @@ impl From<EdgeDirection> for String {
 
 macro_rules! wrapper_struct_to_ident {
     ($simple_wrapper_struct:ty) => {
+        impl From<&$simple_wrapper_struct> for ::proc_macro2::TokenStream {
+            fn from(simple_wrapper_struct: &$simple_wrapper_struct) -> Self {
+                let ident = ::quote::format_ident!("{}", simple_wrapper_struct.0);
+                ::quote::quote!(#ident)
+            }
+        }
+
         impl From<$simple_wrapper_struct> for ::proc_macro2::TokenStream {
             fn from(simple_wrapper_struct: $simple_wrapper_struct) -> Self {
                 let ident = ::quote::format_ident!("{}", simple_wrapper_struct.0);
