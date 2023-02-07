@@ -430,8 +430,7 @@ impl WriteOutTrait for Writes__ {
 // ]
 //
 // {
-// "Writes__": {
-//   type: "StudentWritesBook",
+// "Writes__": { type: "StudentWritesBook",
 //   action: "writes",
 //   direction: "right",
 //   action_type_alias: quote!( type Writes__ = <StudentWritesBook as #crate_name::SurrealdbEdge>::Schema; ),

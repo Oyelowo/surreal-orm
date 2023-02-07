@@ -19,6 +19,151 @@ use super::{
 };
 
 
+// "Writes__": {
+//   type: "StudentWritesBook",
+//   action: "writes",
+//   direction: "right",
+//   action_type_alias: quote!( type Writes__ = <StudentWritesBook as #crate_name::SurrealdbEdge>::Schema; ),
+//   foreign_node_schema: vec![
+//       quote!(
+//         type BookModel = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
+//         type Book = <BookModel as surrealdb_macros::SurrealdbNode>::Schema;
+//       ),
+//       quote!(
+//         type BlogModel = <StudentWritesBlog as surrealdb_macros::SurrealdbEdge>::Out;
+//         type Blog = <BlogModel as surrealdb_macros::SurrealdbNode>::Schema;
+//       ),
+//   ],
+//   edge_to_nodes_trait_methods: vec![
+//       quote!(
+//          fn book(&self, clause: Clause) -> Book;
+//       ),
+//       quote!(
+//          fn blog(&self, clause: Clause) -> Blog;
+//       ),
+//   ],
+//   edge_to_nodes_trait_methods_impl: vec![
+//       quote!(
+//          fn book(&self, clause: Clause) -> Book {
+//              Book::__________connect_to_graph_traversal_string(
+//                  &self.___________graph_traversal_string,
+//                  clause,
+//              )
+//          }
+//       ),
+//       quote!(
+//          fn blog(&self, clause: Clause) -> Blog {
+//              Blog::__________connect_to_graph_traversal_string(
+//                  &self.___________graph_traversal_string,
+//                  clause,
+//              )
+//          }
+//       ),
+//
+//   ],
+// },
+struct NodeEdgeMetadata {
+  /// In addition to action, this is used for building an edge from 
+  /// a model field annotation e.g relate(edge="StudentWritesBook", link="->writes->book") 
+  /// Example of value: StudentWritesBook
+  /// Generates: 
+  /// ```
+  /// type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
+  /// ```
+  connection_model: &'static str, 
+  /// The database table name of the edge. Used for generating other tokens
+  /// e.g "writes"
+  action: &'static str,
+  direction: EdgeDirection,
+  /// Example Generated:
+  /// type Writes__ = <StudentWritesBook as #crate_name::SurrealdbEdge>::Schema;
+  /// 
+  /// Example Value:
+  /// if arrow right outgoing:
+  /// quote!( type Writes__ = <StudentWritesBook as #crate_name::SurrealdbEdge>::Schema; )
+  /// 
+  /// if arrow left incoming:
+  /// quote!( type __Writes = <StudentWritesBook as #crate_name::SurrealdbEdge>::Schema; ) 
+  action_type_alias: TokenStream,
+  /// Example Generated:
+  ///   type BookModel = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
+  ///   type Book = <BookModel as surrealdb_macros::SurrealdbNode>::Schema;
+  ///
+  ///   type BlogModel = <StudentWritesBlog as surrealdb_macros::SurrealdbEdge>::Out;
+  ///   type Blog = <BlogModel as surrealdb_macros::SurrealdbNode>::Schema;
+  ///
+  /// Example Value:
+  /// vec![
+  ///    quote!(
+  ///       type BookModel = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
+  ///       type Book = <BookModel as surrealdb_macros::SurrealdbNode>::Schema;
+  ///     ),
+  ///     quote!(
+  ///       type BlogModel = <StudentWritesBlog as surrealdb_macros::SurrealdbEdge>::Out;
+  ///       type Blog = <BlogModel as surrealdb_macros::SurrealdbNode>::Schema;
+  ///     ),
+  /// ],
+  foreign_node_schema:  Vec<TokenStream>,
+  /// Example to be Generated:
+  /// trait WriteArrowRightTrait {
+  ///     fn book(&self, clause: #crate::Clause) -> Book;
+  ///     fn blog(&self, clause: #crate::Clause) -> Blog;
+  /// }
+  /// 
+  /// Example Value:
+  /// vec![
+  ///     quote!(trait WriteArrowRightTrait {), // trait opening braces
+  ///     quote!(
+  ///        fn book(&self, clause: Clause) -> Book;
+  ///     ),
+  ///     quote!(
+  ///        fn blog(&self, clause: Clause) -> Blog;
+  ///     ),
+  ///     quote!(}),  // Closing braces
+  /// ] 
+  edge_to_nodes_trait_method: Vec<TokenStream>,
+  /// Example Generated:
+  ///
+  /// impl WriteArrowRightTrait for Writes__ {
+  ///     fn book(&self, clause: Clause) -> Book {
+  ///         Book::__________connect_to_graph_traversal_string(
+  ///             &self.___________graph_traversal_string,
+  ///             clause,
+  ///         )
+  ///     }
+  ///
+  ///     fn blog(&self, clause: Clause) -> Blog {
+  ///         Blog::__________connect_to_graph_traversal_string(
+  ///             &self.___________graph_traversal_string,
+  ///             clause,
+  ///         )
+  ///     }
+  /// }
+  ///
+  /// Example Value:
+  /// vec![
+  ///     quote!(impl WriteArrowRightTrait for Writes__ {), // implementation opening braces
+  ///     quote!(
+  ///        fn book(&self, clause: Clause) -> Book {
+  ///            Book::__________connect_to_graph_traversal_string(
+  ///                &self.___________graph_traversal_string,
+  ///                clause,
+  ///            )
+  ///        }
+  ///     ),
+  ///     quote!(
+  ///        fn blog(&self, clause: Clause) -> Blog {
+  ///            Blog::__________connect_to_graph_traversal_string(
+  ///                &self.___________graph_traversal_string,
+  ///                clause,
+  ///            )
+  ///        }
+  ///     ),
+  ///     quote!(}),  // Closing braces
+  ///    ]
+  edge_to_nodes_trait_methods_impl:Vec<TokenStream>, 
+}
+
 #[derive(Default, Clone)]
 pub struct SchemaFieldsProperties {
     /// Generated example: pub timeWritten: DbField,
