@@ -429,8 +429,8 @@ impl WriteOutTrait for Writes__ {
 // { type: "StudentBuysCar", action: "buys__", direction: "right", foreign: ["car"] },
 // ]
 //
-// [
 // {
+// "Writes__": {
 //   type: "StudentWritesBook",
 //   action: "writes",
 //   direction: "right",
@@ -473,7 +473,7 @@ impl WriteOutTrait for Writes__ {
 //
 //   ],
 // },
-// {
+// "__Writes": {
 //   type: "StudentWritesTeacher",
 //   action: "writes",
 //   direction: "left",
@@ -500,7 +500,7 @@ impl WriteOutTrait for Writes__ {
 //       ),
 //   ],
 // },
-// {
+// "Buys__": {
 //   type: "StudentBuysCar ",
 //   action: "buys",
 //   direction: "right",
@@ -529,7 +529,7 @@ impl WriteOutTrait for Writes__ {
 //   direction: "right", foreign: ["book", "blog"] },
 // { type: "StudentWritesTeacher", action: "__writes", direction: "left", foreign: ["teacher"] },
 // { type: "StudentBuysCar", action: "buys__", direction: "right", foreign: ["car"] },
-// ]
+// }
 //
 // // outgoing connection for Writes, hence Writes__
 // type WritesSchema = StudentWritesBook ;
