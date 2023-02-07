@@ -313,7 +313,7 @@ pub struct SchemaFieldsProperties {
     /// The above can be used for e.g ->Writes->Book as book_written
     pub relate_node_alias_method: Vec<TokenStream>,
     
-    pub node_edge_metadata: NodeEdgeMetadataStore
+    pub node_edge_metadata: HashMap<&'static str, NodeEdgeMetadata>
 }
 
 type AllNodeEdgeMetadata = HashMap<&'static str, NodeEdgeMetadata>;
@@ -450,7 +450,6 @@ impl SchemaFieldsProperties {
                             )
                         );
 
-                            store.node_edge_metadata.update(relation_attributes, relation);
                             ReferencedNodeMeta::from_relate(relation, destination_node)
                                 
                     },
@@ -494,11 +493,10 @@ impl SchemaFieldsProperties {
     }
 } 
 
-#[derive(Default, Clone)]
 struct NodeEdgeMetadataStore(HashMap<String, NodeEdgeMetadata>);
 
 impl NodeEdgeMetadataStore {
-  fn update(&self, relation_attributes: RelateAttribute, relation: Relate) ->&Self{
+  fn update_store(&self, relation_attrs: RelateAttribute, relation: Relate) {
     let connection_model = format_ident!("{}", relation.link);
     let relation_attributes = RelateAttribute::from(relation.clone());
     let arrow_direction = String::from(relation_attributes.edge_direction);
@@ -568,7 +566,6 @@ impl NodeEdgeMetadataStore {
         x.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one);
         x.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one);
     }).or_insert(nn);
-        // xx
-        self
+        xx
   }     
 }
