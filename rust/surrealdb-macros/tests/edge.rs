@@ -429,30 +429,132 @@ impl WriteOutTrait for Writes__ {
 // { type: "StudentBuysCar", action: "buys__", direction: "right", foreign: ["car"] },
 // ]
 //
+// [
+// {
+//   type: "StudentWritesBook",
+//   action: "writes",
+//   direction: "right",
+//   action_type_alias: quote!( type Writes__ = <StudentWritesBook as #crate_name::SurrealdbEdge>::Schema; ),
+//   foreign_node_schema: vec![
+//       quote!(
+//         type BookModel = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
+//         type Book = <BookModel as surrealdb_macros::SurrealdbNode>::Schema;
+//       ),
+//       quote!(
+//         type BlogModel = <StudentWritesBlog as surrealdb_macros::SurrealdbEdge>::Out;
+//         type Blog = <BlogModel as surrealdb_macros::SurrealdbNode>::Schema;
+//       ),
+//   ],
+//   edge_to_nodes_trait_methods: vec![
+//       quote!(
+//          fn book(&self, clause: Clause) -> Book;
+//       ),
+//       quote!(
+//          fn blog(&self, clause: Clause) -> Blog;
+//       ),
+//   ],
+//   edge_to_nodes_trait_methods_impl: vec![
+//       quote!(
+//          fn book(&self, clause: Clause) -> Book {
+//              Book::__________connect_to_graph_traversal_string(
+//                  &self.___________graph_traversal_string,
+//                  clause,
+//              )
+//          }
+//       ),
+//       quote!(
+//          fn blog(&self, clause: Clause) -> Blog {
+//              Blog::__________connect_to_graph_traversal_string(
+//                  &self.___________graph_traversal_string,
+//                  clause,
+//              )
+//          }
+//       ),
+//
+//   ],
+// },
+// {
+//   type: "StudentWritesTeacher",
+//   action: "writes",
+//   direction: "left",
+//   action_type_alias: quote!( type __Writes = <StudentWritesTeacher as #crate_name::SurrealdbEdge>::Schema; ),
+//   foreign_node_schema: vec![
+//       quote!(
+//         type TeacherModel = <StudentWritesTeacher as surrealdb_macros::SurrealdbEdge>::In;
+//         type Teacher = <TeacherSchema as surrealdb_macros::SurrealdbNode>::Schema;
+//       ),
+//   ],
+//   edge_to_nodes_trait_methods: vec![
+//       quote!(
+//          fn teacher(&self, clause: Clause) -> Teacher
+//       ),
+//   ],
+//   edge_to_nodes_trait_methods_impl: vec![
+//       quote!(
+//          fn teacher(&self, clause: Clause) -> Teacher {
+//              Teacher::__________connect_to_graph_traversal_string(
+//                  &self.___________graph_traversal_string,
+//                  clause,
+//              )
+//          }
+//       ),
+//   ],
+// },
+// {
+//   type: "StudentBuysCar ",
+//   action: "buys",
+//   direction: "right",
+//   action_type_alias: quote!( type Buys__ = <StudentBuysCar as SurrealdbEdge>::Schema; ),
+//   foreign_node_schema: vec![
+//       quote!(
+//         type CarModel = <StudentBuysCar as surrealdb_macros::SurrealdbEdge>::Out;
+//         type Car = <CarSchema as surrealdb_macros::SurrealdbNode>::Schema;
+//       ),
+//   ],
+//   edge_to_nodes_trait_methods: vec![
+//       quote!(
+//          fn car(&self, clause: Clause) -> Car;
+//       ),
+//   ],
+//   edge_to_nodes_trait_methods_impl: vec![
+//       quote!(
+//          fn car(&self, clause: Clause) -> Car {
+//              Car::__________connect_to_graph_traversal_string(
+//                  &self.___________graph_traversal_string,
+//                  clause,
+//              )
+//          }
+//       ),
+//   ],
+//   direction: "right", foreign: ["book", "blog"] },
+// { type: "StudentWritesTeacher", action: "__writes", direction: "left", foreign: ["teacher"] },
+// { type: "StudentBuysCar", action: "buys__", direction: "right", foreign: ["car"] },
+// ]
+//
 // // outgoing connection for Writes, hence Writes__
 // type WritesSchema = StudentWritesBook ;
 // type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
 //
 // // Connections to Incoming Writes
-// type BookSchema = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
-// type Book = <BookSchema as surrealdb_macros::SurrealdbNode>::Schema;
+// type BookModel = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
+// type Book = <BookModel as surrealdb_macros::SurrealdbNode>::Schema;
 //
-// type Blogschema = <StudentWritesBlog as surrealdb_macros::SurrealdbEdge>::Out;
-// type Blog = <Blogschema as surrealdb_macros::SurrealdbNode>::Schema;
+// type BlogModel = <StudentWritesBlog as surrealdb_macros::SurrealdbEdge>::Out;
+// type Blog = <BlogModel as surrealdb_macros::SurrealdbNode>::Schema;
 //
 // // Incoming connection for Writes, hence __Writes
 // type __Writes = <StudentWritesTeacher as SurrealdbEdge>::Schema;
 //
 // // Connections to Incoming Writes
 // // Note that this uses ::In, instead of ::Out
-// type TeacherSchema = <StudentWritesTeacher as surrealdb_macros::SurrealdbEdge>::In;
+// type TeacherModel = <StudentWritesTeacher as surrealdb_macros::SurrealdbEdge>::In;
 // type Teacher = <TeacherSchema as surrealdb_macros::SurrealdbNode>::Schema;
 //
 // // Outgoing connection for Writes, hence Buys__
 // type Buys__ = <StudentBuysCar as SurrealdbEdge>::Schema;
 //
 // // Connections to Outgoing Buys
-// type CarSchema = <StudentBuysCar as surrealdb_macros::SurrealdbEdge>::Out;
+// type CarModel = <StudentBuysCar as surrealdb_macros::SurrealdbEdge>::Out;
 // type Car = <CarSchema as surrealdb_macros::SurrealdbNode>::Schema;
 //
 // trait WriteArrowRightTrait {
@@ -495,13 +597,6 @@ impl WriteOutTrait for Writes__ {
 // }
 //
 // impl BuysArrowRightTrait for Buys__ {
-//     fn book(&self, clause: Clause) -> Book {
-//         Book::__________connect_to_graph_traversal_string(
-//             &self.___________graph_traversal_string,
-//             clause,
-//         )
-//     }
-//
 //     fn car(&self, clause: Clause) -> Car {
 //         Car::__________connect_to_graph_traversal_string(
 //             &self.___________graph_traversal_string,
