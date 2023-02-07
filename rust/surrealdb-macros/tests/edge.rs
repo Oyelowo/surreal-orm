@@ -398,7 +398,8 @@ fn eerer() {
 type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
 // <Student>
 // type BookMa = <Book as surrealdb_macros::SurrealdbNode>::Schema;
-type BookMa = <StudentWritesBook__Out as surrealdb_macros::SurrealdbNode>::Schema;
+// type BookMa = <StudentWritesBook__Out as surrealdb_macros::SurrealdbNode>::Schema;
+type BookMa = <<StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out as surrealdb_macros::SurrealdbNode>::Schema;
 
 trait WriteOutTrait {
     fn olbook(&self, clause: Clause) -> BookMa;
@@ -422,13 +423,17 @@ impl WriteOutTrait for Writes__ {
 // ]
 //
 //
+// [
+// { type: "StudentWritesBook", action: "writes__", direction: "right", foreign: ["book", "blog"] },
+// { type: "StudentWritesTeacher", action: "__writes", direction: "left", foreign: ["teacher"] },
+// { type: "StudentBuysCar", action: "buys__", direction: "right", foreign: ["car"] },
+// ]
+//
 // // outgoing connection for Writes, hence Writes__
 // type WritesSchema = StudentWritesBook ;
-// // We only need to select one of the Connection Struct and use that to define alias the
-// Writes connection schema. this is fine because similar connections share the same schema.
 // type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
 //
-// // Connections to Outgoing Writes
+// // Connections to Incoming Writes
 // type BookSchema = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
 // type Book = <BookSchema as surrealdb_macros::SurrealdbNode>::Schema;
 //
