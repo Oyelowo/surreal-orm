@@ -5,7 +5,8 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(dead_code)]
 
-use std::{hash::Hash, collections::HashMap};
+use std::{hash::Hash,
+collections::HashMap};
 
 use darling::{ast, util};
 use proc_macro2::{Span, TokenStream};
@@ -64,6 +65,9 @@ use super::{
 // },
 #[derive(Clone, Debug)]
 struct NodeEdgeMetadata {
+  /// e.g if edge table name is writes, this could be Writes__ or __Writes depending on the arrow
+  /// direction 
+  edge_name_with_direction_indicator: String,
   /// In addition to action, this is used for building an edge from 
   /// a model field annotation e.g relate(edge="StudentWritesBook", link="->writes->book") 
   /// Example of value: StudentWritesBook
@@ -494,8 +498,10 @@ impl SchemaFieldsProperties {
     }
 } 
 
+type EdgeNameWithDirectionIndicator = String;
+
 #[derive(Default, Clone)]
-struct NodeEdgeMetadataStore(HashMap<String, NodeEdgeMetadata>);
+struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
 
 impl NodeEdgeMetadataStore {
   fn update(&self, relation_attributes: RelateAttribute, relation: Relate) ->&Self{
@@ -506,12 +512,12 @@ impl NodeEdgeMetadataStore {
     let ref destination_node = TokenStream::from(relation_attributes.node_name.clone());
     // The dunder "__" suffix/prefix determines the arrow direction. Suffixed dunder indicates
     // Outgoing arrow right while prefixed implies incoming arrow left
+    let crate_name = get_crate_name(false);
+    let edge_name_with_direction_title_case = convert_case::Converter::new().to_case(convert_case::Case::Title).convert(edge_name.to_string());
     let edge_name_with_direction_indicator = match relation_attributes.edge_direction {
         EdgeDirection::OutArrowRight => format!("{edge_name}__"),
         EdgeDirection::InArrowLeft => format!("__{edge_name}"),
     };
-    let crate_name = get_crate_name(false);
-    let edge_name_with_direction_title_case = convert_case::Converter::new().to_case(convert_case::Case::Title).convert(edge_name_with_direction_indicator);
     let destination_node_title_case = convert_case::Converter::new().to_case(convert_case::Case::Title).convert(destination_node.to_string());
     let destination_node_model = format_ident!("{destination_node}Model");
     
@@ -543,20 +549,18 @@ impl NodeEdgeMetadataStore {
                         );
     
     let nn = NodeEdgeMetadata {
+              edge_name_with_direction_indicator,  // Closing braces
               connection_model: relation.link, 
               action: relation_attributes.edge_name.to_string(), 
               direction: relation_attributes.edge_direction, 
               action_type_alias: quote!( type #edge_name_with_direction_title_case = <#connection_model as #crate_name::SurrealdbEdge>::Schema; ), 
               foreign_node_schema: vec![foreign_node_schema_one], 
               edge_to_nodes_trait_method: vec![
-                        // quote!(trait WriteArrowRightTrait ), // trait opening braces
-                        // quote!({}), // opening braces
                         edge_to_nodes_trait_method_one
               ], 
               edge_to_nodes_trait_methods_impl: vec![
-                    // quote!(impl WriteArrowRightTrait for Writes\_\_ {), // implementation opening braces
                         edge_to_nodes_trait_methods_impl_one 
-                ],  // Closing braces
+                ],
     };
 //     let values = match map.entry(key) {
 //     Entry::Occupied(o) => o.into_mut(),
@@ -571,4 +575,34 @@ impl NodeEdgeMetadataStore {
         // xx
         self
   }     
+    fn complete_token(&self) -> TokenStream{
+        let node_edge_token_streams = self.0.values().map(|value| {
+            let edge_name_with_direction_indicator = format!("{}", value.edge_name_with_direction_indicator );
+            let edge_trait_name = format_ident!("{edge_name_with_direction_indicator}Trait");
+            let NodeEdgeMetadata {
+                    edge_to_nodes_trait_methods_impl,
+                    edge_name_with_direction_indicator,
+                    edge_to_nodes_trait_method,
+                    action_type_alias,
+                    foreign_node_schema,
+                    ..
+            } = value;
+             quote!(
+                    #action_type_alias
+                
+                    #( #foreign_node_schema) *
+
+                    trait #edge_trait_name {
+                        #( #edge_to_nodes_trait_method) *
+                    }
+
+                    impl #edge_trait_name for #edge_name_with_direction_indicator{
+                        #( #edge_to_nodes_trait_methods_impl) *
+                    }
+                
+                )
+        }).collect::<Vec<_>>();
+        
+        quote!(#( #node_edge_token_streams) *)
+    }
 }
