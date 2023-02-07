@@ -413,9 +413,96 @@ impl WriteOutTrait for Writes__ {
         )
     }
 }
-// [{ action: "writes__", direction: "right", out: ["book"] }]
-// fn writes() -> StudentWritesBookTableNameSchema {
-//     StudentWritesBookTableNameSchema::__________connect_to_graph_traversal_string
+// ->writes->book
+// [
+// { type: "StudentWritesBook", action: "writes", direction: "right", foreign: ["book"] },
+// { type: "StudentWritesBlog", action: "writes", direction: "right", foreign: ["blog"] },
+// { type: "StudentWritesTeacher", action: "writes", direction: "left", foreign: ["teacher"] },
+// { type: "StudentBuysCar", action: "buys", direction: "right", foreign: ["car"] },
+// ]
+//
+//
+// // outgoing connection for Writes, hence Writes__
+// type WritesSchema = StudentWritesBook ;
+// // We only need to select one of the Connection Struct and use that to define alias the
+// Writes connection schema. this is fine because similar connections share the same schema.
+// type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
+//
+// // Connections to Outgoing Writes
+// type BookSchema = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
+// type Book = <BookSchema as surrealdb_macros::SurrealdbNode>::Schema;
+//
+// type Blogschema = <StudentWritesBlog as surrealdb_macros::SurrealdbEdge>::Out;
+// type Blog = <Blogschema as surrealdb_macros::SurrealdbNode>::Schema;
+//
+// // Incoming connection for Writes, hence __Writes
+// type __Writes = <StudentWritesTeacher as SurrealdbEdge>::Schema;
+//
+// // Connections to Incoming Writes
+// // Note that this uses ::In, instead of ::Out
+// type TeacherSchema = <StudentWritesTeacher as surrealdb_macros::SurrealdbEdge>::In;
+// type Teacher = <TeacherSchema as surrealdb_macros::SurrealdbNode>::Schema;
+//
+// // Outgoing connection for Writes, hence Buys__
+// type Buys__ = <StudentBuysCar as SurrealdbEdge>::Schema;
+//
+// // Connections to Outgoing Buys
+// type CarSchema = <StudentBuysCar as surrealdb_macros::SurrealdbEdge>::Out;
+// type Car = <CarSchema as surrealdb_macros::SurrealdbNode>::Schema;
+//
+// trait WriteArrowRightTrait {
+//     fn book(&self, clause: Clause) -> Book;
+//     fn blog(&self, clause: Clause) -> Blog;
+// }
+//
+// impl WriteArrowRightTrait for Writes__ {
+//     fn book(&self, clause: Clause) -> Book {
+//         Book::__________connect_to_graph_traversal_string(
+//             &self.___________graph_traversal_string,
+//             clause,
+//         )
+//     }
+//
+//     fn blog(&self, clause: Clause) -> Blog {
+//         Blog::__________connect_to_graph_traversal_string(
+//             &self.___________graph_traversal_string,
+//             clause,
+//         )
+//     }
+// }
+//
+//
+// trait WriteArrowLeftTrait {
+//     fn teacher(&self, clause: Clause) -> Teacher;
+// }
+//
+// impl WriteArrowLeftTrait for __Writes {
+//     fn teacher(&self, clause: Clause) -> Teacher {
+//         Teacher::__________connect_to_graph_traversal_string(
+//             &self.___________graph_traversal_string,
+//             clause,
+//         )
+//     }
+// }
+//
+// trait BuysArrowRightTrait {
+//     fn car(&self, clause: Clause) -> Car;
+// }
+//
+// impl BuysArrowRightTrait for Buys__ {
+//     fn book(&self, clause: Clause) -> Book {
+//         Book::__________connect_to_graph_traversal_string(
+//             &self.___________graph_traversal_string,
+//             clause,
+//         )
+//     }
+//
+//     fn car(&self, clause: Clause) -> Car {
+//         Car::__________connect_to_graph_traversal_string(
+//             &self.___________graph_traversal_string,
+//             clause,
+//         )
+//     }
 // }
 
 type StudentWritesBookTableNameChecker = <StudentWritesBook as SurrealdbEdge>::TableNameChecker;
