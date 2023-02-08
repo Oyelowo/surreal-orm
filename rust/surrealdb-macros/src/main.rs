@@ -44,7 +44,8 @@ pub struct Student {
     written_blogs: Relate<Book>,
 }
 
-/* fn ewer() {
+/*
+fn ewer() {
     struct Nama<T> {}
 
     impl<T> Nama<T> {
@@ -53,7 +54,9 @@ pub struct Student {
             Self {}
         }
     }
-} */
+}
+*/
+
 // #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -77,6 +80,32 @@ pub struct Book {
     #[builder(default, setter(strip_option))]
     id: Option<String>,
     title: String,
+}
+
+impl Mana for Book {
+    type TableMameChecker = bookxx::TableNameStaticChecker;
+}
+
+type StudentWritesBook__In = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::In;
+type StudentWritesBook__Out = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
+
+type OutBookTableNameChecker = <StudentWritesBook__Out as Mana>::TableMameChecker;
+fn eerer() {
+    StudentWritesBook__In::schema();
+    unimplemented!();
+}
+::static_assertions::assert_fields!(OutBookTableNameChecker: book);
+// ::static_assertions::assert_fields!(StudentWritesBook)
+trait Mana {
+    type TableMameChecker;
+}
+
+type BookTableNameChecker = <Book as Mana>::TableMameChecker;
+::static_assertions::assert_fields!(BookTableNameChecker: book);
+pub mod bookxx {
+    pub struct TableNameStaticChecker {
+        pub book: String,
+    }
 }
 // ::static_assertions::assert_fields!(Book; id);
 // fn fmt(f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
