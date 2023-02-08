@@ -36,6 +36,7 @@ impl ToTokens for FieldsGetterOpts {
 
         // let table_name = table_name;
         let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
+        let table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
         if table_name.as_ref().unwrap() != &expected_table_name {panic!("E don happen");}
     
         let struct_level_casing = rename_all.as_ref().map(|case| {
@@ -103,6 +104,7 @@ impl ToTokens for FieldsGetterOpts {
             // }
         tokens.extend(quote!( 
             impl #crate_name::SurrealdbNode for #struct_name_ident {
+                type TableNameChecker = #module_name::TableNameStaticChecker;
                 type Schema = #module_name::#struct_name_ident;
 
                 fn schema() -> Self::Schema {
@@ -118,7 +120,7 @@ impl ToTokens for FieldsGetterOpts {
                 use ::serde::Serialize;
 
                 pub struct TableNameStaticChecker {
-                    pub book: String,
+                    pub #table_name_ident: String,
                 }
                 
                #( #imports_referenced_node_schema) *

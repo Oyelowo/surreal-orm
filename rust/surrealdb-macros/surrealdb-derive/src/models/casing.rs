@@ -5,6 +5,7 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(dead_code)]
 
+use convert_case::{Case, Casing};
 use strum_macros::EnumString;
 
 /// Options: "lowercase", "UPPERCASE", "PascalCase", "camelCase", "snake_case",
@@ -62,26 +63,18 @@ impl From<FieldIdentUnCased> for FieldIdentCased {
     /// it defaults to exactly how the fields are written out.
     /// However, Field rename attribute overrides this.
     fn from(field_uncased: FieldIdentUnCased) -> Self {
-        let convert_field_identifier = |case: convert_case::Case| {
-            convert_case::Converter::new()
-                .to_case(case)
-                .convert(&field_uncased.uncased_field_name)
-        };
+        let field_name = field_uncased.uncased_field_name;
 
         match field_uncased.casing {
-            None => field_uncased.uncased_field_name,
-            Some(CaseString::Camel) => convert_field_identifier(convert_case::Case::Camel),
-            Some(CaseString::Snake) => convert_field_identifier(convert_case::Case::Snake),
-            Some(CaseString::Pascal) => convert_field_identifier(convert_case::Case::Pascal),
-            Some(CaseString::Lower) => convert_field_identifier(convert_case::Case::Lower),
-            Some(CaseString::Upper) => convert_field_identifier(convert_case::Case::Upper),
-            Some(CaseString::ScreamingSnake) => {
-                convert_field_identifier(convert_case::Case::ScreamingSnake)
-            }
-            Some(CaseString::Kebab) => convert_field_identifier(convert_case::Case::Kebab),
-            Some(CaseString::ScreamingKebab) => {
-                convert_field_identifier(convert_case::Case::UpperKebab)
-            }
+            None => field_name,
+            Some(CaseString::Camel) => field_name.to_case(Case::Camel),
+            Some(CaseString::Snake) => field_name.to_case(Case::Snake),
+            Some(CaseString::Pascal) => field_name.to_case(Case::Pascal),
+            Some(CaseString::Lower) => field_name.to_case(Case::Lower),
+            Some(CaseString::Upper) => field_name.to_case(Case::Upper),
+            Some(CaseString::ScreamingSnake) => field_name.to_case(Case::ScreamingSnake),
+            Some(CaseString::Kebab) => field_name.to_case(Case::Kebab),
+            Some(CaseString::ScreamingKebab) => field_name.to_case(Case::ScreamingSnake),
         }
         .into()
     }

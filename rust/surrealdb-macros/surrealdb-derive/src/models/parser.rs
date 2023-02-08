@@ -8,6 +8,7 @@ Email: oyelowooyedayo@gmail.com
 use std::{hash::Hash,
 collections::HashMap};
 
+use convert_case::{Casing, Case};
 use darling::{ast, util};
 use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
@@ -507,22 +508,23 @@ pub struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdg
 
 impl NodeEdgeMetadataStore {
       fn update(&mut self,  relation: &Relate) ->&Self{
-            let connection_model = format_ident!("{}", relation.model.unwrap());
+            let connection_model = format_ident!("{}", relation.model.as_ref().unwrap());
             let relation_attributes = RelateAttribute::from(relation);
-            let arrow_direction = String::from(relation_attributes.edge_direction);
+            // let arrow_direction = String::from(relation_attributes.edge_direction);
             let edge_name = TokenStream::from(&relation_attributes.edge_name);
             let ref destination_node = TokenStream::from(&relation_attributes.node_name);
+            
             // The dunder "__" suffix/prefix determines the arrow direction. Suffixed dunder indicates
             // Outgoing arrow right while prefixed implies incoming arrow left
             let crate_name = get_crate_name(false);
-            let edge_name_with_direction_title_case = convert_case::Converter::new().to_case(convert_case::Case::Title).convert(edge_name.to_string());
+            let edge_name_with_direction_title_case = edge_name.to_string().to_case(Case::Title);
             
             let ref edge_direction = relation_attributes.edge_direction;
             let ref edge_name_with_direction_indicator =|| match edge_direction {
                 EdgeDirection::OutArrowRight => format!("{edge_name}__"),
                 EdgeDirection::InArrowLeft => format!("__{edge_name}"),
             };
-            let destination_node_title_case = convert_case::Converter::new().to_case(convert_case::Case::Title).convert(destination_node.to_string());
+            let destination_node_title_case = destination_node.to_string().to_case(Case::Title);
             let destination_node_model = format_ident!("{destination_node}Model");
             
             let VariablesModelMacro { 

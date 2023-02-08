@@ -11,6 +11,7 @@ pub mod qbuilder;
 
 pub trait SurrealdbNode {
     type Schema;
+    type TableNameChecker;
     fn schema() -> Self::Schema;
     fn get_key(&self) -> ::std::option::Option<&String>;
 }
