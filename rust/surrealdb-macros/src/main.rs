@@ -40,7 +40,7 @@ pub struct Student {
     // #[surrealdb(link_many = "Book", skip_serializing)]
     // #[serde(rename = "lowo")]
     // all_semester_courses: LinkMany<Book>,
-    #[surrealdb(relate(edge = "StudentWritesBook", link = "->Writes->Book"))]
+    #[surrealdb(relate(model = "StudentWritesBook", connection = "->Writes->Book"))]
     written_blogs: Relate<Book>,
 }
 
@@ -83,13 +83,13 @@ pub struct Book {
 }
 
 impl Mana for Book {
-    type TableMameChecker = bookxx::TableNameStaticChecker;
+    type TableNameChecker = bookxx::TableNameStaticChecker;
 }
 
 type StudentWritesBook__In = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::In;
 type StudentWritesBook__Out = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
 
-type OutBookTableNameChecker = <StudentWritesBook__Out as Mana>::TableMameChecker;
+type OutBookTableNameChecker = <StudentWritesBook__Out as Mana>::TableNameChecker;
 fn eerer() {
     StudentWritesBook__In::schema();
     unimplemented!();
@@ -97,10 +97,10 @@ fn eerer() {
 ::static_assertions::assert_fields!(OutBookTableNameChecker: book);
 // ::static_assertions::assert_fields!(StudentWritesBook)
 trait Mana {
-    type TableMameChecker;
+    type TableNameChecker;
 }
 
-type BookTableNameChecker = <Book as Mana>::TableMameChecker;
+type BookTableNameChecker = <Book as Mana>::TableNameChecker;
 ::static_assertions::assert_fields!(BookTableNameChecker: book);
 pub mod bookxx {
     pub struct TableNameStaticChecker {

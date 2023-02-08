@@ -52,32 +52,34 @@ impl FromMeta for Rename {
 
 #[derive(Debug, Clone)]
 pub struct Relate {
-    pub link: String,
+    pub connection: String,
     // #[darling(default)]
-    pub edge: Option<String>,
+    pub model: Option<String>,
 }
 //#[rename(se)]
 impl FromMeta for Relate {
     fn from_string(value: &str) -> darling::Result<Self> {
         Ok(Self {
-            link: value.into(),
-            edge: None,
+            connection: value.into(),
+            model: None,
         })
     }
     //TODO: Check to maybe remove cos I probably dont need this
     fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
         #[derive(FromMeta)]
         struct FullRelate {
-            edge: String,
-            link: String,
+            model: String,
+            connection: String,
         }
 
         impl From<FullRelate> for Relate {
             fn from(v: FullRelate) -> Self {
-                let FullRelate { link, edge, .. } = v;
+                let FullRelate {
+                    connection, model, ..
+                } = v;
                 Self {
-                    link,
-                    edge: Some(edge),
+                    connection,
+                    model: Some(model),
                 }
             }
         }

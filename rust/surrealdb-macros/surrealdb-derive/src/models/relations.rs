@@ -58,6 +58,15 @@ impl From<EdgeDirection> for &str {
     }
 }
 
+impl From<&EdgeDirection> for String {
+    fn from(direction: &EdgeDirection) -> Self {
+        match direction {
+            EdgeDirection::OutArrowRight => "->".into(),
+            EdgeDirection::InArrowLeft => "<-".into(),
+        }
+    }
+}
+
 impl From<EdgeDirection> for String {
     fn from(direction: EdgeDirection) -> Self {
         match direction {
@@ -153,8 +162,8 @@ impl From<RelateAttribute> for ::proc_macro2::TokenStream {
 // }
 
 // impl From<Relation> for RelateAttribute {
-impl From<Relate> for RelateAttribute {
-    fn from(relation: Relate) -> Self {
+impl From<&Relate> for RelateAttribute {
+    fn from(relation: &Relate) -> Self {
         let right_arrow_count = relation.link.matches("->").count();
         let left_arrow_count = relation.link.matches("<-").count();
         let edge_direction = match (left_arrow_count, right_arrow_count) {
@@ -176,7 +185,7 @@ impl From<Relate> for RelateAttribute {
                 }
                 _ => panic!(
                     "too many actions or object, {}",
-                    get_relation_error(&relation)
+                    get_relation_error(relation)
                 ),
             };
 

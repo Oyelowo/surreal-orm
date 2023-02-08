@@ -363,9 +363,9 @@ impl SchemaFieldsProperties {
                 
                 let referenced_node_meta = match relationship {
                     RelationType::Relate(relation) => {
-                        let relation_attributes = RelateAttribute::from(relation.clone());
-                        let arrow_direction = String::from(relation_attributes.edge_direction);
-                        let edge_name = TokenStream::from(relation_attributes.clone().edge_name);
+                        let relation_attributes = RelateAttribute::from(&relation);
+                        let arrow_direction = String::from(&relation_attributes.edge_direction);
+                        let edge_name = TokenStream::from(&relation_attributes.edge_name);
                         let ref destination_node = TokenStream::from(relation_attributes.node_name.clone());
                         // let extra = ReferencedNodeMeta::from_ref_node_meta(relation_attributes.node_name, field_ident_normalised);
                         //
@@ -405,8 +405,9 @@ impl SchemaFieldsProperties {
                             EdgeDirection::InArrowLeft => format_ident!("__{edge_name}"),
                         };
                         
+                        // let edge_type_alias = format_ident!("{}", relation_attributes.edge_name.to_string());
                         store.relate_edge_schema_method_connection.push(quote!(
-                                    pub fn #edge_method_name_with_direction(&self, clause: #crate_name::Clause) -> #edge_name {
+                                    pub fn #edge_method_name_with_direction(&self, clause: #crate_name::Clause) -> #edge_method_name_with_direction {
                                         #edge_name::#__________connect_to_graph_traversal_string(
                                             &self.#___________graph_traversal_string,
                                             clause,
@@ -417,7 +418,7 @@ impl SchemaFieldsProperties {
                             );
                         
                         // e.g from Writes<In, Out> (Writes<Student, Book>) generics, we can create StudentWritesBook
-                        let edge_alias_specific = format_ident!("{}", relation.edge.as_ref().expect("Edge must be specified for relations"));
+                        let edge_alias_specific = format_ident!("{}", relation.model.as_ref().expect("Edge must be specified for relations"));
                         // type StudentWritesBlogInNode = <StudentWritesBlog as SurrealdbEdge>::In;
                         let (in_node, out_node) = match relation_attributes.clone().edge_direction {
                             // If OutArrowRight, the current struct should be InNode, and
@@ -455,7 +456,7 @@ impl SchemaFieldsProperties {
                             )
                         );
 
-                            store.node_edge_metadata.update(&relation_attributes, &relation);
+                            store.node_edge_metadata.update(&relation);
                             ReferencedNodeMeta::from_relate(relation, destination_node)
                                 
                     },
@@ -505,9 +506,9 @@ type EdgeNameWithDirectionIndicator = String;
 pub struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
 
 impl NodeEdgeMetadataStore {
-      fn update(&mut self, relation_attributes: &RelateAttribute, relation: &Relate) ->&Self{
-            let connection_model = format_ident!("{}", &relation.link);
-            // let relation_attributes = RelateAttribute::from(relation.clone());
+      fn update(&mut self,  relation: &Relate) ->&Self{
+            let connection_model = format_ident!("{}", relation.model.unwrap());
+            let relation_attributes = RelateAttribute::from(relation);
             let arrow_direction = String::from(relation_attributes.edge_direction);
             let edge_name = TokenStream::from(&relation_attributes.edge_name);
             let ref destination_node = TokenStream::from(&relation_attributes.node_name);
@@ -553,7 +554,7 @@ impl NodeEdgeMetadataStore {
             
             let nn = NodeEdgeMetadata {
                       edge_name_with_direction_indicator: edge_name_with_direction_indicator() ,  // Closing braces
-                      connection_model: format_ident!("{}",relation.link), 
+                      connection_model: format_ident!("{}",relation.connection), 
                       action: relation_attributes.edge_name.clone().to_string(), 
                       direction: edge_direction.clone(), 
                       // We only need to take one connection_model for each edge e.g `writes` ,since
