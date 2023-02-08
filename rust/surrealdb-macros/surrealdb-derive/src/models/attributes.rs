@@ -143,7 +143,10 @@ pub struct FieldsGetterOpts {
     pub(crate) rename_all: ::std::option::Option<Rename>,
 
     #[darling(default)]
-    pub(crate) relation_name: ::std::option::Option<String>,
+    pub(crate) table_name: ::std::option::Option<String>,
+
+    #[darling(default)]
+    pub(crate) strict: ::std::option::Option<bool>,
 }
 
 #[derive(Default, Clone)]

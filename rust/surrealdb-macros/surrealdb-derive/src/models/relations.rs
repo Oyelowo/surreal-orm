@@ -164,8 +164,8 @@ impl From<RelateAttribute> for ::proc_macro2::TokenStream {
 // impl From<Relation> for RelateAttribute {
 impl From<&Relate> for RelateAttribute {
     fn from(relation: &Relate) -> Self {
-        let right_arrow_count = relation.link.matches("->").count();
-        let left_arrow_count = relation.link.matches("<-").count();
+        let right_arrow_count = relation.connection.matches("->").count();
+        let left_arrow_count = relation.connection.matches("<-").count();
         let edge_direction = match (left_arrow_count, right_arrow_count) {
             (2, 0) => EdgeDirection::InArrowLeft,
             (0, 2) => EdgeDirection::OutArrowRight,
@@ -174,7 +174,7 @@ impl From<&Relate> for RelateAttribute {
 
         let edge_direction_str: String = edge_direction.into();
         let mut substrings = relation
-            .link
+            .connection
             .split(edge_direction_str.as_str())
             .filter(|x| !x.is_empty());
 

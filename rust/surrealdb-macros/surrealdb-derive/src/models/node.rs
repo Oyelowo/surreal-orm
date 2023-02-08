@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use convert_case::{Casing, Case};
 use darling::{ToTokens, FromDeriveInput};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -28,10 +29,15 @@ impl ToTokens for FieldsGetterOpts {
             ident: ref struct_name_ident,
             ref data,
             ref rename_all,
-            ref relation_name,
+            ref table_name,
+            ref strict,
             ..
         } = *self;
 
+        // let table_name = table_name;
+        let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
+        if table_name.as_ref().unwrap() != &expected_table_name {panic!("E don happen");}
+    
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
@@ -111,6 +117,10 @@ impl ToTokens for FieldsGetterOpts {
             pub mod #module_name {
                 use ::serde::Serialize;
 
+                pub struct TableNameStaticChecker {
+                    pub book: String,
+                }
+                
                #( #imports_referenced_node_schema) *
                 
 
