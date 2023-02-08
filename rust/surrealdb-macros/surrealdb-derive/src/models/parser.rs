@@ -75,7 +75,7 @@ struct NodeEdgeMetadata {
   /// ```
   /// type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
   /// ```
-  connection_model: String, 
+  connection_model: syn::Ident, 
   /// The database table name of the edge. Used for generating other tokens
   /// e.g "writes"
   action: String,
@@ -455,7 +455,7 @@ impl SchemaFieldsProperties {
                             )
                         );
 
-                            store.node_edge_metadata.update(relation_attributes.clone(), relation.clone());
+                            store.node_edge_metadata.update(&relation_attributes, &relation);
                             ReferencedNodeMeta::from_relate(relation, destination_node)
                                 
                     },
@@ -505,12 +505,12 @@ type EdgeNameWithDirectionIndicator = String;
 pub struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
 
 impl NodeEdgeMetadataStore {
-      fn update(&mut self, relation_attributes: RelateAttribute, relation: Relate) ->&Self{
-            let connection_model = format_ident!("{}", relation.link);
+      fn update(&mut self, relation_attributes: &RelateAttribute, relation: &Relate) ->&Self{
+            let connection_model = format_ident!("{}", &relation.link);
             // let relation_attributes = RelateAttribute::from(relation.clone());
             let arrow_direction = String::from(relation_attributes.edge_direction);
             let edge_name = TokenStream::from(&relation_attributes.edge_name);
-            let ref destination_node = TokenStream::from(relation_attributes.node_name.clone());
+            let ref destination_node = TokenStream::from(&relation_attributes.node_name);
             // The dunder "__" suffix/prefix determines the arrow direction. Suffixed dunder indicates
             // Outgoing arrow right while prefixed implies incoming arrow left
             let crate_name = get_crate_name(false);
@@ -553,9 +553,14 @@ impl NodeEdgeMetadataStore {
             
             let nn = NodeEdgeMetadata {
                       edge_name_with_direction_indicator: edge_name_with_direction_indicator() ,  // Closing braces
-                      connection_model: relation.link, 
+                      connection_model: format_ident!("{}",relation.link), 
                       action: relation_attributes.edge_name.clone().to_string(), 
                       direction: edge_direction.clone(), 
+                      // We only need to take one connection_model for each edge e.g `writes` ,since
+                      // they should share similar Schema besides `in` and `out` which are just
+                      // defaulted to ids for edges because, one can always access in and out
+                      // models indirectly from the origin and destination nodes rather than the
+                      // edges themselves. This allows us to minmise confusion
                       action_type_alias: quote!( type #edge_name_with_direction_title_case = <#connection_model as #crate_name::SurrealdbEdge>::Schema; ), 
                       foreign_node_schema: vec![foreign_node_schema_one()], 
                       edge_to_nodes_trait_method: vec![
