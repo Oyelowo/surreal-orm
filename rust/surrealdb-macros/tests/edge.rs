@@ -161,8 +161,8 @@ pub mod student {
             );
             schema_instance
         }
-        pub fn Writes__(&self, clause: surrealdb_macros::Clause) -> Writes {
-            Writes::__________connect_to_graph_traversal_string(
+        pub fn Writes__(&self, clause: surrealdb_macros::Clause) -> super::Writes__ {
+            super::Writes__::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 clause,
                 "->",
@@ -386,7 +386,7 @@ type OutBookTableNameChecker = <StudentWritesBook__Out as Mana>::TableMameChecke
 fn eerer() {
     StudentWritesBook__In::schema()
         .Writes__(Clause::All)
-        .Book(Clause::All)
+        .olbook(Clause::All)
         .title;
 
     StudentWritesBook__Out::schema().title;
@@ -395,13 +395,14 @@ fn eerer() {
 ::static_assertions::assert_fields!(OutBookTableNameChecker: book);
 
 // type Book = <Book as surrealdb_macros::SurrealdbNode>::Schema;
-type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
+pub type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
 // <Student>
 // type BookMa = <Book as surrealdb_macros::SurrealdbNode>::Schema;
 // type BookMa = <StudentWritesBook__Out as surrealdb_macros::SurrealdbNode>::Schema;
 type BookMa = <<StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out as surrealdb_macros::SurrealdbNode>::Schema;
 
 trait WriteOutTrait {
+    fn olbook(&self, clause: Clause) -> BookMa;
     fn olbook(&self, clause: Clause) -> BookMa;
 }
 

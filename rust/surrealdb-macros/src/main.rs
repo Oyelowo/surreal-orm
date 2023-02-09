@@ -41,7 +41,7 @@ pub struct Student {
     // #[surrealdb(link_many = "Book", skip_serializing)]
     // #[serde(rename = "lowo")]
     // all_semester_courses: LinkMany<Book>,
-    #[surrealdb(relate(model = "StudentWritesBook", connection = "->Writes->Book"))]
+    #[surrealdb(relate(model = "StudentWritesBook", connection = "->writes->book"))]
     written_blogs: Relate<Book>,
 }
 

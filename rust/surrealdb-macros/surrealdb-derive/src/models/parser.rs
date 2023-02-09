@@ -65,10 +65,10 @@ use super::{
 //   ],
 // },
 #[derive(Clone, Debug)]
-struct NodeEdgeMetadata<'a> {
+struct NodeEdgeMetadata {
   /// e.g if edge table name is writes, this could be Writes__ or __Writes depending on the arrow
   /// direction 
-  edge_name_as_struct_ident: &'a syn::Ident,
+  edge_name_as_struct_ident:  syn::Ident,
   /// Example of value: StudentWritesBook
   /// a model field annotation e.g relate(edge="StudentWritesBook", link="->writes->book") 
   /// Generates: 
@@ -320,7 +320,7 @@ pub struct SchemaFieldsProperties {
     pub node_edge_metadata: NodeEdgeMetadataStore
 }
 
-type AllNodeEdgeMetadata<'a> = HashMap<&'static str, NodeEdgeMetadata<'a>>;
+type AllNodeEdgeMetadata = HashMap<&'static str, NodeEdgeMetadata>;
 
 
 pub struct SchemaPropertiesArgs<'a> {
@@ -504,9 +504,9 @@ impl SchemaFieldsProperties {
 type EdgeNameWithDirectionIndicator = String;
 
 #[derive(Default, Clone)]
-pub struct NodeEdgeMetadataStore<'a>(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata<'a>>);
+pub struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
 
-impl<'a> NodeEdgeMetadataStore<'a> {
+impl NodeEdgeMetadataStore {
     fn add_direction_indication_to_ident (&self,  ident: &impl Display, edge_direction: &EdgeDirection) -> String { 
         match edge_direction {
             EdgeDirection::OutArrowRight => format!("{ident}__"),
@@ -527,7 +527,8 @@ impl<'a> NodeEdgeMetadataStore<'a> {
             // e.g for ->writes->book, gives writes__. <-writes<-book, gives __writes
             let ref edge_name_as_method_ident =||self.add_direction_indication_to_ident(edge_table_name, edge_direction); 
             // e.g for ->writes->book, gives Writes__. <-writes<-book, gives __Writes
-            let ref edge_name_as_struct_ident = format_ident!("{}", self.add_direction_indication_to_ident(&edge_table_name.to_string().to_case(Case::Pascal), edge_direction) );
+            
+            let  edge_name_as_struct_ident = format_ident!("{}", self.add_direction_indication_to_ident(&edge_table_name.to_string().to_case(Case::Pascal), edge_direction));
             
             
             // represents the schema but aliased as the pascal case of the destination table name
@@ -563,7 +564,7 @@ impl<'a> NodeEdgeMetadataStore<'a> {
                                 );
             
             let node_edge_meta = NodeEdgeMetadata {
-                      edge_name_as_struct_ident, 
+                      edge_name_as_struct_ident: edge_name_as_struct_ident.clone(), 
                       // relation_model, 
                       // edge_table_name: relation_attributes.edge_table_name.clone().to_string(), 
                       direction: edge_direction.clone(), 

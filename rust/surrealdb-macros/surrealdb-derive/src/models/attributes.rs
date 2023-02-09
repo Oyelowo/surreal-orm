@@ -53,7 +53,7 @@ impl FromMeta for Rename {
 #[derive(Debug, Clone)]
 pub struct Relate {
     /// e.g ->writes->book
-    pub connection: String,
+    pub connection_model: String,
     // #[darling(default)]
     /// e.g StudentWritesBook,
     /// derived from: type StudentWritesBook = Writes<Student, Book>;
@@ -63,7 +63,7 @@ pub struct Relate {
 impl FromMeta for Relate {
     fn from_string(value: &str) -> darling::Result<Self> {
         Ok(Self {
-            connection: value.into(),
+            connection_model: value.into(),
             model: None,
         })
     }
@@ -81,7 +81,7 @@ impl FromMeta for Relate {
                     connection, model, ..
                 } = v;
                 Self {
-                    connection,
+                    connection_model: connection,
                     model: Some(model),
                 }
             }
