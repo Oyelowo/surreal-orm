@@ -61,6 +61,7 @@ fn ewer() {
 // #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "writes")]
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -76,6 +77,7 @@ type StudentWritesBook = Writes<Student, Book>;
 
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "book")]
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]

@@ -328,6 +328,7 @@ pub struct SchemaPropertiesArgs<'a> {
     pub data: &'a ast::Data<util::Ignored, MyFieldReceiver>,
     pub struct_level_casing: Option<CaseString>,
     pub struct_name_ident: &'a syn::Ident,
+    pub table_name_ident: &'a syn::Ident,
 }
 impl SchemaFieldsProperties {
     /// .
@@ -338,7 +339,7 @@ impl SchemaFieldsProperties {
     pub(crate) fn from_receiver_data(
         args : SchemaPropertiesArgs
     ) -> Self {
-        let SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident }= args;
+        let SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident, table_name_ident  }= args;
         
         let fields = data
             .as_ref()
@@ -347,8 +348,8 @@ impl SchemaFieldsProperties {
             .fields
             .into_iter()
             .fold(Self::default(), |mut store, field_receiver| {
-                let field_type = &field_receiver.ty;
                 let crate_name = get_crate_name(false);
+                let field_type = &field_receiver.ty;
                 let relationship = RelationType::from(field_receiver);
                 let NormalisedField { 
                          ref field_ident_normalised,

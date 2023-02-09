@@ -9,6 +9,7 @@ Email: oyelowooyedayo@gmail.com
 #![allow(dead_code)]
 
 
+use convert_case::{Casing, Case};
 use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -32,19 +33,26 @@ pub struct FieldsGetterOpts {
     rename_all: ::std::option::Option<Rename>,
 
     #[darling(default)]
-    pub(crate) relation_name: ::std::option::Option<String>,
+    pub(crate) table_name: ::std::option::Option<String>,
+
+    #[darling(default)]
+    pub(crate) strict: ::std::option::Option<bool>,
 }
 
 impl ToTokens for FieldsGetterOpts {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let FieldsGetterOpts {
             ident: ref struct_name_ident,
+            ref table_name,
             ref data,
             ref rename_all,
-            ref relation_name,
             ..
         } = *self;
 
+        let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
+        let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
+        if table_name.as_ref().unwrap() != &expected_table_name {panic!("E don happen");}
+        
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
@@ -62,7 +70,7 @@ impl ToTokens for FieldsGetterOpts {
             schema_instance_edge_arrow_trimmed,
             schema_instance, .. 
         } = VariablesModelMacro::new();
-        let schema_props_args = SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident };
+        let schema_props_args = SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident, table_name_ident };
 
         let SchemaFieldsProperties {
                 schema_struct_fields_types_kv,

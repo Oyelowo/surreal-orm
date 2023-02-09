@@ -52,8 +52,11 @@ impl FromMeta for Rename {
 
 #[derive(Debug, Clone)]
 pub struct Relate {
+    /// e.g ->writes->book
     pub connection: String,
     // #[darling(default)]
+    /// e.g StudentWritesBook,
+    /// derived from: type StudentWritesBook = Writes<Student, Book>;
     pub model: Option<String>,
 }
 //#[rename(se)]
