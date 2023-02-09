@@ -131,15 +131,15 @@ wrapper_struct_to_ident!(NodeName);
 #[derive(Debug, Clone)]
 pub(crate) struct RelateAttribute {
     pub(crate) edge_direction: EdgeDirection,
-    pub(crate) edge_name: EdgeName,
-    pub(crate) node_name: NodeName,
+    pub(crate) edge_table_name: EdgeName,
+    pub(crate) node_table_name: NodeName,
 }
 
 impl From<RelateAttribute> for ::proc_macro2::TokenStream {
     fn from(relate_attrs: RelateAttribute) -> Self {
         let edge_direction = ::proc_macro2::TokenStream::from(relate_attrs.edge_direction);
-        let edge_name = ::proc_macro2::TokenStream::from(relate_attrs.edge_name);
-        let node_name = ::proc_macro2::TokenStream::from(relate_attrs.node_name);
+        let edge_name = ::proc_macro2::TokenStream::from(relate_attrs.edge_table_name);
+        let node_name = ::proc_macro2::TokenStream::from(relate_attrs.node_table_name);
         // ->action->NodeObject
         // <-action<-NodeObject
         // e.g ->manages->Project
@@ -190,8 +190,8 @@ impl From<&Relate> for RelateAttribute {
             };
 
         Self {
-            node_name: node_object,
-            edge_name: edge_action,
+            node_table_name: node_object,
+            edge_table_name: edge_action,
             edge_direction,
         }
     }
