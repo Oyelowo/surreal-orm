@@ -75,6 +75,16 @@ pub struct Book {
     id: Option<String>,
     title: String,
 }
+
+type StudentWritesBlog = Writes<Student, Blog>;
+#[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Blog {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    id: Option<String>,
+    content: String,
+}
 // ==============================================
 // Recursive expansion of the SurrealdbNode macro
 // ==============================================
@@ -87,8 +97,14 @@ impl surrealdb_macros::SurrealdbNode for Student {
     fn get_key(&self) -> ::std::option::Option<&String> {
         self.id.as_ref()
     }
+
+    type TableNameChecker = student::TableNameStaticChecker;
 }
 pub mod student {
+    pub struct TableNameStaticChecker {
+        pub student: String,
+    }
+
     use ::serde::Serialize;
     type Book = <super::Book as surrealdb_macros::SurrealdbNode>::Schema;
     #[derive(Debug, Serialize, Default)]
@@ -181,7 +197,7 @@ pub mod student {
             format!("{} AS {}", self, "writtenBlogs")
         }
     }
-    type Writes = super::WritesSchema<Student>;
+    type Writes = super::WritesSchema<super::Student, super::Book>;
     impl Writes {
         pub fn Book(&self, clause: surrealdb_macros::Clause) -> Book {
             Book::__________connect_to_graph_traversal_string(
@@ -216,7 +232,7 @@ impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
     type In = In;
     type Out = Out;
     type TableNameChecker = writes_schema::TableNameStaticChecker;
-    type Schema = writes_schema::Writes<String>;
+    type Schema = writes_schema::Writes<In, Out>;
     fn schema() -> Self::Schema {
         writes_schema::Writes::new()
     }
@@ -226,19 +242,22 @@ impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
 }
 use writes_schema::Writes as WritesSchema;
 pub mod writes_schema {
+    use surrealdb_macros::SurrealdbNode;
+
     pub struct TableNameStaticChecker {
         pub Writes: String,
     }
     #[derive(Debug, ::serde::Serialize, Default)]
-    pub struct Writes<Model: ::serde::Serialize + Default> {
+    pub struct Writes<ModelIn: SurrealdbNode, ModelOut: SurrealdbNode> {
         pub id: surrealdb_macros::DbField,
         pub in_: surrealdb_macros::DbField,
         pub out: surrealdb_macros::DbField,
         pub timeWritten: surrealdb_macros::DbField,
         pub ___________graph_traversal_string: ::std::string::String,
-        ___________model: ::std::marker::PhantomData<Model>,
+        ___________model_in: ::std::marker::PhantomData<ModelIn>,
+        ___________model_out: ::std::marker::PhantomData<ModelOut>,
     }
-    impl<Model: ::serde::Serialize + Default> Writes<Model> {
+    impl<ModelIn: SurrealdbNode, ModelOut: SurrealdbNode> Writes<ModelIn, ModelOut> {
         pub fn new() -> Self {
             Self {
                 id: "id".into(),
@@ -246,7 +265,8 @@ pub mod writes_schema {
                 out: "out".into(),
                 timeWritten: "timeWritten".into(),
                 ___________graph_traversal_string: "".into(),
-                ___________model: ::std::marker::PhantomData,
+                ___________model_in: ::std::marker::PhantomData,
+                ___________model_out: ::std::marker::PhantomData,
             }
         }
         pub fn __________connect_to_graph_traversal_string(
@@ -254,7 +274,7 @@ pub mod writes_schema {
             clause: surrealdb_macros::Clause,
             arrow_direction: &str,
         ) -> Self {
-            let mut schema_instance = Self::default();
+            let mut schema_instance = Self::new();
             let schema_edge_str_with_arrow = format!(
                 "{}{}{}{}{}",
                 store.as_str(),
@@ -299,8 +319,13 @@ impl surrealdb_macros::SurrealdbNode for Book {
     fn get_key(&self) -> ::std::option::Option<&String> {
         self.id.as_ref()
     }
+
+    type TableNameChecker = book::TableNameStaticChecker;
 }
 pub mod book {
+    pub struct TableNameStaticChecker {
+        pub book: String,
+    }
     use ::serde::Serialize;
     #[derive(Debug, Serialize, Default)]
     pub struct Book {
@@ -364,9 +389,85 @@ pub mod book {
 }
 fn test_book_edge_name() {}
 
+impl surrealdb_macros::SurrealdbNode for Blog {
+    type Schema = blog::Blog;
+    fn schema() -> Self::Schema {
+        blog::Blog::new()
+    }
+    fn get_key(&self) -> ::std::option::Option<&String> {
+        self.id.as_ref()
+    }
+
+    type TableNameChecker = blog::TableNameStaticChecker;
+}
+pub mod blog {
+    pub struct TableNameStaticChecker {
+        pub blog: String,
+    }
+    use ::serde::Serialize;
+    #[derive(Debug, Serialize, Default)]
+    pub struct Blog {
+        pub id: surrealdb_macros::DbField,
+        pub content: surrealdb_macros::DbField,
+        pub(crate) ___________graph_traversal_string: ::std::string::String,
+    }
+    impl ::std::fmt::Display for Blog {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            f.write_fmt(format_args!("{}", self.___________graph_traversal_string))
+        }
+    }
+    impl Blog {
+        pub fn new() -> Self {
+            Self {
+                id: "id".into(),
+                content: "content".into(),
+                ___________graph_traversal_string: "".to_string(),
+            }
+        }
+        pub fn __with_id__(mut self, id: impl ::std::fmt::Display) -> Self {
+            self.___________graph_traversal_string
+                .push_str(id.to_string().as_str());
+            self
+        }
+        pub fn __with__(db_name: impl ::std::fmt::Display) -> Self {
+            let mut schema_instance = Self::new();
+            schema_instance
+                .___________graph_traversal_string
+                .push_str(db_name.to_string().as_str());
+            schema_instance
+        }
+        pub fn __________connect_to_graph_traversal_string(
+            store: &::std::string::String,
+            clause: surrealdb_macros::Clause,
+        ) -> Self {
+            let mut schema_instance = Self::default();
+            let connection = format!(
+                "{}{}{}",
+                store,
+                "Blog",
+                surrealdb_macros::format_clause(clause, "Blog")
+            );
+            schema_instance
+                .___________graph_traversal_string
+                .push_str(connection.as_str());
+            let ___________graph_traversal_string =
+                &schema_instance.___________graph_traversal_string;
+            schema_instance
+                .id
+                .push_str(format!("{}.{}", ___________graph_traversal_string, "id").as_str());
+            schema_instance
+                .content
+                .push_str(format!("{}.{}", ___________graph_traversal_string, "content").as_str());
+            schema_instance
+        }
+        pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {
+            format!("{} AS {}", self, alias)
+        }
+    }
+}
 pub mod bookxx {
     pub struct TableNameStaticChecker {
-        pub book: String,
+        pub blog: String,
     }
 }
 
@@ -374,7 +475,7 @@ trait Mana {
     type TableMameChecker;
 }
 
-impl Mana for Book {
+impl Mana for Blog {
     type TableMameChecker = bookxx::TableNameStaticChecker;
 }
 
@@ -390,11 +491,11 @@ fn eerer() {
         .title;
 
     StudentWritesBook__Out::schema().title;
-    Writes__::default().olbook(Clause::All).title;
+    Writes__::new().olbook(Clause::All).title;
 }
-::static_assertions::assert_fields!(OutBookTableNameChecker: book);
+// ::static_assertions::assert_fields!(OutBookTableNameChecker: book);
 
-// type Book = <Book as surrealdb_macros::SurrealdbNode>::Schema;
+// type Blog = <Book as surrealdb_macros::SurrealdbNode>::Schema;
 pub type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
 // <Student>
 // type BookMa = <Book as surrealdb_macros::SurrealdbNode>::Schema;
@@ -402,7 +503,6 @@ pub type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
 type BookMa = <<StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out as surrealdb_macros::SurrealdbNode>::Schema;
 
 trait WriteOutTrait {
-    fn olbook(&self, clause: Clause) -> BookMa;
     fn olbook(&self, clause: Clause) -> BookMa;
 }
 
@@ -415,6 +515,23 @@ impl WriteOutTrait for Writes__ {
         )
     }
 }
+// mod xx {
+//     use super::*;
+pub type Writes2__ = <StudentWritesBlog as SurrealdbEdge>::Schema;
+trait WriteOutTrait2 {
+    fn olbook(&self, clause: Clause) -> BookMa;
+}
+
+impl WriteOutTrait2 for Writes2__ {
+    fn olbook(&self, clause: Clause) -> BookMa {
+        // BookMa::__________connect_to_graph_traversal_string
+        BookMa::__________connect_to_graph_traversal_string(
+            &self.___________graph_traversal_string,
+            clause,
+        )
+    }
+}
+// }
 // ->writes->book
 // [
 // { type: "StudentWritesBook", action: "writes", direction: "right", foreign: ["book"] },
@@ -613,6 +730,6 @@ type StudentWritesBookTableNameChecker = <StudentWritesBook as SurrealdbEdge>::T
 ::static_assertions::assert_type_eq_all!(StudentWritesBook__Out, Book);
 ::static_assertions::assert_type_eq_all!(Relate<StudentWritesBook__Out>, Relate<Book>);
 
-type BookTableNameChecker = <Book as Mana>::TableMameChecker;
+type BookTableNameChecker = <Book as SurrealdbNode>::TableNameChecker;
 ::static_assertions::assert_fields!(BookTableNameChecker: book);
 fn fdfd() {}
