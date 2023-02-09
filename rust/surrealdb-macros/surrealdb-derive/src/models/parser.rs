@@ -65,21 +65,20 @@ use super::{
 //   ],
 // },
 #[derive(Clone, Debug)]
-struct NodeEdgeMetadata {
+struct NodeEdgeMetadata<'a> {
   /// e.g if edge table name is writes, this could be Writes__ or __Writes depending on the arrow
   /// direction 
-  edge_name_with_direction_indicator: String,
-  /// In addition to action, this is used for building an edge from 
-  /// a model field annotation e.g relate(edge="StudentWritesBook", link="->writes->book") 
+  edge_name_as_struct_ident: &'a syn::Ident,
   /// Example of value: StudentWritesBook
+  /// a model field annotation e.g relate(edge="StudentWritesBook", link="->writes->book") 
   /// Generates: 
   /// ```
   /// type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
   /// ```
-  connection_model: syn::Ident, 
+  // relation_model: syn::Ident, 
   /// The database table name of the edge. Used for generating other tokens
   /// e.g "writes"
-  action: String,
+  // edge_table_name: String,
   direction: EdgeDirection,
   /// Example Generated:
   /// type Writes__ = <StudentWritesBook as #crate_name::SurrealdbEdge>::Schema;
@@ -90,7 +89,7 @@ struct NodeEdgeMetadata {
   /// 
   /// if arrow left incoming:
   /// quote!( type __Writes = <StudentWritesBook as #crate_name::SurrealdbEdge>::Schema; ) 
-  action_type_alias: TokenStream,
+  edge_schema_type_alias: TokenStream,
   /// Example Generated:
   ///   type BookModel = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
   ///   type Book = <BookModel as surrealdb_macros::SurrealdbNode>::Schema;
@@ -109,7 +108,7 @@ struct NodeEdgeMetadata {
   ///       type Blog = <BlogModel as surrealdb_macros::SurrealdbNode>::Schema;
   ///     ),
   /// ],
-  foreign_node_schema:  Vec<TokenStream>,
+  destination_node_schema:  Vec<TokenStream>,
   /// Example to be Generated:
   /// trait WriteArrowRightTrait {
   ///     fn book(&self, clause: #crate::Clause) -> Book;
@@ -321,7 +320,7 @@ pub struct SchemaFieldsProperties {
     pub node_edge_metadata: NodeEdgeMetadataStore
 }
 
-type AllNodeEdgeMetadata = HashMap<&'static str, NodeEdgeMetadata>;
+type AllNodeEdgeMetadata<'a> = HashMap<&'static str, NodeEdgeMetadata<'a>>;
 
 
 pub struct SchemaPropertiesArgs<'a> {
@@ -505,9 +504,9 @@ impl SchemaFieldsProperties {
 type EdgeNameWithDirectionIndicator = String;
 
 #[derive(Default, Clone)]
-pub struct NodeEdgeMetadataStore(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata>);
+pub struct NodeEdgeMetadataStore<'a>(HashMap<EdgeNameWithDirectionIndicator, NodeEdgeMetadata<'a>>);
 
-impl NodeEdgeMetadataStore {
+impl<'a> NodeEdgeMetadataStore<'a> {
     fn add_direction_indication_to_ident (&self,  ident: &impl Display, edge_direction: &EdgeDirection) -> String { 
         match edge_direction {
             EdgeDirection::OutArrowRight => format!("{ident}__"),
@@ -516,7 +515,7 @@ impl NodeEdgeMetadataStore {
     }
       fn update(&mut self,  relation: &Relate) ->&Self{
             let crate_name = get_crate_name(false);
-            let connection_model = format_ident!("{}", relation.model.as_ref().unwrap());
+            let ref relation_model = format_ident!("{}", relation.model.as_ref().unwrap());
             let relation_attributes = RelateAttribute::from(relation);
             // let arrow_direction = String::from(relation_attributes.edge_direction);
             // let RelateAttribute { edge_direction, edge_name, node_name } = relation_attributes;
@@ -526,9 +525,9 @@ impl NodeEdgeMetadataStore {
             
             
             // e.g for ->writes->book, gives writes__. <-writes<-book, gives __writes
-            let ref edge_name_with_as_method_ident =||self.add_direction_indication_to_ident(edge_table_name, edge_direction); 
+            let ref edge_name_as_method_ident =||self.add_direction_indication_to_ident(edge_table_name, edge_direction); 
             // e.g for ->writes->book, gives Writes__. <-writes<-book, gives __Writes
-            let edge_name_as_struct_ident = self.add_direction_indication_to_ident(&edge_table_name.to_string().to_case(Case::Pascal), edge_direction) ;
+            let ref edge_name_as_struct_ident = format_ident!("{}", self.add_direction_indication_to_ident(&edge_table_name.to_string().to_case(Case::Pascal), edge_direction) );
             
             
             // represents the schema but aliased as the pascal case of the destination table name
@@ -547,8 +546,8 @@ impl NodeEdgeMetadataStore {
                 EdgeDirection::OutArrowRight => format_ident!("Out"),
                 EdgeDirection::InArrowLeft => format_ident!("In"),
             };
-            let foreign_node_schema_one = || quote!(
-                                type #destination_node_model_ident = <#connection_model as surrealdb_macros::SurrealdbEdge>::#in_or_out;
+            let destination_node_schema_one = || quote!(
+                                type #destination_node_model_ident = <#relation_model as surrealdb_macros::SurrealdbEdge>::#in_or_out;
                                 type #destination_node_schema_ident = <#destination_node_model_ident as surrealdb_macros::SurrealdbNode>::Schema;
                                 );
             
@@ -563,18 +562,18 @@ impl NodeEdgeMetadataStore {
                                     }
                                 );
             
-            let nn = NodeEdgeMetadata {
-                      edge_name_with_direction_indicator: edge_name_with_as_method_ident() ,  // Closing braces
-                      connection_model: format_ident!("{}",relation.connection), 
-                      action: relation_attributes.edge_table_name.clone().to_string(), 
+            let node_edge_meta = NodeEdgeMetadata {
+                      edge_name_as_struct_ident, 
+                      // relation_model, 
+                      // edge_table_name: relation_attributes.edge_table_name.clone().to_string(), 
                       direction: edge_direction.clone(), 
                       // We only need to take one connection_model for each edge e.g `writes` ,since
                       // they should share similar Schema besides `in` and `out` which are just
                       // defaulted to ids for edges because, one can always access in and out
                       // models indirectly from the origin and destination nodes rather than the
                       // edges themselves. This allows us to minmise confusion
-                      action_type_alias: quote!( type #edge_name_as_struct_ident = <#connection_model as #crate_name::SurrealdbEdge>::Schema; ), 
-                      foreign_node_schema: vec![foreign_node_schema_one()], 
+                      edge_schema_type_alias: quote!( type #edge_name_as_struct_ident = <#relation_model as #crate_name::SurrealdbEdge>::Schema; ), 
+                      destination_node_schema: vec![destination_node_schema_one()], 
                       edge_to_nodes_trait_method: vec![
                                 edge_to_nodes_trait_method_one()
                       ], 
@@ -582,47 +581,49 @@ impl NodeEdgeMetadataStore {
                                 edge_to_nodes_trait_methods_impl_one() 
                         ],
             };
-            // let values = match self.0.entry(edge_name_with_direction_indicator()) {
-            //         Entry::Occupied(o) => {
-            //             let x = o.into_mut();
-            //             x.foreign_node_schema.push(foreign_node_schema_one());
-            //             x.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one());
-            //             x.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one());
-            //         },
-            //         Entry::Vacant(v) => {v.insert(nn.clone());}
-            //     };
-             self.0.entry(edge_name_with_as_method_ident()).and_modify(|x| {
-                // x.direction = EdgeDirection::OutArrowRight;
-                x.foreign_node_schema.push(foreign_node_schema_one());
-                x.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one());
-                x.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one());
-            }).or_insert(nn);
+            
+             match self.0.entry(edge_name_as_method_ident()) {
+                    Entry::Occupied(o) => {
+                        let node_edge_meta = o.into_mut();
+                        node_edge_meta.destination_node_schema.push(destination_node_schema_one());
+                        node_edge_meta.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one());
+                        node_edge_meta.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one());
+                    },
+                    Entry::Vacant(v) => {v.insert(node_edge_meta);}
+                };
+            //  self.0.entry(edge_name_with_as_method_ident()).and_modify(|node_edge_meta| {
+            //     node_edge_meta.destination_node_schema.push(destination_node_schema_one());
+            //     node_edge_meta.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one());
+            //     node_edge_meta.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one());
+            // }).or_insert(node_edge_meta);
                 self
       }     
 
   
     pub(crate) fn generate_token_stream(&self) -> TokenStream{
         let node_edge_token_streams = self.0.values().map(|value| {
-            let edge_name_with_direction_indicator = format_ident!("{}", value.edge_name_with_direction_indicator );
-            let edge_trait_name = format_ident!("{edge_name_with_direction_indicator}Trait");
+            let edge_name_as_struct_ident = format_ident!("{}", value.edge_name_as_struct_ident );
+            let edge_trait_name = format_ident!("{edge_name_as_struct_ident}Trait");
+            
             let NodeEdgeMetadata {
                     edge_to_nodes_trait_methods_impl,
-                    edge_name_with_direction_indicator,
+                    edge_name_as_struct_ident,
                     edge_to_nodes_trait_method,
-                    action_type_alias,
-                    foreign_node_schema,
+                    edge_schema_type_alias,
+                    destination_node_schema,
                     ..
             } = value;
+            
              quote!(
-                    #action_type_alias
+                    #edge_schema_type_alias
                 
-                    #( #foreign_node_schema) *
+                    #( #destination_node_schema) *
 
                     trait #edge_trait_name {
                         #( #edge_to_nodes_trait_method) *
                     }
 
-                    impl #edge_trait_name for #edge_name_with_direction_indicator{
+                    impl #edge_trait_name for #edge_name_as_struct_ident{
                         #( #edge_to_nodes_trait_methods_impl) *
                     }
                 
