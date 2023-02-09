@@ -6,7 +6,7 @@ Email: oyelowooyedayo@gmail.com
 #![allow(dead_code)]
 
 use std::{hash::Hash,
-collections::HashMap};
+collections::{HashMap, hash_map::Entry}};
 
 use convert_case::{Casing, Case};
 use darling::{ast, util};
@@ -573,24 +573,28 @@ impl NodeEdgeMetadataStore {
                                 edge_to_nodes_trait_methods_impl_one() 
                         ],
             };
-        //     let values = match map.entry(key) {
-        //     Entry::Occupied(o) => o.into_mut(),
-        //     Entry::Vacant(v) => v.insert(default),
-        // };
+            // let values = match self.0.entry(edge_name_with_direction_indicator()) {
+            //         Entry::Occupied(o) => {
+            //             let x = o.into_mut();
+            //             x.foreign_node_schema.push(foreign_node_schema_one());
+            //             x.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one());
+            //             x.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one());
+            //         },
+            //         Entry::Vacant(v) => {v.insert(nn.clone());}
+            //     };
              self.0.entry(edge_name_with_direction_indicator()).and_modify(|x| {
                 // x.direction = EdgeDirection::OutArrowRight;
                 x.foreign_node_schema.push(foreign_node_schema_one());
                 x.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one());
                 x.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one());
             }).or_insert(nn);
-                // xx
                 self
       }     
 
   
     pub(crate) fn generate_token_stream(&self) -> TokenStream{
         let node_edge_token_streams = self.0.values().map(|value| {
-            let edge_name_with_direction_indicator = format!("{}", value.edge_name_with_direction_indicator );
+            let edge_name_with_direction_indicator = format_ident!("{}", value.edge_name_with_direction_indicator );
             let edge_trait_name = format_ident!("{edge_name_with_direction_indicator}Trait");
             let NodeEdgeMetadata {
                     edge_to_nodes_trait_methods_impl,
