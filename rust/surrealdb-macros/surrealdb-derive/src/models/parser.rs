@@ -623,6 +623,23 @@ impl NodeEdgeMetadataStore {
     }     
 
   
+    pub(crate) fn generate_static_assertions(&self) -> TokenStream{
+
+        let static_assertions = self.0.values().map(|value| {
+            let NodeEdgeMetadata {
+                    static_assertions,
+                    imports,
+                    ..
+            } = value;
+            
+            quote!(
+                #( #static_assertions) *
+            )
+        }).collect::<Vec<_>>();
+
+        quote!(#( #static_assertions) *)
+    }
+    
     pub(crate) fn generate_token_stream(&self) -> TokenStream{
         let node_edge_token_streams = self.0.values().map(|value| {
             let NodeEdgeMetadata {
@@ -655,6 +672,7 @@ impl NodeEdgeMetadataStore {
             
              quote!(
                 #( #imports) *
+                use #crate_name::links::Relate;
                  
                 impl #origin_struct_ident {
                     pub fn #edge_name_as_method_ident(
@@ -686,7 +704,6 @@ impl NodeEdgeMetadataStore {
                     }
                 }
                 
-                #( #static_assertions) *
             )
         }).collect::<Vec<_>>();
         

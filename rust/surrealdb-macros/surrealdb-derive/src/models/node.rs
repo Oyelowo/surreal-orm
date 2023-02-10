@@ -72,7 +72,8 @@ impl ToTokens for FieldsGetterOpts {
         } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
         );
-       let node_edge_metadata = node_edge_metadata.generate_token_stream() ; 
+       let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream() ; 
+       let node_edge_metadata_static_assertions = node_edge_metadata.generate_static_assertions() ; 
         imports_referenced_node_schema.dedup_by(|a,
                                                 b| a.to_string() == b.to_string());
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
@@ -194,12 +195,14 @@ impl ToTokens for FieldsGetterOpts {
 
                 // #( #relate_edge_schema_struct_type_alias_impl) *
                 
-                #node_edge_metadata
+                #node_edge_metadata_tokens
             }
 
                 
             fn #test_name() {
                 #( #static_assertions) *
+                #( #node_edge_metadata_static_assertions) *
+                
             }
 ));
     }
