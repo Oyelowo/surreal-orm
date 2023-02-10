@@ -171,6 +171,7 @@ struct NodeEdgeMetadata {
   ///    ]
   edge_to_nodes_trait_methods_impl:Vec<TokenStream>, 
   static_assertions: Vec<TokenStream>,
+  imports: Vec<TokenStream>,
   edge_name_as_method_ident: syn::Ident 
 }
 
@@ -503,13 +504,13 @@ impl NodeEdgeMetadataStore {
                         type #home_node_ident = <#relation_model as #crate_name::SurrealdbEdge>::#home_node_associated_type_ident;
                         type #home_node_table_name_checker_ident = <#home_node_ident as #crate_name::SurrealdbNode>::TableNameChecker;
                         ::static_assertions::assert_type_eq_all!(#home_node_ident, #origin_struct_ident);
-                        ::static_assertions::assert_impl_one!(#home_node_ident, #crate_name::SurrealdbNode);
+                        ::static_assertions::assert_impl_one!(#home_node_ident: #crate_name::SurrealdbNode);
                        ),
                    quote!(
                         type #foreign_node_ident = <#relation_model as #crate_name::SurrealdbEdge>::#foreign_node_associated_type_ident;
                         type #foreign_node_table_name_checker_ident = <#foreign_node_ident as #crate_name::SurrealdbNode>::TableNameChecker;
-                        ::static_assertions::assert_fields!(#foreign_node_table_name_checker_ident, #foreign_node_table_name);
-                        ::static_assertions::assert_impl_one!(#foreign_node_ident, #crate_name::SurrealdbNode);
+                        ::static_assertions::assert_fields!(#foreign_node_table_name_checker_ident: #foreign_node_table_name);
+                        ::static_assertions::assert_impl_one!(#foreign_node_ident: #crate_name::SurrealdbNode);
                        ), 
                    quote!(
                         type #edge_model_ident = <#relation_model as #crate_name::SurrealdbEdge>::TableNameChecker;
@@ -577,6 +578,8 @@ impl NodeEdgeMetadataStore {
                                 }
                             );
         let static_assertions =||  Self::create_static_assertions(relation, origin_struct_ident, field_type); 
+        let imports =|| quote!(use super::#relation_model;);
+        // let imports =|| quote!(use super::StudentWritesBook;);
         
         let node_edge_meta = NodeEdgeMetadata {
                     edge_name_as_struct_ident: edge_name_as_struct_ident.clone(), 
@@ -588,13 +591,14 @@ impl NodeEdgeMetadataStore {
                     // defaulted to ids for edges because, one can always access in and out
                     // models indirectly from the origin and destination nodes rather than the
                     // edges themselves. This allows us to minmise confusion
-                    edge_schema_type_alias: quote!( type #edge_name_as_struct_ident = <#relation_model as #crate_name::SurrealdbEdge>::Schema; ), 
+                    edge_schema_type_alias: quote!(pub type #edge_name_as_struct_ident = <#relation_model as #crate_name::SurrealdbEdge>::Schema; ), 
                     destination_node_schema: vec![destination_node_schema_one()], 
                     edge_to_nodes_trait_method: vec![ edge_to_nodes_trait_method_one() ], 
                     edge_to_nodes_trait_methods_impl: vec![ edge_to_nodes_trait_methods_impl_one()],
                     origin_struct_ident: origin_struct_ident.to_owned(),
                     static_assertions: vec![static_assertions()],
-                    edge_name_as_method_ident: format_ident!("{}", edge_name_as_method_ident())
+                    edge_name_as_method_ident: format_ident!("{}", edge_name_as_method_ident()),
+                    imports: vec![imports()],
         };
         
          match self.0.entry(edge_name_as_method_ident()) {
@@ -603,7 +607,8 @@ impl NodeEdgeMetadataStore {
                     node_edge_meta.destination_node_schema.push(destination_node_schema_one());
                     node_edge_meta.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one());
                     node_edge_meta.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one());
-                    node_edge_meta.static_assertions.push(static_assertions())
+                    node_edge_meta.static_assertions.push(static_assertions());
+                    node_edge_meta.imports.push(imports());
                 },
                 Entry::Vacant(v) => {v.insert(node_edge_meta);}
             };
@@ -630,6 +635,7 @@ impl NodeEdgeMetadataStore {
                     direction,
                     static_assertions,
                     edge_name_as_method_ident,
+                    imports,
             } = value;
             
             let crate_name = get_crate_name(false);
@@ -662,6 +668,8 @@ impl NodeEdgeMetadataStore {
                 }
                 
                 mod #edge_inner_module_name {
+                    use #crate_name::links::Relate;
+                    
                     #edge_schema_type_alias
                 
                     #( #destination_node_schema) *

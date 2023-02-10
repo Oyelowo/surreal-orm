@@ -22,7 +22,7 @@ use surrealdb_macros::{
     Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
 };
 use typed_builder::TypedBuilder;
-
+// ::static_assertions::assert_impl_one!()
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "student")]

@@ -169,7 +169,7 @@ impl ToTokens for FieldsGetterOpts {
                     }
 
                     pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, clause: #crate_name::Clause) -> Self {
-                        let mut #schema_instance = Self::default();
+                        let mut #schema_instance = Self::empty();
                         let connection = format!("{}{}{}", store, #struct_name_ident_as_str, #crate_name::format_clause(clause, #struct_name_ident_as_str));
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
