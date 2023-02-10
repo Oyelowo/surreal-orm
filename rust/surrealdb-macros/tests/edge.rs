@@ -197,19 +197,7 @@ pub mod student {
         pub fn writes__(
             &self,
             clause: surrealdb_macros::Clause,
-        ) -> _____________writes_outgoing_schema::Writes__ {
-            _____________writes_outgoing_schema::Writes__::__________connect_to_graph_traversal_string(
-                &self.___________graph_traversal_string,
-                clause,
-                "->",
-            )
-        }
-    }
-    impl Student {
-        pub fn writes__(
-            &self,
-            clause: surrealdb_macros::Clause,
-        ) -> _____________writes_outgoing_schema::Writes__ {
+        ) -> _____________writes_outgoing_schema::Komo {
             _____________writes_outgoing_schema::Writes__::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 clause,
@@ -232,6 +220,8 @@ pub mod student {
     }
 
     mod _____________writes_outgoing_schema {
+        use std::ops::Deref;
+
         type Student = <super::super::StudentWritesBook as surrealdb_macros::SurrealdbEdge>::In;
         type BookModel = <super::super::StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
         type BookTableNameChecker =
@@ -258,15 +248,46 @@ pub mod student {
             fn Book(&self, clause: surrealdb_macros::Clause) -> Book;
         }
 
-        impl Write__Trait for Writes__ {
-            fn Book(&self, clause: surrealdb_macros::Clause) -> Book {
+        pub struct Komo(Writes__);
+
+        impl Deref for Komo {
+            type Target = Writes__;
+
+            fn deref(&self) -> &Self::Target {
+                // todo!()
+                &self.0
+            }
+        }
+
+        // impl Write__Trait for Writes__ {
+        impl Komo {
+            pub fn banana(&self, clause: surrealdb_macros::Clause) -> Book {
                 Book::__________connect_to_graph_traversal_string(
-                    &self.___________graph_traversal_string,
+                    &self.0.___________graph_traversal_string,
                     clause,
                 )
             }
         }
     }
+}
+fn eerer() {
+    // StudentWritesBook__In::schema()
+    //     .writes__(Clause::All)
+    //     .olbook(Clause::All)
+    //     .title;
+    //
+    // StudentWritesBook__Out::schema().title;
+    // Writes__::new().olbook(Clause::All).title;
+
+    Student::schema()
+        .writes__(Clause::All)
+        .banana(Clause::All)
+        .title;
+
+    // Student::schema()
+    //     .writes_test__(Clause::All)
+    //     .olbook(Clause::All)
+    //     .title;
 }
 fn test_student_edge_name() {
     ::static_assertions::assert_impl_one!(Book: surrealdb_macros::SurrealdbNode);
@@ -559,6 +580,15 @@ type StudentWritesBook__Out = <StudentWritesBook as surrealdb_macros::SurrealdbE
 
 type OutBookTableNameChecker = <StudentWritesBook__Out as Mana>::TableMameChecker;
 
+mod xxx {
+
+    // super::Student
+    // super::Student::schema()
+    //     .writes__(Clause::All)
+    //     .olbook(Clause::All)
+    //     .title;
+}
+
 fn eerer() {
     StudentWritesBook__In::schema()
         .writes__(Clause::All)
@@ -586,20 +616,32 @@ pub type Writes__ = <StudentWritesBook as SurrealdbEdge>::Schema;
 // type BookMa = <Book as surrealdb_macros::SurrealdbNode>::Schema;
 // type BookMa = <StudentWritesBook__Out as surrealdb_macros::SurrealdbNode>::Schema;
 type BookMa = <<StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out as surrealdb_macros::SurrealdbNode>::Schema;
+mod xana {
+    use super::Student;
+    use super::SurrealdbNode;
 
-trait WriteOutTrait {
-    fn olbook(&self, clause: Clause) -> BookMa;
+    // Student;
 }
-
-impl WriteOutTrait for Writes__ {
-    fn olbook(&self, clause: Clause) -> BookMa {
-        // BookMa::__________connect_to_graph_traversal_string
-        BookMa::__________connect_to_graph_traversal_string(
-            &self.___________graph_traversal_string,
-            clause,
-        )
-    }
-}
+// use nama::*;
+// pub mod nama {
+//     use super::*;
+//
+//     pub trait WriteOutTrait {
+//         fn olbook(&self, clause: Clause) -> BookMa;
+//     }
+//
+//     struct Komo(Writes__);
+//     // impl WriteOutTrait for Writes__ {
+//     impl Komo {
+//         fn olbook(&self, clause: Clause) -> BookMa {
+//             // BookMa::__________connect_to_graph_traversal_string
+//             BookMa::__________connect_to_graph_traversal_string(
+//                 &self.0.___________graph_traversal_string,
+//                 clause,
+//             )
+//         }
+//     }
+// }
 // mod xx {
 //     use super::*;
 pub type Writes2__ = <StudentWritesBlog as SurrealdbEdge>::Schema;

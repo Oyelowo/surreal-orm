@@ -148,14 +148,16 @@ fn main() {
         .title
         .contains_one("bee");
 
-    // let xx = Student::schema()
-    //     .writes__(Clause::All)
-    //     .book(Clause::Where(
-    //         query().where_(Student::schema().lastName.contains_one("Dayo")),
-    //     ))
-    //     .title
-    //     .__as__("meorm");
-    // println!("xx --- {xx}");
+    Student::schema().writes__(Clause::All).book(Clause::All);
+
+    let xx = Student::schema()
+        .writes__(Clause::All)
+        .book(Clause::Where(
+            query().where_(Student::schema().lastName.contains_one("Dayo")),
+        ))
+        .title
+        .__as__("meorm");
+    println!("xx --- {xx}");
 
     let x2 = Student::schema();
     println!("x2 --- {x2}");
