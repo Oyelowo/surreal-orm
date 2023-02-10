@@ -248,7 +248,7 @@ pub mod student {
             fn Book(&self, clause: surrealdb_macros::Clause) -> Book;
         }
 
-        pub struct Writes__(pub Writes);
+        pub struct Writes__(Writes);
 
         impl From<Writes> for Writes__ {
             fn from(value: Writes) -> Self {
@@ -260,7 +260,6 @@ pub mod student {
             type Target = Writes;
 
             fn deref(&self) -> &Self::Target {
-                // todo!()
                 &self.0
             }
         }
@@ -331,7 +330,7 @@ impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
     type In = In;
     type Out = Out;
     type TableNameChecker = writes_schema::TableNameStaticChecker;
-    type Schema = writes_schema::Writes<In, Out>;
+    type Schema = writes_schema::Writes;
     fn schema() -> Self::Schema {
         writes_schema::Writes::new()
     }
@@ -346,16 +345,14 @@ pub mod writes_schema {
         pub Writes: String,
     }
     #[derive(Debug, ::serde::Serialize, Default)]
-    pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
+    pub struct Writes {
         pub id: surrealdb_macros::DbField,
         pub in_: surrealdb_macros::DbField,
         pub out: surrealdb_macros::DbField,
         pub timeWritten: surrealdb_macros::DbField,
         pub ___________graph_traversal_string: ::std::string::String,
-        ___________in_marker: ::std::marker::PhantomData<In>,
-        ___________out_marker: ::std::marker::PhantomData<Out>,
     }
-    impl<In: SurrealdbNode, Out: SurrealdbNode> Writes<In, Out> {
+    impl Writes {
         pub fn empty() -> Self {
             Self {
                 id: "".into(),
@@ -363,8 +360,6 @@ pub mod writes_schema {
                 out: "".into(),
                 timeWritten: "".into(),
                 ___________graph_traversal_string: "".into(),
-                ___________in_marker: ::std::marker::PhantomData,
-                ___________out_marker: ::std::marker::PhantomData,
             }
         }
         pub fn new() -> Self {
@@ -374,8 +369,6 @@ pub mod writes_schema {
                 out: "out".into(),
                 timeWritten: "timeWritten".into(),
                 ___________graph_traversal_string: "".into(),
-                ___________in_marker: ::std::marker::PhantomData,
-                ___________out_marker: ::std::marker::PhantomData,
             }
         }
         pub fn __________connect_to_graph_traversal_string(
