@@ -106,6 +106,7 @@ pub mod student {
     }
 
     use ::serde::Serialize;
+    use surrealdb_macros::SurrealdbEdge;
     type Book = <super::Book as surrealdb_macros::SurrealdbNode>::Schema;
     #[derive(Debug, Serialize, Default)]
     pub struct Student {
@@ -177,7 +178,7 @@ pub mod student {
             );
             schema_instance
         }
-        pub fn Writes__(&self, clause: surrealdb_macros::Clause) -> super::Writes__ {
+        pub fn writes__(&self, clause: surrealdb_macros::Clause) -> Writes__ {
             super::Writes__::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 clause,
@@ -197,9 +198,23 @@ pub mod student {
             format!("{} AS {}", self, "writtenBlogs")
         }
     }
-    type Writes = super::WritesSchema<super::Student, super::Book>;
-    impl Writes {
-        pub fn Book(&self, clause: surrealdb_macros::Clause) -> Book {
+    // type Writes = super::WritesSchema<super::Student, super::Book>;
+    type Writes__ = <super::StudentWritesBook as SurrealdbEdge>::Schema;
+    // impl Writes {
+    //     pub fn Book(&self, clause: surrealdb_macros::Clause) -> Book {
+    //         Book::__________connect_to_graph_traversal_string(
+    //             &self.___________graph_traversal_string,
+    //             clause,
+    //         )
+    //     }
+    // }
+    trait Write__Trait {
+        // fn olbook(&self, clause: Clause) -> BookMa;
+        fn Book(&self, clause: surrealdb_macros::Clause) -> Book;
+    }
+
+    impl Write__Trait for Writes__ {
+        fn Book(&self, clause: surrealdb_macros::Clause) -> Book {
             Book::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 clause,
@@ -240,7 +255,6 @@ impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
         self.id.as_ref()
     }
 }
-use writes_schema::Writes as WritesSchema;
 pub mod writes_schema {
     use surrealdb_macros::SurrealdbNode;
 
@@ -301,9 +315,9 @@ pub mod writes_schema {
             let ___________graph_traversal_string = &schema_instance
                 .___________graph_traversal_string
                 .replace(arrow_direction, "");
-            schema_instance.id = "".into();
-            schema_instance.in_ = "".into();
-            schema_instance.timeWritten = "".into();
+            // schema_instance.id = "".into();
+            // schema_instance.in_ = "".into();
+            // schema_instance.timeWritten = "".into();
             schema_instance
                 .id
                 .push_str(format!("{}.{}", ___________graph_traversal_string, "id").as_str());
@@ -501,7 +515,7 @@ type OutBookTableNameChecker = <StudentWritesBook__Out as Mana>::TableMameChecke
 
 fn eerer() {
     StudentWritesBook__In::schema()
-        .Writes__(Clause::All)
+        .writes__(Clause::All)
         .olbook(Clause::All)
         .title;
 

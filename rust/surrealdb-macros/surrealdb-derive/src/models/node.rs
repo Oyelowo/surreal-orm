@@ -68,6 +68,7 @@ impl ToTokens for FieldsGetterOpts {
                 connection_with_field_appended,
                 record_link_fields_methods,
             node_edge_metadata,
+            schema_struct_fields_names_kv_empty,
         } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
         );
