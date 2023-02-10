@@ -465,7 +465,7 @@ impl NodeEdgeMetadataStore {
         }
     }
 
-    fn create_static_assertions(&self, relation: &Relate, origin_struct_ident: &syn::Ident, field_type: &syn::Type) -> TokenStream {
+    fn create_static_assertions(relation: &Relate, origin_struct_ident: &syn::Ident, field_type: &syn::Type) -> TokenStream {
         let crate_name = get_crate_name(false);
         let ref relation_model = format_ident!("{}", relation.model.as_ref().unwrap());
         let relation_attributes = RelateAttribute::from(relation);
@@ -576,7 +576,7 @@ impl NodeEdgeMetadataStore {
                                     )
                                 }
                             );
-        let static_assertions =||  self.create_static_assertions(relation, origin_struct_ident, field_type); 
+        let static_assertions =||  Self::create_static_assertions(relation, origin_struct_ident, field_type); 
         
         let node_edge_meta = NodeEdgeMetadata {
                     edge_name_as_struct_ident: edge_name_as_struct_ident.clone(), 
@@ -607,10 +607,11 @@ impl NodeEdgeMetadataStore {
                 },
                 Entry::Vacant(v) => {v.insert(node_edge_meta);}
             };
-        //  self.0.entry(edge_name_with_as_method_ident()).and_modify(|node_edge_meta| {
-        //     node_edge_meta.destination_node_schema.push(destination_node_schema_one());
-        //     node_edge_meta.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one());
-        //     node_edge_meta.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one());
+        //  self.0.entry(edge_name_as_method_ident()).and_modify(|node_edge_meta| {
+        //         node_edge_meta.destination_node_schema.push(destination_node_schema_one());
+        //         node_edge_meta.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one());
+        //         node_edge_meta.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one());
+        //         node_edge_meta.static_assertions.push(static_assertions())
         // }).or_insert(node_edge_meta);
             self
     }     
