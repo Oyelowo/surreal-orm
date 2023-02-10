@@ -68,7 +68,9 @@ impl ToTokens for FieldsGetterOpts {
             ___________graph_traversal_string,
             ___________model,
             schema_instance_edge_arrow_trimmed,
-            schema_instance, .. 
+            schema_instance,
+            ___________in_marker,
+            ___________out_marker,  
         } = VariablesModelMacro::new();
         let schema_props_args = SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident, table_name_ident };
 
@@ -80,6 +82,7 @@ impl ToTokens for FieldsGetterOpts {
                 mut imports_referenced_node_schema,
                 connection_with_field_appended,
                 record_link_fields_methods,
+                schema_struct_fields_names_kv_empty,
                 ..
         } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
@@ -127,27 +130,38 @@ impl ToTokens for FieldsGetterOpts {
                     #( #imports_referenced_node_schema) *
 
                     #[derive(Debug, ::serde::Serialize, Default)]
-                    pub struct #struct_name_ident<Model: ::serde::Serialize + Default> {
+                    pub struct #struct_name_ident<In: SurrealdbNode, Out: SurrealdbNode> {
                        #( #schema_struct_fields_types_kv) *
                         pub #___________graph_traversal_string: ::std::string::String,
-                        #___________model: ::std::marker::PhantomData<Model>,
+                            #___________in_marker: ::std::marker::PhantomData<In>,
+                            #___________out_marker: ::std::marker::PhantomData<Out>,
                     }
 
-                    impl<Model: ::serde::Serialize + Default> #struct_name_ident<Model> {
+                    impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #struct_name_ident<In, Out> {
                         pub fn new() -> Self {
                             Self {
                                #( #schema_struct_fields_names_kv) *
                                 #___________graph_traversal_string: "".into(),
-                                #___________model: ::std::marker::PhantomData,
+                                #___________in_marker: ::std::marker::PhantomData,
+                                #___________out_marker: ::std::marker::PhantomData,
                             }
                         }
 
+                        pub fn empty() -> Self {
+                            Self {
+                               #( #schema_struct_fields_names_kv_empty) *
+                                #___________graph_traversal_string: "".into(),
+                                #___________in_marker: ::std::marker::PhantomData,
+                                #___________out_marker: ::std::marker::PhantomData,
+                            }
+                        }
+                        
                         pub fn #__________connect_to_graph_traversal_string(
                             store: &::std::string::String,
                             clause: #crate_name::Clause,
                             arrow_direction: &str,
                         ) -> Self {
-                            let mut schema_instance = Self::default();
+                            let mut schema_instance = Self::empty();
                             let schema_edge_str_with_arrow = format!(
                                 "{}{}{}{}{}",
                                 store.as_str(),

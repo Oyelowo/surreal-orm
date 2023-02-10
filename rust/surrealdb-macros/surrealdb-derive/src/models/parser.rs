@@ -200,6 +200,18 @@ pub struct SchemaFieldsProperties {
     /// }
     /// ```
     pub schema_struct_fields_names_kv: Vec<TokenStream>,
+    
+    /// Used to build up empty string values for all schema fields
+    /// Example value: pub timeWritten: "".into(),
+    /// Used to build up e.g:
+    /// Self {
+    ///     id: "id".into(),
+    ///     r#in: "in".into(),
+    ///     out: "out".into(),
+    ///     timeWritten: "timeWritten".into(),
+    /// }
+    /// ```
+    pub schema_struct_fields_names_kv_empty: Vec<TokenStream>,
 
     /// Field names after taking into consideration
     /// serde serialized renaming or casings
@@ -485,6 +497,9 @@ impl SchemaFieldsProperties {
   
                 store.schema_struct_fields_names_kv
                     .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+                
+                store.schema_struct_fields_names_kv_empty
+                    .push(quote!(#field_ident_normalised: "".into(),));
 
                 store.serialized_field_names_normalised
                     .push(field_ident_normalised_as_str.to_owned());

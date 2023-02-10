@@ -248,16 +248,27 @@ pub mod writes_schema {
         pub Writes: String,
     }
     #[derive(Debug, ::serde::Serialize, Default)]
-    pub struct Writes<ModelIn: SurrealdbNode, ModelOut: SurrealdbNode> {
+    pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
         pub id: surrealdb_macros::DbField,
         pub in_: surrealdb_macros::DbField,
         pub out: surrealdb_macros::DbField,
         pub timeWritten: surrealdb_macros::DbField,
         pub ___________graph_traversal_string: ::std::string::String,
-        ___________model_in: ::std::marker::PhantomData<ModelIn>,
-        ___________model_out: ::std::marker::PhantomData<ModelOut>,
+        ___________in_marker: ::std::marker::PhantomData<In>,
+        ___________out_marker: ::std::marker::PhantomData<Out>,
     }
-    impl<ModelIn: SurrealdbNode, ModelOut: SurrealdbNode> Writes<ModelIn, ModelOut> {
+    impl<In: SurrealdbNode, Out: SurrealdbNode> Writes<In, Out> {
+        pub fn empty() -> Self {
+            Self {
+                id: "".into(),
+                in_: "".into(),
+                out: "".into(),
+                timeWritten: "".into(),
+                ___________graph_traversal_string: "".into(),
+                ___________in_marker: ::std::marker::PhantomData,
+                ___________out_marker: ::std::marker::PhantomData,
+            }
+        }
         pub fn new() -> Self {
             Self {
                 id: "id".into(),
@@ -265,8 +276,8 @@ pub mod writes_schema {
                 out: "out".into(),
                 timeWritten: "timeWritten".into(),
                 ___________graph_traversal_string: "".into(),
-                ___________model_in: ::std::marker::PhantomData,
-                ___________model_out: ::std::marker::PhantomData,
+                ___________in_marker: ::std::marker::PhantomData,
+                ___________out_marker: ::std::marker::PhantomData,
             }
         }
         pub fn __________connect_to_graph_traversal_string(
@@ -274,7 +285,7 @@ pub mod writes_schema {
             clause: surrealdb_macros::Clause,
             arrow_direction: &str,
         ) -> Self {
-            let mut schema_instance = Self::new();
+            let mut schema_instance = Self::empty();
             let schema_edge_str_with_arrow = format!(
                 "{}{}{}{}{}",
                 store.as_str(),
@@ -283,12 +294,16 @@ pub mod writes_schema {
                 surrealdb_macros::format_clause(clause, "Writes"),
                 arrow_direction,
             );
+
             schema_instance
                 .___________graph_traversal_string
                 .push_str(schema_edge_str_with_arrow.as_str());
             let ___________graph_traversal_string = &schema_instance
                 .___________graph_traversal_string
                 .replace(arrow_direction, "");
+            schema_instance.id = "".into();
+            schema_instance.in_ = "".into();
+            schema_instance.timeWritten = "".into();
             schema_instance
                 .id
                 .push_str(format!("{}.{}", ___________graph_traversal_string, "id").as_str());
