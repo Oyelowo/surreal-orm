@@ -122,7 +122,7 @@ impl ToTokens for FieldsGetterOpts {
                     use #crate_name::SurrealdbNode;
                     
                     pub struct TableNameStaticChecker {
-                        pub #struct_name_ident: String,
+                        pub #table_name_ident: String,
                     }
 
                 

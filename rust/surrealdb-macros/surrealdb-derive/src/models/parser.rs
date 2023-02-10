@@ -407,7 +407,8 @@ impl SchemaFieldsProperties {
 
 
                             store.node_edge_metadata.update(&relation, struct_name_ident, field_type);
-                            ReferencedNodeMeta::from_relate(relation, destination_node)
+                            // ReferencedNodeMeta::from_relate(relation, destination_node)
+                            ReferencedNodeMeta::default()
                                 
                     },
                     RelationType::LinkOne(node_object) => {
@@ -503,7 +504,7 @@ impl NodeEdgeMetadataStore {
                    quote!(
                         type #home_node_ident = <#relation_model as #crate_name::SurrealdbEdge>::#home_node_associated_type_ident;
                         type #home_node_table_name_checker_ident = <#home_node_ident as #crate_name::SurrealdbNode>::TableNameChecker;
-                        ::static_assertions::assert_type_eq_all!(#home_node_ident, #origin_struct_ident);
+                        ::static_assertions::assert_type_eq_all!(#home_node_ident, super::#origin_struct_ident);
                         ::static_assertions::assert_impl_one!(#home_node_ident: #crate_name::SurrealdbNode);
                        ),
                    quote!(
@@ -653,6 +654,7 @@ impl NodeEdgeMetadataStore {
             
             
              quote!(
+                #( #imports) *
                  
                 impl #origin_struct_ident {
                     pub fn #edge_name_as_method_ident(
@@ -668,6 +670,7 @@ impl NodeEdgeMetadataStore {
                 }
                 
                 mod #edge_inner_module_name {
+                    #( #imports) *
                     use #crate_name::links::Relate;
                     
                     #edge_schema_type_alias

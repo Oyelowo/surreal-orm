@@ -149,8 +149,8 @@ fn main() {
         .contains_one("bee");
 
     let xx = Student::schema()
-        .Writes__(Clause::All)
-        .Book(Clause::Where(
+        .writes__(Clause::All)
+        .book(Clause::Where(
             query().where_(Student::schema().lastName.contains_one("Dayo")),
         ))
         .title
