@@ -58,8 +58,8 @@ impl ToTokens for FieldsGetterOpts {
         let SchemaFieldsProperties {
                 // relate_edge_schema_struct_type_alias,
                 // relate_edge_schema_struct_type_alias_impl,
-                relate_edge_schema_method_connection,
-                relate_node_alias_method,
+                // relate_edge_schema_method_connection,
+                // relate_node_alias_method,
                 schema_struct_fields_types_kv,
                 schema_struct_fields_names_kv,
                 serialized_field_names_normalised,
@@ -187,7 +187,7 @@ impl ToTokens for FieldsGetterOpts {
                         format!("{} AS {}", self, alias)
                     }
                     
-                    #( #relate_node_alias_method) *
+                    // #( #relate_node_alias_method) *
                 }
                 
                 // #( #relate_edge_schema_struct_type_alias) *
