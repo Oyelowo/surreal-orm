@@ -56,8 +56,8 @@ impl ToTokens for FieldsGetterOpts {
         let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident, table_name_ident};
 
         let SchemaFieldsProperties {
-                relate_edge_schema_struct_type_alias,
-                relate_edge_schema_struct_type_alias_impl,
+                // relate_edge_schema_struct_type_alias,
+                // relate_edge_schema_struct_type_alias_impl,
                 relate_edge_schema_method_connection,
                 relate_node_alias_method,
                 schema_struct_fields_types_kv,
@@ -178,11 +178,10 @@ impl ToTokens for FieldsGetterOpts {
                         #( #connection_with_field_appended) *
                         #schema_instance
                     }
-
-                    #( #relate_edge_schema_method_connection) *
                     
                     #( #record_link_fields_methods) *
 
+                    // #( #relate_edge_schema_method_connection) *
                     
                     pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {
                         format!("{} AS {}", self, alias)
@@ -191,9 +190,9 @@ impl ToTokens for FieldsGetterOpts {
                     #( #relate_node_alias_method) *
                 }
                 
-                #( #relate_edge_schema_struct_type_alias) *
+                // #( #relate_edge_schema_struct_type_alias) *
 
-                #( #relate_edge_schema_struct_type_alias_impl) *
+                // #( #relate_edge_schema_struct_type_alias_impl) *
                 
                 #node_edge_metadata
             }

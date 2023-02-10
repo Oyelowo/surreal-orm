@@ -76,6 +76,16 @@ impl From<EdgeDirection> for String {
     }
 }
 
+impl ::std::fmt::Display for EdgeDirection {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let arrow = match self {
+            EdgeDirection::OutArrowRight => "->",
+            EdgeDirection::InArrowLeft => "<-",
+        };
+        f.write_fmt(format_args!("{}", arrow))
+    }
+}
+
 macro_rules! wrapper_struct_to_ident {
     ($simple_wrapper_struct:ty) => {
         impl From<&$simple_wrapper_struct> for ::proc_macro2::TokenStream {

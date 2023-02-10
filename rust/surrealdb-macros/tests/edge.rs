@@ -178,13 +178,7 @@ pub mod student {
             );
             schema_instance
         }
-        pub fn writes__(&self, clause: surrealdb_macros::Clause) -> xxx::Writes__ {
-            super::Writes__::__________connect_to_graph_traversal_string(
-                &self.___________graph_traversal_string,
-                clause,
-                "->",
-            )
-        }
+
         pub fn lowo_na(&self, clause: surrealdb_macros::Clause) -> Book {
             Book::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
@@ -198,7 +192,46 @@ pub mod student {
             format!("{} AS {}", self, "writtenBlogs")
         }
     }
-    mod xxx {
+
+    impl Student {
+        pub fn writes__(
+            &self,
+            clause: surrealdb_macros::Clause,
+        ) -> _____________writes_outgoing_schema::Writes__ {
+            _____________writes_outgoing_schema::Writes__::__________connect_to_graph_traversal_string(
+                &self.___________graph_traversal_string,
+                clause,
+                "->",
+            )
+        }
+    }
+    impl Student {
+        pub fn writes__(
+            &self,
+            clause: surrealdb_macros::Clause,
+        ) -> _____________writes_outgoing_schema::Writes__ {
+            _____________writes_outgoing_schema::Writes__::__________connect_to_graph_traversal_string(
+                &self.___________graph_traversal_string,
+                clause,
+                "->",
+            )
+        }
+    }
+
+    impl Student {
+        pub fn writes_test__(
+            &self,
+            clause: surrealdb_macros::Clause,
+        ) -> _____________writes_outgoing_schema::Writes__ {
+            _____________writes_outgoing_schema::Writes__::__________connect_to_graph_traversal_string(
+                &self.___________graph_traversal_string,
+                clause,
+                "->",
+            )
+        }
+    }
+
+    mod _____________writes_outgoing_schema {
         type Student = <super::super::StudentWritesBook as surrealdb_macros::SurrealdbEdge>::In;
         type BookModel = <super::super::StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
         type BookTableNameChecker =
@@ -534,6 +567,16 @@ fn eerer() {
 
     StudentWritesBook__Out::schema().title;
     Writes__::new().olbook(Clause::All).title;
+
+    Student::schema()
+        .writes__(Clause::All)
+        .olbook(Clause::All)
+        .title;
+
+    Student::schema()
+        .writes_test__(Clause::All)
+        .olbook(Clause::All)
+        .title;
 }
 // ::static_assertions::assert_fields!(OutBookTableNameChecker: book);
 
