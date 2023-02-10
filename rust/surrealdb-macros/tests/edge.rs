@@ -178,7 +178,7 @@ pub mod student {
             );
             schema_instance
         }
-        pub fn writes__(&self, clause: surrealdb_macros::Clause) -> Writes__ {
+        pub fn writes__(&self, clause: surrealdb_macros::Clause) -> xxx::Writes__ {
             super::Writes__::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 clause,
@@ -198,27 +198,40 @@ pub mod student {
             format!("{} AS {}", self, "writtenBlogs")
         }
     }
-    // type Writes = super::WritesSchema<super::Student, super::Book>;
-    type Writes__ = <super::StudentWritesBook as SurrealdbEdge>::Schema;
-    // impl Writes {
-    //     pub fn Book(&self, clause: surrealdb_macros::Clause) -> Book {
-    //         Book::__________connect_to_graph_traversal_string(
-    //             &self.___________graph_traversal_string,
-    //             clause,
-    //         )
-    //     }
-    // }
-    trait Write__Trait {
-        // fn olbook(&self, clause: Clause) -> BookMa;
-        fn Book(&self, clause: surrealdb_macros::Clause) -> Book;
-    }
+    mod xxx {
+        type Student = <super::super::StudentWritesBook as surrealdb_macros::SurrealdbEdge>::In;
+        type BookModel = <super::super::StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
+        type BookTableNameChecker =
+            <BookModel as surrealdb_macros::SurrealdbNode>::TableNameChecker;
 
-    impl Write__Trait for Writes__ {
-        fn Book(&self, clause: surrealdb_macros::Clause) -> Book {
-            Book::__________connect_to_graph_traversal_string(
-                &self.___________graph_traversal_string,
-                clause,
-            )
+        // assert destination node name is table name of `book`
+        ::static_assertions::assert_fields!(BookTableNameChecker: book);
+        ::static_assertions::assert_impl_one!(BookModel: surrealdb_macros::SurrealdbNode);
+
+        type Book = <BookModel as surrealdb_macros::SurrealdbNode>::Schema;
+        // type Writes = super::WritesSchema<super::Student, super::Book>;
+        pub type Writes__ =
+            <super::super::StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Schema;
+        // impl Writes {
+        //     pub fn Book(&self, clause: surrealdb_macros::Clause) -> Book {
+        //         Book::__________connect_to_graph_traversal_string(
+        //             &self.___________graph_traversal_string,
+        //             clause,
+        //         )
+        //     }
+        // }
+        trait Write__Trait {
+            // fn olbook(&self, clause: Clause) -> BookMa;
+            fn Book(&self, clause: surrealdb_macros::Clause) -> Book;
+        }
+
+        impl Write__Trait for Writes__ {
+            fn Book(&self, clause: surrealdb_macros::Clause) -> Book {
+                Book::__________connect_to_graph_traversal_string(
+                    &self.___________graph_traversal_string,
+                    clause,
+                )
+            }
         }
     }
 }
