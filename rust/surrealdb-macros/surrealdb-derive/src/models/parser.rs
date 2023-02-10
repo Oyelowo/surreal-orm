@@ -504,7 +504,7 @@ impl NodeEdgeMetadataStore {
                    quote!(
                         type #home_node_ident = <#relation_model as #crate_name::SurrealdbEdge>::#home_node_associated_type_ident;
                         type #home_node_table_name_checker_ident = <#home_node_ident as #crate_name::SurrealdbNode>::TableNameChecker;
-                        ::static_assertions::assert_type_eq_all!(#home_node_ident, super::#origin_struct_ident);
+                        ::static_assertions::assert_type_eq_all!(#home_node_ident, #origin_struct_ident);
                         ::static_assertions::assert_impl_one!(#home_node_ident: #crate_name::SurrealdbNode);
                        ),
                    quote!(

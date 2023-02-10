@@ -201,7 +201,7 @@ impl ToTokens for FieldsGetterOpts {
                 
             fn #test_name() {
                 #( #static_assertions) *
-                #( #node_edge_metadata_static_assertions) *
+                #node_edge_metadata_static_assertions
                 
             }
 ));
