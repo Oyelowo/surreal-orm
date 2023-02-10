@@ -148,6 +148,13 @@ impl ToTokens for FieldsGetterOpts {
                         }
                     }
 
+                    pub fn empty() -> Self {
+                        Self {
+                           #( #schema_struct_fields_names_kv_empty) *
+                            #___________graph_traversal_string: "".to_string(),
+                        }
+                    }
+                    
                     pub fn __with_id__(mut self, id: impl ::std::fmt::Display) -> Self {
                         self.#___________graph_traversal_string.push_str(id.to_string().as_str());
                         self

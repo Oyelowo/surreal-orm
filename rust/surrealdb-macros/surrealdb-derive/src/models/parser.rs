@@ -396,7 +396,7 @@ impl SchemaFieldsProperties {
 
                         // e.g type Writes = super::WritesSchema<#struct_name_ident>;
                         let edge_schema_alias_name = VariablesModelMacro::get_schema_alias(&format_ident!("{edge_name}"));
-                        
+                       // TODO: CHeck this now!!!! 
                         store.relate_edge_schema_struct_type_alias.push(quote!(
                             type #edge_name = super::#edge_schema_alias_name<#struct_name_ident>;
                         ));

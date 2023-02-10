@@ -100,7 +100,6 @@ impl ToTokens for FieldsGetterOpts {
         // let field_names_ident = format_ident!("{struct_name_ident}DbFields");
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         
-        let schema_alias = VariablesModelMacro::get_schema_alias(struct_name_ident);
         
         tokens.extend(quote!( 
                         
@@ -108,7 +107,7 @@ impl ToTokens for FieldsGetterOpts {
                     type In = In;
                     type Out = Out;
                     type TableNameChecker = #module_name::TableNameStaticChecker;
-                    type Schema = #module_name::#struct_name_ident<String>;
+                    type Schema = #module_name::#struct_name_ident<In, Out>;
 
                     fn schema() -> Self::Schema {
                         #module_name::#struct_name_ident::new()
@@ -119,8 +118,8 @@ impl ToTokens for FieldsGetterOpts {
                     }
                 }
                 
-                use #module_name::#struct_name_ident as #schema_alias;
                 pub mod #module_name {
+                    use #crate_name::SurrealdbNode;
                     
                     pub struct TableNameStaticChecker {
                         pub #struct_name_ident: String,
@@ -133,8 +132,8 @@ impl ToTokens for FieldsGetterOpts {
                     pub struct #struct_name_ident<In: SurrealdbNode, Out: SurrealdbNode> {
                        #( #schema_struct_fields_types_kv) *
                         pub #___________graph_traversal_string: ::std::string::String,
-                            #___________in_marker: ::std::marker::PhantomData<In>,
-                            #___________out_marker: ::std::marker::PhantomData<Out>,
+                        #___________in_marker: ::std::marker::PhantomData<In>,
+                        #___________out_marker: ::std::marker::PhantomData<Out>,
                     }
 
                     impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #struct_name_ident<In, Out> {
