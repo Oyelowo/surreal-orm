@@ -197,12 +197,12 @@ pub mod student {
         pub fn writes__(
             &self,
             clause: surrealdb_macros::Clause,
-        ) -> _____________writes_outgoing_schema::Komo {
-            _____________writes_outgoing_schema::Writes__::__________connect_to_graph_traversal_string(
+        ) -> _____________writes_outgoing_schema::Writes__ {
+            _____________writes_outgoing_schema::Writes::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 clause,
                 "->",
-            )
+            ).into()
         }
     }
 
@@ -210,8 +210,8 @@ pub mod student {
         pub fn writes_test__(
             &self,
             clause: surrealdb_macros::Clause,
-        ) -> _____________writes_outgoing_schema::Writes__ {
-            _____________writes_outgoing_schema::Writes__::__________connect_to_graph_traversal_string(
+        ) -> _____________writes_outgoing_schema::Writes {
+            _____________writes_outgoing_schema::Writes::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 clause,
                 "->",
@@ -233,7 +233,7 @@ pub mod student {
 
         type Book = <BookModel as surrealdb_macros::SurrealdbNode>::Schema;
         // type Writes = super::WritesSchema<super::Student, super::Book>;
-        pub type Writes__ =
+        pub type Writes =
             <super::super::StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Schema;
         // impl Writes {
         //     pub fn Book(&self, clause: surrealdb_macros::Clause) -> Book {
@@ -248,10 +248,16 @@ pub mod student {
             fn Book(&self, clause: surrealdb_macros::Clause) -> Book;
         }
 
-        pub struct Komo(Writes__);
+        pub struct Writes__(pub Writes);
 
-        impl Deref for Komo {
-            type Target = Writes__;
+        impl From<Writes> for Writes__ {
+            fn from(value: Writes) -> Self {
+                Self(value)
+            }
+        }
+
+        impl Deref for Writes__ {
+            type Target = Writes;
 
             fn deref(&self) -> &Self::Target {
                 // todo!()
@@ -260,8 +266,15 @@ pub mod student {
         }
 
         // impl Write__Trait for Writes__ {
-        impl Komo {
+        impl Writes__ {
             pub fn banana(&self, clause: surrealdb_macros::Clause) -> Book {
+                Book::__________connect_to_graph_traversal_string(
+                    &self.0.___________graph_traversal_string,
+                    clause,
+                )
+            }
+
+            pub fn olbook(&self, clause: surrealdb_macros::Clause) -> Book {
                 Book::__________connect_to_graph_traversal_string(
                     &self.0.___________graph_traversal_string,
                     clause,
@@ -284,6 +297,10 @@ fn eerer() {
         .banana(Clause::All)
         .title;
 
+    Student::schema()
+        .writes__(Clause::All)
+        .banana(Clause::All)
+        .id;
     // Student::schema()
     //     .writes_test__(Clause::All)
     //     .olbook(Clause::All)
@@ -589,22 +606,9 @@ mod xxx {
     //     .title;
 }
 
-fn eerer() {
+fn eere() {
     StudentWritesBook__In::schema()
         .writes__(Clause::All)
-        .olbook(Clause::All)
-        .title;
-
-    StudentWritesBook__Out::schema().title;
-    Writes__::new().olbook(Clause::All).title;
-
-    Student::schema()
-        .writes__(Clause::All)
-        .olbook(Clause::All)
-        .title;
-
-    Student::schema()
-        .writes_test__(Clause::All)
         .olbook(Clause::All)
         .title;
 }
