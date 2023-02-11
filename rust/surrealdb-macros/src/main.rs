@@ -27,8 +27,8 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "student")]
 pub struct Student {
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // #[builder(default, setter(strip_option))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     id: Option<String>,
     first_name: String,
     last_name: String,
@@ -36,29 +36,18 @@ pub struct Student {
     #[surrealdb(link_one = "Book", skip_serializing)]
     #[serde(rename = "lowo_na")]
     fav_book: LinkOne<Book>,
-    // // #[surrealdb(link_one = "Book", skip_serializing)]
-    // course: LinkOne<Book>,
-    // #[surrealdb(link_many = "Book", skip_serializing)]
-    // #[serde(rename = "lowo")]
-    // all_semester_courses: LinkMany<Book>,
+
+    #[surrealdb(link_one = "Book", skip_serializing)]
+    course: LinkOne<Book>,
+
+    #[surrealdb(link_many = "Book", skip_serializing)]
+    #[serde(rename = "lowo")]
+    all_semester_courses: LinkMany<Book>,
+
     #[surrealdb(relate(model = "StudentWritesBook", connection = "->writes->book"))]
     written_blogs: Relate<Book>,
 }
 
-/*
-fn ewer() {
-    struct Nama<T> {}
-
-    impl<T> Nama<T> {
-        fn new() -> Self {
-            Self::<T>new();
-            Self {}
-        }
-    }
-}
-*/
-
-// #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "writes")]
@@ -85,42 +74,13 @@ pub struct Book {
     title: String,
 }
 
-impl Mana for Book {
-    type TableNameChecker = bookxx::TableNameStaticChecker;
-}
-
-type StudentWritesBook__In = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::In;
-type StudentWritesBook__Out = <StudentWritesBook as surrealdb_macros::SurrealdbEdge>::Out;
-
-type OutBookTableNameChecker = <StudentWritesBook__Out as Mana>::TableNameChecker;
 fn eerer() {
-    Student::schema().writes__(Clause::All).book(Clause::All);
-    StudentWritesBook__In::schema();
-    unimplemented!();
+    Student::schema()
+        .writes__(Clause::All)
+        .book(Clause::All)
+        .title;
 }
-::static_assertions::assert_fields!(OutBookTableNameChecker: book);
-// ::static_assertions::assert_fields!(StudentWritesBook)
-trait Mana {
-    type TableNameChecker;
-}
-
-type BookTableNameChecker = <Book as Mana>::TableNameChecker;
-::static_assertions::assert_fields!(BookTableNameChecker: book);
-pub mod bookxx {
-    pub struct TableNameStaticChecker {
-        pub book: String,
-    }
-}
-// ::static_assertions::assert_fields!(Book; id);
-// fn fmt(f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-//     // f.write_fmt(format_args!("{}", self.___________store))
-//     todo!()
-// }
-// struct Nama {}
-// mod nama {}
 fn main() {
-    // ::std::string::String::std::k
-    // ::std::default::Default
     let book = Book {
         id: Some("book1".into()),
         title: "ere".into(),
@@ -132,6 +92,8 @@ fn main() {
         last_name: "".into(),
         fav_book: LinkOne::from_model(book),
         written_blogs: Default::default(),
+        course: todo!(),
+        all_semester_courses: todo!(),
     };
 
     let x = xx.clone().get_key();
