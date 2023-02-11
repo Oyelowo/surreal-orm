@@ -154,27 +154,13 @@ pub struct FieldsGetterOpts {
 
 #[derive(Default, Clone)]
 pub(crate) struct ReferencedNodeMeta {
+    pub(crate) foreign_node_type: TokenStream,
     pub(crate) foreign_node_schema_import: TokenStream,
     pub(crate) record_link_default_alias_as_method: TokenStream,
     pub(crate) foreign_node_type_validator: TokenStream,
 }
 
 impl ReferencedNodeMeta {
-    pub(crate) fn from_relate(relate: Relate, destination_node: &TokenStream) -> Self {
-        let crate_name = get_crate_name(false);
-        // let destination_node_schema_import = quote!();
-        // let schema_name = relate
-        Self {
-            foreign_node_schema_import: quote!(
-                type #destination_node = <super::#destination_node as #crate_name::SurrealdbNode>::Schema;
-            ),
-
-            record_link_default_alias_as_method: quote!(),
-
-            foreign_node_type_validator: quote!(),
-        }
-    }
-
     pub(crate) fn from_record_link(
         node_type_name: &NodeTypeName,
         normalized_field_name: &::syn::Ident,
@@ -211,6 +197,7 @@ impl ReferencedNodeMeta {
                     #schema_type_ident::#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause)
                 }
             ),
+            foreign_node_type: quote!(schema_type_ident),
         }
     }
 }

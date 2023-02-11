@@ -187,7 +187,7 @@ pub struct SchemaFieldsProperties {
     /// We need imports to be unique, hence the hashset
     /// Used when you use a SurrealdbNode in field e.g: favourite_book: LinkOne<Book>,
     /// e.g: type Book = <super::Book as SurrealdbNode>::Schema;
-    pub imports_referenced_node_schema: Vec<TokenStream>,
+    pub imports_referenced_node_schema: HashMap<String, TokenStream>,
     
     /// This generates a function that is usually called by other Nodes/Structs
     /// self_instance.drunk_water
@@ -284,7 +284,7 @@ impl SchemaFieldsProperties {
                 
                 store.static_assertions.push(referenced_node_meta.foreign_node_type_validator);
                 store.imports_referenced_node_schema
-                    .push(referenced_node_meta.foreign_node_schema_import.into());
+                    .insert(referenced_node_meta.foreign_node_type.to_string(), referenced_node_meta.foreign_node_schema_import.into());
 
                 store.record_link_fields_methods
                     .push(referenced_node_meta.record_link_default_alias_as_method.into());

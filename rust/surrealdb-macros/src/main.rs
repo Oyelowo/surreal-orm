@@ -40,8 +40,8 @@ pub struct Student {
     #[serde(rename = "lowo_na")]
     fav_book: LinkOne<Book>,
 
-    #[surrealdb(link_one = "Book", skip_serializing)]
-    course: LinkOne<Book>,
+    #[surrealdb(link_one = "Blog", skip_serializing)]
+    course: LinkOne<Blog>,
 
     #[surrealdb(link_many = "Book", skip_serializing)]
     #[serde(rename = "lowo")]
@@ -75,6 +75,16 @@ pub struct Book {
     #[builder(default, setter(strip_option))]
     id: Option<String>,
     title: String,
+}
+
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "blog")]
+pub struct Blog {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    id: Option<String>,
+    content: String,
 }
 
 fn eerer() {

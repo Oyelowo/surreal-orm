@@ -11,7 +11,7 @@ pub(crate) fn validate_table_name(
             "table name must be in snake case of the current struct name. 
         Try: `{expected_table_name}`.
         
-        If you don't want to follow this convention, use attribute `relax_table_namehh`"
+        If you don't want to follow this convention, use attribute `relax_table_name`. "
         );
     }
 }

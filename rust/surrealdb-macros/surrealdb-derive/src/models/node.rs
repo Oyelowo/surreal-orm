@@ -68,9 +68,12 @@ impl ToTokens for FieldsGetterOpts {
             schema_props_args,
         );
        let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream() ; 
+       // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
+       let imports_referenced_node_schema = imports_referenced_node_schema.values();
+
        let node_edge_metadata_static_assertions = node_edge_metadata.generate_static_assertions() ; 
-        imports_referenced_node_schema.dedup_by(|a,
-                                                b| a.to_string() == b.to_string());
+
+        // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
