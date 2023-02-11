@@ -94,6 +94,7 @@ type StudentWritesBook__Out = <StudentWritesBook as surrealdb_macros::SurrealdbE
 
 type OutBookTableNameChecker = <StudentWritesBook__Out as Mana>::TableNameChecker;
 fn eerer() {
+    Student::schema().writes__(Clause::All).book(Clause::All);
     StudentWritesBook__In::schema();
     unimplemented!();
 }

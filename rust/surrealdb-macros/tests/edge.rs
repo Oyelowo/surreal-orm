@@ -243,10 +243,10 @@ pub mod student {
         //         )
         //     }
         // }
-        trait Write__Trait {
-            // fn olbook(&self, clause: Clause) -> BookMa;
-            fn Book(&self, clause: surrealdb_macros::Clause) -> Book;
-        }
+        // trait Write__Trait {
+        //     // fn olbook(&self, clause: Clause) -> BookMa;
+        //     fn Book(&self, clause: surrealdb_macros::Clause) -> Book;
+        // }
 
         pub struct Writes__(Writes);
 
