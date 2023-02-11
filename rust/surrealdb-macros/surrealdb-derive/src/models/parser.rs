@@ -240,6 +240,7 @@ impl SchemaFieldsProperties {
             .fold(Self::default(), |mut store, field_receiver| {
                 let crate_name = get_crate_name(false);
                 let field_type = &field_receiver.ty;
+                let field_name_original = field_receiver.ident.as_ref().unwrap();
                 let relationship = RelationType::from(field_receiver);
                 let NormalisedField { 
                          ref field_ident_normalised,
@@ -259,20 +260,31 @@ impl SchemaFieldsProperties {
                                 
                     },
                     RelationType::LinkOne(node_object) => {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised) 
+                        let foreign_node = format_ident!("{node_object}");
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkOne<#foreign_node>);));
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
                     }
                     RelationType::LinkSelf(node_object) => {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised) 
+                        let foreign_node = format_ident!("{node_object}");
+                        if node_object.to_string() != struct_name_ident.to_string() {
+                            panic!("The field - `{field_name_original}` - has a linkself attribute or type that is not pointing to the current struct. \
+                                   Make sure the field attribute is link_self=\"{struct_name_ident}\" \
+                                   and the type is LinkSelf<{struct_name_ident}>. ");
+                        }
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkSelf<#foreign_node>);));
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
                     }
                     RelationType::LinkMany(node_object) => {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised) 
+                        let foreign_node = format_ident!("{node_object}");
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkMany<#foreign_node>);));
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
                     }
                     RelationType::None => ReferencedNodeMeta::default(),
                 };
                 
-                store.static_assertions.push(referenced_node_meta.destination_node_type_validator);
+                store.static_assertions.push(referenced_node_meta.foreign_node_type_validator);
                 store.imports_referenced_node_schema
-                    .push(referenced_node_meta.destination_node_schema_import.into());
+                    .push(referenced_node_meta.foreign_node_schema_import.into());
 
                 store.record_link_fields_methods
                     .push(referenced_node_meta.record_link_default_alias_as_method.into());

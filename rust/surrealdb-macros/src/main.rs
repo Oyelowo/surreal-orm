@@ -33,6 +33,9 @@ pub struct Student {
     first_name: String,
     last_name: String,
 
+    #[surrealdb(link_self = "Student", skip_serializing)]
+    best_class_mate: LinkSelf<Student>,
+
     #[surrealdb(link_one = "Book", skip_serializing)]
     #[serde(rename = "lowo_na")]
     fav_book: LinkOne<Book>,

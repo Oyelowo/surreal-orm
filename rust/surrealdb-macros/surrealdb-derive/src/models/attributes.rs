@@ -8,7 +8,7 @@ use syn::Ident;
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     get_crate_name,
-    relations::NodeName,
+    relations::{NodeTableName, NodeTypeName},
     variables::VariablesModelMacro,
 };
 use quote::{format_ident, quote};
@@ -154,9 +154,9 @@ pub struct FieldsGetterOpts {
 
 #[derive(Default, Clone)]
 pub(crate) struct ReferencedNodeMeta {
-    pub(crate) destination_node_schema_import: TokenStream,
+    pub(crate) foreign_node_schema_import: TokenStream,
     pub(crate) record_link_default_alias_as_method: TokenStream,
-    pub(crate) destination_node_type_validator: TokenStream,
+    pub(crate) foreign_node_type_validator: TokenStream,
 }
 
 impl ReferencedNodeMeta {
@@ -165,19 +165,20 @@ impl ReferencedNodeMeta {
         // let destination_node_schema_import = quote!();
         // let schema_name = relate
         Self {
-            destination_node_schema_import: quote!(
+            foreign_node_schema_import: quote!(
                 type #destination_node = <super::#destination_node as #crate_name::SurrealdbNode>::Schema;
             ),
 
             record_link_default_alias_as_method: quote!(),
 
-            destination_node_type_validator: quote!(),
+            foreign_node_type_validator: quote!(),
         }
     }
 
     pub(crate) fn from_record_link(
-        node_name: &NodeName,
+        node_type_name: &NodeTypeName,
         normalized_field_name: &::syn::Ident,
+        struct_name_ident: &::syn::Ident,
     ) -> Self {
         let VariablesModelMacro {
             __________connect_to_graph_traversal_string,
@@ -185,21 +186,29 @@ impl ReferencedNodeMeta {
             ..
         } = VariablesModelMacro::new();
 
-        let schema_name = format_ident!("{node_name}");
+        let schema_type_ident = format_ident!("{node_type_name}");
         let crate_name = get_crate_name(false);
 
+        let foreign_node_schema_import = if node_type_name.to_string()
+            == struct_name_ident.to_string()
+        {
+            // Dont import for current struct since that already exists in scope
+            quote!()
+        } else {
+            quote!(type #schema_type_ident = <super::#schema_type_ident as #crate_name::SurrealdbNode>::Schema;)
+        };
         Self {
             // imports for specific schema from the trait Generic Associated types e.g
             // type Book = <super::Book as SurrealdbNode>::Schema;
-            destination_node_schema_import: quote!(
-                type #schema_name = <super::#schema_name as #crate_name::SurrealdbNode>::Schema;
+            foreign_node_schema_import,
+
+            foreign_node_type_validator: quote!(
+                ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::SurrealdbNode);
             ),
 
-            destination_node_type_validator: quote!(::static_assertions::assert_impl_one!(#schema_name: #crate_name::SurrealdbNode);),
-
             record_link_default_alias_as_method: quote!(
-                pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_name {
-                    #schema_name::#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause)
+                pub fn #normalized_field_name(&self, clause: #crate_name::Clause) -> #schema_type_ident {
+                    #schema_type_ident::#__________connect_to_graph_traversal_string(&self.#___________graph_traversal_string, clause)
                 }
             ),
         }
