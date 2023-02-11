@@ -51,7 +51,7 @@ impl ToTokens for FieldsGetterOpts {
 
         let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
-        if table_name.as_ref().unwrap() != &expected_table_name {panic!("E don happen");}
+        if table_name.as_ref().unwrap() != &expected_table_name {panic!("table name must be in snake case of the current struct name. Try: {expected_table_name}");}
         
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
