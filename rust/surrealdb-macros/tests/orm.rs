@@ -27,12 +27,16 @@ use typed_builder::TypedBuilder;
 
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "student")]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     id: Option<String>,
     first_name: String,
     last_name: String,
+
+    #[surrealdb(link_one = "Book", skip_serializing)]
+    best_friend: LinkSelf<Student>,
 
     #[surrealdb(link_one = "Book", skip_serializing)]
     #[serde(rename = "unoBook")]
@@ -45,13 +49,14 @@ pub struct Student {
     #[serde(rename = "semCoures")]
     all_semester_courses: LinkMany<Book>,
 
-    #[surrealdb(relate(edge = "StudentWritesBook", link = "->Writes->Book"))]
+    #[surrealdb(relate(model = "StudentWritesBook", connection = "->writes->book"))]
     written_books: Relate<Book>,
 }
 
 // #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "writes")]
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -69,6 +74,7 @@ type StudentWritesBook = Writes<Student, Book>;
 
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "book")]
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -79,6 +85,7 @@ pub struct Book {
 
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "blog")]
 pub struct Blog {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -101,8 +108,8 @@ mod tests {
     #[test]
     fn multiplication_tests2() {
         let x = Student::schema()
-            .Writes__(Clause::All)
-            .Book(Clause::Id(SurId::try_from("Book:blaze").unwrap()))
+            .writes__(Clause::All)
+            .book(Clause::Id(SurId::try_from("Book:blaze").unwrap()))
             .title;
 
         assert_eq!(
@@ -114,10 +121,10 @@ mod tests {
     #[test]
     fn multiplication_tests3() {
         let x = Student::schema()
-            .Writes__(Clause::Where(
+            .writes__(Clause::Where(
                 query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .Book(Clause::All)
+            .book(Clause::All)
             .content;
 
         assert_eq!(
@@ -129,10 +136,10 @@ mod tests {
     #[test]
     fn multiplication_tests4_with_alias() {
         let x = Student::schema()
-            .Writes__(Clause::Where(
+            .writes__(Clause::Where(
                 query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .Book(Clause::Where(query().where_(
+            .book(Clause::Where(query().where_(
                 Book::schema().content.contains_one("Oyelowo in Uranus"),
             )))
             .__as__(Student::schema().writtenBooks);
@@ -147,10 +154,10 @@ mod tests {
     #[test]
     fn multiplication_tests4() {
         let x = Student::schema()
-            .Writes__(Clause::Where(
+            .writes__(Clause::Where(
                 query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .Book(Clause::Where(query().where_(
+            .book(Clause::Where(query().where_(
                 Book::schema().content.contains_one("Oyelowo in Uranus"),
             )))
             .content;
@@ -165,10 +172,10 @@ mod tests {
     #[test]
     fn multiplication_tests5() {
         let x = Student::schema()
-            .Writes__(Clause::Where(
+            .writes__(Clause::Where(
                 query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .Book(Clause::Id(SurId::try_from("Book:oyelowo").unwrap()))
+            .book(Clause::Id(SurId::try_from("Book:oyelowo").unwrap()))
             .content;
 
         assert_eq!(
@@ -181,10 +188,10 @@ mod tests {
     #[test]
     fn multiplication_tests6() {
         let x = Student::schema()
-            .Writes__(Clause::Where(
+            .writes__(Clause::Where(
                 query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .Book(Clause::Id("Book:oyelowo".try_into().unwrap()))
+            .book(Clause::Id("Book:oyelowo".try_into().unwrap()))
             .__as__(Student::schema().writtenBooks);
 
         assert_eq!(
@@ -197,10 +204,10 @@ mod tests {
     #[test]
     fn multiplication_tests7() {
         let x = Student::schema()
-            .Writes__(Clause::Where(
+            .writes__(Clause::Where(
                 query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .Book(Clause::Id("Book:oyelowo".try_into().unwrap()))
+            .book(Clause::Id("Book:oyelowo".try_into().unwrap()))
             .__as__("real_deal");
 
         assert_eq!(

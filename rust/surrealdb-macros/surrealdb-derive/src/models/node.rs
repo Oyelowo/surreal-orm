@@ -101,7 +101,7 @@ impl ToTokens for FieldsGetterOpts {
             //     #[serde(rename = "lowo")]
             //     all_semester_courses: LinkMany<Book>,
             //
-            //     #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
+            //     #[surrealdb(relate(model = "StudentWritesBlog", connection = "->writes->Blog"))]
             //     written_blogs: Relate<Blog>,
             // }
         tokens.extend(quote!( 
