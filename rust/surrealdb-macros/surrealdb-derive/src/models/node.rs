@@ -38,7 +38,9 @@ impl ToTokens for FieldsGetterOpts {
         let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
         if !relax_table_name.unwrap_or(false) && table_name.as_ref().unwrap() != &expected_table_name  {
-            panic!("table name must be in snake case of the current struct name. Try: {expected_table_name}");
+            panic!("table name must be in snake case of the current struct name. 
+                   Try: {expected_table_name}.
+                   If you don't want to follow this convention, use attribute `relax_table_namehh`");
         }
     
         let struct_level_casing = rename_all.as_ref().map(|case| {

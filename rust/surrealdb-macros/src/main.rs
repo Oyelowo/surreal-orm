@@ -44,7 +44,7 @@ pub struct Student {
     #[serde(rename = "lowo")]
     all_semester_courses: LinkMany<Book>,
 
-    #[surrealdb(relate(model = "StudentWritesBook", connection = "->writes->book"))]
+    #[surrealdb(relate(model = "StudentWritesBook", connection = "->rites->book"))]
     written_blogs: Relate<Book>,
 }
 
@@ -76,7 +76,7 @@ pub struct Book {
 
 fn eerer() {
     Student::schema()
-        .writes__(Clause::All)
+        .rites__(Clause::All)
         .book(Clause::All)
         .title;
 }
@@ -111,10 +111,10 @@ fn main() {
         .title
         .contains_one("bee");
 
-    Student::schema().writes__(Clause::All).book(Clause::All);
+    Student::schema().rites__(Clause::All).book(Clause::All);
 
     let xx = Student::schema()
-        .writes__(Clause::All)
+        .rites__(Clause::All)
         .book(Clause::Where(
             query().where_(Student::schema().lastName.contains_one("Dayo")),
         ))
