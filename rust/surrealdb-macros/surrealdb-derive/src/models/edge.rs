@@ -17,7 +17,7 @@ use std::str::FromStr;
 
 use syn::{self, parse_macro_input};
 
-use super::{parser::{SchemaFieldsProperties,  SchemaPropertiesArgs},  casing::CaseString,  attributes::{Rename, MyFieldReceiver}, variables::VariablesModelMacro};
+use super::{parser::{SchemaFieldsProperties,  SchemaPropertiesArgs},  casing::CaseString,  attributes::{Rename, MyFieldReceiver}, variables::VariablesModelMacro, errors};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
@@ -52,11 +52,7 @@ impl ToTokens for FieldsGetterOpts {
 
         let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
-        if !relax_table_name.unwrap_or(false) && table_name.as_ref().unwrap() != &expected_table_name {
-            panic!("table name must be in snake case of the current struct name. 
-                   Try: {expected_table_name}.
-                   If you don't want to follow this convention, use attribute `relax_table_namehh`");
-        }
+        errors::validate_table_name(struct_name_ident, table_name, relax_table_name);
         
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")

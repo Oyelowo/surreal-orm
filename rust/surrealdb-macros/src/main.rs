@@ -66,7 +66,7 @@ type StudentWritesBook = Writes<Student, Book>;
 
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surrealdb(table_name = "book")]
+#[surrealdb(table_name = "ook", relax_table_name)]
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]

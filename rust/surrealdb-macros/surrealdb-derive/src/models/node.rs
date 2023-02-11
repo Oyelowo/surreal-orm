@@ -9,6 +9,7 @@ use std::str::FromStr;
 use syn::{self, parse_macro_input};
 
 use super::{
+    errors,
     casing::CaseString,
     parser::{ SchemaFieldsProperties, SchemaPropertiesArgs}, attributes::FieldsGetterOpts,
     variables::VariablesModelMacro
@@ -34,14 +35,8 @@ impl ToTokens for FieldsGetterOpts {
             ..
         } = *self;
 
-        // let table_name = table_name;
-        let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
-        if !relax_table_name.unwrap_or(false) && table_name.as_ref().unwrap() != &expected_table_name  {
-            panic!("table name must be in snake case of the current struct name. 
-                   Try: {expected_table_name}.
-                   If you don't want to follow this convention, use attribute `relax_table_namehh`");
-        }
+        errors::validate_table_name(struct_name_ident, table_name, relax_table_name);
     
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
@@ -80,24 +75,24 @@ impl ToTokens for FieldsGetterOpts {
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         
-            // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
-            // #[serde(rename_all = "camelCase")]
-            // pub struct Student {
-            //     #[serde(skip_serializing_if = "Option::is_none")]
-            //     #[builder(default, setter(strip_option))]
-            //     id: Option<String>,
-            //     first_name: String,
-            //
-            //     #[surrealdb(link_one = "Book", skip_serializing)]
-            //     course: LinkOne<Book>,
-            //
-            //     #[surrealdb(link_many = "Book", skip_serializing)]
-            //     #[serde(rename = "lowo")]
-            //     all_semester_courses: LinkMany<Book>,
-            //
-            //     #[surrealdb(relate(model = "StudentWritesBlog", connection = "->writes->Blog"))]
-            //     written_blogs: Relate<Blog>,
-            // }
+        // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+        // #[serde(rename_all = "camelCase")]
+        // pub struct Student {
+        //     #[serde(skip_serializing_if = "Option::is_none")]
+        //     #[builder(default, setter(strip_option))]
+        //     id: Option<String>,
+        //     first_name: String,
+        //
+        //     #[surrealdb(link_one = "Book", skip_serializing)]
+        //     course: LinkOne<Book>,
+        //
+        //     #[surrealdb(link_many = "Book", skip_serializing)]
+        //     #[serde(rename = "lowo")]
+        //     all_semester_courses: LinkMany<Book>,
+        //
+        //     #[surrealdb(relate(model = "StudentWritesBlog", connection = "->writes->Blog"))]
+        //     written_blogs: Relate<Blog>,
+        // }
         tokens.extend(quote!( 
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
@@ -194,6 +189,7 @@ impl ToTokens for FieldsGetterOpts {
 ));
     }
 }
+
 
 pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     // Construct a representation of Rust code as a syntax tree
