@@ -554,7 +554,7 @@ impl NodeEdgeMetadataStore {
         
         
         let foreign_node_connection_method = || quote!(
-                                fn #destination_node_table_name(&self, clause: #crate_name::Clause) -> #destination_node_schema_ident {
+                                pub fn #destination_node_table_name(&self, clause: #crate_name::Clause) -> #destination_node_schema_ident {
                                     #destination_node_schema_ident::#__________connect_to_graph_traversal_string(
                                                 &self.#___________graph_traversal_string,
                                                 clause,
