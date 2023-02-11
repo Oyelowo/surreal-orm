@@ -107,7 +107,7 @@ impl ToTokens for FieldsGetterOpts {
                     type In = In;
                     type Out = Out;
                     type TableNameChecker = #module_name::TableNameStaticChecker;
-                    type Schema = #module_name::#struct_name_ident<In, Out>;
+                    type Schema = #module_name::#struct_name_ident;
 
                     fn schema() -> Self::Schema {
                         #module_name::#struct_name_ident::new()
@@ -129,20 +129,16 @@ impl ToTokens for FieldsGetterOpts {
                     #( #imports_referenced_node_schema) *
 
                     #[derive(Debug, ::serde::Serialize, Default)]
-                    pub struct #struct_name_ident<In: SurrealdbNode, Out: SurrealdbNode> {
+                    pub struct #struct_name_ident {
                        #( #schema_struct_fields_types_kv) *
                         pub #___________graph_traversal_string: ::std::string::String,
-                        #___________in_marker: ::std::marker::PhantomData<In>,
-                        #___________out_marker: ::std::marker::PhantomData<Out>,
                     }
 
-                    impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #struct_name_ident<In, Out> {
+                    impl #struct_name_ident {
                         pub fn new() -> Self {
                             Self {
                                #( #schema_struct_fields_names_kv) *
                                 #___________graph_traversal_string: "".into(),
-                                #___________in_marker: ::std::marker::PhantomData,
-                                #___________out_marker: ::std::marker::PhantomData,
                             }
                         }
 
@@ -150,8 +146,6 @@ impl ToTokens for FieldsGetterOpts {
                             Self {
                                #( #schema_struct_fields_names_kv_empty) *
                                 #___________graph_traversal_string: "".into(),
-                                #___________in_marker: ::std::marker::PhantomData,
-                                #___________out_marker: ::std::marker::PhantomData,
                             }
                         }
                         
