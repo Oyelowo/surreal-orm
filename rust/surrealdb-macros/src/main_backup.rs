@@ -23,66 +23,71 @@ use surrealdb::{
 // const_assert!("oylelowo".as_str().len() > 3);
 // assert_fields!(Account_Manage_Project: r#in, out);
 
-use surrealdb_macros::{
-    links::{LinkMany, LinkOne, LinkSelf, Relate},
-    model_id::SurIdComplex,
-    node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
-    query_builder::{query, ToNodeBuilder},
-    Edge, SurrealdbModel,
-};
+// use surrealdb_macros::{
+//     links::{LinkMany, LinkOne, LinkSelf, Relate},
+//     model_id::SurId,
+//     query_builder::{query, NodeBuilder, ToNodeBuilder},
+//     Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
+// };
+// use surrealdb_macros::{
+//     links::{LinkMany, LinkOne, LinkSelf, Relate},
+//     model_id::SurIdComplex,
+//     node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
+//     query_builder::{query, ToNodeBuilder},
+//     Edge, SurrealdbModel,
+// };
 use typed_builder::TypedBuilder;
 
-#[derive(SurrealdbModel, Serialize, Deserialize, Debug)]
-#[surrealdb(rename_all = "camelCase")]
+#[derive(/* SurrealdbModel */ Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct Account {
     id: Option<String>,
     handle: String,
-    // #[surrealdb(rename = "nawao")]
+    // #[urrealdb(rename = "nawao")]
     first_name: String,
-    #[surrealdb(link_self = "Account", skip_serializing)]
-    best_friend: LinkSelf<Account>,
+    // #[surrealdb(link_self = "Account", skip_serializing)]
+    // best_friend: LinkSelf<Account>,
 
-    #[surrealdb(link_self = "Account", skip_serializing)]
-    teacher: LinkSelf<Account>,
+    // #[surrealdb(link_self = "Account", skip_serializing)]
+    // teacher: LinkSelf<Account>,
 
-    #[surrealdb(rename = "lastName")]
+    // #[surrealdb(rename = "lastName")]
     another_name: String,
     chess: String,
     nice_poa: String,
     password: String,
     email: String,
-
     // #[surrealdb(relate(edge="Account_Manage_Project", description="->manage->Account"))]
-    #[surrealdb(relate(edge = "AccountManageProject", link = "->manage->Project"))]
-    managed_projects: Relate<Project>,
+    // #[surrealdb(relate(edge = "AccountManageProject", link = "->manage->Project"))]
+    // managed_projects: Relate<Project>,
 }
 
-#[derive(SurrealdbModel, Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[surrealdb(rename_all = "camelCase")]
 pub struct Project {
     id: Option<String>,
     title: String,
     // #[surrealdbrelate = "->run_by->Account")]
-    #[surrealdb(relate(edge = "AccountManageProject", link = "<-manage<-Account"))]
-    account: Relate<Account>,
+    // #[surrealdb(relate(edge = "AccountManageProject", link = "<-manage<-Account"))]
+    // account: Relate<Account>,
 }
 
 // #[derive(Debug, Serialize, Deserialize, Default)]
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[surrealdb(relation_name = "manage")]
 struct AccountManageProject {
     id: Option<String>,
-    #[surrealdb(link_one = "Account", skip_serializing)]
+    // #[surrealdb(link_one = "Account", skip_serializing)]
     // #[serde(rename = "in")]
     // _in: LinkOne<Account>,
-    r#in: LinkOne<Account>,
-    #[surrealdb(link_one = "Project", skip_serializing)]
-    out: LinkOne<Project>,
+    // r#in: LinkOne<Account>,
+    // #[surrealdb(link_one = "Project", skip_serializing)]
+    // out: LinkOne<Project>,
     when: String,
     destination: String,
 }
 
-#[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -109,7 +114,7 @@ impl Student {
     }
 }
 
-#[derive(SurrealdbModel, Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[surrealdb(relation_name = "writes")]
 struct StudentWritesBlog {
     id: Option<String>,
@@ -121,7 +126,7 @@ struct StudentWritesBlog {
     destination: String,
 }
 
-#[derive(SurrealdbModel, TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
+#[derive(TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
 #[surrealdb(rename_all = "camelCase")]
 pub struct Blog {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -132,7 +137,7 @@ pub struct Blog {
     content: String,
 }
 
-#[derive(SurrealdbModel, TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
+#[derive(TypedBuilder, Default, Serialize, Deserialize, Debug, Clone)]
 #[surrealdb(rename_all = "camelCase")]
 pub struct Course {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -157,6 +162,7 @@ async fn idea_main1() -> Result<()> {
     };
     println!("mowo {}", serde_json::to_string(&xx).unwrap());
 
+    
     let m = query()
         .select(Student::relate_writes_blog())
         // .select(Student::get_schema().writtenBlogs.as_alias("writtenBlogs"))
@@ -732,7 +738,7 @@ mod schema {
     }
     mod book_schema {
         use serde::Serialize;
-        use surrealdb_macros::SurrealdbModel;
+        use surrealdb_macros::
 
         use super::{
             blog_schema::Blog, student_schema::Student, /* writes_schema::Writes, */ Clause, *,

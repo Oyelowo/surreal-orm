@@ -52,32 +52,37 @@ impl FromMeta for Rename {
 
 #[derive(Debug, Clone)]
 pub struct Relate {
-    pub link: String,
+    /// e.g ->writes->book
+    pub connection_model: String,
     // #[darling(default)]
-    pub edge: Option<String>,
+    /// e.g StudentWritesBook,
+    /// derived from: type StudentWritesBook = Writes<Student, Book>;
+    pub model: Option<String>,
 }
 //#[rename(se)]
 impl FromMeta for Relate {
     fn from_string(value: &str) -> darling::Result<Self> {
         Ok(Self {
-            link: value.into(),
-            edge: None,
+            connection_model: value.into(),
+            model: None,
         })
     }
     //TODO: Check to maybe remove cos I probably dont need this
     fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
         #[derive(FromMeta)]
         struct FullRelate {
-            edge: String,
-            link: String,
+            model: String,
+            connection: String,
         }
 
         impl From<FullRelate> for Relate {
             fn from(v: FullRelate) -> Self {
-                let FullRelate { link, edge, .. } = v;
+                let FullRelate {
+                    connection, model, ..
+                } = v;
                 Self {
-                    link,
-                    edge: Some(edge),
+                    connection_model: connection,
+                    model: Some(model),
                 }
             }
         }
@@ -141,7 +146,10 @@ pub struct FieldsGetterOpts {
     pub(crate) rename_all: ::std::option::Option<Rename>,
 
     #[darling(default)]
-    pub(crate) relation_name: ::std::option::Option<String>,
+    pub(crate) table_name: ::std::option::Option<String>,
+
+    #[darling(default)]
+    pub(crate) strict: ::std::option::Option<bool>,
 }
 
 #[derive(Default, Clone)]

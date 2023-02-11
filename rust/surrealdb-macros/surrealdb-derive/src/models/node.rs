@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use convert_case::{Casing, Case};
 use darling::{ToTokens, FromDeriveInput};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -28,10 +29,16 @@ impl ToTokens for FieldsGetterOpts {
             ident: ref struct_name_ident,
             ref data,
             ref rename_all,
-            ref relation_name,
+            ref table_name,
+            ref strict,
             ..
         } = *self;
 
+        // let table_name = table_name;
+        let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
+        let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
+        if table_name.as_ref().unwrap() != &expected_table_name {panic!("table name must be in snake case of the current struct name. Try: {expected_table_name}");}
+    
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
@@ -46,13 +53,13 @@ impl ToTokens for FieldsGetterOpts {
             ___________graph_traversal_string,
             schema_instance, .. 
         } = VariablesModelMacro::new();
-        let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident };
+        let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident, table_name_ident};
 
         let SchemaFieldsProperties {
-                relate_edge_schema_struct_type_alias,
-                relate_edge_schema_struct_type_alias_impl,
-                relate_edge_schema_method_connection,
-                relate_node_alias_method,
+                // relate_edge_schema_struct_type_alias,
+                // relate_edge_schema_struct_type_alias_impl,
+                // relate_edge_schema_method_connection,
+                // relate_node_alias_method,
                 schema_struct_fields_types_kv,
                 schema_struct_fields_names_kv,
                 serialized_field_names_normalised,
@@ -60,10 +67,13 @@ impl ToTokens for FieldsGetterOpts {
                 mut imports_referenced_node_schema,
                 connection_with_field_appended,
                 record_link_fields_methods,
+            node_edge_metadata,
+            schema_struct_fields_names_kv_empty,
         } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
         );
-        
+       let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream() ; 
+       let node_edge_metadata_static_assertions = node_edge_metadata.generate_static_assertions() ; 
         imports_referenced_node_schema.dedup_by(|a,
                                                 b| a.to_string() == b.to_string());
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
@@ -96,6 +106,7 @@ impl ToTokens for FieldsGetterOpts {
             // }
         tokens.extend(quote!( 
             impl #crate_name::SurrealdbNode for #struct_name_ident {
+                type TableNameChecker = #module_name::TableNameStaticChecker;
                 type Schema = #module_name::#struct_name_ident;
 
                 fn schema() -> Self::Schema {
@@ -110,6 +121,10 @@ impl ToTokens for FieldsGetterOpts {
             pub mod #module_name {
                 use ::serde::Serialize;
 
+                pub struct TableNameStaticChecker {
+                    pub #table_name_ident: String,
+                }
+                
                #( #imports_referenced_node_schema) *
                 
 
@@ -134,6 +149,13 @@ impl ToTokens for FieldsGetterOpts {
                         }
                     }
 
+                    pub fn empty() -> Self {
+                        Self {
+                           #( #schema_struct_fields_names_kv_empty) *
+                            #___________graph_traversal_string: "".to_string(),
+                        }
+                    }
+                    
                     pub fn __with_id__(mut self, id: impl ::std::fmt::Display) -> Self {
                         self.#___________graph_traversal_string.push_str(id.to_string().as_str());
                         self
@@ -148,7 +170,7 @@ impl ToTokens for FieldsGetterOpts {
                     }
 
                     pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, clause: #crate_name::Clause) -> Self {
-                        let mut #schema_instance = Self::default();
+                        let mut #schema_instance = Self::empty();
                         let connection = format!("{}{}{}", store, #struct_name_ident_as_str, #crate_name::format_clause(clause, #struct_name_ident_as_str));
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
@@ -157,28 +179,30 @@ impl ToTokens for FieldsGetterOpts {
                         #( #connection_with_field_appended) *
                         #schema_instance
                     }
-
-                    #( #relate_edge_schema_method_connection) *
                     
                     #( #record_link_fields_methods) *
 
+                    // #( #relate_edge_schema_method_connection) *
                     
                     pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {
                         format!("{} AS {}", self, alias)
                     }
                     
-                    #( #relate_node_alias_method) *
+                    // #( #relate_node_alias_method) *
                 }
                 
-                #( #relate_edge_schema_struct_type_alias) *
+                // #( #relate_edge_schema_struct_type_alias) *
 
-                #( #relate_edge_schema_struct_type_alias_impl) *
+                // #( #relate_edge_schema_struct_type_alias_impl) *
                 
+                #node_edge_metadata_tokens
             }
 
                 
             fn #test_name() {
                 #( #static_assertions) *
+                #node_edge_metadata_static_assertions
+                
             }
 ));
     }

@@ -9,6 +9,7 @@ Email: oyelowooyedayo@gmail.com
 #![allow(dead_code)]
 
 
+use convert_case::{Casing, Case};
 use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -32,19 +33,26 @@ pub struct FieldsGetterOpts {
     rename_all: ::std::option::Option<Rename>,
 
     #[darling(default)]
-    pub(crate) relation_name: ::std::option::Option<String>,
+    pub(crate) table_name: ::std::option::Option<String>,
+
+    #[darling(default)]
+    pub(crate) strict: ::std::option::Option<bool>,
 }
 
 impl ToTokens for FieldsGetterOpts {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let FieldsGetterOpts {
             ident: ref struct_name_ident,
+            ref table_name,
             ref data,
             ref rename_all,
-            ref relation_name,
             ..
         } = *self;
 
+        let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
+        let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
+        if table_name.as_ref().unwrap() != &expected_table_name {panic!("table name must be in snake case of the current struct name. Try: {expected_table_name}");}
+        
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
@@ -60,9 +68,11 @@ impl ToTokens for FieldsGetterOpts {
             ___________graph_traversal_string,
             ___________model,
             schema_instance_edge_arrow_trimmed,
-            schema_instance, .. 
+            schema_instance,
+            ___________in_marker,
+            ___________out_marker,  
         } = VariablesModelMacro::new();
-        let schema_props_args = SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident };
+        let schema_props_args = SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident, table_name_ident };
 
         let SchemaFieldsProperties {
                 schema_struct_fields_types_kv,
@@ -72,6 +82,7 @@ impl ToTokens for FieldsGetterOpts {
                 mut imports_referenced_node_schema,
                 connection_with_field_appended,
                 record_link_fields_methods,
+                schema_struct_fields_names_kv_empty,
                 ..
         } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
@@ -89,7 +100,6 @@ impl ToTokens for FieldsGetterOpts {
         // let field_names_ident = format_ident!("{struct_name_ident}DbFields");
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         
-        let schema_alias = VariablesModelMacro::get_schema_alias(struct_name_ident);
         
         tokens.extend(quote!( 
                         
@@ -97,7 +107,7 @@ impl ToTokens for FieldsGetterOpts {
                     type In = In;
                     type Out = Out;
                     type TableNameChecker = #module_name::TableNameStaticChecker;
-                    type Schema = #module_name::#struct_name_ident<String>;
+                    type Schema = #module_name::#struct_name_ident<In, Out>;
 
                     fn schema() -> Self::Schema {
                         #module_name::#struct_name_ident::new()
@@ -108,38 +118,49 @@ impl ToTokens for FieldsGetterOpts {
                     }
                 }
                 
-                use #module_name::#struct_name_ident as #schema_alias;
                 pub mod #module_name {
+                    use #crate_name::SurrealdbNode;
                     
                     pub struct TableNameStaticChecker {
-                        pub #struct_name_ident: String,
+                        pub #table_name_ident: String,
                     }
 
                 
                     #( #imports_referenced_node_schema) *
 
                     #[derive(Debug, ::serde::Serialize, Default)]
-                    pub struct #struct_name_ident<Model: ::serde::Serialize + Default> {
+                    pub struct #struct_name_ident<In: SurrealdbNode, Out: SurrealdbNode> {
                        #( #schema_struct_fields_types_kv) *
                         pub #___________graph_traversal_string: ::std::string::String,
-                        #___________model: ::std::marker::PhantomData<Model>,
+                        #___________in_marker: ::std::marker::PhantomData<In>,
+                        #___________out_marker: ::std::marker::PhantomData<Out>,
                     }
 
-                    impl<Model: ::serde::Serialize + Default> #struct_name_ident<Model> {
+                    impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #struct_name_ident<In, Out> {
                         pub fn new() -> Self {
                             Self {
                                #( #schema_struct_fields_names_kv) *
                                 #___________graph_traversal_string: "".into(),
-                                #___________model: ::std::marker::PhantomData,
+                                #___________in_marker: ::std::marker::PhantomData,
+                                #___________out_marker: ::std::marker::PhantomData,
                             }
                         }
 
+                        pub fn empty() -> Self {
+                            Self {
+                               #( #schema_struct_fields_names_kv_empty) *
+                                #___________graph_traversal_string: "".into(),
+                                #___________in_marker: ::std::marker::PhantomData,
+                                #___________out_marker: ::std::marker::PhantomData,
+                            }
+                        }
+                        
                         pub fn #__________connect_to_graph_traversal_string(
                             store: &::std::string::String,
                             clause: #crate_name::Clause,
                             arrow_direction: &str,
                         ) -> Self {
-                            let mut schema_instance = Self::default();
+                            let mut schema_instance = Self::empty();
                             let schema_edge_str_with_arrow = format!(
                                 "{}{}{}{}{}",
                                 store.as_str(),

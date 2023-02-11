@@ -4,12 +4,14 @@ use model_id::SurId;
 use qbuilder::QueryBuilder;
 
 pub mod links;
+// pub mod main_backup;
 pub mod model_id;
 pub mod node_builder;
 pub mod qbuilder;
 
 pub trait SurrealdbNode {
     type Schema;
+    type TableNameChecker;
     fn schema() -> Self::Schema;
     fn get_key(&self) -> ::std::option::Option<&String>;
 }

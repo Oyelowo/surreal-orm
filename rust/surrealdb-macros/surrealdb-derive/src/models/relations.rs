@@ -58,6 +58,15 @@ impl From<EdgeDirection> for &str {
     }
 }
 
+impl From<&EdgeDirection> for String {
+    fn from(direction: &EdgeDirection) -> Self {
+        match direction {
+            EdgeDirection::OutArrowRight => "->".into(),
+            EdgeDirection::InArrowLeft => "<-".into(),
+        }
+    }
+}
+
 impl From<EdgeDirection> for String {
     fn from(direction: EdgeDirection) -> Self {
         match direction {
@@ -67,8 +76,25 @@ impl From<EdgeDirection> for String {
     }
 }
 
+impl ::std::fmt::Display for EdgeDirection {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let arrow = match self {
+            EdgeDirection::OutArrowRight => "->",
+            EdgeDirection::InArrowLeft => "<-",
+        };
+        f.write_fmt(format_args!("{}", arrow))
+    }
+}
+
 macro_rules! wrapper_struct_to_ident {
     ($simple_wrapper_struct:ty) => {
+        impl From<&$simple_wrapper_struct> for ::proc_macro2::TokenStream {
+            fn from(simple_wrapper_struct: &$simple_wrapper_struct) -> Self {
+                let ident = ::quote::format_ident!("{}", simple_wrapper_struct.0);
+                ::quote::quote!(#ident)
+            }
+        }
+
         impl From<$simple_wrapper_struct> for ::proc_macro2::TokenStream {
             fn from(simple_wrapper_struct: $simple_wrapper_struct) -> Self {
                 let ident = ::quote::format_ident!("{}", simple_wrapper_struct.0);
@@ -115,15 +141,15 @@ wrapper_struct_to_ident!(NodeName);
 #[derive(Debug, Clone)]
 pub(crate) struct RelateAttribute {
     pub(crate) edge_direction: EdgeDirection,
-    pub(crate) edge_name: EdgeName,
-    pub(crate) node_name: NodeName,
+    pub(crate) edge_table_name: EdgeName,
+    pub(crate) node_table_name: NodeName,
 }
 
 impl From<RelateAttribute> for ::proc_macro2::TokenStream {
     fn from(relate_attrs: RelateAttribute) -> Self {
         let edge_direction = ::proc_macro2::TokenStream::from(relate_attrs.edge_direction);
-        let edge_name = ::proc_macro2::TokenStream::from(relate_attrs.edge_name);
-        let node_name = ::proc_macro2::TokenStream::from(relate_attrs.node_name);
+        let edge_name = ::proc_macro2::TokenStream::from(relate_attrs.edge_table_name);
+        let node_name = ::proc_macro2::TokenStream::from(relate_attrs.node_table_name);
         // ->action->NodeObject
         // <-action<-NodeObject
         // e.g ->manages->Project
@@ -146,10 +172,10 @@ impl From<RelateAttribute> for ::proc_macro2::TokenStream {
 // }
 
 // impl From<Relation> for RelateAttribute {
-impl From<Relate> for RelateAttribute {
-    fn from(relation: Relate) -> Self {
-        let right_arrow_count = relation.link.matches("->").count();
-        let left_arrow_count = relation.link.matches("<-").count();
+impl From<&Relate> for RelateAttribute {
+    fn from(relation: &Relate) -> Self {
+        let right_arrow_count = relation.connection_model.matches("->").count();
+        let left_arrow_count = relation.connection_model.matches("<-").count();
         let edge_direction = match (left_arrow_count, right_arrow_count) {
             (2, 0) => EdgeDirection::InArrowLeft,
             (0, 2) => EdgeDirection::OutArrowRight,
@@ -158,7 +184,7 @@ impl From<Relate> for RelateAttribute {
 
         let edge_direction_str: String = edge_direction.into();
         let mut substrings = relation
-            .link
+            .connection_model
             .split(edge_direction_str.as_str())
             .filter(|x| !x.is_empty());
 
@@ -169,13 +195,13 @@ impl From<Relate> for RelateAttribute {
                 }
                 _ => panic!(
                     "too many actions or object, {}",
-                    get_relation_error(&relation)
+                    get_relation_error(relation)
                 ),
             };
 
         Self {
-            node_name: node_object,
-            edge_name: edge_action,
+            node_table_name: node_object,
+            edge_table_name: edge_action,
             edge_direction,
         }
     }
