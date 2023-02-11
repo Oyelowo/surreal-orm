@@ -256,7 +256,7 @@ pub mod student {
             }
         }
 
-        impl Deref for Writes__ {
+        impl ::std::ops::Deref for Writes__ {
             type Target = Writes;
 
             fn deref(&self) -> &Self::Target {
@@ -268,14 +268,14 @@ pub mod student {
         impl Writes__ {
             pub fn banana(&self, clause: surrealdb_macros::Clause) -> Book {
                 Book::__________connect_to_graph_traversal_string(
-                    &self.0.___________graph_traversal_string,
+                    &self.___________graph_traversal_string,
                     clause,
                 )
             }
 
             pub fn olbook(&self, clause: surrealdb_macros::Clause) -> Book {
                 Book::__________connect_to_graph_traversal_string(
-                    &self.0.___________graph_traversal_string,
+                    &self.___________graph_traversal_string,
                     clause,
                 )
             }

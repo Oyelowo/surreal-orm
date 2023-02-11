@@ -561,13 +561,15 @@ impl NodeEdgeMetadataStore {
         } = VariablesModelMacro::new();
         // Within edge generics, there is usually In and Out associated types, this is used to access
         // those
-        let in_or_out = match edge_direction {
+        let foreign_node_in_or_out = match edge_direction {
             EdgeDirection::OutArrowRight => format_ident!("Out"),
             EdgeDirection::InArrowLeft => format_ident!("In"),
         };
+        // We use super twice because we're trying to access the relation model struct name from
+        // the outer outer module because all edge related functionalities are nested
         let destination_node_schema_one = || quote!(
-                            type #destination_node_model_ident = <#relation_model as surrealdb_macros::SurrealdbEdge>::#in_or_out;
-                            type #destination_node_schema_ident = <#destination_node_model_ident as surrealdb_macros::SurrealdbNode>::Schema;
+                            type #destination_node_model_ident = <super::super::#relation_model as #crate_name::SurrealdbEdge>::#foreign_node_in_or_out;
+                            type #destination_node_schema_ident = <#destination_node_model_ident as #crate_name::SurrealdbNode>::Schema;
                             );
         
         let edge_to_nodes_trait_method_one = ||  quote!(fn #destination_node_table_name(&self, clause: #crate_name::Clause) -> #destination_node_schema_ident;);
@@ -693,7 +695,6 @@ impl NodeEdgeMetadataStore {
                 
                 mod #edge_inner_module_name {
                     #( #imports) *
-                    use #crate_name::links::Relate;
                     
                     #( #destination_node_schema) *
                     
