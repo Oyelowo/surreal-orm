@@ -50,7 +50,7 @@ pub struct Student {
 
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surrealdb(table_name = "writes")]
+#[surrealdb(table_name = "rites", relax_table_name)]
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]

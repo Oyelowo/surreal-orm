@@ -30,14 +30,16 @@ impl ToTokens for FieldsGetterOpts {
             ref data,
             ref rename_all,
             ref table_name,
-            ref strict,
+            ref relax_table_name,
             ..
         } = *self;
 
         // let table_name = table_name;
         let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
-        if table_name.as_ref().unwrap() != &expected_table_name {panic!("table name must be in snake case of the current struct name. Try: {expected_table_name}");}
+        if !relax_table_name.unwrap_or(false) && table_name.as_ref().unwrap() != &expected_table_name  {
+            panic!("table name must be in snake case of the current struct name. Try: {expected_table_name}");
+        }
     
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
@@ -56,19 +58,15 @@ impl ToTokens for FieldsGetterOpts {
         let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident, table_name_ident};
 
         let SchemaFieldsProperties {
-                // relate_edge_schema_struct_type_alias,
-                // relate_edge_schema_struct_type_alias_impl,
-                // relate_edge_schema_method_connection,
-                // relate_node_alias_method,
                 schema_struct_fields_types_kv,
                 schema_struct_fields_names_kv,
-                serialized_field_names_normalised,
                 static_assertions,
                 mut imports_referenced_node_schema,
                 connection_with_field_appended,
                 record_link_fields_methods,
-            node_edge_metadata,
-            schema_struct_fields_names_kv_empty,
+                node_edge_metadata,
+                schema_struct_fields_names_kv_empty,
+                ..
         } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
         );
@@ -76,15 +74,9 @@ impl ToTokens for FieldsGetterOpts {
        let node_edge_metadata_static_assertions = node_edge_metadata.generate_static_assertions() ; 
         imports_referenced_node_schema.dedup_by(|a,
                                                 b| a.to_string() == b.to_string());
-        // schema_struct_fields_names_kv.dedup_by(same_bucket)
 
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
-
-        let field_names_ident = format_ident!("{struct_name_ident}DbFields");
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
-        // let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
-        
-        let schema_alias = format_ident!("{}Schema", struct_name_ident.to_string().to_lowercase());
         
             // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
             // #[serde(rename_all = "camelCase")]
@@ -182,18 +174,11 @@ impl ToTokens for FieldsGetterOpts {
                     
                     #( #record_link_fields_methods) *
 
-                    // #( #relate_edge_schema_method_connection) *
-                    
                     pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {
                         format!("{} AS {}", self, alias)
                     }
                     
-                    // #( #relate_node_alias_method) *
                 }
-                
-                // #( #relate_edge_schema_struct_type_alias) *
-
-                // #( #relate_edge_schema_struct_type_alias_impl) *
                 
                 #node_edge_metadata_tokens
             }

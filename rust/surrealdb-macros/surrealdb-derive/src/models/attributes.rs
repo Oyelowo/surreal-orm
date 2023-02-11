@@ -149,7 +149,7 @@ pub struct FieldsGetterOpts {
     pub(crate) table_name: ::std::option::Option<String>,
 
     #[darling(default)]
-    pub(crate) strict: ::std::option::Option<bool>,
+    pub(crate) relax_table_name: ::std::option::Option<bool>,
 }
 
 #[derive(Default, Clone)]
