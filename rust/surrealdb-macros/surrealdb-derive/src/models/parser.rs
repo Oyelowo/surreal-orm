@@ -113,27 +113,9 @@ struct NodeEdgeMetadata {
   ///     ),
   /// ],
   destination_node_schema:  Vec<TokenStream>,
-  /// Example to be Generated:
-  /// trait WriteArrowRightTrait {
-  ///     fn book(&self, clause: #crate::Clause) -> Book;
-  ///     fn blog(&self, clause: #crate::Clause) -> Blog;
-  /// }
-  /// 
-  /// Example Value:
-  /// vec![
-  ///     quote!(trait WriteArrowRightTrait {), // trait opening braces
-  ///     quote!(
-  ///        fn book(&self, clause: Clause) -> Book;
-  ///     ),
-  ///     quote!(
-  ///        fn blog(&self, clause: Clause) -> Blog;
-  ///     ),
-  ///     quote!(}),  // Closing braces
-  /// ] 
-  edge_to_nodes_trait_method: Vec<TokenStream>,
   /// Example Generated:
   ///
-  /// impl WriteArrowRightTrait for Writes__ {
+  /// impl Writes__ {
   ///     fn book(&self, clause: Clause) -> Book {
   ///         Book::__________connect_to_graph_traversal_string(
   ///             &self.___________graph_traversal_string,
@@ -151,7 +133,6 @@ struct NodeEdgeMetadata {
   ///
   /// Example Value:
   /// vec![
-  ///     quote!(impl WriteArrowRightTrait for Writes__ {), // implementation opening braces
   ///     quote!(
   ///        fn book(&self, clause: Clause) -> Book {
   ///            Book::__________connect_to_graph_traversal_string(
@@ -168,9 +149,8 @@ struct NodeEdgeMetadata {
   ///            )
   ///        }
   ///     ),
-  ///     quote!(}),  // Closing braces
   ///    ]
-  edge_to_nodes_trait_methods_impl:Vec<TokenStream>, 
+  foreign_node_connection_method:Vec<TokenStream>, 
   static_assertions: Vec<TokenStream>,
   imports: Vec<TokenStream>,
   edge_name_as_method_ident: syn::Ident 
@@ -572,9 +552,8 @@ impl NodeEdgeMetadataStore {
                             type #destination_node_schema_ident = <#destination_node_model_ident as #crate_name::SurrealdbNode>::Schema;
                             );
         
-        let edge_to_nodes_trait_method_one = ||  quote!(fn #destination_node_table_name(&self, clause: #crate_name::Clause) -> #destination_node_schema_ident;);
         
-        let edge_to_nodes_trait_methods_impl_one = || quote!(
+        let foreign_node_connection_method = || quote!(
                                 fn #destination_node_table_name(&self, clause: #crate_name::Clause) -> #destination_node_schema_ident {
                                     #destination_node_schema_ident::#__________connect_to_graph_traversal_string(
                                                 &self.#___________graph_traversal_string,
@@ -598,8 +577,7 @@ impl NodeEdgeMetadataStore {
                     // models indirectly from the origin and destination nodes rather than the
                     // edges themselves. This allows us to minmise confusion
                     destination_node_schema: vec![destination_node_schema_one()], 
-                    edge_to_nodes_trait_method: vec![ edge_to_nodes_trait_method_one() ], 
-                    edge_to_nodes_trait_methods_impl: vec![ edge_to_nodes_trait_methods_impl_one()],
+                    foreign_node_connection_method: vec![ foreign_node_connection_method()],
                     origin_struct_ident: origin_struct_ident.to_owned(),
                     static_assertions: vec![static_assertions()],
                     edge_name_as_method_ident: format_ident!("{}", edge_name_as_method_ident()),
@@ -611,18 +589,19 @@ impl NodeEdgeMetadataStore {
                 Entry::Occupied(o) => {
                     let node_edge_meta = o.into_mut();
                     node_edge_meta.destination_node_schema.push(destination_node_schema_one());
-                    node_edge_meta.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one());
-                    node_edge_meta.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one());
+                    node_edge_meta.foreign_node_connection_method.push(foreign_node_connection_method());
                     node_edge_meta.static_assertions.push(static_assertions());
                     node_edge_meta.imports.push(imports());
                 },
                 Entry::Vacant(v) => {v.insert(node_edge_meta);}
             };
         //  self.0.entry(edge_name_as_method_ident()).and_modify(|node_edge_meta| {
-        //         node_edge_meta.destination_node_schema.push(destination_node_schema_one());
-        //         node_edge_meta.edge_to_nodes_trait_method.push(edge_to_nodes_trait_method_one());
-        //         node_edge_meta.edge_to_nodes_trait_methods_impl.push(edge_to_nodes_trait_methods_impl_one());
-        //         node_edge_meta.static_assertions.push(static_assertions())
+        //         
+                // node_edge_meta.destination_node_schema.push(destination_node_schema_one());
+                // node_edge_meta.foreign_node_connection_method.push(foreign_node_connection_method());
+                // node_edge_meta.static_assertions.push(static_assertions());
+                // node_edge_meta.imports.push(imports());
+        //         
         // }).or_insert(node_edge_meta);
             self
     }     
@@ -649,23 +628,22 @@ impl NodeEdgeMetadataStore {
         let node_edge_token_streams = self.0.values().map(|value| {
             let NodeEdgeMetadata {
                     origin_struct_ident,
-                    edge_to_nodes_trait_methods_impl,
-                    edge_to_nodes_trait_method,
-                    destination_node_schema,
+                    edge_name_as_struct_with_direction_ident,
+                    edge_name_as_struct_original_ident,
                     edge_table_name,
                     direction,
+                    edge_relation_model_selected_ident,
+                    destination_node_schema,
+                    foreign_node_connection_method,
                     static_assertions,
-                    edge_name_as_method_ident,
                     imports,
-                edge_name_as_struct_with_direction_ident,
-                edge_name_as_struct_original_ident,
-                edge_relation_model_selected_ident,
+                    edge_name_as_method_ident,
             }: &NodeEdgeMetadata = value;
             
             let crate_name = get_crate_name(false);
             // let edge_name_as_struct_ident = format_ident!("{}", value.edge_name_as_struct_ident );
             // let edge_trait_name = format_ident!("{edge_name_as_struct_ident}Trait");
-            let edge_inner_module_name = format_ident!("{}_schema________________", value.edge_name_as_struct_ident.to_string().to_lowercase());
+            let edge_inner_module_name = format_ident!("{}_schema________________", value.edge_name_as_struct_with_direction_ident.to_string().to_lowercase());
             // let arrow = format!("{}", value.direction);
             let arrow =  value.direction.to_string();
             
@@ -718,7 +696,7 @@ impl NodeEdgeMetadataStore {
                     }
 
                     impl #edge_name_as_struct_with_direction_ident {
-                        #( #edge_to_nodes_trait_methods_impl) *
+                        #( #foreign_node_connection_method) *
                     }
                 }
                 
