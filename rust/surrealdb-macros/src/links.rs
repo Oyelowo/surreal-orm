@@ -315,7 +315,7 @@ impl<V: SurrealdbNode> LinkMany<V> {
         LinkMany(vec![])
     }
 
-    pub fn values(&self) -> Vec<Option<&V>> {
+    pub fn values(&self) -> Option<Vec<&V>> {
         let xx = self
             .0
             .iter()
@@ -324,11 +324,11 @@ impl<V: SurrealdbNode> LinkMany<V> {
                 Reference::Id(_) => None,
                 Reference::Null => None,
             })
-            .collect::<Vec<_>>();
+            .collect::<Option<Vec<_>>>();
         xx
     }
 
-    pub fn keys(&self) -> Vec<Option<&SurId>> {
+    pub fn keys(&self) -> Option<Vec<&SurId>> {
         let xx = self
             .0
             .iter()
@@ -337,7 +337,7 @@ impl<V: SurrealdbNode> LinkMany<V> {
                 Reference::Id(id) => Some(id),
                 Reference::Null => None,
             })
-            .collect::<Vec<_>>();
+            .collect::<Option<Vec<_>>>();
         xx
     }
 }
