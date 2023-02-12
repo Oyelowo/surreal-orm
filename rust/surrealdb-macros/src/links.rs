@@ -29,7 +29,7 @@ where
         )
     }
 
-    pub fn id(&self) -> Option<&SurId> {
+    pub fn get_id(&self) -> Option<&SurId> {
         match &self {
             Self::Id(v) => Some(v),
             _ => None,
@@ -90,19 +90,53 @@ macro_rules! implement_bidirectional_conversion {
         }
     };
 }
-
+// fn defr(x: Option<SurId>) {
+//     // let x: Option<SurId> = todo!();
+//     let po = match x {
+//         Some(id) => Reference::id(id),
+//         None => Reference::Null,
+//     };
+// }
+// impl<V: SurrealdbNode> std::convert::From<V> for LinkOne<V> {
+//     fn from(model: V) -> Self {
+//         let x = model.get_key();
+//         let xx = match x {
+//             Some(id) => {
+//                 let bb = id.clone();
+//                 Reference::Id(bb)
+//             }
+//             None => Reference::Null,
+//         };
+//         Self(xx.into())
+//         // Self(
+//         //     Reference::Id(
+//         //         x.expect("Id not found. Make sure Id exists for this model")
+//         //             .to_owned(),
+//         //     )
+//         //     .into(),
+//         // )
+//     }
+// }
 macro_rules! implement_from_for_reference_type {
     ($surrealdb_node_generics:ty, $reference_type:ty) => {
         impl<V: SurrealdbNode> std::convert::From<$surrealdb_node_generics> for $reference_type {
             fn from(model: $surrealdb_node_generics) -> Self {
                 let x = model.get_key();
-                Self(
-                    Reference::Id(
-                        x.expect("Id not found. Make sure Id exists for this model")
-                            .to_owned(),
-                    )
-                    .into(),
-                )
+                let xx = match x {
+                    Some(id) => {
+                        let bb = id.clone();
+                        Reference::Id(bb)
+                    }
+                    None => Reference::Null,
+                };
+                Self(xx.into())
+                // Self(
+                //     Reference::Id(
+                //         x.expect("Id not found. Make sure Id exists for this model")
+                //             .to_owned(),
+                //     )
+                //     .into(),
+                // )
             }
         }
 
@@ -125,18 +159,20 @@ impl<V: SurrealdbNode> std::convert::From<Vec<V>> for LinkMany<V> {
     fn from(model_vec: Vec<V>) -> Self {
         let xx = model_vec
             .into_iter()
-            .map(|m| m.get_key())
-            .collect::<Vec<_>>();
+            .map(|m| {
+                let x = m.get_key();
+                let xx = match x {
+                    Some(id) => {
+                        let bb = id.clone();
+                        Reference::Id(bb)
+                    }
+                    None => Reference::Null,
+                };
+                xx
+            })
+            .collect::<Vec<Reference<V>>>();
 
-        // let x = model_vec.get_key();
         Self(xx)
-        // Self(
-        //     Reference::Id(
-        //         x.expect("Id not found. Make sure Id exists for this model")
-        //             .to_owned(),
-        //     )
-        //     .into(),
-        // )
     }
 }
 // impl<V: SurrealdbNode> std::convert::From<Box<V>> for LinkSelf<V> {
