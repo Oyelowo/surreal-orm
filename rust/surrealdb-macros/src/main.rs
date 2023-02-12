@@ -16,7 +16,7 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
-    links::{LinkMany, LinkOne, LinkSelf, Relate},
+    links::{LinkMany, LinkOne, LinkSelf, Reference, Relate},
     model_id::SurId,
     query_builder::{query, NodeBuilder, ToNodeBuilder},
     Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
@@ -24,7 +24,7 @@ use surrealdb_macros::{
 use typed_builder::TypedBuilder;
 
 // ::static_assertions::assert_impl_one!()
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone /* , Default */)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "student")]
 pub struct Student {
@@ -68,7 +68,7 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
 
 type StudentWritesBook = Writes<Student, Book>;
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
 pub struct Book {
@@ -78,7 +78,7 @@ pub struct Book {
     title: String,
 }
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "blog")]
 pub struct Blog {
@@ -96,7 +96,7 @@ fn eerer() {
 }
 fn main() {
     let book = Book {
-        id: Some("book1".into()),
+        id: Some("book:1".try_into().unwrap()),
         title: "ere".into(),
     };
     let x1 = Student {
@@ -106,8 +106,9 @@ fn main() {
         fav_book: book.into(),
         // fav_book: LinkOne::from(book),
         written_blogs: vec![].into(),
-        all_semester_courses: todo!(),
-        best_class_mate: LinkOne::null(),
+        all_semester_courses: vec![].into(),
+        // best_class_mate: Default::default(),
+        best_class_mate: LinkSelf::nill(),
         course: todo!(),
     };
 
@@ -119,7 +120,7 @@ fn main() {
         // fav_book: LinkOne::from(book),
         written_blogs: vec![].into(),
         all_semester_courses: todo!(),
-        best_class_mate: LinkOne::null(),
+        best_class_mate: x1.into(),
         course: todo!(),
     };
     xx.all_semester_courses

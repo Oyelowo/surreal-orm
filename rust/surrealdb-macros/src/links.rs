@@ -187,7 +187,7 @@ impl<V: SurrealdbNode> std::convert::From<Vec<V>> for LinkMany<V> {
 //         )
 //     }
 // }
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkOne<V: SurrealdbNode>(Reference<V>);
 implement_deref_for_link!(LinkOne<V>; Reference<V>);
 implement_bidirectional_conversion!(LinkOne<V>, Reference<V>);
@@ -223,26 +223,34 @@ impl<V: SurrealdbNode> LinkOne<V> {
     }
 }
 
-impl<V: SurrealdbNode + Default> Default for LinkOne<V> {
-    fn default() -> Self {
-        // Self(Default::default())
-        Self(Reference::Null)
+// impl<V: SurrealdbNode + Default> Default for LinkOne<V> {
+//     fn default() -> Self {
+//         // Self(Default::default())
+//         Self(Reference::Null)
+//     }
+// }
+
+// Use boxing to break reference cycle
+#[derive(Debug, Deserialize, Serialize, Clone, Default)]
+pub struct LinkSelf<V: SurrealdbNode>(Box<Reference<V>>);
+
+impl<V: SurrealdbNode> LinkSelf<V> {
+    pub fn nill() -> Self {
+        Self(Reference::Null.into())
     }
 }
 
-// Use boxing to break reference cycle
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct LinkSelf<V: SurrealdbNode>(Box<Reference<V>>);
+// impl<V: SurrealdbNode> Default for LinkSelf<V> {}
 
 implement_deref_for_link!(LinkSelf<V>; Box<Reference<V>>);
 implement_bidirectional_conversion!(LinkSelf<V>, Box<Reference<V>>);
 implement_from_for_reference_type!(Box<V>, LinkSelf<V>);
 
-impl<V: SurrealdbNode + Default> Default for LinkSelf<V> {
-    fn default() -> Self {
-        Self(Reference::Null.into())
-    }
-}
+// impl<V: SurrealdbNode + Default> Default for LinkSelf<V> {
+//     fn default() -> Self {
+//         Self(Reference::Null.into())
+//     }
+// }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkMany<V: SurrealdbNode>(Vec<Reference<V>>);
