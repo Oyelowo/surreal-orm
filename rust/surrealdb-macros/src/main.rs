@@ -105,11 +105,22 @@ fn main() {
         first_name: "".into(),
         last_name: "".into(),
         fav_book: LinkOne::from_model(book),
-        written_blogs: Default::default(),
-        course: LinkOne::null(),
+        written_blogs: vec![].into(),
         all_semester_courses: todo!(),
-        best_class_mate: todo!(),
+        best_class_mate: LinkOne::null(),
+        course: todo!(),
     };
+    xx.all_semester_courses
+        .into_iter()
+        .map(|x| x.value().unwrap());
+
+    // xx.fav_book.value_owned().unwrap()
+    xx.best_class_mate
+        .value()
+        .unwrap()
+        .fav_book
+        .value()
+        .unwrap();
 
     let x = xx.clone().get_key();
     let cc = xx.clone().get_key();
