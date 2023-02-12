@@ -4,10 +4,10 @@ Email: oyelowooyedayo@gmail.com
 */
 
 
-use std::{collections::{HashMap, hash_map::Entry}, fmt::Display};
+use std::{collections::{HashMap, hash_map::Entry, HashSet}, fmt::Display, ops::Deref};
 
 use convert_case::{Casing, Case};
-use darling::{ast, util};
+use darling::{ast, util, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
@@ -187,7 +187,7 @@ pub struct SchemaFieldsProperties {
     /// We need imports to be unique, hence the hashset
     /// Used when you use a SurrealdbNode in field e.g: favourite_book: LinkOne<Book>,
     /// e.g: type Book = <super::Book as SurrealdbNode>::Schema;
-    pub imports_referenced_node_schema: HashMap<String, TokenStream>,
+    pub imports_referenced_node_schema: HashSet<TokenStreamComparable>,
     
     /// This generates a function that is usually called by other Nodes/Structs
     /// self_instance.drunk_water
@@ -209,6 +209,46 @@ pub struct SchemaFieldsProperties {
     /// ```
     pub record_link_fields_methods: Vec<TokenStream>,
     pub node_edge_metadata: NodeEdgeMetadataStore
+}
+
+
+#[derive(Clone)]
+pub struct TokenStreamComparable(TokenStream);
+
+impl ToTokens for TokenStreamComparable {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        tokens.extend(self.0.clone());
+    }
+}
+
+impl Deref for TokenStreamComparable {
+    type Target=TokenStream;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl From<TokenStream> for TokenStreamComparable {
+    fn from(value: TokenStream) -> Self {
+        Self(value)
+    }
+}
+
+impl Eq for TokenStreamComparable {
+    
+}
+
+impl PartialEq for TokenStreamComparable {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.to_string() == other.0.to_string()
+    }
+}
+
+impl std::hash::Hash for TokenStreamComparable {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.0.to_string().hash(state);
+    }
 }
 
 type AllNodeEdgeMetadata = HashMap<&'static str, NodeEdgeMetadata>;
@@ -284,8 +324,10 @@ impl SchemaFieldsProperties {
                 
                 store.static_assertions.push(referenced_node_meta.foreign_node_type_validator);
                 store.imports_referenced_node_schema
-                    .insert(referenced_node_meta.foreign_node_type.to_string(), referenced_node_meta.foreign_node_schema_import.into());
-
+                    .insert(referenced_node_meta.foreign_node_schema_import.into());
+                // store.imports_referenced_node_schema
+                //     .insert(referenced_node_meta.foreign_node_type.to_string(), referenced_node_meta.foreign_node_schema_import.into());
+                print!("{:?}", referenced_node_meta.foreign_node_type.to_string());
                 store.record_link_fields_methods
                     .push(referenced_node_meta.record_link_default_alias_as_method.into());
   

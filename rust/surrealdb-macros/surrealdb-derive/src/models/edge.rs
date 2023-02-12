@@ -92,7 +92,7 @@ impl ToTokens for FieldsGetterOpts {
             if !serialized_field_names_normalised.contains(&"in".into()) || !serialized_field_names_normalised.contains(&"out".into()) {
                panic!("Vector does not contain both 'in' and 'out'");
             }
-        let imports_referenced_node_schema = imports_referenced_node_schema.values();
+        let imports_referenced_node_schema = Vec::from_iter(imports_referenced_node_schema);
         // imports_referenced_node_schema.dedup_by(|a,
         //                                         b| a.to_string() == b.to_string());
         // schema_struct_fields_names_kv.dedup_by(same_bucket)

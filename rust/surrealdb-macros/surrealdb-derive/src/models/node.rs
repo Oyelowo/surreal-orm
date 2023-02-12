@@ -69,7 +69,7 @@ impl ToTokens for FieldsGetterOpts {
         );
        let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream() ; 
        // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
-       let imports_referenced_node_schema = imports_referenced_node_schema.values();
+       let imports_referenced_node_schema = imports_referenced_node_schema.into_iter().collect::<Vec<_>>();
 
        let node_edge_metadata_static_assertions = node_edge_metadata.generate_static_assertions() ; 
 

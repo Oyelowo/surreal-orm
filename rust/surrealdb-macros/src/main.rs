@@ -22,6 +22,7 @@ use surrealdb_macros::{
     Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
 };
 use typed_builder::TypedBuilder;
+
 // ::static_assertions::assert_impl_one!()
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -33,17 +34,17 @@ pub struct Student {
     first_name: String,
     last_name: String,
 
-    #[surrealdb(link_self = "Student", skip_serializing)]
+    #[surrealdb(link_self = "Student")]
     best_class_mate: LinkSelf<Student>,
 
-    #[surrealdb(link_one = "Book", skip_serializing)]
+    #[surrealdb(link_one = "Book")]
     #[serde(rename = "lowo_na")]
     fav_book: LinkOne<Book>,
 
-    #[surrealdb(link_one = "Blog", skip_serializing)]
+    #[surrealdb(link_one = "Blog")]
     course: LinkOne<Blog>,
 
-    #[surrealdb(link_many = "Book", skip_serializing)]
+    #[surrealdb(link_many = "Book")]
     #[serde(rename = "lowo")]
     all_semester_courses: LinkMany<Book>,
 
@@ -107,6 +108,7 @@ fn main() {
         written_blogs: Default::default(),
         course: todo!(),
         all_semester_courses: todo!(),
+        best_class_mate: todo!(),
     };
 
     let x = xx.clone().get_key();
