@@ -1,5 +1,8 @@
+use serde::{Deserialize, Serialize};
 use std::fmt::Display;
+use thiserror::Error;
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SurId((String, String));
 
 impl Display for SurId {
@@ -44,7 +47,6 @@ impl From<SurId> for (String, String) {
         value.0
     }
 }
-use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum SurrealdbOrmError {

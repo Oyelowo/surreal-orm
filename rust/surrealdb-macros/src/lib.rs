@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
 
-use model_id::SurId;
+pub use model_id::SurId;
 use qbuilder::QueryBuilder;
 
 pub mod links;
@@ -13,7 +13,7 @@ pub trait SurrealdbNode {
     type Schema;
     type TableNameChecker;
     fn schema() -> Self::Schema;
-    fn get_key(&self) -> ::std::option::Option<&String>;
+    fn get_key(&self) -> ::std::option::Option<&SurId>;
 }
 
 pub trait SurrealdbEdge {
@@ -23,7 +23,7 @@ pub trait SurrealdbEdge {
     type Schema;
 
     fn schema() -> Self::Schema;
-    fn get_key(&self) -> ::std::option::Option<&String>;
+    fn get_key(&self) -> ::std::option::Option<&SurId>;
 }
 
 #[derive(serde::Serialize, Debug, Default)]

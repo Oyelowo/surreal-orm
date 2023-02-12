@@ -99,12 +99,24 @@ fn main() {
         id: Some("book1".into()),
         title: "ere".into(),
     };
+    let x1 = Student {
+        id: None,
+        first_name: "".into(),
+        last_name: "".into(),
+        fav_book: book.into(),
+        // fav_book: LinkOne::from(book),
+        written_blogs: vec![].into(),
+        all_semester_courses: todo!(),
+        best_class_mate: LinkOne::null(),
+        course: todo!(),
+    };
 
     let xx = Student {
         id: None,
         first_name: "".into(),
         last_name: "".into(),
-        fav_book: LinkOne::from_model(book),
+        fav_book: book.into(),
+        // fav_book: LinkOne::from(book),
         written_blogs: vec![].into(),
         all_semester_courses: todo!(),
         best_class_mate: LinkOne::null(),

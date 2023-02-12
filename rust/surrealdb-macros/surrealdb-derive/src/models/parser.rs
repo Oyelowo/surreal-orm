@@ -251,8 +251,6 @@ impl std::hash::Hash for TokenStreamComparable {
     }
 }
 
-type AllNodeEdgeMetadata = HashMap<&'static str, NodeEdgeMetadata>;
-
 
 pub struct SchemaPropertiesArgs<'a> {
     pub data: &'a ast::Data<util::Ignored, MyFieldReceiver>,
