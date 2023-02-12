@@ -103,13 +103,13 @@ fn main() {
         id: None,
         first_name: "".into(),
         last_name: "".into(),
-        fav_book: book.into(),
+        fav_book: book.clone().into(),
         // fav_book: LinkOne::from(book),
         written_blogs: vec![].into(),
-        all_semester_courses: vec![].into(),
+        all_semester_courses: LinkMany::nill(),
         // best_class_mate: Default::default(),
         best_class_mate: LinkSelf::nill(),
-        course: todo!(),
+        course: LinkOne::null(),
     };
 
     let xx = Student {
@@ -119,13 +119,14 @@ fn main() {
         fav_book: book.into(),
         // fav_book: LinkOne::from(book),
         written_blogs: vec![].into(),
-        all_semester_courses: todo!(),
+        all_semester_courses: vec![].into(),
         best_class_mate: x1.into(),
-        course: todo!(),
+        course: LinkOne::null(),
     };
-    xx.all_semester_courses
-        .into_iter()
-        .map(|x| x.value().unwrap());
+    let xcv = xx.all_semester_courses.values();
+    // xx.all_semester_courses
+    //     .into_iter()
+    //     .map(|x| x.value().unwrap());
 
     // xx.fav_book.value_owned().unwrap()
     xx.best_class_mate

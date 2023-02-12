@@ -90,6 +90,30 @@ macro_rules! implement_bidirectional_conversion {
         }
     };
 }
+// impl<V: SurrealdbNode> std::convert::From<V> for LinkOne<V> {
+//     fn from(value: V) -> Self {
+//         let reference = match value.get_key() {
+//             Some(id) => Reference::Id(id.to_owned()),
+//             None => Reference::Null,
+//         };
+//         LinkOne(reference.into())
+//     }
+// }
+// macro_rules! implement_bidirectional_model_to_link {
+//     ($from:ty, $to:ty) => {
+//         impl<V: SurrealdbNode> std::convert::From<V> for $to {
+//             fn from(value: V) -> Self {
+//                 value.get_key()
+//             }
+//         }
+//
+//         // impl<V: SurrealdbNode> std::convert::From<$to> for V {
+//         //     fn from(value: $to) -> Self {
+//         //         Self(value)
+//         //     }
+//         // }
+//     };
+// }
 // fn defr(x: Option<SurId>) {
 //     // let x: Option<SurId> = todo!();
 //     let po = match x {
@@ -117,7 +141,7 @@ macro_rules! implement_bidirectional_conversion {
 //         // )
 //     }
 // }
-macro_rules! implement_from_for_reference_type {
+macro_rules! impl_from_model_for_ref_type {
     ($surrealdb_node_generics:ty, $reference_type:ty) => {
         impl<V: SurrealdbNode> std::convert::From<$surrealdb_node_generics> for $reference_type {
             fn from(model: $surrealdb_node_generics) -> Self {
@@ -155,6 +179,27 @@ macro_rules! implement_from_for_reference_type {
     };
 }
 
+// impl<V: SurrealdbNode> std::convert::From<LinkMany<V>> for Vec<V> {
+//     fn from(link_many: LinkMany<V>) -> Self {
+//         link_many.0
+//         let xx = model_vec
+//             .into_iter()
+//             .map(|m| {
+//                 let x = m.get_key();
+//                 let xx = match x {
+//                     Some(id) => {
+//                         let bb = id.clone();
+//                         Reference::Id(bb)
+//                     }
+//                     None => Reference::Null,
+//                 };
+//                 xx
+//             })
+//             .collect::<Vec<Reference<V>>>();
+//
+//         Self(xx)
+//     }
+// }
 impl<V: SurrealdbNode> std::convert::From<Vec<V>> for LinkMany<V> {
     fn from(model_vec: Vec<V>) -> Self {
         let xx = model_vec
@@ -191,7 +236,7 @@ impl<V: SurrealdbNode> std::convert::From<Vec<V>> for LinkMany<V> {
 pub struct LinkOne<V: SurrealdbNode>(Reference<V>);
 implement_deref_for_link!(LinkOne<V>; Reference<V>);
 implement_bidirectional_conversion!(LinkOne<V>, Reference<V>);
-implement_from_for_reference_type!(V, LinkOne<V>);
+impl_from_model_for_ref_type!(V, LinkOne<V>);
 // implement_from_for_reference_type!(Vec<V>, LinkMany<V>);
 
 // impl<V: SurrealdbNode> From<V> for LinkOne<V> {
@@ -244,7 +289,8 @@ impl<V: SurrealdbNode> LinkSelf<V> {
 
 implement_deref_for_link!(LinkSelf<V>; Box<Reference<V>>);
 implement_bidirectional_conversion!(LinkSelf<V>, Box<Reference<V>>);
-implement_from_for_reference_type!(Box<V>, LinkSelf<V>);
+impl_from_model_for_ref_type!(Box<V>, LinkSelf<V>);
+impl_from_model_for_ref_type!(V, LinkSelf<V>);
 
 // impl<V: SurrealdbNode + Default> Default for LinkSelf<V> {
 //     fn default() -> Self {
@@ -256,7 +302,7 @@ implement_from_for_reference_type!(Box<V>, LinkSelf<V>);
 pub struct LinkMany<V: SurrealdbNode>(Vec<Reference<V>>);
 
 implement_deref_for_link!(LinkMany<V>; Vec<Reference<V>>);
-implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);
+// implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);
 
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct Relate<V: SurrealdbNode>(Vec<Reference<V>>);
@@ -264,4 +310,34 @@ pub struct Relate<V: SurrealdbNode>(Vec<Reference<V>>);
 implement_deref_for_link!(Relate<V>; Vec<Reference<V>>);
 implement_bidirectional_conversion!(Relate<V>, Vec<Reference<V>>);
 
-// pub type LinkSelf<V> = Box<LinkOne<V>>;
+impl<V: SurrealdbNode> LinkMany<V> {
+    pub fn nill() -> Self {
+        LinkMany(vec![])
+    }
+
+    pub fn values(&self) -> Vec<Option<&V>> {
+        let xx = self
+            .0
+            .iter()
+            .map(|m| match m {
+                Reference::FetchedValue(v) => Some(v),
+                Reference::Id(_) => None,
+                Reference::Null => None,
+            })
+            .collect::<Vec<_>>();
+        xx
+    }
+
+    pub fn keys(&self) -> Vec<Option<&SurId>> {
+        let xx = self
+            .0
+            .iter()
+            .map(|m| match m {
+                Reference::FetchedValue(_) => None,
+                Reference::Id(id) => Some(id),
+                Reference::Null => None,
+            })
+            .collect::<Vec<_>>();
+        xx
+    }
+}
