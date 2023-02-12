@@ -19,11 +19,39 @@ enum Reference<V: SurrealdbNode> {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct LinkOne<V: SurrealdbNode>(Reference<V>);
 
-pub type LinkMany<V> = Vec<LinkOne<V>>;
-pub type Relate<V> = Vec<LinkOne<V>>;
+impl<V: SurrealdbNode> LinkOne<V> {
+    pub fn null() -> LinkOne<V> {
+        LinkOne(Reference::Null)
+    }
+}
 
+impl<V: SurrealdbNode + Default> Default for LinkOne<V> {
+    fn default() -> Self {
+        // Self(Default::default())
+        Self(Reference::Null)
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, Default)]
+pub struct LinkMany<V: SurrealdbNode>(Vec<LinkOne<V>>);
+// pub type LinkMany<V> = Vec<LinkOne<V>>;
+
+#[derive(Debug, Deserialize, Serialize, Clone, Default)]
+pub struct Relate<V: SurrealdbNode>(Vec<LinkOne<V>>);
+// pub type Relate<V> = Vec<LinkOne<V>>;
+//
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
 // Use boxing to break reference cycle
-pub type LinkSelf<V> = Box<LinkOne<V>>;
+pub struct LinkSelf<V: SurrealdbNode>(Box<LinkOne<V>>);
+
+impl<V: SurrealdbNode + Default> Default for LinkSelf<V> {
+    fn default() -> Self {
+        // Self(Default::default())
+        Self(Box::new(LinkOne(Reference::Null)))
+    }
+}
+// pub type LinkSelf<V> = Box<LinkOne<V>>;
 
 impl<V: SurrealdbNode> From<V> for LinkOne<V> {
     fn from(model: V) -> Self {

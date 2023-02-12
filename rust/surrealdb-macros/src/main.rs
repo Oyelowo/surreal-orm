@@ -106,7 +106,7 @@ fn main() {
         last_name: "".into(),
         fav_book: LinkOne::from_model(book),
         written_blogs: Default::default(),
-        course: todo!(),
+        course: LinkOne::null(),
         all_semester_courses: todo!(),
         best_class_mate: todo!(),
     };
