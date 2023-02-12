@@ -58,8 +58,8 @@ impl<V: SurrealdbNode> Default for Reference<V> {
 }
 
 macro_rules! implement_deref_for_link {
-    ($ident:ident; $target:ty) => {
-        impl<V: SurrealdbNode> std::ops::Deref for $ident<V> {
+    ($reference_ty:ty; $target:ty) => {
+        impl<V: SurrealdbNode> std::ops::Deref for $reference_ty {
             type Target = $target;
 
             fn deref(&self) -> &Self::Target {
@@ -67,7 +67,7 @@ macro_rules! implement_deref_for_link {
             }
         }
 
-        impl<V: SurrealdbNode> std::ops::DerefMut for $ident<V> {
+        impl<V: SurrealdbNode> std::ops::DerefMut for $reference_ty {
             fn deref_mut(&mut self) -> &mut Self::Target {
                 &mut self.0
             }
@@ -75,29 +75,26 @@ macro_rules! implement_deref_for_link {
     };
 }
 
+macro_rules! implement_bidirectional_conversion {
+    ($from:ty, $to:ty) => {
+        impl<V: SurrealdbNode> std::convert::From<$from> for $to {
+            fn from(value: $from) -> Self {
+                value.0
+            }
+        }
+
+        impl<V: SurrealdbNode> std::convert::From<$to> for $from {
+            fn from(value: $to) -> Self {
+                Self(value)
+            }
+        }
+    };
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct LinkOne<V: SurrealdbNode>(Reference<V>);
-implement_deref_for_link!(LinkOne; Reference<V>);
-
-// impl<V: SurrealdbNode> Deref for LinkOne<V> {
-//     type Target = Reference<V>;
-//
-//     fn deref(&self) -> &Self::Target {
-//         todo!()
-//     }
-// }
-
-impl<V: SurrealdbNode> From<LinkOne<V>> for Reference<V> {
-    fn from(value: LinkOne<V>) -> Self {
-        todo!()
-    }
-}
-
-impl<V: SurrealdbNode> From<Reference<V>> for LinkOne<V> {
-    fn from(value: Reference<V>) -> Self {
-        todo!()
-    }
-}
+implement_deref_for_link!(LinkOne<V>; Reference<V>);
+implement_bidirectional_conversion!(LinkOne<V>, Reference<V>);
 
 impl<V: SurrealdbNode> LinkOne<V> {
     pub fn null() -> LinkOne<V> {
@@ -112,60 +109,31 @@ impl<V: SurrealdbNode + Default> Default for LinkOne<V> {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, Default)]
-pub struct LinkMany<V: SurrealdbNode>(Vec<Reference<V>>);
-implement_deref_for_link!(LinkMany; Vec<Reference<V>>);
-
-// impl<V: SurrealdbNode> Deref for LinkMany<V> {
-//     type Target = Vec<Reference<V>>;
-//
-//     fn deref(&self) -> &Self::Target {
-//         &self.0
-//     }
-// }
-
-#[derive(Debug, Deserialize, Serialize, Clone, Default)]
-pub struct Relate<V: SurrealdbNode>(Vec<Reference<V>>);
-implement_deref_for_link!(Relate; Vec<Reference<V>>);
-
-impl<V: SurrealdbNode> From<Relate<V>> for Vec<Reference<V>> {
-    fn from(value: Relate<V>) -> Self {
-        value.0
-    }
-}
-
-impl<V: SurrealdbNode> From<Vec<Reference<V>>> for Relate<V> {
-    fn from(value: Vec<Reference<V>>) -> Self {
-        Self(value)
-    }
-}
-// pub type Relate<V> = Vec<LinkOne<V>>;
-//
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
 // Use boxing to break reference cycle
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct LinkSelf<V: SurrealdbNode>(Box<Reference<V>>);
 
-implement_deref_for_link!(LinkSelf; Box<Reference<V>>);
-// impl<V: SurrealdbNode> Deref for LinkSelf<V> {
-//     type Target = Box<Reference<V>>;
-//
-//     fn deref(&self) -> &Self::Target {
-//         &self.0
-//     }
-// }
-//
-// impl<V: SurrealdbNode> DerefMut for LinkSelf<V> {
-//     fn deref_mut(&mut self) -> &mut Self::Target {
-//         &mut self.0
-//     }
-// }
+implement_deref_for_link!(LinkSelf<V>; Box<Reference<V>>);
+implement_bidirectional_conversion!(LinkSelf<V>, Box<Reference<V>>);
 
 impl<V: SurrealdbNode + Default> Default for LinkSelf<V> {
     fn default() -> Self {
         Self(Reference::Null.into())
     }
 }
+
+#[derive(Debug, Deserialize, Serialize, Clone, Default)]
+pub struct LinkMany<V: SurrealdbNode>(Vec<Reference<V>>);
+
+implement_deref_for_link!(LinkMany<V>; Vec<Reference<V>>);
+implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);
+
+#[derive(Debug, Deserialize, Serialize, Clone, Default)]
+pub struct Relate<V: SurrealdbNode>(Vec<Reference<V>>);
+
+implement_deref_for_link!(Relate<V>; Vec<Reference<V>>);
+implement_bidirectional_conversion!(Relate<V>, Vec<Reference<V>>);
+
 // pub type LinkSelf<V> = Box<LinkOne<V>>;
 
 impl<V: SurrealdbNode> From<V> for LinkOne<V> {
