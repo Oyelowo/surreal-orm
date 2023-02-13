@@ -133,7 +133,17 @@ fn main() {
         .unwrap()
         .clone()
         .clone();
+
+    // Returns either:
+    // the foreign values if fetched
+    // id keys of the foreign Field if not fetched
+    // empty Vec if not available
+    let xcv = xx.all_semester_courses.clone();
+
+    // Returns just the fully fetched values if fetched and available, otherwise, None
     let xcv = xx.all_semester_courses.values();
+    //
+    // Returns just the keys of the foreign field if available, otherwise, None
     let xcv = xx.all_semester_courses.keys();
     // xx.all_semester_courses
     //     .into_iter()

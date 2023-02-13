@@ -43,12 +43,12 @@ where
         }
     }
 
-    // pub fn value_owned(self) -> Option<V> {
-    //     match self {
-    //         Self::FetchedValue(v) => Some(v),
-    //         _ => None,
-    //     }
-    // }
+    pub fn value_owned(self) -> Option<V> {
+        match self {
+            Self::FetchedValue(v) => Some(v),
+            _ => None,
+        }
+    }
 }
 
 impl<V: SurrealdbNode> Default for Reference<V> {
@@ -298,6 +298,10 @@ impl_from_model_for_ref_type!(V, LinkSelf<V>);
 //     }
 // }
 
+/// Returns either:
+/// the foreign values if fetched
+/// id keys of the foreign Field if not fetched
+/// empty Vec if not available
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkMany<V: SurrealdbNode>(Vec<Reference<V>>);
 
@@ -311,10 +315,12 @@ implement_deref_for_link!(Relate<V>; Vec<Reference<V>>);
 implement_bidirectional_conversion!(Relate<V>, Vec<Reference<V>>);
 
 impl<V: SurrealdbNode> LinkMany<V> {
+    /// Returns an empty vector
     pub fn nill() -> Self {
         LinkMany(vec![])
     }
 
+    /// Returns just the fully fetched values if fetched and available, otherwise, None
     pub fn values(&self) -> Option<Vec<&V>> {
         let xx = self
             .0
@@ -328,6 +334,7 @@ impl<V: SurrealdbNode> LinkMany<V> {
         xx
     }
 
+    /// Returns just the keys of the foreign field if available, otherwise, None
     pub fn keys(&self) -> Option<Vec<&SurId>> {
         let xx = self
             .0
