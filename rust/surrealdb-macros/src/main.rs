@@ -123,7 +123,18 @@ fn main() {
         best_class_mate: x1.into(),
         course: LinkOne::null(),
     };
+    let xxo = xx
+        .clone()
+        .best_class_mate
+        .as_ref()
+        .value()
+        .clone()
+        .as_deref()
+        .unwrap()
+        .clone()
+        .clone();
     let xcv = xx.all_semester_courses.values();
+    let xcv = xx.all_semester_courses.keys();
     // xx.all_semester_courses
     //     .into_iter()
     //     .map(|x| x.value().unwrap());

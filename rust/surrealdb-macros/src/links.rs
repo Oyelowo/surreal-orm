@@ -36,19 +36,19 @@ where
         }
     }
 
-    pub fn value_ref(&self) -> Option<&V> {
+    pub fn value(&self) -> Option<&V> {
         match &self {
             Self::FetchedValue(v) => Some(v),
             _ => None,
         }
     }
 
-    pub fn value(self) -> Option<V> {
-        match self {
-            Self::FetchedValue(v) => Some(v),
-            _ => None,
-        }
-    }
+    // pub fn value_owned(self) -> Option<V> {
+    //     match self {
+    //         Self::FetchedValue(v) => Some(v),
+    //         _ => None,
+    //     }
+    // }
 }
 
 impl<V: SurrealdbNode> Default for Reference<V> {
