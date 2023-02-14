@@ -90,57 +90,7 @@ macro_rules! implement_bidirectional_conversion {
         }
     };
 }
-// impl<V: SurrealdbNode> std::convert::From<V> for LinkOne<V> {
-//     fn from(value: V) -> Self {
-//         let reference = match value.get_key() {
-//             Some(id) => Reference::Id(id.to_owned()),
-//             None => Reference::Null,
-//         };
-//         LinkOne(reference.into())
-//     }
-// }
-// macro_rules! implement_bidirectional_model_to_link {
-//     ($from:ty, $to:ty) => {
-//         impl<V: SurrealdbNode> std::convert::From<V> for $to {
-//             fn from(value: V) -> Self {
-//                 value.get_key()
-//             }
-//         }
-//
-//         // impl<V: SurrealdbNode> std::convert::From<$to> for V {
-//         //     fn from(value: $to) -> Self {
-//         //         Self(value)
-//         //     }
-//         // }
-//     };
-// }
-// fn defr(x: Option<SurId>) {
-//     // let x: Option<SurId> = todo!();
-//     let po = match x {
-//         Some(id) => Reference::id(id),
-//         None => Reference::Null,
-//     };
-// }
-// impl<V: SurrealdbNode> std::convert::From<V> for LinkOne<V> {
-//     fn from(model: V) -> Self {
-//         let x = model.get_key();
-//         let xx = match x {
-//             Some(id) => {
-//                 let bb = id.clone();
-//                 Reference::Id(bb)
-//             }
-//             None => Reference::Null,
-//         };
-//         Self(xx.into())
-//         // Self(
-//         //     Reference::Id(
-//         //         x.expect("Id not found. Make sure Id exists for this model")
-//         //             .to_owned(),
-//         //     )
-//         //     .into(),
-//         // )
-//     }
-// }
+
 macro_rules! impl_from_model_for_ref_type {
     ($surrealdb_node_generics:ty, $reference_type:ty) => {
         impl<V: SurrealdbNode> std::convert::From<$surrealdb_node_generics> for $reference_type {
@@ -154,13 +104,6 @@ macro_rules! impl_from_model_for_ref_type {
                     None => Reference::Null,
                 };
                 Self(xx.into())
-                // Self(
-                //     Reference::Id(
-                //         x.expect("Id not found. Make sure Id exists for this model")
-                //             .to_owned(),
-                //     )
-                //     .into(),
-                // )
             }
         }
 
@@ -171,35 +114,11 @@ macro_rules! impl_from_model_for_ref_type {
                     Some(x) => Self(Reference::Id(x.to_owned()).into()),
                     None => Self(Reference::Null.into()),
                 }
-                // Self(Reference::Id(
-                //     x.expect("Id not found. Make sure Id exists for this model"),
-                // ))
             }
         }
     };
 }
 
-// impl<V: SurrealdbNode> std::convert::From<LinkMany<V>> for Vec<V> {
-//     fn from(link_many: LinkMany<V>) -> Self {
-//         link_many.0
-//         let xx = model_vec
-//             .into_iter()
-//             .map(|m| {
-//                 let x = m.get_key();
-//                 let xx = match x {
-//                     Some(id) => {
-//                         let bb = id.clone();
-//                         Reference::Id(bb)
-//                     }
-//                     None => Reference::Null,
-//                 };
-//                 xx
-//             })
-//             .collect::<Vec<Reference<V>>>();
-//
-//         Self(xx)
-//     }
-// }
 impl<V: SurrealdbNode> std::convert::From<Vec<V>> for LinkMany<V> {
     fn from(model_vec: Vec<V>) -> Self {
         let xx = model_vec
@@ -220,18 +139,7 @@ impl<V: SurrealdbNode> std::convert::From<Vec<V>> for LinkMany<V> {
         Self(xx)
     }
 }
-// impl<V: SurrealdbNode> std::convert::From<Box<V>> for LinkSelf<V> {
-//     fn from(model: Box<V>) -> Self {
-//         let x = model.get_key();
-//         Self(
-//             Reference::Id(
-//                 x.expect("Id not found. Make sure Id exists for this model")
-//                     .to_owned(),
-//             )
-//             .into(),
-//         )
-//     }
-// }
+
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkOne<V: SurrealdbNode>(Reference<V>);
 implement_deref_for_link!(LinkOne<V>; Reference<V>);
@@ -239,41 +147,11 @@ implement_bidirectional_conversion!(LinkOne<V>, Reference<V>);
 impl_from_model_for_ref_type!(V, LinkOne<V>);
 // implement_from_for_reference_type!(Vec<V>, LinkMany<V>);
 
-// impl<V: SurrealdbNode> From<V> for LinkOne<V> {
-//     fn from(model: V) -> Self {
-//         let x = model.get_key();
-//         Self(Reference::Id(
-//             x.expect("Id not found. Make sure Id exists for this model")
-//                 .to_owned(),
-//         ))
-//     }
-// }
-//
-// impl<V: SurrealdbNode> From<&V> for LinkOne<V> {
-//     fn from(model: &V) -> Self {
-//         let x = model.clone().get_key();
-//         match x {
-//             Some(x) => Self(Reference::Id(x.to_owned())),
-//             None => Self(Reference::Null),
-//         }
-//         // Self(Reference::Id(
-//         //     x.expect("Id not found. Make sure Id exists for this model"),
-//         // ))
-//     }
-// }
-
 impl<V: SurrealdbNode> LinkOne<V> {
     pub fn null() -> LinkOne<V> {
         LinkOne(Reference::Null)
     }
 }
-
-// impl<V: SurrealdbNode + Default> Default for LinkOne<V> {
-//     fn default() -> Self {
-//         // Self(Default::default())
-//         Self(Reference::Null)
-//     }
-// }
 
 // Use boxing to break reference cycle
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
@@ -286,17 +164,10 @@ impl<V: SurrealdbNode> LinkSelf<V> {
 }
 
 // impl<V: SurrealdbNode> Default for LinkSelf<V> {}
-
 implement_deref_for_link!(LinkSelf<V>; Box<Reference<V>>);
 implement_bidirectional_conversion!(LinkSelf<V>, Box<Reference<V>>);
 impl_from_model_for_ref_type!(Box<V>, LinkSelf<V>);
 impl_from_model_for_ref_type!(V, LinkSelf<V>);
-
-// impl<V: SurrealdbNode + Default> Default for LinkSelf<V> {
-//     fn default() -> Self {
-//         Self(Reference::Null.into())
-//     }
-// }
 
 macro_rules! impl_utils_for_ref_vec {
     ($ref_vec:ident) => {
