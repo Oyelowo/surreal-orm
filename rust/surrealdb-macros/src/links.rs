@@ -280,7 +280,7 @@ impl<V: SurrealdbNode> LinkOne<V> {
 pub struct LinkSelf<V: SurrealdbNode>(Box<Reference<V>>);
 
 impl<V: SurrealdbNode> LinkSelf<V> {
-    pub fn nill() -> Self {
+    pub fn null() -> Self {
         Self(Reference::Null.into())
     }
 }
@@ -298,6 +298,41 @@ impl_from_model_for_ref_type!(V, LinkSelf<V>);
 //     }
 // }
 
+macro_rules! impl_utils_for_ref_vec {
+    ($ref_vec:ident) => {
+        impl<V: SurrealdbNode> $ref_vec<V> {
+            /// Returns an empty vector
+            pub fn null() -> Self {
+                $ref_vec(vec![])
+            }
+
+            /// Returns just the fully fetched values if fetched and available, otherwise, None
+            pub fn values(&self) -> Option<Vec<&V>> {
+                self.0
+                    .iter()
+                    .map(|m| match m {
+                        Reference::FetchedValue(v) => Some(v),
+                        Reference::Id(_) => None,
+                        Reference::Null => None,
+                    })
+                    .collect::<Option<Vec<_>>>()
+            }
+
+            /// Returns just the keys of the foreign field if available, otherwise, None
+            pub fn keys(&self) -> Option<Vec<&SurId>> {
+                self.0
+                    .iter()
+                    .map(|m| match m {
+                        Reference::FetchedValue(_) => None,
+                        Reference::Id(id) => Some(id),
+                        Reference::Null => None,
+                    })
+                    .collect::<Option<Vec<_>>>()
+            }
+        }
+    };
+}
+
 /// Returns either:
 /// the foreign values if fetched
 /// id keys of the foreign Field if not fetched
@@ -306,6 +341,7 @@ impl_from_model_for_ref_type!(V, LinkSelf<V>);
 pub struct LinkMany<V: SurrealdbNode>(Vec<Reference<V>>);
 
 implement_deref_for_link!(LinkMany<V>; Vec<Reference<V>>);
+impl_utils_for_ref_vec!(LinkMany);
 // implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);
 
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
@@ -313,38 +349,4 @@ pub struct Relate<V: SurrealdbNode>(Vec<Reference<V>>);
 
 implement_deref_for_link!(Relate<V>; Vec<Reference<V>>);
 implement_bidirectional_conversion!(Relate<V>, Vec<Reference<V>>);
-
-impl<V: SurrealdbNode> LinkMany<V> {
-    /// Returns an empty vector
-    pub fn nill() -> Self {
-        LinkMany(vec![])
-    }
-
-    /// Returns just the fully fetched values if fetched and available, otherwise, None
-    pub fn values(&self) -> Option<Vec<&V>> {
-        let xx = self
-            .0
-            .iter()
-            .map(|m| match m {
-                Reference::FetchedValue(v) => Some(v),
-                Reference::Id(_) => None,
-                Reference::Null => None,
-            })
-            .collect::<Option<Vec<_>>>();
-        xx
-    }
-
-    /// Returns just the keys of the foreign field if available, otherwise, None
-    pub fn keys(&self) -> Option<Vec<&SurId>> {
-        let xx = self
-            .0
-            .iter()
-            .map(|m| match m {
-                Reference::FetchedValue(_) => None,
-                Reference::Id(id) => Some(id),
-                Reference::Null => None,
-            })
-            .collect::<Option<Vec<_>>>();
-        xx
-    }
-}
+impl_utils_for_ref_vec!(Relate);

@@ -105,11 +105,12 @@ fn main() {
         last_name: "".into(),
         fav_book: book.clone().into(),
         // fav_book: LinkOne::from(book),
-        written_blogs: vec![].into(),
-        all_semester_courses: LinkMany::nill(),
+        // written_blogs: vec![].into(),
+        written_blogs: Relate::null(),
         // best_class_mate: Default::default(),
-        best_class_mate: LinkSelf::nill(),
+        best_class_mate: LinkSelf::null(),
         course: LinkOne::null(),
+        all_semester_courses: LinkMany::null(),
     };
 
     let xx = Student {
@@ -123,16 +124,7 @@ fn main() {
         best_class_mate: x1.into(),
         course: LinkOne::null(),
     };
-    let xxo = xx
-        .clone()
-        .best_class_mate
-        .as_ref()
-        .value()
-        .clone()
-        .as_deref()
-        .unwrap()
-        .clone()
-        .clone();
+    let xxo = xx.clone().best_class_mate.value().unwrap();
 
     // Returns either:
     // the foreign values if fetched
@@ -149,6 +141,13 @@ fn main() {
     //     .into_iter()
     //     .map(|x| x.value().unwrap());
 
+    let xcv = xx.written_blogs.clone();
+
+    // Returns just the fully fetched values if fetched and available, otherwise, None
+    let xcv = xx.written_blogs.values();
+    //
+    // Returns just the keys of the foreign field if available, otherwise, None
+    let xcv = xx.written_blogs.keys();
     // xx.fav_book.value_owned().unwrap()
     xx.best_class_mate
         .value()
