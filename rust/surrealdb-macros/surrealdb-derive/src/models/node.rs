@@ -1,3 +1,8 @@
+/*
+Author: Oyelowo Oyedayo
+Email: oyelowooyedayo@gmail.com
+*/
+
 #![allow(dead_code)]
 
 use convert_case::{Casing, Case};
@@ -14,15 +19,6 @@ use super::{
     parser::{ SchemaFieldsProperties, SchemaPropertiesArgs}, attributes::FieldsGetterOpts,
     variables::VariablesModelMacro
 };
-
-
-
-/*
-Author: Oyelowo Oyedayo
-Email: oyelowooyedayo@gmail.com
-*/
-
-
 
 impl ToTokens for FieldsGetterOpts {
     fn to_tokens(&self, tokens: &mut TokenStream) {

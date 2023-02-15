@@ -1,3 +1,8 @@
+/*
+Author: Oyelowo Oyedayo
+Email: oyelowooyedayo@gmail.com
+*/
+
 use std::fmt::Display;
 
 #[derive(serde::Serialize, Debug, Default)]
