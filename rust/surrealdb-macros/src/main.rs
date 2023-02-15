@@ -18,8 +18,8 @@ use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Reference, Relate},
     model_id::SurId,
-    query_builder::{query, NodeBuilder, ToNodeBuilder},
-    Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
+    query_builder::query,
+    Clause, SurrealdbEdge, SurrealdbNode,
 };
 use typed_builder::TypedBuilder;
 
@@ -169,14 +169,14 @@ fn main() {
             query().where_(Student::schema().lastName.equals("lowo")),
         ))
         .title
-        .contains_one("bee");
+        .contains("bee");
 
     Student::schema().rites__(Clause::All).book(Clause::All);
 
     let xx = Student::schema()
         .rites__(Clause::All)
         .book(Clause::Where(
-            query().where_(Student::schema().lastName.contains_one("Dayo")),
+            query().where_(Student::schema().lastName.contains("Dayo")),
         ))
         .title
         .__as__("meorm");
