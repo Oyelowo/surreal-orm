@@ -20,7 +20,7 @@ use surrealdb_macros::{
     model_id::SurId,
     node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
     query_builder::{query, ToNodeBuilder},
-    Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
+    Clause, SurrealdbEdge, SurrealdbNode,
 };
 use test_case::test_case;
 use typed_builder::TypedBuilder;
@@ -31,7 +31,7 @@ use typed_builder::TypedBuilder;
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<String>,
+    id: Option<SurId>,
     first_name: String,
     last_name: String,
 
@@ -53,14 +53,13 @@ pub struct Student {
     written_books: Relate<Book>,
 }
 
-// #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "writes")]
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<String>,
+    id: Option<SurId>,
 
     // #[surrealdb(link_one = "Book", skip_serializing)]
     #[serde(rename = "in")]
@@ -78,7 +77,7 @@ type StudentWritesBook = Writes<Student, Book>;
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<String>,
+    id: Option<SurId>,
     title: String,
     content: String,
 }
@@ -89,7 +88,7 @@ pub struct Book {
 pub struct Blog {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<String>,
+    id: Option<SurId>,
     title: String,
     content: String,
 }
@@ -109,12 +108,12 @@ mod tests {
     fn multiplication_tests2() {
         let x = Student::schema()
             .writes__(Clause::All)
-            .book(Clause::Id(SurId::try_from("Book:blaze").unwrap()))
+            .book(Clause::Id(SurId::try_from("book:blaze").unwrap()))
             .title;
 
         assert_eq!(
             x.to_string(),
-            "->Writes->Book[WHERE id = Book:blaze].title".to_string()
+            "->writes->book[WHERE id = book:blaze].title".to_string()
         )
     }
 
@@ -129,7 +128,7 @@ mod tests {
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE timeWritten = 12:00]->Book.content".to_string()
+            "->writes[WHERE timeWritten = 12:00]->book.content".to_string()
         )
     }
 
@@ -146,7 +145,7 @@ mod tests {
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE content CONTAINS Oyelowo in Uranus] AS writtenBooks"
+            "->writes[WHERE timeWritten = 12:00]->book[WHERE content CONTAINS Oyelowo in Uranus] AS writtenBooks"
                 .to_string()
         )
     }
@@ -164,7 +163,7 @@ mod tests {
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE content CONTAINS Oyelowo in Uranus].content"
+            "->writes[WHERE timeWritten = 12:00]->book[WHERE content CONTAINS Oyelowo in Uranus].content"
                 .to_string()
         )
     }
@@ -175,12 +174,12 @@ mod tests {
             .writes__(Clause::Where(
                 query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .book(Clause::Id(SurId::try_from("Book:oyelowo").unwrap()))
+            .book(Clause::Id(SurId::try_from("book:oyelowo").unwrap()))
             .content;
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE id = Book:oyelowo].content"
+            "->writes[WHERE timeWritten = 12:00]->book[WHERE id = book:oyelowo].content"
                 .to_string()
         )
     }
@@ -191,12 +190,12 @@ mod tests {
             .writes__(Clause::Where(
                 query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .book(Clause::Id("Book:oyelowo".try_into().unwrap()))
+            .book(Clause::Id("book:oyelowo".try_into().unwrap()))
             .__as__(Student::schema().writtenBooks);
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE id = Book:oyelowo] AS writtenBooks"
+            "->writes[WHERE timeWritten = 12:00]->book[WHERE id = book:oyelowo] AS writtenBooks"
                 .to_string()
         )
     }
@@ -207,12 +206,12 @@ mod tests {
             .writes__(Clause::Where(
                 query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .book(Clause::Id("Book:oyelowo".try_into().unwrap()))
+            .book(Clause::Id("book:oyelowo".try_into().unwrap()))
             .__as__("real_deal");
 
         assert_eq!(
             x.to_string(),
-            "->Writes[WHERE timeWritten = 12:00]->Book[WHERE id = Book:oyelowo] AS real_deal"
+            "->writes[WHERE timeWritten = 12:00]->book[WHERE id = book:oyelowo] AS real_deal"
                 .to_string()
         )
     }

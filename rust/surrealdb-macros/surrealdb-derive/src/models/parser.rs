@@ -187,7 +187,7 @@ pub struct SchemaFieldsProperties {
     /// We need imports to be unique, hence the hashset
     /// Used when you use a SurrealdbNode in field e.g: favourite_book: LinkOne<Book>,
     /// e.g: type Book = <super::Book as SurrealdbNode>::Schema;
-    pub imports_referenced_node_schema: HashSet<TokenStreamComparable>,
+    pub imports_referenced_node_schema: HashSet<TokenStreamHashable>,
     
     /// This generates a function that is usually called by other Nodes/Structs
     /// self_instance.drunk_water
@@ -213,15 +213,15 @@ pub struct SchemaFieldsProperties {
 
 
 #[derive(Clone)]
-pub struct TokenStreamComparable(TokenStream);
+pub struct TokenStreamHashable(TokenStream);
 
-impl ToTokens for TokenStreamComparable {
+impl ToTokens for TokenStreamHashable {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         tokens.extend(self.0.clone());
     }
 }
 
-impl Deref for TokenStreamComparable {
+impl Deref for TokenStreamHashable {
     type Target=TokenStream;
 
     fn deref(&self) -> &Self::Target {
@@ -229,23 +229,21 @@ impl Deref for TokenStreamComparable {
     }
 }
 
-impl From<TokenStream> for TokenStreamComparable {
+impl From<TokenStream> for TokenStreamHashable {
     fn from(value: TokenStream) -> Self {
         Self(value)
     }
 }
 
-impl Eq for TokenStreamComparable {
-    
-}
+impl Eq for TokenStreamHashable {}
 
-impl PartialEq for TokenStreamComparable {
+impl PartialEq for TokenStreamHashable {
     fn eq(&self, other: &Self) -> bool {
         self.0.to_string() == other.0.to_string()
     }
 }
 
-impl std::hash::Hash for TokenStreamComparable {
+impl std::hash::Hash for TokenStreamHashable {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.0.to_string().hash(state);
     }
@@ -265,9 +263,9 @@ impl SchemaFieldsProperties {
     ///
     /// Panics if .
     pub(crate) fn from_receiver_data(
-        args : SchemaPropertiesArgs
+        args: SchemaPropertiesArgs
     ) -> Self {
-        let SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident, table_name_ident  }= args;
+        let SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident, ..  } = args;
         
         let fields = data
             .as_ref()
@@ -305,10 +303,12 @@ impl SchemaFieldsProperties {
                     RelationType::LinkSelf(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         if node_object.to_string() != struct_name_ident.to_string() {
-                            panic!("The field - `{field_name_original}` - has a linkself attribute or type that is not pointing to the current struct. \
+                            panic!("The field - `{field_name_original}` - has a linkself \
+                                   attribute or type that is not pointing to the current struct. \
                                    Make sure the field attribute is link_self=\"{struct_name_ident}\" \
                                    and the type is LinkSelf<{struct_name_ident}>. ");
                         }
+                        
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkSelf<#foreign_node>);));
                         ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
                     }
@@ -321,11 +321,10 @@ impl SchemaFieldsProperties {
                 };
                 
                 store.static_assertions.push(referenced_node_meta.foreign_node_type_validator);
+                
                 store.imports_referenced_node_schema
                     .insert(referenced_node_meta.foreign_node_schema_import.into());
-                // store.imports_referenced_node_schema
-                //     .insert(referenced_node_meta.foreign_node_type.to_string(), referenced_node_meta.foreign_node_schema_import.into());
-                print!("{:?}", referenced_node_meta.foreign_node_type.to_string());
+                
                 store.record_link_fields_methods
                     .push(referenced_node_meta.record_link_default_alias_as_method.into());
   
@@ -349,7 +348,7 @@ impl SchemaFieldsProperties {
 
                 store 
             });
-    fields
+        fields
     }
 } 
 

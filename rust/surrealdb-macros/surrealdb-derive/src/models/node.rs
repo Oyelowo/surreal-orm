@@ -36,7 +36,7 @@ impl ToTokens for FieldsGetterOpts {
         } = *self;
 
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
-        errors::validate_table_name(struct_name_ident, table_name, relax_table_name);
+        let table_name_str = errors::validate_table_name(struct_name_ident, table_name, relax_table_name);
     
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
@@ -75,7 +75,7 @@ impl ToTokens for FieldsGetterOpts {
 
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
-        let test_name = format_ident!("test_{schema_mod_name}_edge_name");
+        let test_function_name = format_ident!("test_{schema_mod_name}_edge_name");
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         
         // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
@@ -163,7 +163,7 @@ impl ToTokens for FieldsGetterOpts {
 
                     pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, clause: #crate_name::Clause) -> Self {
                         let mut #schema_instance = Self::empty();
-                        let connection = format!("{}{}{}", store, #struct_name_ident_as_str, #crate_name::format_clause(clause, #struct_name_ident_as_str));
+                        let connection = format!("{}{}{}", store, #table_name_str, #crate_name::format_clause(clause, #table_name_str));
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
@@ -184,7 +184,7 @@ impl ToTokens for FieldsGetterOpts {
             }
 
                 
-            fn #test_name() {
+            fn #test_function_name() {
                 #( #static_assertions) *
                 #node_edge_metadata_static_assertions
                 
