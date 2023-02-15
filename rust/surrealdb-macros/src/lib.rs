@@ -54,7 +54,7 @@ pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
         }
     }
 }
-
+pub use db_field::DbField;
 pub mod query_builder {
 
     pub fn query() -> super::qbuilder::QueryBuilder<'static> {

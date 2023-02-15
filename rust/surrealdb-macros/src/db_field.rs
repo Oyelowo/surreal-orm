@@ -36,6 +36,11 @@ pub struct DbQuery {
     query_string: String,
 }
 
+impl std::fmt::Display for DbQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}", self.query_string))
+    }
+}
 impl DbQuery {
     pub fn new(query_string: String) -> Self {
         Self { query_string }
@@ -56,7 +61,7 @@ impl DbField {
         self.0.push_str(string)
     }
 
-    fn __as__(&self, alias: impl std::fmt::Display) -> DbQuery {
+    pub fn __as__(&self, alias: impl std::fmt::Display) -> DbQuery {
         // format!("{self} AS {alias}")
         DbQuery::new(format!("{} AS {}", self.0, alias))
     }

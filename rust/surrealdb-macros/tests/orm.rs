@@ -15,11 +15,10 @@ use surrealdb::{
 use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 
 use std::fmt::{Debug, Display};
+use surrealdb_macros::query_builder::query;
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     model_id::SurId,
-    node_builder::{NodeBuilder as NodeBuilder2, ToNodeBuilder as ToNodeBuilder2},
-    query_builder::{query, ToNodeBuilder},
     Clause, SurrealdbEdge, SurrealdbNode,
 };
 use test_case::test_case;
@@ -138,9 +137,9 @@ mod tests {
             .writes__(Clause::Where(
                 query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .book(Clause::Where(query().where_(
-                Book::schema().content.contains_one("Oyelowo in Uranus"),
-            )))
+            .book(Clause::Where(
+                query().where_(Book::schema().content.contains("Oyelowo in Uranus")),
+            ))
             .__as__(Student::schema().writtenBooks);
 
         assert_eq!(
@@ -156,9 +155,9 @@ mod tests {
             .writes__(Clause::Where(
                 query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .book(Clause::Where(query().where_(
-                Book::schema().content.contains_one("Oyelowo in Uranus"),
-            )))
+            .book(Clause::Where(
+                query().where_(Book::schema().content.contains("Oyelowo in Uranus")),
+            ))
             .content;
 
         assert_eq!(

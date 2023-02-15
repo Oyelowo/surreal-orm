@@ -1,4 +1,4 @@
-use std::{borrow::Cow, collections::HashMap};
+use std::{borrow::Cow, collections::HashMap, fmt::Display};
 
 use serde::Serialize;
 
@@ -238,8 +238,8 @@ impl<'a> QueryBuilder<'a> {
     }
 
     /// An alias for `QueryBuilder::filter`
-    pub fn where_<T: Into<CowSegment<'a>>>(self, condition: T) -> Self {
-        self.filter(condition)
+    pub fn where_<T: Display>(self, condition: T) -> Self {
+        self.filter(condition.to_string())
     }
 
     /// Writes a OR followed by the supplied `condition`
