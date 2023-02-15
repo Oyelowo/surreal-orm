@@ -223,5 +223,9 @@ mod tests {
         let sur_id = SurId::new("alien", "oyelowo");
         let json = serde_json::to_string(&sur_id).unwrap();
         assert_eq!(json, "\"alien:oyelowo\"");
+
+        let sur_id = SurId::try_from("alien:oyelowo").unwrap();
+        let json = serde_json::to_string(&sur_id).unwrap();
+        assert_eq!(json, "\"alien:oyelowo\"");
     }
 }
