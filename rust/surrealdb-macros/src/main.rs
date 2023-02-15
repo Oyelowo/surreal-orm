@@ -16,45 +16,49 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
-    links::{LinkMany, LinkOne, LinkSelf, Relate},
+    links::{LinkMany, LinkOne, LinkSelf, Reference, Relate},
     model_id::SurId,
     query_builder::{query, NodeBuilder, ToNodeBuilder},
     Clause, SurrealdbEdge, /* SurrealdbEdge, */ SurrealdbNode,
 };
 use typed_builder::TypedBuilder;
+
 // ::static_assertions::assert_impl_one!()
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone /* , Default */)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "student")]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<String>,
+    id: Option<SurId>,
     first_name: String,
     last_name: String,
 
-    #[surrealdb(link_one = "Book", skip_serializing)]
+    #[surrealdb(link_self = "Student")]
+    best_class_mate: LinkSelf<Student>,
+
+    #[surrealdb(link_one = "Book")]
     #[serde(rename = "lowo_na")]
     fav_book: LinkOne<Book>,
 
-    #[surrealdb(link_one = "Book", skip_serializing)]
-    course: LinkOne<Book>,
+    #[surrealdb(link_one = "Blog")]
+    course: LinkOne<Blog>,
 
-    #[surrealdb(link_many = "Book", skip_serializing)]
+    #[surrealdb(link_many = "Book")]
     #[serde(rename = "lowo")]
     all_semester_courses: LinkMany<Book>,
 
-    #[surrealdb(relate(model = "StudentWritesBook", connection = "->writes->book"))]
+    #[surrealdb(relate(model = "StudentWritesBook", connection = "->rites->book"))]
     written_blogs: Relate<Book>,
 }
 
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[surrealdb(table_name = "writes")]
+#[surrealdb(table_name = "rites", relax_table_name)]
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<String>,
+    id: Option<SurId>,
 
     // #[surrealdb(link_one = "Book", skip_serializing)]
     r#in: In,
@@ -64,37 +68,93 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
 
 type StudentWritesBook = Writes<Student, Book>;
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<String>,
+    id: Option<SurId>,
     title: String,
+}
+
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "blog")]
+pub struct Blog {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    id: Option<SurId>,
+    content: String,
 }
 
 fn eerer() {
     Student::schema()
-        .writes__(Clause::All)
+        .rites__(Clause::All)
         .book(Clause::All)
         .title;
 }
 fn main() {
     let book = Book {
-        id: Some("book1".into()),
+        id: Some("book:1".try_into().unwrap()),
         title: "ere".into(),
+    };
+    let x1 = Student {
+        id: None,
+        first_name: "".into(),
+        last_name: "".into(),
+        fav_book: book.clone().into(),
+        // fav_book: LinkOne::from(book),
+        // written_blogs: vec![].into(),
+        written_blogs: Relate::null(),
+        // best_class_mate: Default::default(),
+        best_class_mate: LinkSelf::null(),
+        course: LinkOne::null(),
+        all_semester_courses: LinkMany::null(),
     };
 
     let xx = Student {
         id: None,
         first_name: "".into(),
         last_name: "".into(),
-        fav_book: LinkOne::from_model(book),
-        written_blogs: Default::default(),
-        course: todo!(),
-        all_semester_courses: todo!(),
+        fav_book: book.into(),
+        // fav_book: LinkOne::from(book),
+        written_blogs: vec![].into(),
+        all_semester_courses: vec![].into(),
+        best_class_mate: x1.into(),
+        course: LinkOne::null(),
     };
+    let xxo = xx.clone().best_class_mate.value().unwrap();
+
+    // Returns either:
+    // the foreign values if fetched
+    // id keys of the foreign Field if not fetched
+    // empty Vec if not available
+    let xcv = xx.all_semester_courses.clone();
+
+    // Returns just the fully fetched values if fetched and available, otherwise, None
+    let xcv = xx.all_semester_courses.values();
+    //
+    // Returns just the keys of the foreign field if available, otherwise, None
+    let xcv = xx.all_semester_courses.keys();
+    // xx.all_semester_courses
+    //     .into_iter()
+    //     .map(|x| x.value().unwrap());
+
+    let xcv = xx.written_blogs.clone();
+
+    // Returns just the fully fetched values if fetched and available, otherwise, None
+    let xcv = xx.written_blogs.values();
+    //
+    // Returns just the keys of the foreign field if available, otherwise, None
+    let xcv = xx.written_blogs.keys();
+    // xx.fav_book.value_owned().unwrap()
+    xx.best_class_mate
+        .value()
+        .unwrap()
+        .fav_book
+        .value()
+        .unwrap();
 
     let x = xx.clone().get_key();
     let cc = xx.clone().get_key();
@@ -111,10 +171,10 @@ fn main() {
         .title
         .contains_one("bee");
 
-    Student::schema().writes__(Clause::All).book(Clause::All);
+    Student::schema().rites__(Clause::All).book(Clause::All);
 
     let xx = Student::schema()
-        .writes__(Clause::All)
+        .rites__(Clause::All)
         .book(Clause::Where(
             query().where_(Student::schema().lastName.contains_one("Dayo")),
         ))

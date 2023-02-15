@@ -1,6 +1,7 @@
 pub(crate) mod attributes;
 pub(crate) mod casing;
 pub(crate) mod edge;
+pub(crate) mod errors;
 pub(crate) mod node;
 pub(crate) mod parser;
 pub(crate) mod relations;

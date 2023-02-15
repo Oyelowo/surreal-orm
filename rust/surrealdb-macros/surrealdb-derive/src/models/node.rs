@@ -9,6 +9,7 @@ use std::str::FromStr;
 use syn::{self, parse_macro_input};
 
 use super::{
+    errors,
     casing::CaseString,
     parser::{ SchemaFieldsProperties, SchemaPropertiesArgs}, attributes::FieldsGetterOpts,
     variables::VariablesModelMacro
@@ -30,14 +31,12 @@ impl ToTokens for FieldsGetterOpts {
             ref data,
             ref rename_all,
             ref table_name,
-            ref strict,
+            ref relax_table_name,
             ..
         } = *self;
 
-        // let table_name = table_name;
-        let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
-        if table_name.as_ref().unwrap() != &expected_table_name {panic!("table name must be in snake case of the current struct name. Try: {expected_table_name}");}
+        let table_name_str = errors::validate_table_name(struct_name_ident, table_name, relax_table_name);
     
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
@@ -56,54 +55,47 @@ impl ToTokens for FieldsGetterOpts {
         let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident, table_name_ident};
 
         let SchemaFieldsProperties {
-                // relate_edge_schema_struct_type_alias,
-                // relate_edge_schema_struct_type_alias_impl,
-                // relate_edge_schema_method_connection,
-                // relate_node_alias_method,
                 schema_struct_fields_types_kv,
                 schema_struct_fields_names_kv,
-                serialized_field_names_normalised,
                 static_assertions,
                 mut imports_referenced_node_schema,
                 connection_with_field_appended,
                 record_link_fields_methods,
-            node_edge_metadata,
-            schema_struct_fields_names_kv_empty,
+                node_edge_metadata,
+                schema_struct_fields_names_kv_empty,
+                ..
         } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
         );
        let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream() ; 
+       // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
+       let imports_referenced_node_schema = imports_referenced_node_schema.into_iter().collect::<Vec<_>>();
+
        let node_edge_metadata_static_assertions = node_edge_metadata.generate_static_assertions() ; 
-        imports_referenced_node_schema.dedup_by(|a,
-                                                b| a.to_string() == b.to_string());
-        // schema_struct_fields_names_kv.dedup_by(same_bucket)
 
-        let test_name = format_ident!("test_{schema_mod_name}_edge_name");
+        // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
-        let field_names_ident = format_ident!("{struct_name_ident}DbFields");
+        let test_function_name = format_ident!("test_{schema_mod_name}_edge_name");
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
-        // let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         
-        let schema_alias = format_ident!("{}Schema", struct_name_ident.to_string().to_lowercase());
-        
-            // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
-            // #[serde(rename_all = "camelCase")]
-            // pub struct Student {
-            //     #[serde(skip_serializing_if = "Option::is_none")]
-            //     #[builder(default, setter(strip_option))]
-            //     id: Option<String>,
-            //     first_name: String,
-            //
-            //     #[surrealdb(link_one = "Book", skip_serializing)]
-            //     course: LinkOne<Book>,
-            //
-            //     #[surrealdb(link_many = "Book", skip_serializing)]
-            //     #[serde(rename = "lowo")]
-            //     all_semester_courses: LinkMany<Book>,
-            //
-            //     #[surrealdb(relate(edge = "StudentWritesBlog", link = "->writes->Blog"))]
-            //     written_blogs: Relate<Blog>,
-            // }
+        // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+        // #[serde(rename_all = "camelCase")]
+        // pub struct Student {
+        //     #[serde(skip_serializing_if = "Option::is_none")]
+        //     #[builder(default, setter(strip_option))]
+        //     id: Option<String>,
+        //     first_name: String,
+        //
+        //     #[surrealdb(link_one = "Book", skip_serializing)]
+        //     course: LinkOne<Book>,
+        //
+        //     #[surrealdb(link_many = "Book", skip_serializing)]
+        //     #[serde(rename = "lowo")]
+        //     all_semester_courses: LinkMany<Book>,
+        //
+        //     #[surrealdb(relate(model = "StudentWritesBlog", connection = "->writes->Blog"))]
+        //     written_blogs: Relate<Blog>,
+        // }
         tokens.extend(quote!( 
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
@@ -113,7 +105,7 @@ impl ToTokens for FieldsGetterOpts {
                     #module_name::#struct_name_ident::new()
                 }
                 
-                fn get_key(&self) -> ::std::option::Option<&String>{
+                fn get_key(&self) -> ::std::option::Option<&#crate_name::SurId>{
                     self.id.as_ref()
                 }
             }
@@ -145,14 +137,14 @@ impl ToTokens for FieldsGetterOpts {
                     pub fn new() -> Self {
                         Self {
                            #( #schema_struct_fields_names_kv) *
-                            #___________graph_traversal_string: "".to_string(),
+                            #___________graph_traversal_string: "".into(),
                         }
                     }
 
                     pub fn empty() -> Self {
                         Self {
                            #( #schema_struct_fields_names_kv_empty) *
-                            #___________graph_traversal_string: "".to_string(),
+                            #___________graph_traversal_string: "".into(),
                         }
                     }
                     
@@ -171,7 +163,7 @@ impl ToTokens for FieldsGetterOpts {
 
                     pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, clause: #crate_name::Clause) -> Self {
                         let mut #schema_instance = Self::empty();
-                        let connection = format!("{}{}{}", store, #struct_name_ident_as_str, #crate_name::format_clause(clause, #struct_name_ident_as_str));
+                        let connection = format!("{}{}{}", store, #table_name_str, #crate_name::format_clause(clause, #table_name_str));
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
@@ -182,24 +174,17 @@ impl ToTokens for FieldsGetterOpts {
                     
                     #( #record_link_fields_methods) *
 
-                    // #( #relate_edge_schema_method_connection) *
-                    
                     pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {
                         format!("{} AS {}", self, alias)
                     }
                     
-                    // #( #relate_node_alias_method) *
                 }
-                
-                // #( #relate_edge_schema_struct_type_alias) *
-
-                // #( #relate_edge_schema_struct_type_alias_impl) *
                 
                 #node_edge_metadata_tokens
             }
 
                 
-            fn #test_name() {
+            fn #test_function_name() {
                 #( #static_assertions) *
                 #node_edge_metadata_static_assertions
                 
@@ -207,6 +192,7 @@ impl ToTokens for FieldsGetterOpts {
 ));
     }
 }
+
 
 pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     // Construct a representation of Rust code as a syntax tree

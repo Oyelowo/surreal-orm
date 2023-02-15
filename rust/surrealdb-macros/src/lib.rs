@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
 
-use model_id::SurId;
+pub use model_id::SurId;
 use qbuilder::QueryBuilder;
 
 pub mod links;
@@ -13,7 +13,7 @@ pub trait SurrealdbNode {
     type Schema;
     type TableNameChecker;
     fn schema() -> Self::Schema;
-    fn get_key(&self) -> ::std::option::Option<&String>;
+    fn get_key(&self) -> ::std::option::Option<&SurId>;
 }
 
 pub trait SurrealdbEdge {
@@ -23,7 +23,7 @@ pub trait SurrealdbEdge {
     type Schema;
 
     fn schema() -> Self::Schema;
-    fn get_key(&self) -> ::std::option::Option<&String>;
+    fn get_key(&self) -> ::std::option::Option<&SurId>;
 }
 
 #[derive(serde::Serialize, Debug, Default)]
@@ -72,7 +72,6 @@ impl query_builder::ToNodeBuilder for DbField {}
 pub enum Clause<'a> {
     All,
     Where(QueryBuilder<'a>),
-    // Change to SurId
     Id(SurId),
 }
 
@@ -89,11 +88,8 @@ pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
         Clause::Id(id) => {
             if !id
                 .to_string()
-                // .to_lowercase()
                 .starts_with(format!("{table_name}:").as_str())
             {
-                // let xx = format!("invalid id {id}. Id does not belong to table {table_name}")
-                //     .as_str();
                 panic!("invalid id {id}. Id does not belong to table {table_name}")
             }
             format!("[WHERE id = {id}]")

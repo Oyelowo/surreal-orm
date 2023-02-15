@@ -17,7 +17,7 @@ use std::str::FromStr;
 
 use syn::{self, parse_macro_input};
 
-use super::{parser::{SchemaFieldsProperties,  SchemaPropertiesArgs},  casing::CaseString,  attributes::{Rename, MyFieldReceiver}, variables::VariablesModelMacro};
+use super::{parser::{SchemaFieldsProperties,  SchemaPropertiesArgs},  casing::CaseString,  attributes::{Rename, MyFieldReceiver}, variables::VariablesModelMacro, errors};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
@@ -36,7 +36,7 @@ pub struct FieldsGetterOpts {
     pub(crate) table_name: ::std::option::Option<String>,
 
     #[darling(default)]
-    pub(crate) strict: ::std::option::Option<bool>,
+    pub(crate) relax_table_name: ::std::option::Option<bool>,
 }
 
 impl ToTokens for FieldsGetterOpts {
@@ -46,12 +46,13 @@ impl ToTokens for FieldsGetterOpts {
             ref table_name,
             ref data,
             ref rename_all,
+            ref relax_table_name,
             ..
         } = *self;
 
         let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
-        if table_name.as_ref().unwrap() != &expected_table_name {panic!("table name must be in snake case of the current struct name. Try: {expected_table_name}");}
+        let table_name_str = errors::validate_table_name(struct_name_ident, table_name, relax_table_name);
         
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
@@ -91,8 +92,9 @@ impl ToTokens for FieldsGetterOpts {
             if !serialized_field_names_normalised.contains(&"in".into()) || !serialized_field_names_normalised.contains(&"out".into()) {
                panic!("Vector does not contain both 'in' and 'out'");
             }
-        imports_referenced_node_schema.dedup_by(|a,
-                                                b| a.to_string() == b.to_string());
+        let imports_referenced_node_schema = Vec::from_iter(imports_referenced_node_schema);
+        // imports_referenced_node_schema.dedup_by(|a,
+        //                                         b| a.to_string() == b.to_string());
         // schema_struct_fields_names_kv.dedup_by(same_bucket)
 
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
@@ -107,13 +109,13 @@ impl ToTokens for FieldsGetterOpts {
                     type In = In;
                     type Out = Out;
                     type TableNameChecker = #module_name::TableNameStaticChecker;
-                    type Schema = #module_name::#struct_name_ident<In, Out>;
+                    type Schema = #module_name::#struct_name_ident;
 
                     fn schema() -> Self::Schema {
                         #module_name::#struct_name_ident::new()
                     }
                     
-                    fn get_key(&self) -> ::std::option::Option<&String>{
+                    fn get_key(&self) -> ::std::option::Option<&#crate_name::SurId>{
                         self.id.as_ref()
                     }
                 }
@@ -129,20 +131,16 @@ impl ToTokens for FieldsGetterOpts {
                     #( #imports_referenced_node_schema) *
 
                     #[derive(Debug, ::serde::Serialize, Default)]
-                    pub struct #struct_name_ident<In: SurrealdbNode, Out: SurrealdbNode> {
+                    pub struct #struct_name_ident {
                        #( #schema_struct_fields_types_kv) *
                         pub #___________graph_traversal_string: ::std::string::String,
-                        #___________in_marker: ::std::marker::PhantomData<In>,
-                        #___________out_marker: ::std::marker::PhantomData<Out>,
                     }
 
-                    impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #struct_name_ident<In, Out> {
+                    impl #struct_name_ident {
                         pub fn new() -> Self {
                             Self {
                                #( #schema_struct_fields_names_kv) *
                                 #___________graph_traversal_string: "".into(),
-                                #___________in_marker: ::std::marker::PhantomData,
-                                #___________out_marker: ::std::marker::PhantomData,
                             }
                         }
 
@@ -150,8 +148,6 @@ impl ToTokens for FieldsGetterOpts {
                             Self {
                                #( #schema_struct_fields_names_kv_empty) *
                                 #___________graph_traversal_string: "".into(),
-                                #___________in_marker: ::std::marker::PhantomData,
-                                #___________out_marker: ::std::marker::PhantomData,
                             }
                         }
                         
@@ -165,8 +161,8 @@ impl ToTokens for FieldsGetterOpts {
                                 "{}{}{}{}{}",
                                 store.as_str(),
                                 arrow_direction,
-                                #struct_name_ident_as_str,
-                                #crate_name::format_clause(clause, #struct_name_ident_as_str),
+                                #table_name_str,
+                                #crate_name::format_clause(clause, #table_name_str),
                                 arrow_direction,
                             );
                             

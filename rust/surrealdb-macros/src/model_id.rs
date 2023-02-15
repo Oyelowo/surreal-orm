@@ -1,6 +1,19 @@
+use serde::{Deserialize, Serialize};
 use std::fmt::Display;
+use thiserror::Error;
 
+#[derive(Debug, Deserialize, Clone)]
 pub struct SurId((String, String));
+
+impl Serialize for SurId {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let table_id_joined = format!("{}:{}", self.0 .0, self.0 .1);
+        serializer.serialize_str(&table_id_joined)
+    }
+}
 
 impl Display for SurId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -9,28 +22,18 @@ impl Display for SurId {
     }
 }
 
-// impl From<String> for SurIdComplex {
-//     fn from(value: String) -> Self {
-//         Self::from(value).0
-//     }
-// }
-
 impl SurId {
-    fn id(self) -> (String, String) {
+    pub fn new(table_name: &str, id_part: &str) -> SurId {
+        SurId((table_name.into(), id_part.into()))
+    }
+
+    pub fn id(self) -> (String, String) {
         self.0
     }
     pub fn from_string(str: String) -> (String, String) {
         Self::from(str).0
     }
 }
-
-// impl From<SurId> for &str {
-//     fn from(value: SurId) -> Self {
-//         let SurId((table_name, id_part)) = value;
-//         let sur_str = format!("{table_name}:{id_part}").as_str();
-//         sur_str
-//     }
-// }
 
 impl From<SurId> for String {
     fn from(value: SurId) -> Self {
@@ -44,7 +47,6 @@ impl From<SurId> for (String, String) {
         value.0
     }
 }
-use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum SurrealdbOrmError {

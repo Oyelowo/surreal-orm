@@ -28,7 +28,7 @@ use typed_builder::TypedBuilder;
 pub struct Student {
     // #[serde(skip_serializing_if = "Option::is_none")]
     // #[builder(default, setter(strip_option))]
-    id: Option<String>,
+    id: Option<SurId>,
     first_name: String,
     last_name: String,
     // #[serde(rename = "lowo_na")]
@@ -41,23 +41,13 @@ pub struct Student {
     // written_blogs: Relate<Book>,
 }
 
-/* fn ewer() {
-    struct Nama<T> {}
-
-    impl<T> Nama<T> {
-        fn new() -> Self {
-            Self::<T>new();
-            Self {}
-        }
-    }
-} */
 // #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[derive(TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<String>,
+    id: Option<SurId>,
 
     // #[surrealdb(link_one = "Book", skip_serializing)]
     r#in: In,
@@ -72,7 +62,7 @@ type StudentWritesBook = Writes<Student, Book>;
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<String>,
+    id: Option<SurId>,
     title: String,
 }
 
@@ -82,7 +72,7 @@ type StudentWritesBlog = Writes<Student, Blog>;
 pub struct Blog {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<String>,
+    id: Option<SurId>,
     content: String,
 }
 // ==============================================
@@ -94,7 +84,7 @@ impl surrealdb_macros::SurrealdbNode for Student {
     fn schema() -> Self::Schema {
         student::Student::new()
     }
-    fn get_key(&self) -> ::std::option::Option<&String> {
+    fn get_key(&self) -> ::std::option::Option<&SurId> {
         self.id.as_ref()
     }
 
@@ -334,7 +324,7 @@ impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
     fn schema() -> Self::Schema {
         writes_schema::Writes::new()
     }
-    fn get_key(&self) -> ::std::option::Option<&String> {
+    fn get_key(&self) -> ::std::option::Option<&SurId> {
         self.id.as_ref()
     }
 }
@@ -422,7 +412,7 @@ impl surrealdb_macros::SurrealdbNode for Book {
     fn schema() -> Self::Schema {
         book::Book::new()
     }
-    fn get_key(&self) -> ::std::option::Option<&String> {
+    fn get_key(&self) -> ::std::option::Option<&SurId> {
         self.id.as_ref()
     }
 
@@ -500,7 +490,7 @@ impl surrealdb_macros::SurrealdbNode for Blog {
     fn schema() -> Self::Schema {
         blog::Blog::new()
     }
-    fn get_key(&self) -> ::std::option::Option<&String> {
+    fn get_key(&self) -> ::std::option::Option<&SurId> {
         self.id.as_ref()
     }
 
