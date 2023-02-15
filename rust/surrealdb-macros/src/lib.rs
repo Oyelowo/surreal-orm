@@ -8,7 +8,6 @@ pub mod operators_macros;
 pub mod links;
 // pub mod main_backup;
 pub mod model_id;
-pub mod node_builder;
 pub mod qbuilder;
 
 pub trait SurrealdbNode {
@@ -61,6 +60,4 @@ pub mod query_builder {
     pub fn query() -> super::qbuilder::QueryBuilder<'static> {
         super::qbuilder::QueryBuilder::new()
     }
-
-    pub use super::node_builder::{NodeBuilder, ToNodeBuilder};
 }

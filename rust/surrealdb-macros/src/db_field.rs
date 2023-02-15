@@ -3,16 +3,6 @@ use std::fmt::Display;
 #[derive(serde::Serialize, Debug, Default)]
 pub struct DbField(String);
 
-impl DbField {
-    pub fn push_str(&mut self, string: &str) {
-        self.0.push_str(string)
-    }
-
-    pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
-        format!("{self} AS {alias}")
-    }
-}
-
 impl From<String> for DbField {
     fn from(value: String) -> Self {
         Self(value.into())
@@ -59,6 +49,16 @@ impl DbQuery {
 impl DbField {
     pub fn new(field_name: &str) -> Self {
         Self(field_name.to_owned())
+    }
+
+    // TODO: replace with long underscore to show it is an internal variable
+    pub fn push_str(&mut self, string: &str) {
+        self.0.push_str(string)
+    }
+
+    fn __as__(&self, alias: impl std::fmt::Display) -> DbQuery {
+        // format!("{self} AS {alias}")
+        DbQuery::new(format!("{} AS {}", self.0, alias))
     }
 
     pub fn equals<T: Display>(&self, value: T) -> DbQuery {
