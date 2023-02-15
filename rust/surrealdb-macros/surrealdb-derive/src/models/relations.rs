@@ -113,22 +113,14 @@ macro_rules! wrapper_struct_to_ident {
                 Self(value.into())
             }
         }
+
         impl From<$simple_wrapper_struct> for String {
             fn from(value: $simple_wrapper_struct) -> Self {
                 value.0
             }
         }
-            };
-        }
-
-/*
-impl From<EdgeAction> for TokenStream {
-    fn from(edge_action: EdgeAction) -> Self {
-        let action = format_ident!("{}", edge_action.0);
-        quote!(#action)
-    }
+    };
 }
-*/
 
 #[derive(Debug, Clone)]
 pub(crate) struct EdgeTableName(String);
