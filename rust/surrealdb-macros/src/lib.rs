@@ -2,6 +2,8 @@
 
 pub use model_id::SurId;
 use qbuilder::QueryBuilder;
+pub mod db_field;
+pub mod operators_macros;
 
 pub mod links;
 // pub mod main_backup;
@@ -25,49 +27,6 @@ pub trait SurrealdbEdge {
     fn schema() -> Self::Schema;
     fn get_key(&self) -> ::std::option::Option<&SurId>;
 }
-
-#[derive(serde::Serialize, Debug, Default)]
-pub struct DbField(String);
-
-impl DbField {
-    pub fn push_str(&mut self, string: &str) {
-        self.0.push_str(string)
-    }
-
-    pub fn __as__(&self, alias: impl std::fmt::Display) -> String {
-        format!("{self} AS {alias}")
-    }
-}
-
-impl From<String> for DbField {
-    fn from(value: String) -> Self {
-        Self(value.into())
-    }
-}
-impl From<&str> for DbField {
-    fn from(value: &str) -> Self {
-        Self(value.into())
-    }
-}
-impl From<DbField> for String {
-    fn from(value: DbField) -> Self {
-        value.0
-    }
-}
-
-impl std::fmt::Display for DbField {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.0))
-    }
-}
-
-/* impl std::fmt::Debug for DbField {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.0))
-    }
-} */
-
-impl query_builder::ToNodeBuilder for DbField {}
 
 pub enum Clause<'a> {
     All,
