@@ -215,4 +215,13 @@ mod tests {
                 .to_string()
         )
     }
+
+    #[test]
+    fn multiplication_tests8() {
+        use serde_json;
+
+        let sur_id = SurId::new("alien", "oyelowo");
+        let json = serde_json::to_string(&sur_id).unwrap();
+        assert_eq!(json, "\"alien:oyelowo\"");
+    }
 }
