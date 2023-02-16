@@ -9,6 +9,7 @@ pub use model_id::SurId;
 use qbuilder::QueryBuilder;
 pub mod db_field;
 pub mod operators_macros;
+pub mod query_builder;
 
 pub mod links;
 // pub mod main_backup;
@@ -60,7 +61,7 @@ pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
     }
 }
 pub use db_field::DbField;
-pub mod query_builder {
+pub mod query_builder_old {
 
     pub fn query() -> super::qbuilder::QueryBuilder<'static> {
         super::qbuilder::QueryBuilder::new()
