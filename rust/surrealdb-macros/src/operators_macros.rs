@@ -1,3 +1,5 @@
+use crate::db_field::DbQuery;
+
 // Define the macro in a separate module
 #[macro_export]
 macro_rules! op {
@@ -153,6 +155,7 @@ macro_rules! where_ {
         }
     };
 }
+
 // macro_rules! wher_ {
 //     ($left: expr op!($op: tt) $right: expr) => {
 //         [$left.to_string().as_str(), stringify!($op), $right]

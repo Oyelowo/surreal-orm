@@ -5,7 +5,7 @@
 
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
-use crate::DbField;
+use crate::{db_field::DbQuery, DbField};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Order<'a> {
@@ -95,9 +95,11 @@ impl Display for OrderOption {
 pub struct Select<'a> {
     projections: Vec<&'a str>,
     targets: Vec<&'a str>,
-    where_: Option<&'a str>,
+    where_: Option<String>,
+    // where_: Option<&'a str>,
     split: Option<Vec<&'a str>>,
-    group_by: Option<Vec<&'a str>>,
+    // group_by: Option<Vec<&'a str>>,
+    group_by: Option<Vec<String>>,
     order_by: Option<Vec<Order<'a>>>,
     limit: Option<u64>,
     start: Option<u64>,
@@ -133,8 +135,10 @@ impl<'a> Select<'a> {
         self
     }
 
-    pub fn where_(&mut self, condition: &'a str) -> &mut Self {
-        self.where_ = Some(condition);
+    // pub fn where_(&mut self, condition: &'a str) -> &mut Self {
+    pub fn where_(&mut self, condition: impl Into<DbQuery>) -> &mut Self {
+        let condition: DbQuery = condition.into();
+        self.where_ = Some(condition.to_string());
         self
     }
 
@@ -143,8 +147,22 @@ impl<'a> Select<'a> {
         self
     }
 
-    pub fn group_by(&mut self, fields: &[&'a str]) -> &mut Self {
-        self.group_by = Some(fields.to_vec());
+    // pub fn group_by(&mut self, fields: &[&'a str]) -> &mut Self {
+    pub fn group_by<T: Into<DbField> + Clone>(&mut self, field: T) -> &mut Self {
+        let xxx: DbField = field.into();
+        let xxx = xxx.to_string();
+        // let fields = fields.iter().map(|f| f.into()).collect::<Vec<&String>>();
+        self.group_by = Some(vec![xxx].to_vec());
+        // self.group_by = Some(&[DbQuery::from(fields)].to_vec());
+        // self.group_by = Some(fields.to_vec());
+        self
+    }
+
+    // // pub fn group_by(&mut self, fields: &[&'a str]) -> &mut Self {
+    pub fn group_by_many<T: Into<DbField> + Clone>(&mut self, fields: &[&T]) -> &mut Self {
+        // let fields = fields.iter().map(|f| f.into()).collect::<Vec<&String>>();
+        // self.group_by = Some(fields.to_vec());
+        // self.group_by = Some(fields.to_vec());
         self
     }
 
@@ -188,9 +206,9 @@ impl<'a> Display for Select<'a> {
         query.push_str(" FROM ");
         query.push_str(&self.targets.join(", "));
 
-        if let Some(condition) = self.where_ {
+        if let Some(condition) = &self.where_ {
             query.push_str(" WHERE ");
-            query.push_str(condition);
+            query.push_str(&condition);
         }
 
         if let Some(split) = &self.split {

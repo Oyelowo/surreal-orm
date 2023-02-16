@@ -33,6 +33,7 @@ pub struct Student {
     id: Option<SurId>,
     first_name: String,
     last_name: String,
+    age: u8,
 
     #[surrealdb(link_self = "Student", skip_serializing)]
     best_friend: LinkSelf<Student>,
@@ -96,9 +97,9 @@ pub struct Blog {
 mod tests {
     use super::*;
     // use surrealdb_macros::prelude::*;
-    use surrealdb_macros::query_builder;
     use surrealdb_macros::query_builder::Order;
-    use surrealdb_macros::DbField;
+    use surrealdb_macros::{op, DbField};
+    use surrealdb_macros::{query_builder, where_};
     use test_case::test_case;
 
     #[test]
@@ -112,25 +113,35 @@ mod tests {
             course,
             semCoures,
             writtenBooks,
-            ___________graph_traversal_string,
+            age,
+            ..
         } = &Student::schema();
 
-        query_builder::Select::new()
-            .projection(format!("Student").as_str())
-            .where_(
-                Student::schema()
-                    .writes__(Clause::Where(
-                        query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
-                    ))
-                    .book(Clause::Where(
-                        query().where_(Book::schema().content.contains("Oyelowo in Uranus")),
-                    ))
-                    .__as__(Student::schema().writtenBooks)
-                    .as_str(),
-            )
-            .order_by(&[Order::new(firstName).rand().desc()]);
-        let x = Student::schema().firstName;
-        assert_eq!(x.to_string(), "firstName".to_string())
+        let mut select = query_builder::Select::new();
+
+        let written_book_selection = Student::schema()
+            .writes__(Clause::Where(
+                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
+            ))
+            .book(Clause::Where(
+                query().where_(Book::schema().content.contains("Oyelowo in Uranus")),
+            ))
+            .__as__(Student::schema().writtenBooks);
+
+        let ref query = select
+            .projection("*")
+            .projection(&written_book_selection.as_str())
+            .where_(age.greater_than_or_equals(18))
+            .where_(where_!(age op!("<=") "12:00"))
+            .order_by(&[Order::new(firstName).rand().desc()])
+            .group_by(course)
+            .group_by_many(&[course, unoBook, "lowo".into()]);
+
+        // if 3 > 3 {
+        //     query.group_by(&[lastName])
+        // }
+
+        assert_eq!(query.to_string(), "SELECT * FROM  WHERE ->writes[WHERE timeWritten = 12:00]->book[WHERE content CONTAINS Oyelowo in Uranus] AS writtenBooks ORDER BY firstName RAND() DESC;".to_string())
     }
 
     #[test]
