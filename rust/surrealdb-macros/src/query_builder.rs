@@ -23,6 +23,7 @@ pub struct Select<'a> {
 pub struct Order<'a> {
     field: &'a str,
     direction: Option<OrderDirection>,
+    option: Option<OrderOption>,
 }
 
 impl<'a> Order<'a> {
@@ -30,6 +31,7 @@ impl<'a> Order<'a> {
         Order {
             field,
             direction: None,
+            option: None,
         }
     }
 
@@ -42,6 +44,26 @@ impl<'a> Order<'a> {
         self.direction = Some(OrderDirection::Desc);
         self
     }
+    pub fn rand(mut self) -> Self {
+        self.option = Some(OrderOption::Rand);
+        self
+    }
+
+    pub fn collate(mut self) -> Self {
+        self.option = Some(OrderOption::Collate);
+        self
+    }
+
+    pub fn numeric(mut self) -> Self {
+        self.option = Some(OrderOption::Numeric);
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum OrderDirection {
+    Asc,
+    Desc,
 }
 
 impl Display for OrderDirection {
@@ -54,19 +76,20 @@ impl Display for OrderDirection {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum OrderDirection {
-    Asc,
-    Desc,
+enum OrderOption {
+    Rand,
+    Collate,
+    Numeric,
 }
-// use surrealdb::sql::{statements, Order};
-// fn arere() {Order::}
-#[derive(Debug, Clone, Copy)]
-pub struct OrderBy<'a> {
-    field: &'a str,
-    rand: bool,
-    collate: bool,
-    numeric: bool,
-    asc: bool,
+
+impl Display for OrderOption {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            OrderOption::Rand => write!(f, "RAND()"),
+            OrderOption::Collate => write!(f, "COLLATE"),
+            OrderOption::Numeric => write!(f, "NUMERIC"),
+        }
+    }
 }
 
 impl<'a> Select<'a> {
