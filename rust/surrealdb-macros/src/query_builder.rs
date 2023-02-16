@@ -3,7 +3,10 @@
  * Email: Oyelowo Oyedayo
  * */
 
-use std::fmt::{Display, Formatter, Result as FmtResult};
+use std::{
+    borrow::Cow,
+    fmt::{Display, Formatter, Result as FmtResult},
+};
 
 use crate::{db_field::DbQuery, DbField};
 
@@ -99,7 +102,7 @@ pub struct Select<'a> {
     // where_: Option<&'a str>,
     split: Option<Vec<&'a str>>,
     // group_by: Option<Vec<&'a str>>,
-    group_by: Option<Vec<String>>,
+    group_by: Vec<String>,
     order_by: Option<Vec<Order<'a>>>,
     limit: Option<u64>,
     start: Option<u64>,
@@ -115,7 +118,7 @@ impl<'a> Select<'a> {
             targets: vec![],
             where_: None,
             split: None,
-            group_by: None,
+            group_by: vec![],
             order_by: None,
             limit: None,
             start: None,
@@ -147,22 +150,27 @@ impl<'a> Select<'a> {
         self
     }
 
-    // pub fn group_by(&mut self, fields: &[&'a str]) -> &mut Self {
-    pub fn group_by<T: Into<DbField> + Clone>(&mut self, field: T) -> &mut Self {
-        let xxx: DbField = field.into();
-        let xxx = xxx.to_string();
-        // let fields = fields.iter().map(|f| f.into()).collect::<Vec<&String>>();
-        self.group_by = Some(vec![xxx].to_vec());
-        // self.group_by = Some(&[DbQuery::from(fields)].to_vec());
-        // self.group_by = Some(fields.to_vec());
+    pub fn group_by<'field, T>(&mut self, field: T) -> &mut Self
+    where
+        T: Into<Cow<'field, DbField>>,
+    {
+        let field: &DbField = &field.into();
+        self.group_by.push(field.to_string());
         self
     }
 
     // // pub fn group_by(&mut self, fields: &[&'a str]) -> &mut Self {
-    pub fn group_by_many<T: Into<DbField> + Clone>(&mut self, fields: &[&T]) -> &mut Self {
-        // let fields = fields.iter().map(|f| f.into()).collect::<Vec<&String>>();
-        // self.group_by = Some(fields.to_vec());
-        // self.group_by = Some(fields.to_vec());
+    pub fn group_by_many<T: Into<DbField> + Clone + Display>(&mut self, fields: &[T]) -> &mut Self {
+        self.group_by.extend_from_slice(
+            fields
+                .into_iter()
+                .map(|field| {
+                    // let field: DbField = field.into();
+                    field.to_string()
+                })
+                .collect::<Vec<_>>()
+                .as_slice(),
+        );
         self
     }
 
@@ -216,10 +224,12 @@ impl<'a> Display for Select<'a> {
             query.push_str(&split.join(", "));
         }
 
-        if let Some(group) = &self.group_by {
+        // if let Some(group) = &self.group_by {
+        if !self.group_by.is_empty() {
             query.push_str(" GROUP BY ");
-            query.push_str(&group.join(", "));
+            query.push_str(&self.group_by.join(", "));
         }
+
         if let Some(order) = &self.order_by {
             query.push_str(" ORDER BY ");
             query.push_str(

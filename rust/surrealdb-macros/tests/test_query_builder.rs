@@ -117,14 +117,15 @@ mod tests {
             ..
         } = &Student::schema();
 
+        let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
+        let book::Book { content, .. } = Book::schema();
+
         let mut select = query_builder::Select::new();
 
         let written_book_selection = Student::schema()
-            .writes__(Clause::Where(
-                query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
-            ))
+            .writes__(Clause::Where(query().where_(timeWritten.equals("12:00"))))
             .book(Clause::Where(
-                query().where_(Book::schema().content.contains("Oyelowo in Uranus")),
+                query().where_(content.contains("Oyelowo in Uranus")),
             ))
             .__as__(Student::schema().writtenBooks);
 
@@ -133,10 +134,11 @@ mod tests {
             .projection(&written_book_selection.as_str())
             .where_(age.greater_than_or_equals(18))
             .where_(where_!(age op!("<=") "12:00"))
-            .order_by(&[Order::new(firstName).rand().desc()])
+            // .order_by(&[Order::new(firstName).rand().desc()])
             .group_by(course)
-            .group_by_many(&[course, unoBook, "lowo".into()]);
-
+            .group_by(firstName)
+            .group_by("lastName".into())
+            .group_by_many(&[course, unoBook, &DbField::new("lowo"), &"lowo".into()]);
         // if 3 > 3 {
         //     query.group_by(&[lastName])
         // }

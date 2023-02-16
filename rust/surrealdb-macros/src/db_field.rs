@@ -3,38 +3,68 @@ Author: Oyelowo Oyedayo
 Email: oyelowooyedayo@gmail.com
 */
 
-use std::fmt::Display;
+use std::{borrow::Cow, fmt::Display};
 
 #[derive(serde::Serialize, Debug, Clone, Default)]
 pub struct DbField(String);
 
-impl<'a> From<&'a str> for &'a DbField {
-    fn from(s: &'a str) -> &'a DbField {
-        let db_field = DbField(s.to_string());
-        let reference = unsafe { std::mem::transmute::<&DbField, &'a DbField>(&db_field) };
-        reference
-    }
-}
+// impl<'a> From<&'a str> for &'a DbField {
+//     fn from(s: &'a str) -> &'a DbField {
+//         let db_field = DbField(s.to_string());
+//         let reference = unsafe { std::mem::transmute::<&DbField, &'a DbField>(&db_field) };
+//         reference
+//     }
+// }
 // impl<'a> From<&str> for &'a DbField {
 //     fn from(s: &str) -> &'a DbField {
 //         todo!()
 //     }
 // }
 
-impl<T: ToString> From<&[T]> for DbField {
-    fn from(values: &[T]) -> Self {
-        let values: Vec<DbField> = values.iter().map(|v| DbField(v.to_string())).collect();
-        // DbField::List(values)
-        todo!()
+// impl<'a> From<DbField> for &'a DbField {
+//     fn from(value: DbField) -> &'a DbField {
+//         Box::leak(Box::new(value))
+//     }
+// }
+
+impl<'a> From<Cow<'a, DbField>> for DbField {
+    fn from(value: Cow<'a, DbField>) -> Self {
+        match value {
+            Cow::Borrowed(v) => v.clone(),
+            Cow::Owned(v) => v,
+        }
+    }
+}
+impl<'a> From<&'a DbField> for Cow<'a, DbField> {
+    fn from(value: &'a DbField) -> Self {
+        Cow::Borrowed(value)
     }
 }
 
-impl<T: ToString> From<&T> for DbField {
-    fn from(value: &T) -> Self {
-        // DbField::Value(DbField(value.to_string()))
-        todo!()
+impl From<DbField> for Cow<'static, DbField> {
+    fn from(value: DbField) -> Self {
+        Cow::Owned(value)
     }
 }
+//
+// impl<'a> From<DbField> for Cow<'a, DbField> {
+//     fn from(value: DbField) -> Self {
+//         Cow::Owned(value)
+//     }
+// }
+//
+// impl<'a> From<&DbField> for Cow<'a, DbField> {
+//     fn from(value: &DbField) -> Self {
+//         Cow::Borrowed(value)
+//     }
+// }
+//
+// impl<T: ToString> From<&T> for DbField {
+//     fn from(value: &T) -> Self {
+//         // DbField::Value(DbField(value.to_string()))
+//         todo!()
+//     }
+// }
 impl From<String> for DbField {
     fn from(value: String) -> Self {
         Self(value.into())
