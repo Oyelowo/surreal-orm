@@ -19,6 +19,56 @@ pub struct Select<'a> {
     parallel: bool,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct Order<'a> {
+    field: &'a str,
+    direction: Option<OrderDirection>,
+}
+
+impl<'a> Order<'a> {
+    pub fn new(field: &'a str) -> Self {
+        Order {
+            field,
+            direction: None,
+        }
+    }
+
+    pub fn asc(mut self) -> Self {
+        self.direction = Some(OrderDirection::Asc);
+        self
+    }
+
+    pub fn desc(mut self) -> Self {
+        self.direction = Some(OrderDirection::Desc);
+        self
+    }
+}
+
+impl Display for OrderDirection {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            OrderDirection::Asc => write!(f, "ASC"),
+            OrderDirection::Desc => write!(f, "DESC"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum OrderDirection {
+    Asc,
+    Desc,
+}
+// use surrealdb::sql::{statements, Order};
+// fn arere() {Order::}
+#[derive(Debug, Clone, Copy)]
+pub struct OrderBy<'a> {
+    field: &'a str,
+    rand: bool,
+    collate: bool,
+    numeric: bool,
+    asc: bool,
+}
+
 impl<'a> Select<'a> {
     pub fn new() -> Select<'a> {
         Select {
@@ -115,22 +165,51 @@ impl<'a> Display for Select<'a> {
             query.push_str(" GROUP BY ");
             query.push_str(&group.join(", "));
         }
-
         if let Some(order) = &self.order_by {
             query.push_str(" ORDER BY ");
-            query.push_str(&order.join(", "));
-
-            if let Some(directions) = &self.order_directions {
-                query.push(' ');
-
-                for (i, direction) in directions.iter().enumerate() {
-                    if i > 0 {
-                        query.push_str(", ");
-                    }
-                    query.push_str(direction);
-                }
-            }
+            query.push_str(
+                &order
+                    .iter()
+                    .map(|o| format!("{} {}", o.field, o.direction.unwrap_or(OrderDirection::Asc)))
+                    .collect::<Vec<_>>()
+                    .join(", "),
+            );
         }
+
+        // if let Some(order) = &self.order_by {
+        //     query.push_str(" ORDER BY ");
+        //     query.push_str(&order.iter().map(|o| o.field).collect::<Vec<_>>().join(", "));
+        //
+        //     if let Some(directions) = &self.order_directions {
+        //         query.push(' ');
+        //
+        //         for (i, direction) in directions.iter().enumerate() {
+        //             if i > 0 {
+        //                 query.push_str(", ");
+        //             }
+        //             query.push_str(match direction {
+        //                 OrderDirection::Asc => "ASC",
+        //                 OrderDirection::Desc => "DESC",
+        //             });
+        //         }
+        //     }
+        // }
+        //
+        // if let Some(order) = &self.order_by {
+        //     query.push_str(" ORDER BY ");
+        //     query.push_str(&order.join(", "));
+        //
+        //     if let Some(directions) = &self.order_directions {
+        //         query.push(' ');
+        //
+        //         for (i, direction) in directions.iter().enumerate() {
+        //             if i > 0 {
+        //                 query.push_str(", ");
+        //             }
+        //             query.push_str(direction);
+        //         }
+        //     }
+        // }
 
         if let Some(limit_value) = self.limit {
             query.push_str(" LIMIT ");

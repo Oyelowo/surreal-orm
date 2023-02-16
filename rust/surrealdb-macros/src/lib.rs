@@ -10,9 +10,11 @@ use qbuilder::QueryBuilder;
 pub mod db_field;
 pub mod operators_macros;
 pub mod query_builder;
+pub mod prelude {
+    use super::query_builder;
+}
 
 pub mod links;
-// pub mod main_backup;
 pub mod model_id;
 pub mod qbuilder;
 
