@@ -5,15 +5,18 @@
 
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
+use crate::DbField;
+
 #[derive(Debug, Clone, Copy)]
 pub struct Order<'a> {
-    field: &'a str,
+    field: &'a DbField,
     direction: Option<OrderDirection>,
     option: Option<OrderOption>,
 }
 
 impl<'a> Order<'a> {
-    pub fn new(field: &'a str) -> Self {
+    // pub fn new(field: &'a str) -> Self {
+    pub fn new(field: &'a DbField) -> Self {
         Order {
             field,
             direction: None,
@@ -43,6 +46,17 @@ impl<'a> Order<'a> {
     pub fn numeric(mut self) -> Self {
         self.option = Some(OrderOption::Numeric);
         self
+    }
+}
+
+impl<'a> Display for &Order<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!(
+            "{} {} {}",
+            self.field,
+            self.option.map_or("".into(), |op| op.to_string()),
+            self.direction.unwrap_or(OrderDirection::Asc)
+        ))
     }
 }
 
@@ -81,7 +95,7 @@ impl Display for OrderOption {
 pub struct Select<'a> {
     projections: Vec<&'a str>,
     targets: Vec<&'a str>,
-    condition: Option<&'a str>,
+    where_: Option<&'a str>,
     split: Option<Vec<&'a str>>,
     group_by: Option<Vec<&'a str>>,
     order_by: Option<Vec<Order<'a>>>,
@@ -97,7 +111,7 @@ impl<'a> Select<'a> {
         Select {
             projections: vec![],
             targets: vec![],
-            condition: None,
+            where_: None,
             split: None,
             group_by: None,
             order_by: None,
@@ -119,8 +133,8 @@ impl<'a> Select<'a> {
         self
     }
 
-    pub fn condition(&mut self, condition: &'a str) -> &mut Self {
-        self.condition = Some(condition);
+    pub fn where_(&mut self, condition: &'a str) -> &mut Self {
+        self.where_ = Some(condition);
         self
     }
 
@@ -174,7 +188,7 @@ impl<'a> Display for Select<'a> {
         query.push_str(" FROM ");
         query.push_str(&self.targets.join(", "));
 
-        if let Some(condition) = self.condition {
+        if let Some(condition) = self.where_ {
             query.push_str(" WHERE ");
             query.push_str(condition);
         }
@@ -193,15 +207,8 @@ impl<'a> Display for Select<'a> {
             query.push_str(
                 &order
                     .iter()
-                    .map(|o| {
-                        format!(
-                            "{} {} {}",
-                            o.field,
-                            o.option.map_or("".into(), |op| op.to_string()),
-                            o.direction.unwrap_or(OrderDirection::Asc)
-                        )
-                    })
-                    .collect::<Vec<_>>()
+                    .map(|o| format!("{o}"))
+                    .collect::<Vec<String>>()
                     .join(", "),
             );
         }

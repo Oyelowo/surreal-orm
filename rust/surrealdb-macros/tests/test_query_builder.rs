@@ -91,17 +91,44 @@ pub struct Blog {
     title: String,
     content: String,
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_builder;
+    use surrealdb_macros::query_builder::Order;
     use surrealdb_macros::DbField;
     use test_case::test_case;
 
     #[test]
     fn multiplication_tests1() {
-        query_builder::Select::projection(&mut self, projection)
+        let student::Student {
+            id,
+            firstName,
+            lastName,
+            bestFriend,
+            unoBook,
+            course,
+            semCoures,
+            writtenBooks,
+            ___________graph_traversal_string,
+        } = &Student::schema();
+
+        query_builder::Select::new()
+            .projection(format!("Student").as_str())
+            .where_(
+                Student::schema()
+                    .writes__(Clause::Where(
+                        query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
+                    ))
+                    .book(Clause::Where(
+                        query().where_(Book::schema().content.contains("Oyelowo in Uranus")),
+                    ))
+                    .__as__(Student::schema().writtenBooks)
+                    .as_str(),
+            )
+            .order_by(&[Order::new(firstName).rand().desc()]);
         let x = Student::schema().firstName;
         assert_eq!(x.to_string(), "firstName".to_string())
     }
