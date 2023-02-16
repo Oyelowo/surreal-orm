@@ -101,7 +101,7 @@ mod tests {
 
     #[test]
     fn multiplication_tests1() {
-        // query_builder::Select
+        query_builder::Select::projection(&mut self, projection)
         let x = Student::schema().firstName;
         assert_eq!(x.to_string(), "firstName".to_string())
     }

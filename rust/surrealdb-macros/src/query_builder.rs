@@ -5,20 +5,6 @@
 
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
-pub struct Select<'a> {
-    projections: Vec<&'a str>,
-    targets: Vec<&'a str>,
-    condition: Option<&'a str>,
-    split: Option<Vec<&'a str>>,
-    group_by: Option<Vec<&'a str>>,
-    order_by: Option<Vec<Order<'a>>>,
-    limit: Option<u64>,
-    start: Option<u64>,
-    fetch: Option<Vec<&'a str>>,
-    timeout: Option<&'a str>,
-    parallel: bool,
-}
-
 #[derive(Debug, Clone, Copy)]
 pub struct Order<'a> {
     field: &'a str,
@@ -90,6 +76,20 @@ impl Display for OrderOption {
             OrderOption::Numeric => write!(f, "NUMERIC"),
         }
     }
+}
+
+pub struct Select<'a> {
+    projections: Vec<&'a str>,
+    targets: Vec<&'a str>,
+    condition: Option<&'a str>,
+    split: Option<Vec<&'a str>>,
+    group_by: Option<Vec<&'a str>>,
+    order_by: Option<Vec<Order<'a>>>,
+    limit: Option<u64>,
+    start: Option<u64>,
+    fetch: Option<Vec<&'a str>>,
+    timeout: Option<&'a str>,
+    parallel: bool,
 }
 
 impl<'a> Select<'a> {
@@ -193,7 +193,14 @@ impl<'a> Display for Select<'a> {
             query.push_str(
                 &order
                     .iter()
-                    .map(|o| format!("{} {}", o.field, o.direction.unwrap_or(OrderDirection::Asc)))
+                    .map(|o| {
+                        format!(
+                            "{} {} {}",
+                            o.field,
+                            o.option.map_or("".into(), |op| op.to_string()),
+                            o.direction.unwrap_or(OrderDirection::Asc)
+                        )
+                    })
                     .collect::<Vec<_>>()
                     .join(", "),
             );
