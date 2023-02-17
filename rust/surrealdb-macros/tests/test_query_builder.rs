@@ -93,6 +93,32 @@ pub struct Blog {
     content: String,
 }
 
+trait WhiteSpaceRemoval {
+    fn remove_extra_whitespace(&self) -> String
+    where
+        Self: std::borrow::Borrow<str>,
+    {
+        let mut result = String::with_capacity(self.borrow().len());
+        let mut last_char_was_whitespace = true;
+
+        for c in self.borrow().chars() {
+            if c.is_whitespace() {
+                if !last_char_was_whitespace {
+                    result.push(' ');
+                    last_char_was_whitespace = true;
+                }
+            } else {
+                result.push(c);
+                last_char_was_whitespace = false;
+            }
+        }
+
+        result
+    }
+}
+impl WhiteSpaceRemoval for &str {}
+impl WhiteSpaceRemoval for String {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -115,7 +141,7 @@ mod tests {
             writtenBooks,
             age,
             ..
-        } = Student::schema();
+        } = &Student::schema();
 
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
         let book::Book { content, .. } = Book::schema();
@@ -129,7 +155,7 @@ mod tests {
             ))
             .__as__(Student::schema().writtenBooks);
 
-        let ref query = select
+        let ref mut query = select
             .projection("*")
             .projection(&written_book_selection.as_str())
             .where_(age.greater_than_or_equals(18))
@@ -137,16 +163,22 @@ mod tests {
             // .order_by(&[Order::new(firstName).rand().desc()])
             .group_by(course)
             .group_by(firstName)
-            // .group_by(&"lastName".into())
-            .group_by_many(&[lastName, unoBook, DbField::new("lowo")])
-            .group_by_many(&[&age, &bestFriend, &DbField::new("lowo")]);
-        // .group_by_many(&[course, unoBook, &DbField::new("lowo")]);
-        // .group_by_many(&[course, unoBook, &DbField::new("lowo"), "lowo".into()]);
-        // if 3 > 3 {
-        //     query.group_by(&[lastName])
-        // }
+            .group_by(&"lastName".into())
+            .group_by_many(&[lastName, unoBook, &DbField::new("lowo")]);
 
-        assert_eq!(query.to_string(), "SELECT * FROM  WHERE ->writes[WHERE timeWritten = 12:00]->book[WHERE content CONTAINS Oyelowo in Uranus] AS writtenBooks ORDER BY firstName RAND() DESC;".to_string())
+        let is_oyelowo = true;
+        if is_oyelowo {
+            query.group_by_many(&[age, bestFriend, &DbField::new("lowo")]);
+        }
+
+        assert_eq!(
+            query.to_string().remove_extra_whitespace(),
+            "SELECT *, ->writes[WHERE timeWritten = 12:00]->book[WHERE \
+            content CONTAINS Oyelowo in Uranus] AS writtenBooks FROM \
+            WHERE age <= 12:00 GROUP BY course, firstName, lastName, \
+            lastName, unoBook, lowo, age, bestFriend, lowo;"
+                .remove_extra_whitespace()
+        )
     }
 
     #[test]
