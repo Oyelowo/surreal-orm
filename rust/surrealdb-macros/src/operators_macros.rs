@@ -2,140 +2,140 @@ use crate::db_field::DbQuery;
 
 // Define the macro in a separate module
 #[macro_export]
-macro_rules! op {
-    ("=") => {
+macro_rules! t {
+    (=) => {
         "="
     };
-    ("!=") => {
+    (!=) => {
         "!="
     };
-    ("==") => {
+    (==) => {
         "=="
     };
-    ("?=") => {
+    (?=) => {
         "?="
     };
-    ("*=") => {
+    (*=) => {
         "*="
     };
-    ("~") => {
+    (~) => {
         "~"
     };
-    ("!~") => {
+    (!~) => {
         "!~"
     };
-    ("?~") => {
+    (?~) => {
         "?~"
     };
-    ("*~") => {
+    (*~) => {
         "*~"
     };
-    ("<") => {
+    (<) => {
         "<"
     };
-    ("<=") => {
+    (<=) => {
         "<="
     };
-    (">") => {
+    (>) => {
         ">"
     };
-    (">=") => {
+    (>=) => {
         ">="
     };
-    ("+") => {
+    (+) => {
         "+"
     };
-    ("-") => {
+    (-) => {
         "-"
     };
-    ("*") => {
+    (*) => {
         "*"
     };
-    ("/") => {
+    (/) => {
         "/"
     };
-    ("&&") => {
+    (&&) => {
         "&&"
     };
-    ("||") => {
+    (||) => {
         "||"
     };
-    ("AND") => {
+    (AND) => {
         "AND"
     };
-    ("OR") => {
+    (OR) => {
         "OR"
     };
-    ("IS") => {
+    (IS) => {
         "IS"
     };
-    ("IS NOT") => {
+    (IS NOT) => {
         "IS NOT"
     };
-    ("CONTAINS") => {
+    (CONTAINS) => {
         "CONTAINS"
     };
     ("∋") => {
         "∋"
     };
-    ("CONTAINSNOT") => {
+    (CONTAINSNOT) => {
         "CONTAINSNOT"
     };
     ("∌") => {
         "∌"
     };
-    ("CONTAINSALL") => {
+    (CONTAINSALL) => {
         "CONTAINSALL"
     };
     ("⊇") => {
         "⊇"
     };
-    ("CONTAINSANY") => {
+    (CONTAINSANY) => {
         "CONTAINSANY"
     };
     ("⊃") => {
         "⊃"
     };
-    ("CONTAINSNONE") => {
+    (CONTAINSNONE) => {
         "CONTAINSNONE"
     };
     ("⊅") => {
         "⊅"
     };
-    ("INSIDE") => {
+    (INSIDE) => {
         "INSIDE"
     };
     ("∈") => {
         "∈"
     };
-    ("NOTINSIDE") => {
+    (NOTINSIDE) => {
         "NOTINSIDE"
     };
     ("∉") => {
         "∉"
     };
-    ("ALLINSIDE") => {
+    (ALLINSIDE) => {
         "ALLINSIDE"
     };
     ("⊆") => {
         "⊆"
     };
-    ("ANYINSIDE") => {
+    (ANYINSIDE) => {
         "ANYINSIDE"
     };
     ("⊂") => {
         "⊂"
     };
-    ("NONEINSIDE") => {
+    (NONEINSIDE) => {
         "NONEINSIDE"
     };
     ("⊄") => {
         "⊄"
     };
-    ("OUTSIDE") => {
+    (OUTSIDE) => {
         "OUTSIDE"
     };
-    ("INTERSECTS") => {
+    (INTERSECTS) => {
         "INTERSECTS"
     };
     ($other: expr) => {
