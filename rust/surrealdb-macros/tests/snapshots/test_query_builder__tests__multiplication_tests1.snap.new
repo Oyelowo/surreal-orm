@@ -1,6 +1,6 @@
 ---
 source: surrealdb-macros/tests/test_query_builder.rs
-assertion_line: 249
-expression: query.to_string()
+assertion_line: 224
+expression: query1.to_string()
 ---
-"SELECT age, firstName, firstName, unoBook FROM student WHERE age > 12:00 firstName ~ lowo SPLIT lastName, firstName, firstName, semCoures GROUP BY *, course, firstName, lastName, lastName, unoBook, lowo, age, bestFriend, lowo ORDER BY firstName RAND() DESC, lastName COLLATE ASC, id NUMERIC DESC, id NUMERIC DESC, firstName  DESC LIMIT 400 START AT 5 FETCH firstName, lastName, age, unoBook, age, unoBook TIMEOUT 10s PARALLEL;"
+"SELECT  FROM book WHERE (content LIKE 'lowo') AND ((age >= 600) OR (firstName = Oyelowo) AND (lastName = Oyedayo)) SPLIT firstName GROUP BY *, content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 15 PARALLEL;"

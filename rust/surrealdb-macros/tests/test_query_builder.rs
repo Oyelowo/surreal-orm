@@ -180,10 +180,8 @@ mod tests {
         let mut queryb = query_builder::QueryBuilder::new();
 
         let written_book_selection = Student::schema()
-            .writes__(Clause::Where(query().where_(timeWritten.equals("12:00"))))
-            .book(Clause::Where(
-                query().where_(content.contains("Oyelowo in Uranus")),
-            ))
+            .writes__(Clause::Where(timeWritten.equals("12:00")))
+            .book(Clause::Where(content.contains("Oyelowo in Uranus")))
             .__as__(Student::schema().writtenBooks);
 
         #[derive(Serialize, Deserialize)]
@@ -195,6 +193,34 @@ mod tests {
             }
         }
         // age.and(firstName)
+
+        let book::Book { content, .. } = Book::schema();
+
+        let ref mut query1 = queryb
+            .select_all()
+            .from(Book::get_table_name())
+            .where_(
+                content.like("lowo").and(
+                    age.greater_than_or_equal(600)
+                        .or(firstName.equal("Oyelowo"))
+                        .and(lastName.equal("Oyedayo")),
+                ),
+            )
+            .group_by(content)
+            .order_by(order(lastName).desc())
+            .limit(50)
+            .start(20)
+            .timeout("15")
+            .parallel();
+
+        let is_lowo = true;
+        if is_lowo {
+            query1.limit(50);
+            query1.group_by(age);
+        }
+        insta::assert_debug_snapshot!(query1.to_string());
+
+        println!("XXXXXXXX {query1}");
 
         let ref mut query = queryb
             .select_all()
@@ -209,7 +235,7 @@ mod tests {
                         .and(lastName.fuzzy_equal("oyedayo")))
                     .and(age.greater_than_or_equal(150)),
             )
-            .where_(cond!(age q!(>) "12:00" firstName q!(~) "lowo"))
+            // .where_(cond!(age q!(>) "12:00" firstName q!(~) "lowo"))
             .order_by(order(firstName).rand().desc())
             .order_by(order(lastName).collate().asc())
             .order_by(order(id).numeric().desc())
@@ -230,11 +256,11 @@ mod tests {
             .timeout("10s")
             .parallel();
 
-        let is_oyelowo = true;
-        if is_oyelowo {
-            query.group_by_many(&[age, bestFriend, &DbField::new("lowo")]);
-        }
-
+        // let is_oyelowo = true;
+        // if is_oyelowo {
+        //     query.group_by_many(&[age, bestFriend, &DbField::new("lowo")]);
+        // }
+        //
         // stringify_tokens!("lowo", "knows", 5);
 
         // stringify_tokens2!("lowo", 5);
@@ -246,7 +272,7 @@ mod tests {
         // let result = sql!(SELECT name WHERE age > 5);
         // let result = sql!(SELECT name WHERE age > 5);
 
-        insta::assert_debug_snapshot!(query.to_string());
+        // insta::assert_debug_snapshot!(query.to_string());
 
         // assert_eq!(
         //     query.to_string().remove_extra_whitespace(),

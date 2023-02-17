@@ -2,4 +2,4 @@
 source: surrealdb-macros/tests/test_query_builder.rs
 expression: query.to_string()
 ---
-"SELECT *, ->writes[WHERE timeWritten = 12:00]->book[WHERE content CONTAINS Oyelowo in Uranus] AS writtenBooks FROM  WHERE age <= 12:00 firstName ~ lowo GROUP BY course, firstName, lastName, lastName, unoBook, lowo, age, bestFriend, lowo ORDER BY firstName RAND() DESC, lastName COLLATE ASC, id NUMERIC DESC, id NUMERIC DESC, firstName  DESC PARALLEL;"
+"SELECT age, firstName, firstName, unoBook FROM student WHERE age > 12:00 firstName ~ lowo SPLIT lastName, firstName, firstName, semCoures GROUP BY *, course, firstName, lastName, lastName, unoBook, lowo, age, bestFriend, lowo ORDER BY firstName RAND() DESC, lastName COLLATE ASC, id NUMERIC DESC, id NUMERIC DESC, firstName  DESC LIMIT 400 START AT 5 FETCH firstName, lastName, age, unoBook, age, unoBook TIMEOUT 10s PARALLEL;"

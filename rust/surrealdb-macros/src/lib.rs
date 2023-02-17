@@ -5,6 +5,7 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(unused_imports)]
 
+use db_field::DbFilter;
 pub use model_id::SurId;
 use qbuilder::QueryBuilder;
 pub mod db_field;
@@ -37,21 +38,18 @@ pub trait SurrealdbEdge {
     fn get_key(&self) -> ::std::option::Option<&SurId>;
 }
 
-pub enum Clause<'a> {
+pub enum Clause {
     All,
-    Where(QueryBuilder<'a>),
+    Where(DbFilter),
     Id(SurId),
 }
 
 pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
     match clause {
         Clause::All => "".into(),
-        Clause::Where(where_clause) => {
-            let where_clause = where_clause.build();
-            if !where_clause.to_lowercase().starts_with("where") {
-                panic!("Invalid where clause, must start with `WHERE`")
-            }
-            format!("[{where_clause}]")
+        Clause::Where(filter) => {
+            let filter = filter.to_string();
+            format!("[WHERE {filter}]")
         }
         Clause::Id(id) => {
             if !id

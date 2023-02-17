@@ -140,11 +140,21 @@ impl DbFilter {
     }
 
     pub fn or(&self, filter: Self) -> Self {
-        DbFilter::new(format!("({self} OR {filter})"))
+        let precendence = self._______bracket_if_not_already();
+        DbFilter::new(format!("{precendence} OR ({filter})"))
+    }
+
+    fn _______bracket_if_not_already(&self) -> impl Display {
+        let filter = self.to_string();
+        match (filter.starts_with('('), filter.ends_with(')')) {
+            (true, true) => format!("{self}"),
+            _ => format!("({self})"),
+        }
     }
 
     pub fn and(&self, filter: Self) -> Self {
-        DbFilter::new(format!("({self} AND {filter})"))
+        let precendence = self._______bracket_if_not_already();
+        DbFilter::new(format!("{precendence} AND ({filter})"))
     }
 
     pub fn bracketed(&self) -> Self {
