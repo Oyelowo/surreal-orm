@@ -156,7 +156,7 @@ mod tests {
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_builder::{order, Order};
     use surrealdb_macros::{cond, query_builder};
-    use surrealdb_macros::{t, DbField};
+    use surrealdb_macros::{q, DbField};
     use test_case::test_case;
 
     #[test]
@@ -200,7 +200,7 @@ mod tests {
             .projection(&written_book_selection.as_str())
             .from(Student::get_table_name())
             .where_(age.greater_than_or_equals(18))
-            .where_(cond!(age t!(>) "12:00" firstName t!(~) "lowo"))
+            .where_(cond!(age q!(>) "12:00" firstName q!(~) "lowo"))
             .order_by(order(firstName).rand().desc())
             .order_by(order(lastName).collate().asc())
             .order_by(order(id).numeric().desc())

@@ -2,7 +2,7 @@ use crate::db_field::DbQuery;
 
 // Define the macro in a separate module
 #[macro_export]
-macro_rules! t {
+macro_rules! q {
     (=) => {
         "="
     };
