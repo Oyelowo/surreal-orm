@@ -4,11 +4,11 @@
  * */
 
 use std::{
-    borrow::Cow,
+    borrow::{Borrow, Cow},
     fmt::{Display, Formatter, Result as FmtResult},
 };
 
-use crate::{db_field::DbQuery, DbField};
+use crate::{db_field::DbQuery, DbField, SurrealdbNode};
 
 pub fn order(field: &DbField) -> Order {
     Order::new(field)
@@ -87,7 +87,6 @@ enum OrderOption {
     Collate,
     Numeric,
 }
-
 impl Display for OrderOption {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -100,13 +99,14 @@ impl Display for OrderOption {
 
 pub struct Select<'a> {
     projections: Vec<&'a str>,
-    targets: Vec<&'a str>,
+    // targets: Vec<&'a str>,
+    targets: Vec<String>,
     where_: Option<String>,
     // where_: Option<&'a str>,
     split: Option<Vec<&'a str>>,
     // group_by: Option<Vec<&'a str>>,
     group_by: Vec<String>,
-    order_by: Option<Vec<Order<'a>>>,
+    order_by: Vec<Order<'a>>,
     limit: Option<u64>,
     start: Option<u64>,
     fetch: Option<Vec<&'a str>>,
@@ -122,7 +122,7 @@ impl<'a> Select<'a> {
             where_: None,
             split: None,
             group_by: vec![],
-            order_by: None,
+            order_by: vec![],
             limit: None,
             start: None,
             fetch: None,
@@ -136,8 +136,9 @@ impl<'a> Select<'a> {
         self
     }
 
-    pub fn from(&mut self, target: &'a str) -> &mut Self {
-        self.targets.push(target);
+    // pub fn from(&mut self, table_name: impl std::borrow::Borrow<str>) -> &mut Self {
+    pub fn from(&'a mut self, table_name: impl std::borrow::Borrow<str> + 'a) -> &'a mut Self {
+        self.targets.push(table_name.borrow().to_string());
         self
     }
 
@@ -176,8 +177,13 @@ impl<'a> Select<'a> {
         self
     }
 
-    pub fn order_by(&mut self, fields: &[Order<'a>]) -> &mut Self {
-        self.order_by = Some(fields.to_vec());
+    pub fn order_by(&mut self, order: Order<'a>) -> &mut Self {
+        self.order_by.push(order);
+        self
+    }
+
+    pub fn order_by_many(&mut self, orders: &[Order<'a>]) -> &mut Self {
+        self.order_by.extend_from_slice(orders.to_vec().as_slice());
         self
     }
 
@@ -232,51 +238,18 @@ impl<'a> Display for Select<'a> {
             query.push_str(&self.group_by.join(", "));
         }
 
-        if let Some(order) = &self.order_by {
+        // if let Some(order) = &self.order_by {
+        if !self.order_by.is_empty() {
             query.push_str(" ORDER BY ");
             query.push_str(
-                &order
+                &self
+                    .order_by
                     .iter()
                     .map(|o| format!("{o}"))
                     .collect::<Vec<String>>()
                     .join(", "),
             );
         }
-
-        // if let Some(order) = &self.order_by {
-        //     query.push_str(" ORDER BY ");
-        //     query.push_str(&order.iter().map(|o| o.field).collect::<Vec<_>>().join(", "));
-        //
-        //     if let Some(directions) = &self.order_directions {
-        //         query.push(' ');
-        //
-        //         for (i, direction) in directions.iter().enumerate() {
-        //             if i > 0 {
-        //                 query.push_str(", ");
-        //             }
-        //             query.push_str(match direction {
-        //                 OrderDirection::Asc => "ASC",
-        //                 OrderDirection::Desc => "DESC",
-        //             });
-        //         }
-        //     }
-        // }
-        //
-        // if let Some(order) = &self.order_by {
-        //     query.push_str(" ORDER BY ");
-        //     query.push_str(&order.join(", "));
-        //
-        //     if let Some(directions) = &self.order_directions {
-        //         query.push(' ');
-        //
-        //         for (i, direction) in directions.iter().enumerate() {
-        //             if i > 0 {
-        //                 query.push_str(", ");
-        //             }
-        //             query.push_str(direction);
-        //         }
-        //     }
-        // }
 
         if let Some(limit_value) = self.limit {
             query.push_str(" LIMIT ");

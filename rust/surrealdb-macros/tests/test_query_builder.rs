@@ -1,9 +1,12 @@
+#![recursion_limit = "2048"]
 #![allow(dead_code)]
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 #![allow(unused_imports)]
 
+use insta;
+use regex;
 use serde::{Deserialize, Serialize};
 use static_assertions::*;
 use surrealdb::{
@@ -119,8 +122,36 @@ trait WhiteSpaceRemoval {
 impl WhiteSpaceRemoval for &str {}
 impl WhiteSpaceRemoval for String {}
 
+// macro_rules! sql {
+//     ($($item:tt)*) => {{
+//         let valid_tokens = ["SELECT", "WHERE"];
+//         let mut exprs = vec![];
+//         $(
+//             match stringify!($item) {
+//                 $(
+//                     x if x == valid_tokens[0] => {
+//                         exprs.push(syn::parse_str(x).unwrap());
+//                     }
+//                 )*
+//                 $(
+//                     x if x == valid_tokens[1] => {
+//                         exprs.push(syn::parse_str(x).unwrap());
+//                     }
+//                 )*
+//                 _ => {
+//                     exprs.push(syn::parse_str(stringify!($item)).unwrap_or_else(|_| {
+//                         compile_error!(concat!("Invalid expression or token: ", stringify!($item)))
+//                     }));
+//                 }
+//             }
+//         )*
+//         exprs
+//     }};
+// }
+
 #[cfg(test)]
 mod tests {
+    #![recursion_limit = "256"]
     use super::*;
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_builder::{order, Order};
@@ -155,30 +186,58 @@ mod tests {
             ))
             .__as__(Student::schema().writtenBooks);
 
+        #[derive(Serialize, Deserialize)]
+        struct AND;
+
+        impl Display for AND {
+            fn fmt(&self, f: &mut _core::fmt::Formatter<'_>) -> _core::fmt::Result {
+                f.write_str("AND")
+            }
+        }
+
         let ref mut query = select
             .projection("*")
             .projection(&written_book_selection.as_str())
+            .from(Student::get_table_name())
             .where_(age.greater_than_or_equals(18))
-            .where_(cond!(age op!("<=") "12:00"))
-            .order_by(&[order(firstName).rand().desc()])
+            .where_(cond!(age op!("<=") "12:00" firstName op!("~") "lowo"))
+            .order_by(order(firstName).rand().desc())
+            .order_by(order(lastName).collate().asc())
+            .order_by(order(id).numeric().desc())
+            .order_by_many(&[order(id).numeric().desc(), order(firstName).desc()])
             .group_by(course)
             .group_by(firstName)
             .group_by(&"lastName".into())
-            .group_by_many(&[lastName, unoBook, &DbField::new("lowo")]);
+            .group_by_many(&[lastName, unoBook, &DbField::new("lowo")])
+            // .timeout("10s")
+            .parallel();
 
         let is_oyelowo = true;
         if is_oyelowo {
             query.group_by_many(&[age, bestFriend, &DbField::new("lowo")]);
         }
 
-        assert_eq!(
-            query.to_string().remove_extra_whitespace(),
-            "SELECT *, ->writes[WHERE timeWritten = 12:00]->book[WHERE \
-            content CONTAINS Oyelowo in Uranus] AS writtenBooks FROM \
-            WHERE age <= 12:00 GROUP BY course, firstName, lastName, \
-            lastName, unoBook, lowo, age, bestFriend, lowo;"
-                .remove_extra_whitespace()
-        )
+        // stringify_tokens!("lowo", "knows", 5);
+
+        // stringify_tokens2!("lowo", 5);
+        let SELECT = "SELECT";
+        let name = "name";
+        let WHERE = "WHERE";
+        let age = "age";
+
+        // let result = sql!(SELECT name WHERE age > 5);
+        // let result = sql!(SELECT name WHERE age > 5);
+
+        insta::assert_debug_snapshot!(query.to_string());
+
+        // assert_eq!(
+        //     query.to_string().remove_extra_whitespace(),
+        //     "SELECT *, ->writes[WHERE timeWritten = 12:00]->book[WHERE \
+        //     content CONTAINS Oyelowo in Uranus] AS writtenBooks FROM \
+        //     WHERE age <= 12:00 GROUP BY course, firstName, lastName, \
+        //     lastName, unoBook, lowo, age, bestFriend, lowo;"
+        //         .remove_extra_whitespace()
+        // )
     }
 
     #[test]

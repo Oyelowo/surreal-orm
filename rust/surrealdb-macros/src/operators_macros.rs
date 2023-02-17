@@ -151,7 +151,7 @@ macro_rules! cond {
             $(
                 v.push($expr.to_string());
             )*
-            v
+            v.join(" ")
         }
     };
 }

@@ -111,7 +111,7 @@ pub struct Blog {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use surrealdb_macros::{op, where_, DbField};
+    use surrealdb_macros::{cond, op, DbField};
     use test_case::test_case;
 
     #[test]
@@ -125,11 +125,11 @@ mod tests {
 
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
 
-        where_!(
+        cond!(
             timeWritten op!(">=") "12:00"
         );
 
-        where_!(
+        cond!(
             timeWritten op!("CONTAINS") "12:00"
         );
 

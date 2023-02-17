@@ -23,6 +23,7 @@ pub trait SurrealdbNode {
     type TableNameChecker;
     fn schema() -> Self::Schema;
     fn get_key(&self) -> ::std::option::Option<&SurId>;
+    fn get_table_name() -> &'static str;
 }
 
 pub trait SurrealdbEdge {
@@ -32,6 +33,7 @@ pub trait SurrealdbEdge {
     type Schema;
 
     fn schema() -> Self::Schema;
+    fn get_table_name() -> &'static str;
     fn get_key(&self) -> ::std::option::Option<&SurId>;
 }
 

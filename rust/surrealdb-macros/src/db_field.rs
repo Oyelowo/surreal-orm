@@ -98,16 +98,24 @@ pub struct DbQuery {
     query_string: String,
 }
 
-impl From<Vec<String>> for DbQuery {
-    fn from(value: Vec<String>) -> Self {
-        Self::new(value.join(" "))
+impl<'a> From<Cow<'a, DbQuery>> for DbQuery {
+    fn from(value: Cow<'a, DbQuery>) -> Self {
+        match value {
+            Cow::Borrowed(v) => v.clone(),
+            Cow::Owned(v) => v,
+        }
     }
 }
-// impl From<Vec<&String>> for DbQuery {
-//     fn from(value: Vec<&String>) -> Self {
+// impl From<Vec<String>> for DbQuery {
+//     fn from(value: Vec<String>) -> Self {
 //         Self::new(value.join(" "))
 //     }
 // }
+impl From<String> for DbQuery {
+    fn from(value: String) -> Self {
+        Self::new(value)
+    }
+}
 // impl Into<Vec<DbQuery>> for Vec<String> {
 //     fn from(value: Vec<String>) -> Self {
 //         todo!()
