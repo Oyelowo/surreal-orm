@@ -115,7 +115,7 @@ mod tests {
             writtenBooks,
             age,
             ..
-        } = &Student::schema();
+        } = Student::schema();
 
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
         let book::Book { content, .. } = Book::schema();
@@ -137,8 +137,11 @@ mod tests {
             // .order_by(&[Order::new(firstName).rand().desc()])
             .group_by(course)
             .group_by(firstName)
-            .group_by("lastName".into())
-            .group_by_many(&[course, unoBook, &DbField::new("lowo"), &"lowo".into()]);
+            // .group_by(&"lastName".into())
+            .group_by_many(&[lastName, unoBook, DbField::new("lowo")])
+            .group_by_many(&[&age, &bestFriend, &DbField::new("lowo")]);
+        // .group_by_many(&[course, unoBook, &DbField::new("lowo")]);
+        // .group_by_many(&[course, unoBook, &DbField::new("lowo"), "lowo".into()]);
         // if 3 > 3 {
         //     query.group_by(&[lastName])
         // }

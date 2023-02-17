@@ -160,7 +160,11 @@ impl<'a> Select<'a> {
     }
 
     // // pub fn group_by(&mut self, fields: &[&'a str]) -> &mut Self {
-    pub fn group_by_many<T: Into<DbField> + Clone + Display>(&mut self, fields: &[T]) -> &mut Self {
+    // pub fn group_by_many<T: Into<DbField> + Clone + Display>(&mut self, fields: &[T]) -> &mut Self {
+    pub fn group_by_many<'field, T>(&mut self, fields: &[T]) -> &mut Self
+    where
+        T: Into<Cow<'field, DbField>> + Clone + Display,
+    {
         self.group_by.extend_from_slice(
             fields
                 .into_iter()
