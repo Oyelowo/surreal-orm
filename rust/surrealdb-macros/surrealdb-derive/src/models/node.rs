@@ -161,9 +161,9 @@ impl ToTokens for FieldsGetterOpts {
                         #schema_instance
                     }
 
-                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, clause: #crate_name::Clause) -> Self {
-                        let mut #schema_instance = Self::empty();
-                        let connection = format!("{}{}{}", store, #table_name_str, #crate_name::format_clause(clause, #table_name_str));
+                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, filter: #crate_name::DbFilter) -> Self {
+                        let mut #schema_instance = Self::empty(); 
+                        let connection = format!("{}{}{}", store, #table_name_str, #crate_name::format_filter(filter, #table_name_str));
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
@@ -174,7 +174,7 @@ impl ToTokens for FieldsGetterOpts {
                     
                     #( #record_link_fields_methods) *
 
-                    pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {
+                    pub fn __as__(&self, &alias: impl ::std::fmt::Display) -> ::std::string::String {
                         format!("{} AS {}", self, alias)
                     }
                     

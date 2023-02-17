@@ -157,7 +157,7 @@ impl ToTokens for FieldsGetterOpts {
                         
                         pub fn #__________connect_to_graph_traversal_string(
                             store: &::std::string::String,
-                            clause: #crate_name::Clause,
+                            filter: #crate_name::DbFilter,
                             arrow_direction: &str,
                         ) -> Self {
                             let mut schema_instance = Self::empty();
@@ -166,7 +166,7 @@ impl ToTokens for FieldsGetterOpts {
                                 store.as_str(),
                                 arrow_direction,
                                 #table_name_str,
-                                #crate_name::format_clause(clause, #table_name_str),
+                                #crate_name::format_filter(filter, #table_name_str),
                                 arrow_direction,
                             );
                             

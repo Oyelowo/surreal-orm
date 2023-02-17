@@ -5,7 +5,6 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(unused_imports)]
 
-use db_field::DbFilter;
 pub use model_id::SurId;
 use qbuilder::QueryBuilder;
 pub mod db_field;
@@ -18,6 +17,15 @@ pub mod prelude {
 pub mod links;
 pub mod model_id;
 pub mod qbuilder;
+
+pub use db_field::DbField;
+pub use db_field::DbFilter;
+pub mod query_builder_old {
+
+    pub fn query() -> super::qbuilder::QueryBuilder<'static> {
+        super::qbuilder::QueryBuilder::new()
+    }
+}
 
 pub trait SurrealdbNode {
     type Schema;
@@ -38,34 +46,35 @@ pub trait SurrealdbEdge {
     fn get_key(&self) -> ::std::option::Option<&SurId>;
 }
 
-pub enum Clause {
-    All,
-    Where(DbFilter),
-    Id(SurId),
-}
+// pub enum Clause {
+//     All,
+//     Where(DbFilter),
+//     Id(SurId),
+// }
 
-pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
-    match clause {
-        Clause::All => "".into(),
-        Clause::Where(filter) => {
-            let filter = filter.to_string();
-            format!("[WHERE {filter}]")
-        }
-        Clause::Id(id) => {
-            if !id
-                .to_string()
-                .starts_with(format!("{table_name}:").as_str())
-            {
-                panic!("invalid id {id}. Id does not belong to table {table_name}")
-            }
-            format!("[WHERE id = {id}]")
-        }
+pub fn format_filter(filter: DbFilter, _table_name: &'static str) -> String {
+    if filter.to_string().is_empty() {
+        "".into()
+    } else {
+        format!("[WHERE {filter}]")
     }
 }
-pub use db_field::DbField;
-pub mod query_builder_old {
 
-    pub fn query() -> super::qbuilder::QueryBuilder<'static> {
-        super::qbuilder::QueryBuilder::new()
-    }
-}
+// pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
+//     match clause {
+//         Clause::All => "".into(),
+//         Clause::Where(filter) => {
+//             let filter = filter.to_string();
+//             format!("[WHERE {filter}]")
+//         }
+//         Clause::Id(id) => {
+//             if !id
+//                 .to_string()
+//                 .starts_with(format!("{table_name}:").as_str())
+//             {
+//                 panic!("invalid id {id}. Id does not belong to table {table_name}")
+//             }
+//             format!("[WHERE id = {id}]")
+//         }
+//     }
+// }

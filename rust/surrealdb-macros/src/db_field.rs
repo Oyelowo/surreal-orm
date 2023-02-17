@@ -101,6 +101,9 @@ pub struct DbFilter {
     query_string: String,
 }
 
+pub fn empty() -> DbFilter {
+    DbFilter::new("".into())
+}
 impl<'a> From<Cow<'a, DbFilter>> for DbFilter {
     fn from(value: Cow<'a, DbFilter>) -> Self {
         match value {
@@ -114,6 +117,15 @@ impl<'a> From<Cow<'a, DbFilter>> for DbFilter {
 //         Self::new(value.join(" "))
 //     }
 // }
+impl From<Option<DbFilter>> for DbFilter {
+    fn from(value: Option<DbFilter>) -> Self {
+        match value {
+            Some(v) => v,
+            None => empty(),
+        }
+    }
+}
+
 impl From<String> for DbFilter {
     fn from(value: String) -> Self {
         Self::new(value)

@@ -67,17 +67,17 @@ struct NodeEdgeMetadata {
   ///
   /// ```
   /// impl Writes__ {
-  ///     fn book(&self, clause: Clause) -> Book {
+  ///     fn book(&self, filter: DbFilter) -> Book {
   ///         Book::__________connect_to_graph_traversal_string(
   ///             &self.___________graph_traversal_string,
-  ///             clause,
+  ///             filter,
   ///         )
   ///     }
   ///
-  ///     fn blog(&self, clause: Clause) -> Blog {
+  ///     fn blog(&self, filter: DbFilter) -> Blog {
   ///         Blog::__________connect_to_graph_traversal_string(
   ///             &self.___________graph_traversal_string,
-  ///             clause,
+  ///             filter,
   ///         )
   ///     }
   /// }
@@ -87,18 +87,18 @@ struct NodeEdgeMetadata {
   /// ```
   /// vec![
   ///     quote!(
-  ///        fn book(&self, clause: Clause) -> Book {
+  ///        fn book(&self, filter: DbFilter) -> Book {
   ///            Book::__________connect_to_graph_traversal_string(
   ///                &self.___________graph_traversal_string,
-  ///                clause,
+  ///                filter,
   ///            )
   ///        }
   ///     ),
   ///     quote!(
-  ///        fn blog(&self, clause: Clause) -> Blog {
+  ///        fn blog(&self, filter: DbFilter) -> Blog {
   ///            Blog::__________connect_to_graph_traversal_string(
   ///                &self.___________graph_traversal_string,
-  ///                clause,
+  ///                filter,
   ///            )
   ///        }
   ///     ),
@@ -203,8 +203,8 @@ pub struct SchemaFieldsProperties {
     /// to be able to access the foreign fields
     /// Generated Example for e.g field with best_student: <Student>
     /// ```
-    /// pub fn best_student(&self, clause: Clause) -> Student {
-    ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, clause)
+    /// pub fn best_student(&self, filter: DbFilter) -> Student {
+    ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, filter)
     /// }
     /// ```
     pub record_link_fields_methods: Vec<TokenStream>,
@@ -464,10 +464,10 @@ impl NodeEdgeMetadataStore {
         
         
         let foreign_node_connection_method = || quote!(
-                                pub fn #destination_node_table_name(&self, clause: #crate_name::Clause) -> #destination_node_schema_ident {
+                                pub fn #destination_node_table_name(&self, filter: #crate_name::DbFilter) -> #destination_node_schema_ident {
                                     #destination_node_schema_ident::#__________connect_to_graph_traversal_string(
                                                 &self.#___________graph_traversal_string,
-                                                clause,
+                                                filter,
                                     )
                                 }
                             );
@@ -556,11 +556,11 @@ impl NodeEdgeMetadataStore {
                 impl #origin_struct_ident {
                     pub fn #edge_name_as_method_ident(
                         &self,
-                        clause: #crate_name::Clause,
+                        filter: #crate_name::DbFilter,
                     ) -> #edge_inner_module_name::#edge_name_as_struct_with_direction_ident {
                         #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_to_graph_traversal_string(
                             &self.#___________graph_traversal_string,
-                            clause,
+                            filter,
                             #arrow,
                         ).into()
                     }
