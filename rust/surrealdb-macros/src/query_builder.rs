@@ -10,6 +10,9 @@ use std::{
 
 use crate::{db_field::DbQuery, DbField};
 
+pub fn order(field: &DbField) -> Order {
+    Order::new(field)
+}
 #[derive(Debug, Clone, Copy)]
 pub struct Order<'a> {
     field: &'a DbField,

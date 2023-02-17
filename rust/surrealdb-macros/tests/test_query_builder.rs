@@ -123,9 +123,9 @@ impl WhiteSpaceRemoval for String {}
 mod tests {
     use super::*;
     // use surrealdb_macros::prelude::*;
-    use surrealdb_macros::query_builder::Order;
+    use surrealdb_macros::query_builder::{order, Order};
+    use surrealdb_macros::{cond, query_builder};
     use surrealdb_macros::{op, DbField};
-    use surrealdb_macros::{query_builder, where_};
     use test_case::test_case;
 
     #[test]
@@ -159,8 +159,8 @@ mod tests {
             .projection("*")
             .projection(&written_book_selection.as_str())
             .where_(age.greater_than_or_equals(18))
-            .where_(where_!(age op!("<=") "12:00"))
-            // .order_by(&[Order::new(firstName).rand().desc()])
+            .where_(cond!(age op!("<=") "12:00"))
+            .order_by(&[order(firstName).rand().desc()])
             .group_by(course)
             .group_by(firstName)
             .group_by(&"lastName".into())

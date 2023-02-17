@@ -144,7 +144,7 @@ macro_rules! op {
 }
 
 #[macro_export]
-macro_rules! where_ {
+macro_rules! cond {
     ($($expr:expr)*) => {
         {
             let mut v = Vec::new();
