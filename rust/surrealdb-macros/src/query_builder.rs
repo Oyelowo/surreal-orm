@@ -8,7 +8,7 @@ use std::{
     fmt::{Display, Formatter, Result as FmtResult},
 };
 
-use crate::{db_field::DbQuery, DbField, SurrealdbNode};
+use crate::{db_field::DbFilter, DbField, SurrealdbNode};
 
 pub fn order(field: &DbField) -> Order {
     Order::new(field)
@@ -169,8 +169,8 @@ impl<'a> QueryBuilder<'a> {
     }
 
     // pub fn where_(&mut self, condition: &'a str) -> &mut Self {
-    pub fn where_(&mut self, condition: impl Into<DbQuery>) -> &mut Self {
-        let condition: DbQuery = condition.into();
+    pub fn where_(&mut self, condition: impl Into<DbFilter>) -> &mut Self {
+        let condition: DbFilter = condition.into();
         self.where_ = Some(condition.to_string());
         self
     }

@@ -88,6 +88,10 @@ impl surrealdb_macros::SurrealdbNode for Student {
         self.id.as_ref()
     }
 
+    fn get_table_name() -> &'static str {
+        "student"
+    }
+
     type TableNameChecker = student::TableNameStaticChecker;
 }
 pub mod student {
@@ -327,6 +331,10 @@ impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
     fn get_key(&self) -> ::std::option::Option<&SurId> {
         self.id.as_ref()
     }
+
+    fn get_table_name() -> &'static str {
+        "writes"
+    }
 }
 pub mod writes_schema {
     use surrealdb_macros::SurrealdbNode;
@@ -415,6 +423,9 @@ impl surrealdb_macros::SurrealdbNode for Book {
     fn get_key(&self) -> ::std::option::Option<&SurId> {
         self.id.as_ref()
     }
+    fn get_table_name() -> &'static str {
+        "book"
+    }
 
     type TableNameChecker = book::TableNameStaticChecker;
 }
@@ -492,6 +503,9 @@ impl surrealdb_macros::SurrealdbNode for Blog {
     }
     fn get_key(&self) -> ::std::option::Option<&SurId> {
         self.id.as_ref()
+    }
+    fn get_table_name() -> &'static str {
+        "blog"
     }
 
     type TableNameChecker = blog::TableNameStaticChecker;

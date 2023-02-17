@@ -1,4 +1,4 @@
-use crate::db_field::DbQuery;
+use crate::db_field::DbFilter;
 
 // Define the macro in a separate module
 #[macro_export]

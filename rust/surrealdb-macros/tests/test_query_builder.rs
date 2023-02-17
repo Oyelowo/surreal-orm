@@ -202,7 +202,13 @@ mod tests {
             .select(firstName)
             .select_many(&[firstName, unoBook])
             .from(Student::get_table_name())
-            .where_(age.greater_than_or_equals(18))
+            .where_(
+                age.greater_than_or_equals(18)
+                    .or(firstName
+                        .like("oyelowo")
+                        .and(lastName.fuzzy_equal("oyedayo")))
+                    .and(age.greater_than_or_equal(150)),
+            )
             .where_(cond!(age q!(>) "12:00" firstName q!(~) "lowo"))
             .order_by(order(firstName).rand().desc())
             .order_by(order(lastName).collate().asc())

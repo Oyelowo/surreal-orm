@@ -116,21 +116,21 @@ mod tests {
 
     #[test]
     fn multiplication_tests4_with_alias() {
-        q!(">=");
+        q!(>=);
         let xx = &[
             StudentWritesBook::schema().timeWritten.to_string().as_str(),
-            q!(">="),
+            q!(>=),
             "12:00",
         ];
 
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
 
         cond!(
-            timeWritten q!(">=") "12:00"
+            timeWritten q!(>=) "12:00"
         );
 
         cond!(
-            timeWritten q!("CONTAINS") "12:00"
+            timeWritten q!(CONTAINS) "12:00"
         );
 
         // here_!(timeWritten op!(">=") "12:00");
