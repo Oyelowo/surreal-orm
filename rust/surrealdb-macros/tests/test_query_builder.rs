@@ -177,7 +177,7 @@ mod tests {
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
         let book::Book { content, .. } = Book::schema();
 
-        let mut select = query_builder::Select::new();
+        let mut queryb = query_builder::QueryBuilder::new();
 
         let written_book_selection = Student::schema()
             .writes__(Clause::Where(query().where_(timeWritten.equals("12:00"))))
@@ -194,10 +194,13 @@ mod tests {
                 f.write_str("AND")
             }
         }
+        // age.and(firstName)
 
-        let ref mut query = select
-            .projection("*")
-            .projection(&written_book_selection.as_str())
+        let ref mut query = queryb
+            .select_all()
+            .select(age)
+            .select(firstName)
+            .select_many(&[firstName, unoBook])
             .from(Student::get_table_name())
             .where_(age.greater_than_or_equals(18))
             .where_(cond!(age q!(>) "12:00" firstName q!(~) "lowo"))
@@ -209,7 +212,16 @@ mod tests {
             .group_by(firstName)
             .group_by(&"lastName".into())
             .group_by_many(&[lastName, unoBook, &DbField::new("lowo")])
-            // .timeout("10s")
+            .start(5)
+            .limit(400)
+            .fetch(firstName)
+            .fetch(lastName)
+            .fetch_many(&[age, unoBook])
+            .fetch_many(&[age, unoBook])
+            .split(lastName)
+            .split(firstName)
+            .split_many(&[firstName, semCoures])
+            .timeout("10s")
             .parallel();
 
         let is_oyelowo = true;

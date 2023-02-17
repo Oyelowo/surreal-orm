@@ -97,46 +97,72 @@ impl Display for OrderOption {
     }
 }
 
-pub struct Select<'a> {
-    projections: Vec<&'a str>,
+pub struct QueryBuilder<'a> {
+    // projections: Vec<&'a str>,
+    projections: Vec<String>,
     // targets: Vec<&'a str>,
     targets: Vec<String>,
     where_: Option<String>,
     // where_: Option<&'a str>,
-    split: Option<Vec<&'a str>>,
+    // split: Option<Vec<&'a str>>,
+    split: Vec<String>,
     // group_by: Option<Vec<&'a str>>,
     group_by: Vec<String>,
     order_by: Vec<Order<'a>>,
     limit: Option<u64>,
     start: Option<u64>,
-    fetch: Option<Vec<&'a str>>,
+    // fetch: Option<Vec<&'a str>>,
+    fetch: Vec<String>,
     timeout: Option<&'a str>,
     parallel: bool,
 }
 
-impl<'a> Select<'a> {
-    pub fn new() -> Select<'a> {
-        Select {
+impl<'a> QueryBuilder<'a> {
+    pub fn new() -> QueryBuilder<'a> {
+        QueryBuilder {
             projections: vec![],
             targets: vec![],
             where_: None,
-            split: None,
+            split: vec![],
             group_by: vec![],
             order_by: vec![],
             limit: None,
             start: None,
-            fetch: None,
+            fetch: vec![],
             timeout: None,
             parallel: false,
         }
     }
 
-    pub fn projection(&mut self, projection: &'a str) -> &mut Self {
-        self.projections.push(projection);
+    // pub fn select(&mut self, projection: &'a str) -> &mut Self {
+    pub fn select_all(&mut self) -> &mut Self {
+        self.group_by.push("*".to_string());
         self
     }
 
-    // pub fn from(&mut self, table_name: impl std::borrow::Borrow<str>) -> &mut Self {
+    pub fn select<'field, T>(&mut self, field: T) -> &mut Self
+    where
+        T: Into<Cow<'field, DbField>>,
+    {
+        let field: &DbField = &field.into();
+        self.projections.push(field.to_string());
+        self
+    }
+
+    pub fn select_many<'field, T>(&mut self, fields: &[T]) -> &mut Self
+    where
+        T: Into<Cow<'field, DbField>> + Clone + Display,
+    {
+        self.projections.extend_from_slice(
+            fields
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+                .as_slice(),
+        );
+        self
+    }
+
     pub fn from(&'a mut self, table_name: impl std::borrow::Borrow<str> + 'a) -> &'a mut Self {
         self.targets.push(table_name.borrow().to_string());
         self
@@ -149,8 +175,30 @@ impl<'a> Select<'a> {
         self
     }
 
-    pub fn split(&mut self, fields: &[&'a str]) -> &mut Self {
-        self.split = Some(fields.to_vec());
+    // pub fn split(&mut self, fields: &[&'a str]) -> &mut Self {
+    //     self.split = Some(fields.to_vec());
+    //     self
+    // }
+    pub fn split<'field, T>(&mut self, field: T) -> &mut Self
+    where
+        T: Into<Cow<'field, DbField>>,
+    {
+        let field: &DbField = &field.into();
+        self.split.push(field.to_string());
+        self
+    }
+
+    pub fn split_many<'field, T>(&mut self, fields: &[T]) -> &mut Self
+    where
+        T: Into<Cow<'field, DbField>> + Clone + Display,
+    {
+        self.split.extend_from_slice(
+            fields
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+                .as_slice(),
+        );
         self
     }
 
@@ -197,11 +245,33 @@ impl<'a> Select<'a> {
         self
     }
 
-    pub fn fetch(&mut self, fields: &[&'a str]) -> &mut Self {
-        self.fetch = Some(fields.to_vec());
+    // pub fn fetch(&mut self, fields: &[&'a str]) -> &mut Self {
+    //     self.fetch = Some(fields.to_vec());
+    //     self
+    // }
+
+    pub fn fetch<'field, T>(&mut self, field: T) -> &mut Self
+    where
+        T: Into<Cow<'field, DbField>>,
+    {
+        let field: &DbField = &field.into();
+        self.fetch.push(field.to_string());
         self
     }
 
+    pub fn fetch_many<'field, T>(&mut self, fields: &[T]) -> &mut Self
+    where
+        T: Into<Cow<'field, DbField>> + Clone + Display,
+    {
+        self.fetch.extend_from_slice(
+            fields
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+                .as_slice(),
+        );
+        self
+    }
     pub fn timeout(&mut self, duration: &'a str) -> &mut Self {
         self.timeout = Some(duration);
         self
@@ -212,8 +282,27 @@ impl<'a> Select<'a> {
         self
     }
 }
-
-impl<'a> Display for Select<'a> {
+/*
+ * Syntax from specs:https://surrealdb.com/docs/surrealql/statements/select
+ * SELECT @projections
+    FROM @targets
+    [ WHERE @condition ]
+    [ SPLIT [ AT ] @field ... ]
+    [ GROUP [ BY ] @field ... ]
+    [ ORDER [ BY ]
+        @field [
+            RAND()
+            | COLLATE
+            | NUMERIC
+        ] [ ASC | DESC ] ...
+    ] ]
+    [ LIMIT [ BY ] @limit ]
+    [ START [ AT ] @start ]
+    [ FETCH @field ... ]
+    [ TIMEOUT @duration ]
+    [ PARALLEL ]
+; */
+impl<'a> Display for QueryBuilder<'a> {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let mut query = String::new();
 
@@ -227,18 +316,16 @@ impl<'a> Display for Select<'a> {
             query.push_str(&condition);
         }
 
-        if let Some(split) = &self.split {
+        if !self.split.is_empty() {
             query.push_str(" SPLIT ");
-            query.push_str(&split.join(", "));
+            query.push_str(&self.split.join(", "));
         }
 
-        // if let Some(group) = &self.group_by {
         if !self.group_by.is_empty() {
             query.push_str(" GROUP BY ");
             query.push_str(&self.group_by.join(", "));
         }
 
-        // if let Some(order) = &self.order_by {
         if !self.order_by.is_empty() {
             query.push_str(" ORDER BY ");
             query.push_str(
@@ -261,9 +348,9 @@ impl<'a> Display for Select<'a> {
             query.push_str(&start_value.to_string());
         }
 
-        if let Some(fetch) = &self.fetch {
+        if !self.fetch.is_empty() {
             query.push_str(" FETCH ");
-            query.push_str(&fetch.join(", "));
+            query.push_str(&self.fetch.join(", "));
         }
 
         if let Some(timeout_value) = self.timeout {

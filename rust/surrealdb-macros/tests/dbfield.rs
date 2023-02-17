@@ -111,26 +111,26 @@ pub struct Blog {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use surrealdb_macros::{cond, t, DbField};
+    use surrealdb_macros::{cond, q, DbField};
     use test_case::test_case;
 
     #[test]
     fn multiplication_tests4_with_alias() {
-        t!(">=");
+        q!(">=");
         let xx = &[
             StudentWritesBook::schema().timeWritten.to_string().as_str(),
-            t!(">="),
+            q!(">="),
             "12:00",
         ];
 
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
 
         cond!(
-            timeWritten t!(">=") "12:00"
+            timeWritten q!(">=") "12:00"
         );
 
         cond!(
-            timeWritten t!("CONTAINS") "12:00"
+            timeWritten q!("CONTAINS") "12:00"
         );
 
         // here_!(timeWritten op!(">=") "12:00");
