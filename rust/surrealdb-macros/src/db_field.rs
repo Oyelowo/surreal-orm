@@ -11,6 +11,18 @@ use std::{
 #[derive(serde::Serialize, Debug, Clone, Default)]
 pub struct DbField(String);
 
+impl Into<DbFilter> for &DbField {
+    fn into(self) -> DbFilter {
+        DbFilter::new(self.to_string())
+    }
+}
+
+impl Into<DbFilter> for DbField {
+    fn into(self) -> DbFilter {
+        DbFilter::new(self.into())
+    }
+}
+
 // impl<'a> From<&'a str> for &'a DbField {
 //     fn from(s: &'a str) -> &'a DbField {
 //         let db_field = DbField(s.to_string());
@@ -101,6 +113,13 @@ pub struct DbFilter {
     query_string: String,
 }
 
+pub fn filter(field: impl Into<DbFilter>) -> DbFilter {
+    field.into()
+}
+// pub fn filter(field: DbField) -> DbFilter {
+//     field.into()
+// }
+
 pub fn empty() -> DbFilter {
     DbFilter::new("".into())
 }
@@ -152,8 +171,9 @@ impl DbFilter {
         &self.query_string
     }
 
-    pub fn or(&self, filter: Self) -> Self {
+    pub fn or(&self, filter: impl Into<Self>) -> Self {
         let precendence = self._______bracket_if_not_already();
+        let filter: Self = filter.into();
         DbFilter::new(format!("{precendence} OR ({filter})"))
     }
 
@@ -165,8 +185,9 @@ impl DbFilter {
         }
     }
 
-    pub fn and(&self, filter: Self) -> Self {
+    pub fn and(&self, filter: impl Into<Self>) -> Self {
         let precendence = self._______bracket_if_not_already();
+        let filter: Self = filter.into();
         DbFilter::new(format!("{precendence} AND ({filter})"))
     }
 
@@ -180,8 +201,8 @@ impl DbFilter {
 }
 
 impl DbField {
-    pub fn new(field_name: &str) -> Self {
-        Self(field_name.to_owned())
+    pub fn new(field_name: impl Display) -> Self {
+        Self(field_name.to_string())
     }
     /// Append the specified string to the field name
     ///
@@ -217,8 +238,8 @@ impl DbField {
     /// let query = field.__as__("name_alias");
     /// assert_eq!(query.to_string(), "name AS name_alias");
     /// ```
-    pub fn __as__(&self, alias: impl std::fmt::Display) -> DbFilter {
-        DbFilter::new(format!("{} AS {}", self.0, alias))
+    pub fn __as__(&self, alias: impl std::fmt::Display) -> Self {
+        Self::new(format!("{} AS {}", self.0, alias))
     }
 
     /// Return a new `DbQuery` that checks whether the field is equal to the specified value
@@ -236,8 +257,8 @@ impl DbField {
     /// let query = field.equals(25);
     /// assert_eq!(query.to_string(), "age = 25");
     /// ```
-    pub fn equals<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} = {}", self.0, value))
+    pub fn equals<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} = {}", self.0, value))
     }
 
     /// Return a new `DbQuery` that checks whether the field is not equal to the specified value
@@ -255,8 +276,8 @@ impl DbField {
     /// let query = field.not_equals(25);
     /// assert_eq!(query.to_string(), "age != 25");
     /// ```
-    pub fn not_equals<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} != {}", self.0, value))
+    pub fn not_equals<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} != {}", self.0, value))
     }
 
     /// Check whether the value of the field is greater than the given value.
@@ -273,8 +294,8 @@ impl DbField {
     /// let query = DbQuery::field("age").greater_than(18);
     /// assert_eq!(query.to_string(), "age > 18");
     /// ```
-    pub fn greater_than<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} > {}", self.0, value))
+    pub fn greater_than<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} > {}", self.0, value))
     }
 
     /// Check whether the value of the field is greater than or equal to the given value.
@@ -291,8 +312,8 @@ impl DbField {
     /// let query = DbQuery::field("age").greater_than_or_equals(18);
     /// assert_eq!(query.to_string(), "age >= 18");
     /// ```
-    pub fn greater_than_or_equals<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} >= {}", self.0, value))
+    pub fn greater_than_or_equals<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} >= {}", self.0, value))
     }
 
     /// Check whether the value of the field is less than the given value.
@@ -309,8 +330,8 @@ impl DbField {
     /// let query = DbQuery::field("age").less_than(30);
     /// assert_eq!(query.to_string(), "age < 30");
     /// ```
-    pub fn less_than<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} < {}", self.0, value))
+    pub fn less_than<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} < {}", self.0, value))
     }
 
     /// Check whether the value of the field is less than or equal to the given value.
@@ -327,8 +348,8 @@ impl DbField {
     /// let query = DbQuery::field("age").less_than_or_equals(30);
     /// assert_eq!(query.to_string(), "age <= 30");
     /// ```
-    pub fn less_than_or_equals<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} <= {}", self.0, value))
+    pub fn less_than_or_equals<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} <= {}", self.0, value))
     }
 
     /// Check whether the value of the field is between the given lower and upper bounds.
@@ -346,8 +367,8 @@ impl DbField {
     /// let query = DbQuery::field("age").between(18, 30);
     /// assert_eq!(query.to_string(), "age BETWEEN 18 AND 30");
     /// ```
-    pub fn between<T: Display, U: Display>(&self, lower_bound: T, upper_bound: U) -> DbFilter {
-        DbFilter::new(format!(
+    pub fn between<T: Display, U: Display>(&self, lower_bound: T, upper_bound: U) -> Self {
+        Self::new(format!(
             "{} BETWEEN {} AND {}",
             self.0, lower_bound, upper_bound
         ))
@@ -367,8 +388,8 @@ impl DbField {
     /// let query = DbQuery::column("name").like("A%");
     /// assert_eq!(query.to_string(), "name LIKE 'A%'");
     /// ```
-    pub fn like(&self, pattern: &str) -> DbFilter {
-        DbFilter::new(format!("{} LIKE '{}'", self.0, pattern))
+    pub fn like(&self, pattern: &str) -> Self {
+        Self::new(format!("{} LIKE '{}'", self.0, pattern))
     }
 
     /// Constructs a NOT LIKE query that checks whether the value of the column does not match the given pattern.
@@ -385,8 +406,8 @@ impl DbField {
     /// let query = DbQuery::column("name").not_like("A%");
     /// assert_eq!(query.to_string(), "name NOT LIKE 'A%'");
     /// ```
-    pub fn not_like(&self, pattern: &str) -> DbFilter {
-        DbFilter::new(format!("{} NOT LIKE '{}'", self.0, pattern))
+    pub fn not_like(&self, pattern: &str) -> Self {
+        Self::new(format!("{} NOT LIKE '{}'", self.0, pattern))
     }
 
     /// Constructs a query that checks whether the value of the column is null.
@@ -399,8 +420,8 @@ impl DbField {
     /// let query = DbQuery::column("age").is_null();
     /// assert_eq!(query.to_string(), "age IS NULL");
     /// ```
-    pub fn is_null(&self) -> DbFilter {
-        DbFilter::new(format!("{} IS NULL", self.0))
+    pub fn is_null(&self) -> Self {
+        Self::new(format!("{} IS NULL", self.0))
     }
 
     /// Constructs a query that checks whether the value of the column is not null.
@@ -413,8 +434,8 @@ impl DbField {
     /// let query = DbQuery::column("age").is_not_null();
     /// assert_eq!(query.to_string(), "age IS NOT NULL");
     /// ```
-    pub fn is_not_null(&self) -> DbFilter {
-        DbFilter::new(format!("{} IS NOT NULL", self.0))
+    pub fn is_not_null(&self) -> Self {
+        Self::new(format!("{} IS NOT NULL", self.0))
     }
 
     /// Constructs a query that checks whether the value of the column is equal to the given value.
@@ -431,8 +452,8 @@ impl DbField {
     /// let query = DbQuery::column("age").equal(42);
     /// assert_eq!(query.to_string(), "age = 42");
     /// ```
-    pub fn equal<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} = {}", self.0, value))
+    pub fn equal<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} = {}", self.0, value))
     }
 
     /// Constructs a query that checks whether the value of the column is not equal to the given value.
@@ -449,8 +470,8 @@ impl DbField {
     /// let query = DbQuery::column("age").not_equal(42);
     /// assert_eq!(query.to_string(), "age != 42");
     /// ```
-    pub fn not_equal<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} != {}", self.0, value))
+    pub fn not_equal<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} != {}", self.0, value))
     }
 
     /// Constructs a query that checks whether the value of the column is exactly equal to the given value.
@@ -467,8 +488,8 @@ impl DbField {
     /// let query = DbQuery::column("age").exactly_equal(42);
     /// assert_eq!(query.to_string(), "age == 42");
     /// ```
-    pub fn exactly_equal<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} == {}", self.0, value))
+    pub fn exactly_equal<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} == {}", self.0, value))
     }
 
     /// Check whether any value in a set is equal to a value.
@@ -486,13 +507,13 @@ impl DbField {
     /// let query = col.any_equal(&["Alice", "Bob"]);
     /// assert_eq!(query.to_string(), "name ?= (Alice, Bob)");
     /// ```
-    pub fn any_equal<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn any_equal<T: Display>(&self, values: &[T]) -> Self {
         let values_str = values
             .iter()
             .map(|value| format!("{}", value))
             .collect::<Vec<String>>()
             .join(", ");
-        DbFilter::new(format!("{} ?= ({})", self.0, values_str))
+        Self::new(format!("{} ?= ({})", self.0, values_str))
     }
 
     /// Check whether all values in a set are equal to a value.
@@ -510,13 +531,13 @@ impl DbField {
     /// let query = col.all_equal(&[20, 30, 40]);
     /// assert_eq!(query.to_string(), "age *= (20, 30, 40)");
     /// ```
-    pub fn all_equal<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn all_equal<T: Display>(&self, values: &[T]) -> Self {
         let values_str = values
             .iter()
             .map(|value| format!("{}", value))
             .collect::<Vec<String>>()
             .join(", ");
-        DbFilter::new(format!("{} *= ({})", self.0, values_str))
+        Self::new(format!("{} *= ({})", self.0, values_str))
     }
 
     /// Compare two values for equality using fuzzy matching.
@@ -534,8 +555,8 @@ impl DbField {
     /// let query = col.fuzzy_equal("Alex");
     /// assert_eq!(query.to_string(), "name ~ Alex");
     /// ```
-    pub fn fuzzy_equal<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} ~ {}", self.0, value))
+    pub fn fuzzy_equal<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} ~ {}", self.0, value))
     }
 
     /// Compare two values for inequality using fuzzy matching.
@@ -553,8 +574,8 @@ impl DbField {
     /// let query = col.fuzzy_not_equal("Alex");
     /// assert_eq!(query.to_string(), "name !~ Alex");
     /// ```
-    pub fn fuzzy_not_equal<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} !~ {}", self.0, value))
+    pub fn fuzzy_not_equal<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} !~ {}", self.0, value))
     }
 
     /// Check whether any value in a set is equal to a value using fuzzy matching.
@@ -570,13 +591,13 @@ impl DbField {
     /// let query = DbQuery::field("name").any_fuzzy_equal(&["foo", "bar"]);
     /// assert_eq!(query.to_string(), r#"name ?~ (foo, bar)"#);
     /// ```
-    pub fn any_fuzzy_equal<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn any_fuzzy_equal<T: Display>(&self, values: &[T]) -> Self {
         let values_str = values
             .iter()
             .map(|value| format!("{}", value))
             .collect::<Vec<String>>()
             .join(", ");
-        DbFilter::new(format!("{} ?~ ({})", self.0, values_str))
+        Self::new(format!("{} ?~ ({})", self.0, values_str))
     }
 
     /// Check whether all values in a set are equal to a value using fuzzy matching.
@@ -592,13 +613,13 @@ impl DbField {
     /// let query = DbQuery::field("name").all_fuzzy_equal(&["foo", "bar"]);
     /// assert_eq!(query.to_string(), r#"name *~ (foo, bar)"#);
     /// ```
-    pub fn all_fuzzy_equal<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn all_fuzzy_equal<T: Display>(&self, values: &[T]) -> Self {
         let values_str = values
             .iter()
             .map(|value| format!("{}", value))
             .collect::<Vec<String>>()
             .join(", ");
-        DbFilter::new(format!("{} *~ ({})", self.0, values_str))
+        Self::new(format!("{} *~ ({})", self.0, values_str))
     }
 
     /// Check whether a value is less than or equal to another value.
@@ -614,8 +635,8 @@ impl DbField {
     /// let query = DbQuery::field("age").less_than_or_equal(30);
     /// assert_eq!(query.to_string(), r#"age <= 30"#);
     /// ```
-    pub fn less_than_or_equal<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} <= {}", self.0, value))
+    pub fn less_than_or_equal<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} <= {}", self.0, value))
     }
 
     /// Check whether a value is greater than or equal to another value.
@@ -630,8 +651,8 @@ impl DbField {
     /// # use surrealdb::DbQuery;
     /// let query = DbQuery::field("age").greater_than_or_equal(30)
     /// assert_eq!(query.to_string(), r#"age => 30"#);
-    pub fn greater_than_or_equal<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} >= {}", self.0, value))
+    pub fn greater_than_or_equal<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} >= {}", self.0, value))
     }
 
     /// Adds a value to the current query.
@@ -650,8 +671,8 @@ impl DbField {
     ///
     /// assert_eq!(new_query.to_string(), "age + 5");
     /// ```
-    pub fn add<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} + {}", self.0, value))
+    pub fn add<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} + {}", self.0, value))
     }
 
     /// Checks whether the current query contains a given value.
@@ -670,8 +691,8 @@ impl DbField {
     ///
     /// assert_eq!(new_query.to_string(), "age CONTAINS \"10-20\"");
     /// ```
-    pub fn contains<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} CONTAINS {}", self.0, value))
+    pub fn contains<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} CONTAINS {}", self.0, value))
     }
 
     /// Checks whether the current query does not contain a given value.
@@ -690,8 +711,8 @@ impl DbField {
     ///
     /// assert_eq!(new_query.to_string(), "age CONTAINSNOT \"10-20\"");
     /// ```
-    pub fn contains_not<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} CONTAINSNOT {}", self.0, value))
+    pub fn contains_not<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} CONTAINSNOT {}", self.0, value))
     }
 
     /// Checks whether the current query contains all of the given values.
@@ -710,13 +731,13 @@ impl DbField {
     ///
     /// assert_eq!(new_query.to_string(), "tags CONTAINSALL (\"food\",\"pizza\")");
     /// ```
-    pub fn contains_all<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn contains_all<T: Display>(&self, values: &[T]) -> Self {
         let values_str = values
             .iter()
             .map(|value| format!("{}", value))
             .collect::<Vec<String>>()
             .join(",");
-        DbFilter::new(format!("{} CONTAINSALL ({})", self.0, values_str))
+        Self::new(format!("{} CONTAINSALL ({})", self.0, values_str))
     }
 
     /// Checks whether the current query contains any of the given values.
@@ -734,13 +755,13 @@ impl DbField {
     /// let new_query = query.contains_all(&["food", "pizza"]);
     ///
     /// assert_eq!(new_query.to_string(), "tags CONTAINSANY (\"food\",\"pizza\")");
-    pub fn contains_any<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn contains_any<T: Display>(&self, values: &[T]) -> Self {
         let values_str = values
             .iter()
             .map(|value| format!("{}", value))
             .collect::<Vec<String>>()
             .join(",");
-        DbFilter::new(format!("{} CONTAINSANY ({})", self.0, values_str))
+        Self::new(format!("{} CONTAINSANY ({})", self.0, values_str))
     }
 
     /// Checks whether the column value does not contain any of the specified values.
@@ -757,13 +778,13 @@ impl DbField {
     /// let query = DbQuery::column("my_column").contains_none(&[1, 2, 3]);
     /// assert_eq!(query.to_string(), "my_column CONTAINSNONE (1,2,3)");
     /// ```
-    pub fn contains_none<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn contains_none<T: Display>(&self, values: &[T]) -> Self {
         let values_str = values
             .iter()
             .map(|value| format!("{}", value))
             .collect::<Vec<String>>()
             .join(",");
-        DbFilter::new(format!("{} CONTAINSNONE ({})", self.0, values_str))
+        Self::new(format!("{} CONTAINSNONE ({})", self.0, values_str))
     }
 
     /// Checks whether the column value is contained in the specified value.
@@ -780,8 +801,8 @@ impl DbField {
     /// let query = DbQuery::column("my_column").inside(10);
     /// assert_eq!(query.to_string(), "my_column INSIDE 10");
     /// ```
-    pub fn inside<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} INSIDE {}", self.0, value))
+    pub fn inside<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} INSIDE {}", self.0, value))
     }
 
     /// Checks whether the column value is not contained in the specified value.
@@ -798,8 +819,8 @@ impl DbField {
     /// let query = DbQuery::column("my_column").not_inside("hello");
     /// assert_eq!(query.to_string(), "my_column NOTINSIDE hello");
     /// ```
-    pub fn not_inside<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} NOTINSIDE {}", self.0, value))
+    pub fn not_inside<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} NOTINSIDE {}", self.0, value))
     }
 
     /// Checks whether all of the specified values are contained in the column value.
@@ -816,13 +837,13 @@ impl DbField {
     /// let query = DbQuery::column("my_column").all_inside(&[1, 2, 3]);
     /// assert_eq!(query.to_string(), "my_column ALLINSIDE (1,2,3)");
     /// ```
-    pub fn all_inside<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn all_inside<T: Display>(&self, values: &[T]) -> Self {
         let values_str = values
             .iter()
             .map(|value| format!("{}", value))
             .collect::<Vec<String>>()
             .join(",");
-        DbFilter::new(format!("{} ALLINSIDE ({})", self.0, values_str))
+        Self::new(format!("{} ALLINSIDE ({})", self.0, values_str))
     }
 
     /// Checks whether any of the specified values are contained in the column value.
@@ -839,13 +860,13 @@ impl DbField {
     /// let query = DbQuery::column("my_column").all_inside(&[1, 2, 3]);
     /// assert_eq!(query.to_string(), "my_column ANYINSIDE (1,2,3)");
     /// ```
-    pub fn any_inside<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn any_inside<T: Display>(&self, values: &[T]) -> Self {
         let values_str = values
             .iter()
             .map(|value| format!("{}", value))
             .collect::<Vec<String>>()
             .join(",");
-        DbFilter::new(format!("{} ANYINSIDE ({})", self.0, values_str))
+        Self::new(format!("{} ANYINSIDE ({})", self.0, values_str))
     }
 
     /// Checks whether none of the values are contained within the current field.
@@ -862,13 +883,13 @@ impl DbField {
     /// let query = DbQuery::field("age").none_inside(&[18, 19, 20]);
     /// assert_eq!(query.to_string(), "age NONEINSIDE (18,19,20)");
     /// ```
-    pub fn none_inside<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn none_inside<T: Display>(&self, values: &[T]) -> Self {
         let values_str = values
             .iter()
             .map(|value| format!("{}", value))
             .collect::<Vec<String>>()
             .join(",");
-        DbFilter::new(format!("{} NONEINSIDE ({})", self.0, values_str))
+        Self::new(format!("{} NONEINSIDE ({})", self.0, values_str))
     }
 
     /// Checks whether the current field is outside of the given value.
@@ -885,8 +906,8 @@ impl DbField {
     /// let query = DbQuery::field("location").outside("USA");
     /// assert_eq!(query.to_string(), "location OUTSIDE USA");
     /// ```
-    pub fn outside<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} OUTSIDE {}", self.0, value))
+    pub fn outside<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} OUTSIDE {}", self.0, value))
     }
 
     /// Checks whether the current field intersects with the given value.
@@ -903,8 +924,8 @@ impl DbField {
     /// let query = DbQuery::field("location").intersects("USA");
     /// assert_eq!(query.to_string(), "location INTERSECTS USA");
     /// ```
-    pub fn intersects<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} INTERSECTS {}", self.0, value))
+    pub fn intersects<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} INTERSECTS {}", self.0, value))
     }
 
     /// Checks whether any value in a set is equal to the current field using fuzzy matching.
@@ -921,13 +942,13 @@ impl DbField {
     /// let query = DbQuery::field("name").any_in_set(&["Oyelowo", "Oyedayo"]);
     /// assert_eq!(query.to_string(), "name ?= (Oyelowo, Oyedayo)");
     /// ```
-    pub fn any_in_set<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn any_in_set<T: Display>(&self, values: &[T]) -> Self {
         let value_str = values
             .iter()
             .map(|v| v.to_string())
             .collect::<Vec<String>>()
             .join(", ");
-        DbFilter::new(format!("{} ?= ({})", self.0, value_str))
+        Self::new(format!("{} ?= ({})", self.0, value_str))
     }
 
     /// Checks whether all values in a set are equal to the current field using fuzzy matching.
@@ -944,13 +965,13 @@ impl DbField {
     /// let query = DbQuery::field("name").all_in_set(&["Oyelowo", "Oyedayo"]);
     /// assert_eq!(query.to_string(), "name ?= (Oyelowo, Oyedayo)");
     /// ```
-    pub fn all_in_set<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn all_in_set<T: Display>(&self, values: &[T]) -> Self {
         let value_str = values
             .iter()
             .map(|v| v.to_string())
             .collect::<Vec<String>>()
             .join(", ");
-        DbFilter::new(format!("{} *= ({})", self.0, value_str))
+        Self::new(format!("{} *= ({})", self.0, value_str))
     }
 
     /// Subtracts a value from the current query value.
@@ -967,8 +988,8 @@ impl DbField {
     /// let subtracted = query.subtract(5);
     /// assert_eq!(subtracted.to_string(), "10 - 5".to_string());
     /// ```
-    pub fn subtract<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} - {}", self.0, value))
+    pub fn subtract<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} - {}", self.0, value))
     }
 
     /// Multiplies the current query value with another value.
@@ -985,8 +1006,8 @@ impl DbField {
     /// let multiplied = query.multiply(5);
     /// assert_eq!(multiplied.to_string(), "10 * 5".to_string());
     /// ```
-    pub fn multiply<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} * {}", self.0, value))
+    pub fn multiply<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} * {}", self.0, value))
     }
 
     /// Divides the current query value by another value.
@@ -1003,8 +1024,8 @@ impl DbField {
     /// let divided = query.divide(5);
     /// assert_eq!(divided.to_string(), "10 / 5".to_string());
     /// ```
-    pub fn divide<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} / {}", self.0, value))
+    pub fn divide<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} / {}", self.0, value))
     }
 
     /// Checks if the current query value is truthy.
@@ -1017,8 +1038,8 @@ impl DbField {
     /// let is_truthy = query.is_truthy();
     /// assert_eq!(is_truthy.to_string(), "true && true".to_string());
     /// ```
-    pub fn is_truthy(&self) -> DbFilter {
-        DbFilter::new(format!("{} && true", self.0))
+    pub fn is_truthy(&self) -> Self {
+        Self::new(format!("{} && true", self.0))
     }
 
     /// Checks if the current query value and another value are truthy.
@@ -1035,8 +1056,8 @@ impl DbField {
     /// let is_truthy_and = query.truthy_and(false);
     /// assert_eq!(is_truthy_and.to_string(), "true && false".to_string());
     /// ```
-    pub fn truthy_and<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} && {}", self.0, value))
+    pub fn truthy_and<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} && {}", self.0, value))
     }
 
     /// Checks if the current query value or another value are truthy.
@@ -1051,8 +1072,8 @@ impl DbField {
     /// let query = DbQuery::new("column_name".to_string()).truthy_or(true);
     /// assert_eq!(query.to_string(), "column_name || true");
     /// ```
-    pub fn truthy_or<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} || {}", self.0, value))
+    pub fn truthy_or<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} || {}", self.0, value))
     }
 
     /// Check whether the value of the field is equal to the specified value.
@@ -1070,8 +1091,8 @@ impl DbField {
     ///
     /// assert_eq!(query.to_string(), "age IS 18");
     /// ```
-    pub fn is<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} IS {}", self.0, value))
+    pub fn is<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} IS {}", self.0, value))
     }
 
     /// Check whether the value of the field is not equal to the specified value.
@@ -1089,8 +1110,8 @@ impl DbField {
     ///
     /// assert_eq!(query.to_string(), "name IS NOT Alice");
     /// ```
-    pub fn is_not<T: Display>(&self, value: T) -> DbFilter {
-        DbFilter::new(format!("{} IS NOT {}", self.0, value))
+    pub fn is_not<T: Display>(&self, value: T) -> Self {
+        Self::new(format!("{} IS NOT {}", self.0, value))
     }
 
     /// Check whether any value in a set is equal to a value using the "=" operator.
@@ -1109,13 +1130,13 @@ impl DbField {
     ///
     /// assert_eq!(query.to_string(), "age ?= {20, 30, 40}");
     /// ```
-    pub fn set_equal<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn set_equal<T: Display>(&self, values: &[T]) -> Self {
         let joined_values = values
             .iter()
             .map(|v| format!("{}", v))
             .collect::<Vec<String>>()
             .join(", ");
-        DbFilter::new(format!("{} ?= {{{}}}", self.0, joined_values))
+        Self::new(format!("{} ?= {{{}}}", self.0, joined_values))
     }
 
     /// Check whether all values in a set are equal to a value using the "*=" operator.
@@ -1134,13 +1155,13 @@ impl DbField {
     ///
     /// assert_eq!(query.to_string(), "age *= {20, 20, 20}");
     /// ```
-    pub fn set_all_equal<T: Display>(&self, values: &[T]) -> DbFilter {
+    pub fn set_all_equal<T: Display>(&self, values: &[T]) -> Self {
         let joined_values = values
             .iter()
             .map(|v| format!("{}", v))
             .collect::<Vec<String>>()
             .join(", ");
-        DbFilter::new(format!("{} *= {{{}}}", self.0, joined_values))
+        Self::new(format!("{} *= {{{}}}", self.0, joined_values))
     }
 
     /// Combine this field with another using the "AND" operator.
@@ -1160,8 +1181,8 @@ impl DbField {
     ///
     /// assert_eq!(query.to_string(), "age AND gender");
     /// ```
-    pub fn and(&self, other: &DbField) -> DbFilter {
-        DbFilter::new(format!("{} AND {}", self.0, other.0))
+    pub fn and(&self, other: &DbField) -> Self {
+        Self::new(format!("{} AND {}", self.0, other.0))
     }
 
     /// Combine this field with another using the "OR" operator.
@@ -1181,7 +1202,7 @@ impl DbField {
     ///
     /// assert_eq!(query.to_string(), "age OR gender");
     /// ```
-    pub fn or(&self, other: &DbField) -> DbFilter {
-        DbFilter::new(format!("{} OR {}", self.0, other.0))
+    pub fn or(&self, other: &DbField) -> Self {
+        Self::new(format!("{} OR {}", self.0, other.0))
     }
 }

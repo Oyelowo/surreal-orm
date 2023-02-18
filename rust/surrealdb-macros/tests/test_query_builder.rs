@@ -152,7 +152,7 @@ impl WhiteSpaceRemoval for String {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use surrealdb_macros::db_field::empty;
+    use surrealdb_macros::db_field::{empty, filter, Chain};
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_builder::{order, Order};
     use surrealdb_macros::{cond, query_builder, DbFilter};
@@ -191,6 +191,50 @@ mod tests {
 
         mana(bk.content.contains("Lowo"));
         mana(None);
+
+        fn manax(xx: impl Into<DbFilter>) {}
+        manax(firstName);
+        manax(
+            filter(firstName.like("oyelowo"))
+                .and(lastName.fuzzy_equal("oyedayo"))
+                .or(age
+                    .greater_than_or_equal(age)
+                    .greater_than_or_equal(age)
+                    .add(age)
+                    .add(age)
+                    .subtract(age)
+                    .divide(age)
+                    .multiply(age)
+                    .or(firstName)
+                    .intersects(age))
+                .and(lastName.greater_than_or_equal("lowo").or(course))
+                .and(
+                    firstName
+                        .any_in_set(&["asrer"])
+                        .greater_than_or_equal(50)
+                        .subtract(5)
+                        .less_than_or_equal(200),
+                ),
+        );
+
+        Chain::new(age.clone())
+            .chain(firstName)
+            .greater_than_or_equal(20);
+
+        // let xx = firstName
+        //     .less_than(age)
+        //     .greater_than(age)
+        //     .less_than(firstName)
+        //     .add(age)
+        //     .multiply(id)
+        //     .subtract(bestFriend)
+        //     .divide(course)
+        //     .fuzzy_equal(unoBook)
+        //     .and(firstName.greater_than(age))
+        //     .or(age.less_than_or_equal(writtenBooks))
+        //     .or(age.greater_than(age));
+        //
+        // println!("maerfineirNAMAAAA :{xx}");
 
         let written_book_selection = st
             .bestFriend(None.into())

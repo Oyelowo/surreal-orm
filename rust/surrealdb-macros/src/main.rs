@@ -19,7 +19,7 @@ use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Reference, Relate},
     model_id::SurId,
     query_builder_old::query,
-    Clause, SurrealdbEdge, SurrealdbNode,
+    SurrealdbEdge, SurrealdbNode,
 };
 use typed_builder::TypedBuilder;
 
@@ -88,110 +88,110 @@ pub struct Blog {
     content: String,
 }
 
-fn eerer() {
-    Student::schema()
-        .rites__(Clause::All)
-        .book(Clause::All)
-        .title;
-}
+// fn eerer() {
+//     Student::schema()
+//         .rites__(Clause::All)
+//         .book(Clause::All)
+//         .title;
+// }
 fn main() {
-    let book = Book {
-        id: Some("book:1".try_into().unwrap()),
-        title: "ere".into(),
-    };
-    let x1 = Student {
-        id: None,
-        first_name: "".into(),
-        last_name: "".into(),
-        fav_book: book.clone().into(),
-        // fav_book: LinkOne::from(book),
-        // written_blogs: vec![].into(),
-        written_blogs: Relate::null(),
-        // best_class_mate: Default::default(),
-        best_class_mate: LinkSelf::null(),
-        course: LinkOne::null(),
-        all_semester_courses: LinkMany::null(),
-    };
-
-    let xx = Student {
-        id: None,
-        first_name: "".into(),
-        last_name: "".into(),
-        fav_book: book.into(),
-        // fav_book: LinkOne::from(book),
-        written_blogs: vec![].into(),
-        all_semester_courses: vec![].into(),
-        best_class_mate: x1.into(),
-        course: LinkOne::null(),
-    };
-    let xxo = xx.clone().best_class_mate.value().unwrap();
-
-    // Returns either:
-    // the foreign values if fetched
-    // id keys of the foreign Field if not fetched
-    // empty Vec if not available
-    let xcv = xx.all_semester_courses.clone();
-
-    // Returns just the fully fetched values if fetched and available, otherwise, None
-    let xcv = xx.all_semester_courses.values();
+    // let book = Book {
+    //     id: Some("book:1".try_into().unwrap()),
+    //     title: "ere".into(),
+    // };
+    // let x1 = Student {
+    //     id: None,
+    //     first_name: "".into(),
+    //     last_name: "".into(),
+    //     fav_book: book.clone().into(),
+    //     // fav_book: LinkOne::from(book),
+    //     // written_blogs: vec![].into(),
+    //     written_blogs: Relate::null(),
+    //     // best_class_mate: Default::default(),
+    //     best_class_mate: LinkSelf::null(),
+    //     course: LinkOne::null(),
+    //     all_semester_courses: LinkMany::null(),
+    // };
     //
-    // Returns just the keys of the foreign field if available, otherwise, None
-    let xcv = xx.all_semester_courses.keys();
-    // xx.all_semester_courses
-    //     .into_iter()
-    //     .map(|x| x.value().unwrap());
-
-    let xcv = xx.written_blogs.clone();
-
-    // Returns just the fully fetched values if fetched and available, otherwise, None
-    let xcv = xx.written_blogs.values();
+    // let xx = Student {
+    //     id: None,
+    //     first_name: "".into(),
+    //     last_name: "".into(),
+    //     fav_book: book.into(),
+    //     // fav_book: LinkOne::from(book),
+    //     written_blogs: vec![].into(),
+    //     all_semester_courses: vec![].into(),
+    //     best_class_mate: x1.into(),
+    //     course: LinkOne::null(),
+    // };
+    // let xxo = xx.clone().best_class_mate.value().unwrap();
     //
-    // Returns just the keys of the foreign field if available, otherwise, None
-    let xcv = xx.written_blogs.keys();
-    // xx.fav_book.value_owned().unwrap()
-    xx.best_class_mate
-        .value()
-        .unwrap()
-        .fav_book
-        .value()
-        .unwrap();
-
-    let x = xx.clone().get_key();
-    let cc = xx.clone().get_key();
-    println!("areore:{xx:?}");
-
-    // xx.get_key()
-    let x1 = Student::schema().firstName.__as__("lowo");
-    println!("x1 --- {x1}");
-
-    let bee = Student::schema()
-        .lowo_na(Clause::Where(
-            query().where_(Student::schema().lastName.equals("lowo")),
-        ))
-        .title
-        .contains("bee");
-
-    Student::schema().rites__(Clause::All).book(Clause::All);
-
-    let xx = Student::schema()
-        .rites__(Clause::All)
-        .book(Clause::Where(
-            query().where_(Student::schema().lastName.contains("Dayo")),
-        ))
-        .title
-        .__as__("meorm");
-    println!("xx --- {xx}");
-
-    let x2 = Student::schema();
-    println!("x2 --- {x2}");
-
-    // Student::schema().favBook(Clause::All);
-    let xx = Student::schema().__with_id__("Student:lowo");
-    // Student::schema().favBook(Clause::All);
-    let xx = Student::schema();
-    println!("dfmoaef --- {xx}");
-    // Student::schema().__with_id__("student:3434").lastName;
-    // Student::schema().__with_id__("student:3434");
+    // // Returns either:
+    // // the foreign values if fetched
+    // // id keys of the foreign Field if not fetched
+    // // empty Vec if not available
+    // let xcv = xx.all_semester_courses.clone();
+    //
+    // // Returns just the fully fetched values if fetched and available, otherwise, None
+    // let xcv = xx.all_semester_courses.values();
+    // //
+    // // Returns just the keys of the foreign field if available, otherwise, None
+    // let xcv = xx.all_semester_courses.keys();
+    // // xx.all_semester_courses
+    // //     .into_iter()
+    // //     .map(|x| x.value().unwrap());
+    //
+    // let xcv = xx.written_blogs.clone();
+    //
+    // // Returns just the fully fetched values if fetched and available, otherwise, None
+    // let xcv = xx.written_blogs.values();
+    // //
+    // // Returns just the keys of the foreign field if available, otherwise, None
+    // let xcv = xx.written_blogs.keys();
+    // // xx.fav_book.value_owned().unwrap()
+    // xx.best_class_mate
+    //     .value()
+    //     .unwrap()
+    //     .fav_book
+    //     .value()
+    //     .unwrap();
+    //
+    // let x = xx.clone().get_key();
+    // let cc = xx.clone().get_key();
+    // println!("areore:{xx:?}");
+    //
+    // // xx.get_key()
+    // let x1 = Student::schema().firstName.__as__("lowo");
+    // println!("x1 --- {x1}");
+    //
+    // let bee = Student::schema()
+    //     .lowo_na(Clause::Where(
+    //         query().where_(Student::schema().lastName.equals("lowo")),
+    //     ))
+    //     .title
+    //     .contains("bee");
+    //
+    // Student::schema().rites__(Clause::All).book(Clause::All);
+    //
+    // let xx = Student::schema()
+    //     .rites__(Clause::All)
+    //     .book(Clause::Where(
+    //         query().where_(Student::schema().lastName.contains("Dayo")),
+    //     ))
+    //     .title
+    //     .__as__("meorm");
+    // println!("xx --- {xx}");
+    //
+    // let x2 = Student::schema();
+    // println!("x2 --- {x2}");
+    //
+    // // Student::schema().favBook(Clause::All);
+    // let xx = Student::schema().__with_id__("Student:lowo");
+    // // Student::schema().favBook(Clause::All);
+    // let xx = Student::schema();
+    // println!("dfmoaef --- {xx}");
+    // // Student::schema().__with_id__("student:3434").lastName;
+    // // Student::schema().__with_id__("student:3434");
 }
 // Student::schema().__with_id__("student:3434").lastName;
 // Student::schema().__with_id__("student:3434");

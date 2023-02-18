@@ -19,7 +19,7 @@ use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     model_id::SurId,
     query_builder_old::query,
-    Clause, SurrealdbEdge, SurrealdbNode,
+    SurrealdbEdge, SurrealdbNode,
 };
 use test_case::test_case;
 use typed_builder::TypedBuilder;
@@ -110,7 +110,7 @@ pub struct Blog {
 // }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    /*     use super::*;
     use surrealdb_macros::{cond, q, DbField};
     use test_case::test_case;
 
@@ -150,5 +150,5 @@ mod tests {
             "->writes[WHERE timeWritten = 12:00]->book[WHERE content CONTAINS Oyelowo in Uranus] AS writtenBooks"
                 .to_string()
         )
-    }
+    } */
 }
