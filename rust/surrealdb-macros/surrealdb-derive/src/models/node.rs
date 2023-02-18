@@ -174,7 +174,9 @@ impl ToTokens for FieldsGetterOpts {
                     
                     #( #record_link_fields_methods) *
 
-                    pub fn __as__(&self, &alias: impl ::std::fmt::Display) -> ::std::string::String {
+                    pub fn __as__<'field, T>(&self, alias: T) -> ::std::string::String
+                        where T: Into<Cow<'field, DbField>>
+                    {
                         format!("{} AS {}", self, alias)
                     }
                     

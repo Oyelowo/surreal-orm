@@ -156,10 +156,17 @@ mod tests {
     use surrealdb_macros::db_field::empty;
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_builder::{order, Order};
-    use surrealdb_macros::{cond, query_builder};
+    use surrealdb_macros::{cond, query_builder, DbFilter};
     use surrealdb_macros::{q, DbField};
     use test_case::test_case;
 
+    fn mana(v: impl Into<DbFilter>) {
+        let x: DbFilter = v.into();
+
+        let m = x.bracketed();
+        println!("OFEMR>>>>{m}");
+        // let xx = DbFilter::from(v);
+    }
     #[test]
     fn multiplication_tests1() {
         let student::Student {
@@ -181,6 +188,9 @@ mod tests {
         let book::Book { content, .. } = Book::schema();
 
         let mut queryb = query_builder::QueryBuilder::new();
+
+        mana(bk.content.contains("Lowo"));
+        mana(None);
 
         let written_book_selection = st
             .bestFriend(None.into())
