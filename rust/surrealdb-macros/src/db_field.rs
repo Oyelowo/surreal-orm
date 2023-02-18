@@ -104,6 +104,7 @@ pub struct DbFilter {
 pub fn empty() -> DbFilter {
     DbFilter::new("".into())
 }
+
 impl<'a> From<Cow<'a, DbFilter>> for DbFilter {
     fn from(value: Cow<'a, DbFilter>) -> Self {
         match value {
@@ -171,6 +172,10 @@ impl DbFilter {
 
     pub fn bracketed(&self) -> Self {
         DbFilter::new(format!("({self})"))
+    }
+
+    pub fn chain(&self, field: DbField) -> DbField {
+        DbField::from(field)
     }
 }
 

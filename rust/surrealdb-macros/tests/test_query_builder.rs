@@ -151,7 +151,6 @@ impl WhiteSpaceRemoval for String {}
 
 #[cfg(test)]
 mod tests {
-    #![recursion_limit = "256"]
     use super::*;
     use surrealdb_macros::db_field::empty;
     // use surrealdb_macros::prelude::*;
@@ -167,6 +166,7 @@ mod tests {
         println!("OFEMR>>>>{m}");
         // let xx = DbFilter::from(v);
     }
+
     #[test]
     fn multiplication_tests1() {
         let student::Student {
@@ -181,7 +181,7 @@ mod tests {
             age,
             ..
         } = &Student::schema();
-        let st = &Student::schema();
+        let st = Student::schema();
         let bk = &Book::schema();
         let wrt = &StudentWritesBook::schema();
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
@@ -198,7 +198,31 @@ mod tests {
             .book(bk.content.contains("Oyelowo in Uranus"))
             .__as__(st.writtenBooks);
 
+        let st = Student::schema();
+        let written_book_selection = st
+            .bestFriend(None.into())
+            .writes__(wrt.timeWritten.equals("12:00"))
+            .book(bk.content.contains("Oyelowo in Uranus"))
+            .__as__(st.writtenBooks);
+
         let rer = "".to_string().is_empty();
+
+        #[derive(Serialize, Deserialize)]
+        struct LIKE;
+
+        impl Display for LIKE {
+            fn fmt(&self, f: &mut _core::fmt::Formatter<'_>) -> _core::fmt::Result {
+                f.write_str("LIKE")
+            }
+        }
+        #[derive(Serialize, Deserialize)]
+        struct OR;
+
+        impl Display for OR {
+            fn fmt(&self, f: &mut _core::fmt::Formatter<'_>) -> _core::fmt::Result {
+                f.write_str("OR")
+            }
+        }
         #[derive(Serialize, Deserialize)]
         struct AND;
 
@@ -215,11 +239,11 @@ mod tests {
             .select_all()
             .from(Book::get_table_name())
             .where_(
-                content.like("lowo").and(
-                    age.greater_than_or_equal(600)
-                        .or(firstName.equal("Oyelowo"))
-                        .and(lastName.equal("Oyedayo")),
-                ),
+                content
+                    .like("lowo")
+                    .and(age.greater_than_or_equal(600))
+                    .or(firstName.equal("Oyelowo"))
+                    .and(lastName.equal("Oyedayo")),
             )
             .group_by(content)
             .order_by(order(lastName).desc())
@@ -245,13 +269,11 @@ mod tests {
             .select_many(&[firstName, unoBook])
             .from(Student::get_table_name())
             .where_(
-                age.greater_than_or_equals(18)
-                    .or(firstName
-                        .like("oyelowo")
-                        .and(lastName.fuzzy_equal("oyedayo")))
-                    .and(age.greater_than_or_equal(150)),
+                age.and(bestFriend).or(firstName.equal(true)), // .and(age.greater_than_or_equal(150)),
             )
-            // .where_(cond!(age q!(>) "12:00" firstName q!(~) "lowo"))
+            // .where_(
+            //     cond!(age q!(>=) "12:00" OR firstName LIKE "oyelowo" AND lastName q!(~) "oyedyao"  AND age q!(>) 150),
+            // )
             .order_by(order(firstName).rand().desc())
             .order_by(order(lastName).collate().asc())
             .order_by(order(id).numeric().desc())
@@ -272,6 +294,7 @@ mod tests {
             .timeout("10s")
             .parallel();
 
+        println!("ZZZZZZXXXXXXXX {query}");
         // let is_oyelowo = true;
         // if is_oyelowo {
         //     query.group_by_many(&[age, bestFriend, &DbField::new("lowo")]);

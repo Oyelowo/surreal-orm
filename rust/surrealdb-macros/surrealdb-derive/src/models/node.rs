@@ -174,10 +174,11 @@ impl ToTokens for FieldsGetterOpts {
                     
                     #( #record_link_fields_methods) *
 
-                    pub fn __as__<'field, T>(&self, alias: T) -> ::std::string::String
-                        where T: Into<Cow<'field, DbField>>
+                    pub fn __as__<'a, T>(&self, alias: T) -> ::std::string::String
+                        where T: Into<::std::borrow::Cow<'a, #crate_name::DbField>>
                     {
-                        format!("{} AS {}", self, alias)
+                        let alias: &#crate_name::DbField = &alias.into();
+                        format!("{} AS {}", self, alias.to_string())
                     }
                     
                 }

@@ -1,6 +1,0 @@
----
-source: surrealdb-macros/tests/test_query_builder.rs
-assertion_line: 224
-expression: query1.to_string()
----
-"SELECT  FROM book WHERE (content LIKE 'lowo') AND ((age >= 600) OR (firstName = Oyelowo) AND (lastName = Oyedayo)) SPLIT firstName GROUP BY *, content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 15 PARALLEL;"
