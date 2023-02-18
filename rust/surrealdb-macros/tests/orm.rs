@@ -15,7 +15,6 @@ use surrealdb::{
 use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 
 use std::fmt::{Debug, Display};
-use surrealdb_macros::query_builder_old::query;
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     model_id::SurId,

@@ -18,7 +18,6 @@ use surrealdb::{
 use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 
 use std::fmt::{Debug, Display};
-use surrealdb_macros::query_builder_old::query;
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     model_id::SurId,
@@ -152,7 +151,7 @@ impl WhiteSpaceRemoval for String {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use surrealdb_macros::db_field::{cond, empty, Chain};
+    use surrealdb_macros::db_field::{cond, empty};
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_builder::{order, Order};
     use surrealdb_macros::{cond, query_builder, DbFilter};
@@ -243,9 +242,9 @@ mod tests {
                 ),
         );
 
-        Chain::new(age.clone())
-            .chain(firstName)
-            .greater_than_or_equal(20);
+        // Chain::new(age.clone())
+        //     .chain(firstName)
+        //     .greater_than_or_equal(20);
 
         // let xx = firstName
         //     .less_than(age)
@@ -309,9 +308,7 @@ mod tests {
             .select_all()
             .from(Book::get_table_name())
             .where_(
-                content
-                    .like("lowo")
-                    .and(age.greater_than_or_equal(600))
+                cond(content.like("lowo").and(age).greater_than_or_equal(600))
                     .or(firstName.equal("Oyelowo"))
                     .and(lastName.equal("Oyedayo")),
             )
@@ -339,7 +336,18 @@ mod tests {
             .select_many(&[firstName, unoBook])
             .from(Student::get_table_name())
             .where_(
-                age.and(bestFriend).or(firstName.equal(true)), // .and(age.greater_than_or_equal(150)),
+                cond(
+                    age.greater_than(age)
+                        .greater_than_or_equal(age)
+                        .less_than_or_equal(20)
+                        .add(5)
+                        .subtract(10)
+                        .and(unoBook)
+                        .or(age),
+                )
+                .and(bestFriend.exactly_equal("Oyelowo"))
+                .or(firstName.equal(true))
+                .and(age.greater_than_or_equal(150)),
             )
             // .where_(
             //     cond!(age q!(>=) "12:00" OR firstName LIKE "oyelowo" AND lastName q!(~) "oyedyao"  AND age q!(>) 150),
@@ -381,7 +389,7 @@ mod tests {
         // let result = sql!(SELECT name WHERE age > 5);
         // let result = sql!(SELECT name WHERE age > 5);
 
-        // insta::assert_debug_snapshot!(query.to_string());
+        insta::assert_debug_snapshot!(query.to_string());
 
         // assert_eq!(
         //     query.to_string().remove_extra_whitespace(),

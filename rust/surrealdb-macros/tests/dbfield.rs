@@ -18,7 +18,6 @@ use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     model_id::SurId,
-    query_builder_old::query,
     SurrealdbEdge, SurrealdbNode,
 };
 use test_case::test_case;

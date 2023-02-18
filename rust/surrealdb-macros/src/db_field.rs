@@ -121,8 +121,8 @@ pub struct DbFilter {
     query_string: String,
 }
 
-pub fn cond(field: impl Into<DbFilter>) -> DbFilter {
-    field.into()
+pub fn cond(filterable: impl Into<DbFilter>) -> DbFilter {
+    filterable.into()
 }
 // pub fn filter(field: DbField) -> DbFilter {
 //     field.into()

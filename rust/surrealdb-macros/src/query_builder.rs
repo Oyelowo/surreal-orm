@@ -136,7 +136,7 @@ impl<'a> QueryBuilder<'a> {
 
     // pub fn select(&mut self, projection: &'a str) -> &mut Self {
     pub fn select_all(&mut self) -> &mut Self {
-        self.group_by.push("*".to_string());
+        self.projections.push("*".to_string());
         self
     }
 

@@ -1,0 +1,5 @@
+---
+source: surrealdb-macros/tests/test_query_builder.rs
+expression: query.to_string()
+---
+"SELECT *, age, firstName, firstName, unoBook FROM student WHERE (age > age >= age <= 20 + 5 - 10 AND unoBook OR age) AND (bestFriend == Oyelowo) OR (firstName = true) AND (age >= 150) SPLIT lastName, firstName, firstName, semCoures GROUP BY course, firstName, lastName, lastName, unoBook, lowo ORDER BY firstName RAND() DESC, lastName COLLATE ASC, id NUMERIC DESC, id NUMERIC DESC, firstName  DESC LIMIT 400 START AT 5 FETCH firstName, lastName, age, unoBook, age, unoBook TIMEOUT 10s PARALLEL;"

@@ -157,16 +157,17 @@ impl ToTokens for FieldsGetterOpts {
                         
                         pub fn #__________connect_to_graph_traversal_string(
                             store: &::std::string::String,
-                            filter: #crate_name::DbFilter,
+                            filter: impl Into<#crate_name::DbFilter>,
                             arrow_direction: &str,
                         ) -> Self {
                             let mut schema_instance = Self::empty();
+                            let filter: #crate_name::DbFilter = filter.into();
                             let schema_edge_str_with_arrow = format!(
                                 "{}{}{}{}{}",
                                 store.as_str(),
                                 arrow_direction,
                                 #table_name_str,
-                                #crate_name::format_filter(filter, #table_name_str),
+                                #crate_name::format_filter(filter),
                                 arrow_direction,
                             );
                             
