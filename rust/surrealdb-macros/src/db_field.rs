@@ -10,6 +10,20 @@ use std::{
 
 use crate::query_builder::QueryBuilder;
 
+/// Represents a field in the database. This type wraps a `String` and
+/// provides a convenient way to refer to a database fields.
+///
+/// # Examples
+///
+/// Creating a `DbField`:
+///
+/// ```
+/// use crate::query::field::DbField;
+///
+/// let field = DbField::new("name");
+///
+/// assert_eq!(field.to_string(), "name");
+/// ```
 #[derive(serde::Serialize, Debug, Clone, Default)]
 pub struct DbField(String);
 
@@ -31,25 +45,6 @@ impl Into<DbFilter> for DbField {
     }
 }
 
-// impl<'a> From<&'a str> for &'a DbField {
-//     fn from(s: &'a str) -> &'a DbField {
-//         let db_field = DbField(s.to_string());
-//         let reference = unsafe { std::mem::transmute::<&DbField, &'a DbField>(&db_field) };
-//         reference
-//     }
-// }
-// impl<'a> From<&str> for &'a DbField {
-//     fn from(s: &str) -> &'a DbField {
-//         todo!()
-//     }
-// }
-
-// impl<'a> From<DbField> for &'a DbField {
-//     fn from(value: DbField) -> &'a DbField {
-//         Box::leak(Box::new(value))
-//     }
-// }
-
 impl<'a> From<Cow<'a, DbField>> for DbField {
     fn from(value: Cow<'a, DbField>) -> Self {
         match value {
@@ -69,25 +64,7 @@ impl From<DbField> for Cow<'static, DbField> {
         Cow::Owned(value)
     }
 }
-//
-// impl<'a> From<DbField> for Cow<'a, DbField> {
-//     fn from(value: DbField) -> Self {
-//         Cow::Owned(value)
-//     }
-// }
-//
-// impl<'a> From<&DbField> for Cow<'a, DbField> {
-//     fn from(value: &DbField) -> Self {
-//         Cow::Borrowed(value)
-//     }
-// }
-//
-// impl<T: ToString> From<&T> for DbField {
-//     fn from(value: &T) -> Self {
-//         // DbField::Value(DbField(value.to_string()))
-//         todo!()
-//     }
-// }
+
 impl From<String> for DbField {
     fn from(value: String) -> Self {
         Self(value.into())
@@ -98,6 +75,7 @@ impl From<&str> for DbField {
         Self(value.into())
     }
 }
+
 impl From<DbField> for String {
     fn from(value: DbField) -> Self {
         value.0
