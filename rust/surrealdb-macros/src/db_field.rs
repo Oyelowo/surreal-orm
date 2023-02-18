@@ -8,7 +8,7 @@ use std::{
     fmt::{format, Display},
 };
 
-use crate::qbuilder::QueryBuilder;
+use crate::query_builder::QueryBuilder;
 
 #[derive(serde::Serialize, Debug, Clone, Default)]
 pub struct DbField(String);
@@ -22,7 +22,7 @@ impl Into<DbFilter> for &DbField {
 impl<'a> Into<DbFilter> for QueryBuilder<'a> {
     fn into(self) -> DbFilter {
         let query_b: QueryBuilder = self;
-        DbFilter::new(query_b())
+        DbFilter::new(query_b.to_string())
     }
 }
 impl Into<DbFilter> for DbField {
