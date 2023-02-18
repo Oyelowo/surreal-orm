@@ -8,6 +8,8 @@ use std::{
     fmt::{format, Display},
 };
 
+use crate::qbuilder::QueryBuilder;
+
 #[derive(serde::Serialize, Debug, Clone, Default)]
 pub struct DbField(String);
 
@@ -17,6 +19,12 @@ impl Into<DbFilter> for &DbField {
     }
 }
 
+impl<'a> Into<DbFilter> for QueryBuilder<'a> {
+    fn into(self) -> DbFilter {
+        let query_b: QueryBuilder = self;
+        DbFilter::new(query_b())
+    }
+}
 impl Into<DbFilter> for DbField {
     fn into(self) -> DbFilter {
         DbFilter::new(self.into())
@@ -113,7 +121,7 @@ pub struct DbFilter {
     query_string: String,
 }
 
-pub fn filter(field: impl Into<DbFilter>) -> DbFilter {
+pub fn cond(field: impl Into<DbFilter>) -> DbFilter {
     field.into()
 }
 // pub fn filter(field: DbField) -> DbFilter {
@@ -1164,6 +1172,25 @@ impl DbField {
         Self::new(format!("{} *= {{{}}}", self.0, joined_values))
     }
 
+    pub fn or_filter(&self, filter: impl Into<DbFilter>) -> DbFilter {
+        let precendence = self._______bracket_if_not_already();
+        let filter: DbFilter = filter.into();
+        DbFilter::new(format!("{precendence} OR ({filter})"))
+    }
+
+    fn _______bracket_if_not_already(&self) -> impl Display {
+        let filter = self.to_string();
+        match (filter.starts_with('('), filter.ends_with(')')) {
+            (true, true) => format!("{self}"),
+            _ => format!("({self})"),
+        }
+    }
+
+    pub fn and_filter(&self, filter: impl Into<DbFilter>) -> DbFilter {
+        let precendence = self._______bracket_if_not_already();
+        let filter: DbFilter = filter.into();
+        DbFilter::new(format!("{precendence} AND ({filter})"))
+    }
     /// Combine this field with another using the "AND" operator.
     ///
     /// # Arguments

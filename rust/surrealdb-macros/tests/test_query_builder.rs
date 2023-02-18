@@ -152,7 +152,7 @@ impl WhiteSpaceRemoval for String {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use surrealdb_macros::db_field::{empty, filter, Chain};
+    use surrealdb_macros::db_field::{cond, empty, Chain};
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_builder::{order, Order};
     use surrealdb_macros::{cond, query_builder, DbFilter};
@@ -192,10 +192,36 @@ mod tests {
         mana(bk.content.contains("Lowo"));
         mana(None);
 
-        fn manax(xx: impl Into<DbFilter>) {}
-        manax(firstName);
-        manax(
-            filter(firstName.like("oyelowo"))
+        fn where___(xx: impl Into<DbFilter>) {}
+        where___(firstName);
+        where___(
+            age.less_than_or_equal(18)
+                .greater_than_or_equal(age)
+                .add(age)
+                .subtract(18)
+                .divide(firstName)
+                .multiply(lastName)
+                .greater_than_or_equal(course)
+                .and_filter(firstName.like("Oyelowoh"))
+                .or(lastName.greater_than_or_equal(4)),
+        );
+
+        where___(firstName.like("oyelowo"));
+
+        let x = firstName.like("oeere");
+        where___(x);
+
+        let x = cond(firstName.like("oeere"));
+        where___(x);
+        where___(None);
+
+        where___(
+            cond(age.add(1).multiply(2).equals(course.divide(2).subtract(1)))
+                .and(age.all_in_set(&[1, 2]))
+                .and(cond(firstName.like("D")).and(lastName.like("E"))),
+        );
+        where___(
+            cond(firstName.like("oyelowo"))
                 .and(lastName.fuzzy_equal("oyedayo"))
                 .or(age
                     .greater_than_or_equal(age)
