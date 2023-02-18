@@ -10,9 +10,25 @@ use std::{
 
 use crate::{db_field::DbFilter, DbField, SurrealdbNode};
 
+/// Creates a new `Order` instance with the specified database field.
+///
+/// # Arguments
+///
+/// * `field` - A reference to a `DbField` instance to be used as the ordering field.
+///
+/// # Example
+///
+/// ```
+/// use my_crate::{Order, DbField};
+///
+/// let id_field = DbField::new("id");
+/// let order = Order::new(&id_field);
+/// ```
 pub fn order(field: &DbField) -> Order {
     Order::new(field)
 }
+
+/// Represents an ordering field, direction, and options for a database query.
 #[derive(Debug, Clone, Copy)]
 pub struct Order<'a> {
     field: &'a DbField,
@@ -21,7 +37,20 @@ pub struct Order<'a> {
 }
 
 impl<'a> Order<'a> {
-    // pub fn new(field: &'a str) -> Self {
+    /// Creates a new `Order` instance with the specified database field.
+    ///
+    /// # Arguments
+    ///
+    /// * `field` - A reference to a `DbField` instance to be used as the ordering field.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use my_crate::{Order, DbField};
+    ///
+    /// let id_field = DbField::new("id");
+    /// let order = Order::new(&id_field);
+    /// ```
     pub fn new(field: &'a DbField) -> Self {
         Order {
             field,
@@ -30,25 +59,83 @@ impl<'a> Order<'a> {
         }
     }
 
+    /// Sets the direction of the ordering to ascending.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use my_crate::{Order, DbField, OrderDirection};
+    ///
+    /// let id_field = DbField::new("id");
+    /// let order = Order::new(&id_field).asc();
+    /// assert_eq!(order.direction, Some(OrderDirection::Asc));
+    /// ```
     pub fn asc(mut self) -> Self {
         self.direction = Some(OrderDirection::Asc);
         self
     }
 
+    /// Sets the direction of the ordering to descending.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use my_crate::{Order, DbField, OrderDirection};
+    ///
+    /// let id_field = DbField::new("id");
+    /// let order = Order::new(&id_field).desc();
+    /// assert_eq!(order.direction, Some(OrderDirection::Desc));
+    /// ```
     pub fn desc(mut self) -> Self {
         self.direction = Some(OrderDirection::Desc);
         self
     }
+
+    /// Sets the ordering option to random.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use my_crate::{Order, DbField, OrderOption};
+    ///
+    /// let id_field = DbField::new("id");
+    /// let order = Order::new(&id_field).rand();
+    /// assert_eq!(order.option, Some(OrderOption::Rand));
+    /// ```
     pub fn rand(mut self) -> Self {
         self.option = Some(OrderOption::Rand);
         self
     }
 
+    /// Sets the ordering option to collate.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use my_crate::{Order, DbField, OrderOption};
+    ///
+    /// let name_field = DbField::new("name");
+    /// let order = Order::new(&name_field).collate();
+    /// assert_eq!(order.option, Some(OrderOption::Collate));
+    /// ```
     pub fn collate(mut self) -> Self {
         self.option = Some(OrderOption::Collate);
         self
     }
 
+    /// Sets the ordering option to sort the values numerically instead of as strings.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use my_cool_database::query::{Order, DbField};
+    ///
+    /// let field = DbField::new("age", "users");
+    /// let order = Order::new(&field).numeric();
+    ///
+    /// assert_eq!(order.field.name(), "age");
+    /// assert_eq!(order.option.unwrap(), OrderOption::Numeric);
+    /// ```
     pub fn numeric(mut self) -> Self {
         self.option = Some(OrderOption::Numeric);
         self
@@ -97,9 +184,11 @@ impl Display for OrderOption {
     }
 }
 
+/// The query builder struct used to construct complex database queries.
 pub struct QueryBuilder<'a> {
     // projections: Vec<&'a str>,
     projections: Vec<String>,
+    /// The list of target tables for the query.
     // targets: Vec<&'a str>,
     targets: Vec<String>,
     where_: Option<String>,
@@ -118,6 +207,15 @@ pub struct QueryBuilder<'a> {
 }
 
 impl<'a> QueryBuilder<'a> {
+    /// Create a new instance of QueryBuilder.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::QueryBuilder;
+    ///
+    /// let query_builder = QueryBuilder::new();
+    /// ```
     pub fn new() -> QueryBuilder<'a> {
         QueryBuilder {
             projections: vec![],
@@ -134,12 +232,35 @@ impl<'a> QueryBuilder<'a> {
         }
     }
 
-    // pub fn select(&mut self, projection: &'a str) -> &mut Self {
+    /// Add a wildcard projection to the query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::QueryBuilder;
+    ///
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.select_all();
+    /// ```
     pub fn select_all(&mut self) -> &mut Self {
         self.projections.push("*".to_string());
         self
     }
 
+    /// Add a projection to the query for a single field.
+    ///
+    /// # Arguments
+    ///
+    /// * `field` - The name of the field to project.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::{QueryBuilder, DbField};
+    ///
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.select(DbField("my_field".to_string()));
+    /// ```
     pub fn select<'field, T>(&mut self, field: T) -> &mut Self
     where
         T: Into<Cow<'field, DbField>>,
@@ -149,6 +270,21 @@ impl<'a> QueryBuilder<'a> {
         self
     }
 
+    /// Add projections to the query for multiple fields.
+    ///
+    /// # Arguments
+    ///
+    /// * `fields` - A slice of field names to project.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::{QueryBuilder, DbField};
+    ///
+    /// let mut query_builder = QueryBuilder::new();
+    /// let fields = &[DbField("field_1".to_string()), DbField("field_2".to_string())];
+    /// query_builder.select_many(fields);
+    /// ```
     pub fn select_many<'field, T>(&mut self, fields: &[T]) -> &mut Self
     where
         T: Into<Cow<'field, DbField>> + Clone + Display,
@@ -163,22 +299,66 @@ impl<'a> QueryBuilder<'a> {
         self
     }
 
+    /// Specifies the table to select from.
+    ///
+    /// # Arguments
+    ///
+    /// * `table_name` - The name of the table to select from.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use query_builder::{QueryBuilder, DbField};
+    ///
+    /// let mut builder = QueryBuilder::select();
+    /// builder.from("users");
+    ///
+    /// assert_eq!(builder.to_string(), "SELECT * FROM users");
+    /// ```
     pub fn from(&'a mut self, table_name: impl std::borrow::Borrow<str> + 'a) -> &'a mut Self {
         self.targets.push(table_name.borrow().to_string());
         self
     }
 
-    // pub fn where_(&mut self, condition: &'a str) -> &mut Self {
+    /// Adds a condition to the `WHERE` clause of the SQL query.
+    ///
+    /// # Arguments
+    ///
+    /// * `condition` - A reference to a filter condition.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use query_builder::{QueryBuilder, DbField, DbFilter};
+    ///
+    /// let mut builder = QueryBuilder::select();
+    /// let condition = DbFilter::from(("age", ">", 18));
+    /// builder.where_(condition);
+    ///
+    /// assert_eq!(builder.to_string(), "SELECT * WHERE age > 18");
+    /// ```
     pub fn where_(&mut self, condition: impl Into<DbFilter>) -> &mut Self {
         let condition: DbFilter = condition.into();
         self.where_ = Some(condition.to_string());
         self
     }
 
-    // pub fn split(&mut self, fields: &[&'a str]) -> &mut Self {
-    //     self.split = Some(fields.to_vec());
-    //     self
-    // }
+    /// Adds a field to the `SPLIT BY` clause of the SQL query.
+    ///
+    /// # Arguments
+    ///
+    /// * `field` - The name of the field to add to the `SPLIT BY` clause.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use query_builder::{QueryBuilder, DbField};
+    ///
+    /// let mut builder = QueryBuilder::select();
+    /// builder.split(DbField::new("country"));
+    ///
+    /// assert_eq!(builder.to_string(), "SELECT * SPLIT BY country");
+    /// ```
     pub fn split<'field, T>(&mut self, field: T) -> &mut Self
     where
         T: Into<Cow<'field, DbField>>,
@@ -188,6 +368,22 @@ impl<'a> QueryBuilder<'a> {
         self
     }
 
+    /// Adds multiple fields to split the query result into multiple groups.
+    ///
+    /// # Arguments
+    ///
+    /// * `fields` - The names of the fields to split the result by.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use my_db::{QueryBuilder, DbField};
+    ///
+    /// let mut query = QueryBuilder::select();
+    /// let fields = vec![DbField::from("age"), DbField::from("gender")];
+    /// query = query.split_many(&fields);
+    /// assert_eq!(query.build(), "SELECT *, age, gender FROM table GROUP BY age, gender");
+    /// ```
     pub fn split_many<'field, T>(&mut self, fields: &[T]) -> &mut Self
     where
         T: Into<Cow<'field, DbField>> + Clone + Display,
@@ -202,6 +398,19 @@ impl<'a> QueryBuilder<'a> {
         self
     }
 
+    /// Sets the GROUP BY clause for the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `field` - The name of the field to group by.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use query_builder::{QueryBuilder, DbField};
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.group_by(DbField::new("age"));
+    /// ```
     pub fn group_by<'field, T>(&mut self, field: T) -> &mut Self
     where
         T: Into<Cow<'field, DbField>>,
@@ -211,6 +420,19 @@ impl<'a> QueryBuilder<'a> {
         self
     }
 
+    /// Sets multiple fields to GROUP BY in the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `fields` - A slice of field names to group by.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use query_builder::{QueryBuilder, DbField};
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.group_by_many(&[DbField::new("age"), DbField::new("name")]);
+    /// ```
     pub fn group_by_many<'field, T>(&mut self, fields: &[T]) -> &mut Self
     where
         T: Into<Cow<'field, DbField>> + Clone + Display,
@@ -225,31 +447,138 @@ impl<'a> QueryBuilder<'a> {
         self
     }
 
+    /// Sets the ORDER BY clause for the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `order` - The field and direction to order by.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use query_builder::{QueryBuilder, Order, Direction, DbField};
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.order_by(Order::new(DbField::new("age"), Direction::Ascending));
+    /// ```
     pub fn order_by(&mut self, order: Order<'a>) -> &mut Self {
         self.order_by.push(order);
         self
     }
 
+    /// Sets multiple fields to ORDER BY in the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `orders` - A slice of fields and directions to order by.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use query_builder::{QueryBuilder, Order, Direction, DbField};
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.order_by_many(&[
+    ///     Order::new(DbField::new("age"), Direction::Ascending),
+    ///     Order::new(DbField::new("name"), Direction::Descending),
+    /// ]);
+    /// ```
     pub fn order_by_many(&mut self, orders: &[Order<'a>]) -> &mut Self {
         self.order_by.extend_from_slice(orders.to_vec().as_slice());
         self
     }
 
+    /// Sets the LIMIT clause for the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `limit` - The maximum number of rows to return.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use query_builder::QueryBuilder;
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.limit(10);
+    /// ```
     pub fn limit(&mut self, limit: u64) -> &mut Self {
         self.limit = Some(limit);
         self
     }
 
+    /// Adds a start offset to the current query.
+    ///
+    /// # Arguments
+    ///
+    /// * `start` - An unsigned 64-bit integer representing the starting offset.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use my_cool_library::QueryBuilder;
+    ///
+    /// let query = QueryBuilder::new()
+    ///     .start(50)
+    ///     .fetch("id")
+    ///     .fetch("name")
+    ///     .from("users")
+    ///     .build();
+    /// ```
+    ///
+    /// # Output
+    ///
+    /// The `start` method returns a mutable reference to the QueryBuilder instance it was called on,
+    /// allowing further method chaining.
+    ///
+    /// ```
+    /// use my_cool_library::QueryBuilder;
+    ///
+    /// let query = QueryBuilder::new()
+    ///     .start(50)
+    ///     .fetch("id")
+    ///     .fetch("name")
+    ///     .from("users")
+    ///     .build();
+    ///
+    /// assert_eq!(query, "SELECT id, name FROM users OFFSET 50");
+    /// ```
     pub fn start(&mut self, start: u64) -> &mut Self {
         self.start = Some(start);
         self
     }
 
-    // pub fn fetch(&mut self, fields: &[&'a str]) -> &mut Self {
-    //     self.fetch = Some(fields.to_vec());
-    //     self
-    // }
-
+    /// Adds a field to the list of fields to fetch in the current query.
+    ///
+    /// # Arguments
+    ///
+    /// * `field` - A reference to a field to be fetched in the query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use my_cool_library::QueryBuilder;
+    ///
+    /// let query = QueryBuilder::new()
+    ///     .fetch("id")
+    ///     .fetch("name")
+    ///     .from("users")
+    ///     .build();
+    /// ```
+    ///
+    /// # Output
+    ///
+    /// The `fetch` method returns a mutable reference to the QueryBuilder instance it was called on,
+    /// allowing further method chaining.
+    ///
+    /// ```
+    /// use my_cool_library::QueryBuilder;
+    ///
+    /// let query = QueryBuilder::new()
+    ///     .fetch("id")
+    ///     .fetch("name")
+    ///     .from("users")
+    ///     .build();
+    ///
+    /// assert_eq!(query, "SELECT id, name FROM users");
+    /// ```
     pub fn fetch<'field, T>(&mut self, field: T) -> &mut Self
     where
         T: Into<Cow<'field, DbField>>,
@@ -259,6 +588,42 @@ impl<'a> QueryBuilder<'a> {
         self
     }
 
+    /// Adds multiple fields to the list of fields to fetch in the current query.
+    ///
+    /// # Arguments
+    ///
+    /// * `fields` - A slice of references to fields to be fetched in the query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use my_cool_library::QueryBuilder;
+    ///
+    /// let fields = ["id", "name"];
+    ///
+    /// let query = QueryBuilder::new()
+    ///     .fetch_many(&fields)
+    ///     .from("users")
+    ///     .build();
+    /// ```
+    ///
+    /// # Output
+    ///
+    /// The `fetch_many` method returns a mutable reference to the QueryBuilder instance it was called on,
+    /// allowing further method chaining.
+    ///
+    /// ```
+    /// use my_cool_library::QueryBuilder;
+    ///
+    /// let fields = ["id", "name"];
+    ///
+    /// let query = QueryBuilder::new()
+    ///     .fetch_many(&fields)
+    ///     .from("users")
+    ///     .build();
+    ///
+    /// assert_eq!(query, "SELECT id, name FROM users");
+    /// ```
     pub fn fetch_many<'field, T>(&mut self, fields: &[T]) -> &mut Self
     where
         T: Into<Cow<'field, DbField>> + Clone + Display,
@@ -272,11 +637,49 @@ impl<'a> QueryBuilder<'a> {
         );
         self
     }
+
+    /// Sets the timeout duration for the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `duration` - a string slice that specifies the timeout duration. It can be expressed in any format that the database driver supports.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use my_db_client::{Query, QueryBuilder};
+    ///
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.timeout("5s");
+    /// ```
+    ///
+    /// ---
+    ///
+    /// Indicates that the query should be executed in parallel.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use my_db_client::{Query, QueryBuilder};
+    ///
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.parallel();
+    /// ```
     pub fn timeout(&mut self, duration: &'a str) -> &mut Self {
         self.timeout = Some(duration);
         self
     }
 
+    /// Indicates that the query should be executed in parallel.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use my_db_client::{Query, QueryBuilder};
+    ///
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.parallel();
+    /// ```
     pub fn parallel(&mut self) -> &mut Self {
         self.parallel = true;
         self
