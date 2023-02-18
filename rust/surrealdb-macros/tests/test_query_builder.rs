@@ -152,6 +152,7 @@ impl WhiteSpaceRemoval for String {}
 mod tests {
     use super::*;
     use surrealdb_macros::db_field::{cond, empty};
+    use surrealdb_macros::query_insert::InsertQuery;
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_select::{order, Order};
     use surrealdb_macros::{cond, query_select, DbFilter};
@@ -416,7 +417,23 @@ mod tests {
         assert_eq!(
             x.to_string(),
             "->writes->book[WHERE id = book:blaze].title".to_string()
-        )
+        );
+
+        let query = InsertQuery::new("company")
+            .fields(&["name", "founded", "founders", "tags"])
+            .values(&[
+                &[
+                    "SurrealDB",
+                    "2021-09-10",
+                    "[person:tobie, person:jaime]",
+                    "['big data', 'database']",
+                ],
+                &["Acme Inc.", "1967-05-03", "null", "null"],
+                &["Apple Inc.", "1976-04-01", "null", "null"],
+            ])
+            .on_duplicate_key_update(&[("tags", "tags += 'new tag'")])
+            .build();
+        println!("{}", query);
     }
 
     #[test]
