@@ -110,26 +110,170 @@ impl std::fmt::Display for DbField {
     }
 }
 
-/* impl std::fmt::Debug for DbField {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.0))
-    }
-} */
-
+/// This module provides functionality for building complex filters for database queries.
+///
+/// A `DbFilter` struct represents a filter that can be composed of subfilters using logical
+/// operators like `AND` and `OR`. Filters can be created using the `empty` function or by
+/// converting a string using `DbFilter::new`.
+///
+/// The `cond` function is used to create a new filter from a given `filterable` input, which
+/// can be of type `DbFilter`.
+///
+/// Methods on a `DbFilter` instance are used to combine filters with logical operators or to
+/// modify the filter using methods like `bracketed`.
+///
+/// # Examples
+///
+/// ```
+/// use crate::query::filter::{DbFilter, cond};
+///
+/// let filter1 = DbFilter::new("name = 'John'".to_string());
+/// let filter2 = DbFilter::new("age > 18".to_string());
+///
+/// // Combine two filters using the 'AND' operator
+/// let combined_filter = filter1.and(filter2);
+///
+/// assert_eq!(combined_filter.to_string(), "(name = 'John') AND (age > 18)");
+///
+/// // Create a filter from a string
+/// let filter3 = DbFilter::new("name like '%Doe%'".to_string());
+///
+/// // Combine multiple filters using the 'OR' operator
+/// let all_filters = cond(filter1).or(filter2).or(filter3);
+///
+/// assert_eq!(all_filters.to_string(), "(name = 'John') OR (age > 18) OR (name like '%Doe%')");
+/// ```
 #[derive(Debug, Clone)]
 pub struct DbFilter {
     query_string: String,
 }
 
+/// Creates a new filter from a given `filterable` input.
+///
+/// # Arguments
+///
+/// * `filterable` - A value that can be converted into a `DbFilter`.
+///
+/// # Example
+///
+/// ```
+/// use crate::query::filter::{DbFilter, cond};
+///
+/// let filter = DbFilter::new("name = 'John'".to_string());
+///
+/// let combined_filter = cond(filter).and("age > 18");
+///
+/// assert_eq!(combined_filter.to_string(), "(name = 'John') AND (age > 18)");
+/// ```
 pub fn cond(filterable: impl Into<DbFilter>) -> DbFilter {
     filterable.into()
 }
-// pub fn filter(field: DbField) -> DbFilter {
-//     field.into()
-// }
 
+/// Creates an empty filter.
+///
+/// # Example
+///
+/// ```
+/// use crate::query::filter::DbFilter;
+///
+/// let empty_filter = DbFilter::empty();
+///
+/// assert_eq!(empty_filter.to_string(), "");
+///
 pub fn empty() -> DbFilter {
     DbFilter::new("".into())
+}
+
+impl DbFilter {
+    /// Creates a new `DbFilter` instance.
+    ///
+    /// # Arguments
+    ///
+    /// * `query_string` - The query string used to initialize the filter.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use crate::query::filter::DbFilter;
+    ///
+    /// let filter = DbFilter::new("name = 'John'".to_string());
+    ///
+    /// assert_eq!(filter.to_string(), "name = 'John'");
+    /// ```
+    pub fn new(query_string: String) -> Self {
+        Self { query_string }
+    }
+
+    /// Combines the current filter with another filter using a logical OR operator.
+    ///
+    /// # Arguments
+    ///
+    /// * `filter` - The filter to be combined with the current filter.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use crate::query::filter::{DbFilter, cond};
+    ///
+    /// let filter = cond(DbFilter::new("name = 'John'".to_string())).or(
+    ///     cond(DbFilter::new("age > 30".to_string()))
+    /// );
+    ///
+    /// assert_eq!(filter.to_string(), "(name = 'John') OR (age > 30)");
+    /// ```
+    pub fn or(&self, filter: impl Into<Self>) -> Self {
+        let precendence = self._______bracket_if_not_already();
+        let filter: Self = filter.into();
+        DbFilter::new(format!("{precendence} OR ({filter})"))
+    }
+
+    /// Combines this `DbFilter` instance with another using the `AND` operator.
+    ///
+    /// # Arguments
+    ///
+    /// * `filter` - The `DbFilter` instance to combine with this one.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use crate::query::filter::{DbFilter, cond};
+    ///
+    /// let filter1 = cond(DbFilter::new("name = 'John'"));
+    /// let filter2 = cond(DbFilter::new("age > 30"));
+    /// let combined = filter1.and(filter2);
+    ///
+    /// assert_eq!(combined.to_string(), "(name = 'John') AND (age > 30)");
+    /// ```
+    pub fn and(&self, filter: impl Into<Self>) -> Self {
+        let precendence = self._______bracket_if_not_already();
+        let filter: Self = filter.into();
+        DbFilter::new(format!("{precendence} AND ({filter})"))
+    }
+
+    /// Wraps this `DbFilter` instance in a set of brackets.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use crate::query::filter::{DbFilter, cond};
+    ///
+    /// let filter = cond(DbFilter::new("name = 'John'")).or(cond(DbFilter::new("age > 30")));
+    /// let wrapped = filter.bracketed();
+    ///
+    /// assert_eq!(wrapped.to_string(), "((name = 'John') OR (age > 30))");
+    /// ```
+    pub fn bracketed(&self) -> Self {
+        DbFilter::new(format!("({self})"))
+    }
+
+    /// Wraps this `DbFilter` instance in a set of brackets if it isn't already wrapped.
+    fn _______bracket_if_not_already(&self) -> impl Display {
+        let filter = self.to_string();
+        match (filter.starts_with('('), filter.ends_with(')')) {
+            (true, true) => format!("{self}"),
+            _ => format!("({self})"),
+        }
+    }
 }
 
 impl<'a> From<Cow<'a, DbFilter>> for DbFilter {
@@ -140,11 +284,7 @@ impl<'a> From<Cow<'a, DbFilter>> for DbFilter {
         }
     }
 }
-// impl From<Vec<String>> for DbQuery {
-//     fn from(value: Vec<String>) -> Self {
-//         Self::new(value.join(" "))
-//     }
-// }
+
 impl From<Option<DbFilter>> for DbFilter {
     fn from(value: Option<DbFilter>) -> Self {
         match value {
@@ -159,55 +299,12 @@ impl From<String> for DbFilter {
         Self::new(value)
     }
 }
-// impl Into<Vec<DbQuery>> for Vec<String> {
-//     fn from(value: Vec<String>) -> Self {
-//         todo!()
-//     }
-// }
 
 impl std::fmt::Display for DbFilter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.query_string))
     }
 }
-impl DbFilter {
-    pub fn new(query_string: String) -> Self {
-        Self { query_string }
-    }
-
-    pub fn get_query_string(&self) -> &str {
-        &self.query_string
-    }
-
-    pub fn or(&self, filter: impl Into<Self>) -> Self {
-        let precendence = self._______bracket_if_not_already();
-        let filter: Self = filter.into();
-        DbFilter::new(format!("{precendence} OR ({filter})"))
-    }
-
-    fn _______bracket_if_not_already(&self) -> impl Display {
-        let filter = self.to_string();
-        match (filter.starts_with('('), filter.ends_with(')')) {
-            (true, true) => format!("{self}"),
-            _ => format!("({self})"),
-        }
-    }
-
-    pub fn and(&self, filter: impl Into<Self>) -> Self {
-        let precendence = self._______bracket_if_not_already();
-        let filter: Self = filter.into();
-        DbFilter::new(format!("{precendence} AND ({filter})"))
-    }
-
-    pub fn bracketed(&self) -> Self {
-        DbFilter::new(format!("({self})"))
-    }
-
-    pub fn chain(&self, field: DbField) -> DbField {
-        DbField::from(field)
-    }
-}
-
 impl DbField {
     pub fn new(field_name: impl Display) -> Self {
         Self(field_name.to_string())
@@ -1172,25 +1269,6 @@ impl DbField {
         Self::new(format!("{} *= {{{}}}", self.0, joined_values))
     }
 
-    pub fn or_filter(&self, filter: impl Into<DbFilter>) -> DbFilter {
-        let precendence = self._______bracket_if_not_already();
-        let filter: DbFilter = filter.into();
-        DbFilter::new(format!("{precendence} OR ({filter})"))
-    }
-
-    fn _______bracket_if_not_already(&self) -> impl Display {
-        let filter = self.to_string();
-        match (filter.starts_with('('), filter.ends_with(')')) {
-            (true, true) => format!("{self}"),
-            _ => format!("({self})"),
-        }
-    }
-
-    pub fn and_filter(&self, filter: impl Into<DbFilter>) -> DbFilter {
-        let precendence = self._______bracket_if_not_already();
-        let filter: DbFilter = filter.into();
-        DbFilter::new(format!("{precendence} AND ({filter})"))
-    }
     /// Combine this field with another using the "AND" operator.
     ///
     /// # Arguments

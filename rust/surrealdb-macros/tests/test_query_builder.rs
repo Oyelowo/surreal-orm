@@ -194,15 +194,16 @@ mod tests {
         fn where___(xx: impl Into<DbFilter>) {}
         where___(firstName);
         where___(
-            age.less_than_or_equal(18)
-                .greater_than_or_equal(age)
-                .add(age)
-                .subtract(18)
-                .divide(firstName)
-                .multiply(lastName)
-                .greater_than_or_equal(course)
-                .and_filter(firstName.like("Oyelowoh"))
-                .or(lastName.greater_than_or_equal(4)),
+            cond(
+                age.less_than_or_equal(18)
+                    .greater_than_or_equal(age)
+                    .add(age)
+                    .subtract(18)
+                    .divide(firstName)
+                    .multiply(lastName)
+                    .greater_than_or_equal(course),
+            )
+            .or(lastName.greater_than_or_equal(4)),
         );
 
         where___(firstName.like("oyelowo"));
