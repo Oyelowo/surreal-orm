@@ -8,7 +8,7 @@ use std::{
     fmt::{format, Display},
 };
 
-use crate::query_builder::QueryBuilder;
+use crate::query_select::QueryBuilder;
 
 /// Represents a field in the database. This type wraps a `String` and
 /// provides a convenient way to refer to a database fields.

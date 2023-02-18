@@ -153,8 +153,8 @@ mod tests {
     use super::*;
     use surrealdb_macros::db_field::{cond, empty};
     // use surrealdb_macros::prelude::*;
-    use surrealdb_macros::query_builder::{order, Order};
-    use surrealdb_macros::{cond, query_builder, DbFilter};
+    use surrealdb_macros::query_select::{order, Order};
+    use surrealdb_macros::{cond, query_select, DbFilter};
     use surrealdb_macros::{q, DbField};
     use test_case::test_case;
 
@@ -186,7 +186,7 @@ mod tests {
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
         let book::Book { content, .. } = Book::schema();
 
-        let mut queryb = query_builder::QueryBuilder::new();
+        let mut queryb = query_select::QueryBuilder::new();
 
         mana(bk.content.contains("Lowo"));
         mana(None);
@@ -329,7 +329,7 @@ mod tests {
 
         println!("XXXXXXXX {query1}");
 
-        let mut queryb = query_builder::QueryBuilder::new();
+        let mut queryb = query_select::QueryBuilder::new();
         let ref mut query = queryb
             .select_all()
             .select(age)
