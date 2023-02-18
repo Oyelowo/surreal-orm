@@ -1,0 +1,132 @@
+
+
+// impl<'a> Display for Select<'a> {
+//     fn fmt(&self, f: &mut Formatter) -> FmtResult {
+//         write!(f, "SELECT ")?;
+//         write!(f, "{} ", self.projections.join(", "))?;
+//         write!(f, "FROM ")?;
+//         write!(f, "{} ", self.targets.join(", "))?;
+//         if let Some(condition) = self.condition {
+//             write!(f, "WHERE {} ", condition)?;
+//         }
+//         if let Some(split_fields) = &self.split {
+//             write!(f, "SPLIT")?;
+//             if !split_fields.is_empty() {
+//                 write!(f, " AT {}", split_fields.join(", "))?;
+//             }
+//             write!(f, " ")?;
+//         }
+//         if let Some(group_by_fields) = &self.group_by {
+//             write!(f, "GROUP BY {} ", group_by_fields.join(", "))?;
+//         }
+
+
+//         fn build_select_query(projections: &[&str], targets: &[&str], condition: Option<&str>, split_fields: Option<&[&str]>, group_fields: Option<&[&str]>, order_fields: Option<&[&str]>, order_directions: Option<&[&str]>, limit: Option<i32>, start: Option<i32>, fetch_fields: Option<&[&str]>, timeout: Option<i32>, parallel: bool) -> String {
+// let mut query = String::new();
+// query.push_str("SELECT ");
+// query.push_str(&projections.join(", "));
+// query.push_str(" FROM ");
+// query.push_str(&targets.join(", "));
+///
+///
+///
+///
+///
+///
+///
+
+// if let Some(cond) = condition {
+//     query.push_str(" WHERE ");
+//     query.push_str(cond);
+// }
+//
+// if let Some(split) = split_fields {
+//     query.push_str(" SPLIT ");
+//     query.push_str(&split.join(", "));
+// }
+//
+// if let Some(group) = group_fields {
+//     query.push_str(" GROUP BY ");
+//     query.push_str(&group.join(", "));
+// }
+//
+// if let Some(order) = order_fields {
+//     query.push_str(" ORDER BY ");
+//     query.push_str(&order.join(", "));
+//
+//     if let Some(directions) = order_directions {
+//         query.push(' ');
+//
+//         for (i, direction) in directions.iter().enumerate() {
+//             if i > 0 {
+//                 query.push_str(", ");
+//             }
+//             query.push_str(direction);
+//         }
+//     }
+// }
+//
+// if let Some(limit_value) = limit {
+//     query.push_str(" LIMIT ");
+//     query.push_str(&limit_value.to_string());
+// }
+//
+// if let Some(start_value) = start {
+//     query.push_str(" START AT ");
+//     query.push_str(&start_value.to_string());
+// }
+//
+// if let Some(fetch) = fetch_fields {
+//     query.push_str(" FETCH ");
+//     query.push_str(&fetch.join(", "));
+// }
+//
+// if let Some(timeout_value) = timeout {
+//     query.push_str(" TIMEOUT ");
+//     query.push_str(&timeout_value.to_string());
+// }
+//
+// if parallel {
+//     query.push_str(" PARALLEL");
+// }
+//
+// query.push(';');
+//
+// query
+//
+//
+// }
+//
+// // test the function
+// fn main() {
+// let projections = vec!["age", "name", "email"];
+// let targets = vec!["user"];
+// let condition = None;
+// let split_fields = None;
+// let group_fields = None;
+// let order_fields = None;
+// let order_directions = None;
+// let limit = None;
+// let start = None;
+// let fetch_fields = None;
+// let timeout = None;
+// let parallel = false;
+//
+//
+//
+// let query = build_select_query(
+//     &projections,
+//     &targets,
+//     condition,
+//     split_fields,
+//     group_fields,
+//     order_fields,
+//     order_directions,
+//     limit,
+//     start,
+//     fetch_fields,
+//     timeout,
+//     parallel,
+// );
+//
+// println!("{}", query);// Output: SELECT age, name, email FROM user;

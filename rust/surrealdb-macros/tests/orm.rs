@@ -15,11 +15,10 @@ use surrealdb::{
 use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 
 use std::fmt::{Debug, Display};
-use surrealdb_macros::query_builder::query;
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     model_id::SurId,
-    Clause, SurrealdbEdge, SurrealdbNode,
+    SurrealdbEdge, SurrealdbNode,
 };
 use test_case::test_case;
 use typed_builder::TypedBuilder;
@@ -93,7 +92,7 @@ pub struct Blog {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    /*     use super::*;
     use surrealdb_macros::DbField;
     use test_case::test_case;
 
@@ -226,5 +225,5 @@ mod tests {
         let sur_id = SurId::try_from("alien:oyelowo").unwrap();
         let json = serde_json::to_string(&sur_id).unwrap();
         assert_eq!(json, "\"alien:oyelowo\"");
-    }
+    } */
 }

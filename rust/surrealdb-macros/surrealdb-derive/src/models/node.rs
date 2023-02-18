@@ -32,7 +32,7 @@ impl ToTokens for FieldsGetterOpts {
         } = *self;
 
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
-        let table_name_str = errors::validate_table_name(struct_name_ident, table_name, relax_table_name);
+        let table_name_str = errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
     
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
@@ -101,6 +101,10 @@ impl ToTokens for FieldsGetterOpts {
                     #module_name::#struct_name_ident::new()
                 }
                 
+                fn get_table_name() -> &'static str {
+                    #table_name_str
+                }
+                
                 fn get_key(&self) -> ::std::option::Option<&#crate_name::SurId>{
                     self.id.as_ref()
                 }
@@ -157,9 +161,11 @@ impl ToTokens for FieldsGetterOpts {
                         #schema_instance
                     }
 
-                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, clause: #crate_name::Clause) -> Self {
-                        let mut #schema_instance = Self::empty();
-                        let connection = format!("{}{}{}", store, #table_name_str, #crate_name::format_clause(clause, #table_name_str));
+                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, filter: impl Into<#crate_name::DbFilter>) -> Self {
+                        let mut #schema_instance = Self::empty(); 
+                        let filter: #crate_name::DbFilter = filter.into();
+                        
+                        let connection = format!("{}{}{}", store, #table_name_str, #crate_name::format_filter(filter));
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
@@ -170,8 +176,11 @@ impl ToTokens for FieldsGetterOpts {
                     
                     #( #record_link_fields_methods) *
 
-                    pub fn __as__(&self, alias: impl ::std::fmt::Display) -> ::std::string::String {
-                        format!("{} AS {}", self, alias)
+                    pub fn __as__<'a, T>(&self, alias: T) -> ::std::string::String
+                        where T: Into<::std::borrow::Cow<'a, #crate_name::DbField>>
+                    {
+                        let alias: &#crate_name::DbField = &alias.into();
+                        format!("{} AS {}", self, alias.to_string())
                     }
                     
                 }

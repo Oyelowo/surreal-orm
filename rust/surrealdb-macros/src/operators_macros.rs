@@ -1,139 +1,141 @@
+use crate::db_field::DbFilter;
+
 // Define the macro in a separate module
 #[macro_export]
-macro_rules! op {
-    ("=") => {
+macro_rules! q {
+    (=) => {
         "="
     };
-    ("!=") => {
+    (!=) => {
         "!="
     };
-    ("==") => {
+    (==) => {
         "=="
     };
-    ("?=") => {
+    (?=) => {
         "?="
     };
-    ("*=") => {
+    (*=) => {
         "*="
     };
-    ("~") => {
+    (~) => {
         "~"
     };
-    ("!~") => {
+    (!~) => {
         "!~"
     };
-    ("?~") => {
+    (?~) => {
         "?~"
     };
-    ("*~") => {
+    (*~) => {
         "*~"
     };
-    ("<") => {
+    (<) => {
         "<"
     };
-    ("<=") => {
+    (<=) => {
         "<="
     };
-    (">") => {
+    (>) => {
         ">"
     };
-    (">=") => {
+    (>=) => {
         ">="
     };
-    ("+") => {
+    (+) => {
         "+"
     };
-    ("-") => {
+    (-) => {
         "-"
     };
-    ("*") => {
+    (*) => {
         "*"
     };
-    ("/") => {
+    (/) => {
         "/"
     };
-    ("&&") => {
+    (&&) => {
         "&&"
     };
-    ("||") => {
+    (||) => {
         "||"
     };
-    ("AND") => {
+    (AND) => {
         "AND"
     };
-    ("OR") => {
+    (OR) => {
         "OR"
     };
-    ("IS") => {
+    (IS) => {
         "IS"
     };
-    ("IS NOT") => {
+    (IS NOT) => {
         "IS NOT"
     };
-    ("CONTAINS") => {
+    (CONTAINS) => {
         "CONTAINS"
     };
     ("∋") => {
         "∋"
     };
-    ("CONTAINSNOT") => {
+    (CONTAINSNOT) => {
         "CONTAINSNOT"
     };
     ("∌") => {
         "∌"
     };
-    ("CONTAINSALL") => {
+    (CONTAINSALL) => {
         "CONTAINSALL"
     };
     ("⊇") => {
         "⊇"
     };
-    ("CONTAINSANY") => {
+    (CONTAINSANY) => {
         "CONTAINSANY"
     };
     ("⊃") => {
         "⊃"
     };
-    ("CONTAINSNONE") => {
+    (CONTAINSNONE) => {
         "CONTAINSNONE"
     };
     ("⊅") => {
         "⊅"
     };
-    ("INSIDE") => {
+    (INSIDE) => {
         "INSIDE"
     };
     ("∈") => {
         "∈"
     };
-    ("NOTINSIDE") => {
+    (NOTINSIDE) => {
         "NOTINSIDE"
     };
     ("∉") => {
         "∉"
     };
-    ("ALLINSIDE") => {
+    (ALLINSIDE) => {
         "ALLINSIDE"
     };
     ("⊆") => {
         "⊆"
     };
-    ("ANYINSIDE") => {
+    (ANYINSIDE) => {
         "ANYINSIDE"
     };
     ("⊂") => {
         "⊂"
     };
-    ("NONEINSIDE") => {
+    (NONEINSIDE) => {
         "NONEINSIDE"
     };
     ("⊄") => {
         "⊄"
     };
-    ("OUTSIDE") => {
+    (OUTSIDE) => {
         "OUTSIDE"
     };
-    ("INTERSECTS") => {
+    (INTERSECTS) => {
         "INTERSECTS"
     };
     ($other: expr) => {
@@ -142,17 +144,18 @@ macro_rules! op {
 }
 
 #[macro_export]
-macro_rules! where_ {
+macro_rules! cond {
     ($($expr:expr)*) => {
         {
             let mut v = Vec::new();
             $(
                 v.push($expr.to_string());
             )*
-            v
+            v.join(" ")
         }
     };
 }
+
 // macro_rules! wher_ {
 //     ($left: expr op!($op: tt) $right: expr) => {
 //         [$left.to_string().as_str(), stringify!($op), $right]

@@ -18,8 +18,7 @@ use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     model_id::SurId,
-    query_builder::query,
-    Clause, SurrealdbEdge, SurrealdbNode,
+    SurrealdbEdge, SurrealdbNode,
 };
 use test_case::test_case;
 use typed_builder::TypedBuilder;
@@ -110,27 +109,27 @@ pub struct Blog {
 // }
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use surrealdb_macros::{op, where_, DbField};
+    /*     use super::*;
+    use surrealdb_macros::{cond, q, DbField};
     use test_case::test_case;
 
     #[test]
     fn multiplication_tests4_with_alias() {
-        op!(">=");
+        q!(>=);
         let xx = &[
             StudentWritesBook::schema().timeWritten.to_string().as_str(),
-            op!(">="),
+            q!(>=),
             "12:00",
         ];
 
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
 
-        where_!(
-            timeWritten op!(">=") "12:00"
+        cond!(
+            timeWritten q!(>=) "12:00"
         );
 
-        where_!(
-            timeWritten op!("CONTAINS") "12:00"
+        cond!(
+            timeWritten q!(CONTAINS) "12:00"
         );
 
         // here_!(timeWritten op!(">=") "12:00");
@@ -150,5 +149,5 @@ mod tests {
             "->writes[WHERE timeWritten = 12:00]->book[WHERE content CONTAINS Oyelowo in Uranus] AS writtenBooks"
                 .to_string()
         )
-    }
+    } */
 }

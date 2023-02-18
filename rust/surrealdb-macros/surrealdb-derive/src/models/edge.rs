@@ -52,7 +52,7 @@ impl ToTokens for FieldsGetterOpts {
 
         let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
-        let table_name_str = errors::validate_table_name(struct_name_ident, table_name, relax_table_name);
+        let table_name_str = errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
         
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
@@ -115,6 +115,10 @@ impl ToTokens for FieldsGetterOpts {
                         #module_name::#struct_name_ident::new()
                     }
                     
+                    fn get_table_name() -> &'static str {
+                        #table_name_str
+                    }
+                    
                     fn get_key(&self) -> ::std::option::Option<&#crate_name::SurId>{
                         self.id.as_ref()
                     }
@@ -153,16 +157,17 @@ impl ToTokens for FieldsGetterOpts {
                         
                         pub fn #__________connect_to_graph_traversal_string(
                             store: &::std::string::String,
-                            clause: #crate_name::Clause,
+                            filter: impl Into<#crate_name::DbFilter>,
                             arrow_direction: &str,
                         ) -> Self {
                             let mut schema_instance = Self::empty();
+                            let filter: #crate_name::DbFilter = filter.into();
                             let schema_edge_str_with_arrow = format!(
                                 "{}{}{}{}{}",
                                 store.as_str(),
                                 arrow_direction,
                                 #table_name_str,
-                                #crate_name::format_clause(clause, #table_name_str),
+                                #crate_name::format_filter(filter),
                                 arrow_direction,
                             );
                             
