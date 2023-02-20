@@ -234,7 +234,7 @@ async fn test_it() -> surrealdb::Result<()> {
     let mut response = db.query("SELECT * FROM company");
     let mut response = response.await?;
     // print all users:
-    let users: Vec<Value> = response.take(0)?;
+    let users: Vec<Company> = response.take(0)?;
     println!("user: {users:?}");
     // print the created user:
     // let user: Option<User> = results.take(0).unwrap();
@@ -295,6 +295,6 @@ async fn main() -> surrealdb::Result<()> {
     println!("==========================================");
     // println!("==========================================");
 
-    // test_it().await.unwrap();
+    test_it().await.unwrap();
     Ok(())
 }

@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
 use serde::Serialize;
+use serde_json::{json, Value};
+use surrealdb::sql;
 
 pub struct InsertStatement<T: Serialize> {
     table: String,
@@ -25,7 +27,7 @@ impl<T: Serialize> InsertStatement<T> {
         self
     }
 
-    pub fn build(&self) -> Result<(String, Vec<(String, String)>), String> {
+    pub fn build(&self) -> Result<(String, Vec<(String, sql::Value)>), String> {
         if self.values.is_empty() {
             return Err(String::from("No values to insert"));
         }
@@ -103,17 +105,33 @@ where
         .collect()
 }
 
-fn get_field_value<T>(value: &T, field_name: &str) -> Result<String, String>
+fn get_field_value<T>(value: &T, field_name: &str) -> Result<surrealdb::sql::Value, String>
 where
     T: serde::Serialize,
 {
-    serde_json::to_value(value)
+    let mut bindings = from_json(json!(value));
+    // bindings.
+    let xx = serde_json::to_value(value)
         .unwrap()
         .as_object()
         .unwrap()
         .get(field_name)
-        .map(|field_value| serde_json::to_string(field_value).unwrap())
-        .ok_or(format!("Field '{}' not found in struct", field_name))
+        // .map(|field_value| serde_json::to_string(field_value).unwrap())
+        .map(|field_value| from_json(json!(field_value)))
+        .ok_or(format!("Field '{}' not found in struct", field_name));
+
+    // let m = json!(xx);
+
+    // from_json(m)
+    xx
+}
+
+pub(crate) fn from_json(json: Value) -> surrealdb::sql::Value {
+    match surrealdb::sql::json(&json.to_string()) {
+        Ok(value) => value,
+        // It shouldn't get to this as `JsonValue` will always produce valid JSON
+        Err(_) => unreachable!(),
+    }
 }
 
 #[derive(Debug)]
