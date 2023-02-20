@@ -63,8 +63,9 @@ impl<T: Serialize> InsertStatement<T> {
             for field_name in &field_names {
                 let field_value = get_field_value(value, field_name)?;
                 let variable_name = format!("{}_{}", field_name, i);
-                variables.push((variable_name, field_value));
-                row_values.push(format!("${}", variables.len()));
+                variables.push((variable_name.clone(), field_value));
+                // row_values.push(format!("${}", variables.len()));
+                row_values.push(format!("${}", variable_name));
             }
             if i > 0 {
                 values.push_str(", ");
