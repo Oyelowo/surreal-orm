@@ -112,7 +112,7 @@ where
         .as_object()
         .unwrap()
         .get(field_name)
-        .map(|field_value| field_value.to_string())
+        .map(|field_value| serde_json::to_string(field_value).unwrap())
         .ok_or(format!("Field '{}' not found in struct", field_name))
 }
 

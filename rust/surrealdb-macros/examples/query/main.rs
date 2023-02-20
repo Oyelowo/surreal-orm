@@ -142,6 +142,7 @@ struct Person {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Company {
+    // id: String,
     name: String,
     founded: Datetime,
     founders: Vec<Person>,
@@ -152,6 +153,7 @@ async fn test_it() -> surrealdb::Result<()> {
     // async fn test_it() {
     let companies = vec![
         Company {
+            // id: "company:1".into(),
             name: "Acme Inc.".to_string(),
             // founded: "1967-05-03".to_string(),
             founded: Datetime::default(),
@@ -166,6 +168,7 @@ async fn test_it() -> surrealdb::Result<()> {
             tags: vec!["foo".to_string(), "bar".to_string()],
         },
         Company {
+            // id: "company:2".into(),
             name: "Apple Inc.".to_string(),
             // founded: "1967-05-03".to_string(),
             founded: Datetime::default(),
@@ -181,6 +184,7 @@ async fn test_it() -> surrealdb::Result<()> {
         },
     ];
     let xx = Company {
+        // id: "company:1".into(),
         name: "Acme Inc.".to_string(),
         // founded: "1967-05-03".to_string(),
         founded: Datetime::default(),
@@ -196,9 +200,13 @@ async fn test_it() -> surrealdb::Result<()> {
     };
 
     let mm = query_insert::InsertStatement::new("company".into())
+        // .insert(xx)
         .insert_all(companies)
         .build()
         .unwrap();
+
+    println!("ERERERErere  mm1 = {:?}", mm.0);
+    println!("ERERERErere  mm2 = {:?}", mm.1);
 
     let db = Surreal::new::<Mem>(()).await.unwrap();
 
@@ -217,66 +225,76 @@ async fn test_it() -> surrealdb::Result<()> {
     // }
     //
     let mut results = results.await.unwrap();
+    println!("==========================================");
+    println!("==========================================");
+    // println!("userQueryyy result: {:?}", results);
+    println!("==========================================");
+    println!("==========================================");
 
+    let mut response = db.query("SELECT * FROM company");
+    let mut response = response.await?;
+    // print all users:
+    let users: Vec<Value> = response.take(0)?;
+    println!("user: {users:?}");
     // print the created user:
-    let user: Option<User> = results.take(0).unwrap();
-    println!("userQueryyy result: {user:?}");
+    // let user: Option<User> = results.take(0).unwrap();
+    // println!("userQueryyy result: {user:?}");
     // println!("xrearXXXXX ---- = {}", serde_json::to_string(&mm).unwrap());
     Ok(())
 }
 #[tokio::main]
 async fn main() -> surrealdb::Result<()> {
-    // let db = Surreal::new::<File>("localhost:8001").await?;
-    // // let db = Surreal::new::<File>("lowona").await?;
-    // let db = Surreal::new::<Mem>(()).await.unwrap();
-    //
-    // // db.use_ns("namespace").use_db("database").await?;
-    // db.use_ns("test").use_db("test").await?;
-    //
-    // // type::thing($tb, $id)
-    // let sql = "CREATE user SET name = $name, company = $company";
-    // let sql = "CREATE $id SET name = $name, company = $company, founded = $founded";
-    // let sql = "CREATE user CONTENT $1";
-    //
-    // let sql = "INSERT INTO company $company";
-    // // INSERT INTO company   //
-    // // println!("Dfdfe {}", Datetime::default());
-    // // println!("thingthinghting {}", thing("user:owo").unwrap().to_string());
-    //
-    // let user = User {
-    //     // id: thing("user:owo").unwrap().to_string(),
-    //     id: "user:owo".to_string(),
-    //     // id: "john".to_owned(),
-    //     name: "John Doe".to_owned(),
-    //     company: "ACME Corporation".to_owned(),
-    //     founded: Datetime::default(),
-    // };
-    //
+    // let db = Surreal::new::<File>("lowona").await?;
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+
+    // db.use_ns("namespace").use_db("database").await?;
+    db.use_ns("test").use_db("test").await?;
+
+    // type::thing($tb, $id)
+    let sql = "CREATE user SET name = $name, company = $company";
+    let sql = "CREATE $id SET name = $name, company = $company, founded = $founded";
+    let sql = "CREATE user CONTENT $1";
+
+    let sql = "INSERT INTO company $company";
+    // INSERT INTO company   //
+    // println!("Dfdfe {}", Datetime::default());
+    // println!("thingthinghting {}", thing("user:owo").unwrap().to_string());
+
+    let user = User {
+        // id: thing("user:owo").unwrap().to_string(),
+        id: "user:owo".to_string(),
+        // id: "john".to_owned(),
+        name: "John Doe".to_owned(),
+        company: "ACME Corporation".to_owned(),
+        founded: Datetime::default(),
+    };
+
     // let users = vec![user.clone(), user.clone()];
     // let users_str = users
     //     .iter()
     //     .map(|u| serde_json::to_string(&u).unwrap())
     //     .collect::<Vec<_>>();
-    // // println!("ushoud:  {:?}", users_str);
-    // // println!("ushoud:  {:?}", json_to_vec(users_str.unwrap().as_str()));
-    //
-    // let mut results = db.query(sql).bind(("company", user.clone())).await?;
-    //
-    // // print the created user:
-    // let user: Option<User> = results.take(0)?;
-    // println!("userQuery result: {user:?}");
-    //
-    // let mut response = db
-    //     .query("SELECT * FROM user WHERE name ~ $name")
-    //     .bind(("name", "John"));
-    // let mut response = response.await?;
-    // // print all users:
-    // let users: Vec<User> = response.take(0)?;
-    // println!("user: {users:?}");
-    //
-    // println!("==========================================");
+    // println!("ushoud:  {:?}", users_str);
+    // println!("ushoud:  {:?}", json_to_vec(users_str.unwrap().as_str()));
+
+    let mut results = db.query(sql).bind(("company", user.clone())).await?;
+
+    // print the created user:
+    let user: Option<User> = results.take(0)?;
+    println!("userQuery result: {user:?}");
+
+    let mut response = db
+        .query("SELECT * FROM user WHERE name ~ $name")
+        .bind(("name", "John"));
+
+    let mut response = response.await?;
+    // print all users:
+    let users: Vec<User> = response.take(0)?;
+    println!("user: {users:?}");
+
+    println!("==========================================");
     // println!("==========================================");
 
-    test_it().await.unwrap();
+    // test_it().await.unwrap();
     Ok(())
 }
