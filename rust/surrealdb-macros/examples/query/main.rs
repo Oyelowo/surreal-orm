@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use serde::Deserialize;
 use serde::Serialize;
 use surrealdb::engine::local::Mem;
@@ -141,16 +143,18 @@ struct Person {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Company {
     name: String,
-    founded: String,
+    founded: Datetime,
     founders: Vec<Person>,
     tags: Vec<String>,
 }
 
-fn test_it() {
+async fn test_it() -> surrealdb::Result<()> {
+    // async fn test_it() {
     let companies = vec![
         Company {
             name: "Acme Inc.".to_string(),
-            founded: "1967-05-03".to_string(),
+            // founded: "1967-05-03".to_string(),
+            founded: Datetime::default(),
             founders: vec![
                 Person {
                     name: "John Doe".to_string(),
@@ -163,7 +167,8 @@ fn test_it() {
         },
         Company {
             name: "Apple Inc.".to_string(),
-            founded: "1967-05-03".to_string(),
+            // founded: "1967-05-03".to_string(),
+            founded: Datetime::default(),
             founders: vec![
                 Person {
                     name: "John Doe".to_string(),
@@ -177,7 +182,8 @@ fn test_it() {
     ];
     let xx = Company {
         name: "Acme Inc.".to_string(),
-        founded: "1967-05-03".to_string(),
+        // founded: "1967-05-03".to_string(),
+        founded: Datetime::default(),
         founders: vec![
             Person {
                 name: "John Doe".to_string(),
@@ -194,7 +200,28 @@ fn test_it() {
         .build()
         .unwrap();
 
-    println!("xrearXXXXX ---- = {}", serde_json::to_string(&mm).unwrap());
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+
+    // let mut results = db.query(mm.0).bind(("company", user.clone())).await?;
+    // let results = Arc::new(db.query(mm.0));
+    // let results = db.query(mm.0);
+    mm.1.iter().fold(db.query(mm.0), |acc, val| {
+        // res.
+        let results = acc.bind(val);
+        results
+    });
+    // for b in mm.1 {
+    //     let results = results.bind(b);
+    //     // let mut results = db.query(mm.0).bind(("company", user.clone())).await?;
+    // }
+    //
+    // let mut results = results.await.unwrap();
+    //
+    // // print the created user:
+    // let user: Option<User> = results.take(0).unwrap();
+    // println!("userQuery result: {user:?}");
+    // println!("xrearXXXXX ---- = {}", serde_json::to_string(&mm).unwrap());
+    Ok(())
 }
 #[tokio::main]
 async fn main() -> surrealdb::Result<()> {

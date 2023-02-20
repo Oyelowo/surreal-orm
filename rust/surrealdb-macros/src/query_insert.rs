@@ -34,12 +34,12 @@ impl<T: Serialize> InsertStatement<T> {
         let field_names = get_field_names(first_value);
         // let mut placeholders = String::new();
 
-        let mut placeholders = field_names
-            .iter()
-            .enumerate()
-            .map(|(i, name)| format!("${name}_{i}"))
-            .collect::<Vec<_>>()
-            .join(", ");
+        // let mut placeholders = field_names
+        //     .iter()
+        //     .enumerate()
+        //     .map(|(i, name)| format!("${name}_{i}"))
+        //     .collect::<Vec<_>>()
+        //     .join(", ");
         // for i in 1..=field_names.len() {
         //     if i > 1 {
         //         placeholders.push_str(", ");
