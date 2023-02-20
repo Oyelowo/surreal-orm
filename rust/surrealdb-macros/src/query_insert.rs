@@ -1,3 +1,154 @@
+use std::collections::HashMap;
+
+use serde::Serialize;
+
+pub struct InsertStatement<T: Serialize> {
+    table: String,
+    values: Vec<T>,
+}
+
+impl<T: Serialize> InsertStatement<T> {
+    pub fn new(table: String) -> Self {
+        Self {
+            table,
+            values: Vec::new(),
+        }
+    }
+
+    pub fn insert(&mut self, value: T) {
+        self.values.push(value);
+    }
+
+    pub fn insert_all(&mut self, values: Vec<T>) {
+        self.values = values;
+    }
+
+    pub fn build(&self) -> Result<(String, Vec<(String, String)>), String> {
+        if self.values.is_empty() {
+            return Err(String::from("No values to insert"));
+        }
+
+        let first_value = self.values.get(0).unwrap();
+        let field_names = get_field_names(first_value);
+        let mut placeholders = String::new();
+
+        for i in 1..=field_names.len() {
+            if i > 1 {
+                placeholders.push_str(", ");
+            }
+            placeholders.push('$');
+            placeholders.push_str(&i.to_string());
+        }
+
+        let mut query = String::new();
+        query.push_str("INSERT INTO ");
+        query.push_str(&self.table);
+        query.push_str(" (");
+        query.push_str(&field_names.join(", "));
+        query.push_str(") VALUES ");
+
+        let mut variables = Vec::new();
+        let mut values = String::new();
+
+        for (i, value) in self.values.iter().enumerate() {
+            let mut row_values = Vec::new();
+            for field_name in &field_names {
+                let field_value = get_field_value(value, field_name)?;
+                let variable_name = format!("{}_{}", field_name, i);
+                variables.push((variable_name, field_value));
+                row_values.push(format!("${}", variables.len()));
+            }
+            if i > 0 {
+                values.push_str(", ");
+            }
+            values.push_str("(");
+            values.push_str(&row_values.join(", "));
+            values.push_str(")");
+        }
+
+        query.push_str(&values);
+
+        Ok((query, variables))
+    }
+}
+
+// fn get_field_names<T>(value: &T) -> Vec<String>
+// where
+//     T: serde::Serialize,
+// {
+//     let object = serde_json::to_value(value)?
+//         .as_object()
+//         .ok_or("Not an object")?;
+//     object.keys().map(|key| key.to_string()).collect()
+// }
+fn get_field_names<T>(value: &T) -> Vec<String>
+where
+    T: serde::Serialize,
+{
+    serde_json::to_value(value)
+        .unwrap()
+        .as_object()
+        .unwrap()
+        .keys()
+        .map(|key| key.to_string())
+        .collect()
+}
+
+fn get_field_value<T>(value: &T, field_name: &str) -> Result<String, String>
+where
+    T: serde::Serialize,
+{
+    serde_json::to_value(value)
+        .unwrap()
+        .as_object()
+        .unwrap()
+        .get(field_name)
+        .map(|field_value| field_value.to_string())
+        .ok_or(format!("Field '{}' not found in struct", field_name))
+}
+
+#[derive(Debug)]
+struct Person {
+    name: String,
+}
+
+#[derive(Debug)]
+struct Company {
+    name: String,
+    founded: String,
+    founders: Vec<Person>,
+    tags: Vec<String>,
+}
+fn ere() {
+    let companies = vec![
+        Company {
+            name: "Acme Inc.".to_string(),
+            founded: "1967-05-03".to_string(),
+            founders: vec![
+                Person {
+                    name: "John Doe".to_string(),
+                },
+                Person {
+                    name: "Jane Doe".to_string(),
+                },
+            ],
+            tags: vec!["foo".to_string(), "bar".to_string()],
+        },
+        Company {
+            name: "Apple Inc.".to_string(),
+            founded: "1967-05-03".to_string(),
+            founders: vec![
+                Person {
+                    name: "John Doe".to_string(),
+                },
+                Person {
+                    name: "Jane Doe".to_string(),
+                },
+            ],
+            tags: vec!["foo".to_string(), "bar".to_string()],
+        },
+    ];
+}
 // use std::collections::HashMap;
 //
 // struct InsertQuery {

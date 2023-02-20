@@ -163,6 +163,7 @@ async fn main() -> surrealdb::Result<()> {
         company: "ACME Corporation".to_owned(),
         founded: Datetime::default(),
     };
+
     let users = vec![user.clone(), user.clone()];
     let users_str = users
         .iter()
@@ -182,9 +183,8 @@ async fn main() -> surrealdb::Result<()> {
 
     let mut response = db
         .query("SELECT * FROM user WHERE name ~ $name")
-        .bind(("name", "John"))
-        .await?;
-
+        .bind(("name", "John"));
+    let mut response = response.await?;
     // print all users:
     println!("lwowo5");
     let users: Vec<User> = response.take(0)?;
