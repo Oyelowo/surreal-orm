@@ -34,6 +34,7 @@ thiserror = { workspace = true }
 test-case = { workspace = true  }
 regex = "1.7.1"
 insta = "1.28.0"
+chrono.workspace = true
 # [lib]
 # proc-macro = true
 # crate_type = ["proc-macro"]
