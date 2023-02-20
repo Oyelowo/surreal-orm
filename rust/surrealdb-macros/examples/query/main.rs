@@ -17,6 +17,7 @@ struct User {
 
 use serde_json::Result;
 use serde_json::{Map, Value};
+use surrealdb_macros::query_insert;
 fn mana() {
     #[derive(Serialize, Deserialize)]
     struct Country {
@@ -132,28 +133,87 @@ fn json_to_vec(json: &str) -> Vec<(String, Value)> {
         .collect()
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct Person {
+    name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct Company {
+    name: String,
+    founded: String,
+    founders: Vec<Person>,
+    tags: Vec<String>,
+}
+
+fn test_it() {
+    let companies = vec![
+        Company {
+            name: "Acme Inc.".to_string(),
+            founded: "1967-05-03".to_string(),
+            founders: vec![
+                Person {
+                    name: "John Doe".to_string(),
+                },
+                Person {
+                    name: "Jane Doe".to_string(),
+                },
+            ],
+            tags: vec!["foo".to_string(), "bar".to_string()],
+        },
+        Company {
+            name: "Apple Inc.".to_string(),
+            founded: "1967-05-03".to_string(),
+            founders: vec![
+                Person {
+                    name: "John Doe".to_string(),
+                },
+                Person {
+                    name: "Jane Doe".to_string(),
+                },
+            ],
+            tags: vec!["foo".to_string(), "bar".to_string()],
+        },
+    ];
+    let xx = Company {
+        name: "Acme Inc.".to_string(),
+        founded: "1967-05-03".to_string(),
+        founders: vec![
+            Person {
+                name: "John Doe".to_string(),
+            },
+            Person {
+                name: "Jane Doe".to_string(),
+            },
+        ],
+        tags: vec!["foo".to_string(), "bar".to_string()],
+    };
+
+    let mm = query_insert::InsertStatement::new("company".into())
+        .insert_all(companies)
+        .build()
+        .unwrap();
+
+    println!("xrearXXXXX ---- = {}", serde_json::to_string(&mm).unwrap());
+}
 #[tokio::main]
 async fn main() -> surrealdb::Result<()> {
     // let db = Surreal::new::<File>("localhost:8001").await?;
     // let db = Surreal::new::<File>("lowona").await?;
     let db = Surreal::new::<Mem>(()).await.unwrap();
-    println!("lwowo1");
-
-    println!("lwowo2");
 
     // db.use_ns("namespace").use_db("database").await?;
     db.use_ns("test").use_db("test").await?;
 
-    println!("lwowo3");
     // type::thing($tb, $id)
     let sql = "CREATE user SET name = $name, company = $company";
     let sql = "CREATE $id SET name = $name, company = $company, founded = $founded";
-    let sql = "CREATE user CONTENT $company";
+    let sql = "CREATE user CONTENT $1";
 
     let sql = "INSERT INTO company $company";
     // INSERT INTO company   //
-    println!("Dfdfe {}", Datetime::default());
-    println!("thingthinghting {}", thing("user:owo").unwrap().to_string());
+    // println!("Dfdfe {}", Datetime::default());
+    // println!("thingthinghting {}", thing("user:owo").unwrap().to_string());
 
     let user = User {
         // id: thing("user:owo").unwrap().to_string(),
@@ -169,26 +229,26 @@ async fn main() -> surrealdb::Result<()> {
         .iter()
         .map(|u| serde_json::to_string(&u).unwrap())
         .collect::<Vec<_>>();
-    println!("ushoud:  {:?}", users_str);
+    // println!("ushoud:  {:?}", users_str);
     // println!("ushoud:  {:?}", json_to_vec(users_str.unwrap().as_str()));
 
-    let mut results = db.query(sql).bind(("company", user)).await?;
+    let mut results = db.query(sql).bind(("company", user.clone())).await?;
 
-    println!("lwowo4");
     // print the created user:
     let user: Option<User> = results.take(0)?;
-    println!("{user:?}");
-
-    println!("lwowox");
+    println!("userQuery result: {user:?}");
 
     let mut response = db
         .query("SELECT * FROM user WHERE name ~ $name")
         .bind(("name", "John"));
     let mut response = response.await?;
     // print all users:
-    println!("lwowo5");
     let users: Vec<User> = response.take(0)?;
     println!("user: {users:?}");
 
+    println!("==========================================");
+    println!("==========================================");
+
+    test_it();
     Ok(())
 }

@@ -15,12 +15,14 @@ impl<T: Serialize> InsertStatement<T> {
         }
     }
 
-    pub fn insert(&mut self, value: T) {
+    pub fn insert(&mut self, value: T) -> &mut Self {
         self.values.push(value);
+        self
     }
 
-    pub fn insert_all(&mut self, values: Vec<T>) {
+    pub fn insert_all(&mut self, values: Vec<T>) -> &mut Self {
         self.values = values;
+        self
     }
 
     pub fn build(&self) -> Result<(String, Vec<(String, String)>), String> {
@@ -30,15 +32,21 @@ impl<T: Serialize> InsertStatement<T> {
 
         let first_value = self.values.get(0).unwrap();
         let field_names = get_field_names(first_value);
-        let mut placeholders = String::new();
+        // let mut placeholders = String::new();
 
-        for i in 1..=field_names.len() {
-            if i > 1 {
-                placeholders.push_str(", ");
-            }
-            placeholders.push('$');
-            placeholders.push_str(&i.to_string());
-        }
+        let mut placeholders = field_names
+            .iter()
+            .enumerate()
+            .map(|(i, name)| format!("${name}_{i}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        // for i in 1..=field_names.len() {
+        //     if i > 1 {
+        //         placeholders.push_str(", ");
+        //     }
+        //     placeholders.push('$');
+        //     placeholders.push_str(&i.to_string());
+        // }
 
         let mut query = String::new();
         query.push_str("INSERT INTO ");
