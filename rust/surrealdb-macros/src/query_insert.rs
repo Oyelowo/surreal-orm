@@ -4,12 +4,12 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::{json, Value};
 use surrealdb::{engine::local::Db, method::Query, opt::QueryResult, sql, Response, Surreal};
 
-pub struct InsertStatement<T: Serialize> {
+pub struct InsertStatement<T: Serialize + DeserializeOwned> {
     table: String,
     values: Vec<T>,
 }
 
-impl<T: Serialize> InsertStatement<T> {
+impl<T: Serialize + DeserializeOwned> InsertStatement<T> {
     pub fn new(table: String) -> Self {
         Self {
             table,
@@ -83,10 +83,7 @@ impl<T: Serialize> InsertStatement<T> {
         Ok((query, variables))
     }
 
-    pub async fn run<'de, R: DeserializeOwned>(
-        &self,
-        db: Surreal<Db>,
-    ) -> surrealdb::Result<Vec<R>> {
+    pub async fn run(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
         let query_result = self.build().unwrap();
         let results = query_result
             .1
@@ -98,7 +95,7 @@ impl<T: Serialize> InsertStatement<T> {
             });
         let mut results = results.await?;
         // // let user: Vec<Company> = results.take(0)?;
-        let response: Vec<R> = results.take(0)?;
+        let response: Vec<T> = results.take(0)?;
         Ok(response)
         // Ok(user)
     }

@@ -260,13 +260,16 @@ async fn test_it() -> surrealdb::Result<()> {
     let results = query_insert::InsertStatement::new("company".into())
         // .insert(xx)
         .insert_all(companies)
-        .run::<Company>(db)
+        .run(db)
         .await
         .unwrap();
 
     println!("==========================================");
     println!("==========================================");
-    println!("userQueryyy result: {:#?}", results);
+    println!(
+        "userQueryyy result: {}",
+        serde_json::to_string(&results).unwrap()
+    );
     // let mut results = results.await?;
     println!("==========================================");
     println!("==========================================");
