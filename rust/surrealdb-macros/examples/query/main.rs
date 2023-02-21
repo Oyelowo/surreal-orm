@@ -1,12 +1,25 @@
 use std::sync::Arc;
 
+use geo::coord;
+use geo::Coord;
+use geo::GeodesicIntermediate;
+use geo::Line;
+use geo::LineString;
+use geo::Point;
 use serde::Deserialize;
 use serde::Serialize;
+use serde_json::json;
 use surrealdb::engine::local::Mem;
 use surrealdb::opt::auth::Root;
+use surrealdb::sql;
 use surrealdb::sql::thing;
 use surrealdb::sql::Datetime;
+use surrealdb::sql::Geometry;
+use surrealdb::sql::Limit;
+use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
+// use geo
+// use geo::point;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[allow(dead_code)]
@@ -143,20 +156,44 @@ struct Person {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Company {
     // id: String,
+    nam: Uuid,
     name: String,
     founded: Datetime,
     founders: Vec<Person>,
     tags: Vec<String>,
+    // location: Geometry,
+    // home: Geometry,
 }
 
+// {
+//     type: "Point",
+//     coordinates: [-0.118092, 51.509865],
+// }
+//
+//
+//
+// journey
+// UPDATE city:london SET centre = {
+//     type: "Point",
+//     coordinates: [-0.118092, 51.509865],
+// };
+//
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct City {
+    name: String,
+    centre: Geometry,
+}
 async fn test_it() -> surrealdb::Result<()> {
     // async fn test_it() {
+    let a = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1., y: 1. });
+    let b = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1.001, y: 1. });
     let companies = vec![
         Company {
             // id: "company:1".into(),
             name: "Acme Inc.".to_string(),
             // founded: "1967-05-03".to_string(),
             founded: Datetime::default(),
+
             founders: vec![
                 Person {
                     name: "John Doe".to_string(),
@@ -166,6 +203,11 @@ async fn test_it() -> surrealdb::Result<()> {
                 },
             ],
             tags: vec!["foo".to_string(), "bar".to_string()],
+            nam: Uuid::new(), // location: Geometry::Point((45.0, 45.0).into()),
+                              // location: (45.0, 45.0).into(),
+                              // home: Geometry::Line(a.into()),
+                              // home: (45.0, 45.0).into(),
+                              // home: LineString(vec![Coord { x: 34.6, y: 34.6 }]),
         },
         Company {
             // id: "company:2".into(),
@@ -181,8 +223,17 @@ async fn test_it() -> surrealdb::Result<()> {
                 },
             ],
             tags: vec!["foo".to_string(), "bar".to_string()],
+            nam: Uuid::new(),
+            // home: Point::new(25.3, 39.4).into(),
+            // home: Geometry::Line(b.into()),
+            // home: (63.0, 21.0).into(),
+            // location: Geometry::Point((45.0, 45.0).into()),
         },
     ];
+    println!(
+        "OPOOOOO____{}",
+        serde_json::to_value(&companies.clone()).unwrap()
+    );
     let xx = Company {
         // id: "company:1".into(),
         name: "Acme Inc.".to_string(),
@@ -197,100 +248,174 @@ async fn test_it() -> surrealdb::Result<()> {
             },
         ],
         tags: vec!["foo".to_string(), "bar".to_string()],
+        nam: Uuid::new(), // location: (63.0, 21.0).into(),
+                          // home: Geometry::Point((45.0, 45.0).into()),
+                          // home: Geometry::Point(Point::new(20.2, 60.9)),
+                          // home: (63.0, 21.0).into(),
     };
 
-    let mm = query_insert::InsertStatement::new("company".into())
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await?;
+
+    let results = query_insert::InsertStatement::new("company".into())
         // .insert(xx)
         .insert_all(companies)
-        .build()
+        .run::<Company>(db)
+        .await
         .unwrap();
 
-    println!("ERERERErere  mm1 = {:?}", mm.0);
-    println!("ERERERErere  mm2 = {:?}", mm.1);
+    println!("==========================================");
+    println!("==========================================");
+    println!("userQueryyy result: {:#?}", results);
+    // let mut results = results.await?;
+    println!("==========================================");
+    println!("==========================================");
+    // println!("userQueryyyAwaited result: {:#?}", results);
+    println!("==========================================");
+    println!("Value==========================================");
+    // let user: Vec<Company> = results.take(0)?;
+    // let user: Vec<Company> = user;
+    // println!("nama result: {}", serde_json::to_string(&user).unwrap());
+    // println!("xrearXXXXX ---- = {}", serde_json::to_string(&mm).unwrap());
+    // println!("ERERERErere  mm1 = {:#?}", mm.clone().0);
+    // println!("ERERERErere  mm2 = {:#?}", mm.clone().1);
+    // println!(
+    //     "ERERERErere  mm3 = {:}",
+    //     serde_json::to_string(&mm.1).unwrap()
+    // );
 
-    let db = Surreal::new::<Mem>(()).await.unwrap();
-
-    db.use_ns("test").use_db("test").await?;
     // let mut results = db.query(mm.0).bind(("company", user.clone())).await?;
     // let results = Arc::new(db.query(mm.0));
     // let results = db.query(mm.0);
-    let results = mm.1.iter().fold(db.query(mm.0), |acc, val| {
-        // res.
-        let results = acc.bind(val);
-        results
-    });
+    // let results =
+    //     mm.1.clone()
+    //         .iter()
+    //         .fold(db.query(mm.clone().0), |acc, val| {
+    //             // res.
+    //             let results = acc.bind(val);
+    //             results
+    //         });
+    // let mut response = db.query("INSERT INTO mana { name: 'lowo'};");
+    // let mut response = response.await?;
+    // print all users:
+
+    // let mut response = db.query("SELECT * fROM mana;");
+    // let mut response = response.await?;
+
+    // #[derive(Debug, Serialize, Deserialize, Clone)]
+    // struct Mana {
+    //     name: String,
+    // }
+    // let users: Option<Mana> = response.take(0)?;
+    // println!("SAMAAAAAAAAA: {users:?}");
     // for b in mm.1 {
     //     let results = results.bind(b);
     //     // let mut results = db.query(mm.0).bind(("company", user.clone())).await?;
     // }
     //
-    let mut results = results.await.unwrap();
-    println!("==========================================");
-    println!("==========================================");
-    // println!("userQueryyy result: {:?}", results);
-    println!("==========================================");
-    println!("==========================================");
-
-    let mut response = db.query("SELECT * FROM company");
-    let mut response = response.await?;
-    // print all users:
-    let users: Vec<Company> = response.take(0)?;
-    println!("user: {users:?}");
-    // print the created user:
-    // let user: Option<User> = results.take(0).unwrap();
-    // println!("userQueryyy result: {user:?}");
+    //     let mut results = db.query("
+    // INSERT INTO company (name, founded) VALUES ('Acme Inc.', '1967-05-03'), ('Apple Inc.', '1976-04-01');
+    // ");
+    // let mut results = db
+    //     .query(
+    //         "
+    // INSERT INTO company $company;
+    // ",
+    //     )
+    //     .bind(("company", xx));
+    // println!("==========================================");
+    // println!("==========================================");
+    // println!("userQueryyy result: {:#?}", results);
+    // let mut results = results.await?;
+    // println!("==========================================");
+    // println!("==========================================");
+    // println!("userQueryyyAwaited result: {:#?}", results);
+    // println!("==========================================");
+    // println!("Value==========================================");
+    // let user: Vec<Company> = results.take(0)?;
+    // // let user: Vec<Company> = user;
+    // println!("nama result: {}", serde_json::to_string(&user).unwrap());
     // println!("xrearXXXXX ---- = {}", serde_json::to_string(&mm).unwrap());
+
+    // UPDATE city:london SET centre = {
+    //     type: "Point",
+    //     coordinates: [-0.118092, 51.509865],
+    // };
+    // println!("2222==========================================");
+    // let mut response = db.query("CREATE city:london SET name ='lowocity', centre = { type: \"Point\", coordinates: [-0.118092, 51.509865], };");
+    // let mut response = db.query("CREATE city:london CONTENT $city;").bind((
+    //     "city",
+    //     City {
+    //         name: "mars".into(),
+    //         centre: (44.4, 27.1).into(),
+    //     },
+    // ));
+    // println!("cityQueryyy result: {:#?}", response);
+    // let mut response = response.await?;
+    //
+    // // let city: Option<City> = response.take(0)?;
+    // let city: Option<Value> = response.take(0)?;
+    //
+    // println!("City: {}", serde_json::to_string(&city).unwrap());
+    // println!("2222==========================================");
+    // let mut response = db.query("SELECT * FROM company");
+    // let mut response = response.await?;
+    // // print all users:
+    //
+    // let users: Vec<Company> = response.take(0)?;
+    // println!("company: {users:?}");
+    // print the created user:
     Ok(())
 }
 #[tokio::main]
 async fn main() -> surrealdb::Result<()> {
     // let db = Surreal::new::<File>("lowona").await?;
-    let db = Surreal::new::<Mem>(()).await.unwrap();
-
-    // db.use_ns("namespace").use_db("database").await?;
-    db.use_ns("test").use_db("test").await?;
-
-    // type::thing($tb, $id)
-    let sql = "CREATE user SET name = $name, company = $company";
-    let sql = "CREATE $id SET name = $name, company = $company, founded = $founded";
-    let sql = "CREATE user CONTENT $1";
-
-    let sql = "INSERT INTO company $company";
-    // INSERT INTO company   //
-    // println!("Dfdfe {}", Datetime::default());
-    // println!("thingthinghting {}", thing("user:owo").unwrap().to_string());
-
-    let user = User {
-        // id: thing("user:owo").unwrap().to_string(),
-        id: "user:owo".to_string(),
-        // id: "john".to_owned(),
-        name: "John Doe".to_owned(),
-        company: "ACME Corporation".to_owned(),
-        founded: Datetime::default(),
-    };
-
-    // let users = vec![user.clone(), user.clone()];
-    // let users_str = users
-    //     .iter()
-    //     .map(|u| serde_json::to_string(&u).unwrap())
-    //     .collect::<Vec<_>>();
-    // println!("ushoud:  {:?}", users_str);
-    // println!("ushoud:  {:?}", json_to_vec(users_str.unwrap().as_str()));
-
-    let mut results = db.query(sql).bind(("company", user.clone())).await?;
-
-    // print the created user:
-    let user: Option<User> = results.take(0)?;
-    println!("userQuery result: {user:?}");
-
-    let mut response = db
-        .query("SELECT * FROM user WHERE name ~ $name")
-        .bind(("name", "John"));
-
-    let mut response = response.await?;
-    // print all users:
-    let users: Vec<User> = response.take(0)?;
-    println!("user: {users:?}");
+    // let db = Surreal::new::<Mem>(()).await.unwrap();
+    //
+    // // db.use_ns("namespace").use_db("database").await?;
+    // db.use_ns("test").use_db("test").await?;
+    //
+    // // type::thing($tb, $id)
+    // let sql = "CREATE user SET name = $name, company = $company";
+    // let sql = "CREATE $id SET name = $name, company = $company, founded = $founded";
+    // let sql = "CREATE user CONTENT $1";
+    //
+    // let sql = "INSERT INTO company $company";
+    // // INSERT INTO company   //
+    // // println!("Dfdfe {}", Datetime::default());
+    // // println!("thingthinghting {}", thing("user:owo").unwrap().to_string());
+    //
+    // let user = User {
+    //     // id: thing("user:owo").unwrap().to_string(),
+    //     id: "user:owo".to_string(),
+    //     // id: "john".to_owned(),
+    //     name: "John Doe".to_owned(),
+    //     company: "ACME Corporation".to_owned(),
+    //     founded: Datetime::default(),
+    // };
+    //
+    // // let users = vec![user.clone(), user.clone()];
+    // // let users_str = users
+    // //     .iter()
+    // //     .map(|u| serde_json::to_string(&u).unwrap())
+    // //     .collect::<Vec<_>>();
+    // // println!("ushoud:  {:?}", users_str);
+    // // println!("ushoud:  {:?}", json_to_vec(users_str.unwrap().as_str()));
+    //
+    // let mut results = db.query(sql).bind(("company", user.clone())).await?;
+    //
+    // // print the created user:
+    // let user: Option<User> = results.take(0)?;
+    // println!("userQuery result: {user:?}");
+    //
+    // let mut response = db
+    //     .query("SELECT * FROM user WHERE name ~ $name")
+    //     .bind(("name", "John"));
+    //
+    // let mut response = response.await?;
+    // // print all users:
+    // let users: Vec<User> = response.take(0)?;
+    // println!("user: {users:?}");
 
     println!("==========================================");
     // println!("==========================================");

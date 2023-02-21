@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use serde::Serialize;
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::{json, Value};
-use surrealdb::sql;
+use surrealdb::{engine::local::Db, method::Query, opt::QueryResult, sql, Response, Surreal};
 
 pub struct InsertStatement<T: Serialize> {
     table: String,
@@ -27,6 +27,7 @@ impl<T: Serialize> InsertStatement<T> {
         self
     }
 
+    // pub fn build(&self) -> Result<(String, Vec<(String, Value)>), String> {
     pub fn build(&self) -> Result<(String, Vec<(String, sql::Value)>), String> {
         if self.values.is_empty() {
             return Err(String::from("No values to insert"));
@@ -81,6 +82,26 @@ impl<T: Serialize> InsertStatement<T> {
 
         Ok((query, variables))
     }
+
+    pub async fn run<'de, R: DeserializeOwned>(
+        &self,
+        db: Surreal<Db>,
+    ) -> surrealdb::Result<Vec<R>> {
+        let query_result = self.build().unwrap();
+        let results = query_result
+            .1
+            .clone()
+            .iter()
+            .fold(db.query(query_result.0), |acc, val| {
+                let results = acc.bind(val);
+                results
+            });
+        let mut results = results.await?;
+        // // let user: Vec<Company> = results.take(0)?;
+        let response: Vec<R> = results.take(0)?;
+        Ok(response)
+        // Ok(user)
+    }
 }
 
 // fn get_field_names<T>(value: &T) -> Vec<String>
@@ -105,25 +126,17 @@ where
         .collect()
 }
 
-fn get_field_value<T>(value: &T, field_name: &str) -> Result<surrealdb::sql::Value, String>
+fn get_field_value<T: Serialize>(
+    value: &T,
+    field_name: &str,
+) -> Result<surrealdb::sql::Value, String>
+// fn get_field_value<T>(value: &T, field_name: &str) -> Result<Value, String>
 where
     T: serde::Serialize,
 {
-    let mut bindings = from_json(json!(value));
-    // bindings.
-    let xx = serde_json::to_value(value)
-        .unwrap()
-        .as_object()
-        .unwrap()
-        .get(field_name)
-        // .map(|field_value| serde_json::to_string(field_value).unwrap())
-        .map(|field_value| from_json(json!(field_value)))
-        .ok_or(format!("Field '{}' not found in struct", field_name));
-
-    // let m = json!(xx);
-
-    // from_json(m)
-    xx
+    let whole_struct = json!(value);
+    // TODO: Improve error handling
+    Ok(sql::json(&whole_struct[field_name].to_string())?)
 }
 
 pub(crate) fn from_json(json: Value) -> surrealdb::sql::Value {
