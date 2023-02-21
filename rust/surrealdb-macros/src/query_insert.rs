@@ -83,21 +83,29 @@ impl<T: Serialize + DeserializeOwned> InsertStatement<T> {
         Ok((query, variables))
     }
 
-    pub async fn run(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
-        let query_result = self.build().unwrap();
-        let results = query_result
-            .1
+    pub async fn get_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+        let (query, variables) = self.build().unwrap();
+        let response = variables
             .clone()
             .iter()
-            .fold(db.query(query_result.0), |acc, val| {
-                let results = acc.bind(val);
-                results
-            });
-        let mut results = results.await?;
-        // // let user: Vec<Company> = results.take(0)?;
-        let response: Vec<T> = results.take(0)?;
+            .fold(db.query(query), |acc, val| acc.bind(val))
+            .await?
+            .take::<Option<T>>(0)?;
+
+        // TODO:: Handle error if nothing is returned
+        Ok(response.unwrap())
+    }
+
+    pub async fn get_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+        let (query, variables) = self.build().unwrap();
+        let response = variables
+            .clone()
+            .iter()
+            .fold(db.query(query), |acc, val| acc.bind(val))
+            .await?
+            .take::<Vec<T>>(0)?;
+
         Ok(response)
-        // Ok(user)
     }
 }
 

@@ -258,9 +258,9 @@ async fn test_it() -> surrealdb::Result<()> {
     db.use_ns("test").use_db("test").await?;
 
     let results = query_insert::InsertStatement::new("company".into())
-        // .insert(xx)
+        .insert(xx)
         .insert_all(companies)
-        .run(db)
+        .get_many(db)
         .await
         .unwrap();
 
