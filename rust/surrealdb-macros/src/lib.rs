@@ -19,12 +19,14 @@ pub mod model_id;
 
 pub use db_field::DbField;
 pub use db_field::DbFilter;
+pub use surrealdb::opt::RecordId;
 
 pub trait SurrealdbNode {
     type Schema;
     type TableNameChecker;
     fn schema() -> Self::Schema;
-    fn get_key(&self) -> ::std::option::Option<&SurId>;
+    // fn get_key<T: Into<RecordId>>(&self) -> ::std::option::Option<&T>;
+    fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
     fn get_table_name() -> &'static str;
 }
 
@@ -36,7 +38,8 @@ pub trait SurrealdbEdge {
 
     fn schema() -> Self::Schema;
     fn get_table_name() -> &'static str;
-    fn get_key(&self) -> ::std::option::Option<&SurId>;
+    // fn get_key(&self) -> ::std::option::Option<&SurId>;
+    fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
 }
 
 // pub enum Clause {

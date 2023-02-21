@@ -4,15 +4,18 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::{json, Value};
 use surrealdb::{engine::local::Db, method::Query, opt::QueryResult, sql, Response, Surreal};
 
-pub struct InsertStatement<T: Serialize + DeserializeOwned> {
-    table: String,
+use crate::SurrealdbNode;
+
+pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbNode> {
+    // table: String,
     values: Vec<T>,
 }
 
-impl<T: Serialize + DeserializeOwned> InsertStatement<T> {
-    pub fn new(table: String) -> Self {
+impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
+    // pub fn new(table: String) -> Self {
+    pub fn new() -> Self {
         Self {
-            table,
+            // table,
             values: Vec::new(),
         }
     }
@@ -53,7 +56,9 @@ impl<T: Serialize + DeserializeOwned> InsertStatement<T> {
 
         let mut query = String::new();
         query.push_str("INSERT INTO ");
-        query.push_str(&self.table);
+        let table_name = T::get_table_name();
+        query.push_str(&T::get_table_name());
+        // query.push_str(&self.table);
         query.push_str(" (");
         query.push_str(&field_names.join(", "));
         query.push_str(") VALUES ");

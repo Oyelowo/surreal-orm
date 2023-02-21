@@ -11,6 +11,7 @@ use serde::Serialize;
 use serde_json::json;
 use surrealdb::engine::local::Mem;
 use surrealdb::opt::auth::Root;
+use surrealdb::opt::RecordId;
 use surrealdb::sql;
 use surrealdb::sql::thing;
 use surrealdb::sql::Datetime;
@@ -32,7 +33,9 @@ struct User {
 
 use serde_json::Result;
 use serde_json::{Map, Value};
+use surrealdb_derive::SurrealdbNode;
 use surrealdb_macros::query_insert;
+use surrealdb_macros::SurId;
 fn mana() {
     #[derive(Serialize, Deserialize)]
     struct Country {
@@ -153,8 +156,13 @@ struct Person {
     name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "company")]
 struct Company {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[builder(default, setter(strip_option))]
+    id: Option<SurId>,
     // id: String,
     nam: Uuid,
     name: String,
@@ -189,6 +197,7 @@ async fn test_it() -> surrealdb::Result<()> {
     let b = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1.001, y: 1. });
     let companies = vec![
         Company {
+            id: None,
             // id: "company:1".into(),
             name: "Acme Inc.".to_string(),
             // founded: "1967-05-03".to_string(),
@@ -210,6 +219,7 @@ async fn test_it() -> surrealdb::Result<()> {
                               // home: LineString(vec![Coord { x: 34.6, y: 34.6 }]),
         },
         Company {
+            id: None,
             // id: "company:2".into(),
             name: "Apple Inc.".to_string(),
             // founded: "1967-05-03".to_string(),
@@ -230,11 +240,13 @@ async fn test_it() -> surrealdb::Result<()> {
             // location: Geometry::Point((45.0, 45.0).into()),
         },
     ];
+
     println!(
         "OPOOOOO____{}",
         serde_json::to_value(&companies.clone()).unwrap()
     );
     let xx = Company {
+        id: None,
         // id: "company:1".into(),
         name: "Acme Inc.".to_string(),
         // founded: "1967-05-03".to_string(),
@@ -257,8 +269,8 @@ async fn test_it() -> surrealdb::Result<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await?;
 
-    let results = query_insert::InsertStatement::new("company".into())
-        .insert(xx)
+    let results = query_insert::InsertStatement::new()
+        // .insert(xx)
         .insert_all(companies)
         .get_many(db)
         .await

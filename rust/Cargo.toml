@@ -22,6 +22,7 @@ documentation = "https://codebreather.com/oyelowo"
 lib-common = { path = "./lib-common" }
 lib-my-macros = { path = "./lib-my-macros" }
 
+# surrealdb = { path = "./surrealdb", features = [
 surrealdb = { git = "https://github.com/surrealdb/surrealdb", branch = "main", features = [
     "protocol-ws",
     "protocol-http",
