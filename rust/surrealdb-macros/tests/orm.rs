@@ -17,8 +17,7 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
-    model_id::SurId,
-    SurrealdbEdge, SurrealdbNode,
+    RecordId, SurrealdbEdge, SurrealdbNode,
 };
 use test_case::test_case;
 use typed_builder::TypedBuilder;
@@ -29,7 +28,7 @@ use typed_builder::TypedBuilder;
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     first_name: String,
     last_name: String,
 
@@ -57,7 +56,7 @@ pub struct Student {
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
 
     // #[surrealdb(link_one = "Book", skip_serializing)]
     #[serde(rename = "in")]
@@ -75,7 +74,7 @@ type StudentWritesBook = Writes<Student, Book>;
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     title: String,
     content: String,
 }
@@ -86,7 +85,7 @@ pub struct Book {
 pub struct Blog {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     title: String,
     content: String,
 }
@@ -106,7 +105,7 @@ mod tests {
     fn multiplication_tests2() {
         let x = Student::schema()
             .writes__(Clause::All)
-            .book(Clause::Id(SurId::try_from("book:blaze").unwrap()))
+            .book(Clause::Id(RecordId::try_from("book:blaze").unwrap()))
             .title;
 
         assert_eq!(
@@ -172,7 +171,7 @@ mod tests {
             .writes__(Clause::Where(
                 query().where_(StudentWritesBook::schema().timeWritten.equals("12:00")),
             ))
-            .book(Clause::Id(SurId::try_from("book:oyelowo").unwrap()))
+            .book(Clause::Id(RecordId::try_from("book:oyelowo").unwrap()))
             .content;
 
         assert_eq!(
@@ -218,11 +217,11 @@ mod tests {
     fn multiplication_tests8() {
         use serde_json;
 
-        let sur_id = SurId::new("alien", "oyelowo");
+        let sur_id = RecordId::new("alien", "oyelowo");
         let json = serde_json::to_string(&sur_id).unwrap();
         assert_eq!(json, "\"alien:oyelowo\"");
 
-        let sur_id = SurId::try_from("alien:oyelowo").unwrap();
+        let sur_id = RecordId::try_from("alien:oyelowo").unwrap();
         let json = serde_json::to_string(&sur_id).unwrap();
         assert_eq!(json, "\"alien:oyelowo\"");
     } */

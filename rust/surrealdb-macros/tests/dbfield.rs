@@ -29,7 +29,7 @@ use typed_builder::TypedBuilder;
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<Thing>,
+    id: Option<RecordId>,
     first_name: String,
     last_name: String,
 
@@ -75,7 +75,7 @@ type StudentWritesBook = Writes<Student, Book>;
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     title: String,
     content: String,
 }
@@ -86,7 +86,7 @@ pub struct Book {
 pub struct Blog {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     title: String,
     content: String,
 }

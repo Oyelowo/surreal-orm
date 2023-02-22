@@ -17,8 +17,7 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Reference, Relate},
-    model_id::SurId,
-    SurrealdbEdge, SurrealdbNode,
+    RecordId, SurrealdbEdge, SurrealdbNode,
 };
 use typed_builder::TypedBuilder;
 
@@ -29,7 +28,7 @@ use typed_builder::TypedBuilder;
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     first_name: String,
     last_name: String,
 
@@ -57,7 +56,7 @@ pub struct Student {
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
 
     // #[surrealdb(link_one = "Book", skip_serializing)]
     r#in: In,
@@ -73,7 +72,7 @@ type StudentWritesBook = Writes<Student, Book>;
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     title: String,
 }
 
@@ -83,7 +82,7 @@ pub struct Book {
 pub struct Blog {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     content: String,
 }
 

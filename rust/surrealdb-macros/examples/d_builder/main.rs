@@ -1,6 +1,6 @@
 use derive_builder::Builder;
 
-#[derive(Builder)]
+#[derive(Builder, Debug)]
 struct Lorem {
     ipsum: u32,
 }
@@ -11,6 +11,6 @@ fn main() {
         builder.ipsum(42);
     }
 
-    let x: Lorem = builder.build();
-    println!("PRINN, {builder}");
+    let x: Lorem = builder.build().unwrap();
+    println!("PRINN, {x:?}");
 }

@@ -1,3 +1,4 @@
+use std::ops::Deref;
 use std::sync::Arc;
 
 use geo::coord;
@@ -156,19 +157,56 @@ struct Person {
     name: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct Manan(RecordId);
+
+impl From<RecordId> for Manan {
+    fn from(value: RecordId) -> Self {
+        Self(value)
+    }
+}
+
+impl From<Manan> for RecordId {
+    fn from(value: Manan) -> Self {
+        value.0
+    }
+}
+
+impl Deref for Manan {
+    type Target = RecordId;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl From<String> for Manan {
+    fn from(value: String) -> Self {
+        value.split(":");
+        let mut spl = value.split(':');
+        match (spl.next(), spl.next(), spl.next()) {
+            (Some(table), Some(id), None) => {
+                Self(RecordId::from((table.to_string(), id.to_string())))
+            }
+            // _ => Err(SurrealdbOrmError::InvalidId(value.to_string())),
+            _ => panic!("E don happen"),
+        }
+    }
+}
+
 #[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "company")]
 struct Company {
     #[serde(skip_serializing_if = "Option::is_none")]
     // #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<Manan>,
     // id: String,
-    nam: Uuid,
+    // nam: Uuid,
     name: String,
-    founded: Datetime,
-    founders: Vec<Person>,
-    tags: Vec<String>,
+    // founded: Datetime,
+    // founders: Vec<Person>,
+    // tags: Vec<String>,
     // location: Geometry,
     // home: Geometry,
 }
@@ -201,39 +239,39 @@ async fn test_it() -> surrealdb::Result<()> {
             // id: "company:1".into(),
             name: "Acme Inc.".to_string(),
             // founded: "1967-05-03".to_string(),
-            founded: Datetime::default(),
-
-            founders: vec![
-                Person {
-                    name: "John Doe".to_string(),
-                },
-                Person {
-                    name: "Jane Doe".to_string(),
-                },
-            ],
-            tags: vec!["foo".to_string(), "bar".to_string()],
-            nam: Uuid::new(), // location: Geometry::Point((45.0, 45.0).into()),
-                              // location: (45.0, 45.0).into(),
-                              // home: Geometry::Line(a.into()),
-                              // home: (45.0, 45.0).into(),
-                              // home: LineString(vec![Coord { x: 34.6, y: 34.6 }]),
+            // founded: Datetime::default(),
+            //
+            // founders: vec![
+            //     Person {
+            //         name: "John Doe".to_string(),
+            //     },
+            //     Person {
+            //         name: "Jane Doe".to_string(),
+            //     },
+            // ],
+            // tags: vec!["foo".to_string(), "bar".to_string()],
+            // nam: Uuid::new(), // location: Geometry::Point((45.0, 45.0).into()),
+            // location: (45.0, 45.0).into(),
+            // home: Geometry::Line(a.into()),
+            // home: (45.0, 45.0).into(),
+            // home: LineString(vec![Coord { x: 34.6, y: 34.6 }]),
         },
         Company {
             id: None,
             // id: "company:2".into(),
             name: "Apple Inc.".to_string(),
             // founded: "1967-05-03".to_string(),
-            founded: Datetime::default(),
-            founders: vec![
-                Person {
-                    name: "John Doe".to_string(),
-                },
-                Person {
-                    name: "Jane Doe".to_string(),
-                },
-            ],
-            tags: vec!["foo".to_string(), "bar".to_string()],
-            nam: Uuid::new(),
+            // founded: Datetime::default(),
+            // founders: vec![
+            //     Person {
+            //         name: "John Doe".to_string(),
+            //     },
+            //     Person {
+            //         name: "Jane Doe".to_string(),
+            //     },
+            // ],
+            // tags: vec!["foo".to_string(), "bar".to_string()],
+            // nam: Uuid::new(),
             // home: Point::new(25.3, 39.4).into(),
             // home: Geometry::Line(b.into()),
             // home: (63.0, 21.0).into(),
@@ -246,48 +284,51 @@ async fn test_it() -> surrealdb::Result<()> {
         serde_json::to_value(&companies.clone()).unwrap()
     );
     let xx = Company {
-        id: None,
+        id: Some(RecordId::from(("company", "lowo")).into()),
         // id: "company:1".into(),
         name: "Acme Inc.".to_string(),
         // founded: "1967-05-03".to_string(),
-        founded: Datetime::default(),
-        founders: vec![
-            Person {
-                name: "John Doe".to_string(),
-            },
-            Person {
-                name: "Jane Doe".to_string(),
-            },
-        ],
-        tags: vec!["foo".to_string(), "bar".to_string()],
-        nam: Uuid::new(), // location: (63.0, 21.0).into(),
-                          // home: Geometry::Point((45.0, 45.0).into()),
-                          // home: Geometry::Point(Point::new(20.2, 60.9)),
-                          // home: (63.0, 21.0).into(),
+        // founded: Datetime::default(),
+        // founders: vec![
+        //     Person {
+        //         name: "John Doe".to_string(),
+        //     },
+        //     Person {
+        //         name: "Jane Doe".to_string(),
+        //     },
+        // ],
+        // tags: vec!["foo".to_string(), "bar".to_string()],
+        // nam: Uuid::new(), // location: (63.0, 21.0).into(),
+        // home: Geometry::Point((45.0, 45.0).into()),
+        // home: Geometry::Point(Point::new(20.2, 60.9)),
+        // home: (63.0, 21.0).into(),
     };
+
+    println!("LOPERER{xx:#?}");
 
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await?;
 
-    let results = query_insert::InsertStatement::new()
-        // .insert(xx)
-        .insert_all(companies)
-        .get_many(db)
-        .await
-        .unwrap();
-
-    println!("==========================================");
-    println!("==========================================");
-    println!(
-        "userQueryyy result: {}",
-        serde_json::to_string(&results).unwrap()
-    );
-    // let mut results = results.await?;
-    println!("==========================================");
-    println!("==========================================");
-    // println!("userQueryyyAwaited result: {:#?}", results);
-    println!("==========================================");
-    println!("Value==========================================");
+    // let results = query_insert::InsertStatement::new()
+    //     .insert(xx)
+    //     // .insert_all(companies)
+    //     .get_one(db)
+    //     // .get_many(db)
+    //     .await
+    //     .unwrap();
+    //
+    // println!("==========================================");
+    // println!("==========================================");
+    // println!(
+    //     "userQueryyy result: {}",
+    //     serde_json::to_string(&results).unwrap()
+    // );
+    // // let mut results = results.await?;
+    // println!("==========================================");
+    // println!("==========================================");
+    // // println!("userQueryyyAwaited result: {:#?}", results);
+    // println!("==========================================");
+    // println!("Value==========================================");
     // let user: Vec<Company> = results.take(0)?;
     // let user: Vec<Company> = user;
     // println!("nama result: {}", serde_json::to_string(&user).unwrap());
@@ -331,23 +372,26 @@ async fn test_it() -> surrealdb::Result<()> {
     //     let mut results = db.query("
     // INSERT INTO company (name, founded) VALUES ('Acme Inc.', '1967-05-03'), ('Apple Inc.', '1976-04-01');
     // ");
-    // let mut results = db
-    //     .query(
-    //         "
-    // INSERT INTO company $company;
-    // ",
-    //     )
-    //     .bind(("company", xx));
-    // println!("==========================================");
-    // println!("==========================================");
-    // println!("userQueryyy result: {:#?}", results);
-    // let mut results = results.await?;
-    // println!("==========================================");
-    // println!("==========================================");
-    // println!("userQueryyyAwaited result: {:#?}", results);
-    // println!("==========================================");
-    // println!("Value==========================================");
-    // let user: Vec<Company> = results.take(0)?;
+    let mut results = db
+        .query(
+            "
+    INSERT INTO company (id, name) VALUES (type::thing($tb, $id), $name);
+    ",
+        )
+        .bind(("tb", "company"))
+        .bind(("id", xx.id))
+        // .bind(("company", xx))
+        .bind(("name", xx.name));
+    println!("==========================================");
+    println!("==========================================");
+    println!("userQueryyy result: {:#?}", results);
+    let mut results = results.await?;
+    println!("==========================================");
+    println!("==========================================");
+    println!("userQueryyyAwaited result: {:#?}", results);
+    println!("==========================================");
+    println!("Value==========================================");
+    let user: Option<Company> = results.take(0).expect("shit");
     // // let user: Vec<Company> = user;
     // println!("nama result: {}", serde_json::to_string(&user).unwrap());
     // println!("xrearXXXXX ---- = {}", serde_json::to_string(&mm).unwrap());

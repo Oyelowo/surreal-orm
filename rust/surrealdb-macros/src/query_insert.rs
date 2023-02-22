@@ -70,6 +70,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
             let mut row_values = Vec::new();
             for field_name in &field_names {
                 let field_value = get_field_value(value, field_name)?;
+                println!("FIVVVV {}", serde_json::to_string(&first_value).unwrap());
                 let variable_name = format!("{}_{}", field_name, i);
                 variables.push((variable_name.clone(), field_value));
                 // row_values.push(format!("${}", variables.len()));

@@ -20,8 +20,7 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
-    model_id::SurId,
-    SurrealdbEdge, SurrealdbNode,
+    RecordId, SurrealdbEdge, SurrealdbNode,
 };
 use test_case::test_case;
 use typed_builder::TypedBuilder;
@@ -32,7 +31,7 @@ use typed_builder::TypedBuilder;
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     first_name: String,
     last_name: String,
     age: u8,
@@ -61,7 +60,7 @@ pub struct Student {
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
 
     // #[surrealdb(link_one = "Book", skip_serializing)]
     #[serde(rename = "in")]
@@ -79,7 +78,7 @@ type StudentWritesBook = Writes<Student, Book>;
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     title: String,
     content: String,
 }
@@ -90,7 +89,7 @@ pub struct Book {
 pub struct Blog {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     title: String,
     content: String,
 }
@@ -152,7 +151,6 @@ impl WhiteSpaceRemoval for String {}
 mod tests {
     use super::*;
     use surrealdb_macros::db_field::{cond, empty};
-    use surrealdb_macros::query_insert::InsertQuery;
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_select::{order, Order};
     use surrealdb_macros::{cond, query_select, DbFilter};
@@ -407,11 +405,7 @@ mod tests {
     fn multiplication_tests2() {
         let x = Student::schema()
             .writes__(empty())
-            .book(
-                Book::schema()
-                    .id
-                    .equal(SurId::try_from("book:blaze").unwrap()),
-            )
+            .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
             .title;
 
         assert_eq!(
@@ -419,21 +413,21 @@ mod tests {
             "->writes->book[WHERE id = book:blaze].title".to_string()
         );
 
-        let query = InsertQuery::new("company")
-            .fields(&["name", "founded", "founders", "tags"])
-            .values(&[
-                &[
-                    "SurrealDB",
-                    "2021-09-10",
-                    "[person:tobie, person:jaime]",
-                    "['big data', 'database']",
-                ],
-                &["Acme Inc.", "1967-05-03", "null", "null"],
-                &["Apple Inc.", "1976-04-01", "null", "null"],
-            ])
-            .on_duplicate_key_update(&[("tags", "tags += 'new tag'")])
-            .build();
-        println!("{}", query);
+        // let query = InsertQuery::new("company")
+        //     .fields(&["name", "founded", "founders", "tags"])
+        //     .values(&[
+        //         &[
+        //             "SurrealDB",
+        //             "2021-09-10",
+        //             "[person:tobie, person:jaime]",
+        //             "['big data', 'database']",
+        //         ],
+        //         &["Acme Inc.", "1967-05-03", "null", "null"],
+        //         &["Apple Inc.", "1976-04-01", "null", "null"],
+        //     ])
+        //     .on_duplicate_key_update(&[("tags", "tags += 'new tag'")])
+        //     .build();
+        // println!("{}", query);
     }
 
     #[test]
@@ -453,11 +447,11 @@ mod tests {
     fn multiplication_tests8() {
         use serde_json;
 
-        let sur_id = SurId::new("alien", "oyelowo");
+        let sur_id = ("alien", "oyelowo");
         let json = serde_json::to_string(&sur_id).unwrap();
         assert_eq!(json, "\"alien:oyelowo\"");
 
-        let sur_id = SurId::try_from("alien:oyelowo").unwrap();
+        let sur_id = RecordId::from(("alien", "oyelowo"));
         let json = serde_json::to_string(&sur_id).unwrap();
         assert_eq!(json, "\"alien:oyelowo\"");
     }
