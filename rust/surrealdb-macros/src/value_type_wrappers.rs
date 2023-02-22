@@ -88,7 +88,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                 coordinates: Vec<Vec<Vec<(f64, f64)>>>,
             },
             GeometryCollection {
-                geometries: Vec<Geometry>,
+                geometries: Vec<GeometryCustom>,
             },
         }
 
@@ -133,6 +133,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                 )),
             )),
             GeometryType::GeometryCollection { geometries } => {
+                let geometries: Vec<Geometry> = geometries.into_iter().map(|g| g.0).collect();
                 Ok(GeometryCustom(sql::Geometry::Collection(geometries)))
             }
         }
