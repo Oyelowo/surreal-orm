@@ -38,21 +38,6 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
 
         let first_value = self.values.get(0).unwrap();
         let field_names = get_field_names(first_value);
-        // let mut placeholders = String::new();
-
-        // let mut placeholders = field_names
-        //     .iter()
-        //     .enumerate()
-        //     .map(|(i, name)| format!("${name}_{i}"))
-        //     .collect::<Vec<_>>()
-        //     .join(", ");
-        // for i in 1..=field_names.len() {
-        //     if i > 1 {
-        //         placeholders.push_str(", ");
-        //     }
-        //     placeholders.push('$');
-        //     placeholders.push_str(&i.to_string());
-        // }
 
         let mut query = String::new();
         query.push_str("INSERT INTO ");
@@ -70,11 +55,10 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
             let mut row_values = Vec::new();
             for field_name in &field_names {
                 let field_value = get_field_value(value, field_name)?;
-                println!("FIVVVV {}", serde_json::to_string(&first_value).unwrap());
-                let variable_name = format!("{}_{}", field_name, i);
-                variables.push((variable_name.clone(), field_value));
+                let placeholder_var_names = format!("{}_{}", field_name, i);
+                variables.push((placeholder_var_names.clone(), field_value));
                 // row_values.push(format!("${}", variables.len()));
-                row_values.push(format!("${}", variable_name));
+                row_values.push(format!("${}", placeholder_var_names));
             }
             if i > 0 {
                 values.push_str(", ");
@@ -115,15 +99,6 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
     }
 }
 
-// fn get_field_names<T>(value: &T) -> Vec<String>
-// where
-//     T: serde::Serialize,
-// {
-//     let object = serde_json::to_value(value)?
-//         .as_object()
-//         .ok_or("Not an object")?;
-//     object.keys().map(|key| key.to_string()).collect()
-// }
 fn get_field_names<T>(value: &T) -> Vec<String>
 where
     T: serde::Serialize,
@@ -133,7 +108,7 @@ where
         .as_object()
         .unwrap()
         .keys()
-        .map(|key| key.to_string())
+        .map(ToString::to_string)
         .collect()
 }
 
@@ -141,7 +116,6 @@ fn get_field_value<T: Serialize>(
     value: &T,
     field_name: &str,
 ) -> Result<surrealdb::sql::Value, String>
-// fn get_field_value<T>(value: &T, field_name: &str) -> Result<Value, String>
 where
     T: serde::Serialize,
 {
@@ -150,56 +124,6 @@ where
     Ok(sql::json(&whole_struct[field_name].to_string())?)
 }
 
-pub(crate) fn from_json(json: Value) -> surrealdb::sql::Value {
-    match surrealdb::sql::json(&json.to_string()) {
-        Ok(value) => value,
-        // It shouldn't get to this as `JsonValue` will always produce valid JSON
-        Err(_) => unreachable!(),
-    }
-}
-
-#[derive(Debug)]
-struct Person {
-    name: String,
-}
-
-#[derive(Debug)]
-struct Company {
-    name: String,
-    founded: String,
-    founders: Vec<Person>,
-    tags: Vec<String>,
-}
-fn ere() {
-    let companies = vec![
-        Company {
-            name: "Acme Inc.".to_string(),
-            founded: "1967-05-03".to_string(),
-            founders: vec![
-                Person {
-                    name: "John Doe".to_string(),
-                },
-                Person {
-                    name: "Jane Doe".to_string(),
-                },
-            ],
-            tags: vec!["foo".to_string(), "bar".to_string()],
-        },
-        Company {
-            name: "Apple Inc.".to_string(),
-            founded: "1967-05-03".to_string(),
-            founders: vec![
-                Person {
-                    name: "John Doe".to_string(),
-                },
-                Person {
-                    name: "Jane Doe".to_string(),
-                },
-            ],
-            tags: vec!["foo".to_string(), "bar".to_string()],
-        },
-    ];
-}
 // use std::collections::HashMap;
 //
 // struct InsertQuery {

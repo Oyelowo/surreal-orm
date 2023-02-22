@@ -3,10 +3,19 @@ use std::sync::Arc;
 
 use geo::coord;
 use geo::Coord;
+use geo::Coordinate;
 use geo::GeodesicIntermediate;
+use geo::GeometryCollection;
 use geo::Line;
 use geo::LineString;
+use geo::MultiLineString;
+use geo::MultiPoint;
+use geo::MultiPolygon;
 use geo::Point;
+use geo::Polygon;
+
+use geo::point;
+use geo::polygon;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::json;
@@ -14,15 +23,16 @@ use surrealdb::engine::local::Mem;
 use surrealdb::opt::auth::Root;
 use surrealdb::opt::RecordId;
 use surrealdb::sql;
+use surrealdb::sql::geometry;
 use surrealdb::sql::thing;
 use surrealdb::sql::Datetime;
 use surrealdb::sql::Geometry;
 use surrealdb::sql::Limit;
 use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
+
 // use geo
 // use geo::point;
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[allow(dead_code)]
 struct User {
@@ -36,6 +46,8 @@ use serde_json::Result;
 use serde_json::{Map, Value};
 use surrealdb_derive::SurrealdbNode;
 use surrealdb_macros::query_insert;
+use surrealdb_macros::value_type_wrappers::GeometryCustom;
+use surrealdb_macros::value_type_wrappers::SurrealId;
 use surrealdb_macros::SurId;
 fn mana() {
     #[derive(Serialize, Deserialize)]
@@ -157,71 +169,6 @@ struct Person {
     name: String,
 }
 
-#[derive(Debug, Serialize, Clone)]
-struct SurrealId(RecordId);
-
-impl<'de> Deserialize<'de> for SurrealId {
-    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let s = String::deserialize(deserializer)?;
-        Ok(SurrealId(thing(&s).map_err(serde::de::Error::custom)?))
-    }
-}
-// impl<'de> Deserialize<'de> for Manan {
-//     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
-//     where
-//         D: serde::Deserializer<'de>,
-//     {
-//         let s = String::deserialize(deserializer)?;
-//         let thing = thing(&s).map_err(serde::de::Error::custom)?;
-//         Ok(Manan(thing))
-//     }
-// }
-// impl<'de> Deserialize<'de> for Manan {
-//     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
-//     where
-//         D: serde::Deserializer<'de>,
-//     {
-//         let thing = RecordId::deserialize(deserializer)?;
-//         Ok(Manan(thing))
-//     }
-// }
-impl From<RecordId> for SurrealId {
-    fn from(value: RecordId) -> Self {
-        Self(value)
-    }
-}
-
-impl From<SurrealId> for RecordId {
-    fn from(value: SurrealId) -> Self {
-        value.0
-    }
-}
-
-impl Deref for SurrealId {
-    type Target = RecordId;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl From<String> for SurrealId {
-    fn from(value: String) -> Self {
-        value.split(":");
-        let mut spl = value.split(':');
-        match (spl.next(), spl.next(), spl.next()) {
-            (Some(table), Some(id), None) => {
-                Self(RecordId::from((table.to_string(), id.to_string())))
-            }
-            // _ => Err(SurrealdbOrmError::InvalidId(value.to_string())),
-            _ => panic!("E don happen"),
-        }
-    }
-}
-
 #[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "company")]
@@ -236,7 +183,7 @@ struct Company {
     // founders: Vec<Person>,
     // tags: Vec<String>,
     // location: Geometry,
-    // home: Geometry,
+    home: GeometryCustom,
 }
 
 // {
@@ -261,6 +208,114 @@ async fn test_it() -> surrealdb::Result<()> {
     // async fn test_it() {
     let a = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1., y: 1. });
     let b = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1.001, y: 1. });
+    //
+    // println!(
+    //     "OPOOOOO____{}",
+    //     serde_json::to_value(&companies.clone()).unwrap()
+    // );
+    let a = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1., y: 1. });
+
+    let a = LineString::from(a);
+    let b = LineString::from(b);
+    // let a = MultiPoint::from(a);
+    // let a: MultiPoint<_> = vec![(0., 0.), (1., 2.)].into();
+    // let a: MultiLineString<_> = vec![(0., 0.), (1., 2.)].into();
+    // let a: MultiLineString<_> = vec![a, b].into();
+
+    let a = polygon![
+        (x: 0.0, y: 0.0),
+        (x: 4.0, y: 0.0),
+        (x: 4.0, y: 1.0),
+        (x: 1.0, y: 1.0),
+        (x: 1.0, y: 4.0),
+        (x: 0.0, y: 4.0),
+        (x: 0.0, y: 0.0),
+    ];
+    let a = point! {
+        x: 40.02f64,
+        y: 116.34,
+    };
+    // let a = (33f64, 44f64);
+    let a = Point::new(0.0, 0.0); // create a point at the origin
+    let a = Point::from((45.0, 90.0)); // cr
+                                       //
+                                       //
+                                       // Coordinate(Coord{})
+    let a = LineString(vec![
+        Coordinate::from((0.0, 0.0)),
+        Coordinate::from((1.0, 1.0)),
+        Coordinate::from((2.0, 0.0)),
+    ]);
+    let a = LineString(vec![
+        Coord {
+            x: -122.33583,
+            y: 47.60621,
+        },
+        Coord {
+            x: -122.33583,
+            y: 47.60622,
+        },
+        Coord {
+            x: -122.33584,
+            y: 47.60622,
+        },
+        Coord {
+            x: -122.33584,
+            y: 47.60621,
+        },
+        Coord {
+            x: -122.33583,
+            y: 47.60621,
+        },
+    ]);
+    let points = vec![
+        Coord { x: 0.0, y: 0.0 },
+        Coord { x: 1.0, y: 1.0 },
+        Coord { x: 2.0, y: 2.0 },
+    ];
+    // let multipoint = MultiPoint(points);
+    // let a = MultiPoint(vec![Point::new(0.0, 0.0), Point::new(1.0, 1.0)]);
+    let linestring1 = LineString(vec![
+        Coord { x: 0.0, y: 0.0 },
+        Coord { x: 1.0, y: 1.0 },
+        Coord { x: 2.0, y: 2.0 },
+    ]);
+    let linestring2 = LineString(vec![
+        Coord { x: 3.0, y: 3.0 },
+        Coord { x: 4.0, y: 4.0 },
+        Coord { x: 5.0, y: 5.0 },
+    ]);
+    let a = MultiLineString(vec![linestring1, linestring2]);
+    let polygon1 = Polygon::new(
+        LineString(vec![
+            Coord { x: 0.0, y: 0.0 },
+            Coord { x: 1.0, y: 1.0 },
+            Coord { x: 2.0, y: 2.0 },
+            Coord { x: 0.0, y: 0.0 },
+        ]),
+        vec![],
+    );
+    let polygon2 = Polygon::new(
+        LineString(vec![
+            Coord { x: 3.0, y: 3.0 },
+            Coord { x: 4.0, y: 4.0 },
+            Coord { x: 5.0, y: 5.0 },
+            Coord { x: 3.0, y: 3.0 },
+        ]),
+        vec![],
+    );
+    let a = MultiPolygon(vec![polygon1, polygon2]);
+    let point = Point(Coordinate { x: 0.0, y: 0.0 });
+    let linestring = LineString(vec![
+        Coordinate { x: 1.0, y: 1.0 },
+        Coordinate { x: 2.0, y: 2.0 },
+    ]);
+    let geometry_collection = GeometryCollection(vec![
+        geo::Geometry::Point(point),
+        geo::Geometry::LineString(linestring),
+    ]);
+    let a = Geometry::from(a);
+
     let companies = vec![
         Company {
             id: None,
@@ -280,8 +335,8 @@ async fn test_it() -> surrealdb::Result<()> {
             // tags: vec!["foo".to_string(), "bar".to_string()],
             // nam: Uuid::new(), // location: Geometry::Point((45.0, 45.0).into()),
             // location: (45.0, 45.0).into(),
-            // home: Geometry::Line(a.into()),
-            // home: (45.0, 45.0).into(),
+            home: GeometryCustom(a.clone().into()),
+            // home: GeometryCustom((45.0, 45.0).into()),
             // home: LineString(vec![Coord { x: 34.6, y: 34.6 }]),
         },
         Company {
@@ -302,19 +357,16 @@ async fn test_it() -> surrealdb::Result<()> {
             // nam: Uuid::new(),
             // home: Point::new(25.3, 39.4).into(),
             // home: Geometry::Line(b.into()),
-            // home: (63.0, 21.0).into(),
+            home: GeometryCustom((63.0, 21.0).into()),
             // location: Geometry::Point((45.0, 45.0).into()),
         },
     ];
-
-    println!(
-        "OPOOOOO____{}",
-        serde_json::to_value(&companies.clone()).unwrap()
-    );
+    // let a = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1., y: 1. });
+    // let b = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1.001, y: 1. });
     let xx = Company {
         id: Some(RecordId::from(("company", "lowo")).into()),
         // id: "company:1".into(),
-        name: "Acme Inc.".to_string(),
+        name: "Mana Inc.".to_string(),
         // founded: "1967-05-03".to_string(),
         // founded: Datetime::default(),
         // founders: vec![
@@ -327,30 +379,43 @@ async fn test_it() -> surrealdb::Result<()> {
         // ],
         // tags: vec!["foo".to_string(), "bar".to_string()],
         // nam: Uuid::new(), // location: (63.0, 21.0).into(),
-        // home: Geometry::Point((45.0, 45.0).into()),
+        // home: Geome(Geometry::Point((45.0, 45.0).into())),
+        home: GeometryCustom(a.clone().into()),
+        // home: Geome((63.0, 21.0).into()),
         // home: Geometry::Point(Point::new(20.2, 60.9)),
         // home: (63.0, 21.0).into(),
     };
 
-    println!("LOPERER{xx:#?}");
+    // let loc = serde_json::to_string(&xx.home).unwrap();
+    println!("companyMMMMMM: {}", serde_json::to_string(&xx).unwrap());
+    let loca = r#"{"type":"Point","coordinates":[65.0,21.0]}"#;
+    let json = r#"{
+    "type": "LineString",
+    "coordinates": [[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]]
+}"#;
+    println!("rererexxxx {}", geometry(&loca).unwrap().1);
+    let val = &serde_json::to_string(&a).unwrap();
+    println!("VAAAL {val}");
+    println!("rererexxxx2 {}", geometry(json).unwrap().1);
+    // println!("LOPERER{xx:#?}");
 
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await?;
 
-    // let results = query_insert::InsertStatement::new()
-    //     .insert(xx)
-    //     // .insert_all(companies)
-    //     .get_one(db)
-    //     // .get_many(db)
-    //     .await
-    //     .unwrap();
-    //
-    // println!("==========================================");
-    // println!("==========================================");
-    // println!(
-    //     "userQueryyy result: {}",
-    //     serde_json::to_string(&results).unwrap()
-    // );
+    let results = query_insert::InsertStatement::new()
+        .insert(xx.clone())
+        .insert_all(companies)
+        // .get_one(db.clone())
+        .get_many(db)
+        .await
+        .unwrap();
+
+    println!("==========================================");
+    println!("==========================================");
+    println!(
+        "userQueryyy result: {}",
+        serde_json::to_string(&results).unwrap()
+    );
     // // let mut results = results.await?;
     // println!("==========================================");
     // println!("==========================================");
@@ -400,32 +465,33 @@ async fn test_it() -> surrealdb::Result<()> {
     //     let mut results = db.query("
     // INSERT INTO company (name, founded) VALUES ('Acme Inc.', '1967-05-03'), ('Apple Inc.', '1976-04-01');
     // ");
-    let mut results = db
-        .query(
-            "
-    INSERT INTO company (id, name) VALUES (type::thing($tb, $id), $name);
-    ",
-        )
-        .bind(("tb", "company"))
-        .bind(("id", xx.id))
-        // .bind(("company", xx))
-        .bind(("name", xx.name));
-    println!("==========================================");
-    println!("==========================================");
-    println!("userQueryyy result: {:#?}", results);
-    let mut results = results.await?;
-    println!("==========================================");
-    println!("==========================================");
-    println!("userQueryyyAwaited result: {:#?}", results);
-    println!("==========================================");
-    println!("Value==========================================");
-    // println!(
-    //     "ompany: {}",
-    //     serde_json::to_string(&RecordId::from(("lowo", "kolo"))).unwrap()
-    // );
-    let user: Option<Company> = results.take(0).expect("shit");
-
-    println!("company: {}", serde_json::to_string(&user).unwrap());
+    // let mut results = db
+    //     .query(
+    //         "
+    // INSERT INTO company (id, name, home) VALUES (type::thing($tb, $id), $name, $home);
+    // ",
+    //     )
+    //     .bind(("tb", "company"))
+    //     .bind(("id", xx.id))
+    //     // .bind(("home", xx.home))
+    //     // .bind(("company", xx))
+    //     .bind(("name", xx.name));
+    // println!("==========================================");
+    // println!("==========================================");
+    // // println!("userQueryyy result: {:#?}", results);
+    // let mut results = results.await?;
+    // // println!("==========================================");
+    // // println!("==========================================");
+    // // println!("userQueryyyAwaited result: {:#?}", results);
+    // // println!("==========================================");
+    // // println!("Value==========================================");
+    // // // println!(
+    // // //     "ompany: {}",
+    // // //     serde_json::to_string(&RecordId::from(("lowo", "kolo"))).unwrap()
+    // // // );
+    // let user: Option<Value> = results.take(0).expect("shit");
+    //
+    // println!("company: {}", serde_json::to_string(&user).unwrap());
 
     // // let user: Vec<Company> = user;
     // println!("nama result: {}", serde_json::to_string(&user).unwrap());
@@ -516,4 +582,19 @@ async fn main() -> surrealdb::Result<()> {
 
     test_it().await.unwrap();
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn simple() {
+        let sql = "(51.509865, -0.118092)";
+        let res = geometry(sql);
+        assert!(res.is_ok());
+        let out = res.unwrap().1;
+        assert_eq!("(51.509865, -0.118092)", format!("{}", out));
+    }
 }

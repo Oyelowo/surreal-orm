@@ -7,7 +7,6 @@
 // use crate::api::Connection;
 // use crate::api::Result;
 // use indexmap::IndexMap;
-use surrealdb::
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json::json;
