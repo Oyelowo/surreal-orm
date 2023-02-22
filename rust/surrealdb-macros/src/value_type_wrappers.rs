@@ -6,6 +6,8 @@ use surrealdb::{
     sql::{self, thing, Geometry},
 };
 
+use crate::model_id::SurrealdbOrmError;
+
 #[derive(Debug, Serialize, Clone)]
 pub struct SurrealId(RecordId);
 
@@ -19,6 +21,23 @@ impl<'de> Deserialize<'de> for SurrealId {
     }
 }
 
+impl TryFrom<&str> for SurrealId {
+    // fn from(value: &str) -> Self {
+    //     Self(thing(&value.to_string()).unwrap())
+    // }
+
+    type Error = SurrealdbOrmError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        // TODO: Improve error handling
+        Ok(Self(thing(&value.to_string()).unwrap()))
+    }
+}
+// impl From<&str> for SurrealId {
+//     fn from(value: &str) -> Self {
+//         Self(thing(&value.to_string()).unwrap())
+//     }
+// }
 impl From<RecordId> for SurrealId {
     fn from(value: RecordId) -> Self {
         Self(value)

@@ -153,6 +153,7 @@ mod tests {
     use surrealdb_macros::db_field::{cond, empty};
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_select::{order, Order};
+    use surrealdb_macros::value_type_wrappers::SurrealId;
     use surrealdb_macros::{cond, query_select, DbFilter};
     use surrealdb_macros::{q, DbField};
     use test_case::test_case;
@@ -447,7 +448,7 @@ mod tests {
     fn multiplication_tests8() {
         use serde_json;
 
-        let sur_id = ("alien", "oyelowo");
+        let sur_id = SurrealId::try_from("alien:oyelowo").unwrap();
         let json = serde_json::to_string(&sur_id).unwrap();
         assert_eq!(json, "\"alien:oyelowo\"");
 
