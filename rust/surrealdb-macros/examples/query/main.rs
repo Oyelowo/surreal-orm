@@ -157,22 +157,50 @@ struct Person {
     name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-struct Manan(RecordId);
+#[derive(Debug, Serialize, Clone)]
+struct SurrealId(RecordId);
 
-impl From<RecordId> for Manan {
+impl<'de> Deserialize<'de> for SurrealId {
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        Ok(SurrealId(thing(&s).map_err(serde::de::Error::custom)?))
+    }
+}
+// impl<'de> Deserialize<'de> for Manan {
+//     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+//     where
+//         D: serde::Deserializer<'de>,
+//     {
+//         let s = String::deserialize(deserializer)?;
+//         let thing = thing(&s).map_err(serde::de::Error::custom)?;
+//         Ok(Manan(thing))
+//     }
+// }
+// impl<'de> Deserialize<'de> for Manan {
+//     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+//     where
+//         D: serde::Deserializer<'de>,
+//     {
+//         let thing = RecordId::deserialize(deserializer)?;
+//         Ok(Manan(thing))
+//     }
+// }
+impl From<RecordId> for SurrealId {
     fn from(value: RecordId) -> Self {
         Self(value)
     }
 }
 
-impl From<Manan> for RecordId {
-    fn from(value: Manan) -> Self {
+impl From<SurrealId> for RecordId {
+    fn from(value: SurrealId) -> Self {
         value.0
     }
 }
 
-impl Deref for Manan {
+impl Deref for SurrealId {
     type Target = RecordId;
 
     fn deref(&self) -> &Self::Target {
@@ -180,7 +208,7 @@ impl Deref for Manan {
     }
 }
 
-impl From<String> for Manan {
+impl From<String> for SurrealId {
     fn from(value: String) -> Self {
         value.split(":");
         let mut spl = value.split(':');
@@ -200,7 +228,7 @@ impl From<String> for Manan {
 struct Company {
     #[serde(skip_serializing_if = "Option::is_none")]
     // #[builder(default, setter(strip_option))]
-    id: Option<Manan>,
+    id: Option<SurrealId>,
     // id: String,
     // nam: Uuid,
     name: String,
@@ -391,7 +419,14 @@ async fn test_it() -> surrealdb::Result<()> {
     println!("userQueryyyAwaited result: {:#?}", results);
     println!("==========================================");
     println!("Value==========================================");
+    // println!(
+    //     "ompany: {}",
+    //     serde_json::to_string(&RecordId::from(("lowo", "kolo"))).unwrap()
+    // );
     let user: Option<Company> = results.take(0).expect("shit");
+
+    println!("company: {}", serde_json::to_string(&user).unwrap());
+
     // // let user: Vec<Company> = user;
     // println!("nama result: {}", serde_json::to_string(&user).unwrap());
     // println!("xrearXXXXX ---- = {}", serde_json::to_string(&mm).unwrap());
