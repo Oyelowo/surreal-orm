@@ -23,7 +23,9 @@ lib-common = { path = "./lib-common" }
 lib-my-macros = { path = "./lib-my-macros" }
 
 # surrealdb = { path = "./surrealdb", features = [
-surrealdb = { git = "https://github.com/surrealdb/surrealdb", branch = "main", features = [
+# https://github.com/Oyelowo/surrealdb/
+# surrealdb = { git = "https://github.com/surrealdb/surrealdb", branch = "main", features = [
+surrealdb = { git = "https://github.com/oyelowo/surrealdb", branch = "main", features = [
     "protocol-ws",
     "protocol-http",
     "kv-mem",
@@ -76,8 +78,8 @@ async-graphql = { version = "5.0.2", features = [
 ] }
 
 async-graphql-poem = "5.0.2"
-futures = "0.3.25"
-futures-util = "0.3.25"
+futures = "0.3.26"
+futures-util = "0.3.26"
 tokio = { version = "1.22.0", features = ["full"] }
 redis = { version = "0.22.1", features = [
     "tokio-comp",
@@ -150,6 +152,9 @@ bytes = "1.3.0"
 pin-project = "1.0.12"
 bevy_reflect = "0.9.1"
 
+# geo stuff
+geo = { version = "0.23.1", features = ["use-serde"] }
+
 # Maceos metapogramming lib
 syn = "1.0"
 quote = "1.0"
@@ -171,4 +176,3 @@ pretty_assertions = "1.3.0"
 tokio-test = "0.4.2"
 wiremock = "0.5.15"
 test-case = "2.2.2"
-
