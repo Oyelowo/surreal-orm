@@ -22,10 +22,6 @@ impl<'de> Deserialize<'de> for SurrealId {
 }
 
 impl TryFrom<&str> for SurrealId {
-    // fn from(value: &str) -> Self {
-    //     Self(thing(&value.to_string()).unwrap())
-    // }
-
     type Error = SurrealdbOrmError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
@@ -33,11 +29,7 @@ impl TryFrom<&str> for SurrealId {
         Ok(Self(thing(&value.to_string()).unwrap()))
     }
 }
-// impl From<&str> for SurrealId {
-//     fn from(value: &str) -> Self {
-//         Self(thing(&value.to_string()).unwrap())
-//     }
-// }
+
 impl From<RecordId> for SurrealId {
     fn from(value: RecordId) -> Self {
         Self(value)
