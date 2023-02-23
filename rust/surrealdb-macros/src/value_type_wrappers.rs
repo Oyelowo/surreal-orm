@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{iter::Skip, ops::Deref};
 
 use serde::{Deserialize, Serialize};
 use surrealdb::{
@@ -50,30 +50,6 @@ impl Deref for SurrealId {
     }
 }
 
-#[derive(Debug)]
-pub struct PolygonBuilder {
-    exterior: geo::LineString<f64>,
-    interiors: Vec<geo::LineString<f64>>,
-}
-
-impl PolygonBuilder {
-    pub fn new(exterior: geo::LineString<f64>) -> Self {
-        Self {
-            exterior,
-            interiors: Vec::new(),
-        }
-    }
-
-    pub fn add_interior(&mut self, interior: geo::LineString<f64>) -> &mut Self {
-        self.interiors.push(interior);
-        self
-    }
-
-    pub fn build(self) -> geo::Polygon<f64> {
-        geo::Polygon::new(self.exterior, self.interiors)
-    }
-}
-
 #[derive(Debug, Clone, Serialize)]
 pub struct GeometryCustom(pub Geometry);
 
@@ -108,38 +84,35 @@ impl<'de> Deserialize<'de> for GeometryCustom {
             },
         }
         let geo_type = GeometryType::deserialize(deserializer)?;
+
         let surreal_geometry = match geo_type {
             GeometryType::Point { coordinates } => {
-                sql::Geometry::Point(geo::Point::from(coordinates)).into()
+                sql::Geometry::Point(geo::Point::from(coordinates))
             }
-            GeometryType::LineString { coordinates } => {
-                sql::Geometry::Line(geo::LineString::from(
-                    coordinates
-                        .into_iter()
-                        .map(|c| geo::Coord { x: c[0], y: c[1] })
-                        .collect::<Vec<geo::Coord>>(),
-                ))
-            }
-            .into(),
+            GeometryType::LineString { coordinates } => sql::Geometry::Line(geo::LineString::from(
+                coordinates
+                    .into_iter()
+                    .map(|c| geo::Coord { x: c[0], y: c[1] })
+                    .collect::<Vec<geo::Coord>>(),
+            )),
 
-            GeometryType::Polygon { mut coordinates } => {
-                let interior = coordinates.split_off(1);
+            GeometryType::Polygon { coordinates } => {
                 let exterior = geo::LineString::from(
                     coordinates[0]
-                        .clone()
-                        .into_iter()
+                        .iter()
                         .map(|c| geo::Coord { x: c[0], y: c[1] })
                         .collect::<Vec<geo::Coord>>(),
                 );
-                let interiors = interior
+                let interiors = coordinates
                     .iter()
+                    .skip(1)
                     .map(|ls| {
                         ls.into_iter()
                             .map(|c| geo::Coord { x: c[0], y: c[1] })
                             .collect()
                     })
                     .collect();
-                sql::Geometry::Polygon(geo::Polygon::new(exterior, interiors)).into()
+                sql::Geometry::Polygon(geo::Polygon::new(exterior, interiors))
             }
             GeometryType::MultiPoint { coordinates } => {
                 sql::Geometry::MultiPoint(geo::MultiPoint::from(
@@ -148,7 +121,6 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                         .map(|c| geo::Point::from(c))
                         .collect::<Vec<geo::Point>>(),
                 ))
-                .into()
             }
             GeometryType::MultiLineString { coordinates } => {
                 sql::Geometry::MultiLine(geo::MultiLineString::new(
@@ -163,20 +135,19 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                         })
                         .collect(),
                 ))
-                .into()
             }
             GeometryType::MultiPolygon { coordinates } => {
                 let polygons = coordinates
                     .into_iter()
-                    .map(|mut p| {
-                        let interiors_poly = p.split_off(1);
+                    .map(|p| {
                         let exterior = geo::LineString::from(
                             p[0].iter()
                                 .map(|c| geo::Coord { x: c[0], y: c[1] })
                                 .collect::<Vec<geo::Coord>>(),
                         );
-                        let interiors = interiors_poly
+                        let interiors = p
                             .iter()
+                            .skip(1)
                             .map(|ls| {
                                 ls.into_iter()
                                     .map(|c| geo::Coord { x: c[0], y: c[1] })
@@ -186,132 +157,16 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                         geo::Polygon::new(exterior, interiors)
                     })
                     .collect();
-                sql::Geometry::MultiPolygon(geo::MultiPolygon::new(polygons)).into()
+                sql::Geometry::MultiPolygon(geo::MultiPolygon::new(polygons))
             }
             GeometryType::GeometryCollection { geometries } => {
                 let geometries: Vec<Geometry> = geometries.into_iter().map(|g| g.0).collect();
-                sql::Geometry::Collection(geometries).into()
+                sql::Geometry::Collection(geometries)
             }
         };
-        Ok(GeometryCustom(surreal_geometry))
+        Ok(surreal_geometry.into())
     }
 }
-// impl<'de> Deserialize<'de> for GeometryCustom {
-//     fn deserialize<D>(deserializer: D) -> std::result::Result<GeometryCustom, D::Error>
-//     where
-//         D: serde::Deserializer<'de>,
-//     {
-//         #[derive(Deserialize)]
-//         #[serde(tag = "type")]
-//         enum GeometryType {
-//             Point {
-//                 coordinates: (f64, f64),
-//             },
-//             LineString {
-//                 coordinates: Vec<(f64, f64)>,
-//             },
-//             Polygon {
-//                 coordinates: Vec<Vec<(f64, f64)>>,
-//             },
-//             MultiPoint {
-//                 coordinates: Vec<(f64, f64)>,
-//             },
-//             MultiLineString {
-//                 coordinates: Vec<Vec<(f64, f64)>>,
-//             },
-//             MultiPolygon {
-//                 coordinates: Vec<Vec<Vec<(f64, f64)>>>,
-//             },
-//             GeometryCollection {
-//                 geometries: Vec<GeometryCustom>,
-//             },
-//         }
-//
-//         // let ve = vec![];
-//         // ve.splitof
-//         let geo_type = GeometryType::deserialize(deserializer)?;
-//         let surreal_geometry = match geo_type {
-//             GeometryType::Point { coordinates } => {
-//                 sql::Geometry::Point(geo::Point::from(coordinates)).into()
-//             }
-//             GeometryType::LineString { coordinates } => {
-//                 sql::Geometry::Line(geo::LineString::from(coordinates))
-//             }
-//             // GeometryType::Polygon { coordinates } => {
-//             //     let (outer, inner) = coordinates.into_iter().map(geo::LineString::from).fold(
-//             //         (None, Vec::new()),
-//             //         |(outer, mut inner), ls| match outer {
-//             //             Some(_) => (outer, inner),
-//             //             None => {
-//             //                 inner.push(ls.into());
-//             //                 (Some(ls), inner)
-//             //             }
-//             //         },
-//             //     );
-//             //     Geometry::Polygon(geo::Polygon::new(outer.unwrap(), inner)).into()
-//             // }
-//             GeometryType::Polygon { mut coordinates } => {
-//                 let interior = coordinates.split_off(1);
-//                 let mut builder = PolygonBuilder::new(geo::LineString::from(
-//                     coordinates[0]
-//                         .iter()
-//                         .map(|&c| geo::Coord { x: c.0, y: c.1 })
-//                         .collect::<Vec<_>>(),
-//                 ));
-//
-//                 interior.iter().skip(1).for_each(|interior_coords| {
-//                     builder.add_interior(geo::LineString::from(
-//                         interior_coords
-//                             .iter()
-//                             .map(|&c| geo::Coord { x: c.0, y: c.1 })
-//                             .collect::<Vec<_>>(),
-//                     ));
-//                 });
-//
-//                 sql::Geometry::Polygon(builder.build()).into()
-//             }
-//             GeometryType::MultiPoint { coordinates } => {
-//                 sql::Geometry::MultiPoint(geo::MultiPoint::from(coordinates)).into()
-//             }
-//             GeometryType::MultiLineString { coordinates } => Geometry::MultiLine(
-//                 geo::MultiLineString::new(coordinates.into_iter().map(|ls| ls.into()).collect()),
-//             )
-//             .into(),
-//
-//             GeometryType::MultiPolygon { coordinates } => {
-//                 sql::Geometry::MultiPolygon(geo::MultiPolygon::new(
-//                     coordinates
-//                         .into_iter()
-//                         .map(|p| {
-//                             let mut builder = PolygonBuilder::new(geo::LineString::from(
-//                                 p[0].iter()
-//                                     .map(|&c| geo::Coord { x: c.0, y: c.1 })
-//                                     .collect::<Vec<_>>(),
-//                             ));
-//
-//                             for interior_coords in p.iter().skip(1) {
-//                                 builder.add_interior(geo::LineString::from(
-//                                     interior_coords
-//                                         .iter()
-//                                         .map(|&c| geo::Coord { x: c.0, y: c.1 })
-//                                         .collect::<Vec<_>>(),
-//                                 ));
-//                             }
-//                             builder.build()
-//                         })
-//                         .collect(),
-//                 ))
-//                 .into()
-//             }
-//             GeometryType::GeometryCollection { geometries } => {
-//                 let geometries: Vec<Geometry> = geometries.into_iter().map(|g| g.0).collect();
-//                 sql::Geometry::Collection(geometries).into()
-//             }
-//         };
-//
-//         Ok(surreal_geometry.into())
-//     }
-// }
 
 impl From<Geometry> for GeometryCustom {
     fn from(value: Geometry) -> Self {
