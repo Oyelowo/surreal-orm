@@ -9,6 +9,7 @@ use crate::SurrealdbNode;
 pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbNode> {
     // table: String,
     values: Vec<T>,
+    on_duplicate_key_update: Vec<String>,
 }
 
 impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
@@ -17,6 +18,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         Self {
             // table,
             values: Vec::new(),
+            on_duplicate_key_update: Vec::new(),
         }
     }
 
@@ -25,8 +27,18 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         self
     }
 
-    pub fn insert_all(&mut self, values: Vec<T>) -> &mut Self {
+    pub fn insert_many(&mut self, values: Vec<T>) -> &mut Self {
         self.values = values;
+        self
+    }
+
+    fn on_duplicate_key_update(&mut self, update: String) -> &mut Self {
+        // let update_map: HashMap<String, String> = updates
+        //     .iter()
+        //     .map(|(k, v)| (String::from(*k), String::from(*v)))
+        //     .collect();
+        // self.on_duplicate_key_update = (update_map);
+        self.on_duplicate_key_update.push(update);
         self
     }
 
