@@ -249,7 +249,7 @@ mod tests {
         db.use_ns("test").use_db("test").await?;
 
         let results = query_insert::InsertStatement::new()
-            .insert_all(companies)
+            .insert_many(companies)
             .get_many(db)
             .await
             .unwrap();
