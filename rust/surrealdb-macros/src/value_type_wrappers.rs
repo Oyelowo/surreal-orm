@@ -60,7 +60,9 @@ impl<'de> Deserialize<'de> for GeometryCustom {
     {
         #[derive(Deserialize)]
         #[serde(tag = "type")]
-        enum GeometryType {
+        enum GeometryType
+</* T: TryInto<f64> */>
+        {
             Point {
                 coordinates: [f64; 2],
             },
@@ -68,7 +70,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                 coordinates: Vec<[f64; 2]>,
             },
             Polygon {
-                coordinates: Vec<Vec<[f64; 2]>>,
+                coordinates: Vec<Vec<(String, String)>>,
             },
             MultiPoint {
                 coordinates: Vec<[f64; 2]>,
@@ -83,7 +85,10 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                 geometries: Vec<GeometryCustom>,
             },
         }
+
+        println!("ZOPPPPPP BEFORE");
         let geo_type = GeometryType::deserialize(deserializer)?;
+        println!("ZOPPPPPP AFTER");
 
         let surreal_geometry = match geo_type {
             GeometryType::Point { coordinates } => {
@@ -97,10 +102,20 @@ impl<'de> Deserialize<'de> for GeometryCustom {
             )),
 
             GeometryType::Polygon { coordinates } => {
+                println!("ZOPPPPPP");
                 let exterior = geo::LineString::from(
                     coordinates[0]
                         .iter()
-                        .map(|c| geo::Coord { x: c[0], y: c[1] })
+                        .map(|c: &(String, String)| {
+                            let x = 10;
+                            // let xx = c[0];
+                            // let xx = c.0;
+                            geo::Coord {
+                                x: string_to_f64(&c.0),
+                                y: string_to_f64(&c.1),
+                            }
+                            // geo::Coord { x: 35.2, y: 97.2 }
+                        })
                         .collect::<Vec<geo::Coord>>(),
                 );
                 let interiors = coordinates
@@ -108,11 +123,18 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                     .skip(1)
                     .map(|ls| {
                         ls.into_iter()
-                            .map(|c| geo::Coord { x: c[0], y: c[1] })
-                            .collect()
+                            .map(|c| {
+                                let xx = 34;
+                                // geo::Coord { x: c[0], y: c[1] }
+                                geo::Coord {
+                                    x: string_to_f64(&c.0),
+                                    y: string_to_f64(&c.1),
+                                }
+                            })
+                            .collect::<Vec<_>>()
                     })
-                    .collect();
-                sql::Geometry::Polygon(geo::Polygon::new(exterior, interiors))
+                    .collect::<Vec<_>>();
+                sql::Geometry::Polygon(geo::Polygon::new(exterior, vec![]))
             }
             GeometryType::MultiPoint { coordinates } => {
                 sql::Geometry::MultiPoint(geo::MultiPoint::from(
@@ -168,6 +190,10 @@ impl<'de> Deserialize<'de> for GeometryCustom {
     }
 }
 
+fn string_to_f64(string: &String) -> f64 {
+    // serde_json::to_string(&serde_json::to_string(string).unwrap())
+    string.parse().expect("numnopasse")
+}
 impl From<Geometry> for GeometryCustom {
     fn from(value: Geometry) -> Self {
         Self(value)
