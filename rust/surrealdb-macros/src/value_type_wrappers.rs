@@ -85,33 +85,31 @@ impl<'de> Deserialize<'de> for GeometryCustom {
         }
 
         let geo_type = GeometryType::deserialize(deserializer)?;
-        match geo_type {
-            GeometryType::Point { coordinates } => Ok(GeometryCustom(sql::Geometry::Point(
-                geo::Point::from(coordinates),
-            ))),
-            GeometryType::LineString { coordinates } => Ok(GeometryCustom(sql::Geometry::Line(
-                geo::LineString::from(coordinates),
-            ))),
-            GeometryType::Polygon { coordinates } => {
-                Ok(GeometryCustom(sql::Geometry::Polygon(geo::Polygon::new(
-                    geo::LineString::from(coordinates.clone().into_iter().next().unwrap()),
-                    coordinates
-                        .clone()
-                        .into_iter()
-                        .skip(1)
-                        .map(|ls| ls.into())
-                        .collect(),
-                ))))
+        let surreal_geometry = match geo_type {
+            GeometryType::Point { coordinates } => {
+                sql::Geometry::Point(geo::Point::from(coordinates)).into()
             }
-            GeometryType::MultiPoint { coordinates } => Ok(GeometryCustom(
-                sql::Geometry::MultiPoint(geo::MultiPoint::from(coordinates)),
-            )),
-            GeometryType::MultiLineString { coordinates } => Ok(GeometryCustom(
-                Geometry::MultiLine(geo::MultiLineString::new(
-                    coordinates.into_iter().map(|ls| ls.into()).collect(),
-                )),
-            )),
-            GeometryType::MultiPolygon { coordinates } => Ok(GeometryCustom(
+            GeometryType::LineString { coordinates } => {
+                sql::Geometry::Line(geo::LineString::from(coordinates))
+            }
+            GeometryType::Polygon { coordinates } => sql::Geometry::Polygon(geo::Polygon::new(
+                geo::LineString::from(coordinates.clone().into_iter().next().unwrap()),
+                coordinates
+                    .clone()
+                    .into_iter()
+                    .skip(1)
+                    .map(|ls| ls.into())
+                    .collect(),
+            ))
+            .into(),
+            GeometryType::MultiPoint { coordinates } => {
+                sql::Geometry::MultiPoint(geo::MultiPoint::from(coordinates)).into()
+            }
+            GeometryType::MultiLineString { coordinates } => Geometry::MultiLine(
+                geo::MultiLineString::new(coordinates.into_iter().map(|ls| ls.into()).collect()),
+            )
+            .into(),
+            GeometryType::MultiPolygon { coordinates } => {
                 sql::Geometry::MultiPolygon(geo::MultiPolygon::new(
                     coordinates
                         .into_iter()
@@ -122,13 +120,16 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                             )
                         })
                         .collect(),
-                )),
-            )),
+                ))
+                .into()
+            }
             GeometryType::GeometryCollection { geometries } => {
                 let geometries: Vec<Geometry> = geometries.into_iter().map(|g| g.0).collect();
-                Ok(GeometryCustom(sql::Geometry::Collection(geometries)))
+                sql::Geometry::Collection(geometries).into()
             }
-        }
+        };
+
+        Ok(surreal_geometry.into())
     }
 }
 
