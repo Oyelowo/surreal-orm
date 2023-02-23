@@ -404,7 +404,7 @@ async fn test_it() -> surrealdb::Result<()> {
 
     let results = query_insert::InsertStatement::new()
         .insert(xx.clone())
-        .insert_all(companies)
+        .insert_many(companies)
         // .get_one(db.clone())
         .get_many(db)
         .await
