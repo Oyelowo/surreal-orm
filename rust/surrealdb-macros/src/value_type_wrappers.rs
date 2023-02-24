@@ -118,7 +118,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                 sql::Geometry::MultiPoint(geo::MultiPoint::from(
                     coordinates
                         .into_iter()
-                        .map(|c| geo::Point::from(c.parse_value_to_coord()))
+                        .map(|c| c.parse_value_to_coord().into())
                         .collect::<Vec<geo::Point>>(),
                 ))
             }
