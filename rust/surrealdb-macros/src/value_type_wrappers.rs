@@ -1,4 +1,8 @@
-use std::{fmt, iter::Skip, ops::Deref};
+use std::{
+    fmt::{self, Display},
+    iter::Skip,
+    ops::Deref,
+};
 
 use serde::{
     de::{self, SeqAccess, Unexpected, Visitor},
@@ -109,71 +113,45 @@ impl<'de> Deserialize<'de> for GeometryCustom {
             )),
             GeometryType::Polygon { coordinates } => match coordinates {
                 PolygonCoordinates::F64(coords) => {
-                    let exterior = geo::LineString::from(
-                        coords
-                            .iter()
-                            .next()
-                            .unwrap_or(&vec![])
-                            .iter()
-                            .map(|c| {
-                                if let Some(coord) = try_parse_coord_f64(c) {
-                                    coord
-                                } else {
-                                    panic!("Invalid coordinate: {:?}", c)
-                                }
-                            })
-                            .collect::<Vec<geo::Coord<f64>>>(),
-                    );
-
-                    let interiors = coords
-                        .iter()
-                        .skip(1)
-                        .map(|ls| {
-                            ls.iter()
-                                .map(|c| {
-                                    if let Some(coord) = try_parse_coord_f64(c) {
-                                        coord
-                                    } else {
-                                        panic!("Invalid coordinate: {:?}", c)
-                                    }
-                                })
-                                .collect::<Vec<_>>()
-                        })
-                        .map(|coords| geo::LineString::from(coords))
-                        .collect::<Vec<geo::LineString>>();
-                    sql::Geometry::Polygon(geo::Polygon::new(exterior, interiors))
+                    // deserialize_polygon_from_coords(coords, |x, y| {
+                    //     try_parse_coord_f64(x.clone(), y.clone())
+                    sql::Geometry::Polygon(deserialize_polygon_from_coords(coords))
                 }
                 PolygonCoordinates::String(coords) => {
-                    let exterior = geo::LineString::from(
-                        coords[0]
-                            .iter()
-                            .map(|c| {
-                                if let Some(coord) = try_parse_coord_str(&c.0, &c.1) {
-                                    coord
-                                } else {
-                                    panic!("Invalid coordinateoooo: {:?}", c.clone())
-                                }
-                            })
-                            .collect::<Vec<geo::Coord<f64>>>(),
-                    );
-
-                    let interiors = coords
-                        .iter()
-                        .skip(1)
-                        .map(|ls| {
-                            ls.iter()
-                                .map(|c| {
-                                    if let Some(coord) = try_parse_coord_str(&c.0, &c.1) {
-                                        coord
-                                    } else {
-                                        panic!("Invalid coordinatexx: {:?}", c)
-                                    }
-                                })
-                                .collect::<Vec<_>>()
-                        })
-                        .map(|coords| geo::LineString::from(coords))
-                        .collect::<Vec<geo::LineString>>();
-                    sql::Geometry::Polygon(geo::Polygon::new(exterior, interiors))
+                    // deserialize_polygon_from_coords(coords, |ref x, ref y| {
+                    //     try_parse_coord_str(&x, &y)
+                    // })
+                    sql::Geometry::Polygon(deserialize_polygon_from_coords(coords))
+                    // let exterior = geo::LineString::from(
+                    //     coords[0]
+                    //         .iter()
+                    //         .map(|c| {
+                    //             if let Some(coord) = try_parse_coord_str(&c.0, &c.1) {
+                    //                 coord
+                    //             } else {
+                    //                 panic!("Invalid coordinateoooo: {:?}", c.clone())
+                    //             }
+                    //         })
+                    //         .collect::<Vec<geo::Coord<f64>>>(),
+                    // );
+                    //
+                    // let interiors = coords
+                    //     .iter()
+                    //     .skip(1)
+                    //     .map(|ls| {
+                    //         ls.iter()
+                    //             .map(|c| {
+                    //                 if let Some(coord) = try_parse_coord_str(&c.0, &c.1) {
+                    //                     coord
+                    //                 } else {
+                    //                     panic!("Invalid coordinatexx: {:?}", c)
+                    //                 }
+                    //             })
+                    //             .collect::<Vec<_>>()
+                    //     })
+                    //     .map(|coords| geo::LineString::from(coords))
+                    //     .collect::<Vec<geo::LineString>>();
+                    // sql::Geometry::Polygon(geo::Polygon::new(exterior, interiors))
                 }
             },
             GeometryType::MultiPoint { coordinates } => {
@@ -204,72 +182,68 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                     .map(|p| {
                         let xx = match p {
                             PolygonCoordinates::F64(coords) => {
-                                let exterior = geo::LineString::from(
-                                    coords
-                                        .iter()
-                                        .next()
-                                        .unwrap_or(&vec![])
-                                        .iter()
-                                        .map(|c| {
-                                            if let Some(coord) = try_parse_coord_f64(c) {
-                                                coord
-                                            } else {
-                                                panic!("Invalid coordinate: {:?}", c)
-                                            }
-                                        })
-                                        .collect::<Vec<geo::Coord<f64>>>(),
-                                );
-
-                                let interiors = coords
-                                    .iter()
-                                    .skip(1)
-                                    .map(|ls| {
-                                        ls.iter()
-                                            .map(|c| {
-                                                if let Some(coord) = try_parse_coord_f64(c) {
-                                                    coord
-                                                } else {
-                                                    panic!("Invalid coordinate: {:?}", c)
-                                                }
-                                            })
-                                            .collect::<Vec<_>>()
-                                    })
-                                    .map(|coords| geo::LineString::from(coords))
-                                    .collect::<Vec<geo::LineString>>();
-                                geo::Polygon::new(exterior, interiors)
+                                deserialize_polygon_from_coords(coords)
+                                // let exterior = geo::LineString::from(
+                                //     coords
+                                //         .iter()
+                                //         .next()
+                                //         .unwrap_or(&vec![])
+                                //         .iter()
+                                //         .map(|(x, y)| {
+                                //             try_parse_coord_f64(*x, *y)
+                                //                 .expect("Invalid coordinate: {x},{y}")
+                                //         })
+                                //         .collect::<Vec<geo::Coord<f64>>>(),
+                                // );
+                                //
+                                // let interiors = coords
+                                //     .iter()
+                                //     .skip(1)
+                                //     .map(|ls| {
+                                //         ls.iter()
+                                //             .map(|(x, y)| {
+                                //                 try_parse_coord_f64(*x, *y)
+                                //                     .expect("Invalid coordinate: {x},{y}")
+                                //             })
+                                //             .collect::<Vec<_>>()
+                                //     })
+                                //     .map(|coords| geo::LineString::from(coords))
+                                //     .collect::<Vec<geo::LineString>>();
+                                // geo::Polygon::new(exterior, interiors)
                             }
                             PolygonCoordinates::String(coords) => {
-                                let exterior = geo::LineString::from(
-                                    coords[0]
-                                        .iter()
-                                        .map(|c| {
-                                            if let Some(coord) = try_parse_coord_str(&c.0, &c.1) {
-                                                coord
-                                            } else {
-                                                panic!("Invalid coordinateoooo: {:?}", c.clone())
-                                            }
-                                        })
-                                        .collect::<Vec<geo::Coord<f64>>>(),
-                                );
-
-                                let interiors = coords
-                                    .iter()
-                                    .skip(1)
-                                    .map(|ls| {
-                                        ls.iter()
-                                            .map(|c| {
-                                                if let Some(coord) = try_parse_coord_str(&c.0, &c.1)
-                                                {
-                                                    coord
-                                                } else {
-                                                    panic!("Invalid coordinatexx: {:?}", c)
-                                                }
-                                            })
-                                            .collect::<Vec<_>>()
-                                    })
-                                    .map(|coords| geo::LineString::from(coords))
-                                    .collect::<Vec<geo::LineString>>();
-                                geo::Polygon::new(exterior, interiors)
+                                deserialize_polygon_from_coords(coords)
+                                // let exterior = geo::LineString::from(
+                                //     coords[0]
+                                //         .iter()
+                                //         .map(|c| {
+                                //             if let Some(coord) = try_parse_coord_str(&c.0, &c.1) {
+                                //                 coord
+                                //             } else {
+                                //                 panic!("Invalid coordinateoooo: {:?}", c.clone())
+                                //             }
+                                //         })
+                                //         .collect::<Vec<geo::Coord<f64>>>(),
+                                // );
+                                //
+                                // let interiors = coords
+                                //     .iter()
+                                //     .skip(1)
+                                //     .map(|ls| {
+                                //         ls.iter()
+                                //             .map(|c| {
+                                //                 if let Some(coord) = try_parse_coord_str(&c.0, &c.1)
+                                //                 {
+                                //                     coord
+                                //                 } else {
+                                //                     panic!("Invalid coordinatexx: {:?}", c)
+                                //                 }
+                                //             })
+                                //             .collect::<Vec<_>>()
+                                //     })
+                                //     .map(|coords| geo::LineString::from(coords))
+                                //     .collect::<Vec<geo::LineString>>();
+                                // geo::Polygon::new(exterior, interiors)
                             }
                         };
                         xx
@@ -287,11 +261,60 @@ impl<'de> Deserialize<'de> for GeometryCustom {
     }
 }
 
-fn try_parse_coord_f64(c: &(f64, f64)) -> Option<geo::Coord<f64>> {
-    Some(geo::Coord { x: c.0, y: c.1 })
+fn deserialize_polygon_from_coords<
+    T: CoordParser, /* + fmt::Debug, F: Fn(T) -> Option<geo::Coord> */
+>(
+    coords: Vec<Vec<(T)>>,
+    // try_parse_coord_f64: F,
+) -> geo::Polygon {
+    let exterior = geo::LineString::from(
+        coords
+            .iter()
+            .next()
+            .unwrap_or(&vec![])
+            .iter()
+            .map(|c| {
+                // if let Some(coord) = try_parse_coord_f64(c.0.into(), c.1.into()) {
+                <T as CoordParser>::parse_value_to_coord(c)
+            })
+            .collect::<Vec<geo::Coord<f64>>>(),
+    );
+
+    let interiors = coords
+        .iter()
+        .skip(1)
+        .map(|ls| {
+            ls.iter()
+                .map(|c| <T as CoordParser>::parse_value_to_coord(c))
+                .collect::<Vec<_>>()
+        })
+        .map(|coords| geo::LineString::from(coords))
+        .collect::<Vec<geo::LineString>>();
+    // sql::Geometry::Polygon(geo::Polygon::new(exterior, interiors))
+    geo::Polygon::new(exterior, interiors)
 }
 
-fn try_parse_coord_str(x: &String, y: &String) -> Option<geo::Coord<f64>> {
+trait CoordParser {
+    fn parse_value_to_coord(&self) -> geo::Coord;
+}
+
+impl CoordParser for (f64, f64) {
+    fn parse_value_to_coord(&self) -> geo::Coord {
+        try_parse_coord_f64(self).expect("Invalid coordinate: {self}")
+    }
+}
+
+impl CoordParser for (String, String) {
+    fn parse_value_to_coord(&self) -> geo::Coord {
+        try_parse_coord_str(self.clone()).expect("Invalid coordinate: {self}")
+    }
+}
+
+fn try_parse_coord_f64(&(x, y): &(f64, f64)) -> Option<geo::Coord<f64>> {
+    Some(geo::Coord { x, y })
+}
+
+fn try_parse_coord_str((x, y): (String, String)) -> Option<geo::Coord<f64>> {
     let x = x.parse::<f64>().ok();
     let y = y.parse::<f64>().ok();
     match (x, y) {
