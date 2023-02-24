@@ -72,31 +72,21 @@ impl<'de> Deserialize<'de> for GeometryCustom {
     where
         D: serde::Deserializer<'de>,
     {
+        type PointCoords = CoordinateValue;
         type PolygonCoords = Vec<Vec<CoordinateValue>>;
+        type LineCoords = Vec<CoordinateValue>;
+
         #[derive(Deserialize)]
         #[serde(tag = "type")]
         enum GeometryType {
-            Point {
-                coordinates: CoordinateValue,
-            },
-            LineString {
-                coordinates: Vec<CoordinateValue>,
-            },
-            Polygon {
-                coordinates: PolygonCoords,
-            },
-            MultiPoint {
-                coordinates: Vec<CoordinateValue>,
-            },
-            MultiLineString {
-                coordinates: Vec<Vec<CoordinateValue>>,
-            },
-            MultiPolygon {
-                coordinates: Vec<PolygonCoords>,
-            },
-            GeometryCollection {
-                geometries: Vec<GeometryCustom>,
-            },
+            Point { coordinates: PointCoords },
+            LineString { coordinates: LineCoords },
+            Polygon { coordinates: PolygonCoords },
+
+            MultiPoint { coordinates: Vec<PointCoords> },
+            MultiLineString { coordinates: Vec<LineCoords> },
+            MultiPolygon { coordinates: Vec<PolygonCoords> },
+            GeometryCollection { geometries: Vec<GeometryCustom> },
         }
 
         let geo_type = GeometryType::deserialize(deserializer)?;
@@ -109,7 +99,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                 coordinates
                     .into_iter()
                     .map(|c| c.parse_value_to_coord())
-                    .collect::<Vec<geo::Coord>>(),
+                    .collect::<Vec<_>>(),
             )),
             GeometryType::Polygon { coordinates } => {
                 sql::Geometry::Polygon(deserialize_polygon_from_coords(coordinates))
@@ -118,8 +108,8 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                 sql::Geometry::MultiPoint(geo::MultiPoint::from(
                     coordinates
                         .into_iter()
-                        .map(|c| c.parse_value_to_coord().into())
-                        .collect::<Vec<geo::Point>>(),
+                        .map(|c| c.parse_value_to_coord())
+                        .collect::<Vec<_>>(),
                 ))
             }
             GeometryType::MultiLineString { coordinates } => {
@@ -130,7 +120,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                             geo::LineString::from(
                                 ls.into_iter()
                                     .map(|c| c.parse_value_to_coord())
-                                    .collect::<Vec<geo::Coord>>(),
+                                    .collect::<Vec<_>>(),
                             )
                         })
                         .collect(),
@@ -144,7 +134,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                 sql::Geometry::MultiPolygon(geo::MultiPolygon::new(polygons))
             }
             GeometryType::GeometryCollection { geometries } => {
-                let geometries: Vec<Geometry> = geometries.into_iter().map(|g| g.0).collect();
+                let geometries = geometries.into_iter().map(|g| g.0).collect();
                 sql::Geometry::Collection(geometries)
             }
         };
