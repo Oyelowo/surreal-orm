@@ -63,6 +63,12 @@ enum CoordinateValue {
     F64((f64, f64)),
     String((String, String)),
 }
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum PolygonCoordinates {
+    F64(Vec<Vec<(f64, f64)>>),
+    String(Vec<Vec<(String, String)>>),
+}
 
 #[derive(Debug, Clone, Serialize)]
 pub struct GeometryCustom(pub Geometry);
