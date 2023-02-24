@@ -306,7 +306,7 @@ impl CoordParser for (f64, f64) {
 
 impl CoordParser for (String, String) {
     fn parse_value_to_coord(&self) -> geo::Coord {
-        try_parse_coord_str(self.clone()).expect("Invalid coordinate: {self}")
+        try_parse_coord_str(self).expect("Invalid coordinate: {self}")
     }
 }
 
@@ -314,7 +314,7 @@ fn try_parse_coord_f64(&(x, y): &(f64, f64)) -> Option<geo::Coord<f64>> {
     Some(geo::Coord { x, y })
 }
 
-fn try_parse_coord_str((x, y): (String, String)) -> Option<geo::Coord<f64>> {
+fn try_parse_coord_str((x, y): &(String, String)) -> Option<geo::Coord<f64>> {
     let x = x.parse::<f64>().ok();
     let y = y.parse::<f64>().ok();
     match (x, y) {
