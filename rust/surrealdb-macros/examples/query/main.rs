@@ -49,6 +49,7 @@ use surrealdb_macros::query_insert::updater;
 use surrealdb_macros::query_insert::Updater;
 use surrealdb_macros::value_type_wrappers::GeometryCustom;
 use surrealdb_macros::value_type_wrappers::SurrealId;
+use surrealdb_macros::DbField;
 use surrealdb_macros::SurId;
 fn mana() {
     #[derive(Serialize, Deserialize)]
@@ -603,6 +604,7 @@ async fn main() -> surrealdb::Result<()> {
     let a = updater("e").plus_equal(sql::Geometry::Point(point));
     println!("a = {a}");
 
+    let a = updater("e").plus_equal(sql::Geometry::Polygon(poly.clone()));
     let a = updater("e").plus_equal(sql::Geometry::Polygon(poly));
     println!("a = {a}");
 
@@ -615,6 +617,7 @@ async fn main() -> surrealdb::Result<()> {
     let a = updater("e").decrement_by(923.54);
     println!("a = {a}");
     updater("e").increment_by("crm");
+    DbField::new("d".to_string()).equals(5);
     Ok(())
 }
 
