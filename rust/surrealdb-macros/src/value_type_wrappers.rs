@@ -97,7 +97,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
             }
             GeometryType::LineString { coordinates } => sql::Geometry::Line(geo::LineString::from(
                 coordinates
-                    .into_iter()
+                    .iter()
                     .map(|c| c.parse_value_to_coord())
                     .collect::<Vec<_>>(),
             )),
@@ -107,7 +107,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
             GeometryType::MultiPoint { coordinates } => {
                 sql::Geometry::MultiPoint(geo::MultiPoint::from(
                     coordinates
-                        .into_iter()
+                        .iter()
                         .map(|c| c.parse_value_to_coord())
                         .collect::<Vec<_>>(),
                 ))
@@ -115,7 +115,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
             GeometryType::MultiLineString { coordinates } => {
                 sql::Geometry::MultiLine(geo::MultiLineString::new(
                     coordinates
-                        .into_iter()
+                        .iter()
                         .map(|ls| {
                             geo::LineString::from(
                                 ls.into_iter()
