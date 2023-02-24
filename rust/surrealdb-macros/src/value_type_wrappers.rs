@@ -59,6 +59,12 @@ impl Deref for SurrealId {
 
 #[derive(Deserialize)]
 #[serde(untagged)]
+enum CoordinateValue {
+    F64((f64, f64)),
+    String((String, String)),
+}
+#[derive(Deserialize)]
+#[serde(untagged)]
 enum PolygonCoordinates {
     F64(Vec<Vec<(f64, f64)>>),
     String(Vec<Vec<(String, String)>>),
@@ -76,19 +82,19 @@ impl<'de> Deserialize<'de> for GeometryCustom {
         #[serde(tag = "type")]
         enum GeometryType {
             Point {
-                coordinates: [f64; 2],
+                coordinates: CoordinateValue,
             },
             LineString {
-                coordinates: Vec<[f64; 2]>,
+                coordinates: Vec<CoordinateValue>,
             },
             Polygon {
                 coordinates: PolygonCoordinates,
             },
             MultiPoint {
-                coordinates: Vec<[f64; 2]>,
+                coordinates: Vec<CoordinateValue>,
             },
             MultiLineString {
-                coordinates: Vec<Vec<[f64; 2]>>,
+                coordinates: Vec<Vec<CoordinateValue>>,
             },
             MultiPolygon {
                 coordinates: Vec<PolygonCoordinates>,
@@ -102,12 +108,12 @@ impl<'de> Deserialize<'de> for GeometryCustom {
 
         let surreal_geometry = match geo_type {
             GeometryType::Point { coordinates } => {
-                sql::Geometry::Point(geo::Point::from(coordinates))
+                sql::Geometry::Point(geo::Point::from(coordinates.parse_value_to_coord()))
             }
             GeometryType::LineString { coordinates } => sql::Geometry::Line(geo::LineString::from(
                 coordinates
                     .into_iter()
-                    .map(|c| geo::Coord { x: c[0], y: c[1] })
+                    .map(|c| c.parse_value_to_coord())
                     .collect::<Vec<geo::Coord>>(),
             )),
             GeometryType::Polygon { coordinates } => match coordinates {
@@ -122,7 +128,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                 sql::Geometry::MultiPoint(geo::MultiPoint::from(
                     coordinates
                         .into_iter()
-                        .map(|c| geo::Point::from(c))
+                        .map(|c| geo::Point::from(c.parse_value_to_coord()))
                         .collect::<Vec<geo::Point>>(),
                 ))
             }
@@ -133,7 +139,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                         .map(|ls| {
                             geo::LineString::from(
                                 ls.into_iter()
-                                    .map(|c| geo::Coord { x: c[0], y: c[1] })
+                                    .map(|c| c.parse_value_to_coord())
                                     .collect::<Vec<geo::Coord>>(),
                             )
                         })
@@ -161,21 +167,14 @@ impl<'de> Deserialize<'de> for GeometryCustom {
     }
 }
 
-fn deserialize_polygon_from_coords<
-    T: CoordParser, /* + fmt::Debug, F: Fn(T) -> Option<geo::Coord> */
->(
-    coords: Vec<Vec<T>>,
-) -> geo::Polygon {
+fn deserialize_polygon_from_coords<T: CoordParser>(coords: Vec<Vec<T>>) -> geo::Polygon {
     let exterior = geo::LineString::from(
         coords
             .iter()
             .next()
             .unwrap_or(&vec![])
             .iter()
-            .map(|c| {
-                // if let Some(coord) = try_parse_coord_f64(c.0.into(), c.1.into()) {
-                <T as CoordParser>::parse_value_to_coord(c)
-            })
+            .map(|c| <T as CoordParser>::parse_value_to_coord(c))
             .collect::<Vec<geo::Coord<f64>>>(),
     );
 
@@ -195,7 +194,16 @@ fn deserialize_polygon_from_coords<
 trait CoordParser {
     fn parse_value_to_coord(&self) -> geo::Coord;
 }
-
+impl CoordParser for CoordinateValue {
+    fn parse_value_to_coord(&self) -> geo::Coord {
+        match self {
+            CoordinateValue::F64(coord_f64) => coord_f64.parse_value_to_coord(),
+            CoordinateValue::String(coord_stringified_f64) => {
+                coord_stringified_f64.parse_value_to_coord()
+            }
+        }
+    }
+}
 impl CoordParser for (f64, f64) {
     fn parse_value_to_coord(&self) -> geo::Coord {
         Some(geo::Coord {
