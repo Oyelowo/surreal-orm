@@ -119,8 +119,9 @@ impl ToTokens for FieldsGetterOpts {
                         #table_name_str
                     }
                     
-                    fn get_key(&self) -> ::std::option::Option<&#crate_name::SurId>{
-                        self.id.as_ref()
+                    fn get_key<T: From<#crate_name::RecordId>>(self) -> ::std::option::Option<T>{
+                        let record_id = self.id.map(|id| #crate_name::RecordId::from(id).into());
+                        record_id
                     }
                 }
                 

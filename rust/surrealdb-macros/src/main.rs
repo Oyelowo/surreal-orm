@@ -17,8 +17,7 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Reference, Relate},
-    model_id::SurId,
-    SurrealdbEdge, SurrealdbNode,
+    RecordId, SurrealdbEdge, SurrealdbNode,
 };
 use typed_builder::TypedBuilder;
 
@@ -29,7 +28,7 @@ use typed_builder::TypedBuilder;
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     first_name: String,
     last_name: String,
 
@@ -57,7 +56,7 @@ pub struct Student {
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
 
     // #[surrealdb(link_one = "Book", skip_serializing)]
     r#in: In,
@@ -73,7 +72,7 @@ type StudentWritesBook = Writes<Student, Book>;
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     title: String,
 }
 
@@ -83,7 +82,7 @@ pub struct Book {
 pub struct Blog {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<SurId>,
+    id: Option<RecordId>,
     content: String,
 }
 
@@ -94,6 +93,122 @@ pub struct Blog {
 //         .title;
 // }
 fn main() {
+    use serde::{Deserialize, Serialize};
+    use serde_json::Result;
+    use serde_json::{Map, Value};
+
+    #[derive(Serialize, Deserialize)]
+    struct Country {
+        title: String,
+        continent: String,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    struct Person {
+        name: String,
+        age: u8,
+        countries: Vec<Country>,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    struct Address {
+        street: String,
+        city: String,
+        countries: Vec<Country>,
+        owner: Person,
+    }
+
+    fn print_an_address() -> Result<String> {
+        // Some data structure.
+
+        let address = Address {
+            street: "10 Downing Street".to_owned(),
+            city: "London".to_owned(),
+            countries: vec![
+                Country {
+                    title: "Canada".into(),
+                    continent: "NA".into(),
+                },
+                Country {
+                    title: "finland".into(),
+                    continent: "EU".into(),
+                },
+            ],
+            owner: Person {
+                name: "Oyelowo".into(),
+                age: 90,
+                countries: vec![
+                    Country {
+                        title: "Canada".into(),
+                        continent: "NA".into(),
+                    },
+                    Country {
+                        title: "finland".into(),
+                        continent: "EU".into(),
+                    },
+                ],
+            },
+        };
+
+        //
+        // insert.values(address);
+        //
+        // insert(Company {
+        //     name: "SurrealDB".into(),
+        //     founded: Date(2021-09-10)
+        // })
+        // [("name", String("SurrealDB")), ("founded", Date(2021-09-10))]
+        //
+        // INSERT INTO company (name, founded) VALUES ($name, $founded);
+        //
+        //
+        // INSERT INTO company (name, founded) VALUES ('SurrealDB', '2021-09-10');
+        //
+        // INSERT INTO company (name, founded) VALUES ($name, $founded);
+        // bindings: [
+        //           (name, 'SurrealDB')
+        //           (founded, '2021-09-10')
+        // ]
+        //
+        // INSERT INTO company (name, founded) VALUES ($arg1, $arg2);
+        // bindings: [
+        //           (arg1, 'SurrealDB')
+        //           (arg2, '2021-09-10')
+        // ]
+        //
+        // [("street", String("10 Downing Street")), ("city", String("London")), ("countries", Array [Object {"title": String("Canada"), "continent": String("NA")}, Object {"title": String("finland"), "continent": String("E
+        // U")}]), ("owner", Object {"name": String("Oyelowo"), "age": Number(90), "countries": Array [Object {"title": String("Canada"), "continent": String("NA")}, Object {"title": String("finland"), "continent": String("
+        // EU")}]})]                                                                                                                                      git:(204-surrealdb-orm-implement-fully-compliant-insert-query|✚2⚑20
+        //
+        //
+        //
+        //
+        // Serialize it to a JSON string.
+        let j = serde_json::to_string(&address)?;
+
+        // Print, write to a file, or send to an HTTP server.
+
+        // println!("ADDRES = {}", j);
+
+        Ok(j)
+    }
+    // print_an_address().unwrap();
+    fn json_to_vec(json: &str) -> Vec<(String, Value)> {
+        let parsed: Map<String, Value> = serde_json::from_str(json).unwrap();
+
+        parsed
+            .into_iter()
+            .map(|(key, value)| (key, value))
+            .collect()
+    }
+
+    // fn dmain() {
+    let json = r#"{"key1": "value1", "key2": 42}"#;
+
+    let result = json_to_vec(print_an_address().unwrap().as_str());
+
+    println!("{:?}", result);
+    // }
     // let book = Book {
     //     id: Some("book:1".try_into().unwrap()),
     //     title: "ere".into(),

@@ -8,9 +8,12 @@ Email: oyelowooyedayo@gmail.com
 pub use model_id::SurId;
 pub mod db_field;
 pub mod operators_macros;
-pub mod query_builder;
+pub mod query_insert;
+pub mod query_select;
+pub mod value_type_wrappers;
+// pub mod querydb;
 pub mod prelude {
-    use super::query_builder;
+    use super::query_select;
 }
 
 pub mod links;
@@ -18,12 +21,14 @@ pub mod model_id;
 
 pub use db_field::DbField;
 pub use db_field::DbFilter;
+pub use surrealdb::opt::RecordId;
 
 pub trait SurrealdbNode {
     type Schema;
     type TableNameChecker;
     fn schema() -> Self::Schema;
-    fn get_key(&self) -> ::std::option::Option<&SurId>;
+    // fn get_key<T: Into<RecordId>>(&self) -> ::std::option::Option<&T>;
+    fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
     fn get_table_name() -> &'static str;
 }
 
@@ -35,7 +40,8 @@ pub trait SurrealdbEdge {
 
     fn schema() -> Self::Schema;
     fn get_table_name() -> &'static str;
-    fn get_key(&self) -> ::std::option::Option<&SurId>;
+    // fn get_key(&self) -> ::std::option::Option<&SurId>;
+    fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
 }
 
 // pub enum Clause {

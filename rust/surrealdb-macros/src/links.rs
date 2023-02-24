@@ -8,7 +8,7 @@ use super::*;
 #[serde(untagged)]
 pub enum Reference<V: SurrealdbNode> {
     FetchedValue(V),
-    Id(SurId),
+    Id(RecordId),
     Null,
 }
 
@@ -22,14 +22,14 @@ where
     ///
     /// Panics if .
     pub fn from_model(model: impl SurrealdbNode) -> Self {
-        let x = model.get_key();
+        let x = model.get_key::<RecordId>();
         Self::Id(
             x.expect("Id not found. Make sure Id exists for this model")
                 .to_owned(),
         )
     }
 
-    pub fn get_id(&self) -> Option<&SurId> {
+    pub fn get_id(&self) -> Option<&RecordId> {
         match &self {
             Self::Id(v) => Some(v),
             _ => None,
@@ -95,7 +95,7 @@ macro_rules! impl_from_model_for_ref_type {
     ($surrealdb_node_generics:ty, $reference_type:ty) => {
         impl<V: SurrealdbNode> std::convert::From<$surrealdb_node_generics> for $reference_type {
             fn from(model: $surrealdb_node_generics) -> Self {
-                let x = model.get_key();
+                let x = model.get_key::<RecordId>();
                 let xx = match x {
                     Some(id) => {
                         let bb = id.clone();
@@ -107,9 +107,11 @@ macro_rules! impl_from_model_for_ref_type {
             }
         }
 
-        impl<V: SurrealdbNode> std::convert::From<&$surrealdb_node_generics> for $reference_type {
+        impl<V: SurrealdbNode + Clone> std::convert::From<&$surrealdb_node_generics>
+            for $reference_type
+        {
             fn from(model: &$surrealdb_node_generics) -> Self {
-                let x = model.clone().get_key();
+                let x = model.clone().get_key::<RecordId>();
                 match x {
                     Some(x) => Self(Reference::Id(x.to_owned()).into()),
                     None => Self(Reference::Null.into()),
@@ -124,7 +126,7 @@ impl<V: SurrealdbNode> std::convert::From<Vec<V>> for LinkMany<V> {
         let xx = model_vec
             .into_iter()
             .map(|m| {
-                let x = m.get_key();
+                let x = m.get_key::<RecordId>();
                 let xx = match x {
                     Some(id) => {
                         let bb = id.clone();
@@ -190,7 +192,7 @@ macro_rules! impl_utils_for_ref_vec {
             }
 
             /// Returns just the keys of the foreign field if available, otherwise, None
-            pub fn keys(&self) -> Option<Vec<&SurId>> {
+            pub fn keys(&self) -> Option<Vec<&RecordId>> {
                 self.0
                     .iter()
                     .map(|m| match m {
