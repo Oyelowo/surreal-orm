@@ -198,13 +198,24 @@ trait CoordParser {
 
 impl CoordParser for (f64, f64) {
     fn parse_value_to_coord(&self) -> geo::Coord {
-        try_parse_coord_f64(self).expect("Invalid coordinate: {self}")
+        Some(geo::Coord {
+            x: self.0,
+            y: self.1,
+        })
+        .expect("Invalid coordinate: {self}")
     }
 }
 
 impl CoordParser for (String, String) {
     fn parse_value_to_coord(&self) -> geo::Coord {
-        try_parse_coord_str(self).expect("Invalid coordinate: {self}")
+        let x = self.0.parse::<f64>().ok();
+        let y = self.1.parse::<f64>().ok();
+
+        match (x, y) {
+            (Some(x), Some(y)) => Some(geo::Coord { x, y }),
+            (_, _) => None,
+        }
+        .expect("Invalid coordinate: {self}")
     }
 }
 
