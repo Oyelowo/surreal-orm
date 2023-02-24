@@ -124,17 +124,45 @@ mod tests {
     #[tokio::test]
     async fn polygon() -> surrealdb::Result<()> {
         let polygon = polygon![
-            (x: 0.0, y: 0.0),
-            (x: 4.0, y: 0.0),
-            (x: 4.0, y: 1.0),
-            (x: 1.0, y: 1.0),
-            (x: 1.0, y: 4.0),
-            (x: 0.0, y: 4.0),
-            (x: 0.0, y: 0.0),
+                (x: -111., y: 45.),
+                (x: -111., y: 41.),
+                (x: -104., y: 41.),
+                (x: -104., y: 45.),
+            // (x: 0.0, y: 0.0),
+            // (x: 4.0, y: 0.0),
+            // (x: 4.0, y: 1.0),
+            // (x: 1.0, y: 1.0),
+            // (x: 1.0, y: 4.0),
+            // (x: 0.0, y: 4.0),
+            // (x: 0.0, y: 0.0),
         ];
-
+        //
         let company = create_geom_test(polygon).await?;
         insta::assert_snapshot!(company);
+
+        let poly = polygon!(
+            exterior: [
+                (x: -111., y: 45.),
+                (x: -111., y: 41.),
+                (x: -104., y: 41.),
+                (x: -104., y: 45.),
+            ],
+            interiors: [
+                [
+                    (x: -110., y: 44.),
+                    (x: -110., y: 42.),
+                    (x: -105., y: 42.),
+                    (x: -105., y: 44.),
+                ],
+            ],
+        );
+
+        let company_complex = create_geom_test(poly).await?;
+        println!(
+            "ZMZMZMZM {}",
+            serde_json::to_string(&company_complex).unwrap()
+        );
+        insta::assert_snapshot!(company_complex);
         Ok(())
     }
 
@@ -190,7 +218,24 @@ mod tests {
             ]),
             vec![],
         );
-        let multi_polygon = MultiPolygon(vec![polygon1, polygon2]);
+        let poly3 = polygon!(
+            exterior: [
+                (x: -111., y: 45.),
+                (x: -111., y: 41.),
+                (x: -104., y: 41.),
+                (x: -104., y: 45.),
+            ],
+            interiors: [
+                [
+                    (x: -110., y: 44.),
+                    (x: -110., y: 42.43),
+                    (x: -105., y: 42.),
+                    (x: -105., y: 44.),
+                ],
+            ],
+        );
+        let multi_polygon = MultiPolygon(vec![polygon1, polygon2, poly3]);
+        insta::assert_snapshot!(serde_json::to_string(&multi_polygon).unwrap());
         let company = create_geom_test(multi_polygon).await?;
         insta::assert_snapshot!(company);
         Ok(())
