@@ -23,7 +23,6 @@ use surrealdb::engine::local::Mem;
 use surrealdb::opt::auth::Root;
 use surrealdb::opt::RecordId;
 use surrealdb::sql;
-use surrealdb::sql::geometry;
 use surrealdb::sql::thing;
 use surrealdb::sql::Datetime;
 use surrealdb::sql::Geometry;
@@ -169,82 +168,360 @@ struct Person {
     name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "company")]
 struct Company {
-    id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[builder(default, setter(strip_option))]
+    id: Option<SurrealId>,
+    // id: String,
+    // nam: Uuid,
+    name: String,
+    // founded: Datetime,
+    // founders: Vec<Person>,
+    // tags: Vec<String>,
+    // location: Geometry,
     home: GeometryCustom,
 }
 
+// {
+//     type: "Point",
+//     coordinates: [-0.118092, 51.509865],
+// }
+//
+//
+//
+// journey
+// UPDATE city:london SET centre = {
+//     type: "Point",
+//     coordinates: [-0.118092, 51.509865],
+// };
+//
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct City {
+    name: String,
+    centre: Geometry,
+}
 async fn test_it() -> surrealdb::Result<()> {
-    let polygon = polygon![
-                (x: -111., y: 45.),
-                (x: -111., y: 41.),
-                (x: -104., y: 41.),
-                (x: -104., y: 45.),
-    ];
+    // async fn test_it() {
+    let a = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1., y: 1. });
+    let b = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1.001, y: 1. });
     //
+    // println!(
+    //     "OPOOOOO____{}",
+    //     serde_json::to_value(&companies.clone()).unwrap()
+    // );
+    let a = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1., y: 1. });
 
-    let company_1 = Company {
-        id: "company:1".to_string(),
-        home: GeometryCustom(polygon.into()),
+    let a = LineString::from(a);
+    let b = LineString::from(b);
+    // let a = MultiPoint::from(a);
+    // let a: MultiPoint<_> = vec![(0., 0.), (1., 2.)].into();
+    // let a: MultiLineString<_> = vec![(0., 0.), (1., 2.)].into();
+    // let a: MultiLineString<_> = vec![a, b].into();
+
+    let a = polygon![
+        (x: 0.0, y: 0.0),
+        (x: 4.0, y: 0.0),
+        (x: 4.0, y: 1.0),
+        (x: 1.0, y: 1.0),
+        (x: 1.0, y: 4.0),
+        (x: 0.0, y: 4.0),
+        (x: 0.0, y: 0.0),
+    ];
+    let a = point! {
+        x: 40.02f64,
+        y: 116.34,
+    };
+    // let a = (33f64, 44f64);
+    let a = Point::new(0.0, 0.0); // create a point at the origin
+    let a = Point::from((45.0, 90.0)); // cr
+                                       //
+                                       //
+                                       // Coordinate(Coord{})
+    let a = LineString(vec![
+        Coordinate::from((0.0, 0.0)),
+        Coordinate::from((1.0, 1.0)),
+        Coordinate::from((2.0, 0.0)),
+    ]);
+    let a = LineString(vec![
+        Coord {
+            x: -122.33583,
+            y: 47.60621,
+        },
+        Coord {
+            x: -122.33583,
+            y: 47.60622,
+        },
+        Coord {
+            x: -122.33584,
+            y: 47.60622,
+        },
+        Coord {
+            x: -122.33584,
+            y: 47.60621,
+        },
+        Coord {
+            x: -122.33583,
+            y: 47.60621,
+        },
+    ]);
+    let points = vec![
+        Coord { x: 0.0, y: 0.0 },
+        Coord { x: 1.0, y: 1.0 },
+        Coord { x: 2.0, y: 2.0 },
+    ];
+    // let multipoint = MultiPoint(points);
+    // let a = MultiPoint(vec![Point::new(0.0, 0.0), Point::new(1.0, 1.0)]);
+    let linestring1 = LineString(vec![
+        Coord { x: 0.0, y: 0.0 },
+        Coord { x: 1.0, y: 1.0 },
+        Coord { x: 2.0, y: 2.0 },
+    ]);
+    let linestring2 = LineString(vec![
+        Coord { x: 3.0, y: 3.0 },
+        Coord { x: 4.0, y: 4.0 },
+        Coord { x: 5.0, y: 5.0 },
+    ]);
+    let a = MultiLineString(vec![linestring1, linestring2]);
+    let polygon1 = Polygon::new(
+        LineString(vec![
+            Coord { x: 0.0, y: 0.0 },
+            Coord { x: 1.0, y: 1.0 },
+            Coord { x: 2.0, y: 2.0 },
+            Coord { x: 0.0, y: 0.0 },
+        ]),
+        vec![],
+    );
+    let polygon2 = Polygon::new(
+        LineString(vec![
+            Coord { x: 3.0, y: 3.0 },
+            Coord { x: 4.0, y: 4.0 },
+            Coord { x: 5.0, y: 5.0 },
+            Coord { x: 3.0, y: 3.0 },
+        ]),
+        vec![],
+    );
+    let a = MultiPolygon(vec![polygon1, polygon2]);
+    let point = Point(Coordinate { x: 0.0, y: 0.0 });
+    let linestring = LineString(vec![
+        Coordinate { x: 1.0, y: 1.0 },
+        Coordinate { x: 2.0, y: 2.0 },
+    ]);
+    let geometry_collection = GeometryCollection(vec![
+        geo::Geometry::Point(point),
+        geo::Geometry::LineString(linestring),
+    ]);
+    let a = Geometry::from(a);
+
+    let companies = vec![
+        Company {
+            id: None,
+            // id: "company:1".into(),
+            name: "Acme Inc.".to_string(),
+            // founded: "1967-05-03".to_string(),
+            // founded: Datetime::default(),
+            //
+            // founders: vec![
+            //     Person {
+            //         name: "John Doe".to_string(),
+            //     },
+            //     Person {
+            //         name: "Jane Doe".to_string(),
+            //     },
+            // ],
+            // tags: vec!["foo".to_string(), "bar".to_string()],
+            // nam: Uuid::new(), // location: Geometry::Point((45.0, 45.0).into()),
+            // location: (45.0, 45.0).into(),
+            home: GeometryCustom(a.clone().into()),
+            // home: GeometryCustom((45.0, 45.0).into()),
+            // home: LineString(vec![Coord { x: 34.6, y: 34.6 }]),
+        },
+        Company {
+            id: None,
+            // id: "company:2".into(),
+            name: "Apple Inc.".to_string(),
+            // founded: "1967-05-03".to_string(),
+            // founded: Datetime::default(),
+            // founders: vec![
+            //     Person {
+            //         name: "John Doe".to_string(),
+            //     },
+            //     Person {
+            //         name: "Jane Doe".to_string(),
+            //     },
+            // ],
+            // tags: vec!["foo".to_string(), "bar".to_string()],
+            // nam: Uuid::new(),
+            // home: Point::new(25.3, 39.4).into(),
+            // home: Geometry::Line(b.into()),
+            home: GeometryCustom((63.0, 21.0).into()),
+            // location: Geometry::Point((45.0, 45.0).into()),
+        },
+    ];
+    // let a = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1., y: 1. });
+    // let b = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1.001, y: 1. });
+    let xx = Company {
+        id: Some(RecordId::from(("company", "lowo")).into()),
+        // id: "company:1".into(),
+        name: "Mana Inc.".to_string(),
+        // founded: "1967-05-03".to_string(),
+        // founded: Datetime::default(),
+        // founders: vec![
+        //     Person {
+        //         name: "John Doe".to_string(),
+        //     },
+        //     Person {
+        //         name: "Jane Doe".to_string(),
+        //     },
+        // ],
+        // tags: vec!["foo".to_string(), "bar".to_string()],
+        // nam: Uuid::new(), // location: (63.0, 21.0).into(),
+        // home: Geome(Geometry::Point((45.0, 45.0).into())),
+        home: GeometryCustom(a.clone().into()),
+        // home: Geome((63.0, 21.0).into()),
+        // home: Geometry::Point(Point::new(20.2, 60.9)),
+        // home: (63.0, 21.0).into(),
     };
 
-    println!("=========CASE 1==========================");
-    println!("==========================================");
+    // let loc = serde_json::to_string(&xx.home).unwrap();
+    println!("companyMMMMMM: {}", serde_json::to_string(&xx).unwrap());
+    let loca = r#"{"type":"Point","coordinates":[65.0,21.0]}"#;
+    let json = r#"{
+    "type": "LineString",
+    "coordinates": [[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]]
+}"#;
+    let val = &serde_json::to_string(&a).unwrap();
+    println!("VAAAL {val}");
+    // println!("LOPERER{xx:#?}");
+
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await?;
 
-    let results = db
-        .query("INSERT INTO company $company;")
-        .bind(("company", company_1));
-    let mut results = results.await?;
-    let complex_polygon_properly_deserialized: Option<Company> =
-        results.take(0).expect("Should work");
+    let results = query_insert::InsertStatement::new()
+        .insert(xx.clone())
+        .insert_many(companies)
+        // .get_one(db.clone())
+        .get_many(db)
+        .await
+        .unwrap();
 
-    println!(
-        "company: {}",
-        serde_json::to_string(&complex_polygon_properly_deserialized).unwrap()
-    );
-
-    println!("=========CASE 2==========================");
     println!("==========================================");
-    let db = Surreal::new::<Mem>(()).await.unwrap();
-    db.use_ns("test").use_db("test").await?;
-    let poly_complex = polygon!(
-            exterior: [
-                (x: -111., y: 45.),
-                (x: -111., y: 41.),
-                (x: -104., y: 41.),
-                (x: -104., y: 45.),
-            ],
-            interiors: [
-                [
-                    (x: -110., y: 44.),
-                    (x: -110., y: 42.),
-                    (x: -105., y: 42.),
-                    (x: -105., y: 44.),
-                ],
-            ],
-        );
-    let company_2 = Company {
-        id: "company:2".to_string(),
-        // home: poly_complex.into(),
-        home: GeometryCustom(poly_complex.into()),
-    };
-    let results = db
-        .query("INSERT INTO company $company;")
-        .bind(("company", company_2));
-    let mut results = results.await?;
-
-    // The problematic line
-    let complex_polygon_not_properly_deserialized: Option<Company> = results
-        .take(0)
-        .expect("transforms coordinates to strings rather f64 during deserialization");
-
+    println!("==========================================");
     println!(
-        "company: {}",
-        serde_json::to_string(&complex_polygon_not_properly_deserialized).unwrap()
+        "userQueryyy result: {}",
+        serde_json::to_string(&results).unwrap()
     );
+    // // let mut results = results.await?;
+    // println!("==========================================");
+    // println!("==========================================");
+    // // println!("userQueryyyAwaited result: {:#?}", results);
+    // println!("==========================================");
+    // println!("Value==========================================");
+    // let user: Vec<Company> = results.take(0)?;
+    // let user: Vec<Company> = user;
+    // println!("nama result: {}", serde_json::to_string(&user).unwrap());
+    // println!("xrearXXXXX ---- = {}", serde_json::to_string(&mm).unwrap());
+    // println!("ERERERErere  mm1 = {:#?}", mm.clone().0);
+    // println!("ERERERErere  mm2 = {:#?}", mm.clone().1);
+    // println!(
+    //     "ERERERErere  mm3 = {:}",
+    //     serde_json::to_string(&mm.1).unwrap()
+    // );
+
+    // let mut results = db.query(mm.0).bind(("company", user.clone())).await?;
+    // let results = Arc::new(db.query(mm.0));
+    // let results = db.query(mm.0);
+    // let results =
+    //     mm.1.clone()
+    //         .iter()
+    //         .fold(db.query(mm.clone().0), |acc, val| {
+    //             // res.
+    //             let results = acc.bind(val);
+    //             results
+    //         });
+    // let mut response = db.query("INSERT INTO mana { name: 'lowo'};");
+    // let mut response = response.await?;
+    // print all users:
+
+    // let mut response = db.query("SELECT * fROM mana;");
+    // let mut response = response.await?;
+
+    // #[derive(Debug, Serialize, Deserialize, Clone)]
+    // struct Mana {
+    //     name: String,
+    // }
+    // let users: Option<Mana> = response.take(0)?;
+    // println!("SAMAAAAAAAAA: {users:?}");
+    // for b in mm.1 {
+    //     let results = results.bind(b);
+    //     // let mut results = db.query(mm.0).bind(("company", user.clone())).await?;
+    // }
+    //
+    //     let mut results = db.query("
+    // INSERT INTO company (name, founded) VALUES ('Acme Inc.', '1967-05-03'), ('Apple Inc.', '1976-04-01');
+    // ");
+    // let mut results = db
+    //     .query(
+    //         "
+    // INSERT INTO company (id, name, home) VALUES (type::thing($tb, $id), $name, $home);
+    // ",
+    //     )
+    //     .bind(("tb", "company"))
+    //     .bind(("id", xx.id))
+    //     // .bind(("home", xx.home))
+    //     // .bind(("company", xx))
+    //     .bind(("name", xx.name));
+    // println!("==========================================");
+    // println!("==========================================");
+    // // println!("userQueryyy result: {:#?}", results);
+    // let mut results = results.await?;
+    // // println!("==========================================");
+    // // println!("==========================================");
+    // // println!("userQueryyyAwaited result: {:#?}", results);
+    // // println!("==========================================");
+    // // println!("Value==========================================");
+    // // // println!(
+    // // //     "ompany: {}",
+    // // //     serde_json::to_string(&RecordId::from(("lowo", "kolo"))).unwrap()
+    // // // );
+    // let user: Option<Value> = results.take(0).expect("shit");
+    //
+    // println!("company: {}", serde_json::to_string(&user).unwrap());
+
+    // // let user: Vec<Company> = user;
+    // println!("nama result: {}", serde_json::to_string(&user).unwrap());
+    // println!("xrearXXXXX ---- = {}", serde_json::to_string(&mm).unwrap());
+
+    // UPDATE city:london SET centre = {
+    //     type: "Point",
+    //     coordinates: [-0.118092, 51.509865],
+    // };
+    // println!("2222==========================================");
+    // let mut response = db.query("CREATE city:london SET name ='lowocity', centre = { type: \"Point\", coordinates: [-0.118092, 51.509865], };");
+    // let mut response = db.query("CREATE city:london CONTENT $city;").bind((
+    //     "city",
+    //     City {
+    //         name: "mars".into(),
+    //         centre: (44.4, 27.1).into(),
+    //     },
+    // ));
+    // println!("cityQueryyy result: {:#?}", response);
+    // let mut response = response.await?;
+    //
+    // // let city: Option<City> = response.take(0)?;
+    // let city: Option<Value> = response.take(0)?;
+    //
+    // println!("City: {}", serde_json::to_string(&city).unwrap());
+    // println!("2222==========================================");
+    // let mut response = db.query("SELECT * FROM company");
+    // let mut response = response.await?;
+    // // print all users:
+    //
+    // let users: Vec<Company> = response.take(0)?;
+    // println!("company: {users:?}");
+    // print the created user:
     Ok(())
 }
 #[tokio::main]
