@@ -91,7 +91,6 @@ impl<'de> Deserialize<'de> for GeometryCustom {
                 coordinates: Vec<Vec<[f64; 2]>>,
             },
             MultiPolygon {
-                // coordinates: Vec<Vec<Vec<[f64; 2]>>>,
                 coordinates: Vec<PolygonCoordinates>,
             },
             GeometryCollection {
@@ -113,45 +112,10 @@ impl<'de> Deserialize<'de> for GeometryCustom {
             )),
             GeometryType::Polygon { coordinates } => match coordinates {
                 PolygonCoordinates::F64(coords) => {
-                    // deserialize_polygon_from_coords(coords, |x, y| {
-                    //     try_parse_coord_f64(x.clone(), y.clone())
                     sql::Geometry::Polygon(deserialize_polygon_from_coords(coords))
                 }
                 PolygonCoordinates::String(coords) => {
-                    // deserialize_polygon_from_coords(coords, |ref x, ref y| {
-                    //     try_parse_coord_str(&x, &y)
-                    // })
                     sql::Geometry::Polygon(deserialize_polygon_from_coords(coords))
-                    // let exterior = geo::LineString::from(
-                    //     coords[0]
-                    //         .iter()
-                    //         .map(|c| {
-                    //             if let Some(coord) = try_parse_coord_str(&c.0, &c.1) {
-                    //                 coord
-                    //             } else {
-                    //                 panic!("Invalid coordinateoooo: {:?}", c.clone())
-                    //             }
-                    //         })
-                    //         .collect::<Vec<geo::Coord<f64>>>(),
-                    // );
-                    //
-                    // let interiors = coords
-                    //     .iter()
-                    //     .skip(1)
-                    //     .map(|ls| {
-                    //         ls.iter()
-                    //             .map(|c| {
-                    //                 if let Some(coord) = try_parse_coord_str(&c.0, &c.1) {
-                    //                     coord
-                    //                 } else {
-                    //                     panic!("Invalid coordinatexx: {:?}", c)
-                    //                 }
-                    //             })
-                    //             .collect::<Vec<_>>()
-                    //     })
-                    //     .map(|coords| geo::LineString::from(coords))
-                    //     .collect::<Vec<geo::LineString>>();
-                    // sql::Geometry::Polygon(geo::Polygon::new(exterior, interiors))
                 }
             },
             GeometryType::MultiPoint { coordinates } => {
@@ -179,75 +143,11 @@ impl<'de> Deserialize<'de> for GeometryCustom {
             GeometryType::MultiPolygon { coordinates } => {
                 let polygons = coordinates
                     .into_iter()
-                    .map(|p| {
-                        let xx = match p {
-                            PolygonCoordinates::F64(coords) => {
-                                deserialize_polygon_from_coords(coords)
-                                // let exterior = geo::LineString::from(
-                                //     coords
-                                //         .iter()
-                                //         .next()
-                                //         .unwrap_or(&vec![])
-                                //         .iter()
-                                //         .map(|(x, y)| {
-                                //             try_parse_coord_f64(*x, *y)
-                                //                 .expect("Invalid coordinate: {x},{y}")
-                                //         })
-                                //         .collect::<Vec<geo::Coord<f64>>>(),
-                                // );
-                                //
-                                // let interiors = coords
-                                //     .iter()
-                                //     .skip(1)
-                                //     .map(|ls| {
-                                //         ls.iter()
-                                //             .map(|(x, y)| {
-                                //                 try_parse_coord_f64(*x, *y)
-                                //                     .expect("Invalid coordinate: {x},{y}")
-                                //             })
-                                //             .collect::<Vec<_>>()
-                                //     })
-                                //     .map(|coords| geo::LineString::from(coords))
-                                //     .collect::<Vec<geo::LineString>>();
-                                // geo::Polygon::new(exterior, interiors)
-                            }
-                            PolygonCoordinates::String(coords) => {
-                                deserialize_polygon_from_coords(coords)
-                                // let exterior = geo::LineString::from(
-                                //     coords[0]
-                                //         .iter()
-                                //         .map(|c| {
-                                //             if let Some(coord) = try_parse_coord_str(&c.0, &c.1) {
-                                //                 coord
-                                //             } else {
-                                //                 panic!("Invalid coordinateoooo: {:?}", c.clone())
-                                //             }
-                                //         })
-                                //         .collect::<Vec<geo::Coord<f64>>>(),
-                                // );
-                                //
-                                // let interiors = coords
-                                //     .iter()
-                                //     .skip(1)
-                                //     .map(|ls| {
-                                //         ls.iter()
-                                //             .map(|c| {
-                                //                 if let Some(coord) = try_parse_coord_str(&c.0, &c.1)
-                                //                 {
-                                //                     coord
-                                //                 } else {
-                                //                     panic!("Invalid coordinatexx: {:?}", c)
-                                //                 }
-                                //             })
-                                //             .collect::<Vec<_>>()
-                                //     })
-                                //     .map(|coords| geo::LineString::from(coords))
-                                //     .collect::<Vec<geo::LineString>>();
-                                // geo::Polygon::new(exterior, interiors)
-                            }
-                        };
-                        xx
-                        // geo::Polygon::new(exterior, interiors)
+                    .map(|p| match p {
+                        PolygonCoordinates::F64(coords) => deserialize_polygon_from_coords(coords),
+                        PolygonCoordinates::String(coords) => {
+                            deserialize_polygon_from_coords(coords)
+                        }
                     })
                     .collect();
                 sql::Geometry::MultiPolygon(geo::MultiPolygon::new(polygons))
@@ -264,8 +164,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
 fn deserialize_polygon_from_coords<
     T: CoordParser, /* + fmt::Debug, F: Fn(T) -> Option<geo::Coord> */
 >(
-    coords: Vec<Vec<(T)>>,
-    // try_parse_coord_f64: F,
+    coords: Vec<Vec<T>>,
 ) -> geo::Polygon {
     let exterior = geo::LineString::from(
         coords
@@ -290,7 +189,6 @@ fn deserialize_polygon_from_coords<
         })
         .map(|coords| geo::LineString::from(coords))
         .collect::<Vec<geo::LineString>>();
-    // sql::Geometry::Polygon(geo::Polygon::new(exterior, interiors))
     geo::Polygon::new(exterior, interiors)
 }
 
