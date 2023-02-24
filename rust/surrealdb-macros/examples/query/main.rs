@@ -45,6 +45,8 @@ use serde_json::Result;
 use serde_json::{Map, Value};
 use surrealdb_derive::SurrealdbNode;
 use surrealdb_macros::query_insert;
+use surrealdb_macros::query_insert::updater;
+use surrealdb_macros::query_insert::Updater;
 use surrealdb_macros::value_type_wrappers::GeometryCustom;
 use surrealdb_macros::value_type_wrappers::SurrealId;
 use surrealdb_macros::SurId;
@@ -577,7 +579,42 @@ async fn main() -> surrealdb::Result<()> {
     println!("==========================================");
     // println!("==========================================");
 
-    test_it().await.unwrap();
+    // test_it().await.unwrap();
+    let point = geo::point! {
+        x: 40.02f64,
+        y: 116.34,
+    };
+
+    let poly = polygon!(
+            exterior: [
+                (x: -111.35, y: 45.),
+                (x: -111., y: 41.),
+                (x: -104., y: 41.),
+                (x: -104., y: 45.),
+            ],
+            interiors: [
+                [
+                    (x: -110., y: 44.),
+                    (x: -110., y: 42.),
+                    (x: -105., y: 42.),
+                    (x: -105., y: 44.),
+                ],
+            ],);
+    let a = updater("e").plus_equal(sql::Geometry::Point(point));
+    println!("a = {a}");
+
+    let a = updater("e").plus_equal(sql::Geometry::Polygon(poly));
+    println!("a = {a}");
+
+    let a = updater("e").increment_by(sql::Number::from(5));
+    println!("a = {a}");
+
+    let a = updater("e").increment_by(34);
+    println!("a = {a}");
+
+    let a = updater("e").decrement_by(923.54);
+    println!("a = {a}");
+    updater("e").increment_by("crm");
     Ok(())
 }
 

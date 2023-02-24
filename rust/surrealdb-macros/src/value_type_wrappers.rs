@@ -169,6 +169,7 @@ fn deserialize_polygon_from_coords(coords: Vec<Vec<CoordinateValue>>) -> geo::Po
 trait CoordParser {
     fn parse_value_to_coord(&self) -> geo::Coord;
 }
+
 impl CoordParser for CoordinateValue {
     fn parse_value_to_coord(&self) -> geo::Coord {
         match self {
@@ -179,6 +180,7 @@ impl CoordParser for CoordinateValue {
         }
     }
 }
+
 impl CoordParser for (f64, f64) {
     fn parse_value_to_coord(&self) -> geo::Coord {
         Some(geo::Coord {
