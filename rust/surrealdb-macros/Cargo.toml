@@ -13,6 +13,7 @@ surrealdb-derive = { path = "./surrealdb-derive" }
 surrealdb= { workspace = true }
 tokio= { workspace = true }
 
+bigdecimal = { workspace = true }
 async-graphql = { workspace = true }
 syn = { workspace = true }
 quote = { workspace = true }

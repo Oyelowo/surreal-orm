@@ -44,13 +44,16 @@ struct User {
 use serde_json::Result;
 use serde_json::{Map, Value};
 use surrealdb_derive::SurrealdbNode;
+use surrealdb_macros::db_field::cond;
 use surrealdb_macros::query_insert;
 use surrealdb_macros::query_insert::updater;
 use surrealdb_macros::query_insert::Updater;
+use surrealdb_macros::query_select;
 use surrealdb_macros::value_type_wrappers::GeometryCustom;
 use surrealdb_macros::value_type_wrappers::SurrealId;
 use surrealdb_macros::DbField;
 use surrealdb_macros::SurId;
+use surrealdb_macros::SurrealdbNode;
 fn mana() {
     #[derive(Serialize, Deserialize)]
     struct Country {
@@ -618,6 +621,45 @@ async fn main() -> surrealdb::Result<()> {
     println!("a = {a}");
     updater("e").increment_by("crm");
     DbField::new("d".to_string()).equals(5);
+    // sql::Value::Param(sql::Param("trt"));
+
+    let xx = sql::Field::Alone("dd".into());
+    let xx = sql::Strand("dd".into());
+
+    // sql::Param::from("jij".into());
+    println!("xxx {} erere", &xx.0);
+
+    let xx = sql::Value::Strand("Rer".into());
+    let xx = sql::Table("Rer".into());
+    let xx = DbField::new("oejfiner");
+    // sql::Field;
+    let cc: sql::Table = xx.into();
+    println!("xxx {} erere", cc);
+    // println!("xxx {}", serde_json::to_string(&cc).unwrap());
+    // println!(
+    //     "qqqq {}",
+    //     sql::json(&serde_json::to_string(&cc.to_string()).unwrap()).unwrap()
+    // );
+
+    let company::Company { id, name, home, .. } = Company::schema();
+    println!("xxxxvv {}", name.clone());
+    let ref age = name;
+    let firstName = &name;
+    let mut queryb = query_select::QueryBuilder::new();
+    let ref mut query = queryb.select_all().from(Company::get_table_name()).where_(
+        cond(
+            age.greater_than(id)
+                .greater_than_or_equal(300)
+                .less_than_or_equal(20)
+                .like(firstName)
+                .add(5)
+                .subtract(10)
+                .or(age),
+        )
+        // .and(bestFriend.exactly_equal("Oyelowo"))
+        .or(firstName.equal(true))
+        .and(age.greater_than_or_equal(150)),
+    );
     Ok(())
 }
 

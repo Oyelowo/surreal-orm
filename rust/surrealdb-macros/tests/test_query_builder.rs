@@ -341,6 +341,7 @@ mod tests {
                     age.greater_than(age)
                         .greater_than_or_equal(age)
                         .less_than_or_equal(20)
+                        .like(firstName)
                         .add(5)
                         .subtract(10)
                         .and(unoBook)

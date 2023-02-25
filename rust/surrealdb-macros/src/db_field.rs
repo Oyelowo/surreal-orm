@@ -6,9 +6,11 @@ Email: oyelowooyedayo@gmail.com
 use std::{
     borrow::Cow,
     fmt::{format, Display},
+    ops::Deref,
 };
 
-use surrealdb::sql::{self, Value};
+use proc_macro2::Span;
+use surrealdb::sql::{self, Number, Value};
 
 use crate::query_select::QueryBuilder;
 
@@ -28,6 +30,177 @@ use crate::query_select::QueryBuilder;
 /// ```
 #[derive(serde::Serialize, Debug, Clone, Default)]
 pub struct DbField(String);
+
+impl From<DbField> for sql::Table {
+    fn from(value: DbField) -> Self {
+        sql::Table(value.0)
+    }
+}
+
+impl Into<sql::Value> for &DbField {
+    fn into(self) -> sql::Value {
+        let xx = sql::Table(self.0.to_string());
+        xx.into()
+    }
+}
+
+impl Into<sql::Value> for DbField {
+    fn into(self) -> sql::Value {
+        let xx = sql::Table(self.0.to_string());
+        xx.into()
+    }
+}
+
+impl Into<Number> for &DbField {
+    fn into(self) -> Number {
+        let xx = sql::Value::Table(self.0.to_string().into());
+        xx.as_string().into()
+    }
+}
+
+#[derive(serde::Serialize, Debug, Clone)]
+enum NumberOrField {
+    Number(sql::Number),
+    Field(sql::Value),
+}
+
+impl Deref for NumberOrField {
+    type Target = sql::Number;
+
+    fn deref(&self) -> &Self::Target {
+        todo!()
+    }
+}
+
+impl From<i8> for NumberOrField {
+    fn from(i: i8) -> Self {
+        Self::Number(sql::Number::from(i))
+    }
+}
+
+impl From<i16> for NumberOrField {
+    fn from(i: i16) -> Self {
+        Self::Number(sql::Number::from(i))
+    }
+}
+
+impl From<i32> for NumberOrField {
+    fn from(i: i32) -> Self {
+        Self::Number(sql::Number::from(i))
+    }
+}
+
+impl From<i64> for NumberOrField {
+    fn from(i: i64) -> Self {
+        Self::Number(sql::Number::from(i))
+    }
+}
+
+impl From<isize> for NumberOrField {
+    fn from(i: isize) -> Self {
+        Self::Number(sql::Number::from(i))
+    }
+}
+
+impl From<u8> for NumberOrField {
+    fn from(i: u8) -> Self {
+        Self::Number(sql::Number::from(i))
+    }
+}
+
+impl From<u16> for NumberOrField {
+    fn from(i: u16) -> Self {
+        Self::Number(sql::Number::from(i))
+    }
+}
+
+impl From<u32> for NumberOrField {
+    fn from(i: u32) -> Self {
+        Self::Number(sql::Number::from(i))
+    }
+}
+
+impl From<u64> for NumberOrField {
+    fn from(i: u64) -> Self {
+        Self::Number(sql::Number::from(i))
+    }
+}
+
+impl From<usize> for NumberOrField {
+    fn from(i: usize) -> Self {
+        Self::Number(sql::Number::from(i))
+    }
+}
+
+impl From<f32> for NumberOrField {
+    fn from(f: f32) -> Self {
+        Self::Number(sql::Number::from(f))
+    }
+}
+
+impl From<f64> for NumberOrField {
+    fn from(f: f64) -> Self {
+        Self::Number(sql::Number::from(f))
+    }
+}
+
+impl From<BigDecimal> for NumberOrField {
+    fn from(v: BigDecimal) -> Self {
+        // Self::Decimal(v)
+        Self::Number(sql::Number::from(v))
+    }
+}
+// impl Into<DbField> for &DbField {
+//     fn into(self) -> DbField {
+//         self.clone()
+//     }
+// }
+
+impl Into<NumberOrField> for DbField {
+    fn into(self) -> NumberOrField {
+        NumberOrField::Field(self.into())
+    }
+}
+
+impl Into<NumberOrField> for &DbField {
+    fn into(self) -> NumberOrField {
+        NumberOrField::Field(self.into())
+    }
+}
+impl Into<Value> for NumberOrField {
+    fn into(self) -> Value {
+        match self {
+            NumberOrField::Number(n) => n.into(),
+            NumberOrField::Field(f) => f.into(),
+        }
+    }
+}
+
+// impl std::fmt::Display for NumberOfField {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         let num_field: sql::Value = match self {
+//             NumberOfField::Number(n) => n.to_owned().into,
+//             NumberOfField::Field(f) => f.clone().into(),
+//         };
+//         f.write_fmt(format_args!("{}", self.))
+//     }
+// }
+
+impl Into<NumberOrField> for sql::Number {
+    fn into(self) -> NumberOrField {
+        NumberOrField::Number(self)
+    }
+}
+
+impl Into<Number> for DbField {
+    fn into(self) -> Number {
+        // sql::Strand::from(self.0.into())
+        // let xx = sql::Strand::from(self.0.into());
+        let xx = sql::Value::Strand(self.0.into());
+        xx.as_string().into()
+        // todo!()
+    }
+}
 
 impl Into<DbFilter> for &DbField {
     fn into(self) -> DbFilter {
@@ -285,6 +458,7 @@ impl std::fmt::Display for DbFilter {
         f.write_fmt(format_args!("{}", self.query_string))
     }
 }
+
 impl DbField {
     pub fn new(field_name: impl Display) -> Self {
         Self(field_name.to_string())
@@ -389,9 +563,13 @@ impl DbField {
     /// ```
     pub fn greater_than<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Number>,
+        T: Into<NumberOrField>,
     {
-        let value: sql::Number = value.into();
+        // let xx = sql::Table("Rer".into());
+        let value: NumberOrField = value.into();
+        let value: sql::Value = value.into();
+        let xx = Self::new(format!("{} > {}", self.0, value));
+        println!("ZZZZZ ... {}  ---- {}", xx, value);
         Self::new(format!("{} > {}", self.0, value))
     }
 
@@ -411,9 +589,9 @@ impl DbField {
     /// ```
     pub fn greater_than_or_equals<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Number>,
+        T: Into<Number>,
     {
-        let value: sql::Number = value.into();
+        let value: Number = value.into();
         Self::new(format!("{} >= {}", self.0, value))
     }
 
@@ -433,9 +611,9 @@ impl DbField {
     /// ```
     pub fn less_than<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Number>,
+        T: Into<Number>,
     {
-        let value: sql::Number = value.into();
+        let value: Number = value.into();
         Self::new(format!("{} < {}", self.0, value))
     }
 
@@ -455,9 +633,9 @@ impl DbField {
     /// ```
     pub fn less_than_or_equals<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Number>,
+        T: Into<Number>,
     {
-        let value: sql::Number = value.into();
+        let value: Number = value.into();
         Self::new(format!("{} <= {}", self.0, value))
     }
 
@@ -478,10 +656,10 @@ impl DbField {
     /// ```
     pub fn between<T>(&self, lower_bound: T, upper_bound: T) -> Self
     where
-        T: Into<sql::Number>,
+        T: Into<Number>,
     {
-        let lower_bound: sql::Number = lower_bound.into();
-        let upper_bound: sql::Number = upper_bound.into();
+        let lower_bound: Number = lower_bound.into();
+        let upper_bound: Number = upper_bound.into();
         // Self::new(format!("{} < {} AND {} < {}", self.0 lower_bound, self.0, upper_bound))
         Self::new(format!("{} < {} < {}", lower_bound, self.0, upper_bound))
     }
@@ -503,10 +681,10 @@ impl DbField {
     /// ```
     pub fn within<T>(&self, lower_bound: T, upper_bound: T) -> Self
     where
-        T: Into<sql::Number>,
+        T: Into<Number>,
     {
-        let lower_bound: sql::Number = lower_bound.into();
-        let upper_bound: sql::Number = upper_bound.into();
+        let lower_bound: Number = lower_bound.into();
+        let upper_bound: Number = upper_bound.into();
         // Self::new(format!("{} <= {} AND {} <= {}", self.0 lower_bound, self.0, upper_bound))
         Self::new(format!("{} <= {} <= {}", lower_bound, self.0, upper_bound))
     }
@@ -798,9 +976,9 @@ impl DbField {
     /// ```
     pub fn less_than_or_equal<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Number>,
+        T: Into<Number>,
     {
-        let value: sql::Number = value.into();
+        let value: Number = value.into();
         Self::new(format!("{} <= {}", self.0, value))
     }
 
@@ -818,9 +996,13 @@ impl DbField {
     /// assert_eq!(query.to_string(), r#"age => 30"#);
     pub fn greater_than_or_equal<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Number>,
+        T: Into<NumberOrField>,
     {
-        let value: sql::Number = value.into();
+        let value: NumberOrField = value.into();
+        let value: sql::Value = value.into();
+        // let value: Number = value.into();
+        let mm = Self::new(format!("{} >= {}", self.0, value));
+        println!("mmm {}", mm);
         Self::new(format!("{} >= {}", self.0, value))
     }
 
@@ -1201,9 +1383,9 @@ impl DbField {
     /// ```
     pub fn multiply<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Number>,
+        T: Into<Number>,
     {
-        let value: sql::Number = value.into();
+        let value: Number = value.into();
         Self::new(format!("{} * {}", self.0, value))
     }
 
@@ -1223,9 +1405,9 @@ impl DbField {
     /// ```
     pub fn divide<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Number>,
+        T: Into<Number>,
     {
-        let value: sql::Number = value.into();
+        let value: Number = value.into();
         Self::new(format!("{} / {}", self.0, value))
     }
 
@@ -1447,9 +1629,9 @@ impl DbField {
     /// ```
     pub fn increment_by<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Number>,
+        T: Into<Number>,
     {
-        let value: sql::Number = value.into();
+        let value: Number = value.into();
         let increment_string = format!("{self} += {}", value);
         // let other = serde_json::to_string(&other).unwrap();
         // let other = sql::json(&other).unwrap();
@@ -1500,9 +1682,9 @@ impl DbField {
     /// ```
     pub fn decrement_by<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Number>,
+        T: Into<Number>,
     {
-        let value: sql::Number = value.into();
+        let value: Number = value.into();
         let decrement_string = format!("{self} -= {}", value);
         Self::new(decrement_string)
     }
