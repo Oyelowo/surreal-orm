@@ -389,9 +389,9 @@ impl DbField {
     /// ```
     pub fn greater_than<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Number>,
     {
-        let value: Value = value.into();
+        let value: sql::Number = value.into();
         Self::new(format!("{} > {}", self.0, value))
     }
 
@@ -411,9 +411,9 @@ impl DbField {
     /// ```
     pub fn greater_than_or_equals<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Number>,
     {
-        let value: Value = value.into();
+        let value: sql::Number = value.into();
         Self::new(format!("{} >= {}", self.0, value))
     }
 
@@ -433,9 +433,9 @@ impl DbField {
     /// ```
     pub fn less_than<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Number>,
     {
-        let value: Value = value.into();
+        let value: sql::Number = value.into();
         Self::new(format!("{} < {}", self.0, value))
     }
 
@@ -455,9 +455,9 @@ impl DbField {
     /// ```
     pub fn less_than_or_equals<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Number>,
     {
-        let value: Value = value.into();
+        let value: sql::Number = value.into();
         Self::new(format!("{} <= {}", self.0, value))
     }
 
@@ -474,18 +474,41 @@ impl DbField {
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::field("age").between(18, 30);
-    /// assert_eq!(query.to_string(), "age BETWEEN 18 AND 30");
+    /// assert_eq!(query.to_string(), "age < 18 AND age < 30");
     /// ```
     pub fn between<T>(&self, lower_bound: T, upper_bound: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Number>,
     {
-        let lower_bound: Value = lower_bound.into();
-        let upper_bound: Value = upper_bound.into();
-        Self::new(format!(
-            "{} BETWEEN {} AND {}",
-            self.0, lower_bound, upper_bound
-        ))
+        let lower_bound: sql::Number = lower_bound.into();
+        let upper_bound: sql::Number = upper_bound.into();
+        // Self::new(format!("{} < {} AND {} < {}", self.0 lower_bound, self.0, upper_bound))
+        Self::new(format!("{} < {} < {}", lower_bound, self.0, upper_bound))
+    }
+
+    /// Check whether the value of the field is between the given lower and upper bounds.
+    ///
+    /// # Arguments
+    ///
+    /// * `lower_bound` - The lower bound to compare against the field.
+    /// * `upper_bound` - The upper bound to compare against the field.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::field("age").within(18, 30);
+    /// assert_eq!(query.to_string(), "age <= 18 AND age <= 30");
+    /// ```
+    pub fn within<T>(&self, lower_bound: T, upper_bound: T) -> Self
+    where
+        T: Into<sql::Number>,
+    {
+        let lower_bound: sql::Number = lower_bound.into();
+        let upper_bound: sql::Number = upper_bound.into();
+        // Self::new(format!("{} <= {} AND {} <= {}", self.0 lower_bound, self.0, upper_bound))
+        Self::new(format!("{} <= {} <= {}", lower_bound, self.0, upper_bound))
     }
 
     /// Constructs a LIKE query that checks whether the value of the column matches the given pattern.
@@ -775,9 +798,9 @@ impl DbField {
     /// ```
     pub fn less_than_or_equal<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Number>,
     {
-        let value: Value = value.into();
+        let value: sql::Number = value.into();
         Self::new(format!("{} <= {}", self.0, value))
     }
 
@@ -795,9 +818,9 @@ impl DbField {
     /// assert_eq!(query.to_string(), r#"age => 30"#);
     pub fn greater_than_or_equal<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Number>,
     {
-        let value: Value = value.into();
+        let value: sql::Number = value.into();
         Self::new(format!("{} >= {}", self.0, value))
     }
 
@@ -1068,9 +1091,9 @@ impl DbField {
     /// ```
     pub fn outside<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Geometry>,
     {
-        let value: Value = value.into();
+        let value: sql::Geometry = value.into();
         Self::new(format!("{} OUTSIDE {}", self.0, value))
     }
 
@@ -1090,9 +1113,9 @@ impl DbField {
     /// ```
     pub fn intersects<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Geometry>,
     {
-        let value: Value = value.into();
+        let value: sql::Geometry = value.into();
         Self::new(format!("{} INTERSECTS {}", self.0, value))
     }
 
@@ -1178,9 +1201,9 @@ impl DbField {
     /// ```
     pub fn multiply<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Number>,
     {
-        let value: Value = value.into();
+        let value: sql::Number = value.into();
         Self::new(format!("{} * {}", self.0, value))
     }
 
@@ -1200,9 +1223,9 @@ impl DbField {
     /// ```
     pub fn divide<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Number>,
     {
-        let value: Value = value.into();
+        let value: sql::Number = value.into();
         Self::new(format!("{} / {}", self.0, value))
     }
 
