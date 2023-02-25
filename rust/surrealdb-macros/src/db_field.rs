@@ -3,6 +3,7 @@ Author: Oyelowo Oyedayo
 Email: oyelowooyedayo@gmail.com
 */
 
+use bigdecimal::BigDecimal;
 use std::{
     borrow::Cow,
     fmt::{format, Display},
@@ -146,15 +147,9 @@ impl From<f64> for NumberOrField {
 
 impl From<BigDecimal> for NumberOrField {
     fn from(v: BigDecimal) -> Self {
-        // Self::Decimal(v)
         Self::Number(sql::Number::from(v))
     }
 }
-// impl Into<DbField> for &DbField {
-//     fn into(self) -> DbField {
-//         self.clone()
-//     }
-// }
 
 impl Into<NumberOrField> for DbField {
     fn into(self) -> NumberOrField {
@@ -565,11 +560,8 @@ impl DbField {
     where
         T: Into<NumberOrField>,
     {
-        // let xx = sql::Table("Rer".into());
         let value: NumberOrField = value.into();
         let value: sql::Value = value.into();
-        let xx = Self::new(format!("{} > {}", self.0, value));
-        println!("ZZZZZ ... {}  ---- {}", xx, value);
         Self::new(format!("{} > {}", self.0, value))
     }
 
@@ -589,9 +581,10 @@ impl DbField {
     /// ```
     pub fn greater_than_or_equals<T>(&self, value: T) -> Self
     where
-        T: Into<Number>,
+        T: Into<NumberOrField>,
     {
-        let value: Number = value.into();
+        let value: NumberOrField = value.into();
+        let value: sql::Value = value.into();
         Self::new(format!("{} >= {}", self.0, value))
     }
 
@@ -611,9 +604,10 @@ impl DbField {
     /// ```
     pub fn less_than<T>(&self, value: T) -> Self
     where
-        T: Into<Number>,
+        T: Into<NumberOrField>,
     {
-        let value: Number = value.into();
+        let value: NumberOrField = value.into();
+        let value: sql::Value = value.into();
         Self::new(format!("{} < {}", self.0, value))
     }
 
@@ -633,9 +627,10 @@ impl DbField {
     /// ```
     pub fn less_than_or_equals<T>(&self, value: T) -> Self
     where
-        T: Into<Number>,
+        T: Into<NumberOrField>,
     {
-        let value: Number = value.into();
+        let value: NumberOrField = value.into();
+        let value: sql::Value = value.into();
         Self::new(format!("{} <= {}", self.0, value))
     }
 
@@ -656,11 +651,12 @@ impl DbField {
     /// ```
     pub fn between<T>(&self, lower_bound: T, upper_bound: T) -> Self
     where
-        T: Into<Number>,
+        T: Into<NumberOrField>,
     {
-        let lower_bound: Number = lower_bound.into();
-        let upper_bound: Number = upper_bound.into();
-        // Self::new(format!("{} < {} AND {} < {}", self.0 lower_bound, self.0, upper_bound))
+        let lower_bound: NumberOrField = lower_bound.into();
+        let lower_bound: sql::Value = lower_bound.into();
+        let upper_bound: NumberOrField = upper_bound.into();
+        let upper_bound: sql::Value = upper_bound.into();
         Self::new(format!("{} < {} < {}", lower_bound, self.0, upper_bound))
     }
 
@@ -681,11 +677,12 @@ impl DbField {
     /// ```
     pub fn within<T>(&self, lower_bound: T, upper_bound: T) -> Self
     where
-        T: Into<Number>,
+        T: Into<NumberOrField>,
     {
-        let lower_bound: Number = lower_bound.into();
-        let upper_bound: Number = upper_bound.into();
-        // Self::new(format!("{} <= {} AND {} <= {}", self.0 lower_bound, self.0, upper_bound))
+        let lower_bound: NumberOrField = lower_bound.into();
+        let lower_bound: sql::Value = lower_bound.into();
+        let upper_bound: NumberOrField = upper_bound.into();
+        let upper_bound: sql::Value = upper_bound.into();
         Self::new(format!("{} <= {} <= {}", lower_bound, self.0, upper_bound))
     }
 
