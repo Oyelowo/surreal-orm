@@ -574,7 +574,7 @@ impl DbField {
     /// let query = DbQuery::column("age").equal(42);
     /// assert_eq!(query.to_string(), "age = 42");
     /// ```
-    pub fn equal<T: Display>(&self, value: T) -> Self
+    pub fn equal<T>(&self, value: T) -> Self
     where
         T: Into<Value>,
     {
@@ -596,7 +596,7 @@ impl DbField {
     /// let query = DbQuery::column("age").not_equal(42);
     /// assert_eq!(query.to_string(), "age != 42");
     /// ```
-    pub fn not_equal<T: Display>(&self, value: T) -> Self
+    pub fn not_equal<T>(&self, value: T) -> Self
     where
         T: Into<Value>,
     {
@@ -645,15 +645,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = values
-            .to_vec()
-            .into_iter()
-            .map(|value| {
-                let value: Value = value.into();
-                format!("{}", value)
-            })
-            .collect::<Vec<String>>()
-            .join(", ");
+        let values_str = collect_query_values(values);
         Self::new(format!("{} ?= ({})", self.0, values_str))
     }
 
@@ -676,15 +668,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = values
-            .to_vec()
-            .into_iter()
-            .map(|value| {
-                let value: Value = value.into();
-                format!("{}", value)
-            })
-            .collect::<Vec<String>>()
-            .join(", ");
+        let values_str = collect_query_values(values);
         Self::new(format!("{} *= ({})", self.0, values_str))
     }
 
@@ -703,10 +687,11 @@ impl DbField {
     /// let query = col.fuzzy_equal("Alex");
     /// assert_eq!(query.to_string(), "name ~ Alex");
     /// ```
-    pub fn fuzzy_equal<T: Display>(&self, value: T) -> Self
+    pub fn fuzzy_equal<T>(&self, value: T) -> Self
     where
         T: Into<Value> + Clone,
     {
+        let value: Value = value.into();
         Self::new(format!("{} ~ {}", self.0, value))
     }
 
@@ -725,10 +710,11 @@ impl DbField {
     /// let query = col.fuzzy_not_equal("Alex");
     /// assert_eq!(query.to_string(), "name !~ Alex");
     /// ```
-    pub fn fuzzy_not_equal<T: Display>(&self, value: T) -> Self
+    pub fn fuzzy_not_equal<T>(&self, value: T) -> Self
     where
-        T: Into<Value> + Clone,
+        T: Into<Value>,
     {
+        let value: Value = value.into();
         Self::new(format!("{} !~ {}", self.0, value))
     }
 
@@ -745,12 +731,11 @@ impl DbField {
     /// let query = DbQuery::field("name").any_fuzzy_equal(&["foo", "bar"]);
     /// assert_eq!(query.to_string(), r#"name ?~ (foo, bar)"#);
     /// ```
-    pub fn any_fuzzy_equal<T: Display>(&self, values: &[T]) -> Self {
-        let values_str = values
-            .iter()
-            .map(|value| format!("{}", value))
-            .collect::<Vec<String>>()
-            .join(", ");
+    pub fn any_fuzzy_equal<T>(&self, values: &[T]) -> Self
+    where
+        T: Into<Value> + Clone,
+    {
+        let values_str = collect_query_values(values);
         Self::new(format!("{} ?~ ({})", self.0, values_str))
     }
 
@@ -767,12 +752,11 @@ impl DbField {
     /// let query = DbQuery::field("name").all_fuzzy_equal(&["foo", "bar"]);
     /// assert_eq!(query.to_string(), r#"name *~ (foo, bar)"#);
     /// ```
-    pub fn all_fuzzy_equal<T: Display>(&self, values: &[T]) -> Self {
-        let values_str = values
-            .iter()
-            .map(|value| format!("{}", value))
-            .collect::<Vec<String>>()
-            .join(", ");
+    pub fn all_fuzzy_equal<T>(&self, values: &[T]) -> Self
+    where
+        T: Into<Value> + Clone,
+    {
+        let values_str = collect_query_values(values);
         Self::new(format!("{} *~ ({})", self.0, values_str))
     }
 
@@ -789,10 +773,11 @@ impl DbField {
     /// let query = DbQuery::field("age").less_than_or_equal(30);
     /// assert_eq!(query.to_string(), r#"age <= 30"#);
     /// ```
-    pub fn less_than_or_equal<T: Display>(&self, value: T) -> Self
+    pub fn less_than_or_equal<T>(&self, value: T) -> Self
     where
-        T: Into<Value> + Clone,
+        T: Into<Value>,
     {
+        let value: Value = value.into();
         Self::new(format!("{} <= {}", self.0, value))
     }
 
@@ -808,10 +793,11 @@ impl DbField {
     /// # use surrealdb::DbQuery;
     /// let query = DbQuery::field("age").greater_than_or_equal(30)
     /// assert_eq!(query.to_string(), r#"age => 30"#);
-    pub fn greater_than_or_equal<T: Display>(&self, value: T) -> Self
+    pub fn greater_than_or_equal<T>(&self, value: T) -> Self
     where
-        T: Into<Value> + Clone,
+        T: Into<Value>,
     {
+        let value: Value = value.into();
         Self::new(format!("{} >= {}", self.0, value))
     }
 
@@ -831,10 +817,11 @@ impl DbField {
     ///
     /// assert_eq!(new_query.to_string(), "age + 5");
     /// ```
-    pub fn add<T: Display>(&self, value: T) -> Self
+    pub fn add<T>(&self, value: T) -> Self
     where
-        T: Into<Value> + Clone,
+        T: Into<Value>,
     {
+        let value: Value = value.into();
         Self::new(format!("{} + {}", self.0, value))
     }
 
@@ -854,10 +841,11 @@ impl DbField {
     ///
     /// assert_eq!(new_query.to_string(), "age CONTAINS \"10-20\"");
     /// ```
-    pub fn contains<T: Display>(&self, value: T) -> Self
+    pub fn contains<T>(&self, value: T) -> Self
     where
-        T: Into<Value> + Clone,
+        T: Into<Value>,
     {
+        let value: Value = value.into();
         Self::new(format!("{} CONTAINS {}", self.0, value))
     }
 
@@ -877,10 +865,11 @@ impl DbField {
     ///
     /// assert_eq!(new_query.to_string(), "age CONTAINSNOT \"10-20\"");
     /// ```
-    pub fn contains_not<T: Display>(&self, value: T) -> Self
+    pub fn contains_not<T>(&self, value: T) -> Self
     where
-        T: Into<Value> + Clone,
+        T: Into<Value>,
     {
+        let value: Value = value.into();
         Self::new(format!("{} CONTAINSNOT {}", self.0, value))
     }
 
@@ -900,15 +889,11 @@ impl DbField {
     ///
     /// assert_eq!(new_query.to_string(), "tags CONTAINSALL (\"food\",\"pizza\")");
     /// ```
-    pub fn contains_all<T: Display>(&self, values: &[T]) -> Self
+    pub fn contains_all<T>(&self, values: &[T]) -> Self
     where
         T: Into<Value> + Clone,
     {
-        let values_str = values
-            .iter()
-            .map(|value| format!("{}", value))
-            .collect::<Vec<String>>()
-            .join(",");
+        let values_str = collect_query_values(values);
         Self::new(format!("{} CONTAINSALL ({})", self.0, values_str))
     }
 
@@ -927,15 +912,11 @@ impl DbField {
     /// let new_query = query.contains_all(&["food", "pizza"]);
     ///
     /// assert_eq!(new_query.to_string(), "tags CONTAINSANY (\"food\",\"pizza\")");
-    pub fn contains_any<T: Display>(&self, values: &[T]) -> Self
+    pub fn contains_any<T>(&self, values: &[T]) -> Self
     where
         T: Into<Value> + Clone,
     {
-        let values_str = values
-            .iter()
-            .map(|value| format!("{}", value))
-            .collect::<Vec<String>>()
-            .join(",");
+        let values_str = collect_query_values(values);
         Self::new(format!("{} CONTAINSANY ({})", self.0, values_str))
     }
 
@@ -953,15 +934,11 @@ impl DbField {
     /// let query = DbQuery::column("my_column").contains_none(&[1, 2, 3]);
     /// assert_eq!(query.to_string(), "my_column CONTAINSNONE (1,2,3)");
     /// ```
-    pub fn contains_none<T: Display>(&self, values: &[T]) -> Self
+    pub fn contains_none<T>(&self, values: &[T]) -> Self
     where
         T: Into<Value> + Clone,
     {
-        let values_str = values
-            .iter()
-            .map(|value| format!("{}", value))
-            .collect::<Vec<String>>()
-            .join(",");
+        let values_str = collect_query_values(values);
         Self::new(format!("{} CONTAINSNONE ({})", self.0, values_str))
     }
 
@@ -979,10 +956,11 @@ impl DbField {
     /// let query = DbQuery::column("my_column").inside(10);
     /// assert_eq!(query.to_string(), "my_column INSIDE 10");
     /// ```
-    pub fn inside<T: Display>(&self, value: T) -> Self
+    pub fn inside<T>(&self, value: T) -> Self
     where
-        T: Into<Value> + Clone,
+        T: Into<Value>,
     {
+        let value: Value = value.into();
         Self::new(format!("{} INSIDE {}", self.0, value))
     }
 
@@ -1000,10 +978,11 @@ impl DbField {
     /// let query = DbQuery::column("my_column").not_inside("hello");
     /// assert_eq!(query.to_string(), "my_column NOTINSIDE hello");
     /// ```
-    pub fn not_inside<T: Display>(&self, value: T) -> Self
+    pub fn not_inside<T>(&self, value: T) -> Self
     where
-        T: Into<Value> + Clone,
+        T: Into<Value>,
     {
+        let value: Value = value.into();
         Self::new(format!("{} NOTINSIDE {}", self.0, value))
     }
 
@@ -1021,15 +1000,11 @@ impl DbField {
     /// let query = DbQuery::column("my_column").all_inside(&[1, 2, 3]);
     /// assert_eq!(query.to_string(), "my_column ALLINSIDE (1,2,3)");
     /// ```
-    pub fn all_inside<T: Display>(&self, values: &[T]) -> Self
+    pub fn all_inside<T>(&self, values: &[T]) -> Self
     where
         T: Into<Value> + Clone,
     {
-        let values_str = values
-            .iter()
-            .map(|value| format!("{}", value))
-            .collect::<Vec<String>>()
-            .join(",");
+        let values_str = collect_query_values(values);
         Self::new(format!("{} ALLINSIDE ({})", self.0, values_str))
     }
 
@@ -1047,15 +1022,11 @@ impl DbField {
     /// let query = DbQuery::column("my_column").all_inside(&[1, 2, 3]);
     /// assert_eq!(query.to_string(), "my_column ANYINSIDE (1,2,3)");
     /// ```
-    pub fn any_inside<T: Display>(&self, values: &[T]) -> Self
+    pub fn any_inside<T>(&self, values: &[T]) -> Self
     where
         T: Into<Value> + Clone,
     {
-        let values_str = values
-            .iter()
-            .map(|value| format!("{}", value))
-            .collect::<Vec<String>>()
-            .join(",");
+        let values_str = collect_query_values(values);
         Self::new(format!("{} ANYINSIDE ({})", self.0, values_str))
     }
 
@@ -1073,15 +1044,11 @@ impl DbField {
     /// let query = DbQuery::field("age").none_inside(&[18, 19, 20]);
     /// assert_eq!(query.to_string(), "age NONEINSIDE (18,19,20)");
     /// ```
-    pub fn none_inside<T: Display>(&self, values: &[T]) -> Self
+    pub fn none_inside<T>(&self, values: &[T]) -> Self
     where
         T: Into<Value> + Clone,
     {
-        let values_str = values
-            .iter()
-            .map(|value| format!("{}", value))
-            .collect::<Vec<String>>()
-            .join(",");
+        let values_str = collect_query_values(values);
         Self::new(format!("{} NONEINSIDE ({})", self.0, values_str))
     }
 
@@ -1099,10 +1066,11 @@ impl DbField {
     /// let query = DbQuery::field("location").outside("USA");
     /// assert_eq!(query.to_string(), "location OUTSIDE USA");
     /// ```
-    pub fn outside<T: Display>(&self, value: T) -> Self
+    pub fn outside<T>(&self, value: T) -> Self
     where
-        T: Into<Value> + Clone,
+        T: Into<Value>,
     {
+        let value: Value = value.into();
         Self::new(format!("{} OUTSIDE {}", self.0, value))
     }
 
@@ -1120,7 +1088,11 @@ impl DbField {
     /// let query = DbQuery::field("location").intersects("USA");
     /// assert_eq!(query.to_string(), "location INTERSECTS USA");
     /// ```
-    pub fn intersects<T: Display>(&self, value: T) -> Self {
+    pub fn intersects<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
         Self::new(format!("{} INTERSECTS {}", self.0, value))
     }
 
@@ -1138,16 +1110,12 @@ impl DbField {
     /// let query = DbQuery::field("name").any_in_set(&["Oyelowo", "Oyedayo"]);
     /// assert_eq!(query.to_string(), "name ?= (Oyelowo, Oyedayo)");
     /// ```
-    pub fn any_in_set<T: Display>(&self, values: &[T]) -> Self
+    pub fn any_in_set<T>(&self, values: &[T]) -> Self
     where
         T: Into<Value> + Clone,
     {
-        let value_str = values
-            .iter()
-            .map(|v| v.to_string())
-            .collect::<Vec<String>>()
-            .join(", ");
-        Self::new(format!("{} ?= ({})", self.0, value_str))
+        let values_str = collect_query_values(values);
+        Self::new(format!("{} ?= ({})", self.0, values_str))
     }
 
     /// Checks whether all values in a set are equal to the current field using fuzzy matching.
@@ -1164,16 +1132,12 @@ impl DbField {
     /// let query = DbQuery::field("name").all_in_set(&["Oyelowo", "Oyedayo"]);
     /// assert_eq!(query.to_string(), "name ?= (Oyelowo, Oyedayo)");
     /// ```
-    pub fn all_in_set<T: Display>(&self, values: &[T]) -> Self
+    pub fn all_in_set<T>(&self, values: &[T]) -> Self
     where
         T: Into<Value> + Clone,
     {
-        let value_str = values
-            .iter()
-            .map(|v| v.to_string())
-            .collect::<Vec<String>>()
-            .join(", ");
-        Self::new(format!("{} *= ({})", self.0, value_str))
+        let values_str = collect_query_values(values);
+        Self::new(format!("{} *= ({})", self.0, values_str))
     }
 
     /// Subtracts a value from the current query value.
@@ -1190,10 +1154,11 @@ impl DbField {
     /// let subtracted = query.subtract(5);
     /// assert_eq!(subtracted.to_string(), "10 - 5".to_string());
     /// ```
-    pub fn subtract<T: Display>(&self, value: T) -> Self
+    pub fn subtract<T>(&self, value: T) -> Self
     where
-        T: Into<Value> + Clone,
+        T: Into<Value>,
     {
+        let value: Value = value.into();
         Self::new(format!("{} - {}", self.0, value))
     }
 
@@ -1211,10 +1176,11 @@ impl DbField {
     /// let multiplied = query.multiply(5);
     /// assert_eq!(multiplied.to_string(), "10 * 5".to_string());
     /// ```
-    pub fn multiply<T: Display>(&self, value: T) -> Self
+    pub fn multiply<T>(&self, value: T) -> Self
     where
-        T: Into<Value> + Clone,
+        T: Into<Value>,
     {
+        let value: Value = value.into();
         Self::new(format!("{} * {}", self.0, value))
     }
 
@@ -1232,10 +1198,11 @@ impl DbField {
     /// let divided = query.divide(5);
     /// assert_eq!(divided.to_string(), "10 / 5".to_string());
     /// ```
-    pub fn divide<T: Display>(&self, value: T) -> Self
+    pub fn divide<T>(&self, value: T) -> Self
     where
-        T: Into<Value> + Clone,
+        T: Into<Value>,
     {
+        let value: Value = value.into();
         Self::new(format!("{} / {}", self.0, value))
     }
 
@@ -1359,14 +1326,9 @@ impl DbField {
     /// ```
     pub fn set_equal<T>(&self, values: &[T]) -> Self
     where
-        T: Into<Value>,
+        T: Into<Value> + Clone,
     {
-        let value: sql::Value = value.into();
-        let joined_values = values
-            .iter()
-            .map(|v| format!("{}", v))
-            .collect::<Vec<String>>()
-            .join(", ");
+        let joined_values = collect_query_values(values);
         Self::new(format!("{} ?= {{{}}}", self.0, joined_values))
     }
 
@@ -1388,13 +1350,9 @@ impl DbField {
     /// ```
     pub fn set_all_equal<T>(&self, values: &[T]) -> Self
     where
-        T: Into<Value>,
+        T: Into<Value> + Clone,
     {
-        let joined_values = values
-            .iter()
-            .map(|v| format!("{}", v))
-            .collect::<Vec<String>>()
-            .join(", ");
+        let joined_values = collect_query_values(values);
         Self::new(format!("{} *= {{{}}}", self.0, joined_values))
     }
 
@@ -1419,7 +1377,8 @@ impl DbField {
     where
         T: Into<Value>,
     {
-        Self::new(format!("{} AND {}", self.0, other.0))
+        let other: sql::Value = other.into();
+        Self::new(format!("{} AND {}", self.0, other))
     }
 
     /// Combine this field with another using the "OR" operator.
@@ -1443,7 +1402,7 @@ impl DbField {
     where
         T: Into<Value>,
     {
-        let value: sql::Value = value.into();
+        let other: sql::Value = other.into();
         Self::new(format!("{} OR {}", self, other))
     }
     // UPDATER METHODS
@@ -1594,4 +1553,20 @@ impl DbField {
         let remove_string = format!("{self} -= {}", value);
         Self::new(remove_string)
     }
+}
+
+fn collect_query_values<T>(values: &[T]) -> String
+where
+    T: Into<Value> + Clone,
+{
+    let values_str = values
+        .to_vec()
+        .into_iter()
+        .map(|value| {
+            let value: Value = value.into();
+            format!("{}", value)
+        })
+        .collect::<Vec<String>>()
+        .join(", ");
+    values_str
 }
