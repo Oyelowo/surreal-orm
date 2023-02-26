@@ -691,8 +691,9 @@ async fn main() -> surrealdb::Result<()> {
             .or(firstName.greater_than(439))
             .and(age.greater_than(150))
             .and(age.greater_than(316))
-            .and(age.greater_than(711)),
+            .and(age.greater_than(711).greater_than_or_equal(421).equal(25)),
     );
+    println!("MAWAOOOO----->{}", query);
     let mb = Uuid::new_v4();
     println!("uuid: {}", mb.as_fields().0);
     println!("uuid: {}", Uuid::new_v4().as_simple());

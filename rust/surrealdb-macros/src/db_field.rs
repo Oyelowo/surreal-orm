@@ -193,9 +193,7 @@ impl Into<Number> for DbField {
     fn into(self) -> Number {
         // sql::Strand::from(self.field_name.into())
         // let xx = sql::Strand::from(self.field_name.into());
-        let xx = Value::Strand(self.field_name.into());
-        xx.as_string().into()
-        // todo!()
+        Value::Strand(self.field_name.into()).as_string().into()
     }
 }
 
@@ -249,7 +247,6 @@ impl From<String> for DbField {
     fn from(value: String) -> Self {
         Self {
             field_name: value.into(),
-            // params: Rc::new(vec![].into()),
             params: vec![],
         }
     }
@@ -258,7 +255,6 @@ impl From<&str> for DbField {
     fn from(value: &str) -> Self {
         Self {
             field_name: value.into(),
-            // params: Rc::new(vec![].into()),
             params: vec![],
         }
     }
@@ -322,7 +318,7 @@ impl ParamsExtractor for DbFilter {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Param((String, Value));
+pub struct Param(pub (String, Value));
 
 impl From<(String, Value)> for Param {
     fn from(value: (String, Value)) -> Self {
@@ -597,7 +593,14 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} = {}", self.field_name, value))
+        let condition = format!("{} = {}", self.field_name, value);
+        let param = generate_param_name();
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            params: updated_params,
+        }
     }
 
     /// Return a new `DbQuery` that checks whether the field is not equal to the specified value
@@ -620,7 +623,14 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} != {}", self.field_name, value))
+        let param = generate_param_name();
+        let condition = format!("{} != {}", self.field_name, value);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            params: updated_params,
+        }
     }
 
     /// Check whether the value of the field is greater than the given value.
@@ -646,15 +656,18 @@ impl DbField {
         let param = generate_param_name();
         let condition = format!("{} > ${}", self.field_name, &param);
 
-        let mut xx = vec![];
-        xx.extend(self.params.to_vec());
-        xx.extend([(param, value).into()]);
-        // self.params.borrow_mut().push((param, value).into());
+        let updated_params = self.__update_params(param, value);
         Self {
             field_name: condition,
-            params: xx,
+            params: updated_params,
         }
-        // Self::new(condition)
+    }
+
+    fn __update_params(&self, param: String, value: Value) -> Vec<Param> {
+        let mut updated_params = vec![];
+        updated_params.extend(self.params.to_vec());
+        updated_params.extend([(param, value).into()]);
+        updated_params
     }
 
     /// Check whether the value of the field is greater than or equal to the given value.
@@ -680,8 +693,11 @@ impl DbField {
         let param = generate_param_name();
         let condition = format!("{} >= ${}", self.field_name, &param);
 
-        // self.params.borrow_mut().push((param, value).into());
-        Self::new(condition)
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            params: updated_params,
+        }
     }
 
     /// Check whether the value of the field is less than the given value.
@@ -704,7 +720,14 @@ impl DbField {
     {
         let value: NumberOrField = value.into();
         let value: Value = value.into();
-        Self::new(format!("{} < {}", self.field_name, value))
+        let param = generate_param_name();
+        let condition = format!("{} < {}", self.field_name, &param);
+        let updated_params = self.__update_params(param, value);
+
+        Self {
+            field_name: condition,
+            params: updated_params,
+        }
     }
 
     /// Check whether the value of the field is less than or equal to the given value.

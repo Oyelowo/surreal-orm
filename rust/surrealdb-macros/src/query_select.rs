@@ -352,14 +352,12 @@ impl<'a> QueryBuilder<'a> {
     /// assert_eq!(builder.to_string(), "SELECT * WHERE age > 18");
     /// ```
     pub fn where_(&mut self, condition: impl Into<DbFilter> + ParamsExtractor) -> &mut Self {
-        let ll = condition.get_params();
-        let mut xx = vec![];
-        xx.extend(self.________params_accumulator.to_vec());
-        xx.extend(condition.get_params());
+        let mut updated_params = vec![];
+        updated_params.extend(self.________params_accumulator.to_vec());
+        updated_params.extend(condition.get_params());
         let condition: DbFilter = condition.into();
+        self.________params_accumulator = updated_params;
         self.where_ = Some(condition.to_string());
-        self.________params_accumulator = xx.clone();
-        println!("GGGGg {}", self);
         self
     }
 
@@ -786,7 +784,18 @@ impl<'a> Display for QueryBuilder<'a> {
         }
 
         query.push(';');
-
+        // Idea
+        // println!(
+        //     "VOOOOVOOO {:?}",
+        //     self.________params_accumulator
+        //         .clone()
+        //         .into_iter()
+        //         .map(|x| {
+        //             let xx = x.clone().0;
+        //             (format!("x{}", xx.0), format!("{}", xx.1))
+        //         })
+        //         .collect::<Vec<_>>()
+        // );
         write!(f, "{}", query)
     }
 }
