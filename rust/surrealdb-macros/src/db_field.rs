@@ -215,11 +215,19 @@ impl<'a> Into<DbFilter> for QueryBuilder<'a> {
         DbFilter::new(query_b.to_string())
     }
 }
-impl Into<DbFilter> for DbField {
-    fn into(self) -> DbFilter {
-        DbFilter::new(self.into())
+impl From<DbField> for DbFilter {
+    fn from(value: DbField) -> Self {
+        Self {
+            query_string: value.field_name,
+            params: value.params,
+        }
     }
 }
+// impl Into<DbFilter> for DbField {
+//     fn into(self) -> DbFilter {
+//         DbFilter::new(self.into())
+//     }
+// }
 
 impl<'a> From<Cow<'a, DbField>> for DbField {
     fn from(value: Cow<'a, DbField>) -> Self {
@@ -348,12 +356,12 @@ pub trait ParamsExtractor {
 /// assert_eq!(combined_filter.to_string(), "(name = 'John') AND (age > 18)");
 /// ```
 pub fn cond(filterable: impl Into<DbFilter> + ParamsExtractor) -> DbFilter {
-    // filterable.into()
-    DbFilter {
-        query_string: "".into(),
-        // params: vec![].into(),
-        params: filterable.get_params(),
-    }
+    // let filterable: DbFilter = filterable.into();
+    // DbFilter {
+    //     query_string: filterable,
+    //     params: filterable.get_params(),
+    // }
+    filterable.into()
 }
 
 /// Creates an empty filter.
@@ -391,7 +399,6 @@ impl DbFilter {
         Self {
             query_string,
             params: vec![].into(),
-            // params: vec![].into(),
         }
     }
 
@@ -414,29 +421,15 @@ impl DbFilter {
     /// ```
     pub fn or(self, filter: impl Into<Self> + ParamsExtractor) -> Self {
         let precendence = self._______bracket_if_not_already();
-        let mut xx = vec![];
-        xx.extend(self.params);
-        xx.extend(filter.get_params());
-        // let oo = self.params_test.copy_from_slice([ll]);
+        let new_params = self.___update_params(&filter);
 
-        // let c = self
-        //     .params_test
-        //     .into_iter()
-        //     .chain(filter.get_params().into_iter())
-        //     .collect::<Vec<_>>(); // Consumed
-
-        let filter: Self = filter.into();
+        let ref filter: Self = filter.into();
         let query_string = format!("{precendence} OR ({filter})");
 
-        println!("ZZZZZZ {:?}", xx);
-        let ddd = DbFilter {
+        DbFilter {
             query_string,
-            // params: vec![].into(),
-            params: xx,
-            // params_test: c,
-        };
-        ddd
-        // DbFilter::new(format!("{precendence} OR ({filter})"))
+            params: new_params,
+        }
     }
 
     /// Combines this `DbFilter` instance with another using the `AND` operator.
@@ -458,34 +451,28 @@ impl DbFilter {
     /// ```
     pub fn and(self, filter: impl Into<Self> + ParamsExtractor) -> Self {
         let precendence = self._______bracket_if_not_already();
-        // // self.params
-        // //     .borrow_mut()
-        // //     .extend_from_slice(filter.get_params().borrow().as_slice());
-        //
-        // let filter: Self = filter.into();
-        // DbFilter::new(format!("{precendence} AND ({filter})"))
-        let mut xx = vec![];
-        xx.extend(self.params);
-        xx.extend(filter.get_params());
-        // let oo = self.params_test.copy_from_slice([ll]);
+        let new_params = self.___update_params(&filter);
 
-        // let c = self
-        //     .params_test
+        let ref filter: Self = filter.into();
+        let query_string = format!("{precendence} AND ({filter})");
+
+        DbFilter {
+            query_string,
+            params: new_params,
+        }
+    }
+
+    fn ___update_params(self, filter: &impl ParamsExtractor) -> Vec<Param> {
+        // let new_params = self
+        //     .params
+        //     .to_owned()
         //     .into_iter()
         //     .chain(filter.get_params().into_iter())
         //     .collect::<Vec<_>>(); // Consumed
-
-        let filter: Self = filter.into();
-        let query_string = format!("{precendence} AND ({filter})");
-
-        println!("MMMMM {:?}", xx);
-        let ddd = DbFilter {
-            query_string,
-            // params: vec![].into(),
-            params: xx,
-            // params_test: c,
-        };
-        ddd
+        let mut new_params = vec![];
+        new_params.extend(self.params);
+        new_params.extend(filter.get_params());
+        new_params
     }
 
     /// Wraps this `DbFilter` instance in a set of brackets.
