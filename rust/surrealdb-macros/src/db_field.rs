@@ -30,31 +30,34 @@ use crate::query_select::QueryBuilder;
 /// assert_eq!(field.to_string(), "name");
 /// ```
 #[derive(serde::Serialize, Debug, Clone, Default)]
-pub struct DbField(String);
+pub struct DbField {
+    field_name: String,
+    params: Vec<(String, sql::Value)>,
+}
 
 impl From<DbField> for sql::Table {
     fn from(value: DbField) -> Self {
-        sql::Table(value.0)
+        sql::Table(value.field_name)
     }
 }
 
 impl Into<sql::Value> for &DbField {
     fn into(self) -> sql::Value {
-        let xx = sql::Table(self.0.to_string());
+        let xx = sql::Table(self.field_name.to_string());
         xx.into()
     }
 }
 
 impl Into<sql::Value> for DbField {
     fn into(self) -> sql::Value {
-        let xx = sql::Table(self.0.to_string());
+        let xx = sql::Table(self.field_name.to_string());
         xx.into()
     }
 }
 
 impl Into<Number> for &DbField {
     fn into(self) -> Number {
-        let xx = sql::Value::Table(self.0.to_string().into());
+        let xx = sql::Value::Table(self.field_name.to_string().into());
         xx.as_string().into()
     }
 }
@@ -73,6 +76,7 @@ macro_rules! impl_geometry_or_field_from {
         })*
     };
 }
+
 impl_geometry_or_field_from!(
     geo::Polygon,
     geo::Point,
@@ -154,9 +158,9 @@ impl Into<NumberOrField> for sql::Number {
 
 impl Into<Number> for DbField {
     fn into(self) -> Number {
-        // sql::Strand::from(self.0.into())
-        // let xx = sql::Strand::from(self.0.into());
-        let xx = sql::Value::Strand(self.0.into());
+        // sql::Strand::from(self.field_name.into())
+        // let xx = sql::Strand::from(self.field_name.into());
+        let xx = sql::Value::Strand(self.field_name.into());
         xx.as_string().into()
         // todo!()
     }
@@ -202,24 +206,30 @@ impl From<DbField> for Cow<'static, DbField> {
 
 impl From<String> for DbField {
     fn from(value: String) -> Self {
-        Self(value.into())
+        Self {
+            field_name: value.into(),
+            params: vec![],
+        }
     }
 }
 impl From<&str> for DbField {
     fn from(value: &str) -> Self {
-        Self(value.into())
+        Self {
+            field_name: value.into(),
+            params: vec![],
+        }
     }
 }
 
 impl From<DbField> for String {
     fn from(value: DbField) -> Self {
-        value.0
+        value.field_name
     }
 }
 
 impl std::fmt::Display for DbField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.0))
+        f.write_fmt(format_args!("{}", self.field_name))
     }
 }
 
@@ -421,7 +431,10 @@ impl std::fmt::Display for DbFilter {
 
 impl DbField {
     pub fn new(field_name: impl Display) -> Self {
-        Self(field_name.to_string())
+        Self {
+            field_name: field_name.to_string(),
+            params: vec![],
+        }
     }
     /// Append the specified string to the field name
     ///
@@ -439,7 +452,7 @@ impl DbField {
     /// ```
     // TODO: replace with long underscore to show it is an internal variable
     pub fn push_str(&mut self, string: &str) {
-        self.0.push_str(string)
+        self.field_name.push_str(string)
     }
 
     /// Return a new `DbQuery` that renames the field with the specified alias
@@ -458,7 +471,7 @@ impl DbField {
     /// assert_eq!(query.to_string(), "name AS name_alias");
     /// ```
     pub fn __as__(&self, alias: impl std::fmt::Display) -> Self {
-        Self::new(format!("{} AS {}", self.0, alias))
+        Self::new(format!("{} AS {}", self.field_name, alias))
     }
 
     /// Return a new `DbQuery` that checks whether the field is equal to the specified value
@@ -481,7 +494,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} = {}", self.0, value))
+        Self::new(format!("{} = {}", self.field_name, value))
     }
 
     /// Return a new `DbQuery` that checks whether the field is not equal to the specified value
@@ -504,7 +517,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} != {}", self.0, value))
+        Self::new(format!("{} != {}", self.field_name, value))
     }
 
     /// Check whether the value of the field is greater than the given value.
@@ -527,7 +540,7 @@ impl DbField {
     {
         let value: NumberOrField = value.into();
         let value: sql::Value = value.into();
-        Self::new(format!("{} > {}", self.0, value))
+        Self::new(format!("{} > {}", self.field_name, value))
     }
 
     /// Check whether the value of the field is greater than or equal to the given value.
@@ -550,7 +563,7 @@ impl DbField {
     {
         let value: NumberOrField = value.into();
         let value: sql::Value = value.into();
-        Self::new(format!("{} >= {}", self.0, value))
+        Self::new(format!("{} >= {}", self.field_name, value))
     }
 
     /// Check whether the value of the field is less than the given value.
@@ -573,7 +586,7 @@ impl DbField {
     {
         let value: NumberOrField = value.into();
         let value: sql::Value = value.into();
-        Self::new(format!("{} < {}", self.0, value))
+        Self::new(format!("{} < {}", self.field_name, value))
     }
 
     /// Check whether the value of the field is less than or equal to the given value.
@@ -596,7 +609,7 @@ impl DbField {
     {
         let value: NumberOrField = value.into();
         let value: sql::Value = value.into();
-        Self::new(format!("{} <= {}", self.0, value))
+        Self::new(format!("{} <= {}", self.field_name, value))
     }
 
     /// Check whether the value of the field is between the given lower and upper bounds.
@@ -622,7 +635,10 @@ impl DbField {
         let lower_bound: sql::Value = lower_bound.into();
         let upper_bound: NumberOrField = upper_bound.into();
         let upper_bound: sql::Value = upper_bound.into();
-        Self::new(format!("{} < {} < {}", lower_bound, self.0, upper_bound))
+        Self::new(format!(
+            "{} < {} < {}",
+            lower_bound, self.field_name, upper_bound
+        ))
     }
 
     /// Check whether the value of the field is between the given lower and upper bounds.
@@ -648,7 +664,10 @@ impl DbField {
         let lower_bound: sql::Value = lower_bound.into();
         let upper_bound: NumberOrField = upper_bound.into();
         let upper_bound: sql::Value = upper_bound.into();
-        Self::new(format!("{} <= {} <= {}", lower_bound, self.0, upper_bound))
+        Self::new(format!(
+            "{} <= {} <= {}",
+            lower_bound, self.field_name, upper_bound
+        ))
     }
 
     /// Constructs a LIKE query that checks whether the value of the column matches the given pattern.
@@ -670,7 +689,7 @@ impl DbField {
         T: Into<Value>,
     {
         let pattern: Value = pattern.into();
-        Self::new(format!("{} LIKE '{}'", self.0, pattern))
+        Self::new(format!("{} LIKE '{}'", self.field_name, pattern))
     }
 
     /// Constructs a NOT LIKE query that checks whether the value of the column does not match the given pattern.
@@ -692,7 +711,7 @@ impl DbField {
         T: Into<Value>,
     {
         let pattern: Value = pattern.into();
-        Self::new(format!("{} NOT LIKE '{}'", self.0, pattern))
+        Self::new(format!("{} NOT LIKE '{}'", self.field_name, pattern))
     }
 
     /// Constructs a query that checks whether the value of the column is null.
@@ -706,7 +725,7 @@ impl DbField {
     /// assert_eq!(query.to_string(), "age IS NULL");
     /// ```
     pub fn is_null(&self) -> Self {
-        Self::new(format!("{} IS NULL", self.0))
+        Self::new(format!("{} IS NULL", self.field_name))
     }
 
     /// Constructs a query that checks whether the value of the column is not null.
@@ -720,7 +739,7 @@ impl DbField {
     /// assert_eq!(query.to_string(), "age IS NOT NULL");
     /// ```
     pub fn is_not_null(&self) -> Self {
-        Self::new(format!("{} IS NOT NULL", self.0))
+        Self::new(format!("{} IS NOT NULL", self.field_name))
     }
 
     /// Constructs a query that checks whether the value of the column is equal to the given value.
@@ -742,7 +761,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} = {}", self.0, value))
+        Self::new(format!("{} = {}", self.field_name, value))
     }
 
     /// Constructs a query that checks whether the value of the column is not equal to the given value.
@@ -764,7 +783,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} != {}", self.0, value))
+        Self::new(format!("{} != {}", self.field_name, value))
     }
 
     /// Constructs a query that checks whether the value of the column is exactly equal to the given value.
@@ -786,7 +805,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} == {}", self.0, value))
+        Self::new(format!("{} == {}", self.field_name, value))
     }
 
     /// Check whether any value in a set is equal to a value.
@@ -809,7 +828,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let values_str = collect_query_values(values);
-        Self::new(format!("{} ?= ({})", self.0, values_str))
+        Self::new(format!("{} ?= ({})", self.field_name, values_str))
     }
 
     /// Check whether all values in a set are equal to a value.
@@ -832,7 +851,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let values_str = collect_query_values(values);
-        Self::new(format!("{} *= ({})", self.0, values_str))
+        Self::new(format!("{} *= ({})", self.field_name, values_str))
     }
 
     /// Compare two values for equality using fuzzy matching.
@@ -855,7 +874,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let value: Value = value.into();
-        Self::new(format!("{} ~ {}", self.0, value))
+        Self::new(format!("{} ~ {}", self.field_name, value))
     }
 
     /// Compare two values for inequality using fuzzy matching.
@@ -878,7 +897,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} !~ {}", self.0, value))
+        Self::new(format!("{} !~ {}", self.field_name, value))
     }
 
     /// Check whether any value in a set is equal to a value using fuzzy matching.
@@ -899,7 +918,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let values_str = collect_query_values(values);
-        Self::new(format!("{} ?~ ({})", self.0, values_str))
+        Self::new(format!("{} ?~ ({})", self.field_name, values_str))
     }
 
     /// Check whether all values in a set are equal to a value using fuzzy matching.
@@ -920,7 +939,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let values_str = collect_query_values(values);
-        Self::new(format!("{} *~ ({})", self.0, values_str))
+        Self::new(format!("{} *~ ({})", self.field_name, values_str))
     }
 
     /// Check whether a value is less than or equal to another value.
@@ -941,7 +960,7 @@ impl DbField {
         T: Into<Number>,
     {
         let value: Number = value.into();
-        Self::new(format!("{} <= {}", self.0, value))
+        Self::new(format!("{} <= {}", self.field_name, value))
     }
 
     /// Check whether a value is greater than or equal to another value.
@@ -963,9 +982,9 @@ impl DbField {
         let value: NumberOrField = value.into();
         let value: sql::Value = value.into();
         // let value: Number = value.into();
-        let mm = Self::new(format!("{} >= {}", self.0, value));
+        let mm = Self::new(format!("{} >= {}", self.field_name, value));
         println!("mmm {}", mm);
-        Self::new(format!("{} >= {}", self.0, value))
+        Self::new(format!("{} >= {}", self.field_name, value))
     }
 
     /// Adds a value to the current query.
@@ -989,7 +1008,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} + {}", self.0, value))
+        Self::new(format!("{} + {}", self.field_name, value))
     }
 
     /// Checks whether the current query contains a given value.
@@ -1013,7 +1032,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} CONTAINS {}", self.0, value))
+        Self::new(format!("{} CONTAINS {}", self.field_name, value))
     }
 
     /// Checks whether the current query does not contain a given value.
@@ -1037,7 +1056,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} CONTAINSNOT {}", self.0, value))
+        Self::new(format!("{} CONTAINSNOT {}", self.field_name, value))
     }
 
     /// Checks whether the current query contains all of the given values.
@@ -1061,7 +1080,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let values_str = collect_query_values(values);
-        Self::new(format!("{} CONTAINSALL ({})", self.0, values_str))
+        Self::new(format!("{} CONTAINSALL ({})", self.field_name, values_str))
     }
 
     /// Checks whether the current query contains any of the given values.
@@ -1084,7 +1103,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let values_str = collect_query_values(values);
-        Self::new(format!("{} CONTAINSANY ({})", self.0, values_str))
+        Self::new(format!("{} CONTAINSANY ({})", self.field_name, values_str))
     }
 
     /// Checks whether the column value does not contain any of the specified values.
@@ -1106,7 +1125,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let values_str = collect_query_values(values);
-        Self::new(format!("{} CONTAINSNONE ({})", self.0, values_str))
+        Self::new(format!("{} CONTAINSNONE ({})", self.field_name, values_str))
     }
 
     /// Checks whether the column value is contained in the specified value.
@@ -1128,7 +1147,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} INSIDE {}", self.0, value))
+        Self::new(format!("{} INSIDE {}", self.field_name, value))
     }
 
     /// Checks whether the column value is not contained in the specified value.
@@ -1150,7 +1169,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} NOTINSIDE {}", self.0, value))
+        Self::new(format!("{} NOTINSIDE {}", self.field_name, value))
     }
 
     /// Checks whether all of the specified values are contained in the column value.
@@ -1172,7 +1191,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let values_str = collect_query_values(values);
-        Self::new(format!("{} ALLINSIDE ({})", self.0, values_str))
+        Self::new(format!("{} ALLINSIDE ({})", self.field_name, values_str))
     }
 
     /// Checks whether any of the specified values are contained in the column value.
@@ -1194,7 +1213,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let values_str = collect_query_values(values);
-        Self::new(format!("{} ANYINSIDE ({})", self.0, values_str))
+        Self::new(format!("{} ANYINSIDE ({})", self.field_name, values_str))
     }
 
     /// Checks whether none of the values are contained within the current field.
@@ -1216,7 +1235,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let values_str = collect_query_values(values);
-        Self::new(format!("{} NONEINSIDE ({})", self.0, values_str))
+        Self::new(format!("{} NONEINSIDE ({})", self.field_name, values_str))
     }
 
     /// Checks whether the current field is outside of the given value.
@@ -1241,7 +1260,7 @@ impl DbField {
         let value: sql::Value = value.into();
         let xx = Self::new(format!("OUTSIDE {}", value));
         println!("koko {}", xx);
-        Self::new(format!("{} OUTSIDE {}", self.0, value))
+        Self::new(format!("{} OUTSIDE {}", self.field_name, value))
     }
 
     /// Checks whether the current field intersects with the given value.
@@ -1263,7 +1282,7 @@ impl DbField {
         T: Into<sql::Geometry>,
     {
         let value: sql::Geometry = value.into();
-        Self::new(format!("{} INTERSECTS {}", self.0, value))
+        Self::new(format!("{} INTERSECTS {}", self.field_name, value))
     }
 
     /// Checks whether any value in a set is equal to the current field using fuzzy matching.
@@ -1285,7 +1304,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let values_str = collect_query_values(values);
-        Self::new(format!("{} ?= ({})", self.0, values_str))
+        Self::new(format!("{} ?= ({})", self.field_name, values_str))
     }
 
     /// Checks whether all values in a set are equal to the current field using fuzzy matching.
@@ -1307,7 +1326,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let values_str = collect_query_values(values);
-        Self::new(format!("{} *= ({})", self.0, values_str))
+        Self::new(format!("{} *= ({})", self.field_name, values_str))
     }
 
     /// Subtracts a value from the current query value.
@@ -1329,7 +1348,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} - {}", self.0, value))
+        Self::new(format!("{} - {}", self.field_name, value))
     }
 
     /// Multiplies the current query value with another value.
@@ -1351,7 +1370,7 @@ impl DbField {
         T: Into<Number>,
     {
         let value: Number = value.into();
-        Self::new(format!("{} * {}", self.0, value))
+        Self::new(format!("{} * {}", self.field_name, value))
     }
 
     /// Divides the current query value by another value.
@@ -1373,7 +1392,7 @@ impl DbField {
         T: Into<Number>,
     {
         let value: Number = value.into();
-        Self::new(format!("{} / {}", self.0, value))
+        Self::new(format!("{} / {}", self.field_name, value))
     }
 
     /// Checks if the current query value is truthy.
@@ -1387,7 +1406,7 @@ impl DbField {
     /// assert_eq!(is_truthy.to_string(), "true && true".to_string());
     /// ```
     pub fn is_truthy(&self) -> Self {
-        Self::new(format!("{} && true", self.0))
+        Self::new(format!("{} && true", self.field_name))
     }
 
     /// Checks if the current query value and another value are truthy.
@@ -1409,7 +1428,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: sql::Value = value.into();
-        Self::new(format!("{} && {}", self.0, value))
+        Self::new(format!("{} && {}", self.field_name, value))
     }
 
     /// Checks if the current query value or another value are truthy.
@@ -1429,7 +1448,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: sql::Value = value.into();
-        Self::new(format!("{} || {}", self.0, value))
+        Self::new(format!("{} || {}", self.field_name, value))
     }
 
     /// Check whether the value of the field is equal to the specified value.
@@ -1452,7 +1471,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: sql::Value = value.into();
-        Self::new(format!("{} IS {}", self.0, value))
+        Self::new(format!("{} IS {}", self.field_name, value))
     }
 
     /// Check whether the value of the field is not equal to the specified value.
@@ -1475,7 +1494,7 @@ impl DbField {
         T: Into<Value>,
     {
         let value: sql::Value = value.into();
-        Self::new(format!("{} IS NOT {}", self.0, value))
+        Self::new(format!("{} IS NOT {}", self.field_name, value))
     }
 
     /// Check whether any value in a set is equal to a value using the "=" operator.
@@ -1499,7 +1518,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let joined_values = collect_query_values(values);
-        Self::new(format!("{} ?= {{{}}}", self.0, joined_values))
+        Self::new(format!("{} ?= {{{}}}", self.field_name, joined_values))
     }
 
     /// Check whether all values in a set are equal to a value using the "*=" operator.
@@ -1523,7 +1542,7 @@ impl DbField {
         T: Into<Value> + Clone,
     {
         let joined_values = collect_query_values(values);
-        Self::new(format!("{} *= {{{}}}", self.0, joined_values))
+        Self::new(format!("{} *= {{{}}}", self.field_name, joined_values))
     }
 
     /// Combine this field with another using the "AND" operator.
@@ -1548,7 +1567,7 @@ impl DbField {
         T: Into<Value>,
     {
         let other: sql::Value = other.into();
-        Self::new(format!("{} AND {}", self.0, other))
+        Self::new(format!("{} AND {}", self.field_name, other))
     }
 
     /// Combine this field with another using the "OR" operator.
