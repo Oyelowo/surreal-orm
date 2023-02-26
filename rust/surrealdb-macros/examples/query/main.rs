@@ -644,7 +644,7 @@ async fn main() -> surrealdb::Result<()> {
 
     let company::Company { id, name, home, .. } = Company::schema();
     println!("xxxxvv {}", name.clone());
-    let ref age = name;
+    let ref age = DbField::new("age");
     let firstName = &name;
     let mut queryb = query_select::QueryBuilder::new();
     let line = line_string![

@@ -6,12 +6,13 @@ Email: oyelowooyedayo@gmail.com
 use bigdecimal::BigDecimal;
 use std::{
     borrow::Cow,
+    cell::{Cell, RefCell},
     fmt::{format, Display},
     ops::Deref,
 };
 
 use proc_macro2::Span;
-use surrealdb::sql::{self, Number, Value};
+use surrealdb::sql::{self, Number, Uuid, Value};
 
 use crate::query_select::QueryBuilder;
 
@@ -29,10 +30,22 @@ use crate::query_select::QueryBuilder;
 ///
 /// assert_eq!(field.to_string(), "name");
 /// ```
-#[derive(serde::Serialize, Debug, Clone, Default)]
+#[derive(serde::Serialize, Debug, Clone)]
 pub struct DbField {
     field_name: String,
-    params: Vec<(String, sql::Value)>,
+    params: RefCell<Vec<(String, sql::Value)>>,
+}
+
+// impl From<&mut DbField> for sql::Value {
+//     fn from(value: &mut DbField) -> Self {
+//         // sql::Value(value.field_name.to_string())
+//         Self::Table(value.field_name.to_string().into())
+//     }
+// }
+impl From<&mut DbField> for sql::Table {
+    fn from(value: &mut DbField) -> Self {
+        sql::Table(value.field_name.to_string())
+    }
 }
 
 impl From<DbField> for sql::Table {
@@ -221,7 +234,7 @@ impl From<String> for DbField {
     fn from(value: String) -> Self {
         Self {
             field_name: value.into(),
-            params: vec![],
+            params: vec![].into(),
         }
     }
 }
@@ -229,7 +242,7 @@ impl From<&str> for DbField {
     fn from(value: &str) -> Self {
         Self {
             field_name: value.into(),
-            params: vec![],
+            params: vec![].into(),
         }
     }
 }
@@ -442,11 +455,16 @@ impl std::fmt::Display for DbFilter {
     }
 }
 
+fn generate_param_name() -> String {
+    let sanitized_uuid = Uuid::new_v4().simple();
+    format!("_{sanitized_uuid}")
+}
+
 impl DbField {
     pub fn new(field_name: impl Display) -> Self {
         Self {
             field_name: field_name.to_string(),
-            params: vec![],
+            params: vec![].into(),
         }
     }
     /// Append the specified string to the field name
@@ -553,7 +571,11 @@ impl DbField {
     {
         let value: NumberOrField = value.into();
         let value: sql::Value = value.into();
-        Self::new(format!("{} > {}", self.field_name, value))
+        let param = generate_param_name();
+        let condition = format!("{} > ${}", self.field_name, &param);
+
+        self.params.borrow_mut().push((param, value));
+        Self::new(condition)
     }
 
     /// Check whether the value of the field is greater than or equal to the given value.
@@ -576,7 +598,11 @@ impl DbField {
     {
         let value: NumberOrField = value.into();
         let value: sql::Value = value.into();
-        Self::new(format!("{} >= {}", self.field_name, value))
+        let param = generate_param_name();
+        let condition = format!("{} >= ${}", self.field_name, &param);
+
+        self.params.borrow_mut().push((param, value));
+        Self::new(condition)
     }
 
     /// Check whether the value of the field is less than the given value.

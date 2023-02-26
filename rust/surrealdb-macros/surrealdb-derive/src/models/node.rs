@@ -121,7 +121,7 @@ impl ToTokens for FieldsGetterOpts {
                #( #imports_referenced_node_schema) *
                 
 
-                #[derive(Debug, Serialize, Default)]
+                #[derive(Debug, ::serde::Serialize)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
                     pub(crate) #___________graph_traversal_string: ::std::string::String,
