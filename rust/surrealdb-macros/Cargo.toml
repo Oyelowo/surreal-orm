@@ -39,6 +39,7 @@ chrono.workspace = true
 geo = { workspace = true } 
 derive_builder = "0.12.0"
 geojson = "0.24.0"
+uuid.workspace = true
 # [lib]
 # proc-macro = true
 # crate_type = ["proc-macro"]

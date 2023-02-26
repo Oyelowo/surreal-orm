@@ -14,6 +14,7 @@ use geo::MultiPolygon;
 use geo::Point;
 use geo::Polygon;
 
+use geo::line_string;
 use geo::point;
 use geo::polygon;
 use serde::Deserialize;
@@ -646,6 +647,38 @@ async fn main() -> surrealdb::Result<()> {
     let ref age = name;
     let firstName = &name;
     let mut queryb = query_select::QueryBuilder::new();
+    let line = line_string![
+        (x: -21.95156, y: 64.1446),
+        (x: -21.951, y: 64.14479),
+        (x: -21.95044, y: 64.14527),
+        (x: -21.951445, y: 64.145508),
+    ];
+    let polygon = polygon![
+        (x: 0.9, y: 0.0),
+        (x: 4.0, y: 0.0),
+        (x: 4.0, y: 1.0),
+        (x: 1.0, y: 1.0),
+        (x: 1.0, y: 4.0),
+        (x: 0.0, y: 4.0),
+        (x: 0.0, y: 0.0),
+    ];
+    let poly = polygon!(
+    exterior: [
+        (x: -111., y: 45.),
+        (x: -111., y: 41.),
+        (x: -104., y: 41.),
+        (x: -104., y: 45.),
+    ],
+    interiors: [
+        [
+            (x: -110., y: 44.),
+            (x: -110., y: 42.),
+            (x: -105., y: 42.),
+            (x: -105., y: 44.),
+        ],
+    ],
+);
+    // let polygon: sql::Value = sql::Geometry::Polygon(polygon.into()).into();
     let ref mut query = queryb.select_all().from(Company::get_table_name()).where_(
         cond(
             age.greater_than(id)
@@ -654,12 +687,20 @@ async fn main() -> surrealdb::Result<()> {
                 .like(firstName)
                 .add(5)
                 .subtract(10)
+                .outside(line)
                 .or(age),
         )
         // .and(bestFriend.exactly_equal("Oyelowo"))
         .or(firstName.equal(true))
         .and(age.greater_than_or_equal(150)),
     );
+    let mb = Uuid::new_v4();
+    println!("uuid: {}", mb.as_fields().0);
+    println!("uuid: {}", Uuid::new_v4().as_simple());
+    println!("uuid: {}", Uuid::new_v4().as_simple());
+    println!("uuid: {}", mb.simple());
+    let _44908904dfcb4dfca54694b2ecb5e579 = 434;
+    let _44908904dfcb4dfca54694b2ecb5e579 = 434;
     Ok(())
 }
 

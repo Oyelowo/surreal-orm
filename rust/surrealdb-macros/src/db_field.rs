@@ -58,98 +58,63 @@ impl Into<Number> for &DbField {
         xx.as_string().into()
     }
 }
-
 #[derive(serde::Serialize, Debug, Clone)]
-enum NumberOrField {
+pub enum GeometryOrField {
+    Geometry(sql::Geometry),
+    Field(sql::Value),
+}
+
+macro_rules! impl_geometry_or_field_from {
+    ($($t:ty),*) => {
+        $(impl From<$t> for GeometryOrField {
+            fn from(value: $t) -> Self {
+                Self::Geometry(sql::Geometry::from(value))
+            }
+        })*
+    };
+}
+impl_geometry_or_field_from!(
+    geo::Polygon,
+    geo::Point,
+    geo::LineString,
+    geo::MultiPoint,
+    geo::MultiPolygon,
+    geo::MultiLineString
+);
+
+impl From<Value> for GeometryOrField {
+    fn from(value: Value) -> Self {
+        Self::Field(value)
+    }
+}
+
+impl From<GeometryOrField> for Value {
+    fn from(val: GeometryOrField) -> Self {
+        match val {
+            GeometryOrField::Geometry(g) => g.into(),
+            GeometryOrField::Field(f) => f.into(),
+        }
+    }
+}
+#[derive(serde::Serialize, Debug, Clone)]
+pub enum NumberOrField {
     Number(sql::Number),
     Field(sql::Value),
 }
 
-impl Deref for NumberOrField {
-    type Target = sql::Number;
-
-    fn deref(&self) -> &Self::Target {
-        todo!()
-    }
+macro_rules! impl_number_or_field_from {
+    ($($t:ty),*) => {
+        $(impl From<$t> for NumberOrField {
+            fn from(value: $t) -> Self {
+                Self::Number(sql::Number::from(value))
+            }
+        })*
+    };
 }
 
-impl From<i8> for NumberOrField {
-    fn from(i: i8) -> Self {
-        Self::Number(sql::Number::from(i))
-    }
-}
-
-impl From<i16> for NumberOrField {
-    fn from(i: i16) -> Self {
-        Self::Number(sql::Number::from(i))
-    }
-}
-
-impl From<i32> for NumberOrField {
-    fn from(i: i32) -> Self {
-        Self::Number(sql::Number::from(i))
-    }
-}
-
-impl From<i64> for NumberOrField {
-    fn from(i: i64) -> Self {
-        Self::Number(sql::Number::from(i))
-    }
-}
-
-impl From<isize> for NumberOrField {
-    fn from(i: isize) -> Self {
-        Self::Number(sql::Number::from(i))
-    }
-}
-
-impl From<u8> for NumberOrField {
-    fn from(i: u8) -> Self {
-        Self::Number(sql::Number::from(i))
-    }
-}
-
-impl From<u16> for NumberOrField {
-    fn from(i: u16) -> Self {
-        Self::Number(sql::Number::from(i))
-    }
-}
-
-impl From<u32> for NumberOrField {
-    fn from(i: u32) -> Self {
-        Self::Number(sql::Number::from(i))
-    }
-}
-
-impl From<u64> for NumberOrField {
-    fn from(i: u64) -> Self {
-        Self::Number(sql::Number::from(i))
-    }
-}
-
-impl From<usize> for NumberOrField {
-    fn from(i: usize) -> Self {
-        Self::Number(sql::Number::from(i))
-    }
-}
-
-impl From<f32> for NumberOrField {
-    fn from(f: f32) -> Self {
-        Self::Number(sql::Number::from(f))
-    }
-}
-
-impl From<f64> for NumberOrField {
-    fn from(f: f64) -> Self {
-        Self::Number(sql::Number::from(f))
-    }
-}
-
-impl From<BigDecimal> for NumberOrField {
-    fn from(v: BigDecimal) -> Self {
-        Self::Number(sql::Number::from(v))
-    }
-}
+impl_number_or_field_from!(
+    i8, i16, i32, i64, isize, u8, u16, u32, u64, usize, f32, f64, BigDecimal
+);
 
 impl Into<NumberOrField> for DbField {
     fn into(self) -> NumberOrField {
@@ -1270,9 +1235,12 @@ impl DbField {
     /// ```
     pub fn outside<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Geometry>,
+        T: Into<GeometryOrField>,
     {
-        let value: sql::Geometry = value.into();
+        let value: GeometryOrField = value.into();
+        let value: sql::Value = value.into();
+        let xx = Self::new(format!("OUTSIDE {}", value));
+        println!("koko {}", xx);
         Self::new(format!("{} OUTSIDE {}", self.0, value))
     }
 
