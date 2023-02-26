@@ -678,21 +678,17 @@ async fn main() -> surrealdb::Result<()> {
         ],
     ],
 );
-    // let polygon: sql::Value = sql::Geometry::Polygon(polygon.into()).into();
+    let x = vec![1, 2, 3];
+    let y = 9;
+    let z = x.into_iter().chain(std::iter::once(y)).collect::<Vec<_>>();
+    println!("{:?}", z); // prints [1, 2, 3, 9]
+                         // let polygon: sql::Value = sql::Geometry::Polygon(polygon.into()).into();
     let ref mut query = queryb.select_all().from(Company::get_table_name()).where_(
-        cond(
-            age.greater_than(id)
-                .greater_than_or_equal(300)
-                .less_than_or_equal(20)
-                .like(firstName)
-                .add(5)
-                .subtract(10)
-                .outside(line)
-                .or(age),
-        )
-        // .and(bestFriend.exactly_equal("Oyelowo"))
-        .or(firstName.equal(true))
-        .and(age.greater_than_or_equal(150)),
+        cond(age.greater_than(id).greater_than(age))
+            .or(firstName.greater_than(90))
+            .or(firstName.greater_than(90))
+            .or(firstName.greater_than(90))
+            .and(age.greater_than(150)),
     );
     let mb = Uuid::new_v4();
     println!("uuid: {}", mb.as_fields().0);

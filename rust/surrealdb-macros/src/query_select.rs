@@ -8,7 +8,12 @@ use std::{
     fmt::{Display, Formatter, Result as FmtResult},
 };
 
-use crate::{db_field::DbFilter, DbField, SurrealdbNode};
+use surrealdb::sql;
+
+use crate::{
+    db_field::{DbFilter, ParamList, ParamsExtractor},
+    DbField, SurrealdbNode,
+};
 
 /// Creates a new `Order` instance with the specified database field.
 ///
@@ -204,6 +209,13 @@ pub struct QueryBuilder<'a> {
     fetch: Vec<String>,
     timeout: Option<&'a str>,
     parallel: bool,
+    ________params_accumulator: ParamList,
+}
+
+impl<'a> ParamsExtractor for QueryBuilder<'a> {
+    fn get_params(&self) -> ParamList {
+        self.________params_accumulator.to_vec()
+    }
 }
 
 impl<'a> QueryBuilder<'a> {
@@ -229,6 +241,7 @@ impl<'a> QueryBuilder<'a> {
             fetch: vec![],
             timeout: None,
             parallel: false,
+            ________params_accumulator: vec![],
         }
     }
 
@@ -337,9 +350,15 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * WHERE age > 18");
     /// ```
-    pub fn where_(&mut self, condition: impl Into<DbFilter>) -> &mut Self {
+    pub fn where_(&mut self, condition: impl Into<DbFilter> + ParamsExtractor) -> &mut Self {
+        let ll = condition.get_params();
+        let mut xx = vec![];
+        xx.extend(self.________params_accumulator.to_vec());
+        xx.extend(condition.get_params());
         let condition: DbFilter = condition.into();
         self.where_ = Some(condition.to_string());
+        self.________params_accumulator = xx.clone();
+        println!("GGGGg {:?}", self.________params_accumulator);
         self
     }
 

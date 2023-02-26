@@ -37,10 +37,13 @@ pub struct DbField {
     field_name: String,
     params: ParamList,
 }
-type ParamList = Rc<RefCell<Vec<Param>>>;
+pub type ParamList = Vec<Param>;
+// type ParamList = Rc<RefCell<Vec<Param>>>;
 impl ParamsExtractor for DbField {
     fn get_params(&self) -> ParamList {
-        Rc::clone(&self.params)
+        // Rc::clone(&self.params)
+        // vec![]
+        self.params.to_vec()
     }
 }
 
@@ -242,7 +245,8 @@ impl From<String> for DbField {
     fn from(value: String) -> Self {
         Self {
             field_name: value.into(),
-            params: Rc::new(vec![].into()),
+            // params: Rc::new(vec![].into()),
+            params: vec![],
         }
     }
 }
@@ -250,7 +254,8 @@ impl From<&str> for DbField {
     fn from(value: &str) -> Self {
         Self {
             field_name: value.into(),
-            params: Rc::new(vec![].into()),
+            // params: Rc::new(vec![].into()),
+            params: vec![],
         }
     }
 }
@@ -303,12 +308,13 @@ impl std::fmt::Display for DbField {
 #[derive(Debug, Clone)]
 pub struct DbFilter {
     query_string: String,
-    params: ParamList,
+    // params: Vec<Param>,
+    params: Vec<Param>,
 }
 
 impl ParamsExtractor for DbFilter {
     fn get_params(&self) -> ParamList {
-        Rc::clone(&self.params)
+        self.params.to_vec()
     }
 }
 
@@ -345,6 +351,7 @@ pub fn cond(filterable: impl Into<DbFilter> + ParamsExtractor) -> DbFilter {
     // filterable.into()
     DbFilter {
         query_string: "".into(),
+        // params: vec![].into(),
         params: filterable.get_params(),
     }
 }
@@ -383,7 +390,8 @@ impl DbFilter {
     pub fn new(query_string: String) -> Self {
         Self {
             query_string,
-            params: Rc::new(vec![].into()),
+            params: vec![].into(),
+            // params: vec![].into(),
         }
     }
 
@@ -404,15 +412,31 @@ impl DbFilter {
     ///
     /// assert_eq!(filter.to_string(), "(name = 'John') OR (age > 30)");
     /// ```
-    pub fn or(&self, filter: impl Into<Self> + ParamsExtractor) -> Self {
+    pub fn or(self, filter: impl Into<Self> + ParamsExtractor) -> Self {
         let precendence = self._______bracket_if_not_already();
-        self.params
-            .borrow_mut()
-            .extend(filter.get_params().borrow().to_vec());
-        println!("DDDD {:?}", self.params);
-        let filter: Self = filter.into();
+        let mut xx = vec![];
+        xx.extend(self.params);
+        xx.extend(filter.get_params());
+        // let oo = self.params_test.copy_from_slice([ll]);
 
-        DbFilter::new(format!("{precendence} OR ({filter})"))
+        // let c = self
+        //     .params_test
+        //     .into_iter()
+        //     .chain(filter.get_params().into_iter())
+        //     .collect::<Vec<_>>(); // Consumed
+
+        let filter: Self = filter.into();
+        let query_string = format!("{precendence} OR ({filter})");
+
+        println!("ZZZZZZ {:?}", xx);
+        let ddd = DbFilter {
+            query_string,
+            // params: vec![].into(),
+            params: xx,
+            // params_test: c,
+        };
+        ddd
+        // DbFilter::new(format!("{precendence} OR ({filter})"))
     }
 
     /// Combines this `DbFilter` instance with another using the `AND` operator.
@@ -432,14 +456,36 @@ impl DbFilter {
     ///
     /// assert_eq!(combined.to_string(), "(name = 'John') AND (age > 30)");
     /// ```
-    pub fn and(&self, filter: impl Into<Self> + ParamsExtractor) -> Self {
+    pub fn and(self, filter: impl Into<Self> + ParamsExtractor) -> Self {
         let precendence = self._______bracket_if_not_already();
-        self.params
-            .borrow_mut()
-            .extend_from_slice(filter.get_params().borrow().as_slice());
+        // // self.params
+        // //     .borrow_mut()
+        // //     .extend_from_slice(filter.get_params().borrow().as_slice());
+        //
+        // let filter: Self = filter.into();
+        // DbFilter::new(format!("{precendence} AND ({filter})"))
+        let mut xx = vec![];
+        xx.extend(self.params);
+        xx.extend(filter.get_params());
+        // let oo = self.params_test.copy_from_slice([ll]);
+
+        // let c = self
+        //     .params_test
+        //     .into_iter()
+        //     .chain(filter.get_params().into_iter())
+        //     .collect::<Vec<_>>(); // Consumed
 
         let filter: Self = filter.into();
-        DbFilter::new(format!("{precendence} AND ({filter})"))
+        let query_string = format!("{precendence} AND ({filter})");
+
+        println!("MMMMM {:?}", xx);
+        let ddd = DbFilter {
+            query_string,
+            // params: vec![].into(),
+            params: xx,
+            // params_test: c,
+        };
+        ddd
     }
 
     /// Wraps this `DbFilter` instance in a set of brackets.
@@ -507,7 +553,8 @@ impl DbField {
     pub fn new(field_name: impl Display) -> Self {
         Self {
             field_name: field_name.to_string(),
-            params: Rc::new(vec![].into()),
+            // params: Rc::new(vec![].into()),
+            params: vec![].into(),
         }
     }
     /// Append the specified string to the field name
@@ -617,8 +664,15 @@ impl DbField {
         let param = generate_param_name();
         let condition = format!("{} > ${}", self.field_name, &param);
 
-        self.params.borrow_mut().push((param, value).into());
-        Self::new(condition)
+        let mut xx = vec![];
+        xx.extend(self.params.to_vec());
+        xx.extend([(param, value).into()]);
+        // self.params.borrow_mut().push((param, value).into());
+        Self {
+            field_name: condition,
+            params: xx,
+        }
+        // Self::new(condition)
     }
 
     /// Check whether the value of the field is greater than or equal to the given value.
@@ -644,7 +698,7 @@ impl DbField {
         let param = generate_param_name();
         let condition = format!("{} >= ${}", self.field_name, &param);
 
-        self.params.borrow_mut().push((param, value).into());
+        // self.params.borrow_mut().push((param, value).into());
         Self::new(condition)
     }
 
