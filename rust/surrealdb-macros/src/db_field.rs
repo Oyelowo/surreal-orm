@@ -86,6 +86,18 @@ impl_geometry_or_field_from!(
     geo::MultiLineString
 );
 
+impl Into<GeometryOrField> for DbField {
+    fn into(self) -> GeometryOrField {
+        GeometryOrField::Field(self.into())
+    }
+}
+
+impl Into<GeometryOrField> for &DbField {
+    fn into(self) -> GeometryOrField {
+        GeometryOrField::Field(self.into())
+    }
+}
+
 impl From<Value> for GeometryOrField {
     fn from(value: Value) -> Self {
         Self::Field(value)
@@ -100,6 +112,7 @@ impl From<GeometryOrField> for Value {
         }
     }
 }
+
 #[derive(serde::Serialize, Debug, Clone)]
 pub enum NumberOrField {
     Number(sql::Number),
@@ -689,7 +702,7 @@ impl DbField {
         T: Into<Value>,
     {
         let pattern: Value = pattern.into();
-        Self::new(format!("{} LIKE '{}'", self.field_name, pattern))
+        Self::new(format!("{} LIKE {}", self.field_name, pattern))
     }
 
     /// Constructs a NOT LIKE query that checks whether the value of the column does not match the given pattern.
@@ -711,7 +724,7 @@ impl DbField {
         T: Into<Value>,
     {
         let pattern: Value = pattern.into();
-        Self::new(format!("{} NOT LIKE '{}'", self.field_name, pattern))
+        Self::new(format!("{} NOT LIKE {}", self.field_name, pattern))
     }
 
     /// Constructs a query that checks whether the value of the column is null.
@@ -1279,9 +1292,10 @@ impl DbField {
     /// ```
     pub fn intersects<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Geometry>,
+        T: Into<GeometryOrField>,
     {
-        let value: sql::Geometry = value.into();
+        let value: GeometryOrField = value.into();
+        let value: sql::Value = value.into();
         Self::new(format!("{} INTERSECTS {}", self.field_name, value))
     }
 

@@ -233,7 +233,7 @@ mod tests {
                     .multiply(age)
                     .or(firstName)
                     .intersects(age))
-                .and(lastName.greater_than_or_equal("lowo").or(course))
+                .and(lastName.greater_than_or_equal(45).or(course))
                 .and(
                     firstName
                         .any_in_set(&["asrer"])
