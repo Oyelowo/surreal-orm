@@ -190,6 +190,7 @@ impl Display for OrderOption {
 }
 
 /// The query builder struct used to construct complex database queries.
+#[derive(Debug, Clone)]
 pub struct QueryBuilder<'a> {
     // projections: Vec<&'a str>,
     projections: Vec<String>,
@@ -358,7 +359,7 @@ impl<'a> QueryBuilder<'a> {
         let condition: DbFilter = condition.into();
         self.where_ = Some(condition.to_string());
         self.________params_accumulator = xx.clone();
-        println!("GGGGg {:?}", self.________params_accumulator);
+        println!("GGGGg {}", self);
         self
     }
 
