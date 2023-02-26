@@ -851,7 +851,14 @@ impl DbField {
         T: Into<Value>,
     {
         let pattern: Value = pattern.into();
-        Self::new(format!("{} LIKE {}", self.field_name, pattern))
+        let param = generate_param_name();
+        let condition = format!("{} LIKE {}", self.field_name, pattern);
+
+        let updated_params = self.__update_params(param, pattern);
+        Self {
+            field_name: condition,
+            params: updated_params,
+        }
     }
 
     /// Constructs a NOT LIKE query that checks whether the value of the column does not match the given pattern.
@@ -873,7 +880,14 @@ impl DbField {
         T: Into<Value>,
     {
         let pattern: Value = pattern.into();
-        Self::new(format!("{} NOT LIKE {}", self.field_name, pattern))
+        let param = generate_param_name();
+        let condition = format!("{} NOT LIKE {}", self.field_name, pattern);
+
+        let updated_params = self.__update_params(param, pattern);
+        Self {
+            field_name: condition,
+            params: updated_params,
+        }
     }
 
     /// Constructs a query that checks whether the value of the column is null.
@@ -923,7 +937,14 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        Self::new(format!("{} == {}", self.field_name, value))
+        let param = generate_param_name();
+        let condition = format!("{} == {}", self.field_name, value);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            params: updated_params,
+        }
     }
 
     /// Check whether any value in a set is equal to a value.
