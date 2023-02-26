@@ -38,11 +38,8 @@ pub struct DbField {
     params: ParamList,
 }
 pub type ParamList = Vec<Param>;
-// type ParamList = Rc<RefCell<Vec<Param>>>;
 impl ParamsExtractor for DbField {
     fn get_params(&self) -> ParamList {
-        // Rc::clone(&self.params)
-        // vec![]
         self.params.to_vec()
     }
 }
@@ -67,22 +64,21 @@ impl From<DbField> for sql::Table {
 
 impl Into<Value> for &DbField {
     fn into(self) -> Value {
-        let xx = sql::Table(self.field_name.to_string());
-        xx.into()
+        sql::Table(self.field_name.to_string()).into()
     }
 }
 
 impl Into<Value> for DbField {
     fn into(self) -> Value {
-        let xx = sql::Table(self.field_name.to_string());
-        xx.into()
+        sql::Table(self.field_name.to_string()).into()
     }
 }
 
 impl Into<Number> for &DbField {
     fn into(self) -> Number {
-        let xx = Value::Table(self.field_name.to_string().into());
-        xx.as_string().into()
+        Value::Table(self.field_name.to_string().into())
+            .as_string()
+            .into()
     }
 }
 #[derive(serde::Serialize, Debug, Clone)]
@@ -316,7 +312,6 @@ impl std::fmt::Display for DbField {
 #[derive(Debug, Clone)]
 pub struct DbFilter {
     query_string: String,
-    // params: Vec<Param>,
     params: Vec<Param>,
 }
 
