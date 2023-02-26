@@ -4,7 +4,7 @@ Email: oyelowooyedayo@gmail.com
 */
 
 use bigdecimal::BigDecimal;
-use serde::Serialize;
+use serde::{de::value, Serialize};
 use std::{
     borrow::Cow,
     cell::{Cell, RefCell},
@@ -35,12 +35,12 @@ use crate::query_select::QueryBuilder;
 #[derive(Debug, Clone)]
 pub struct DbField {
     field_name: String,
-    params: ParamList,
+    bindings: ParamList,
 }
 pub type ParamList = Vec<Param>;
 impl ParamsExtractor for DbField {
     fn get_params(&self) -> ParamList {
-        self.params.to_vec()
+        self.bindings.to_vec()
     }
 }
 
@@ -213,7 +213,7 @@ impl From<DbField> for DbFilter {
     fn from(value: DbField) -> Self {
         Self {
             query_string: value.field_name,
-            params: value.params,
+            params: value.bindings,
         }
     }
 }
@@ -247,7 +247,7 @@ impl From<String> for DbField {
     fn from(value: String) -> Self {
         Self {
             field_name: value.into(),
-            params: vec![],
+            bindings: vec![],
         }
     }
 }
@@ -255,7 +255,7 @@ impl From<&str> for DbField {
     fn from(value: &str) -> Self {
         Self {
             field_name: value.into(),
-            params: vec![],
+            bindings: vec![],
         }
     }
 }
@@ -532,7 +532,7 @@ impl DbField {
         Self {
             field_name: field_name.to_string(),
             // params: Rc::new(vec![].into()),
-            params: vec![].into(),
+            bindings: vec![].into(),
         }
     }
     /// Append the specified string to the field name
@@ -599,7 +599,7 @@ impl DbField {
         let updated_params = self.__update_params(param, value);
         Self {
             field_name: condition,
-            params: updated_params,
+            bindings: updated_params,
         }
     }
 
@@ -629,7 +629,7 @@ impl DbField {
         let updated_params = self.__update_params(param, value);
         Self {
             field_name: condition,
-            params: updated_params,
+            bindings: updated_params,
         }
     }
 
@@ -659,13 +659,13 @@ impl DbField {
         let updated_params = self.__update_params(param, value);
         Self {
             field_name: condition,
-            params: updated_params,
+            bindings: updated_params,
         }
     }
 
-    fn __update_params(&self, param: String, value: Value) -> Vec<Param> {
+    fn __update_params(&self, param: String, value: sql::Value) -> Vec<Param> {
         let mut updated_params = vec![];
-        updated_params.extend(self.params.to_vec());
+        updated_params.extend(self.bindings.to_vec());
         updated_params.extend([(param, value).into()]);
         updated_params
     }
@@ -696,7 +696,7 @@ impl DbField {
         let updated_params = self.__update_params(param, value);
         Self {
             field_name: condition,
-            params: updated_params,
+            bindings: updated_params,
         }
     }
 
@@ -726,7 +726,7 @@ impl DbField {
 
         Self {
             field_name: condition,
-            params: updated_params,
+            bindings: updated_params,
         }
     }
 
@@ -756,7 +756,7 @@ impl DbField {
         let updated_params = self.__update_params(param, value);
         Self {
             field_name: condition,
-            params: updated_params,
+            bindings: updated_params,
         }
     }
 
@@ -792,7 +792,7 @@ impl DbField {
         let updated_params = [lower_updated_params, upper_updated_params].concat();
         Self {
             field_name: condition,
-            params: updated_params,
+            bindings: updated_params,
         }
     }
 
@@ -828,7 +828,7 @@ impl DbField {
         let updated_params = [lower_updated_params, upper_updated_params].concat();
         Self {
             field_name: condition,
-            params: updated_params,
+            bindings: updated_params,
         }
     }
 
@@ -857,7 +857,7 @@ impl DbField {
         let updated_params = self.__update_params(param, pattern);
         Self {
             field_name: condition,
-            params: updated_params,
+            bindings: updated_params,
         }
     }
 
@@ -886,7 +886,7 @@ impl DbField {
         let updated_params = self.__update_params(param, pattern);
         Self {
             field_name: condition,
-            params: updated_params,
+            bindings: updated_params,
         }
     }
 
@@ -943,7 +943,7 @@ impl DbField {
         let updated_params = self.__update_params(param, value);
         Self {
             field_name: condition,
-            params: updated_params,
+            bindings: updated_params,
         }
     }
 
@@ -966,7 +966,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = collect_query_values(values);
+        let values_str = self.__collect_query_values(values);
         Self::new(format!("{} ?= ({})", self.field_name, values_str))
     }
 
@@ -989,7 +989,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = collect_query_values(values);
+        let values_str = self.__collect_query_values(values);
         Self::new(format!("{} *= ({})", self.field_name, values_str))
     }
 
@@ -1056,7 +1056,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = collect_query_values(values);
+        let values_str = self.__collect_query_values(values);
         Self::new(format!("{} ?~ ({})", self.field_name, values_str))
     }
 
@@ -1077,7 +1077,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = collect_query_values(values);
+        let values_str = self.__collect_query_values(values);
         Self::new(format!("{} *~ ({})", self.field_name, values_str))
     }
 
@@ -1194,7 +1194,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = collect_query_values(values);
+        let values_str = self.__collect_query_values(values);
         Self::new(format!("{} CONTAINSALL ({})", self.field_name, values_str))
     }
 
@@ -1217,7 +1217,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = collect_query_values(values);
+        let values_str = self.__collect_query_values(values);
         Self::new(format!("{} CONTAINSANY ({})", self.field_name, values_str))
     }
 
@@ -1239,7 +1239,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = collect_query_values(values);
+        let values_str = self.__collect_query_values(values);
         Self::new(format!("{} CONTAINSNONE ({})", self.field_name, values_str))
     }
 
@@ -1305,7 +1305,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = collect_query_values(values);
+        let values_str = self.__collect_query_values(values);
         Self::new(format!("{} ALLINSIDE ({})", self.field_name, values_str))
     }
 
@@ -1327,7 +1327,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = collect_query_values(values);
+        let values_str = self.__collect_query_values(values);
         Self::new(format!("{} ANYINSIDE ({})", self.field_name, values_str))
     }
 
@@ -1349,7 +1349,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = collect_query_values(values);
+        let values_str = self.__collect_query_values(values);
         Self::new(format!("{} NONEINSIDE ({})", self.field_name, values_str))
     }
 
@@ -1419,7 +1419,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = collect_query_values(values);
+        let values_str = self.__collect_query_values(values);
         Self::new(format!("{} ?= ({})", self.field_name, values_str))
     }
 
@@ -1441,7 +1441,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let values_str = collect_query_values(values);
+        let values_str = self.__collect_query_values(values);
         Self::new(format!("{} *= ({})", self.field_name, values_str))
     }
 
@@ -1633,7 +1633,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let joined_values = collect_query_values(values);
+        let joined_values = self.__collect_query_values(values);
         Self::new(format!("{} ?= {{{}}}", self.field_name, joined_values))
     }
 
@@ -1657,7 +1657,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let joined_values = collect_query_values(values);
+        let joined_values = self.__collect_query_values(values);
         Self::new(format!("{} *= {{{}}}", self.field_name, joined_values))
     }
 
@@ -1858,20 +1858,22 @@ impl DbField {
         let remove_string = format!("{self} -= {}", value);
         Self::new(remove_string)
     }
-}
 
-fn collect_query_values<T>(values: &[T]) -> String
-where
-    T: Into<Value> + Clone,
-{
-    let values_str = values
-        .to_vec()
-        .into_iter()
-        .map(|value| {
-            let value: Value = value.into();
-            format!("{}", value)
-        })
-        .collect::<Vec<String>>()
-        .join(", ");
-    values_str
+    fn __collect_query_values<T>(&self, operator: sql::Operator, values: &[T]) -> Self
+    where
+        T: Into<Value> + Clone,
+    {
+        let mut all_params = vec![];
+        let mut bindings = vec![];
+        for value in values.to_vec() {
+            let param = generate_param_name();
+            all_params.push(format!("{}", &param));
+            bindings.extend(self.__update_params(param, value.into()));
+        }
+        let condition = format!("{} {operator} {}", self.field_name, all_params.join(", "));
+        Self {
+            field_name: condition,
+            bindings,
+        }
+    }
 }
