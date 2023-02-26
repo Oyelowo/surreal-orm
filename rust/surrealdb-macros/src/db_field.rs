@@ -303,7 +303,13 @@ impl std::fmt::Display for DbField {
 #[derive(Debug, Clone)]
 pub struct DbFilter {
     query_string: String,
-    params: RefCell<Vec<Param>>,
+    params: ParamList,
+}
+
+impl ParamsExtractor for DbFilter {
+    fn get_params(&self) -> ParamList {
+        Rc::clone(&self.params)
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -335,8 +341,12 @@ pub trait ParamsExtractor {
 ///
 /// assert_eq!(combined_filter.to_string(), "(name = 'John') AND (age > 18)");
 /// ```
-pub fn cond(filterable: impl Into<DbFilter>) -> DbFilter {
-    filterable.into()
+pub fn cond(filterable: impl Into<DbFilter> + ParamsExtractor) -> DbFilter {
+    // filterable.into()
+    DbFilter {
+        query_string: "".into(),
+        params: filterable.get_params(),
+    }
 }
 
 /// Creates an empty filter.
@@ -373,7 +383,7 @@ impl DbFilter {
     pub fn new(query_string: String) -> Self {
         Self {
             query_string,
-            params: vec![].into(),
+            params: Rc::new(vec![].into()),
         }
     }
 
@@ -394,9 +404,14 @@ impl DbFilter {
     ///
     /// assert_eq!(filter.to_string(), "(name = 'John') OR (age > 30)");
     /// ```
-    pub fn or(&self, filter: impl Into<Self>) -> Self {
+    pub fn or(&self, filter: impl Into<Self> + ParamsExtractor) -> Self {
         let precendence = self._______bracket_if_not_already();
+        self.params
+            .borrow_mut()
+            .extend(filter.get_params().borrow().to_vec());
+        println!("DDDD {:?}", self.params);
         let filter: Self = filter.into();
+
         DbFilter::new(format!("{precendence} OR ({filter})"))
     }
 
