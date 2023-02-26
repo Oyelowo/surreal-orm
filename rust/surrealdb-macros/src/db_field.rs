@@ -4,11 +4,13 @@ Email: oyelowooyedayo@gmail.com
 */
 
 use bigdecimal::BigDecimal;
+use serde::Serialize;
 use std::{
     borrow::Cow,
     cell::{Cell, RefCell},
     fmt::{format, Display},
     ops::Deref,
+    rc::Rc,
 };
 
 use proc_macro2::Span;
@@ -30,10 +32,16 @@ use crate::query_select::QueryBuilder;
 ///
 /// assert_eq!(field.to_string(), "name");
 /// ```
-#[derive(serde::Serialize, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct DbField {
     field_name: String,
-    params: RefCell<Vec<(String, sql::Value)>>,
+    params: ParamList,
+}
+type ParamList = Rc<RefCell<Vec<Param>>>;
+impl ParamsExtractor for DbField {
+    fn get_params(&self) -> ParamList {
+        Rc::clone(&self.params)
+    }
 }
 
 // impl From<&mut DbField> for sql::Value {
@@ -54,15 +62,15 @@ impl From<DbField> for sql::Table {
     }
 }
 
-impl Into<sql::Value> for &DbField {
-    fn into(self) -> sql::Value {
+impl Into<Value> for &DbField {
+    fn into(self) -> Value {
         let xx = sql::Table(self.field_name.to_string());
         xx.into()
     }
 }
 
-impl Into<sql::Value> for DbField {
-    fn into(self) -> sql::Value {
+impl Into<Value> for DbField {
+    fn into(self) -> Value {
         let xx = sql::Table(self.field_name.to_string());
         xx.into()
     }
@@ -70,14 +78,14 @@ impl Into<sql::Value> for DbField {
 
 impl Into<Number> for &DbField {
     fn into(self) -> Number {
-        let xx = sql::Value::Table(self.field_name.to_string().into());
+        let xx = Value::Table(self.field_name.to_string().into());
         xx.as_string().into()
     }
 }
 #[derive(serde::Serialize, Debug, Clone)]
 pub enum GeometryOrField {
     Geometry(sql::Geometry),
-    Field(sql::Value),
+    Field(Value),
 }
 
 macro_rules! impl_geometry_or_field_from {
@@ -129,7 +137,7 @@ impl From<GeometryOrField> for Value {
 #[derive(serde::Serialize, Debug, Clone)]
 pub enum NumberOrField {
     Number(sql::Number),
-    Field(sql::Value),
+    Field(Value),
 }
 
 macro_rules! impl_number_or_field_from {
@@ -186,7 +194,7 @@ impl Into<Number> for DbField {
     fn into(self) -> Number {
         // sql::Strand::from(self.field_name.into())
         // let xx = sql::Strand::from(self.field_name.into());
-        let xx = sql::Value::Strand(self.field_name.into());
+        let xx = Value::Strand(self.field_name.into());
         xx.as_string().into()
         // todo!()
     }
@@ -234,7 +242,7 @@ impl From<String> for DbField {
     fn from(value: String) -> Self {
         Self {
             field_name: value.into(),
-            params: vec![].into(),
+            params: Rc::new(vec![].into()),
         }
     }
 }
@@ -242,7 +250,7 @@ impl From<&str> for DbField {
     fn from(value: &str) -> Self {
         Self {
             field_name: value.into(),
-            params: vec![].into(),
+            params: Rc::new(vec![].into()),
         }
     }
 }
@@ -295,8 +303,21 @@ impl std::fmt::Display for DbField {
 #[derive(Debug, Clone)]
 pub struct DbFilter {
     query_string: String,
+    params: RefCell<Vec<Param>>,
 }
 
+#[derive(Debug, Clone, Serialize)]
+pub struct Param((String, Value));
+
+impl From<(String, Value)> for Param {
+    fn from(value: (String, Value)) -> Self {
+        Self(value)
+    }
+}
+
+pub trait ParamsExtractor {
+    fn get_params(&self) -> ParamList;
+}
 /// Creates a new filter from a given `filterable` input.
 ///
 /// # Arguments
@@ -350,7 +371,10 @@ impl DbFilter {
     /// assert_eq!(filter.to_string(), "name = 'John'");
     /// ```
     pub fn new(query_string: String) -> Self {
-        Self { query_string }
+        Self {
+            query_string,
+            params: vec![].into(),
+        }
     }
 
     /// Combines the current filter with another filter using a logical OR operator.
@@ -393,8 +417,12 @@ impl DbFilter {
     ///
     /// assert_eq!(combined.to_string(), "(name = 'John') AND (age > 30)");
     /// ```
-    pub fn and(&self, filter: impl Into<Self>) -> Self {
+    pub fn and(&self, filter: impl Into<Self> + ParamsExtractor) -> Self {
         let precendence = self._______bracket_if_not_already();
+        self.params
+            .borrow_mut()
+            .extend_from_slice(filter.get_params().borrow().as_slice());
+
         let filter: Self = filter.into();
         DbFilter::new(format!("{precendence} AND ({filter})"))
     }
@@ -464,7 +492,7 @@ impl DbField {
     pub fn new(field_name: impl Display) -> Self {
         Self {
             field_name: field_name.to_string(),
-            params: vec![].into(),
+            params: Rc::new(vec![].into()),
         }
     }
     /// Append the specified string to the field name
@@ -570,11 +598,11 @@ impl DbField {
         T: Into<NumberOrField>,
     {
         let value: NumberOrField = value.into();
-        let value: sql::Value = value.into();
+        let value: Value = value.into();
         let param = generate_param_name();
         let condition = format!("{} > ${}", self.field_name, &param);
 
-        self.params.borrow_mut().push((param, value));
+        self.params.borrow_mut().push((param, value).into());
         Self::new(condition)
     }
 
@@ -597,11 +625,11 @@ impl DbField {
         T: Into<NumberOrField>,
     {
         let value: NumberOrField = value.into();
-        let value: sql::Value = value.into();
+        let value: Value = value.into();
         let param = generate_param_name();
         let condition = format!("{} >= ${}", self.field_name, &param);
 
-        self.params.borrow_mut().push((param, value));
+        self.params.borrow_mut().push((param, value).into());
         Self::new(condition)
     }
 
@@ -624,7 +652,7 @@ impl DbField {
         T: Into<NumberOrField>,
     {
         let value: NumberOrField = value.into();
-        let value: sql::Value = value.into();
+        let value: Value = value.into();
         Self::new(format!("{} < {}", self.field_name, value))
     }
 
@@ -647,7 +675,7 @@ impl DbField {
         T: Into<NumberOrField>,
     {
         let value: NumberOrField = value.into();
-        let value: sql::Value = value.into();
+        let value: Value = value.into();
         Self::new(format!("{} <= {}", self.field_name, value))
     }
 
@@ -671,9 +699,9 @@ impl DbField {
         T: Into<NumberOrField>,
     {
         let lower_bound: NumberOrField = lower_bound.into();
-        let lower_bound: sql::Value = lower_bound.into();
+        let lower_bound: Value = lower_bound.into();
         let upper_bound: NumberOrField = upper_bound.into();
-        let upper_bound: sql::Value = upper_bound.into();
+        let upper_bound: Value = upper_bound.into();
         Self::new(format!(
             "{} < {} < {}",
             lower_bound, self.field_name, upper_bound
@@ -700,9 +728,9 @@ impl DbField {
         T: Into<NumberOrField>,
     {
         let lower_bound: NumberOrField = lower_bound.into();
-        let lower_bound: sql::Value = lower_bound.into();
+        let lower_bound: Value = lower_bound.into();
         let upper_bound: NumberOrField = upper_bound.into();
-        let upper_bound: sql::Value = upper_bound.into();
+        let upper_bound: Value = upper_bound.into();
         Self::new(format!(
             "{} <= {} <= {}",
             lower_bound, self.field_name, upper_bound
@@ -1019,7 +1047,7 @@ impl DbField {
         T: Into<NumberOrField>,
     {
         let value: NumberOrField = value.into();
-        let value: sql::Value = value.into();
+        let value: Value = value.into();
         // let value: Number = value.into();
         let mm = Self::new(format!("{} >= {}", self.field_name, value));
         println!("mmm {}", mm);
@@ -1296,7 +1324,7 @@ impl DbField {
         T: Into<GeometryOrField>,
     {
         let value: GeometryOrField = value.into();
-        let value: sql::Value = value.into();
+        let value: Value = value.into();
         let xx = Self::new(format!("OUTSIDE {}", value));
         println!("koko {}", xx);
         Self::new(format!("{} OUTSIDE {}", self.field_name, value))
@@ -1321,7 +1349,7 @@ impl DbField {
         T: Into<GeometryOrField>,
     {
         let value: GeometryOrField = value.into();
-        let value: sql::Value = value.into();
+        let value: Value = value.into();
         Self::new(format!("{} INTERSECTS {}", self.field_name, value))
     }
 
@@ -1467,7 +1495,7 @@ impl DbField {
     where
         T: Into<Value>,
     {
-        let value: sql::Value = value.into();
+        let value: Value = value.into();
         Self::new(format!("{} && {}", self.field_name, value))
     }
 
@@ -1487,7 +1515,7 @@ impl DbField {
     where
         T: Into<Value>,
     {
-        let value: sql::Value = value.into();
+        let value: Value = value.into();
         Self::new(format!("{} || {}", self.field_name, value))
     }
 
@@ -1510,7 +1538,7 @@ impl DbField {
     where
         T: Into<Value>,
     {
-        let value: sql::Value = value.into();
+        let value: Value = value.into();
         Self::new(format!("{} IS {}", self.field_name, value))
     }
 
@@ -1533,7 +1561,7 @@ impl DbField {
     where
         T: Into<Value>,
     {
-        let value: sql::Value = value.into();
+        let value: Value = value.into();
         Self::new(format!("{} IS NOT {}", self.field_name, value))
     }
 
@@ -1606,7 +1634,7 @@ impl DbField {
     where
         T: Into<Value>,
     {
-        let other: sql::Value = other.into();
+        let other: Value = other.into();
         Self::new(format!("{} AND {}", self.field_name, other))
     }
 
@@ -1631,7 +1659,7 @@ impl DbField {
     where
         T: Into<Value>,
     {
-        let other: sql::Value = other.into();
+        let other: Value = other.into();
         Self::new(format!("{} OR {}", self, other))
     }
     // UPDATER METHODS
