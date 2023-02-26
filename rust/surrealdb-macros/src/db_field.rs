@@ -588,13 +588,13 @@ impl DbField {
     /// let query = field.equals(25);
     /// assert_eq!(query.to_string(), "age = 25");
     /// ```
-    pub fn equals<T>(&self, value: T) -> Self
+    pub fn equal<T>(&self, value: T) -> Self
     where
         T: Into<Value>,
     {
         let value: Value = value.into();
-        let condition = format!("{} = {}", self.field_name, value);
         let param = generate_param_name();
+        let condition = format!("{} = {}", self.field_name, param);
 
         let updated_params = self.__update_params(param, value);
         Self {
@@ -618,7 +618,7 @@ impl DbField {
     /// let query = field.not_equals(25);
     /// assert_eq!(query.to_string(), "age != 25");
     /// ```
-    pub fn not_equals<T>(&self, value: T) -> Self
+    pub fn not_equal<T>(&self, value: T) -> Self
     where
         T: Into<Value>,
     {
@@ -684,7 +684,7 @@ impl DbField {
     /// let query = DbQuery::field("age").greater_than_or_equals(18);
     /// assert_eq!(query.to_string(), "age >= 18");
     /// ```
-    pub fn greater_than_or_equals<T>(&self, value: T) -> Self
+    pub fn greater_than_or_equal<T>(&self, value: T) -> Self
     where
         T: Into<NumberOrField>,
     {
@@ -750,7 +750,14 @@ impl DbField {
     {
         let value: NumberOrField = value.into();
         let value: Value = value.into();
-        Self::new(format!("{} <= {}", self.field_name, value))
+        let param = generate_param_name();
+        let condition = format!("{} <= {}", self.field_name, param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            params: updated_params,
+        }
     }
 
     /// Check whether the value of the field is between the given lower and upper bounds.
@@ -776,10 +783,17 @@ impl DbField {
         let lower_bound: Value = lower_bound.into();
         let upper_bound: NumberOrField = upper_bound.into();
         let upper_bound: Value = upper_bound.into();
-        Self::new(format!(
-            "{} < {} < {}",
-            lower_bound, self.field_name, upper_bound
-        ))
+        let lower_param = generate_param_name();
+        let upper_param = generate_param_name();
+        let condition = format!("{} < {} < {}", lower_param, self.field_name, upper_param);
+
+        let lower_updated_params = self.__update_params(lower_param, lower_bound);
+        let upper_updated_params = self.__update_params(upper_param, upper_bound);
+        let updated_params = [lower_updated_params, upper_updated_params].concat();
+        Self {
+            field_name: condition,
+            params: updated_params,
+        }
     }
 
     /// Check whether the value of the field is between the given lower and upper bounds.
@@ -805,10 +819,17 @@ impl DbField {
         let lower_bound: Value = lower_bound.into();
         let upper_bound: NumberOrField = upper_bound.into();
         let upper_bound: Value = upper_bound.into();
-        Self::new(format!(
-            "{} <= {} <= {}",
-            lower_bound, self.field_name, upper_bound
-        ))
+        let lower_param = generate_param_name();
+        let upper_param = generate_param_name();
+        let condition = format!("{} <= {} <= {}", lower_param, self.field_name, upper_param);
+
+        let lower_updated_params = self.__update_params(lower_param, lower_bound);
+        let upper_updated_params = self.__update_params(upper_param, upper_bound);
+        let updated_params = [lower_updated_params, upper_updated_params].concat();
+        Self {
+            field_name: condition,
+            params: updated_params,
+        }
     }
 
     /// Constructs a LIKE query that checks whether the value of the column matches the given pattern.
@@ -881,50 +902,6 @@ impl DbField {
     /// ```
     pub fn is_not_null(&self) -> Self {
         Self::new(format!("{} IS NOT NULL", self.field_name))
-    }
-
-    /// Constructs a query that checks whether the value of the column is equal to the given value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to compare against.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::column("age").equal(42);
-    /// assert_eq!(query.to_string(), "age = 42");
-    /// ```
-    pub fn equal<T>(&self, value: T) -> Self
-    where
-        T: Into<Value>,
-    {
-        let value: Value = value.into();
-        Self::new(format!("{} = {}", self.field_name, value))
-    }
-
-    /// Constructs a query that checks whether the value of the column is not equal to the given value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to compare against.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::column("age").not_equal(42);
-    /// assert_eq!(query.to_string(), "age != 42");
-    /// ```
-    pub fn not_equal<T>(&self, value: T) -> Self
-    where
-        T: Into<Value>,
-    {
-        let value: Value = value.into();
-        Self::new(format!("{} != {}", self.field_name, value))
     }
 
     /// Constructs a query that checks whether the value of the column is exactly equal to the given value.
@@ -1102,30 +1079,6 @@ impl DbField {
     {
         let value: Number = value.into();
         Self::new(format!("{} <= {}", self.field_name, value))
-    }
-
-    /// Check whether a value is greater than or equal to another value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - A value to compare against.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # use surrealdb::DbQuery;
-    /// let query = DbQuery::field("age").greater_than_or_equal(30)
-    /// assert_eq!(query.to_string(), r#"age => 30"#);
-    pub fn greater_than_or_equal<T>(&self, value: T) -> Self
-    where
-        T: Into<NumberOrField>,
-    {
-        let value: NumberOrField = value.into();
-        let value: Value = value.into();
-        // let value: Number = value.into();
-        let mm = Self::new(format!("{} >= {}", self.field_name, value));
-        println!("mmm {}", mm);
-        Self::new(format!("{} >= {}", self.field_name, value))
     }
 
     /// Adds a value to the current query.

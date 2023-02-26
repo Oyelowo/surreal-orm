@@ -621,7 +621,7 @@ async fn main() -> surrealdb::Result<()> {
     let a = updater("e").decrement_by(923.54);
     println!("a = {a}");
     updater("e").increment_by("crm");
-    DbField::new("d".to_string()).equals(5);
+    DbField::new("d".to_string()).equal(5);
     // sql::Value::Param(sql::Param("trt"));
 
     let xx = sql::Field::Alone("dd".into());
@@ -691,7 +691,8 @@ async fn main() -> surrealdb::Result<()> {
             .or(firstName.greater_than(439))
             .and(age.greater_than(150))
             .and(age.greater_than(316))
-            .and(age.greater_than(711).greater_than_or_equal(421).equal(25)),
+            .and(age.greater_than(711).greater_than_or_equal(421).equal(25))
+            .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
     );
     println!("MAWAOOOO----->{}", query);
     let mb = Uuid::new_v4();
