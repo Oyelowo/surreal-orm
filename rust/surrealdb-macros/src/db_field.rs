@@ -531,7 +531,6 @@ impl DbField {
     pub fn new(field_name: impl Display) -> Self {
         Self {
             field_name: field_name.to_string(),
-            // params: Rc::new(vec![].into()),
             bindings: vec![].into(),
         }
     }
@@ -1633,7 +1632,7 @@ impl DbField {
     where
         T: Into<Value> + Clone,
     {
-        let joined_values = self.__collect_query_values(values);
+        let joined_values = self.__collect_query_values(sql::Operator::AnyEqual, values);
         Self::new(format!("{} ?= {{{}}}", self.field_name, joined_values))
     }
 
