@@ -35,11 +35,11 @@ use crate::query_select::QueryBuilder;
 #[derive(Debug, Clone)]
 pub struct DbField {
     field_name: String,
-    bindings: ParamList,
+    bindings: BindingsList,
 }
-pub type ParamList = Vec<Param>;
-impl ParamsExtractor for DbField {
-    fn get_params(&self) -> ParamList {
+pub type BindingsList = Vec<Binding>;
+impl Parametric for DbField {
+    fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }
@@ -308,26 +308,27 @@ impl std::fmt::Display for DbField {
 #[derive(Debug, Clone)]
 pub struct DbFilter {
     query_string: String,
-    params: Vec<Param>,
+    params: Vec<Binding>,
 }
 
-impl ParamsExtractor for DbFilter {
-    fn get_params(&self) -> ParamList {
+impl Parametric for DbFilter {
+    fn get_bindings(&self) -> BindingsList {
         self.params.to_vec()
     }
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Param(pub (String, Value));
+pub struct Binding(pub (String, Value));
 
-impl From<(String, Value)> for Param {
+impl From<(String, Value)> for Binding {
     fn from(value: (String, Value)) -> Self {
         Self(value)
     }
 }
 
-pub trait ParamsExtractor {
-    fn get_params(&self) -> ParamList;
+/// Can have parameters which can be bound
+pub trait Parametric {
+    fn get_bindings(&self) -> BindingsList;
 }
 /// Creates a new filter from a given `filterable` input.
 ///
@@ -346,7 +347,7 @@ pub trait ParamsExtractor {
 ///
 /// assert_eq!(combined_filter.to_string(), "(name = 'John') AND (age > 18)");
 /// ```
-pub fn cond(filterable: impl Into<DbFilter> + ParamsExtractor) -> DbFilter {
+pub fn cond(filterable: impl Into<DbFilter> + Parametric) -> DbFilter {
     // let filterable: DbFilter = filterable.into();
     // DbFilter {
     //     query_string: filterable,
@@ -388,7 +389,7 @@ impl DbFilter {
     /// ```
     pub fn new(query_string: String) -> Self {
         Self {
-            query_string,
+            query_string: format!("({query_string})"),
             params: vec![].into(),
         }
     }
@@ -410,7 +411,7 @@ impl DbFilter {
     ///
     /// assert_eq!(filter.to_string(), "(name = 'John') OR (age > 30)");
     /// ```
-    pub fn or(self, filter: impl Into<Self> + ParamsExtractor) -> Self {
+    pub fn or(self, filter: impl Into<Self> + Parametric) -> Self {
         let precendence = self._______bracket_if_not_already();
         let new_params = self.___update_params(&filter);
 
@@ -440,7 +441,7 @@ impl DbFilter {
     ///
     /// assert_eq!(combined.to_string(), "(name = 'John') AND (age > 30)");
     /// ```
-    pub fn and(self, filter: impl Into<Self> + ParamsExtractor) -> Self {
+    pub fn and(self, filter: impl Into<Self> + Parametric) -> Self {
         let precendence = self._______bracket_if_not_already();
         let new_params = self.___update_params(&filter);
 
@@ -453,7 +454,7 @@ impl DbFilter {
         }
     }
 
-    fn ___update_params(self, filter: &impl ParamsExtractor) -> Vec<Param> {
+    fn ___update_params(self, filter: &impl Parametric) -> Vec<Binding> {
         // let new_params = self
         //     .params
         //     .to_owned()
@@ -462,7 +463,7 @@ impl DbFilter {
         //     .collect::<Vec<_>>(); // Consumed
         let mut new_params = vec![];
         new_params.extend(self.params);
-        new_params.extend(filter.get_params());
+        new_params.extend(filter.get_bindings());
         new_params
     }
 
@@ -522,9 +523,12 @@ impl std::fmt::Display for DbFilter {
     }
 }
 
-fn generate_param_name() -> String {
+fn generate_param_name(prefix: &str) -> String {
     let sanitized_uuid = Uuid::new_v4().simple();
-    format!("_{sanitized_uuid}")
+    let mut param = format!("_{prefix}_{sanitized_uuid}");
+    // TODO: this is temporary
+    // param.truncate(10);
+    param
 }
 
 impl DbField {
@@ -1543,12 +1547,12 @@ impl DbField {
         let lower_bound: Value = lower_bound.into();
         let upper_bound: NumberOrField = upper_bound.into();
         let upper_bound: Value = upper_bound.into();
-        let lower_param = generate_param_name();
-        let upper_param = generate_param_name();
+        let lower_param = generate_param_name(&self.field_name);
+        let upper_param = generate_param_name(&self.field_name);
         let condition = format!("{} < {} < {}", lower_param, self.field_name, upper_param);
 
-        let lower_updated_params = self.__update_params(lower_param, lower_bound);
-        let upper_updated_params = self.__update_params(upper_param, upper_bound);
+        let lower_updated_params = self.__update_bindings(lower_param, lower_bound);
+        let upper_updated_params = self.__update_bindings(upper_param, upper_bound);
         let updated_params = [lower_updated_params, upper_updated_params].concat();
         Self {
             field_name: condition,
@@ -1579,12 +1583,12 @@ impl DbField {
         let lower_bound: Value = lower_bound.into();
         let upper_bound: NumberOrField = upper_bound.into();
         let upper_bound: Value = upper_bound.into();
-        let lower_param = generate_param_name();
-        let upper_param = generate_param_name();
+        let lower_param = generate_param_name(&self.field_name);
+        let upper_param = generate_param_name(&self.field_name);
         let condition = format!("{} <= {} <= {}", lower_param, self.field_name, upper_param);
 
-        let lower_updated_params = self.__update_params(lower_param, lower_bound);
-        let upper_updated_params = self.__update_params(upper_param, upper_bound);
+        let lower_updated_params = self.__update_bindings(lower_param, lower_bound);
+        let upper_updated_params = self.__update_bindings(upper_param, upper_bound);
         let updated_params = [lower_updated_params, upper_updated_params].concat();
         Self {
             field_name: condition,
@@ -1592,7 +1596,7 @@ impl DbField {
         }
     }
 
-    fn __update_params(&self, param: String, value: sql::Value) -> Vec<Param> {
+    fn __update_bindings(&self, param: String, value: sql::Value) -> Vec<Binding> {
         let mut updated_params = vec![];
         updated_params.extend(self.bindings.to_vec());
         updated_params.extend([(param, value).into()]);
@@ -1604,10 +1608,10 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        let param = generate_param_name();
+        let param = generate_param_name(&"param");
         let condition = format!("{} {} ${}", self.field_name, operator, &param);
 
-        let updated_params = self.__update_params(param, value);
+        let updated_params = self.__update_bindings(param, value);
         Self {
             field_name: condition,
             bindings: updated_params,
