@@ -646,6 +646,7 @@ async fn main() -> surrealdb::Result<()> {
     println!("xxxxvv {}", name.clone());
     let ref age = DbField::new("age");
     let firstName = &name;
+    let lastName = &name;
     let mut queryb = query_select::QueryBuilder::new();
     let line = line_string![
         (x: -21.95156, y: 64.1446),
@@ -683,15 +684,22 @@ async fn main() -> surrealdb::Result<()> {
     let z = x.into_iter().chain(std::iter::once(y)).collect::<Vec<_>>();
     println!("{:?}", z); // prints [1, 2, 3, 9]
                          // let polygon: sql::Value = sql::Geometry::Polygon(polygon.into()).into();
+                         // let ref mut query = queryb.select_all().from(Company::get_table_name()).where_(
+                         //     cond(age.greater_than(id).greater_than(age))
+                         //         .or(firstName.greater_than(90))
+                         //         .or(firstName.greater_than(90))
+                         //         .or(firstName.greater_than(90))
+                         //         .or(firstName.greater_than(439))
+                         //         .and(age.greater_than(150))
+                         //         .and(age.greater_than(316))
+                         //         .and(age.greater_than(711).greater_than_or_equal(421).equal(25))
+                         //         .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
+                         // );
     let ref mut query = queryb.select_all().from(Company::get_table_name()).where_(
-        cond(age.greater_than(id).greater_than(age))
-            .or(firstName.greater_than(90))
-            .or(firstName.greater_than(90))
-            .or(firstName.greater_than(90))
-            .or(firstName.greater_than(439))
-            .and(age.greater_than(150))
-            .and(age.greater_than(316))
-            .and(age.greater_than(711).greater_than_or_equal(421).equal(25))
+        cond(age.greater_than(id))
+            .or(firstName.like("Oyelowo"))
+            .and(lastName.exactly_equal("Oyedayo"))
+            .and(age.less_than(150))
             .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
     );
     println!("MAWAOOOO----->{}", query);

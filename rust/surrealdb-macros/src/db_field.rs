@@ -84,7 +84,7 @@ impl Into<Number> for &DbField {
 #[derive(serde::Serialize, Debug, Clone)]
 pub enum GeometryOrField {
     Geometry(sql::Geometry),
-    Field(Value),
+    Field(sql::Value),
 }
 
 macro_rules! impl_geometry_or_field_from {
@@ -527,7 +527,7 @@ fn generate_param_name(prefix: &str) -> String {
     let sanitized_uuid = Uuid::new_v4().simple();
     let mut param = format!("_{prefix}_{sanitized_uuid}");
     // TODO: this is temporary
-    // param.truncate(10);
+    param.truncate(15);
     param
 }
 

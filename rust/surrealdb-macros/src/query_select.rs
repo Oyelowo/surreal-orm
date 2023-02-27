@@ -11,7 +11,7 @@ use std::{
 use surrealdb::sql;
 
 use crate::{
-    db_field::{DbFilter, ParamList, ParamsExtractor},
+    db_field::{BindingsList, DbFilter, Parametric},
     DbField, SurrealdbNode,
 };
 
@@ -210,11 +210,11 @@ pub struct QueryBuilder<'a> {
     fetch: Vec<String>,
     timeout: Option<&'a str>,
     parallel: bool,
-    ________params_accumulator: ParamList,
+    ________params_accumulator: BindingsList,
 }
 
-impl<'a> ParamsExtractor for QueryBuilder<'a> {
-    fn get_params(&self) -> ParamList {
+impl<'a> Parametric for QueryBuilder<'a> {
+    fn get_bindings(&self) -> BindingsList {
         self.________params_accumulator.to_vec()
     }
 }
@@ -329,7 +329,7 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * FROM users");
     /// ```
-    pub fn from(&'a mut self, table_name: impl std::borrow::Borrow<str> + 'a) -> &'a mut Self {
+    pub fn from(&'a mut self, table_name: impl Into<sql::Table> + 'a + Parametric) -> &'a mut Self {
         self.targets.push(table_name.borrow().to_string());
         self
     }
@@ -351,10 +351,10 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * WHERE age > 18");
     /// ```
-    pub fn where_(&mut self, condition: impl Into<DbFilter> + ParamsExtractor) -> &mut Self {
+    pub fn where_(&mut self, condition: impl Into<DbFilter> + Parametric) -> &mut Self {
         let mut updated_params = vec![];
         updated_params.extend(self.________params_accumulator.to_vec());
-        updated_params.extend(condition.get_params());
+        updated_params.extend(condition.get_bindings());
         let condition: DbFilter = condition.into();
         self.________params_accumulator = updated_params;
         self.where_ = Some(condition.to_string());
@@ -785,17 +785,16 @@ impl<'a> Display for QueryBuilder<'a> {
 
         query.push(';');
         // Idea
-        // println!(
-        //     "VOOOOVOOO {:?}",
-        //     self.________params_accumulator
-        //         .clone()
-        //         .into_iter()
-        //         .map(|x| {
-        //             let xx = x.clone().0;
-        //             (format!("x{}", xx.0), format!("{}", xx.1))
-        //         })
-        //         .collect::<Vec<_>>()
-        // );
+        println!("VOOOOVOOO ",);
+        self.________params_accumulator
+            .clone()
+            .into_iter()
+            .map(|x| {
+                let xx = x.clone().0;
+                let yy = (format!("{}", xx.0), format!("{}", xx.1));
+                dbg!(yy)
+            })
+            .collect::<Vec<_>>();
         write!(f, "{}", query)
     }
 }
