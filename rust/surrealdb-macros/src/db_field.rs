@@ -593,7 +593,7 @@ impl DbField {
     {
         let value: Value = value.into();
         let param = generate_param_name();
-        let condition = format!("{} = {}", self.field_name, param);
+        let condition = format!("{} {} {}", self.field_name, sql::Operator::Equal, param);
 
         let updated_params = self.__update_params(param, value);
         Self {
@@ -623,7 +623,283 @@ impl DbField {
     {
         let value: Value = value.into();
         let param = generate_param_name();
-        let condition = format!("{} != {}", self.field_name, value);
+        let condition = format!("{} {} {}", self.field_name, sql::Operator::NotLike, param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Constructs a query that checks whether the value of the column is exactly equal to the given value.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compare against.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::column("age").exactly_equal(42);
+    /// assert_eq!(query.to_string(), "age == 42");
+    /// ```
+    pub fn exactly_equal<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!("{} {} {}", self.field_name, sql::Operator::Exact, param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Check whether any value in a arraa\y is equal to another value.
+    ///
+    /// # Arguments
+    ///
+    /// * `values` - An array of values to be checked for equality with the column.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbColumn;
+    ///
+    /// let col = DbColumn::new("friends");
+    /// let query = col.any_equal("Alice");
+    /// assert_eq!(query.to_string(), friends ?= Alice)");
+    /// ```
+    pub fn any_equal<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!("{} {} {}", self.field_name, sql::Operator::AnyEqual, value);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Check whether all values in an array is equals to another value.
+    ///
+    /// # Arguments
+    ///
+    /// * `values` - An array of values to be checked for equality with the column.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbColumn;
+    ///
+    /// let col = DbColumn::new("friends");
+    /// let query = col.any_equal("Alice");
+    /// assert_eq!(query.to_string(), friends *= Alice)");
+    /// ```
+    pub fn all_equal<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        // let condition = format!("{} *= {}", self.field_name, value);
+        let condition = format!("{} {} {}", self.field_name, sql::Operator::AllEqual, value);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Compare two values for equality using fuzzy matching.
+    ///
+    /// # Arguments
+    ///
+    /// * `pattern` - The pattern to match against.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::column("name").like("A");
+    /// assert_eq!(query.to_string(), "name ~ 'A'");
+    /// ```
+    pub fn like<T>(&self, pattern: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let pattern: Value = pattern.into();
+        let param = generate_param_name();
+        let condition = format!("{} {} {}", self.field_name, sql::Operator::Like, pattern);
+
+        let updated_params = self.__update_params(param, pattern);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Compare two values for inequality using fuzzy matching.
+    ///
+    /// # Arguments
+    ///
+    /// * `pattern` - The pattern to match against.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::column("name").not_like("A");
+    /// assert_eq!(query.to_string(), "name !~ 'A'");
+    /// ```
+    pub fn not_like<T>(&self, pattern: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let pattern: Value = pattern.into();
+        let param = generate_param_name();
+        let condition = format!("{} {} {}", self.field_name, sql::Operator::NotLike, pattern);
+
+        let updated_params = self.__update_params(param, pattern);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Check whether any value in a set is equal to a value using fuzzy matching
+    ///
+    /// # Arguments
+    ///
+    /// * `pattern` - The pattern to match against.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::column("name").all_like("A");
+    /// assert_eq!(query.to_string(), "name ?~ 'A'");
+    /// ```
+    pub fn any_like<T>(&self, pattern: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let pattern: Value = pattern.into();
+        let param = generate_param_name();
+        let condition = format!("{} {} {}", self.field_name, sql::Operator::AnyLike, pattern);
+
+        let updated_params = self.__update_params(param, pattern);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Check whether all values in a set are equal to a value using fuzzy matching.
+    ///
+    /// # Arguments
+    ///
+    /// * `pattern` - The pattern to match against.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::column("name").all_like("A");
+    /// assert_eq!(query.to_string(), "name *~ 'A'");
+    /// ```
+    pub fn all_like<T>(&self, pattern: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let pattern: Value = pattern.into();
+        let param = generate_param_name();
+        let condition = format!("{} {} {}", self.field_name, sql::Operator::AllLike, pattern);
+
+        let updated_params = self.__update_params(param, pattern);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Check whether the value of the field is less than the given value.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compare against the field.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::field("age").less_than(30);
+    /// assert_eq!(query.to_string(), "age < 30");
+    /// ```
+    pub fn less_than<T>(&self, value: T) -> Self
+    where
+        T: Into<NumberOrField>,
+    {
+        let value: NumberOrField = value.into();
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!(
+            "{} {} ${}",
+            self.field_name,
+            sql::Operator::LessThan,
+            &param
+        );
+        let updated_params = self.__update_params(param, value);
+
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Check whether the value of the field is less than or equal to the given value.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compare against the field.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::field("age").less_than_or_equals(30);
+    /// assert_eq!(query.to_string(), "age <= 30");
+    /// ```
+    pub fn less_than_or_equal<T>(&self, value: T) -> Self
+    where
+        T: Into<NumberOrField>,
+    {
+        let value: NumberOrField = value.into();
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!(
+            "{} {} ${}",
+            self.field_name,
+            sql::Operator::LessThanOrEqual,
+            &param
+        );
 
         let updated_params = self.__update_params(param, value);
         Self {
@@ -653,20 +929,18 @@ impl DbField {
         let value: NumberOrField = value.into();
         let value: Value = value.into();
         let param = generate_param_name();
-        let condition = format!("{} > ${}", self.field_name, &param);
+        let condition = format!(
+            "{} {} ${}",
+            self.field_name,
+            sql::Operator::MoreThan,
+            &param
+        );
 
         let updated_params = self.__update_params(param, value);
         Self {
             field_name: condition,
             bindings: updated_params,
         }
-    }
-
-    fn __update_params(&self, param: String, value: sql::Value) -> Vec<Param> {
-        let mut updated_params = vec![];
-        updated_params.extend(self.bindings.to_vec());
-        updated_params.extend([(param, value).into()]);
-        updated_params
     }
 
     /// Check whether the value of the field is greater than or equal to the given value.
@@ -690,7 +964,12 @@ impl DbField {
         let value: NumberOrField = value.into();
         let value: Value = value.into();
         let param = generate_param_name();
-        let condition = format!("{} >= ${}", self.field_name, &param);
+        let condition = format!(
+            "{} {} ${}",
+            self.field_name,
+            sql::Operator::MoreThanOrEqual,
+            &param
+        );
 
         let updated_params = self.__update_params(param, value);
         Self {
@@ -699,196 +978,439 @@ impl DbField {
         }
     }
 
-    /// Check whether the value of the field is less than the given value.
+    /// Adds a value to the current query.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compare against the field.
+    /// * `value` - The value to be added to the current query.
     ///
     /// # Example
     ///
     /// ```
     /// use surrealdb::DbQuery;
     ///
-    /// let query = DbQuery::field("age").less_than(30);
-    /// assert_eq!(query.to_string(), "age < 30");
+    /// let query = DbQuery::new("age".to_string());
+    /// let new_query = query.add(5);
+    ///
+    /// assert_eq!(new_query.to_string(), "age + 5");
     /// ```
-    pub fn less_than<T>(&self, value: T) -> Self
-    where
-        T: Into<NumberOrField>,
-    {
-        let value: NumberOrField = value.into();
-        let value: Value = value.into();
-        let param = generate_param_name();
-        let condition = format!("{} < {}", self.field_name, &param);
-        let updated_params = self.__update_params(param, value);
-
-        Self {
-            field_name: condition,
-            bindings: updated_params,
-        }
-    }
-
-    /// Check whether the value of the field is less than or equal to the given value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to compare against the field.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("age").less_than_or_equals(30);
-    /// assert_eq!(query.to_string(), "age <= 30");
-    /// ```
-    pub fn less_than_or_equals<T>(&self, value: T) -> Self
-    where
-        T: Into<NumberOrField>,
-    {
-        let value: NumberOrField = value.into();
-        let value: Value = value.into();
-        let param = generate_param_name();
-        let condition = format!("{} <= {}", self.field_name, param);
-
-        let updated_params = self.__update_params(param, value);
-        Self {
-            field_name: condition,
-            bindings: updated_params,
-        }
-    }
-
-    /// Check whether the value of the field is between the given lower and upper bounds.
-    ///
-    /// # Arguments
-    ///
-    /// * `lower_bound` - The lower bound to compare against the field.
-    /// * `upper_bound` - The upper bound to compare against the field.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("age").between(18, 30);
-    /// assert_eq!(query.to_string(), "age < 18 AND age < 30");
-    /// ```
-    pub fn between<T>(&self, lower_bound: T, upper_bound: T) -> Self
-    where
-        T: Into<NumberOrField>,
-    {
-        let lower_bound: NumberOrField = lower_bound.into();
-        let lower_bound: Value = lower_bound.into();
-        let upper_bound: NumberOrField = upper_bound.into();
-        let upper_bound: Value = upper_bound.into();
-        let lower_param = generate_param_name();
-        let upper_param = generate_param_name();
-        let condition = format!("{} < {} < {}", lower_param, self.field_name, upper_param);
-
-        let lower_updated_params = self.__update_params(lower_param, lower_bound);
-        let upper_updated_params = self.__update_params(upper_param, upper_bound);
-        let updated_params = [lower_updated_params, upper_updated_params].concat();
-        Self {
-            field_name: condition,
-            bindings: updated_params,
-        }
-    }
-
-    /// Check whether the value of the field is between the given lower and upper bounds.
-    ///
-    /// # Arguments
-    ///
-    /// * `lower_bound` - The lower bound to compare against the field.
-    /// * `upper_bound` - The upper bound to compare against the field.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("age").within(18, 30);
-    /// assert_eq!(query.to_string(), "age <= 18 AND age <= 30");
-    /// ```
-    pub fn within<T>(&self, lower_bound: T, upper_bound: T) -> Self
-    where
-        T: Into<NumberOrField>,
-    {
-        let lower_bound: NumberOrField = lower_bound.into();
-        let lower_bound: Value = lower_bound.into();
-        let upper_bound: NumberOrField = upper_bound.into();
-        let upper_bound: Value = upper_bound.into();
-        let lower_param = generate_param_name();
-        let upper_param = generate_param_name();
-        let condition = format!("{} <= {} <= {}", lower_param, self.field_name, upper_param);
-
-        let lower_updated_params = self.__update_params(lower_param, lower_bound);
-        let upper_updated_params = self.__update_params(upper_param, upper_bound);
-        let updated_params = [lower_updated_params, upper_updated_params].concat();
-        Self {
-            field_name: condition,
-            bindings: updated_params,
-        }
-    }
-
-    /// Constructs a LIKE query that checks whether the value of the column matches the given pattern.
-    ///
-    /// # Arguments
-    ///
-    /// * `pattern` - The pattern to match against.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::column("name").like("A%");
-    /// assert_eq!(query.to_string(), "name LIKE 'A%'");
-    /// ```
-    pub fn like<T>(&self, pattern: T) -> Self
+    pub fn add<T>(&self, value: T) -> Self
     where
         T: Into<Value>,
     {
-        let pattern: Value = pattern.into();
+        let value: Value = value.into();
         let param = generate_param_name();
-        let condition = format!("{} LIKE {}", self.field_name, pattern);
+        let condition = format!("{} {} ${}", self.field_name, sql::Operator::Add, &param);
 
-        let updated_params = self.__update_params(param, pattern);
+        let updated_params = self.__update_params(param, value);
         Self {
             field_name: condition,
             bindings: updated_params,
         }
     }
 
-    /// Constructs a NOT LIKE query that checks whether the value of the column does not match the given pattern.
+    /// Subtracts a value to the current query.
     ///
     /// # Arguments
     ///
-    /// * `pattern` - The pattern to match against.
+    /// * `value` - The value to be subtract to the current query.
     ///
     /// # Example
     ///
     /// ```
     /// use surrealdb::DbQuery;
     ///
-    /// let query = DbQuery::column("name").not_like("A%");
-    /// assert_eq!(query.to_string(), "name NOT LIKE 'A%'");
+    /// let query = DbQuery::new("age".to_string());
+    /// let new_query = query.add(5);
+    ///
+    /// assert_eq!(new_query.to_string(), "age - 5");
     /// ```
-    pub fn not_like<T>(&self, pattern: T) -> Self
+    pub fn subtract<T>(&self, value: T) -> Self
     where
         T: Into<Value>,
     {
-        let pattern: Value = pattern.into();
+        let value: Value = value.into();
         let param = generate_param_name();
-        let condition = format!("{} NOT LIKE {}", self.field_name, pattern);
+        let condition = format!("{} {} ${}", self.field_name, sql::Operator::Sub, &param);
 
-        let updated_params = self.__update_params(param, pattern);
+        let updated_params = self.__update_params(param, value);
         Self {
             field_name: condition,
             bindings: updated_params,
         }
     }
 
+    /// Multiply a value to the current query.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to be multiply to the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("age".to_string());
+    /// let new_query = query.add(5);
+    ///
+    /// assert_eq!(new_query.to_string(), "age * 5");
+    /// ```
+    pub fn multiply<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!("{} {} ${}", self.field_name, sql::Operator::Mul, &param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Divide a value to the current query.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to be divide to the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("age".to_string());
+    /// let new_query = query.add(5);
+    ///
+    /// assert_eq!(new_query.to_string(), "age / 5");
+    /// ```
+    pub fn divide<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!("{} {} ${}", self.field_name, sql::Operator::Div, &param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Checks whether two values are truthy.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compared with the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("age".to_string());
+    /// let new_query = query.add(5);
+    ///
+    /// assert_eq!(new_query.to_string(), "age && 5");
+    /// ```
+    pub fn truthy_and<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!("{} && ${}", self.field_name, &param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Checks whether either of two values are truthy.
+
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compared with the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("age".to_string());
+    /// let new_query = query.add(5);
+    ///
+    /// assert_eq!(new_query.to_string(), "age || 5");
+    /// ```
+    pub fn truthy_or<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!("{} || ${}", self.field_name, &param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Checks whether two values are truthy.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compared with the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("age".to_string());
+    /// let new_query = query.add(5);
+    ///
+    /// assert_eq!(new_query.to_string(), "age AND 5");
+    /// ```
+    pub fn and<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!("{} {} ${}", self.field_name, sql::Operator::And, &param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Checks whether either of two values are truthy.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compared with the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("age".to_string());
+    /// let new_query = query.add(5);
+    ///
+    /// assert_eq!(new_query.to_string(), "age OR 5");
+    /// ```
+    pub fn or<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!("{} {} ${}", self.field_name, sql::Operator::OR, &param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Check whether two values are equal.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compared with the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("age".to_string());
+    /// let new_query = query.add(5);
+    ///
+    /// assert_eq!(new_query.to_string(), "age IS 5");
+    /// ```
+    pub fn is<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!("{} IS ${}", self.field_name, &param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Check whether two values are not equal.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compared with the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("age".to_string());
+    /// let new_query = query.add(5);
+    ///
+    /// assert_eq!(new_query.to_string(), "age IS NOT 5");
+    /// ```
+    pub fn is_not<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!("{} IS NOT ${}", self.field_name, &param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Check whether a value contains another value.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compared with the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("friends".to_string());
+    /// let new_query = query.contains("Oyelowo")
+    ///
+    /// assert_eq!(new_query.to_string(), "friends CONTAINS 'Oyelowo'");
+    /// ```
+    pub fn contains<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!("{} {} ${}", self.field_name, sql::Operator::Contain, &param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Check whether a value does not contain another value.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compared with the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("friends".to_string());
+    /// let new_query = query.contains_not("Oyelowo")
+    ///
+    /// assert_eq!(new_query.to_string(), "friends CONTAINSNOT 'Oyelowo'");
+    /// ```
+    pub fn contains_not<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        self.generate_query(sql::Operator::NotContain, value)
+    }
+
+    /// Check whether a value contains all of multiple values.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compared with the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("number_counts");
+    /// let new_query = query.contains_all([10, 20, 10]);
+    ///
+    /// assert_eq!(new_query.to_string(), "number_counts CONTAINSALL [10, 20, 10]");
+    /// ```
+    pub fn contains_all<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        self.generate_query(sql::Operator::ContainAll, value)
+    }
+
+    /// Check whether a value contains any of multiple values.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compared with the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("number_counts");
+    /// let new_query = query.contains_all([10, 20, 10]);
+    ///
+    /// assert_eq!(new_query.to_string(), "number_counts CONTAINSANY [10, 20, 10]");
+    /// ```
+    pub fn contains_any<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        self.generate_query(sql::Operator::ContainAny, value)
+    }
+
+    /// Check whether a value does not contain any of multiple values.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compared with the current query.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::new("number_counts");
+    /// let new_query = query.contains_all([10, 20, 10]);
+    ///
+    /// assert_eq!(new_query.to_string(), "number_counts CONTAINSNONE [10, 20, 10]");
+    /// ```
+    pub fn contains_none<T>(&self, value: T) -> Self
+    where
+        T: Into<Value>,
+    {
+        self.generate_query(sql::Operator::ContainNone, value)
+    }
     /// Constructs a query that checks whether the value of the column is null.
     ///
     /// # Example
@@ -917,104 +1439,6 @@ impl DbField {
         Self::new(format!("{} IS NOT NULL", self.field_name))
     }
 
-    /// Constructs a query that checks whether the value of the column is exactly equal to the given value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to compare against.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::column("age").exactly_equal(42);
-    /// assert_eq!(query.to_string(), "age == 42");
-    /// ```
-    pub fn exactly_equal<T>(&self, value: T) -> Self
-    where
-        T: Into<Value>,
-    {
-        let value: Value = value.into();
-        let param = generate_param_name();
-        let condition = format!("{} == {}", self.field_name, value);
-
-        let updated_params = self.__update_params(param, value);
-        Self {
-            field_name: condition,
-            bindings: updated_params,
-        }
-    }
-
-    /// Check whether any value in a set is equal to a value.
-    ///
-    /// # Arguments
-    ///
-    /// * `values` - An array of values to be checked for equality with the column.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbColumn;
-    ///
-    /// let col = DbColumn::new("name");
-    /// let query = col.any_equal(&["Alice", "Bob"]);
-    /// assert_eq!(query.to_string(), "name ?= (Alice, Bob)");
-    /// ```
-    pub fn any_equal<T>(&self, values: &[T]) -> Self
-    where
-        T: Into<Value> + Clone,
-    {
-        let values_str = self.__collect_query_values(values);
-        Self::new(format!("{} ?= ({})", self.field_name, values_str))
-    }
-
-    /// Check whether all values in a set are equal to a value.
-    ///
-    /// # Arguments
-    ///
-    /// * `values` - An array of values to be checked for equality with the column.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbColumn;
-    ///
-    /// let col = DbColumn::new("age");
-    /// let query = col.all_equal(&[20, 30, 40]);
-    /// assert_eq!(query.to_string(), "age *= (20, 30, 40)");
-    /// ```
-    pub fn all_equal<T>(&self, values: &[T]) -> Self
-    where
-        T: Into<Value> + Clone,
-    {
-        let values_str = self.__collect_query_values(values);
-        Self::new(format!("{} *= ({})", self.field_name, values_str))
-    }
-
-    /// Compare two values for equality using fuzzy matching.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to be compared with the column using fuzzy matching.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbColumn;
-    ///
-    /// let col = DbColumn::new("name");
-    /// let query = col.fuzzy_equal("Alex");
-    /// assert_eq!(query.to_string(), "name ~ Alex");
-    /// ```
-    pub fn fuzzy_equal<T>(&self, value: T) -> Self
-    where
-        T: Into<Value> + Clone,
-    {
-        let value: Value = value.into();
-        Self::new(format!("{} ~ {}", self.field_name, value))
-    }
-
     /// Compare two values for inequality using fuzzy matching.
     ///
     /// # Arguments
@@ -1038,27 +1462,6 @@ impl DbField {
         Self::new(format!("{} !~ {}", self.field_name, value))
     }
 
-    /// Check whether any value in a set is equal to a value using fuzzy matching.
-    ///
-    /// # Arguments
-    ///
-    /// * `values` - A slice of values to match against.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # use surrealdb::DbQuery;
-    /// let query = DbQuery::field("name").any_fuzzy_equal(&["foo", "bar"]);
-    /// assert_eq!(query.to_string(), r#"name ?~ (foo, bar)"#);
-    /// ```
-    pub fn any_fuzzy_equal<T>(&self, values: &[T]) -> Self
-    where
-        T: Into<Value> + Clone,
-    {
-        let values_str = self.__collect_query_values(values);
-        Self::new(format!("{} ?~ ({})", self.field_name, values_str))
-    }
-
     /// Check whether all values in a set are equal to a value using fuzzy matching.
     ///
     /// # Arguments
@@ -1078,99 +1481,6 @@ impl DbField {
     {
         let values_str = self.__collect_query_values(values);
         Self::new(format!("{} *~ ({})", self.field_name, values_str))
-    }
-
-    /// Check whether a value is less than or equal to another value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - A value to compare against.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # use surrealdb::DbQuery;
-    /// let query = DbQuery::field("age").less_than_or_equal(30);
-    /// assert_eq!(query.to_string(), r#"age <= 30"#);
-    /// ```
-    pub fn less_than_or_equal<T>(&self, value: T) -> Self
-    where
-        T: Into<Number>,
-    {
-        let value: Number = value.into();
-        Self::new(format!("{} <= {}", self.field_name, value))
-    }
-
-    /// Adds a value to the current query.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to be added to the current query.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.add(5);
-    ///
-    /// assert_eq!(new_query.to_string(), "age + 5");
-    /// ```
-    pub fn add<T>(&self, value: T) -> Self
-    where
-        T: Into<Value>,
-    {
-        let value: Value = value.into();
-        Self::new(format!("{} + {}", self.field_name, value))
-    }
-
-    /// Checks whether the current query contains a given value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to be checked for containment in the current query.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.contains("10-20");
-    ///
-    /// assert_eq!(new_query.to_string(), "age CONTAINS \"10-20\"");
-    /// ```
-    pub fn contains<T>(&self, value: T) -> Self
-    where
-        T: Into<Value>,
-    {
-        let value: Value = value.into();
-        Self::new(format!("{} CONTAINS {}", self.field_name, value))
-    }
-
-    /// Checks whether the current query does not contain a given value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to be checked for non-containment in the current query.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.contains_not("10-20");
-    ///
-    /// assert_eq!(new_query.to_string(), "age CONTAINSNOT \"10-20\"");
-    /// ```
-    pub fn contains_not<T>(&self, value: T) -> Self
-    where
-        T: Into<Value>,
-    {
-        let value: Value = value.into();
-        Self::new(format!("{} CONTAINSNOT {}", self.field_name, value))
     }
 
     /// Checks whether the current query contains all of the given values.
@@ -1444,72 +1754,6 @@ impl DbField {
         Self::new(format!("{} *= ({})", self.field_name, values_str))
     }
 
-    /// Subtracts a value from the current query value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - A value to subtract from the current query value.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # use surrealdb::DbQuery;
-    /// let query = DbQuery::from(10);
-    /// let subtracted = query.subtract(5);
-    /// assert_eq!(subtracted.to_string(), "10 - 5".to_string());
-    /// ```
-    pub fn subtract<T>(&self, value: T) -> Self
-    where
-        T: Into<Value>,
-    {
-        let value: Value = value.into();
-        Self::new(format!("{} - {}", self.field_name, value))
-    }
-
-    /// Multiplies the current query value with another value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - A value to multiply with the current query value.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # use surrealdb::DbQuery;
-    /// let query = DbQuery::from(10);
-    /// let multiplied = query.multiply(5);
-    /// assert_eq!(multiplied.to_string(), "10 * 5".to_string());
-    /// ```
-    pub fn multiply<T>(&self, value: T) -> Self
-    where
-        T: Into<Number>,
-    {
-        let value: Number = value.into();
-        Self::new(format!("{} * {}", self.field_name, value))
-    }
-
-    /// Divides the current query value by another value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - A value to divide the current query value by.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # use surrealdb::DbQuery;
-    /// let query = DbQuery::from(10);
-    /// let divided = query.divide(5);
-    /// assert_eq!(divided.to_string(), "10 / 5".to_string());
-    /// ```
-    pub fn divide<T>(&self, value: T) -> Self
-    where
-        T: Into<Number>,
-    {
-        let value: Number = value.into();
-        Self::new(format!("{} / {}", self.field_name, value))
-    }
-
     /// Checks if the current query value is truthy.
     ///
     /// # Example
@@ -1522,94 +1766,6 @@ impl DbField {
     /// ```
     pub fn is_truthy(&self) -> Self {
         Self::new(format!("{} && true", self.field_name))
-    }
-
-    /// Checks if the current query value and another value are truthy.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - A value to check if it's truthy along with the current query value.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # use surrealdb::DbQuery;
-    /// let query = DbQuery::from(true);
-    /// let is_truthy_and = query.truthy_and(false);
-    /// assert_eq!(is_truthy_and.to_string(), "true && false".to_string());
-    /// ```
-    pub fn truthy_and<T>(&self, value: T) -> Self
-    where
-        T: Into<Value>,
-    {
-        let value: Value = value.into();
-        Self::new(format!("{} && {}", self.field_name, value))
-    }
-
-    /// Checks if the current query value or another value are truthy.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - A value to check if it's truthy or the current query value.
-    ///
-    /// # Example
-    /// ```
-    /// use surrealdb::DbQuery;
-    /// let query = DbQuery::new("column_name".to_string()).truthy_or(true);
-    /// assert_eq!(query.to_string(), "column_name || true");
-    /// ```
-    pub fn truthy_or<T>(&self, value: T) -> Self
-    where
-        T: Into<Value>,
-    {
-        let value: Value = value.into();
-        Self::new(format!("{} || {}", self.field_name, value))
-    }
-
-    /// Check whether the value of the field is equal to the specified value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - A value of type T that implements the `Display` trait, representing the value to compare against.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("age").is(18);
-    ///
-    /// assert_eq!(query.to_string(), "age IS 18");
-    /// ```
-    pub fn is<T>(&self, value: T) -> Self
-    where
-        T: Into<Value>,
-    {
-        let value: Value = value.into();
-        Self::new(format!("{} IS {}", self.field_name, value))
-    }
-
-    /// Check whether the value of the field is not equal to the specified value.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - A value of type T that implements the `Display` trait, representing the value to compare against.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("name").is_not("Alice");
-    ///
-    /// assert_eq!(query.to_string(), "name IS NOT Alice");
-    /// ```
-    pub fn is_not<T>(&self, value: T) -> Self
-    where
-        T: Into<Value>,
-    {
-        let value: Value = value.into();
-        Self::new(format!("{} IS NOT {}", self.field_name, value))
     }
 
     /// Check whether any value in a set is equal to a value using the "=" operator.
@@ -1856,6 +2012,100 @@ impl DbField {
         let value: Value = value.into();
         let remove_string = format!("{self} -= {}", value);
         Self::new(remove_string)
+    }
+
+    /// Check whether the value of the field is between the given lower and upper bounds.
+    ///
+    /// # Arguments
+    ///
+    /// * `lower_bound` - The lower bound to compare against the field.
+    /// * `upper_bound` - The upper bound to compare against the field.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::field("age").between(18, 30);
+    /// assert_eq!(query.to_string(), "age < 18 AND age < 30");
+    /// ```
+    pub fn between<T>(&self, lower_bound: T, upper_bound: T) -> Self
+    where
+        T: Into<NumberOrField>,
+    {
+        let lower_bound: NumberOrField = lower_bound.into();
+        let lower_bound: Value = lower_bound.into();
+        let upper_bound: NumberOrField = upper_bound.into();
+        let upper_bound: Value = upper_bound.into();
+        let lower_param = generate_param_name();
+        let upper_param = generate_param_name();
+        let condition = format!("{} < {} < {}", lower_param, self.field_name, upper_param);
+
+        let lower_updated_params = self.__update_params(lower_param, lower_bound);
+        let upper_updated_params = self.__update_params(upper_param, upper_bound);
+        let updated_params = [lower_updated_params, upper_updated_params].concat();
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Check whether the value of the field is between the given lower and upper bounds.
+    ///
+    /// # Arguments
+    ///
+    /// * `lower_bound` - The lower bound to compare against the field.
+    /// * `upper_bound` - The upper bound to compare against the field.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::field("age").within(18, 30);
+    /// assert_eq!(query.to_string(), "age <= 18 AND age <= 30");
+    /// ```
+    pub fn within<T>(&self, lower_bound: T, upper_bound: T) -> Self
+    where
+        T: Into<NumberOrField>,
+    {
+        let lower_bound: NumberOrField = lower_bound.into();
+        let lower_bound: Value = lower_bound.into();
+        let upper_bound: NumberOrField = upper_bound.into();
+        let upper_bound: Value = upper_bound.into();
+        let lower_param = generate_param_name();
+        let upper_param = generate_param_name();
+        let condition = format!("{} <= {} <= {}", lower_param, self.field_name, upper_param);
+
+        let lower_updated_params = self.__update_params(lower_param, lower_bound);
+        let upper_updated_params = self.__update_params(upper_param, upper_bound);
+        let updated_params = [lower_updated_params, upper_updated_params].concat();
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
+    }
+
+    fn __update_params(&self, param: String, value: sql::Value) -> Vec<Param> {
+        let mut updated_params = vec![];
+        updated_params.extend(self.bindings.to_vec());
+        updated_params.extend([(param, value).into()]);
+        updated_params
+    }
+
+    fn generate_query<T>(&self, operator: impl Into<sql::Operator>, value: T) -> DbField
+    where
+        T: Into<Value>,
+    {
+        let value: Value = value.into();
+        let param = generate_param_name();
+        let condition = format!("{} {} ${}", self.field_name, operator, &param);
+
+        let updated_params = self.__update_params(param, value);
+        Self {
+            field_name: condition,
+            bindings: updated_params,
+        }
     }
 
     fn __collect_query_values<T>(&self, operator: sql::Operator, values: &[T]) -> Self
