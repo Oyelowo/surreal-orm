@@ -1599,7 +1599,6 @@ impl DbField {
         updated_params
     }
 
-    // fn generate_query<T>(&self, operator: impl Into<sql::Operator>, value: T) -> DbField
     fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> DbField
     where
         T: Into<Value>,
@@ -1612,24 +1611,6 @@ impl DbField {
         Self {
             field_name: condition,
             bindings: updated_params,
-        }
-    }
-
-    fn __collect_query_values<T>(&self, operator: sql::Operator, values: &[T]) -> Self
-    where
-        T: Into<Value> + Clone,
-    {
-        let mut all_params = vec![];
-        let mut bindings = vec![];
-        for value in values.to_vec() {
-            let param = generate_param_name();
-            all_params.push(format!("{}", &param));
-            bindings.extend(self.__update_params(param, value.into()));
-        }
-        let condition = format!("{} {operator} {}", self.field_name, all_params.join(", "));
-        Self {
-            field_name: condition,
-            bindings,
         }
     }
 }
