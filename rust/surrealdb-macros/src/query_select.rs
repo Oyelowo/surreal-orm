@@ -191,7 +191,7 @@ impl Display for OrderOption {
 }
 
 #[derive(Debug, Clone)]
-pub enum FromAbles<'a> {
+pub enum Targettables<'a> {
     Table(Table),
     Tables(sql::Tables),
     SurrealId(SurrealId),
@@ -200,50 +200,50 @@ pub enum FromAbles<'a> {
     SubQuery(QueryBuilder<'a>),
 }
 
-impl<'a> From<sql::Tables> for FromAbles<'a> {
+impl<'a> From<sql::Tables> for Targettables<'a> {
     fn from(value: sql::Tables) -> Self {
         Self::Tables(value)
     }
 }
 
-impl<'a> From<Vec<sql::Thing>> for FromAbles<'a> {
+impl<'a> From<Vec<sql::Thing>> for Targettables<'a> {
     fn from(value: Vec<sql::Thing>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
 }
 
-impl<'a> From<sql::Thing> for FromAbles<'a> {
+impl<'a> From<sql::Thing> for Targettables<'a> {
     fn from(value: sql::Thing) -> Self {
         Self::SurrealId(value.into())
     }
 }
 
-impl<'a> From<Vec<SurrealId>> for FromAbles<'a> {
+impl<'a> From<Vec<SurrealId>> for Targettables<'a> {
     fn from(value: Vec<SurrealId>) -> Self {
         Self::SurrealIds(value)
     }
 }
 
-impl<'a> From<SurrealId> for FromAbles<'a> {
+impl<'a> From<SurrealId> for Targettables<'a> {
     fn from(value: SurrealId) -> Self {
         Self::SurrealId(value)
     }
 }
 
-impl<'a> From<Table> for FromAbles<'a> {
+impl<'a> From<Table> for Targettables<'a> {
     fn from(value: Table) -> Self {
         Self::Table(value)
     }
 }
 
-impl<'a> Parametric for FromAbles<'a> {
+impl<'a> Parametric for Targettables<'a> {
     fn get_bindings(&self) -> BindingsList {
         match self {
-            FromAbles::Table(table) => {
+            Targettables::Table(table) => {
                 let binding = Binding::new(table.to_owned());
                 vec![binding]
             }
-            FromAbles::Tables(tables) => {
+            Targettables::Tables(tables) => {
                 let bindings = tables
                     .to_vec()
                     .into_iter()
@@ -252,10 +252,10 @@ impl<'a> Parametric for FromAbles<'a> {
                 bindings
             }
             // Should already be bound
-            FromAbles::SubQuery(_query) => vec![],
-            FromAbles::SurrealId(id) => vec![Binding::new(id.to_owned())],
+            Targettables::SubQuery(_query) => vec![],
+            Targettables::SurrealId(id) => vec![Binding::new(id.to_owned())],
 
-            FromAbles::SurrealIds(ids) => {
+            Targettables::SurrealIds(ids) => {
                 let bindings = ids
                     .into_iter()
                     .map(|id| Binding::new(id.to_owned()))
@@ -406,23 +406,23 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * FROM users");
     /// ```
-    pub fn from(&'a mut self, targets: impl Into<FromAbles<'a>>) -> &'a mut Self {
-        let targets: FromAbles = targets.into();
+    pub fn from(&'a mut self, targets: impl Into<Targettables<'a>>) -> &'a mut Self {
+        let targets: Targettables = targets.into();
         let targets_bindings = targets.get_bindings();
 
         // When we have either one or many table names or record ids, we want to use placeholders
         // as the targets which would be bound later but for a subquery in from, that must have
         // already been done by the Subquery(in this case, select query) builder itself
         let target_names = match targets {
-            FromAbles::Table(_)
-            | FromAbles::Tables(_)
-            | FromAbles::SurrealId(_)
-            | FromAbles::SurrealIds(_) => targets_bindings
+            Targettables::Table(_)
+            | Targettables::Tables(_)
+            | Targettables::SurrealId(_)
+            | Targettables::SurrealIds(_) => targets_bindings
                 .iter()
                 .map(|b| b.get_param().to_string())
                 .collect::<Vec<_>>(),
             // Subquery must have be built and interpolated, so no need for rebinding
-            FromAbles::SubQuery(subquery) => vec![subquery.to_string()],
+            Targettables::SubQuery(subquery) => vec![format!("({subquery})")],
         };
         self.update_bindings(targets_bindings);
         // self.________params_accumulator.extend(targets_bindings);
