@@ -193,18 +193,23 @@ impl Display for OrderOption {
 #[derive(Debug, Clone)]
 pub enum Targettables<'a> {
     Table(Table),
-    Tables(sql::Tables),
+    Tables(Vec<sql::Table>),
     SurrealId(SurrealId),
     SurrealIds(Vec<SurrealId>),
     // Should already be bound
     SubQuery(QueryBuilder<'a>),
 }
 
-impl<'a> From<sql::Tables> for Targettables<'a> {
-    fn from(value: sql::Tables) -> Self {
-        Self::Tables(value)
+impl<'a> From<Vec<sql::Table>> for Targettables<'a> {
+    fn from(value: Vec<sql::Table>) -> Self {
+        Self::Tables(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
 }
+// impl<'a> From<sql::Tables> for Targettables<'a> {
+//     fn from(value: sql::Tables) -> Self {
+//         Self::Tables(value)
+//     }
+// }
 
 impl<'a> From<Vec<sql::Thing>> for Targettables<'a> {
     fn from(value: Vec<sql::Thing>) -> Self {
@@ -215,6 +220,12 @@ impl<'a> From<Vec<sql::Thing>> for Targettables<'a> {
 impl<'a> From<sql::Thing> for Targettables<'a> {
     fn from(value: sql::Thing) -> Self {
         Self::SurrealId(value.into())
+    }
+}
+
+impl<'a, const N: usize> From<&[SurrealId; N]> for Targettables<'a> {
+    fn from(value: &[SurrealId; N]) -> Self {
+        Self::SurrealIds(value.iter().cloned().collect())
     }
 }
 
@@ -236,6 +247,17 @@ impl<'a> From<Table> for Targettables<'a> {
     }
 }
 
+impl<'a, 'b> From<&mut QueryBuilder<'a>> for Targettables<'a> {
+    fn from(value: &mut QueryBuilder<'a>) -> Self {
+        Self::SubQuery(value.to_owned())
+    }
+}
+
+impl<'a, 'b> From<QueryBuilder<'a>> for Targettables<'a> {
+    fn from(value: QueryBuilder<'a>) -> Self {
+        Self::SubQuery(value.to_owned())
+    }
+}
 impl<'a> Parametric for Targettables<'a> {
     fn get_bindings(&self) -> BindingsList {
         match self {

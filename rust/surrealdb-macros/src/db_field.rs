@@ -56,13 +56,36 @@ impl From<&mut DbField> for sql::Table {
     }
 }
 
-// impl<T> Into<sql::Value> for &[T] {}
+// impl<T> From<&[T]> for sql::Value {}
 
 impl From<DbField> for sql::Table {
     fn from(value: DbField) -> Self {
         sql::Table(value.field_name)
     }
 }
+
+// struct ValueCustom<T: Into<sql::Value>>(T);
+struct ValueCustom(sql::Value);
+
+impl From<sql::Value> for ValueCustom {
+    fn from(value: sql::Value) -> Self {
+        todo!()
+    }
+}
+
+// impl<T: Into<sql::Value>> Deref for ValueCustom<T> {
+//     type Target = sql::Value;
+//
+//     fn deref(&self) -> &Self::Target {
+//         todo!()
+//     }
+// }
+
+// fn xx(argzz: impl Into<ValueCustom>) {}
+//
+// fn ttt() {
+//     let xx = xx(5);
+// }
 
 impl Into<Value> for &DbField {
     fn into(self) -> Value {
