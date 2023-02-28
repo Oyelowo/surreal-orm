@@ -37,15 +37,28 @@ impl TryFrom<&str> for SurrealId {
     }
 }
 
-impl From<RecordId> for SurrealId {
-    fn from(value: RecordId) -> Self {
+impl From<SurrealId> for sql::Thing {
+    fn from(value: SurrealId) -> Self {
+        value.0
+    }
+}
+
+impl From<sql::Thing> for SurrealId {
+    fn from(value: sql::Thing) -> Self {
         Self(value)
     }
 }
 
-impl From<SurrealId> for RecordId {
-    fn from(value: SurrealId) -> Self {
-        value.0
+// surrealdb::opt::RecordId is surrealdb::sql::Thing
+// impl From<RecordId> for SurrealId {
+//     fn from(value: RecordId) -> Self {
+//         Self(value)
+//     }
+// }
+
+impl Into<sql::Value> for SurrealId {
+    fn into(self) -> sql::Value {
+        self.0.into()
     }
 }
 

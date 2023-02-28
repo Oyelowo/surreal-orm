@@ -8,10 +8,11 @@ use std::{
     fmt::{Display, Formatter, Result as FmtResult},
 };
 
-use surrealdb::sql;
+use surrealdb::sql::{self, Table, Value};
 
 use crate::{
-    db_field::{BindingsList, DbFilter, Parametric},
+    db_field::{Binding, BindingsList, DbFilter, Parametric},
+    value_type_wrappers::SurrealId,
     DbField, SurrealdbNode,
 };
 
@@ -189,6 +190,82 @@ impl Display for OrderOption {
     }
 }
 
+#[derive(Debug, Clone)]
+pub enum FromAbles<'a> {
+    Table(Table),
+    Tables(sql::Tables),
+    SurrealId(SurrealId),
+    SurrealIds(Vec<SurrealId>),
+    // Should already be bound
+    SubQuery(QueryBuilder<'a>),
+}
+
+impl<'a> From<sql::Tables> for FromAbles<'a> {
+    fn from(value: sql::Tables) -> Self {
+        Self::Tables(value)
+    }
+}
+
+impl<'a> From<Vec<sql::Thing>> for FromAbles<'a> {
+    fn from(value: Vec<sql::Thing>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
+    }
+}
+
+impl<'a> From<sql::Thing> for FromAbles<'a> {
+    fn from(value: sql::Thing) -> Self {
+        Self::SurrealId(value.into())
+    }
+}
+
+impl<'a> From<Vec<SurrealId>> for FromAbles<'a> {
+    fn from(value: Vec<SurrealId>) -> Self {
+        Self::SurrealIds(value)
+    }
+}
+
+impl<'a> From<SurrealId> for FromAbles<'a> {
+    fn from(value: SurrealId) -> Self {
+        Self::SurrealId(value)
+    }
+}
+
+impl<'a> From<Table> for FromAbles<'a> {
+    fn from(value: Table) -> Self {
+        Self::Table(value)
+    }
+}
+
+impl<'a> Parametric for FromAbles<'a> {
+    fn get_bindings(&self) -> BindingsList {
+        match self {
+            FromAbles::Table(table) => {
+                let binding = Binding::new(table.to_owned());
+                vec![binding]
+            }
+            FromAbles::Tables(tables) => {
+                let bindings = tables
+                    .to_vec()
+                    .into_iter()
+                    .map(|t| Binding::new(t))
+                    .collect::<Vec<_>>();
+                bindings
+            }
+            // Should already be bound
+            FromAbles::SubQuery(_query) => vec![],
+            FromAbles::SurrealId(id) => vec![Binding::new(id.to_owned())],
+
+            FromAbles::SurrealIds(ids) => {
+                let bindings = ids
+                    .into_iter()
+                    .map(|id| Binding::new(id.to_owned()))
+                    .collect::<Vec<_>>();
+                bindings
+            }
+        }
+    }
+}
+
 /// The query builder struct used to construct complex database queries.
 #[derive(Debug, Clone)]
 pub struct QueryBuilder<'a> {
@@ -329,8 +406,27 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * FROM users");
     /// ```
-    pub fn from(&'a mut self, table_name: impl Into<sql::Table> + 'a + Parametric) -> &'a mut Self {
-        self.targets.push(table_name.borrow().to_string());
+    pub fn from(&'a mut self, targets: impl Into<FromAbles<'a>>) -> &'a mut Self {
+        let targets: FromAbles = targets.into();
+        let targets_bindings = targets.get_bindings();
+
+        // When we have either one or many table names or record ids, we want to use placeholders
+        // as the targets which would be bound later but for a subquery in from, that must have
+        // already been done by the Subquery(in this case, select query) builder itself
+        let target_names = match targets {
+            FromAbles::Table(_)
+            | FromAbles::Tables(_)
+            | FromAbles::SurrealId(_)
+            | FromAbles::SurrealIds(_) => targets_bindings
+                .iter()
+                .map(|b| b.get_param().to_string())
+                .collect::<Vec<_>>(),
+            // Subquery must have be built and interpolated, so no need for rebinding
+            FromAbles::SubQuery(subquery) => vec![subquery.to_string()],
+        };
+        self.update_bindings(targets_bindings);
+        // self.________params_accumulator.extend(targets_bindings);
+        self.targets.extend(target_names);
         self
     }
 
@@ -352,12 +448,17 @@ impl<'a> QueryBuilder<'a> {
     /// assert_eq!(builder.to_string(), "SELECT * WHERE age > 18");
     /// ```
     pub fn where_(&mut self, condition: impl Into<DbFilter> + Parametric) -> &mut Self {
-        let mut updated_params = vec![];
-        updated_params.extend(self.________params_accumulator.to_vec());
-        updated_params.extend(condition.get_bindings());
+        self.update_bindings(condition.get_bindings());
         let condition: DbFilter = condition.into();
-        self.________params_accumulator = updated_params;
         self.where_ = Some(condition.to_string());
+        self
+    }
+
+    fn update_bindings(&mut self, bindings: BindingsList) -> &mut Self {
+        // let mut updated_params = vec![];
+        // updated_params.extend(self.________params_accumulator.to_vec());
+        // updated_params.extend(parametric_value.get_bindings());
+        self.________params_accumulator.extend(bindings);
         self
     }
 
@@ -790,8 +891,7 @@ impl<'a> Display for QueryBuilder<'a> {
             .clone()
             .into_iter()
             .map(|x| {
-                let xx = x.clone().0;
-                let yy = (format!("{}", xx.0), format!("{}", xx.1));
+                let yy = (format!("{}", x.get_param()), format!("{}", x.get_value()));
                 dbg!(yy)
             })
             .collect::<Vec<_>>();

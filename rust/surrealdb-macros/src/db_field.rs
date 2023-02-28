@@ -56,6 +56,8 @@ impl From<&mut DbField> for sql::Table {
     }
 }
 
+// impl<T> Into<sql::Value> for &[T] {}
+
 impl From<DbField> for sql::Table {
     fn from(value: DbField) -> Self {
         sql::Table(value.field_name)
@@ -318,9 +320,31 @@ impl Parametric for DbFilter {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Binding(pub (String, Value));
+pub struct Binding((String, sql::Value));
 
-impl From<(String, Value)> for Binding {
+impl Binding {
+    pub fn new(value: impl Into<sql::Value>) -> Self {
+        let value = value.into();
+        let param_name = generate_param_name(&"param");
+        Binding((param_name, value))
+    }
+
+    pub fn get_param(&self) -> &String {
+        &self.0 .0
+    }
+
+    pub fn get_value(&self) -> &sql::Value {
+        &self.0 .1
+    }
+}
+
+impl From<sql::Value> for Binding {
+    fn from(value: Value) -> Self {
+        Self::new(value)
+    }
+}
+
+impl From<(String, sql::Value)> for Binding {
     fn from(value: (String, Value)) -> Self {
         Self(value)
     }
@@ -1547,12 +1571,17 @@ impl DbField {
         let lower_bound: Value = lower_bound.into();
         let upper_bound: NumberOrField = upper_bound.into();
         let upper_bound: Value = upper_bound.into();
-        let lower_param = generate_param_name(&self.field_name);
-        let upper_param = generate_param_name(&self.field_name);
-        let condition = format!("{} < {} < {}", lower_param, self.field_name, upper_param);
+        let lower_bound_binding = Binding::new(lower_bound);
+        let upper_bound_binding = Binding::new(upper_bound);
+        let condition = format!(
+            "{} < {} < {}",
+            lower_bound_binding.get_param(),
+            self.field_name,
+            upper_bound_binding.get_param()
+        );
 
-        let lower_updated_params = self.__update_bindings(lower_param, lower_bound);
-        let upper_updated_params = self.__update_bindings(upper_param, upper_bound);
+        let lower_updated_params = self.__update_bindings(lower_bound_binding);
+        let upper_updated_params = self.__update_bindings(upper_bound_binding);
         let updated_params = [lower_updated_params, upper_updated_params].concat();
         Self {
             field_name: condition,
@@ -1583,12 +1612,17 @@ impl DbField {
         let lower_bound: Value = lower_bound.into();
         let upper_bound: NumberOrField = upper_bound.into();
         let upper_bound: Value = upper_bound.into();
-        let lower_param = generate_param_name(&self.field_name);
-        let upper_param = generate_param_name(&self.field_name);
-        let condition = format!("{} <= {} <= {}", lower_param, self.field_name, upper_param);
+        let lower_bound_binding = Binding::new(lower_bound);
+        let upper_bound_binding = Binding::new(upper_bound);
+        let condition = format!(
+            "{} <= {} <= {}",
+            lower_bound_binding.get_param(),
+            self.field_name,
+            upper_bound_binding.get_param()
+        );
 
-        let lower_updated_params = self.__update_bindings(lower_param, lower_bound);
-        let upper_updated_params = self.__update_bindings(upper_param, upper_bound);
+        let lower_updated_params = self.__update_bindings(lower_bound_binding);
+        let upper_updated_params = self.__update_bindings(upper_bound_binding);
         let updated_params = [lower_updated_params, upper_updated_params].concat();
         Self {
             field_name: condition,
@@ -1596,10 +1630,10 @@ impl DbField {
         }
     }
 
-    fn __update_bindings(&self, param: String, value: sql::Value) -> Vec<Binding> {
+    fn __update_bindings(&self, binding: Binding) -> Vec<Binding> {
         let mut updated_params = vec![];
         updated_params.extend(self.bindings.to_vec());
-        updated_params.extend([(param, value).into()]);
+        updated_params.extend([binding]);
         updated_params
     }
 
@@ -1608,13 +1642,14 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        let param = generate_param_name(&"param");
-        let condition = format!("{} {} ${}", self.field_name, operator, &param);
+        let binding = Binding::new(value);
+        let condition = format!("{} {} ${}", self.field_name, operator, &binding.get_param());
+        let updated_bindings = self.__update_bindings(binding);
 
-        let updated_params = self.__update_bindings(param, value);
+        // let updated_bindings = self.__update_bindings(param, value);
         Self {
             field_name: condition,
-            bindings: updated_params,
+            bindings: updated_bindings,
         }
     }
 }

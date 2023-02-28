@@ -216,13 +216,15 @@ mod tests {
         where___(None);
 
         where___(
-            cond(age.add(1).multiply(2).equals(course.divide(2).subtract(1)))
-                .and(age.all_in_set(&[1, 2]))
+            cond(age.add(1).multiply(2).equal(course.divide(2).subtract(1)))
+                // TODO: Make it possible to do &[1, 2] or vec![1, 2] without explicitly specifying the
+                // integer type
+                .and(age.all_inside(vec![1u8, 2]))
                 .and(cond(firstName.like("D")).and(lastName.like("E"))),
         );
         where___(
             cond(firstName.like("oyelowo"))
-                .and(lastName.fuzzy_equal("oyedayo"))
+                .and(lastName.like("oyedayo"))
                 .or(age
                     .greater_than_or_equal(age)
                     .greater_than_or_equal(age)
@@ -236,7 +238,7 @@ mod tests {
                 .and(lastName.greater_than_or_equal(45).or(course))
                 .and(
                     firstName
-                        .any_in_set(&["asrer"])
+                        .any_equal(vec!["asrer"])
                         .greater_than_or_equal(50)
                         .subtract(5)
                         .less_than_or_equal(200),
@@ -264,14 +266,14 @@ mod tests {
 
         let written_book_selection = st
             .bestFriend(None.into())
-            .writes__(wrt.timeWritten.equals("12:00"))
+            .writes__(wrt.timeWritten.equal("12:00"))
             .book(bk.content.contains("Oyelowo in Uranus"))
             .__as__(st.writtenBooks);
 
         let st = Student::schema();
         let written_book_selection = st
             .bestFriend(None.into())
-            .writes__(wrt.timeWritten.equals("12:00"))
+            .writes__(wrt.timeWritten.equal("12:00"))
             .book(bk.content.contains("Oyelowo in Uranus"))
             .__as__(st.writtenBooks);
 
@@ -435,7 +437,7 @@ mod tests {
     #[test]
     fn multiplication_tests3() {
         let x = Student::schema()
-            .writes__(StudentWritesBook::schema().timeWritten.equals("12:00"))
+            .writes__(StudentWritesBook::schema().timeWritten.equal("12:00"))
             .book(empty())
             .content;
 
