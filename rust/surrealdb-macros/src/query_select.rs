@@ -223,9 +223,26 @@ impl<'a> From<sql::Thing> for Targettables<'a> {
     }
 }
 
+impl<'a, const N: usize> From<&[sql::Table; N]> for Targettables<'a> {
+    fn from(value: &[sql::Table; N]) -> Self {
+        Self::Tables(value.to_vec())
+    }
+}
+
 impl<'a, const N: usize> From<&[SurrealId; N]> for Targettables<'a> {
     fn from(value: &[SurrealId; N]) -> Self {
-        Self::SurrealIds(value.iter().cloned().collect())
+        Self::SurrealIds(value.to_vec())
+    }
+}
+
+impl<'a, const N: usize> From<&[sql::Thing; N]> for Targettables<'a> {
+    fn from(value: &[sql::Thing; N]) -> Self {
+        Self::SurrealIds(
+            value
+                .into_iter()
+                .map(|t| t.to_owned().into())
+                .collect::<Vec<_>>(),
+        )
     }
 }
 

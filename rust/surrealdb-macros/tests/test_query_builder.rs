@@ -337,10 +337,12 @@ mod tests {
             .select(age)
             .select(firstName)
             .select_many(&[firstName, unoBook])
+            .from(Student::get_table_name())
+            .from(&[Student::get_table_name(), Book::get_table_name()])
             .from(vec![Student::get_table_name(), Book::get_table_name()])
             .from(SurrealId::try_from("book:1").unwrap())
-            .from(vec![SurrealId::try_from("book:1").unwrap()])
             .from(&[SurrealId::try_from("book:1").unwrap()])
+            .from(vec![SurrealId::try_from("book:1").unwrap()])
             .from(query1)
             // .from(3)
             .where_(
