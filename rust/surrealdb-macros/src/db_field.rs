@@ -291,6 +291,14 @@ impl From<DbField> for String {
     }
 }
 
+struct ArrayCustom(sql::Array);
+
+// impl<T, const N: usize> Into<sql::Array> for &[T; N] {
+//     fn from(value: &[sql::Table; N]) -> Self {
+//         Self::Tables(value.to_vec())
+//     }
+// }
+
 impl std::fmt::Display for DbField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.field_name))
@@ -1203,8 +1211,9 @@ impl DbField {
     /// ```
     pub fn contains_all<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Array>,
     {
+        let value = value.into();
         self.generate_query(sql::Operator::ContainAll, value)
     }
 
@@ -1220,18 +1229,19 @@ impl DbField {
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("number_counts");
-    /// let new_query = query.contains_all([10, 20, 10]);
+    /// let new_query = query.contains_any([10, 20, 10]);
     ///
     /// assert_eq!(new_query.to_string(), "number_counts CONTAINSANY [10, 20, 10]");
     /// ```
     pub fn contains_any<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Array>,
     {
+        let value = value.into();
         self.generate_query(sql::Operator::ContainAny, value)
     }
 
-    /// Check whether a value does not contain any of multiple values.
+    /// Check whether a value does not contain none of multiple values.
     ///
     /// # Arguments
     ///
@@ -1243,14 +1253,15 @@ impl DbField {
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("number_counts");
-    /// let new_query = query.contains_all([10, 20, 10]);
+    /// let new_query = query.contains_none([10, 20, 10]);
     ///
     /// assert_eq!(new_query.to_string(), "number_counts CONTAINSNONE [10, 20, 10]");
     /// ```
     pub fn contains_none<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Array>,
     {
+        let value = value.into();
         self.generate_query(sql::Operator::ContainNone, value)
     }
 
@@ -1318,7 +1329,7 @@ impl DbField {
     /// ```
     pub fn all_inside<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::AllInside, value)
     }

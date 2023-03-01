@@ -220,6 +220,7 @@ mod tests {
                 // TODO: Make it possible to do &[1, 2] or vec![1, 2] without explicitly specifying the
                 // integer type
                 .and(age.all_inside(vec![1u8, 2]))
+                // .and(age.all_inside(&[1u8, 2]))
                 .and(cond(firstName.like("D")).and(lastName.like("E"))),
         );
         where___(
@@ -306,6 +307,15 @@ mod tests {
         // age.and(firstName)
 
         let book::Book { content, .. } = Book::schema();
+
+        content
+            // .contains_any("Dyayo")
+            .contains_any(vec!["Dyayo"])
+            .or("lowo")
+            .and(age.less_than(55))
+            .or(age.greater_than(17))
+            .or(firstName.equal("Oyelowo"))
+            .and(lastName.equal("Oyedayo"));
 
         let query1 = queryb
             .select_all()
