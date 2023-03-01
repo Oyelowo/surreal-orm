@@ -293,7 +293,10 @@ impl From<DbField> for String {
 
 pub struct ArrayCustom(sql::Array);
 
-impl<T: Into<sql::Value>> From<Vec<T>> for ArrayCustom {
+impl<T> From<Vec<T>> for ArrayCustom
+where
+    T: Into<sql::Value>,
+{
     fn from(value: Vec<T>) -> Self {
         Self(
             value
@@ -305,7 +308,10 @@ impl<T: Into<sql::Value>> From<Vec<T>> for ArrayCustom {
     }
 }
 
-impl<T: Into<sql::Value> + Clone, const N: usize> From<&[T; N]> for ArrayCustom {
+impl<T, const N: usize> From<&[T; N]> for ArrayCustom
+where
+    T: Into<sql::Value> + Clone,
+{
     fn from(value: &[T; N]) -> Self {
         Self(
             value

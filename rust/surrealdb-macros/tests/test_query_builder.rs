@@ -219,8 +219,8 @@ mod tests {
             cond(age.add(1).multiply(2).equal(course.divide(2).subtract(1)))
                 // TODO: Make it possible to do &[1, 2] or vec![1, 2] without explicitly specifying the
                 // integer type
-                .and(age.all_inside(vec![1u8, 2]))
-                // .and(age.all_inside(&[1u8, 2]))
+                .and(age.all_inside(vec![1, 2]))
+                .and(age.all_inside(&[1, 2]))
                 .and(cond(firstName.like("D")).and(lastName.like("E"))),
         );
         where___(

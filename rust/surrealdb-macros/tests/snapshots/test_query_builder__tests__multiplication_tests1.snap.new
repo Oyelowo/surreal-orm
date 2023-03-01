@@ -1,0 +1,6 @@
+---
+source: surrealdb-macros/tests/test_query_builder.rs
+assertion_line: 347
+expression: query1.to_string()
+---
+"SELECT * FROM _param_a33648cf WHERE (content ~ $_param_ba11a162 AND $_param_0336ef66 >= $_param_fd822011) OR (firstName = $_param_98f161eb) AND (lastName = $_param_63fa2b48) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 15 PARALLEL;"

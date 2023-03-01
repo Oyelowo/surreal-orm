@@ -2,4 +2,4 @@
 source: surrealdb-macros/tests/test_query_builder.rs
 expression: query1.to_string()
 ---
-"SELECT * FROM book WHERE (content LIKE 'lowo' AND age >= 600) OR (firstName = 'Oyelowo') AND (lastName = 'Oyedayo') GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 15 PARALLEL;"
+"SELECT * FROM _param_4855a3cd WHERE (content ~ $_param_22585608 AND $_param_b698a8da >= $_param_90dfa5f8) OR (firstName = $_param_d8e6e409) AND (lastName = $_param_8b89c983) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 15 PARALLEL;"
