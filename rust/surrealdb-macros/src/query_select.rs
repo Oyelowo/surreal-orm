@@ -42,6 +42,53 @@ pub struct Order<'a> {
     option: Option<OrderOption>,
 }
 
+impl<'a> Parametric for Order<'a> {
+    fn get_bindings(&self) -> BindingsList {
+        self.field.get_bindings()
+    }
+}
+
+impl<'a> Parametric for &[Order<'a>] {
+    fn get_bindings(&self) -> BindingsList {
+        todo!()
+    }
+}
+
+impl<'a> Parametric for Vec<Order<'a>> {
+    fn get_bindings(&self) -> BindingsList {
+        todo!()
+    }
+}
+
+impl<'a> Parametric for Orderables<'a> {
+    fn get_bindings(&self) -> BindingsList {
+        todo!()
+    }
+}
+
+enum Orderables<'a> {
+    Order(Order<'a>),
+    OrdersList(Vec<Order<'a>>),
+}
+
+impl<'a> From<Order<'a>> for Orderables<'a> {
+    fn from(value: Order<'a>) -> Self {
+        todo!()
+    }
+}
+
+impl<'a> From<Vec<Order<'a>>> for Orderables<'a> {
+    fn from(value: Vec<Order<'a>>) -> Self {
+        todo!()
+    }
+}
+
+impl<'a, const N: usize> From<&[Order<'a>; N]> for Orderables<'a> {
+    fn from(value: &[Order<'a>; N]) -> Self {
+        todo!()
+    }
+}
+
 impl<'a> Order<'a> {
     /// Creates a new `Order` instance with the specified database field.
     ///
@@ -605,11 +652,12 @@ impl<'a> QueryBuilder<'a> {
         self
     }
 
-    /// Sets the ORDER BY clause for the query.
+    /// Sets the ORDER BY clause for the query. Multiple values can also be set within same call.
+    /// Repeated calls are accumulated
     ///
     /// # Arguments
     ///
-    /// * `order` - The field and direction to order by.
+    /// * `orderables` - The field and direction to order by.
     ///
     /// # Example
     ///
@@ -617,9 +665,14 @@ impl<'a> QueryBuilder<'a> {
     /// # use query_builder::{QueryBuilder, Order, Direction, DbField};
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.order_by(Order::new(DbField::new("age"), Direction::Ascending));
+    ///
+    /// query_builder.order(&[
+    ///     Order::new(DbField::new("age"), Direction::Ascending),
+    ///     Order::new(DbField::new("name"), Direction::Descending),
+    /// ]);
     /// ```
-    pub fn order_by(&mut self, order: Order<'a>) -> &mut Self {
-        self.order_by.push(order);
+    pub fn order_by(&mut self, orderables: impl Into<Orderables<'a>>) -> &mut Self {
+        // self.order_by.push(order);
         self
     }
 

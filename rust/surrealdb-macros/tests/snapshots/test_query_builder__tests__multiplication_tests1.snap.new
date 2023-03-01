@@ -1,6 +1,6 @@
 ---
 source: surrealdb-macros/tests/test_query_builder.rs
-assertion_line: 347
-expression: query1.to_string()
+assertion_line: 420
+expression: query.to_string()
 ---
-"SELECT * FROM _param_a33648cf WHERE (content ~ $_param_ba11a162 AND $_param_0336ef66 >= $_param_fd822011) OR (firstName = $_param_98f161eb) AND (lastName = $_param_63fa2b48) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 15 PARALLEL;"
+"SELECT *, age, firstName, firstName, unoBook FROM _param_83274da5, _param_10be2327, _param_81606897, _param_5fdfc759, _param_596cad2d, _param_f8edec62, _param_4773c9ed, _param_3f0079e0, (SELECT * FROM _param_d81356ad WHERE (content ~ $_param_1e095c4f AND $_param_e8e3a26a >= $_param_c3e20c1f) OR (firstName = $_param_1912e55c) AND (lastName = $_param_5548efac) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 15 PARALLEL;) WHERE (age > $_param_7f644aab >= $_param_cb035f1d <= $_param_9e7733af ~ $_param_4e86e2c8 + $_param_41a2c217 - $_param_e3a54165 AND $_param_63dfd540 OR $_param_4d190637) AND (bestFriend == $_param_016b5f5e) OR (firstName = $_param_325d1ce7) AND (age >= $_param_ee872eab) SPLIT lastName, firstName, firstName, semCoures GROUP BY course, firstName, lastName, lastName, unoBook, lowo ORDER BY firstName RAND() DESC, lastName COLLATE ASC, id NUMERIC DESC, id NUMERIC DESC, firstName  DESC LIMIT 400 START AT 5 FETCH firstName, lastName, age, unoBook, age, unoBook TIMEOUT 10s PARALLEL;"

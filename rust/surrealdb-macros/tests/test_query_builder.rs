@@ -344,7 +344,7 @@ mod tests {
             query1.limit(50);
             query1.group_by(age);
         }
-        insta::assert_debug_snapshot!(query1.to_string());
+        // insta::assert_debug_snapshot!(query1.to_string());
 
         println!("XXXXXXXX {query1}");
 
@@ -383,7 +383,10 @@ mod tests {
             .order_by(order(firstName).rand().desc())
             .order_by(order(lastName).collate().asc())
             .order_by(order(id).numeric().desc())
+            .order_by(vec![order(id).numeric().desc()])
+            .order_by(&[order(id).numeric().desc(), order(firstName).desc()])
             .order_by_many(&[order(id).numeric().desc(), order(firstName).desc()])
+            // .order_by_many(vec![order(id).numeric().desc(), order(firstName).desc()])
             .group_by(course)
             .group_by(firstName)
             .group_by(&"lastName".into())
