@@ -310,7 +310,14 @@ mod tests {
 
         content
             // .contains_any("Dyayo")
-            .contains_any(vec!["Dyayo"])
+            .contains_any(vec!["Dyayo", "fdfd"])
+            .contains_any(&["Dyayo", "fdfd"])
+            .contains_all(vec!["Dyayo", "fdfd"])
+            .contains_all(&["Dyayo", "fdfd"])
+            .contains_none(vec!["Dyayo", "fdfd"])
+            .contains_none(&["Dyayo", "fdfd"])
+            .contains_none(vec![1, 3])
+            .contains_none(&[1, 3])
             .or("lowo")
             .and(age.less_than(55))
             .or(age.greater_than(17))

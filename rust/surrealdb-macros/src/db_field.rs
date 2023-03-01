@@ -291,13 +291,37 @@ impl From<DbField> for String {
     }
 }
 
-struct ArrayCustom(sql::Array);
+pub struct ArrayCustom(sql::Array);
 
-// impl<T, const N: usize> Into<sql::Array> for &[T; N] {
-//     fn from(value: &[sql::Table; N]) -> Self {
-//         Self::Tables(value.to_vec())
-//     }
-// }
+impl<T: Into<sql::Value>> From<Vec<T>> for ArrayCustom {
+    fn from(value: Vec<T>) -> Self {
+        Self(
+            value
+                .into_iter()
+                .map(|v| v.into())
+                .collect::<Vec<sql::Value>>()
+                .into(),
+        )
+    }
+}
+
+impl<T: Into<sql::Value> + Clone, const N: usize> From<&[T; N]> for ArrayCustom {
+    fn from(value: &[T; N]) -> Self {
+        Self(
+            value
+                .into_iter()
+                .map(|v| v.clone().into())
+                .collect::<Vec<sql::Value>>()
+                .into(),
+        )
+    }
+}
+
+impl From<ArrayCustom> for sql::Value {
+    fn from(value: ArrayCustom) -> Self {
+        Self::Array(value.0.into())
+    }
+}
 
 impl std::fmt::Display for DbField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -1211,7 +1235,7 @@ impl DbField {
     /// ```
     pub fn contains_all<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Array>,
+        T: Into<ArrayCustom>,
     {
         let value = value.into();
         self.generate_query(sql::Operator::ContainAll, value)
@@ -1235,7 +1259,7 @@ impl DbField {
     /// ```
     pub fn contains_any<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Array>,
+        T: Into<ArrayCustom>,
     {
         let value = value.into();
         self.generate_query(sql::Operator::ContainAny, value)
@@ -1259,7 +1283,7 @@ impl DbField {
     /// ```
     pub fn contains_none<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Array>,
+        T: Into<ArrayCustom>,
     {
         let value = value.into();
         self.generate_query(sql::Operator::ContainNone, value)
