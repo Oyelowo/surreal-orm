@@ -1353,8 +1353,9 @@ impl DbField {
     /// ```
     pub fn all_inside<T>(&self, value: T) -> Self
     where
-        T: Into<sql::Value>,
+        T: Into<ArrayCustom>,
     {
+        let value = value.into();
         self.generate_query(sql::Operator::AllInside, value)
     }
 
@@ -1376,8 +1377,9 @@ impl DbField {
     /// ```
     pub fn any_inside<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<ArrayCustom>,
     {
+        let value = value.into();
         self.generate_query(sql::Operator::AllInside, value)
     }
 
@@ -1399,8 +1401,9 @@ impl DbField {
     /// ```
     pub fn none_inside<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<ArrayCustom>,
     {
+        let value = value.into();
         self.generate_query(sql::Operator::NoneInside, value)
     }
 
