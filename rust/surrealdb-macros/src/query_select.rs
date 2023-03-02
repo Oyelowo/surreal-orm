@@ -341,25 +341,25 @@ impl<'a> Parametric for Targettables<'a> {
     fn get_bindings(&self) -> BindingsList {
         match self {
             Targettables::Table(table) => {
-                let binding = Binding::new(table.to_owned());
+                let binding = Binding::new(table.to_owned(), None);
                 vec![binding]
             }
             Targettables::Tables(tables) => {
                 let bindings = tables
                     .to_vec()
                     .into_iter()
-                    .map(Binding::new)
+                    .map(|t| Binding::new(t, None))
                     .collect::<Vec<_>>();
                 bindings
             }
             // Should already be bound
             Targettables::SubQuery(_query) => vec![],
-            Targettables::SurrealId(id) => vec![Binding::new(id.to_owned())],
+            Targettables::SurrealId(id) => vec![Binding::new(id.to_owned(), None)],
 
             Targettables::SurrealIds(ids) => {
                 let bindings = ids
                     .into_iter()
-                    .map(|id| Binding::new(id.to_owned()))
+                    .map(|id| Binding::new(id.to_owned(), None))
                     .collect::<Vec<_>>();
                 bindings
             }

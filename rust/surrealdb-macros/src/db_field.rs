@@ -14,7 +14,7 @@ use std::{
 };
 
 use proc_macro2::Span;
-use surrealdb::sql::{self, Number, Uuid, Value};
+use surrealdb::sql::{self, Number, Value};
 
 use crate::query_select::QueryBuilder;
 
@@ -35,6 +35,7 @@ use crate::query_select::QueryBuilder;
 #[derive(Debug, Clone)]
 pub struct DbField {
     field_name: String,
+    conditional_operation: String,
     bindings: BindingsList,
 }
 pub type BindingsList = Vec<Binding>;
@@ -52,7 +53,7 @@ impl Parametric for DbField {
 // }
 impl From<&mut DbField> for sql::Table {
     fn from(value: &mut DbField) -> Self {
-        sql::Table(value.field_name.to_string())
+        sql::Table(value.conditional_operation.to_string())
     }
 }
 
@@ -60,7 +61,7 @@ impl From<&mut DbField> for sql::Table {
 
 impl From<DbField> for sql::Table {
     fn from(value: DbField) -> Self {
-        sql::Table(value.field_name)
+        sql::Table(value.conditional_operation)
     }
 }
 
@@ -89,19 +90,19 @@ impl From<sql::Value> for ValueCustom {
 
 impl Into<Value> for &DbField {
     fn into(self) -> Value {
-        sql::Table(self.field_name.to_string()).into()
+        sql::Table(self.conditional_operation.to_string()).into()
     }
 }
 
 impl Into<Value> for DbField {
     fn into(self) -> Value {
-        sql::Table(self.field_name.to_string()).into()
+        sql::Table(self.conditional_operation.to_string()).into()
     }
 }
 
 impl Into<Number> for &DbField {
     fn into(self) -> Number {
-        Value::Table(self.field_name.to_string().into())
+        Value::Table(self.conditional_operation.to_string().into())
             .as_string()
             .into()
     }
@@ -218,7 +219,9 @@ impl Into<Number> for DbField {
     fn into(self) -> Number {
         // sql::Strand::from(self.field_name.into())
         // let xx = sql::Strand::from(self.field_name.into());
-        Value::Strand(self.field_name.into()).as_string().into()
+        Value::Strand(self.conditional_operation.into())
+            .as_string()
+            .into()
     }
 }
 
@@ -237,7 +240,7 @@ impl<'a> Into<DbFilter> for QueryBuilder<'a> {
 impl From<DbField> for DbFilter {
     fn from(value: DbField) -> Self {
         Self {
-            query_string: value.field_name,
+            query_string: value.conditional_operation,
             params: value.bindings,
         }
     }
@@ -281,7 +284,7 @@ impl From<&str> for DbField {
 
 impl From<DbField> for String {
     fn from(value: DbField) -> Self {
-        value.field_name
+        value.conditional_operation
     }
 }
 
@@ -325,7 +328,7 @@ impl From<ArrayCustom> for sql::Value {
 
 impl std::fmt::Display for DbField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.field_name))
+        f.write_fmt(format_args!("{}", self.conditional_operation))
     }
 }
 
@@ -378,9 +381,10 @@ impl Parametric for DbFilter {
 pub struct Binding((String, sql::Value));
 
 impl Binding {
-    pub fn new(value: impl Into<sql::Value>) -> Self {
+    pub fn new(value: impl Into<sql::Value>, prefix: Option<String>) -> Self {
         let value = value.into();
-        let param_name = generate_param_name(&"param");
+        let prefix = format!("param_{}", prefix.unwrap_or("".into()));
+        let param_name = generate_param_name(prefix.as_str());
         Binding((param_name, value))
     }
 
@@ -395,7 +399,7 @@ impl Binding {
 
 impl From<sql::Value> for Binding {
     fn from(value: Value) -> Self {
-        Self::new(value)
+        Self::new(value, None)
     }
 }
 
@@ -603,19 +607,25 @@ impl std::fmt::Display for DbFilter {
 }
 
 fn generate_param_name(prefix: &str) -> String {
-    let sanitized_uuid = Uuid::new_v4().simple();
+    let nil_id = uuid::Uuid::nil();
+    #[cfg(test)]
+    let sanitized_uuid = nil_id.as_simple();
+    #[cfg(not(test))]
+    let sanitized_uuid = uuid::Uuid::new_v4().simple();
     let mut param = format!("_{prefix}_{sanitized_uuid}");
     // TODO: this is temporary
-    param.truncate(15);
+    // param.truncate(15);
     param
 }
 
 impl DbField {
     pub fn new(field_name: impl Display) -> Self {
         let field: sql::Value = sql::Value::Idiom(field_name.to_string().into());
-        let binding = Binding::new(field);
+        let binding = Binding::new(field, Some(field_name.to_string()));
         Self {
             field_name: field_name.to_string(),
+            // e.g age > 5
+            conditional_operation: field_name.to_string(),
             bindings: vec![].into(),
             // TODO: Rethink if bindings should be used even for fields. If so, just uncomment
             // below in favour over above. This is more paranoid mode.
@@ -639,7 +649,7 @@ impl DbField {
     /// ```
     // TODO: replace with long underscore to show it is an internal variable
     pub fn push_str(&mut self, string: &str) {
-        self.field_name.push_str(string)
+        self.conditional_operation.push_str(string)
     }
 
     /// Return a new `DbQuery` that renames the field with the specified alias
@@ -658,7 +668,7 @@ impl DbField {
     /// assert_eq!(query.to_string(), "name AS name_alias");
     /// ```
     pub fn __as__(&self, alias: impl std::fmt::Display) -> Self {
-        Self::new(format!("{} AS {}", self.field_name, alias))
+        Self::new(format!("{} AS {}", self.conditional_operation, alias))
     }
 
     /// Return a new `DbQuery` that checks whether the field is equal to the specified value
@@ -1638,12 +1648,12 @@ impl DbField {
         let lower_bound: Value = lower_bound.into();
         let upper_bound: NumberOrField = upper_bound.into();
         let upper_bound: Value = upper_bound.into();
-        let lower_bound_binding = Binding::new(lower_bound);
-        let upper_bound_binding = Binding::new(upper_bound);
+        let lower_bound_binding = Binding::new(lower_bound, Some(self.field_name.to_string()));
+        let upper_bound_binding = Binding::new(upper_bound, Some(self.field_name.to_string()));
         let condition = format!(
             "{} < {} < {}",
             lower_bound_binding.get_param(),
-            self.field_name,
+            self.conditional_operation,
             upper_bound_binding.get_param()
         );
 
@@ -1651,8 +1661,9 @@ impl DbField {
         let upper_updated_params = self.__update_bindings(upper_bound_binding);
         let updated_params = [lower_updated_params, upper_updated_params].concat();
         Self {
-            field_name: condition,
+            conditional_operation: condition,
             bindings: updated_params,
+            field_name: self.field_name.to_string(),
         }
     }
 
@@ -1679,12 +1690,12 @@ impl DbField {
         let lower_bound: Value = lower_bound.into();
         let upper_bound: NumberOrField = upper_bound.into();
         let upper_bound: Value = upper_bound.into();
-        let lower_bound_binding = Binding::new(lower_bound);
-        let upper_bound_binding = Binding::new(upper_bound);
+        let lower_bound_binding = Binding::new(lower_bound, Some(self.field_name.to_string()));
+        let upper_bound_binding = Binding::new(upper_bound, Some(self.field_name.to_string()));
         let condition = format!(
             "{} <= {} <= {}",
             lower_bound_binding.get_param(),
-            self.field_name,
+            self.conditional_operation,
             upper_bound_binding.get_param()
         );
 
@@ -1692,8 +1703,9 @@ impl DbField {
         let upper_updated_params = self.__update_bindings(upper_bound_binding);
         let updated_params = [lower_updated_params, upper_updated_params].concat();
         Self {
-            field_name: condition,
+            conditional_operation: condition,
             bindings: updated_params,
+            field_name: self.field_name.to_string(),
         }
     }
 
@@ -1709,14 +1721,20 @@ impl DbField {
         T: Into<Value>,
     {
         let value: Value = value.into();
-        let binding = Binding::new(value);
-        let condition = format!("{} {} ${}", self.field_name, operator, &binding.get_param());
+        let binding = Binding::new(value, Some(self.field_name.clone()));
+        let condition = format!(
+            "{} {} ${}",
+            self.conditional_operation,
+            operator,
+            &binding.get_param()
+        );
         let updated_bindings = self.__update_bindings(binding);
 
         // let updated_bindings = self.__update_bindings(param, value);
         Self {
-            field_name: condition,
+            conditional_operation: condition,
             bindings: updated_bindings,
+            field_name: self.field_name.to_string(),
         }
     }
 }

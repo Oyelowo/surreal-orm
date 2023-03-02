@@ -3,4 +3,4 @@ source: surrealdb-macros/tests/test_query_builder.rs
 assertion_line: 351
 expression: query1.to_string()
 ---
-"SELECT * FROM _param_bab656a8 WHERE (content ~ $_param_fe88515e AND $_param_d08b9e3b >= $_param_9a9e502d) OR (firstName = $_param_eaef1fac) AND (lastName = $_param_372f6a1f) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 15 PARALLEL;"
+"SELECT * FROM _param__3e537233f84a45a88f0fe4fd44d8c1ee WHERE (content ~ $_param_content_d90b4fea59024de5a22344d278be8ab7 AND $_param_content_35425bfc4fc44ef0aadb77f3a4db76b8 >= $_param_content_b890d1aeede142f39ecb80641014446b) OR (firstName = $_param_firstName_555a186585a8453990ddd253557e937a) AND (lastName = $_param_lastName_4e5edda700694fc587777e59367ee2aa) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 15 PARALLEL;"
