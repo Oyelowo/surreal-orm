@@ -40,6 +40,8 @@ pub struct DbField {
 pub type BindingsList = Vec<Binding>;
 impl Parametric for DbField {
     fn get_bindings(&self) -> BindingsList {
+        // let xx = Binding::new(self.clone().field_name.clone());
+
         self.bindings.to_vec()
     }
 }
@@ -270,18 +272,12 @@ impl From<DbField> for Cow<'static, DbField> {
 
 impl From<String> for DbField {
     fn from(value: String) -> Self {
-        Self {
-            field_name: value.into(),
-            bindings: vec![],
-        }
+        Self::new(value)
     }
 }
 impl From<&str> for DbField {
     fn from(value: &str) -> Self {
-        Self {
-            field_name: value.into(),
-            bindings: vec![],
-        }
+        Self::new(value)
     }
 }
 
@@ -618,9 +614,15 @@ fn generate_param_name(prefix: &str) -> String {
 
 impl DbField {
     pub fn new(field_name: impl Display) -> Self {
+        let field: sql::Value = sql::Value::Idiom(field_name.to_string().into());
+        let binding = Binding::new(field);
         Self {
             field_name: field_name.to_string(),
             bindings: vec![].into(),
+            // TODO: Rethink if bindings should be used even for fields. If so, just uncomment
+            // below in favour over above. This is more paranoid mode.
+            // field_name: binding.get_param().to_string(),
+            // bindings: vec![binding.into()].into(),
         }
     }
     /// Append the specified string to the field name

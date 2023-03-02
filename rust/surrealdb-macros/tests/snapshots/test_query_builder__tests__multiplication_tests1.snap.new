@@ -1,6 +1,6 @@
 ---
 source: surrealdb-macros/tests/test_query_builder.rs
-assertion_line: 423
-expression: query.to_string()
+assertion_line: 351
+expression: query1.to_string()
 ---
-"SELECT *, age, firstName, firstName, unoBook FROM _param_d3631120, _param_6dd75e79, _param_5f0d0096, _param_1b2e15a2, _param_f4df1d7f, _param_57285b99, _param_d907ecf1, _param_22067b54, (SELECT * FROM _param_3a283567 WHERE (content ~ $_param_831b6389 AND $_param_dcde5af1 >= $_param_84ddcd7d) OR (firstName = $_param_428637b4) AND (lastName = $_param_764233d7) GROUP BY content, age LIMIT 50 START AT 20 TIMEOUT 15 PARALLEL;) WHERE (age > $_param_2e08b863 >= $_param_2a6ca197 <= $_param_27d8d48e ~ $_param_b212bacb + $_param_2291f357 - $_param_56aef4ac AND $_param_e32886ec OR $_param_9f7e781f) AND (bestFriend == $_param_bc902f0f) OR (firstName = $_param_a2b560fa) AND (age >= $_param_d114c6f0) SPLIT lastName, firstName, firstName, semCoures GROUP BY course, firstName, lastName, lastName, unoBook, lowo ORDER BY id NUMERIC DESC, firstName  DESC LIMIT 400 START AT 5 FETCH firstName, lastName, age, unoBook, age, unoBook TIMEOUT 10s PARALLEL;"
+"SELECT * FROM _param_bab656a8 WHERE (content ~ $_param_fe88515e AND $_param_d08b9e3b >= $_param_9a9e502d) OR (firstName = $_param_eaef1fac) AND (lastName = $_param_372f6a1f) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 15 PARALLEL;"

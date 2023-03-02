@@ -56,13 +56,18 @@ impl<'a> Parametric for &[Order<'a>] {
 
 impl<'a> Parametric for Vec<Order<'a>> {
     fn get_bindings(&self) -> BindingsList {
-        todo!()
+        self.into_iter()
+            .flat_map(|o| o.get_bindings())
+            .collect::<Vec<_>>()
     }
 }
 
 impl<'a> Parametric for Orderables<'a> {
     fn get_bindings(&self) -> BindingsList {
-        todo!()
+        match self {
+            Orderables::Order(o) => o.get_bindings(),
+            Orderables::OrdersList(ol) => ol.get_bindings(),
+        }
     }
 }
 
@@ -206,17 +211,18 @@ impl<'a> Order<'a> {
 
 impl<'a> Display for &Order<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let binding = self
-            .field
-            .get_bindings()
-            .first()
-            .expect("Must have one binding")
-            .clone();
-        let field = binding.get_param();
-
+        // let field = self.field;
+        // dbg!(field);
+        // let binding = field
+        //     .get_bindings()
+        //     .first()
+        //     .expect("Must have one binding")
+        //     .clone();
+        // let field = binding.get_param();
+        //
         f.write_fmt(format_args!(
             "{} {} {}",
-            field,
+            self.field,
             self.option.map_or("".into(), |op| op.to_string()),
             self.direction.unwrap_or(OrderDirection::Asc)
         ))

@@ -150,7 +150,7 @@ impl WhiteSpaceRemoval for String {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use surrealdb_macros::db_field::{cond, empty};
+    use surrealdb_macros::db_field::{cond, empty, Parametric};
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_select::{order, Order};
     use surrealdb_macros::value_type_wrappers::SurrealId;
@@ -344,9 +344,11 @@ mod tests {
             query1.limit(50);
             query1.group_by(age);
         }
-        // insta::assert_debug_snapshot!(query1.to_string());
 
-        println!("XXXXXXXX {query1}");
+        println!("VVVVV ");
+        println!("MMMMMM {query1}");
+        println!("FFFFFF {query1}");
+        insta::assert_debug_snapshot!(query1.to_string());
 
         let mut queryb = query_select::QueryBuilder::new();
         let ref mut query = queryb
@@ -437,6 +439,8 @@ mod tests {
             .writes__(empty())
             .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
             .title;
+
+        // let m = x.get_bindings();
 
         assert_eq!(
             x.to_string(),
