@@ -1732,7 +1732,19 @@ impl DbField {
         }
     }
 
-    fn __update_bindings(&self, binding: Binding) -> Vec<Binding> {
+    pub fn __update_many_bindings(&self, bindings: Vec<Binding>) -> Self {
+        println!("bindingszz {bindings:?}");
+        let mut updated_params = vec![];
+        updated_params.extend(self.bindings.to_vec());
+        updated_params.extend(bindings);
+        // updated_params
+        Self {
+            field_name: self.field_name.to_string(),
+            bindings: updated_params,
+        }
+    }
+
+    pub fn __update_bindings(&self, binding: Binding) -> Vec<Binding> {
         let mut updated_params = vec![];
         updated_params.extend(self.bindings.to_vec());
         updated_params.extend([binding]);

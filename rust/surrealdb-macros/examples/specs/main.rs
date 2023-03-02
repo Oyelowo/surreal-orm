@@ -492,7 +492,10 @@ impl surrealdb_macros::SurrealdbNode for Book {
 }
 pub mod book {
     use ::serde::Serialize;
-    use surrealdb_macros::db_field::{BindingsList, Parametric};
+    use surrealdb_macros::{
+        db_field::{BindingsList, Parametric},
+        DbField,
+    };
     pub struct TableNameStaticChecker {
         pub book: String,
     }
@@ -551,7 +554,10 @@ pub mod book {
             let mut schema_instance = Self::empty();
             let filter: surrealdb_macros::DbFilter = filter.into();
             let bindings = [existing_bindings, filter.get_bindings()].concat();
-            schema_instance.___________bindings.extend(bindings);
+            schema_instance
+                .___________bindings
+                .extend(bindings.to_vec());
+
             let connection = format!(
                 "{}{}{}",
                 store,
@@ -566,9 +572,15 @@ pub mod book {
             schema_instance
                 .id
                 .push_str(format!("{}.{}", ___________graph_traversal_string, "id").as_str());
-            schema_instance
-                .title
-                .push_str(format!("{}.{}", ___________graph_traversal_string, "title").as_str());
+            // schema_instance
+            //     .title
+            //     .push_str(format!("{}.{}", ___________graph_traversal_string, "title").as_str());
+
+            // schema_instance.title = schema_instance.title.__update_many_bindings(bindings);
+            schema_instance.title =
+                DbField::new(format!("{}.{}", ___________graph_traversal_string, "title"))
+                    .__update_many_bindings(bindings);
+            // schema_instance.title
             schema_instance
         }
         pub fn __as__<'a, T>(&self, alias: T) -> ::std::string::String
@@ -686,7 +698,8 @@ fn main() {
         .writes__(cond(
             StudentWritesBook::schema().timeWritten.greater_than(453),
         ))
-        .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))));
+        .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
+        .title;
 
     // let x = Student::schema().unoBook(cond(
     //     Book::schema().id.equal(RecordId::from(("book", "blaze"))),
