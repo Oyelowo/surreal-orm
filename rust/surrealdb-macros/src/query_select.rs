@@ -8,7 +8,13 @@ use std::{
     fmt::{Display, Formatter, Result as FmtResult},
 };
 
-use crate::{db_field::DbFilter, DbField, SurrealdbNode};
+use surrealdb::sql::{self, Table, Value};
+
+use crate::{
+    db_field::{Binding, BindingsList, DbFilter, Parametric},
+    value_type_wrappers::SurrealId,
+    DbField, SurrealdbNode,
+};
 
 /// Creates a new `Order` instance with the specified database field.
 ///
@@ -34,6 +40,67 @@ pub struct Order<'a> {
     field: &'a DbField,
     direction: Option<OrderDirection>,
     option: Option<OrderOption>,
+}
+
+impl<'a> Parametric for Order<'a> {
+    fn get_bindings(&self) -> BindingsList {
+        self.field.get_bindings()
+    }
+}
+
+impl<'a> Parametric for &[Order<'a>] {
+    fn get_bindings(&self) -> BindingsList {
+        todo!()
+    }
+}
+
+impl<'a> Parametric for Vec<Order<'a>> {
+    fn get_bindings(&self) -> BindingsList {
+        self.into_iter()
+            .flat_map(|o| o.get_bindings())
+            .collect::<Vec<_>>()
+    }
+}
+
+impl<'a> Parametric for Orderables<'a> {
+    fn get_bindings(&self) -> BindingsList {
+        match self {
+            Orderables::Order(o) => o.get_bindings(),
+            Orderables::OrdersList(ol) => ol.get_bindings(),
+        }
+    }
+}
+
+pub enum Orderables<'a> {
+    Order(Order<'a>),
+    OrdersList(Vec<Order<'a>>),
+}
+
+impl<'a> From<Order<'a>> for Orderables<'a> {
+    fn from(value: Order<'a>) -> Self {
+        Self::Order(value)
+    }
+}
+
+impl<'a> From<Vec<Order<'a>>> for Orderables<'a> {
+    fn from(value: Vec<Order<'a>>) -> Self {
+        Self::OrdersList(value)
+    }
+}
+
+impl<'a, const N: usize> From<&[Order<'a>; N]> for Orderables<'a> {
+    fn from(value: &[Order<'a>; N]) -> Self {
+        Self::OrdersList(value.to_vec())
+    }
+}
+
+impl<'a> From<Orderables<'a>> for Vec<Order<'a>> {
+    fn from(value: Orderables<'a>) -> Self {
+        match value {
+            Orderables::Order(o) => vec![o.into()],
+            Orderables::OrdersList(ol) => ol,
+        }
+    }
 }
 
 impl<'a> Order<'a> {
@@ -184,7 +251,124 @@ impl Display for OrderOption {
     }
 }
 
+#[derive(Debug, Clone)]
+pub enum Targettables<'a> {
+    Table(Table),
+    Tables(Vec<sql::Table>),
+    SurrealId(SurrealId),
+    SurrealIds(Vec<SurrealId>),
+    // Should already be bound
+    SubQuery(QueryBuilder<'a>),
+}
+
+impl<'a> From<Vec<sql::Table>> for Targettables<'a> {
+    fn from(value: Vec<sql::Table>) -> Self {
+        Self::Tables(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
+    }
+}
+// impl<'a> From<sql::Tables> for Targettables<'a> {
+//     fn from(value: sql::Tables) -> Self {
+//         Self::Tables(value)
+//     }
+// }
+
+impl<'a> From<Vec<sql::Thing>> for Targettables<'a> {
+    fn from(value: Vec<sql::Thing>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
+    }
+}
+
+impl<'a> From<sql::Thing> for Targettables<'a> {
+    fn from(value: sql::Thing) -> Self {
+        Self::SurrealId(value.into())
+    }
+}
+
+impl<'a, const N: usize> From<&[sql::Table; N]> for Targettables<'a> {
+    fn from(value: &[sql::Table; N]) -> Self {
+        Self::Tables(value.to_vec())
+    }
+}
+
+impl<'a, const N: usize> From<&[SurrealId; N]> for Targettables<'a> {
+    fn from(value: &[SurrealId; N]) -> Self {
+        Self::SurrealIds(value.to_vec())
+    }
+}
+
+impl<'a, const N: usize> From<&[sql::Thing; N]> for Targettables<'a> {
+    fn from(value: &[sql::Thing; N]) -> Self {
+        Self::SurrealIds(
+            value
+                .into_iter()
+                .map(|t| t.to_owned().into())
+                .collect::<Vec<_>>(),
+        )
+    }
+}
+
+impl<'a> From<Vec<SurrealId>> for Targettables<'a> {
+    fn from(value: Vec<SurrealId>) -> Self {
+        Self::SurrealIds(value)
+    }
+}
+
+impl<'a> From<SurrealId> for Targettables<'a> {
+    fn from(value: SurrealId) -> Self {
+        Self::SurrealId(value)
+    }
+}
+
+impl<'a> From<Table> for Targettables<'a> {
+    fn from(value: Table) -> Self {
+        Self::Table(value)
+    }
+}
+
+impl<'a, 'b> From<&mut QueryBuilder<'a>> for Targettables<'a> {
+    fn from(value: &mut QueryBuilder<'a>) -> Self {
+        Self::SubQuery(value.to_owned())
+    }
+}
+
+impl<'a, 'b> From<QueryBuilder<'a>> for Targettables<'a> {
+    fn from(value: QueryBuilder<'a>) -> Self {
+        Self::SubQuery(value.to_owned())
+    }
+}
+
+impl<'a> Parametric for Targettables<'a> {
+    fn get_bindings(&self) -> BindingsList {
+        match self {
+            Targettables::Table(table) => {
+                let binding = Binding::new(table.to_owned());
+                vec![binding]
+            }
+            Targettables::Tables(tables) => {
+                let bindings = tables
+                    .to_vec()
+                    .into_iter()
+                    .map(Binding::new)
+                    .collect::<Vec<_>>();
+                bindings
+            }
+            // Should already be bound
+            Targettables::SubQuery(_query) => vec![],
+            Targettables::SurrealId(id) => vec![Binding::new(id.to_owned())],
+
+            Targettables::SurrealIds(ids) => {
+                let bindings = ids
+                    .into_iter()
+                    .map(|id| Binding::new(id.to_owned()))
+                    .collect::<Vec<_>>();
+                bindings
+            }
+        }
+    }
+}
+
 /// The query builder struct used to construct complex database queries.
+#[derive(Debug, Clone)]
 pub struct QueryBuilder<'a> {
     // projections: Vec<&'a str>,
     projections: Vec<String>,
@@ -204,6 +388,13 @@ pub struct QueryBuilder<'a> {
     fetch: Vec<String>,
     timeout: Option<&'a str>,
     parallel: bool,
+    ________params_accumulator: BindingsList,
+}
+
+impl<'a> Parametric for QueryBuilder<'a> {
+    fn get_bindings(&self) -> BindingsList {
+        self.________params_accumulator.to_vec()
+    }
 }
 
 impl<'a> QueryBuilder<'a> {
@@ -229,6 +420,7 @@ impl<'a> QueryBuilder<'a> {
             fetch: vec![],
             timeout: None,
             parallel: false,
+            ________params_accumulator: vec![],
         }
     }
 
@@ -315,8 +507,27 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * FROM users");
     /// ```
-    pub fn from(&'a mut self, table_name: impl std::borrow::Borrow<str> + 'a) -> &'a mut Self {
-        self.targets.push(table_name.borrow().to_string());
+    pub fn from(&'a mut self, targets: impl Into<Targettables<'a>>) -> &'a mut Self {
+        let targets: Targettables = targets.into();
+        let targets_bindings = targets.get_bindings();
+
+        // When we have either one or many table names or record ids, we want to use placeholders
+        // as the targets which would be bound later but for a subquery in from, that must have
+        // already been done by the Subquery(in this case, select query) builder itself
+        let target_names = match targets {
+            Targettables::Table(_)
+            | Targettables::Tables(_)
+            | Targettables::SurrealId(_)
+            | Targettables::SurrealIds(_) => targets_bindings
+                .iter()
+                .map(|b| b.get_param().to_string())
+                .collect::<Vec<_>>(),
+            // Subquery must have be built and interpolated, so no need for rebinding
+            Targettables::SubQuery(subquery) => vec![format!("({subquery})")],
+        };
+        self.update_bindings(targets_bindings);
+        // self.________params_accumulator.extend(targets_bindings);
+        self.targets.extend(target_names);
         self
     }
 
@@ -337,9 +548,18 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * WHERE age > 18");
     /// ```
-    pub fn where_(&mut self, condition: impl Into<DbFilter>) -> &mut Self {
+    pub fn where_(&mut self, condition: impl Into<DbFilter> + Parametric) -> &mut Self {
+        self.update_bindings(condition.get_bindings());
         let condition: DbFilter = condition.into();
         self.where_ = Some(condition.to_string());
+        self
+    }
+
+    fn update_bindings(&mut self, bindings: BindingsList) -> &mut Self {
+        // let mut updated_params = vec![];
+        // updated_params.extend(self.________params_accumulator.to_vec());
+        // updated_params.extend(parametric_value.get_bindings());
+        self.________params_accumulator.extend(bindings);
         self
     }
 
@@ -447,11 +667,12 @@ impl<'a> QueryBuilder<'a> {
         self
     }
 
-    /// Sets the ORDER BY clause for the query.
+    /// Sets the ORDER BY clause for the query. Multiple values can also be set within same call.
+    /// Repeated calls are accumulated
     ///
     /// # Arguments
     ///
-    /// * `order` - The field and direction to order by.
+    /// * `orderables` - The field and direction to order by.
     ///
     /// # Example
     ///
@@ -459,29 +680,17 @@ impl<'a> QueryBuilder<'a> {
     /// # use query_builder::{QueryBuilder, Order, Direction, DbField};
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.order_by(Order::new(DbField::new("age"), Direction::Ascending));
-    /// ```
-    pub fn order_by(&mut self, order: Order<'a>) -> &mut Self {
-        self.order_by.push(order);
-        self
-    }
-
-    /// Sets multiple fields to ORDER BY in the query.
     ///
-    /// # Arguments
-    ///
-    /// * `orders` - A slice of fields and directions to order by.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// # use query_builder::{QueryBuilder, Order, Direction, DbField};
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.order_by_many(&[
+    /// query_builder.order(&[
     ///     Order::new(DbField::new("age"), Direction::Ascending),
     ///     Order::new(DbField::new("name"), Direction::Descending),
     /// ]);
     /// ```
-    pub fn order_by_many(&mut self, orders: &[Order<'a>]) -> &mut Self {
+    pub fn order_by(&mut self, orderables: impl Into<Orderables<'a>>) -> &mut Self {
+        let orderables: Orderables = orderables.into();
+        self.update_bindings(orderables.get_bindings());
+
+        let orders: Vec<Order> = orderables.into();
         self.order_by.extend_from_slice(orders.to_vec().as_slice());
         self
     }
@@ -766,7 +975,16 @@ impl<'a> Display for QueryBuilder<'a> {
         }
 
         query.push(';');
-
+        // Idea
+        // println!("VOOOOVOOO ",);
+        self.________params_accumulator
+            .clone()
+            .into_iter()
+            .map(|x| {
+                let yy = (format!("{}", x.get_param()), format!("{}", x.get_value()));
+                // dbg!(yy)
+            })
+            .collect::<Vec<_>>();
         write!(f, "{}", query)
     }
 }

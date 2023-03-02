@@ -150,7 +150,7 @@ impl WhiteSpaceRemoval for String {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use surrealdb_macros::db_field::{cond, empty};
+    use surrealdb_macros::db_field::{cond, empty, Binding, Parametric};
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_select::{order, Order};
     use surrealdb_macros::value_type_wrappers::SurrealId;
@@ -216,13 +216,16 @@ mod tests {
         where___(None);
 
         where___(
-            cond(age.add(1).multiply(2).equals(course.divide(2).subtract(1)))
-                .and(age.all_in_set(&[1, 2]))
+            cond(age.add(1).multiply(2).equal(course.divide(2).subtract(1)))
+                // TODO: Make it possible to do &[1, 2] or vec![1, 2] without explicitly specifying the
+                // integer type
+                .and(age.all_inside(vec![1, 2]))
+                .and(age.all_inside(&[1, 2]))
                 .and(cond(firstName.like("D")).and(lastName.like("E"))),
         );
         where___(
             cond(firstName.like("oyelowo"))
-                .and(lastName.fuzzy_equal("oyedayo"))
+                .and(lastName.like("oyedayo"))
                 .or(age
                     .greater_than_or_equal(age)
                     .greater_than_or_equal(age)
@@ -233,10 +236,10 @@ mod tests {
                     .multiply(age)
                     .or(firstName)
                     .intersects(age))
-                .and(lastName.greater_than_or_equal("lowo").or(course))
+                .and(lastName.greater_than_or_equal(45).or(course))
                 .and(
                     firstName
-                        .any_in_set(&["asrer"])
+                        .any_equal(vec!["asrer"])
                         .greater_than_or_equal(50)
                         .subtract(5)
                         .less_than_or_equal(200),
@@ -264,14 +267,14 @@ mod tests {
 
         let written_book_selection = st
             .bestFriend(None.into())
-            .writes__(wrt.timeWritten.equals("12:00"))
+            .writes__(wrt.timeWritten.equal("12:00"))
             .book(bk.content.contains("Oyelowo in Uranus"))
             .__as__(st.writtenBooks);
 
         let st = Student::schema();
         let written_book_selection = st
             .bestFriend(None.into())
-            .writes__(wrt.timeWritten.equals("12:00"))
+            .writes__(wrt.timeWritten.equal("12:00"))
             .book(bk.content.contains("Oyelowo in Uranus"))
             .__as__(st.writtenBooks);
 
@@ -305,7 +308,23 @@ mod tests {
 
         let book::Book { content, .. } = Book::schema();
 
-        let ref mut query1 = queryb
+        content
+            // .contains_any("Dyayo")
+            .contains_any(vec!["Dyayo", "fdfd"])
+            .contains_any(&["Dyayo", "fdfd"])
+            .contains_all(vec!["Dyayo", "fdfd"])
+            .contains_all(&["Dyayo", "fdfd"])
+            .contains_none(vec!["Dyayo", "fdfd"])
+            .contains_none(&["Dyayo", "fdfd"])
+            .contains_none(vec![1, 3])
+            .contains_none(&[1, 3])
+            .or("lowo")
+            .and(age.less_than(55))
+            .or(age.greater_than(17))
+            .or(firstName.equal("Oyelowo"))
+            .and(lastName.equal("Oyedayo"));
+
+        let query1 = queryb
             .select_all()
             .from(Book::get_table_name())
             .where_(
@@ -325,9 +344,11 @@ mod tests {
             query1.limit(50);
             query1.group_by(age);
         }
-        insta::assert_debug_snapshot!(query1.to_string());
 
-        println!("XXXXXXXX {query1}");
+        println!("VVVVV ");
+        println!("MMMMMM {query1}");
+        println!("FFFFFF {query1}");
+        insta::assert_debug_snapshot!(query1.to_string());
 
         let mut queryb = query_select::QueryBuilder::new();
         let ref mut query = queryb
@@ -336,11 +357,19 @@ mod tests {
             .select(firstName)
             .select_many(&[firstName, unoBook])
             .from(Student::get_table_name())
+            .from(&[Student::get_table_name(), Book::get_table_name()])
+            .from(vec![Student::get_table_name(), Book::get_table_name()])
+            .from(SurrealId::try_from("book:1").unwrap())
+            .from(&[SurrealId::try_from("book:1").unwrap()])
+            .from(vec![SurrealId::try_from("book:1").unwrap()])
+            .from(query1)
+            // .from(3)
             .where_(
                 cond(
                     age.greater_than(age)
                         .greater_than_or_equal(age)
                         .less_than_or_equal(20)
+                        .like(firstName)
                         .add(5)
                         .subtract(10)
                         .and(unoBook)
@@ -356,7 +385,9 @@ mod tests {
             .order_by(order(firstName).rand().desc())
             .order_by(order(lastName).collate().asc())
             .order_by(order(id).numeric().desc())
-            .order_by_many(&[order(id).numeric().desc(), order(firstName).desc()])
+            .order_by(vec![order(id).numeric().desc()])
+            .order_by(&[order(id).numeric().desc(), order(firstName).desc()])
+            .order_by(&[order(id).numeric().desc(), order(firstName).desc()])
             .group_by(course)
             .group_by(firstName)
             .group_by(&"lastName".into())
@@ -411,9 +442,12 @@ mod tests {
 
         assert_eq!(
             x.to_string(),
-            "->writes->book[WHERE id = book:blaze].title".to_string()
+            // "->writes->book[WHERE id = book:blaze].title".to_string()
+            "->writes->book[WHERE id = $_param_00000000].title".to_string()
         );
 
+        let m = x.get_bindings();
+        assert_eq!(format!("{m:?}"), "".to_string());
         // let query = InsertQuery::new("company")
         //     .fields(&["name", "founded", "founders", "tags"])
         //     .values(&[
@@ -434,13 +468,14 @@ mod tests {
     #[test]
     fn multiplication_tests3() {
         let x = Student::schema()
-            .writes__(StudentWritesBook::schema().timeWritten.equals("12:00"))
+            .writes__(StudentWritesBook::schema().timeWritten.equal("12:00"))
             .book(empty())
             .content;
 
         assert_eq!(
             x.to_string(),
-            "->writes[WHERE timeWritten = 12:00]->book.content".to_string()
+            // "->writes[WHERE timeWritten = 12:00]->book.content".to_string()
+            "->writes[WHERE timeWritten = $_param_00000000]->book.content".to_string()
         )
     }
 

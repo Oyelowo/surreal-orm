@@ -1,0 +1,58 @@
+[
+  {
+    "time": "252.916µs",
+    "status": "OK",
+    "result": [
+      {
+        "age": 21,
+        "agee": 21,
+        "id": "student:82g7138yl6j5iwqiqe81",
+        "name": "dayo"
+      },
+      {
+        "age": 25,
+        "agee": 32,
+        "id": "student:hs7q4gcw6th244f4lqfz",
+        "name": "pama"
+      },
+      {
+        "age": 18,
+        "agee": 24,
+        "id": "student:th0lp89ydn0rmoqw2rby",
+        "name": "oye"
+      },
+      {
+        "age": 99,
+        "email": "dayo@coder.com",
+        "id": "users:dayo",
+        "mediate": ["Nama", "Buka"],
+        "name": "oyedayo"
+      },
+      {
+        "age": 99,
+        "friends": ["users:oye", "users:lowo"],
+        "id": "users:hali",
+        "name": "hali"
+      },
+      {
+        "age": 99,
+        "id": "users:leke",
+        "name": "lowo",
+        "team_mates": ["person:jamie", "person:tobie"]
+      },
+      {
+        "age": 99,
+        "id": "users:lowo",
+        "name": "lowo",
+        "team_mates": ["persons:jamie", "persons:tobie"]
+      },
+      {
+        "age": 18,
+        "email": "oye@gmail.com",
+        "id": "users:oye",
+        "mediate": ["Calm", "Geeky"],
+        "name": "oye"
+      }
+    ]
+  }
+]

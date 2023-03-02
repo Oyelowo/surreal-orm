@@ -6,13 +6,17 @@ authors = { workspace = true }
 description = { workspace = true }
 documentation = { workspace = true }
 
+[features]
+mock = []
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 surrealdb-derive = { path = "./surrealdb-derive" }
-surrealdb= { workspace = true }
-tokio= { workspace = true }
+surrealdb = { workspace = true }
+tokio = { workspace = true }
 
+bigdecimal = { workspace = true }
 async-graphql = { workspace = true }
 syn = { workspace = true }
 quote = { workspace = true }
@@ -26,18 +30,19 @@ serde_json = { workspace = true }
 rayon = { workspace = true }
 static_assertions = "1.1.0"
 typed-builder = { workspace = true }
-bevy_reflect = { workspace = true  }
+bevy_reflect = { workspace = true }
 thiserror = { workspace = true }
 # proc-macro2-diagnostics = { workspace = true }
 
 
-test-case = { workspace = true  }
+test-case = { workspace = true }
 regex = "1.7.1"
 insta = "1.28.0"
 chrono.workspace = true
-geo = { workspace = true } 
+geo = { workspace = true }
 derive_builder = "0.12.0"
 geojson = "0.24.0"
+uuid.workspace = true
 # [lib]
 # proc-macro = true
 # crate_type = ["proc-macro"]

@@ -14,6 +14,7 @@ use geo::MultiPolygon;
 use geo::Point;
 use geo::Polygon;
 
+use geo::line_string;
 use geo::point;
 use geo::polygon;
 use serde::Deserialize;
@@ -44,10 +45,16 @@ struct User {
 use serde_json::Result;
 use serde_json::{Map, Value};
 use surrealdb_derive::SurrealdbNode;
+use surrealdb_macros::db_field::cond;
 use surrealdb_macros::query_insert;
+use surrealdb_macros::query_insert::updater;
+use surrealdb_macros::query_insert::Updater;
+use surrealdb_macros::query_select;
 use surrealdb_macros::value_type_wrappers::GeometryCustom;
 use surrealdb_macros::value_type_wrappers::SurrealId;
+use surrealdb_macros::DbField;
 use surrealdb_macros::SurId;
+use surrealdb_macros::SurrealdbNode;
 fn mana() {
     #[derive(Serialize, Deserialize)]
     struct Country {
@@ -577,7 +584,132 @@ async fn main() -> surrealdb::Result<()> {
     println!("==========================================");
     // println!("==========================================");
 
-    test_it().await.unwrap();
+    // test_it().await.unwrap();
+    let point = geo::point! {
+        x: 40.02f64,
+        y: 116.34,
+    };
+
+    let poly = polygon!(
+            exterior: [
+                (x: -111.35, y: 45.),
+                (x: -111., y: 41.),
+                (x: -104., y: 41.),
+                (x: -104., y: 45.),
+            ],
+            interiors: [
+                [
+                    (x: -110., y: 44.),
+                    (x: -110., y: 42.),
+                    (x: -105., y: 42.),
+                    (x: -105., y: 44.),
+                ],
+            ],);
+    let a = updater("e").plus_equal(sql::Geometry::Point(point));
+    println!("a = {a}");
+
+    let a = updater("e").plus_equal(sql::Geometry::Polygon(poly.clone()));
+    let a = updater("e").plus_equal(sql::Geometry::Polygon(poly));
+    println!("a = {a}");
+
+    let a = updater("e").increment_by(sql::Number::from(5));
+    println!("a = {a}");
+
+    let a = updater("e").increment_by(34);
+    println!("a = {a}");
+
+    let a = updater("e").decrement_by(923.54);
+    println!("a = {a}");
+    updater("e").increment_by("crm");
+    DbField::new("d".to_string()).equal(5);
+    // sql::Value::Param(sql::Param("trt"));
+
+    let xx = sql::Field::Alone("dd".into());
+    let xx = sql::Strand("dd".into());
+
+    // sql::Param::from("jij".into());
+    println!("xxx {} erere", &xx.0);
+
+    let xx = sql::Value::Strand("Rer".into());
+    let xx = sql::Table("Rer".into());
+    let xx = DbField::new("oejfiner");
+    // sql::Field;
+    let cc: sql::Table = xx.into();
+    println!("xxx {} erere", cc);
+    // println!("xxx {}", serde_json::to_string(&cc).unwrap());
+    // println!(
+    //     "qqqq {}",
+    //     sql::json(&serde_json::to_string(&cc.to_string()).unwrap()).unwrap()
+    // );
+
+    let company::Company { id, name, home, .. } = Company::schema();
+    println!("xxxxvv {}", name.clone());
+    let ref age = DbField::new("age");
+    let firstName = &name;
+    let lastName = &name;
+    let mut queryb = query_select::QueryBuilder::new();
+    let line = line_string![
+        (x: -21.95156, y: 64.1446),
+        (x: -21.951, y: 64.14479),
+        (x: -21.95044, y: 64.14527),
+        (x: -21.951445, y: 64.145508),
+    ];
+    let polygon = polygon![
+        (x: 0.9, y: 0.0),
+        (x: 4.0, y: 0.0),
+        (x: 4.0, y: 1.0),
+        (x: 1.0, y: 1.0),
+        (x: 1.0, y: 4.0),
+        (x: 0.0, y: 4.0),
+        (x: 0.0, y: 0.0),
+    ];
+    let poly = polygon!(
+    exterior: [
+        (x: -111., y: 45.),
+        (x: -111., y: 41.),
+        (x: -104., y: 41.),
+        (x: -104., y: 45.),
+    ],
+    interiors: [
+        [
+            (x: -110., y: 44.),
+            (x: -110., y: 42.),
+            (x: -105., y: 42.),
+            (x: -105., y: 44.),
+        ],
+    ],
+);
+    let x = vec![1, 2, 3];
+    let y = 9;
+    let z = x.into_iter().chain(std::iter::once(y)).collect::<Vec<_>>();
+    println!("{:?}", z); // prints [1, 2, 3, 9]
+                         // let polygon: sql::Value = sql::Geometry::Polygon(polygon.into()).into();
+                         // let ref mut query = queryb.select_all().from(Company::get_table_name()).where_(
+                         //     cond(age.greater_than(id).greater_than(age))
+                         //         .or(firstName.greater_than(90))
+                         //         .or(firstName.greater_than(90))
+                         //         .or(firstName.greater_than(90))
+                         //         .or(firstName.greater_than(439))
+                         //         .and(age.greater_than(150))
+                         //         .and(age.greater_than(316))
+                         //         .and(age.greater_than(711).greater_than_or_equal(421).equal(25))
+                         //         .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
+                         // );
+    let ref mut query = queryb.select_all().from(Company::get_table_name()).where_(
+        cond(age.greater_than(id))
+            .or(firstName.like("Oyelowo"))
+            .and(lastName.exactly_equal("Oyedayo"))
+            .and(age.less_than(150))
+            .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
+    );
+    println!("MAWAOOOO----->{}", query);
+    let mb = Uuid::new_v4();
+    println!("uuid: {}", mb.as_fields().0);
+    println!("uuid: {}", Uuid::new_v4().as_simple());
+    println!("uuid: {}", Uuid::new_v4().as_simple());
+    println!("uuid: {}", mb.simple());
+    let _44908904dfcb4dfca54694b2ecb5e579 = 434;
+    let _44908904dfcb4dfca54694b2ecb5e579 = 434;
     Ok(())
 }
 

@@ -21,7 +21,10 @@ pub mod model_id;
 
 pub use db_field::DbField;
 pub use db_field::DbFilter;
+// pub use db_field::Param;
+// pub use db_field::ParamsExtractor;
 pub use surrealdb::opt::RecordId;
+use surrealdb::sql;
 
 pub trait SurrealdbNode {
     type Schema;
@@ -29,7 +32,7 @@ pub trait SurrealdbNode {
     fn schema() -> Self::Schema;
     // fn get_key<T: Into<RecordId>>(&self) -> ::std::option::Option<&T>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
-    fn get_table_name() -> &'static str;
+    fn get_table_name() -> sql::Table;
 }
 
 pub trait SurrealdbEdge {
@@ -39,7 +42,7 @@ pub trait SurrealdbEdge {
     type Schema;
 
     fn schema() -> Self::Schema;
-    fn get_table_name() -> &'static str;
+    fn get_table_name() -> sql::Table;
     // fn get_key(&self) -> ::std::option::Option<&SurId>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
 }
@@ -53,6 +56,7 @@ pub trait SurrealdbEdge {
 // pub fn format_filter(filter: DbFilter, _table_name: &'static str) -> String {
 pub fn format_filter(filter: impl Into<DbFilter>) -> String {
     let filter: DbFilter = filter.into();
+    println!("FFFFILEEERRR {}", filter);
     if filter.to_string().is_empty() {
         "".into()
     } else {

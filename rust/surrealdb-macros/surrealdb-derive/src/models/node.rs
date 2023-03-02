@@ -101,8 +101,8 @@ impl ToTokens for FieldsGetterOpts {
                     #module_name::#struct_name_ident::new()
                 }
                 
-                fn get_table_name() -> &'static str {
-                    #table_name_str
+                fn get_table_name() -> ::surrealdb::sql::Table {
+                    #table_name_str.into()
                 }
                 
                 fn get_key<T: From<#crate_name::RecordId>>(self) -> ::std::option::Option<T>{
@@ -121,7 +121,7 @@ impl ToTokens for FieldsGetterOpts {
                #( #imports_referenced_node_schema) *
                 
 
-                #[derive(Debug, Serialize, Default)]
+                #[derive(Debug)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
                     pub(crate) #___________graph_traversal_string: ::std::string::String,
