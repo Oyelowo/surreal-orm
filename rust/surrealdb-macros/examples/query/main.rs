@@ -46,6 +46,7 @@ use serde_json::Result;
 use serde_json::{Map, Value};
 use surrealdb_derive::SurrealdbNode;
 use surrealdb_macros::db_field::cond;
+use surrealdb_macros::db_field::Parametric;
 use surrealdb_macros::query_insert;
 use surrealdb_macros::query_insert::updater;
 use surrealdb_macros::query_insert::Updater;
@@ -696,20 +697,23 @@ async fn main() -> surrealdb::Result<()> {
                          //         .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
                          // );
     let ref mut query = queryb.select_all().from(Company::get_table_name()).where_(
-        cond(age.greater_than(id))
+        cond(age.greater_than(id.clone()))
             .or(firstName.like("Oyelowo"))
             .and(lastName.exactly_equal("Oyedayo"))
             .and(age.less_than(150))
             .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
     );
     println!("MAWAOOOO----->{}", query);
-    let mb = Uuid::new_v4();
-    println!("uuid: {}", mb.as_fields().0);
-    println!("uuid: {}", Uuid::new_v4().as_simple());
-    println!("uuid: {}", Uuid::new_v4().as_simple());
-    println!("uuid: {}", mb.simple());
-    let _44908904dfcb4dfca54694b2ecb5e579 = 434;
-    let _44908904dfcb4dfca54694b2ecb5e579 = 434;
+    println!("BINDAAAA----->{:?}", query.get_bindings());
+    let xx = cond(age.greater_than(id.clone()));
+    println!("AEKERJERJ----->{}", xx);
+    println!("AEKERJERJ----->{:?}", xx.get_bindings());
+    // let x = Student::schema()
+    //     .writes__(empty())
+    //     .book(id.equal(RecordId::from(("book", "blaze"))))
+    //     .title;
+    // println!("XXX----->{:?}", x);
+    // println!("MANA----->{:?}", x.get_bindings());
     Ok(())
 }
 
