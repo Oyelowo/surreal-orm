@@ -56,6 +56,7 @@ pub trait SurrealdbEdge {
 // pub fn format_filter(filter: DbFilter, _table_name: &'static str) -> String {
 pub fn format_filter(filter: impl Into<DbFilter>) -> String {
     let filter: DbFilter = filter.into();
+    println!("FFFFILEEERRR {}", filter);
     if filter.to_string().is_empty() {
         "".into()
     } else {

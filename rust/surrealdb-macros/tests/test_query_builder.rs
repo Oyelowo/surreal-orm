@@ -150,7 +150,7 @@ impl WhiteSpaceRemoval for String {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use surrealdb_macros::db_field::{cond, empty, Parametric};
+    use surrealdb_macros::db_field::{cond, empty, Binding, Parametric};
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_select::{order, Order};
     use surrealdb_macros::value_type_wrappers::SurrealId;
@@ -440,13 +440,14 @@ mod tests {
             .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
             .title;
 
-        // let m = x.get_bindings();
-
         assert_eq!(
             x.to_string(),
-            "->writes->book[WHERE id = book:blaze].title".to_string()
+            // "->writes->book[WHERE id = book:blaze].title".to_string()
+            "->writes->book[WHERE id = $_param_00000000].title".to_string()
         );
 
+        let m = x.get_bindings();
+        assert_eq!(format!("{m:?}"), "".to_string());
         // let query = InsertQuery::new("company")
         //     .fields(&["name", "founded", "founders", "tags"])
         //     .values(&[
@@ -473,7 +474,8 @@ mod tests {
 
         assert_eq!(
             x.to_string(),
-            "->writes[WHERE timeWritten = 12:00]->book.content".to_string()
+            // "->writes[WHERE timeWritten = 12:00]->book.content".to_string()
+            "->writes[WHERE timeWritten = $_param_00000000]->book.content".to_string()
         )
     }
 

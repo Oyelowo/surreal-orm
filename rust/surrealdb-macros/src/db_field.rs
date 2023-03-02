@@ -14,7 +14,7 @@ use std::{
 };
 
 use proc_macro2::Span;
-use surrealdb::sql::{self, Number, Uuid, Value};
+use surrealdb::sql::{self, Number, Value};
 
 use crate::query_select::QueryBuilder;
 
@@ -467,8 +467,13 @@ impl DbFilter {
     /// assert_eq!(filter.to_string(), "name = 'John'");
     /// ```
     pub fn new(query_string: String) -> Self {
+        let query_string = if query_string.is_empty() {
+            "".into()
+        } else {
+            format!("({query_string})")
+        };
         Self {
-            query_string: format!("({query_string})"),
+            query_string,
             params: vec![].into(),
         }
     }
@@ -603,7 +608,15 @@ impl std::fmt::Display for DbFilter {
 }
 
 fn generate_param_name(prefix: &str) -> String {
-    let sanitized_uuid = Uuid::new_v4().simple();
+    let nil_id = uuid::Uuid::nil();
+    // #[cfg(test)]
+    #[cfg(feature = "mock")]
+    let sanitized_uuid = uuid::Uuid::nil();
+
+    // #[cfg(not(test))]
+    #[cfg(not(feature = "mock"))]
+    let sanitized_uuid = uuid::Uuid::new_v4().simple();
+
     let mut param = format!("_{prefix}_{sanitized_uuid}");
     // TODO: this is temporary
     param.truncate(15);

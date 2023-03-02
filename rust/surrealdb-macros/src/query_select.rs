@@ -976,13 +976,13 @@ impl<'a> Display for QueryBuilder<'a> {
 
         query.push(';');
         // Idea
-        println!("VOOOOVOOO ",);
+        // println!("VOOOOVOOO ",);
         self.________params_accumulator
             .clone()
             .into_iter()
             .map(|x| {
                 let yy = (format!("{}", x.get_param()), format!("{}", x.get_value()));
-                dbg!(yy)
+                // dbg!(yy)
             })
             .collect::<Vec<_>>();
         write!(f, "{}", query)
