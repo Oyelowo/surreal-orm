@@ -211,15 +211,6 @@ impl<'a> Order<'a> {
 
 impl<'a> Display for &Order<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // let field = self.field;
-        // dbg!(field);
-        // let binding = field
-        //     .get_bindings()
-        //     .first()
-        //     .expect("Must have one binding")
-        //     .clone();
-        // let field = binding.get_param();
-        //
         f.write_fmt(format_args!(
             "{} {} {}",
             self.field,

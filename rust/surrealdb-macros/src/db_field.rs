@@ -40,8 +40,6 @@ pub struct DbField {
 pub type BindingsList = Vec<Binding>;
 impl Parametric for DbField {
     fn get_bindings(&self) -> BindingsList {
-        // let xx = Binding::new(self.clone().field_name.clone());
-
         self.bindings.to_vec()
     }
 }
