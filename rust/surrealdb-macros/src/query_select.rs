@@ -66,26 +66,35 @@ impl<'a> Parametric for Orderables<'a> {
     }
 }
 
-enum Orderables<'a> {
+pub enum Orderables<'a> {
     Order(Order<'a>),
     OrdersList(Vec<Order<'a>>),
 }
 
 impl<'a> From<Order<'a>> for Orderables<'a> {
     fn from(value: Order<'a>) -> Self {
-        todo!()
+        Self::Order(value)
     }
 }
 
 impl<'a> From<Vec<Order<'a>>> for Orderables<'a> {
     fn from(value: Vec<Order<'a>>) -> Self {
-        todo!()
+        Self::OrdersList(value)
     }
 }
 
 impl<'a, const N: usize> From<&[Order<'a>; N]> for Orderables<'a> {
     fn from(value: &[Order<'a>; N]) -> Self {
-        todo!()
+        Self::OrdersList(value.to_vec())
+    }
+}
+
+impl<'a> From<Orderables<'a>> for Vec<Order<'a>> {
+    fn from(value: Orderables<'a>) -> Self {
+        match value {
+            Orderables::Order(o) => vec![o.into()],
+            Orderables::OrdersList(ol) => ol,
+        }
     }
 }
 
@@ -197,9 +206,17 @@ impl<'a> Order<'a> {
 
 impl<'a> Display for &Order<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let binding = self
+            .field
+            .get_bindings()
+            .first()
+            .expect("Must have one binding")
+            .clone();
+        let field = binding.get_param();
+
         f.write_fmt(format_args!(
             "{} {} {}",
-            self.field,
+            field,
             self.option.map_or("".into(), |op| op.to_string()),
             self.direction.unwrap_or(OrderDirection::Asc)
         ))
@@ -673,27 +690,10 @@ impl<'a> QueryBuilder<'a> {
     /// ]);
     /// ```
     pub fn order_by(&mut self, orderables: impl Into<Orderables<'a>>) -> &mut Self {
-        // self.order_by.push(order);
-        self
-    }
+        let orderables: Orderables = orderables.into();
+        self.update_bindings(orderables.get_bindings());
 
-    /// Sets multiple fields to ORDER BY in the query.
-    ///
-    /// # Arguments
-    ///
-    /// * `orders` - A slice of fields and directions to order by.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// # use query_builder::{QueryBuilder, Order, Direction, DbField};
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.order_by_many(&[
-    ///     Order::new(DbField::new("age"), Direction::Ascending),
-    ///     Order::new(DbField::new("name"), Direction::Descending),
-    /// ]);
-    /// ```
-    pub fn order_by_many(&mut self, orders: &[Order<'a>]) -> &mut Self {
+        let orders: Vec<Order> = orderables.into();
         self.order_by.extend_from_slice(orders.to_vec().as_slice());
         self
     }
