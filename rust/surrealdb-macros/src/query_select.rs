@@ -322,6 +322,7 @@ impl<'a, 'b> From<QueryBuilder<'a>> for Targettables<'a> {
         Self::SubQuery(value.to_owned())
     }
 }
+
 impl<'a> Parametric for Targettables<'a> {
     fn get_bindings(&self) -> BindingsList {
         match self {
@@ -333,7 +334,7 @@ impl<'a> Parametric for Targettables<'a> {
                 let bindings = tables
                     .to_vec()
                     .into_iter()
-                    .map(|t| Binding::new(t))
+                    .map(Binding::new)
                     .collect::<Vec<_>>();
                 bindings
             }
