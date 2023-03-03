@@ -150,7 +150,7 @@ impl WhiteSpaceRemoval for String {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use surrealdb_macros::db_field::{cond, empty, Binding, Parametric};
+    use surrealdb_macros::db_field::{cond, empty, Binding, Empty, Parametric};
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_select::{order, Order};
     use surrealdb_macros::value_type_wrappers::SurrealId;
@@ -266,14 +266,14 @@ mod tests {
         // println!("maerfineirNAMAAAA :{xx}");
 
         let written_book_selection = st
-            .bestFriend(None.into())
+            .bestFriend(Empty)
             .writes__(wrt.timeWritten.equal("12:00"))
             .book(bk.content.contains("Oyelowo in Uranus"))
             .__as__(st.writtenBooks);
 
         let st = Student::schema();
         let written_book_selection = st
-            .bestFriend(None.into())
+            .bestFriend(Empty)
             .writes__(wrt.timeWritten.equal("12:00"))
             .book(bk.content.contains("Oyelowo in Uranus"))
             .__as__(st.writtenBooks);
@@ -345,10 +345,8 @@ mod tests {
             query1.group_by(age);
         }
 
-        println!("VVVVV ");
-        println!("MMMMMM {query1}");
-        println!("FFFFFF {query1}");
         insta::assert_debug_snapshot!(query1.to_string());
+        insta::assert_debug_snapshot!(query1.get_bindings());
 
         let mut queryb = query_select::QueryBuilder::new();
         let ref mut query = queryb
@@ -404,12 +402,11 @@ mod tests {
             .timeout("10s")
             .parallel();
 
-        println!("ZZZZZZXXXXXXXX {query}");
-        // let is_oyelowo = true;
-        // if is_oyelowo {
-        //     query.group_by_many(&[age, bestFriend, &DbField::new("lowo")]);
-        // }
-        //
+        let is_oyelowo = true;
+        if is_oyelowo {
+            query.group_by_many(&[age, bestFriend, &DbField::new("lowo")]);
+        }
+
         // stringify_tokens!("lowo", "knows", 5);
 
         // stringify_tokens2!("lowo", 5);
@@ -422,6 +419,7 @@ mod tests {
         // let result = sql!(SELECT name WHERE age > 5);
 
         insta::assert_debug_snapshot!(query.to_string());
+        insta::assert_debug_snapshot!(query.get_bindings());
 
         // assert_eq!(
         //     query.to_string().remove_extra_whitespace(),
@@ -436,7 +434,7 @@ mod tests {
     #[test]
     fn multiplication_tests2() {
         let x = Student::schema()
-            .writes__(empty())
+            .writes__(Empty)
             .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
             .title;
 
@@ -447,7 +445,36 @@ mod tests {
         );
 
         let m = x.get_bindings();
-        assert_eq!(format!("{m:?}"), "".to_string());
+        assert_eq!(
+            serde_json::to_string(&m).unwrap(),
+            "[[\"_param_00000000\",\"book:blaze\"]]".to_string()
+        );
+
+        let student = Student::schema();
+        // Another case
+        let x = student
+            .bestFriend(student.age.between(18, 150))
+            .bestFriend(Empty)
+            .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))
+            .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))));
+
+        insta::assert_display_snapshot!(x);
+        insta::assert_debug_snapshot!(x.get_bindings());
+        // assert_eq!(
+        //     x.to_string(),
+        //     // "->writes->book[WHERE id = book:blaze].title".to_string()
+        //     "->writes->book[WHERE id = $_param_00000000].title".to_string()
+        // );
+        //
+        // let m = x.get_bindings();
+        // assert_eq!(
+        //     serde_json::to_string(&m).unwrap(),
+        //     "[[\"_param_00000000\",\"book:blaze\"]]".to_string()
+        // );
+        // assert_eq!(
+        //     format!("{m:?}"),
+        //     "[[\"_param_00000000\",\"book:blaze\"]]".to_string()
+        // );
         // let query = InsertQuery::new("company")
         //     .fields(&["name", "founded", "founders", "tags"])
         //     .values(&[

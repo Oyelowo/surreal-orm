@@ -19,8 +19,10 @@ pub mod prelude {
 pub mod links;
 pub mod model_id;
 
+pub use db_field::BindingsList;
 pub use db_field::DbField;
 pub use db_field::DbFilter;
+pub use db_field::Parametric;
 // pub use db_field::Param;
 // pub use db_field::ParamsExtractor;
 pub use surrealdb::opt::RecordId;

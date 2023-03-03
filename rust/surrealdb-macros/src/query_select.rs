@@ -353,7 +353,7 @@ impl<'a> Parametric for Targettables<'a> {
                 bindings
             }
             // Should already be bound
-            Targettables::SubQuery(_query) => vec![],
+            Targettables::SubQuery(query) => query.get_bindings(),
             Targettables::SurrealId(id) => vec![Binding::new(id.to_owned())],
 
             Targettables::SurrealIds(ids) => {
@@ -507,8 +507,8 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * FROM users");
     /// ```
-    pub fn from(&'a mut self, targets: impl Into<Targettables<'a>>) -> &'a mut Self {
-        let targets: Targettables = targets.into();
+    pub fn from(&'a mut self, targettables: impl Into<Targettables<'a>>) -> &'a mut Self {
+        let targets: Targettables = targettables.into();
         let targets_bindings = targets.get_bindings();
 
         // When we have either one or many table names or record ids, we want to use placeholders
@@ -526,7 +526,6 @@ impl<'a> QueryBuilder<'a> {
             Targettables::SubQuery(subquery) => vec![format!("({subquery})")],
         };
         self.update_bindings(targets_bindings);
-        // self.________params_accumulator.extend(targets_bindings);
         self.targets.extend(target_names);
         self
     }
@@ -548,8 +547,9 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * WHERE age > 18");
     /// ```
-    pub fn where_(&mut self, condition: impl Into<DbFilter> + Parametric) -> &mut Self {
+    pub fn where_(&mut self, condition: impl Into<DbFilter> + Parametric + Clone) -> &mut Self {
         self.update_bindings(condition.get_bindings());
+        println!("Mana {:?}", self);
         let condition: DbFilter = condition.into();
         self.where_ = Some(condition.to_string());
         self
@@ -982,7 +982,7 @@ impl<'a> Display for QueryBuilder<'a> {
             .into_iter()
             .map(|x| {
                 let yy = (format!("{}", x.get_param()), format!("{}", x.get_value()));
-                // dbg!(yy)
+                dbg!(yy)
             })
             .collect::<Vec<_>>();
         write!(f, "{}", query)

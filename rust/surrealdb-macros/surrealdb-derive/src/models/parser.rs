@@ -286,7 +286,10 @@ impl SchemaFieldsProperties {
                 let VariablesModelMacro { 
                     __________connect_to_graph_traversal_string, 
                     ___________graph_traversal_string, 
-                    schema_instance, .. 
+                    ____________update_many_bindings,
+                    schema_instance, 
+                    bindings,
+                    .. 
                 } = VariablesModelMacro::new();
                 
                 let referenced_node_meta = match relationship {
@@ -342,9 +345,10 @@ impl SchemaFieldsProperties {
 
                 store.connection_with_field_appended
                     .push(quote!(
-                               #schema_instance.#field_ident_normalised
-                                     .push_str(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str).as_str());));
-  
+                                #schema_instance.#field_ident_normalised =
+                                    #crate_name::DbField::new(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str).as_str())
+                                        .#____________update_many_bindings(#bindings);
+                                ));
 
                 store 
             });
@@ -464,12 +468,13 @@ impl NodeEdgeMetadataStore {
         
         
         let foreign_node_connection_method = || quote!(
-                                pub fn #destination_node_table_name(&self, filter: impl Into<#crate_name::DbFilter>) -> #destination_node_schema_ident {
-                                    let filter: #crate_name::DbFilter = filter.into();
+                                pub fn #destination_node_table_name(&self, filterable: impl Into<#crate_name::DbFilter>) -> #destination_node_schema_ident {
+                                    let filter: #crate_name::DbFilter = filterable.into();
                                     
                                     #destination_node_schema_ident::#__________connect_to_graph_traversal_string(
                                                 &self.#___________graph_traversal_string,
                                                 filter,
+                                                self.get_bindings(),
                                     )
                                 }
                             );
@@ -553,25 +558,26 @@ impl NodeEdgeMetadataStore {
             
              quote!(
                 #( #imports) *
-                use #crate_name::links::Relate;
                  
                 impl #origin_struct_ident {
                     pub fn #edge_name_as_method_ident(
                         &self,
-                        filter: impl Into<#crate_name::DbFilter>,
+                        filterable: impl Into<#crate_name::DbFilter>,
                     ) -> #edge_inner_module_name::#edge_name_as_struct_with_direction_ident {
-                        let filter: #crate_name::DbFilter = filter.into();
+                        let filter: #crate_name::DbFilter = filterable.into();
                         
                         #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_to_graph_traversal_string(
                             &self.#___________graph_traversal_string,
                             filter,
                             #arrow,
+                            self.get_bindings()
                         ).into()
                     }
                 }
                 
                 mod #edge_inner_module_name {
                     #( #imports) *
+                    use #crate_name::Parametric as _;
                     
                     #( #destination_node_schema) *
                     

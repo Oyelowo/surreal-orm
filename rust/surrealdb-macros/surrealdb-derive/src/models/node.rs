@@ -46,6 +46,7 @@ impl ToTokens for FieldsGetterOpts {
         let  VariablesModelMacro { 
             __________connect_to_graph_traversal_string, 
             ___________graph_traversal_string,
+            ___________bindings,
             schema_instance, .. 
         } = VariablesModelMacro::new();
         let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident, table_name_ident};
@@ -112,7 +113,7 @@ impl ToTokens for FieldsGetterOpts {
             }
 
             pub mod #module_name {
-                use ::serde::Serialize;
+                use #crate_name::Parametric as _;
 
                 pub struct TableNameStaticChecker {
                     pub #table_name_ident: String,
@@ -125,8 +126,14 @@ impl ToTokens for FieldsGetterOpts {
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
                     pub(crate) #___________graph_traversal_string: ::std::string::String,
+                    #___________bindings: #crate_name::BindingsList,
                 }
 
+                impl #crate_name::Parametric for #struct_name_ident {
+                    fn get_bindings(&self) -> #crate_name::BindingsList {
+                        self.#___________bindings.to_vec()
+                    }
+                }
                 
                 impl ::std::fmt::Display for #struct_name_ident {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
@@ -139,6 +146,7 @@ impl ToTokens for FieldsGetterOpts {
                         Self {
                            #( #schema_struct_fields_names_kv) *
                             #___________graph_traversal_string: "".into(),
+                            #___________bindings: vec![],
                         }
                     }
 
@@ -146,6 +154,7 @@ impl ToTokens for FieldsGetterOpts {
                         Self {
                            #( #schema_struct_fields_names_kv_empty) *
                             #___________graph_traversal_string: "".into(),
+                            #___________bindings: vec![],
                         }
                     }
                     
@@ -162,9 +171,13 @@ impl ToTokens for FieldsGetterOpts {
                         #schema_instance
                     }
 
-                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, filter: impl Into<#crate_name::DbFilter>) -> Self {
+                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, filterable: impl Into<#crate_name::DbFilter>, existing_bindings: #crate_name::BindingsList) -> Self {
                         let mut #schema_instance = Self::empty(); 
-                        let filter: #crate_name::DbFilter = filter.into();
+                        let filter: #crate_name::DbFilter = filterable.into();
+                        let bindings = [&existing_bindings[..], &filter.get_bindings()[..]].concat();
+                        let bindings = bindings.as_slice();
+
+                        schema_instance.#___________bindings = bindings.into();
                         
                         let connection = format!("{}{}{}", store, #table_name_str, #crate_name::format_filter(filter));
 

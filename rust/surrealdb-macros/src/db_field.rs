@@ -224,21 +224,21 @@ impl Into<Number> for DbField {
 
 impl Into<DbFilter> for &DbField {
     fn into(self) -> DbFilter {
-        DbFilter::new(self.to_string())
+        DbFilter::new(self.clone())
     }
 }
 
 impl<'a> Into<DbFilter> for QueryBuilder<'a> {
     fn into(self) -> DbFilter {
         let query_b: QueryBuilder = self;
-        DbFilter::new(query_b.to_string())
+        DbFilter::new(query_b)
     }
 }
 impl From<DbField> for DbFilter {
     fn from(value: DbField) -> Self {
         Self {
             query_string: value.field_name,
-            params: value.bindings,
+            bindings: value.bindings,
         }
     }
 }
@@ -365,12 +365,12 @@ impl std::fmt::Display for DbField {
 #[derive(Debug, Clone)]
 pub struct DbFilter {
     query_string: String,
-    params: Vec<Binding>,
+    bindings: Vec<Binding>,
 }
 
 impl Parametric for DbFilter {
     fn get_bindings(&self) -> BindingsList {
-        self.params.to_vec()
+        self.bindings.to_vec()
     }
 }
 
@@ -447,9 +447,28 @@ pub fn cond(filterable: impl Into<DbFilter> + Parametric) -> DbFilter {
 /// assert_eq!(empty_filter.to_string(), "");
 ///
 pub fn empty() -> DbFilter {
-    DbFilter::new("".into())
+    DbFilter::new(Empty)
 }
 
+pub struct Empty;
+
+impl From<Empty> for DbFilter {
+    fn from(value: Empty) -> Self {
+        DbFilter::new(value)
+    }
+}
+
+impl std::fmt::Display for Empty {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!(""))
+    }
+}
+
+impl Parametric for Empty {
+    fn get_bindings(&self) -> BindingsList {
+        vec![]
+    }
+}
 impl DbFilter {
     /// Creates a new `DbFilter` instance.
     ///
@@ -466,15 +485,18 @@ impl DbFilter {
     ///
     /// assert_eq!(filter.to_string(), "name = 'John'");
     /// ```
-    pub fn new(query_string: String) -> Self {
+    // pub fn new(query_string: String) -> Self {
+    pub fn new(query: impl Parametric + std::fmt::Display) -> Self {
+        let query_string = format!("{query}");
         let query_string = if query_string.is_empty() {
             "".into()
         } else {
             format!("({query_string})")
         };
+
         Self {
             query_string,
-            params: vec![].into(),
+            bindings: query.get_bindings(),
         }
     }
 
@@ -504,7 +526,7 @@ impl DbFilter {
 
         DbFilter {
             query_string,
-            params: new_params,
+            bindings: new_params,
         }
     }
 
@@ -534,7 +556,7 @@ impl DbFilter {
 
         DbFilter {
             query_string,
-            params: new_params,
+            bindings: new_params,
         }
     }
 
@@ -546,7 +568,7 @@ impl DbFilter {
         //     .chain(filter.get_params().into_iter())
         //     .collect::<Vec<_>>(); // Consumed
         let mut new_params = vec![];
-        new_params.extend(self.params);
+        new_params.extend(self.bindings);
         new_params.extend(filter.get_bindings());
         new_params
     }
@@ -564,7 +586,10 @@ impl DbFilter {
     /// assert_eq!(wrapped.to_string(), "((name = 'John') OR (age > 30))");
     /// ```
     pub fn bracketed(&self) -> Self {
-        DbFilter::new(format!("({self})"))
+        DbFilter {
+            query_string: format!("({self})"),
+            bindings: self.bindings.to_vec(),
+        }
     }
 
     /// Wraps this `DbFilter` instance in a set of brackets if it isn't already wrapped.
@@ -597,7 +622,10 @@ impl From<Option<DbFilter>> for DbFilter {
 
 impl From<String> for DbFilter {
     fn from(value: String) -> Self {
-        Self::new(value)
+        Self {
+            query_string: value,
+            bindings: vec![],
+        }
     }
 }
 
@@ -1710,11 +1738,27 @@ impl DbField {
         }
     }
 
-    fn __update_bindings(&self, binding: Binding) -> Vec<Binding> {
-        let mut updated_params = vec![];
-        updated_params.extend(self.bindings.to_vec());
-        updated_params.extend([binding]);
-        updated_params
+    pub fn ____________update_many_bindings<'bi>(
+        &self,
+        bindings: impl Into<&'bi [Binding]>,
+    ) -> Self {
+        let bindings: &'bi [Binding] = bindings.into();
+        println!("bindingszz {bindings:?}");
+        // updated_params.extend_from_slice(&self.bindings[..]);
+        // updated_params.extend_from_slice(&bindings[..]);
+        let updated_params = [&self.get_bindings().as_slice(), bindings].concat();
+        Self {
+            field_name: self.field_name.to_string(),
+            bindings: updated_params,
+        }
+    }
+
+    pub fn __update_bindings(&self, binding: Binding) -> Vec<Binding> {
+        // let mut updated_params = Vec::with_capacity(self.bindings.len() + 1);
+        // updated_params.extend(self.bindings.to_vec());
+        // updated_params.extend([binding]);
+        // updated_params
+        [self.bindings.as_slice(), &[binding]].concat()
     }
 
     fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> DbField
