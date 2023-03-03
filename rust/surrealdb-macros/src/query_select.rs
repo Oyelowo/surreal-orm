@@ -703,7 +703,7 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// let age = DbField::new("age");
     /// let gender = DbField::new("gender");
-    /// query = query.split_many(&[age, gender]);
+    /// query = query.split(&[age, gender]);
     ///
     /// assert_eq!(query.build(), "SELECT *, age, gender FROM table SPLIT age, gender");
     /// ```
@@ -745,7 +745,7 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// let age = DbField::new("age");
     /// let gender = DbField::new("gender");
-    /// query = query.split_many(&[age, gender]);
+    /// query = query.group_by(&[age, gender]);
     ///
     /// assert_eq!(query.build(), "SELECT *, age, gender FROM table GROUP BY age, gender");
     /// ```
