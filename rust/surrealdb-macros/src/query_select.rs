@@ -587,7 +587,7 @@ impl From<Selectables> for QueryBuilder {
 pub fn select(selectables: impl Into<Selectables>) -> QueryBuilder {
     let mut builder = QueryBuilder::new();
     let selectables: Selectables = selectables.into();
-    builder.select(selectables);
+    let builder = builder.select(selectables);
     builder
     // let selectables: Selectables = selectables.into();
     // selectables.into()
@@ -648,7 +648,7 @@ impl QueryBuilder {
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.select(selectables);
     /// ```
-    pub fn select(&mut self, selectables: impl Into<Selectables>) -> &mut Self {
+    pub fn select(mut self, selectables: impl Into<Selectables>) -> Self {
         let selectables: Selectables = selectables.into();
         let fields = match selectables {
             Selectables::All => vec!["*".to_string()],

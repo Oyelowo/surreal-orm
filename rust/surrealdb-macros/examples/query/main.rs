@@ -51,6 +51,8 @@ use surrealdb_macros::query_insert;
 use surrealdb_macros::query_insert::updater;
 use surrealdb_macros::query_insert::Updater;
 use surrealdb_macros::query_select;
+use surrealdb_macros::query_select::select;
+use surrealdb_macros::query_select::All;
 use surrealdb_macros::value_type_wrappers::GeometryCustom;
 use surrealdb_macros::value_type_wrappers::SurrealId;
 use surrealdb_macros::DbField;
@@ -696,7 +698,7 @@ async fn main() -> surrealdb::Result<()> {
                          //         .and(age.greater_than(711).greater_than_or_equal(421).equal(25))
                          //         .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
                          // );
-    let ref mut query = queryb.select_all().from(Company::get_table_name()).where_(
+    let ref mut query = select(All).from(Company::get_table_name()).where_(
         cond(age.greater_than(id.clone()))
             .or(firstName.like("Oyelowo"))
             .and(lastName.exactly_equal("Oyedayo"))

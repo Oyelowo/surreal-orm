@@ -325,7 +325,7 @@ mod tests {
             .or(firstName.equal("Oyelowo"))
             .and(lastName.equal("Oyedayo"));
 
-        let query1 = queryb
+        let mut query1 = queryb
             .select(All)
             .from(Book::get_table_name())
             .where_(
@@ -342,8 +342,7 @@ mod tests {
 
         let is_lowo = true;
         if is_lowo {
-            query1.limit(50);
-            query1.group_by(age);
+            query1 = query1.limit(50).group_by(age);
         }
 
         insta::assert_debug_snapshot!(query1.to_string());
@@ -353,7 +352,7 @@ mod tests {
 
         println!("{mmm}");
 
-        let query = select(All)
+        let mut query = select(All)
             .select(age)
             .select(firstName)
             .select(&[firstName, unoBook])
@@ -408,7 +407,7 @@ mod tests {
 
         let is_oyelowo = true;
         if is_oyelowo {
-            query.group_by(&[age, bestFriend, &DbField::new("lowo")]);
+            query = query.group_by(&[age, bestFriend, &DbField::new("lowo")]);
         }
 
         // stringify_tokens!("lowo", "knows", 5);
