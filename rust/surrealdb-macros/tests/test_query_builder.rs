@@ -436,7 +436,7 @@ mod tests {
     #[test]
     fn multiplication_tests2() {
         let x = Student::schema()
-            .writes__(empty())
+            .writes__(Empty)
             .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
             .title;
 
@@ -447,7 +447,36 @@ mod tests {
         );
 
         let m = x.get_bindings();
-        assert_eq!(format!("{m:?}"), "".to_string());
+        assert_eq!(
+            serde_json::to_string(&m).unwrap(),
+            "[[\"_param_00000000\",\"book:blaze\"]]".to_string()
+        );
+
+        let student = Student::schema();
+        // Another case
+        let x = student
+            .bestFriend(student.age.between(18, 150))
+            .bestFriend(Empty)
+            .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))
+            .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))));
+
+        insta::assert_display_snapshot!(x);
+        insta::assert_debug_snapshot!(x.get_bindings());
+        // assert_eq!(
+        //     x.to_string(),
+        //     // "->writes->book[WHERE id = book:blaze].title".to_string()
+        //     "->writes->book[WHERE id = $_param_00000000].title".to_string()
+        // );
+        //
+        // let m = x.get_bindings();
+        // assert_eq!(
+        //     serde_json::to_string(&m).unwrap(),
+        //     "[[\"_param_00000000\",\"book:blaze\"]]".to_string()
+        // );
+        // assert_eq!(
+        //     format!("{m:?}"),
+        //     "[[\"_param_00000000\",\"book:blaze\"]]".to_string()
+        // );
         // let query = InsertQuery::new("company")
         //     .fields(&["name", "founded", "founders", "tags"])
         //     .values(&[
