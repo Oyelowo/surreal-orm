@@ -150,7 +150,7 @@ impl WhiteSpaceRemoval for String {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use surrealdb_macros::db_field::{cond, empty, Binding, Parametric};
+    use surrealdb_macros::db_field::{cond, empty, Binding, Empty, Parametric};
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_select::{order, Order};
     use surrealdb_macros::value_type_wrappers::SurrealId;
@@ -266,14 +266,14 @@ mod tests {
         // println!("maerfineirNAMAAAA :{xx}");
 
         let written_book_selection = st
-            .bestFriend(None.into())
+            .bestFriend(Empty)
             .writes__(wrt.timeWritten.equal("12:00"))
             .book(bk.content.contains("Oyelowo in Uranus"))
             .__as__(st.writtenBooks);
 
         let st = Student::schema();
         let written_book_selection = st
-            .bestFriend(None.into())
+            .bestFriend(Empty)
             .writes__(wrt.timeWritten.equal("12:00"))
             .book(bk.content.contains("Oyelowo in Uranus"))
             .__as__(st.writtenBooks);

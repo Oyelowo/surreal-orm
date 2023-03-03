@@ -114,6 +114,8 @@ impl surrealdb_macros::SurrealdbNode for Student {
 }
 pub mod student {
     use ::serde::Serialize;
+    use surrealdb_macros::Parametric as _;
+    struct Parametric {}
     pub struct TableNameStaticChecker {
         pub student: String,
     }
@@ -130,10 +132,10 @@ pub mod student {
         pub semCoures: surrealdb_macros::DbField,
         pub writtenBooks: surrealdb_macros::DbField,
         pub(crate) ___________graph_traversal_string: ::std::string::String,
-        ___________bindings: BindingsList,
+        ___________bindings: surrealdb_macros::BindingsList,
     }
 
-    impl Parametric for Student {
+    impl surrealdb_macros::Parametric for Student {
         fn get_bindings(&self) -> surrealdb_macros::db_field::BindingsList {
             self.___________bindings.to_vec()
         }
@@ -189,8 +191,9 @@ pub mod student {
         pub fn __________connect_to_graph_traversal_string(
             store: &::std::string::String,
             filter: impl Into<surrealdb_macros::DbFilter>,
-            existing_bindings: BindingsList,
+            existing_bindings: surrealdb_macros::BindingsList,
         ) -> Self {
+            use surrealdb_macros::Parametric as _;
             let mut schema_instance = Self::empty();
             let filter: surrealdb_macros::DbFilter = filter.into();
             let bindings = [&existing_bindings[..], &filter.get_bindings()[..]].concat();
@@ -276,10 +279,6 @@ pub mod student {
         }
     }
     use super::StudentWritesBook;
-    use surrealdb_macros::{
-        db_field::{BindingsList, Parametric},
-        links::Relate,
-    };
     impl Student {
         pub fn writes__(
             &self,
@@ -296,7 +295,7 @@ pub mod student {
         }
     }
     mod writes___schema________________ {
-        use surrealdb_macros::db_field::Parametric;
+        use surrealdb_macros::db_field::Parametric as _;
 
         use super::StudentWritesBook;
         type ______________BookModel =

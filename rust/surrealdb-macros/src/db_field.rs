@@ -450,7 +450,13 @@ pub fn empty() -> DbFilter {
     DbFilter::new(Empty)
 }
 
-struct Empty;
+pub struct Empty;
+
+impl From<Empty> for DbFilter {
+    fn from(value: Empty) -> Self {
+        DbFilter::new(value)
+    }
+}
 
 impl std::fmt::Display for Empty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

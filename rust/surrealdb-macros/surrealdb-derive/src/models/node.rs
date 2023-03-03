@@ -113,7 +113,7 @@ impl ToTokens for FieldsGetterOpts {
             }
 
             pub mod #module_name {
-                use #crate_name::Parametric;
+                use #crate_name::Parametric as _;
 
                 pub struct TableNameStaticChecker {
                     pub #table_name_ident: String,
