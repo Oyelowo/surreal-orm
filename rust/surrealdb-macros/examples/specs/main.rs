@@ -189,12 +189,15 @@ pub mod student {
         pub fn __________connect_to_graph_traversal_string(
             store: &::std::string::String,
             filter: impl Into<surrealdb_macros::DbFilter>,
+            existing_bindings: BindingsList,
         ) -> Self {
             let mut schema_instance = Self::empty();
             let filter: surrealdb_macros::DbFilter = filter.into();
-            schema_instance
-                .___________bindings
-                .extend(filter.get_bindings());
+            let bindings = [&existing_bindings[..], &filter.get_bindings()[..]].concat();
+            let bindings = bindings.as_slice();
+
+            schema_instance.___________bindings = bindings.into();
+
             let connection = format!(
                 "{}{}{}",
                 store,
@@ -240,6 +243,7 @@ pub mod student {
             Student::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 filter,
+                self.get_bindings(),
             )
         }
         pub fn unoBook(&self, filter: impl Into<surrealdb_macros::DbFilter>) -> Book {
@@ -286,6 +290,7 @@ pub mod student {
                 &self.___________graph_traversal_string,
                 filter,
                 "->",
+                self.get_bindings(),
             )
             .into()
         }
@@ -389,7 +394,7 @@ impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
 pub mod writes_schema {
     use surrealdb_macros::{
         db_field::{BindingsList, Parametric},
-        SurrealdbNode,
+        DbField, SurrealdbNode,
     };
     pub struct TableNameStaticChecker {
         pub writes: String,
@@ -431,14 +436,19 @@ pub mod writes_schema {
         }
         pub fn __________connect_to_graph_traversal_string(
             store: &::std::string::String,
-            filter: impl Into<surrealdb_macros::DbFilter>,
+            filterable: impl Into<surrealdb_macros::DbFilter>,
             arrow_direction: &str,
+            existing_bindings: BindingsList,
         ) -> Self {
             let mut schema_instance = Self::empty();
-            let filter: surrealdb_macros::DbFilter = filter.into();
-            schema_instance
-                .___________bindings
-                .extend(filter.get_bindings());
+            let filter: surrealdb_macros::DbFilter = filterable.into();
+            let bindings = [&existing_bindings[..], &filter.get_bindings()[..]].concat();
+            let bindings = bindings.as_slice();
+
+            schema_instance.___________bindings = bindings.into();
+            // schema_instance
+            //     .___________bindings
+            //     .extend(bindings.to_vec());
             let schema_edge_str_with_arrow = format!(
                 "{}{}{}{}{}",
                 store.as_str(),
@@ -462,9 +472,14 @@ pub mod writes_schema {
             schema_instance
                 .out
                 .push_str(format!("{}.{}", ___________graph_traversal_string, "out").as_str());
-            schema_instance.timeWritten.push_str(
-                format!("{}.{}", ___________graph_traversal_string, "timeWritten").as_str(),
-            );
+            // schema_instance.timeWritten.push_str(
+            //     format!("{}.{}", ___________graph_traversal_string, "timeWritten").as_str(),
+            // );
+            schema_instance.timeWritten = DbField::new(format!(
+                "{}.{}",
+                ___________graph_traversal_string, "timeWritten"
+            ))
+            .__update_many_bindings(bindings);
             schema_instance
         }
     }

@@ -71,7 +71,10 @@ impl ToTokens for FieldsGetterOpts {
             schema_instance_edge_arrow_trimmed,
             schema_instance,
             ___________in_marker,
-            ___________out_marker,  
+            ___________out_marker,
+            ___________bindings,
+            ____________update_many_bindings,
+            bindings,  
         } = VariablesModelMacro::new();
         let schema_props_args = SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident, table_name_ident };
 
@@ -140,6 +143,7 @@ impl ToTokens for FieldsGetterOpts {
                     pub struct #struct_name_ident {
                        #( #schema_struct_fields_types_kv) *
                         pub #___________graph_traversal_string: ::std::string::String,
+                        #___________bindings: #crate_name::BindingsList,
                     }
 
                     impl #struct_name_ident {
@@ -147,6 +151,7 @@ impl ToTokens for FieldsGetterOpts {
                             Self {
                                #( #schema_struct_fields_names_kv) *
                                 #___________graph_traversal_string: "".into(),
+                                #___________bindings: vec![],
                             }
                         }
 
@@ -154,6 +159,7 @@ impl ToTokens for FieldsGetterOpts {
                             Self {
                                #( #schema_struct_fields_names_kv_empty) *
                                 #___________graph_traversal_string: "".into(),
+                                #___________bindings: vec![],
                             }
                         }
                         
@@ -161,9 +167,14 @@ impl ToTokens for FieldsGetterOpts {
                             store: &::std::string::String,
                             filter: impl Into<#crate_name::DbFilter>,
                             arrow_direction: &str,
+                            existing_bindings: #crate_name::BindingsList,
                         ) -> Self {
                             let mut schema_instance = Self::empty();
                             let filter: #crate_name::DbFilter = filter.into();
+                            let bindings = [&existing_bindings[..], &filter.get_bindings()[..]].concat();
+                            let bindings = bindings.as_slice();
+                            schema_instance.#___________bindings = bindings.into();
+                            
                             let schema_edge_str_with_arrow = format!(
                                 "{}{}{}{}{}",
                                 store.as_str(),

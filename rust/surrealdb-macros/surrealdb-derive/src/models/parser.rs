@@ -286,7 +286,10 @@ impl SchemaFieldsProperties {
                 let VariablesModelMacro { 
                     __________connect_to_graph_traversal_string, 
                     ___________graph_traversal_string, 
-                    schema_instance, .. 
+                    ____________update_many_bindings,
+                    schema_instance, 
+                    bindings,
+                    .. 
                 } = VariablesModelMacro::new();
                 
                 let referenced_node_meta = match relationship {
@@ -342,9 +345,10 @@ impl SchemaFieldsProperties {
 
                 store.connection_with_field_appended
                     .push(quote!(
-                               #schema_instance.#field_ident_normalised
-                                     .push_str(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str).as_str());));
-  
+                                #schema_instance.#field_ident_normalised =
+                                    #crate_name::DbField::new(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str).as_str())
+                                        .#____________update_many_bindings(#bindings);
+                                ));
 
                 store 
             });
@@ -555,6 +559,7 @@ impl NodeEdgeMetadataStore {
              quote!(
                 #( #imports) *
                 use #crate_name::links::Relate;
+                use #crate_name::{BindingsList, Parametric};
                  
                 impl #origin_struct_ident {
                     pub fn #edge_name_as_method_ident(

@@ -11,6 +11,8 @@ pub(crate) struct VariablesModelMacro {
     pub __________connect_to_graph_traversal_string: syn::Ident,
     pub ___________bindings: syn::Ident,
     pub ___________graph_traversal_string: syn::Ident,
+    pub ____________update_many_bindings: syn::Ident,
+    pub bindings: syn::Ident,
     pub schema_instance: syn::Ident,
     pub ___________model: syn::Ident,
     pub ___________in_marker: syn::Ident,
@@ -28,6 +30,8 @@ impl VariablesModelMacro {
             format_ident!("__________connect_to_graph_traversal_string");
         let ___________graph_traversal_string = format_ident!("___________graph_traversal_string");
         let ___________bindings = format_ident!("___________bindings");
+        let bindings = format_ident!("bindings");
+        let ____________update_many_bindings = format_ident!("____________update_many_bindings");
 
         let ___________model = format_ident!("___________model");
         let schema_instance = format_ident!("schema_instance");
@@ -45,6 +49,8 @@ impl VariablesModelMacro {
             ___________in_marker,
             ___________out_marker,
             ___________bindings,
+            ____________update_many_bindings,
+            bindings,
         }
     }
 
