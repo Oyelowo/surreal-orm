@@ -407,7 +407,7 @@ mod tests {
 
         let is_oyelowo = true;
         if is_oyelowo {
-            query = query.group_by(&[age, bestFriend, &DbField::new("lowo")]);
+            query = query.group_by(&[age, bestFriend, &DbField::new("dayo")]);
         }
 
         // stringify_tokens!("lowo", "knows", 5);
