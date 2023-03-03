@@ -46,6 +46,7 @@ impl ToTokens for FieldsGetterOpts {
         let  VariablesModelMacro { 
             __________connect_to_graph_traversal_string, 
             ___________graph_traversal_string,
+            ___________bindings,
             schema_instance, .. 
         } = VariablesModelMacro::new();
         let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident, table_name_ident};
@@ -125,6 +126,7 @@ impl ToTokens for FieldsGetterOpts {
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
                     pub(crate) #___________graph_traversal_string: ::std::string::String,
+                    #___________bindings: #crate_name::BindingsList,
                 }
 
                 
@@ -139,6 +141,7 @@ impl ToTokens for FieldsGetterOpts {
                         Self {
                            #( #schema_struct_fields_names_kv) *
                             #___________graph_traversal_string: "".into(),
+                            #___________bindings: vec![],
                         }
                     }
 
@@ -146,6 +149,7 @@ impl ToTokens for FieldsGetterOpts {
                         Self {
                            #( #schema_struct_fields_names_kv_empty) *
                             #___________graph_traversal_string: "".into(),
+                            #___________bindings: vec![],
                         }
                     }
                     

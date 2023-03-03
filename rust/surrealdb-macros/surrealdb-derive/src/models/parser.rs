@@ -464,12 +464,13 @@ impl NodeEdgeMetadataStore {
         
         
         let foreign_node_connection_method = || quote!(
-                                pub fn #destination_node_table_name(&self, filter: impl Into<#crate_name::DbFilter>) -> #destination_node_schema_ident {
-                                    let filter: #crate_name::DbFilter = filter.into();
+                                pub fn #destination_node_table_name(&self, filterable: impl Into<#crate_name::DbFilter>) -> #destination_node_schema_ident {
+                                    let filter: #crate_name::DbFilter = filterable.into();
                                     
                                     #destination_node_schema_ident::#__________connect_to_graph_traversal_string(
                                                 &self.#___________graph_traversal_string,
                                                 filter,
+                                                self.get_bindings(),
                                     )
                                 }
                             );
@@ -558,14 +559,15 @@ impl NodeEdgeMetadataStore {
                 impl #origin_struct_ident {
                     pub fn #edge_name_as_method_ident(
                         &self,
-                        filter: impl Into<#crate_name::DbFilter>,
+                        filterable: impl Into<#crate_name::DbFilter>,
                     ) -> #edge_inner_module_name::#edge_name_as_struct_with_direction_ident {
-                        let filter: #crate_name::DbFilter = filter.into();
+                        let filter: #crate_name::DbFilter = filterable.into();
                         
                         #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_to_graph_traversal_string(
                             &self.#___________graph_traversal_string,
                             filter,
                             #arrow,
+                            self.get_bindings()
                         ).into()
                     }
                 }

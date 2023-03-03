@@ -130,7 +130,7 @@ pub mod student {
         pub semCoures: surrealdb_macros::DbField,
         pub writtenBooks: surrealdb_macros::DbField,
         pub(crate) ___________graph_traversal_string: ::std::string::String,
-        pub(crate) ___________bindings: BindingsList,
+        ___________bindings: BindingsList,
     }
 
     impl Parametric for Student {
@@ -401,7 +401,7 @@ pub mod writes_schema {
         pub out: surrealdb_macros::DbField,
         pub timeWritten: surrealdb_macros::DbField,
         pub ___________graph_traversal_string: ::std::string::String,
-        pub(crate) ___________bindings: BindingsList,
+        ___________bindings: BindingsList,
     }
     impl Parametric for Writes {
         fn get_bindings(&self) -> surrealdb_macros::db_field::BindingsList {
@@ -505,7 +505,7 @@ pub mod book {
         pub id: surrealdb_macros::DbField,
         pub title: surrealdb_macros::DbField,
         pub(crate) ___________graph_traversal_string: ::std::string::String,
-        pub(crate) ___________bindings: BindingsList,
+        ___________bindings: BindingsList,
     }
 
     impl Parametric for Book {

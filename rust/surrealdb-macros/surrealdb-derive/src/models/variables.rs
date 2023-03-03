@@ -9,6 +9,7 @@ pub(crate) struct VariablesModelMacro {
     /// For edges, it usually surrounds the SurrealdbEdge with arrows e.g ->writes-> or <-writes<-
     /// Overall, this helps us do the graph traversal
     pub __________connect_to_graph_traversal_string: syn::Ident,
+    pub ___________bindings: syn::Ident,
     pub ___________graph_traversal_string: syn::Ident,
     pub schema_instance: syn::Ident,
     pub ___________model: syn::Ident,
@@ -26,6 +27,8 @@ impl VariablesModelMacro {
         let __________connect_to_graph_traversal_string =
             format_ident!("__________connect_to_graph_traversal_string");
         let ___________graph_traversal_string = format_ident!("___________graph_traversal_string");
+        let ___________bindings = format_ident!("___________bindings");
+
         let ___________model = format_ident!("___________model");
         let schema_instance = format_ident!("schema_instance");
         let ___________in_marker = format_ident!("___________in_marker");
@@ -41,6 +44,7 @@ impl VariablesModelMacro {
             schema_instance_edge_arrow_trimmed,
             ___________in_marker,
             ___________out_marker,
+            ___________bindings,
         }
     }
 
