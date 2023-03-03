@@ -367,6 +367,33 @@ impl<'a> Parametric for Targettables<'a> {
     }
 }
 
+#[derive(Clone)]
+pub enum Splittables {
+    Split(DbField),
+    Splits(Vec<DbField>),
+}
+
+impl From<&DbField> for Splittables {
+    fn from(value: &DbField) -> Self {
+        Self::Split(value.into())
+    }
+}
+
+impl Parametric for Splittables {
+    fn get_bindings(&self) -> BindingsList {
+        match self {
+            Splittables::Split(s) => vec![Binding::new(s)],
+            Splittables::Splits(splits) => {
+                let bindings = splits
+                    .into_iter()
+                    .map(|id| Binding::new(id.to_owned()))
+                    .collect::<Vec<_>>();
+                bindings
+            }
+        }
+    }
+}
+
 /// The query builder struct used to construct complex database queries.
 #[derive(Debug, Clone)]
 pub struct QueryBuilder<'a> {
@@ -549,7 +576,6 @@ impl<'a> QueryBuilder<'a> {
     /// ```
     pub fn where_(&mut self, condition: impl Into<DbFilter> + Parametric + Clone) -> &mut Self {
         self.update_bindings(condition.get_bindings());
-        println!("Mana {:?}", self);
         let condition: DbFilter = condition.into();
         self.where_ = Some(condition.to_string());
         self
@@ -563,58 +589,49 @@ impl<'a> QueryBuilder<'a> {
         self
     }
 
-    /// Adds a field to the `SPLIT BY` clause of the SQL query.
+    /// Adds a field or multiple fields to the `SPLIT BY` clause of the SQL query.
     ///
     /// # Arguments
     ///
-    /// * `field` - The name of the field to add to the `SPLIT BY` clause.
+    /// * `splittables` - The name of the field or array or vector of fields to add to the `SPLIT BY` clause.
     ///
-    /// # Example
+    /// # Example: For single field
     ///
     /// ```
     /// use query_builder::{QueryBuilder, DbField};
     ///
     /// let mut builder = QueryBuilder::select();
-    /// builder.split(DbField::new("country"));
+    /// let country = DbField::new("country");
+    /// builder.split(country);
     ///
     /// assert_eq!(builder.to_string(), "SELECT * SPLIT BY country");
-    /// ```
-    pub fn split<'field, T>(&mut self, field: T) -> &mut Self
-    where
-        T: Into<Cow<'field, DbField>>,
-    {
-        let field: &DbField = &field.into();
-        self.split.push(field.to_string());
-        self
-    }
-
-    /// Adds multiple fields to split the query result into multiple groups.
-    ///
-    /// # Arguments
-    ///
-    /// * `fields` - The names of the fields to split the result by.
-    ///
-    /// # Example
     ///
     /// ```
-    /// use my_db::{QueryBuilder, DbField};
     ///
-    /// let mut query = QueryBuilder::select();
-    /// let fields = vec![DbField::from("age"), DbField::from("gender")];
-    /// query = query.split_many(&fields);
+    /// # Examples: For multiple fields
+    ///
+    /// ```
+    ///
+    /// let age = DbField::new("age");
+    /// let gender = DbField::new("gender");
+    /// query = query.split_many(&[age, gender]);
+    ///
     /// assert_eq!(query.build(), "SELECT *, age, gender FROM table GROUP BY age, gender");
     /// ```
-    pub fn split_many<'field, T>(&mut self, fields: &[T]) -> &mut Self
-    where
-        T: Into<Cow<'field, DbField>> + Clone + Display,
-    {
-        self.split.extend_from_slice(
-            fields
-                .iter()
-                .map(ToString::to_string)
-                .collect::<Vec<_>>()
-                .as_slice(),
-        );
+    pub fn split(&mut self, splittables: impl Into<Splittables>) -> &mut Self {
+        let fields: Splittables = splittables.into();
+        self.update_bindings(fields.get_bindings());
+
+        let fields = match fields {
+            Splittables::Split(one_field) => vec![one_field],
+            Splittables::Splits(many_fields) => many_fields,
+        };
+
+        // self.split
+        //     .extend(fields.iter().map(ToString::to_string).collect::<Vec<_>>());
+        fields.iter().for_each(|f| {
+            self.split.push(f.to_string());
+        });
         self
     }
 

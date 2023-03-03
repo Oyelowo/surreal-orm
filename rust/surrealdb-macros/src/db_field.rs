@@ -273,6 +273,11 @@ impl From<String> for DbField {
         Self::new(value)
     }
 }
+impl From<&DbField> for DbField {
+    fn from(value: &DbField) -> Self {
+        value.to_owned()
+    }
+}
 impl From<&str> for DbField {
     fn from(value: &str) -> Self {
         Self::new(value)
