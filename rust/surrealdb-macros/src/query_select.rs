@@ -368,102 +368,44 @@ impl<'a> Parametric for Targettables<'a> {
 }
 
 #[derive(Clone)]
-pub enum Groupables {
+pub enum Splittables {
     Field(DbField),
     Fields(Vec<DbField>),
 }
 
-impl From<DbField> for Groupables {
-    fn from(value: DbField) -> Self {
-        Self::Field(value.into())
-    }
-}
-
-impl From<&DbField> for Groupables {
-    fn from(value: &DbField) -> Self {
-        Self::Field(value.into())
-    }
-}
-
-impl<'a, const N: usize> From<&[&DbField; N]> for Groupables {
-    fn from(value: &[&DbField; N]) -> Self {
-        Self::Fields(value.map(Into::into).to_vec())
-    }
-}
-
-impl<'a, const N: usize> From<&[DbField; N]> for Groupables {
-    fn from(value: &[DbField; N]) -> Self {
-        Self::Fields(value.to_vec())
-    }
-}
-
-impl From<Vec<DbField>> for Groupables {
-    fn from(value: Vec<DbField>) -> Self {
-        Self::Fields(value)
-    }
-}
-
-impl From<Vec<&DbField>> for Groupables {
-    fn from(value: Vec<&DbField>) -> Self {
-        Self::Fields(value.into_iter().map(Into::into).collect::<Vec<_>>())
-    }
-}
-
-impl Parametric for Groupables {
-    fn get_bindings(&self) -> BindingsList {
-        // match self {
-        // Splittables::Field(field) => vec![Binding::new(s)],
-        // Splittables::Fields(fields) => {
-        //     let bindings = fields
-        //         .into_iter()
-        //         .map(|id| Binding::new(id.to_owned()))
-        //         .collect::<Vec<_>>();
-        //     bindings
-        // }
-        // }
-        vec![]
-    }
-}
-
-#[derive(Clone)]
-pub enum Splittables {
-    Split(DbField),
-    Splits(Vec<DbField>),
-}
-
 impl From<DbField> for Splittables {
     fn from(value: DbField) -> Self {
-        Self::Split(value.into())
+        Self::Field(value.into())
     }
 }
 
 impl From<&DbField> for Splittables {
     fn from(value: &DbField) -> Self {
-        Self::Split(value.into())
+        Self::Field(value.into())
     }
 }
 
 impl<'a, const N: usize> From<&[&DbField; N]> for Splittables {
     fn from(value: &[&DbField; N]) -> Self {
-        Self::Splits(value.map(Into::into).to_vec())
+        Self::Fields(value.map(Into::into).to_vec())
     }
 }
 
 impl<'a, const N: usize> From<&[DbField; N]> for Splittables {
     fn from(value: &[DbField; N]) -> Self {
-        Self::Splits(value.to_vec())
+        Self::Fields(value.to_vec())
     }
 }
 
 impl From<Vec<DbField>> for Splittables {
     fn from(value: Vec<DbField>) -> Self {
-        Self::Splits(value)
+        Self::Fields(value)
     }
 }
 
 impl From<Vec<&DbField>> for Splittables {
     fn from(value: Vec<&DbField>) -> Self {
-        Self::Splits(value.into_iter().map(Into::into).collect::<Vec<_>>())
+        Self::Fields(value.into_iter().map(Into::into).collect::<Vec<_>>())
     }
 }
 
@@ -482,6 +424,8 @@ impl Parametric for Splittables {
         vec![]
     }
 }
+type Groupables = Splittables;
+type Fetchables = Groupables;
 
 /// The query builder struct used to construct complex database queries.
 #[derive(Debug, Clone)]
@@ -712,8 +656,8 @@ impl<'a> QueryBuilder<'a> {
         self.update_bindings(fields.get_bindings());
 
         let fields = match fields {
-            Splittables::Split(one_field) => vec![one_field],
-            Splittables::Splits(many_fields) => many_fields,
+            Splittables::Field(one_field) => vec![one_field],
+            Splittables::Fields(many_fields) => many_fields,
         };
 
         // self.split
@@ -853,96 +797,37 @@ impl<'a> QueryBuilder<'a> {
         self
     }
 
-    /// Adds a field to the list of fields to fetch in the current query.
+    /// Adds a field or many fields to the list of fields to fetch in the current query.
     ///
     /// # Arguments
     ///
-    /// * `field` - A reference to a field to be fetched in the query.
+    /// * `fetchables` - A reference to a field/fields to be fetched in the query.
     ///
     /// # Example
     ///
     /// ```
-    /// use my_cool_library::QueryBuilder;
+    /// use surrealdb_macros::QueryBuilder;
     ///
     /// let query = QueryBuilder::new()
-    ///     .fetch("id")
-    ///     .fetch("name")
-    ///     .from("users")
-    ///     .build();
-    /// ```
-    ///
-    /// # Output
-    ///
-    /// The `fetch` method returns a mutable reference to the QueryBuilder instance it was called on,
-    /// allowing further method chaining.
-    ///
-    /// ```
-    /// use my_cool_library::QueryBuilder;
-    ///
-    /// let query = QueryBuilder::new()
-    ///     .fetch("id")
-    ///     .fetch("name")
-    ///     .from("users")
+    ///     .fetch("friend")
+    ///     .fetch(&["friend", "book"])
+    ///     .from(vec!["fiend", "book"])
     ///     .build();
     ///
-    /// assert_eq!(query, "SELECT id, name FROM users");
+    /// assert_eq!(query, "FETCH friend, book");
     /// ```
-    pub fn fetch<'field, T>(&mut self, field: T) -> &mut Self
-    where
-        T: Into<Cow<'field, DbField>>,
-    {
-        let field: &DbField = &field.into();
-        self.fetch.push(field.to_string());
-        self
-    }
+    pub fn fetch(&mut self, fetchables: impl Into<Fetchables>) -> &mut Self {
+        let fields: Fetchables = fetchables.into();
+        self.update_bindings(fields.get_bindings());
 
-    /// Adds multiple fields to the list of fields to fetch in the current query.
-    ///
-    /// # Arguments
-    ///
-    /// * `fields` - A slice of references to fields to be fetched in the query.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use my_cool_library::QueryBuilder;
-    ///
-    /// let fields = ["id", "name"];
-    ///
-    /// let query = QueryBuilder::new()
-    ///     .fetch_many(&fields)
-    ///     .from("users")
-    ///     .build();
-    /// ```
-    ///
-    /// # Output
-    ///
-    /// The `fetch_many` method returns a mutable reference to the QueryBuilder instance it was called on,
-    /// allowing further method chaining.
-    ///
-    /// ```
-    /// use my_cool_library::QueryBuilder;
-    ///
-    /// let fields = ["id", "name"];
-    ///
-    /// let query = QueryBuilder::new()
-    ///     .fetch_many(&fields)
-    ///     .from("users")
-    ///     .build();
-    ///
-    /// assert_eq!(query, "SELECT id, name FROM users");
-    /// ```
-    pub fn fetch_many<'field, T>(&mut self, fields: &[T]) -> &mut Self
-    where
-        T: Into<Cow<'field, DbField>> + Clone + Display,
-    {
-        self.fetch.extend_from_slice(
-            fields
-                .iter()
-                .map(ToString::to_string)
-                .collect::<Vec<_>>()
-                .as_slice(),
-        );
+        let fields = match fields {
+            Fetchables::Field(one_field) => vec![one_field],
+            Fetchables::Fields(many_fields) => many_fields,
+        };
+
+        fields.iter().for_each(|f| {
+            self.group_by.push(f.to_string());
+        });
         self
     }
 
