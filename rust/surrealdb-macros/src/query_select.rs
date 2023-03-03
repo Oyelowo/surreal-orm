@@ -405,16 +405,17 @@ impl From<Vec<&DbField>> for Splittables {
 
 impl Parametric for Splittables {
     fn get_bindings(&self) -> BindingsList {
-        match self {
-            Splittables::Split(s) => vec![Binding::new(s)],
-            Splittables::Splits(splits) => {
-                let bindings = splits
-                    .into_iter()
-                    .map(|id| Binding::new(id.to_owned()))
-                    .collect::<Vec<_>>();
-                bindings
-            }
-        }
+        // match self {
+        // Splittables::Split(s) => vec![Binding::new(s)],
+        // Splittables::Splits(splits) => {
+        //     let bindings = splits
+        //         .into_iter()
+        //         .map(|id| Binding::new(id.to_owned()))
+        //         .collect::<Vec<_>>();
+        //     bindings
+        // }
+        // }
+        vec![]
     }
 }
 
