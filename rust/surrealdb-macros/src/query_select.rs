@@ -6,6 +6,7 @@
 use std::{
     borrow::{Borrow, Cow},
     fmt::{Display, Formatter, Result as FmtResult},
+    ops::Deref,
 };
 
 use surrealdb::sql::{self, Table, Value};
@@ -427,6 +428,39 @@ impl Parametric for Splittables {
 type Groupables = Splittables;
 type Fetchables = Groupables;
 
+pub struct Duration(sql::Duration);
+
+impl From<self::Duration> for sql::Duration {
+    fn from(value: self::Duration) -> Self {
+        value.0
+    }
+}
+impl From<sql::Duration> for self::Duration {
+    fn from(value: sql::Duration) -> Self {
+        Self(value)
+    }
+}
+
+impl From<&std::time::Duration> for Duration {
+    fn from(value: &std::time::Duration) -> Self {
+        Self(value.to_owned().into())
+    }
+}
+
+impl From<std::time::Duration> for Duration {
+    fn from(value: std::time::Duration) -> Self {
+        Self(value.into())
+    }
+}
+
+impl Deref for Duration {
+    type Target = sql::Duration;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 /// The query builder struct used to construct complex database queries.
 #[derive(Debug, Clone)]
 pub struct QueryBuilder<'a> {
@@ -446,7 +480,7 @@ pub struct QueryBuilder<'a> {
     start: Option<u64>,
     // fetch: Option<Vec<&'a str>>,
     fetch: Vec<String>,
-    timeout: Option<&'a str>,
+    timeout: Option<String>,
     parallel: bool,
     ________params_accumulator: BindingsList,
 }
@@ -858,8 +892,10 @@ impl<'a> QueryBuilder<'a> {
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(&mut self, duration: &'a str) -> &mut Self {
-        self.timeout = Some(duration);
+    pub fn timeout(&mut self, duration: impl Into<self::Duration>) -> &mut Self {
+        let duration: self::Duration = duration.into();
+        let duration = sql::Duration::from(duration);
+        self.timeout = Some(duration.to_string());
         self
     }
 
@@ -949,7 +985,7 @@ impl<'a> Display for QueryBuilder<'a> {
             query.push_str(&self.fetch.join(", "));
         }
 
-        if let Some(timeout_value) = self.timeout {
+        if let Some(timeout_value) = &self.timeout {
             query.push_str(" TIMEOUT ");
             query.push_str(&timeout_value.to_string());
         }

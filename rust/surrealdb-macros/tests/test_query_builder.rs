@@ -150,6 +150,8 @@ impl WhiteSpaceRemoval for String {}
 #[cfg(test)]
 mod tests {
     use super::*;
+    use _core::time::Duration;
+    use surrealdb::sql;
     use surrealdb_macros::db_field::{cond, empty, Binding, Empty, Parametric};
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_select::{order, Order};
@@ -336,7 +338,7 @@ mod tests {
             .order_by(order(lastName).desc())
             .limit(50)
             .start(20)
-            .timeout("15")
+            .timeout(Duration::from_secs(9))
             .parallel();
 
         let is_lowo = true;
@@ -400,7 +402,7 @@ mod tests {
             .split(firstName)
             .split(&[firstName, semCoures])
             .split(vec![firstName, semCoures])
-            .timeout("10s")
+            .timeout(Duration::from_secs(8))
             .parallel();
 
         let is_oyelowo = true;
