@@ -296,6 +296,7 @@ pub mod student {
     }
     mod writes___schema________________ {
         use surrealdb_macros::db_field::Parametric as _;
+        use surrealdb_macros::db_field::Parametric as _;
 
         use super::StudentWritesBook;
         type ______________BookModel =

@@ -345,10 +345,8 @@ mod tests {
             query1.group_by(age);
         }
 
-        println!("VVVVV ");
-        println!("MMMMMM {query1}");
-        println!("FFFFFF {query1}");
         insta::assert_debug_snapshot!(query1.to_string());
+        insta::assert_debug_snapshot!(query1.get_bindings());
 
         let mut queryb = query_select::QueryBuilder::new();
         let ref mut query = queryb
@@ -404,12 +402,11 @@ mod tests {
             .timeout("10s")
             .parallel();
 
-        println!("ZZZZZZXXXXXXXX {query}");
-        // let is_oyelowo = true;
-        // if is_oyelowo {
-        //     query.group_by_many(&[age, bestFriend, &DbField::new("lowo")]);
-        // }
-        //
+        let is_oyelowo = true;
+        if is_oyelowo {
+            query.group_by_many(&[age, bestFriend, &DbField::new("lowo")]);
+        }
+
         // stringify_tokens!("lowo", "knows", 5);
 
         // stringify_tokens2!("lowo", 5);
@@ -422,6 +419,7 @@ mod tests {
         // let result = sql!(SELECT name WHERE age > 5);
 
         insta::assert_debug_snapshot!(query.to_string());
+        insta::assert_debug_snapshot!(query.get_bindings());
 
         // assert_eq!(
         //     query.to_string().remove_extra_whitespace(),
