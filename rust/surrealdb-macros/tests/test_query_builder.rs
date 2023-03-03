@@ -398,7 +398,8 @@ mod tests {
             .fetch_many(&[age, unoBook])
             .split(lastName)
             .split(firstName)
-            .split_many(&[firstName, semCoures])
+            .split(&[firstName, semCoures])
+            .split(vec![firstName, semCoures])
             .timeout("10s")
             .parallel();
 

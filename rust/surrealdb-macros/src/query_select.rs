@@ -325,13 +325,13 @@ impl<'a> From<Table> for Targettables<'a> {
     }
 }
 
-impl<'a, 'b> From<&mut QueryBuilder<'a>> for Targettables<'a> {
+impl<'a> From<&mut QueryBuilder<'a>> for Targettables<'a> {
     fn from(value: &mut QueryBuilder<'a>) -> Self {
         Self::SubQuery(value.to_owned())
     }
 }
 
-impl<'a, 'b> From<QueryBuilder<'a>> for Targettables<'a> {
+impl<'a> From<QueryBuilder<'a>> for Targettables<'a> {
     fn from(value: QueryBuilder<'a>) -> Self {
         Self::SubQuery(value.to_owned())
     }
@@ -376,6 +376,30 @@ pub enum Splittables {
 impl From<&DbField> for Splittables {
     fn from(value: &DbField) -> Self {
         Self::Split(value.into())
+    }
+}
+
+impl<'a, const N: usize> From<&[&DbField; N]> for Splittables {
+    fn from(value: &[&DbField; N]) -> Self {
+        Self::Splits(value.map(Into::into).to_vec())
+    }
+}
+
+impl<'a, const N: usize> From<&[DbField; N]> for Splittables {
+    fn from(value: &[DbField; N]) -> Self {
+        Self::Splits(value.to_vec())
+    }
+}
+
+impl From<Vec<DbField>> for Splittables {
+    fn from(value: Vec<DbField>) -> Self {
+        Self::Splits(value)
+    }
+}
+
+impl From<Vec<&DbField>> for Splittables {
+    fn from(value: Vec<&DbField>) -> Self {
+        Self::Splits(value.into_iter().map(Into::into).collect::<Vec<_>>())
     }
 }
 
