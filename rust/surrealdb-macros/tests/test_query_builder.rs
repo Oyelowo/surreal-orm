@@ -311,7 +311,6 @@ mod tests {
         let book::Book { content, .. } = Book::schema();
 
         content
-            // .contains_any("Dyayo")
             .contains_any(vec!["Dyayo", "fdfd"])
             .contains_any(&["Dyayo", "fdfd"])
             .contains_all(vec!["Dyayo", "fdfd"])
@@ -363,7 +362,6 @@ mod tests {
             .from(&[SurrealId::try_from("book:1").unwrap()])
             .from(vec![SurrealId::try_from("book:1").unwrap()])
             .from(query1)
-            // .from(3)
             .where_(
                 cond(
                     age.greater_than(age)
