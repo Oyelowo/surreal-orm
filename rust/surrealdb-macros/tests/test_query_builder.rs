@@ -388,8 +388,8 @@ mod tests {
             .order_by(&[order(id).numeric().desc(), order(firstName).desc()])
             .group_by(course)
             .group_by(firstName)
-            .group_by(&"lastName".into())
-            .group_by_many(&[lastName, unoBook, &DbField::new("lowo")])
+            .group_by(&[lastName, unoBook, &DbField::new("lowo")])
+            .group_by(vec![lastName, unoBook, &DbField::new("lowo")])
             .start(5)
             .limit(400)
             .fetch(firstName)
@@ -405,7 +405,7 @@ mod tests {
 
         let is_oyelowo = true;
         if is_oyelowo {
-            query.group_by_many(&[age, bestFriend, &DbField::new("lowo")]);
+            query.group_by(&[age, bestFriend, &DbField::new("lowo")]);
         }
 
         // stringify_tokens!("lowo", "knows", 5);

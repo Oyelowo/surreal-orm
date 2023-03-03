@@ -368,9 +368,73 @@ impl<'a> Parametric for Targettables<'a> {
 }
 
 #[derive(Clone)]
+pub enum Groupables {
+    Field(DbField),
+    Fields(Vec<DbField>),
+}
+
+impl From<DbField> for Groupables {
+    fn from(value: DbField) -> Self {
+        Self::Field(value.into())
+    }
+}
+
+impl From<&DbField> for Groupables {
+    fn from(value: &DbField) -> Self {
+        Self::Field(value.into())
+    }
+}
+
+impl<'a, const N: usize> From<&[&DbField; N]> for Groupables {
+    fn from(value: &[&DbField; N]) -> Self {
+        Self::Fields(value.map(Into::into).to_vec())
+    }
+}
+
+impl<'a, const N: usize> From<&[DbField; N]> for Groupables {
+    fn from(value: &[DbField; N]) -> Self {
+        Self::Fields(value.to_vec())
+    }
+}
+
+impl From<Vec<DbField>> for Groupables {
+    fn from(value: Vec<DbField>) -> Self {
+        Self::Fields(value)
+    }
+}
+
+impl From<Vec<&DbField>> for Groupables {
+    fn from(value: Vec<&DbField>) -> Self {
+        Self::Fields(value.into_iter().map(Into::into).collect::<Vec<_>>())
+    }
+}
+
+impl Parametric for Groupables {
+    fn get_bindings(&self) -> BindingsList {
+        // match self {
+        // Splittables::Field(field) => vec![Binding::new(s)],
+        // Splittables::Fields(fields) => {
+        //     let bindings = fields
+        //         .into_iter()
+        //         .map(|id| Binding::new(id.to_owned()))
+        //         .collect::<Vec<_>>();
+        //     bindings
+        // }
+        // }
+        vec![]
+    }
+}
+
+#[derive(Clone)]
 pub enum Splittables {
     Split(DbField),
     Splits(Vec<DbField>),
+}
+
+impl From<DbField> for Splittables {
+    fn from(value: DbField) -> Self {
+        Self::Split(value.into())
+    }
 }
 
 impl From<&DbField> for Splittables {
@@ -641,7 +705,7 @@ impl<'a> QueryBuilder<'a> {
     /// let gender = DbField::new("gender");
     /// query = query.split_many(&[age, gender]);
     ///
-    /// assert_eq!(query.build(), "SELECT *, age, gender FROM table GROUP BY age, gender");
+    /// assert_eq!(query.build(), "SELECT *, age, gender FROM table SPLIT age, gender");
     /// ```
     pub fn split(&mut self, splittables: impl Into<Splittables>) -> &mut Self {
         let fields: Splittables = splittables.into();
@@ -664,7 +728,7 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// # Arguments
     ///
-    /// * `field` - The name of the field to group by.
+    /// * `field(s)` - The name or names of the field to group by.
     ///
     /// # Example
     ///
@@ -673,39 +737,32 @@ impl<'a> QueryBuilder<'a> {
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.group_by(DbField::new("age"));
     /// ```
-    pub fn group_by<'field, T>(&mut self, field: T) -> &mut Self
-    where
-        T: Into<Cow<'field, DbField>>,
-    {
-        let field: &DbField = &field.into();
-        self.group_by.push(field.to_string());
-        self
-    }
-
-    /// Sets multiple fields to GROUP BY in the query.
     ///
-    /// # Arguments
     ///
-    /// * `fields` - A slice of field names to group by.
+    /// # Examples: For multiple fields
     ///
-    /// # Example
-    ///
-    /// ```rust
-    /// # use query_builder::{QueryBuilder, DbField};
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.group_by_many(&[DbField::new("age"), DbField::new("name")]);
     /// ```
-    pub fn group_by_many<'field, T>(&mut self, fields: &[T]) -> &mut Self
-    where
-        T: Into<Cow<'field, DbField>> + Clone + Display,
-    {
-        self.group_by.extend_from_slice(
-            fields
-                .iter()
-                .map(ToString::to_string)
-                .collect::<Vec<_>>()
-                .as_slice(),
-        );
+    ///
+    /// let age = DbField::new("age");
+    /// let gender = DbField::new("gender");
+    /// query = query.split_many(&[age, gender]);
+    ///
+    /// assert_eq!(query.build(), "SELECT *, age, gender FROM table GROUP BY age, gender");
+    /// ```
+    pub fn group_by(&mut self, groupables: impl Into<Groupables>) -> &mut Self {
+        let fields: Groupables = groupables.into();
+        self.update_bindings(fields.get_bindings());
+
+        let fields = match fields {
+            Groupables::Field(one_field) => vec![one_field],
+            Groupables::Fields(many_fields) => many_fields,
+        };
+
+        // self.split
+        //     .extend(fields.iter().map(ToString::to_string).collect::<Vec<_>>());
+        fields.iter().for_each(|f| {
+            self.split.push(f.to_string());
+        });
         self
     }
 
