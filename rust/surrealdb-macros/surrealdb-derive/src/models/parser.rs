@@ -558,8 +558,6 @@ impl NodeEdgeMetadataStore {
             
              quote!(
                 #( #imports) *
-                use #crate_name::links::Relate;
-                use #crate_name::{BindingsList, Parametric};
                  
                 impl #origin_struct_ident {
                     pub fn #edge_name_as_method_ident(
@@ -579,6 +577,7 @@ impl NodeEdgeMetadataStore {
                 
                 mod #edge_inner_module_name {
                     #( #imports) *
+                    use #crate_name::Parametric;
                     
                     #( #destination_node_schema) *
                     

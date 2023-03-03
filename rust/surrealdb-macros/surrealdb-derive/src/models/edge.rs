@@ -147,6 +147,12 @@ impl ToTokens for FieldsGetterOpts {
                         #___________bindings: #crate_name::BindingsList,
                     }
 
+                    impl #crate_name::Parametric for #struct_name_ident {
+                        fn get_bindings(&self) -> #crate_name::BindingsList {
+                            self.#___________bindings.to_vec()
+                        }
+                    }
+                    
                     impl #struct_name_ident {
                         pub fn new() -> Self {
                             Self {

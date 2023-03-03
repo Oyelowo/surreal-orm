@@ -114,7 +114,6 @@ impl ToTokens for FieldsGetterOpts {
 
             pub mod #module_name {
                 use #crate_name::Parametric;
-                use ::serde::Serialize;
 
                 pub struct TableNameStaticChecker {
                     pub #table_name_ident: String,
@@ -130,6 +129,11 @@ impl ToTokens for FieldsGetterOpts {
                     #___________bindings: #crate_name::BindingsList,
                 }
 
+                impl #crate_name::Parametric for #struct_name_ident {
+                    fn get_bindings(&self) -> #crate_name::BindingsList {
+                        self.#___________bindings.to_vec()
+                    }
+                }
                 
                 impl ::std::fmt::Display for #struct_name_ident {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
