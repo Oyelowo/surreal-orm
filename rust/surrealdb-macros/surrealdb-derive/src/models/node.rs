@@ -113,6 +113,7 @@ impl ToTokens for FieldsGetterOpts {
             }
 
             pub mod #module_name {
+                use #crate_name::Parametric;
                 use ::serde::Serialize;
 
                 pub struct TableNameStaticChecker {
@@ -166,7 +167,7 @@ impl ToTokens for FieldsGetterOpts {
                         #schema_instance
                     }
 
-                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, filterable: impl Into<#crate_name::DbFilter>, existings_bindings: #crate_name::BindingsList) -> Self {
+                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, filterable: impl Into<#crate_name::DbFilter>, existing_bindings: #crate_name::BindingsList) -> Self {
                         let mut #schema_instance = Self::empty(); 
                         let filter: #crate_name::DbFilter = filterable.into();
                         let bindings = [&existing_bindings[..], &filter.get_bindings()[..]].concat();

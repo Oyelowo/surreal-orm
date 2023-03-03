@@ -131,6 +131,7 @@ impl ToTokens for FieldsGetterOpts {
                 
                 pub mod #module_name {
                     use #crate_name::SurrealdbNode;
+                    use #crate_name::Parametric;
                     
                     pub struct TableNameStaticChecker {
                         pub #table_name_ident: String,
