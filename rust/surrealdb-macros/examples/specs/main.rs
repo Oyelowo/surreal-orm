@@ -463,23 +463,32 @@ pub mod writes_schema {
             let ___________graph_traversal_string = &schema_instance
                 .___________graph_traversal_string
                 .replace(arrow_direction, "");
-            schema_instance
-                .id
-                .push_str(format!("{}.{}", ___________graph_traversal_string, "id").as_str());
-            schema_instance
-                .in_
-                .push_str(format!("{}.{}", ___________graph_traversal_string, "in").as_str());
-            schema_instance
-                .out
-                .push_str(format!("{}.{}", ___________graph_traversal_string, "out").as_str());
+            // schema_instance
+            //     .id
+            //     .push_str(format!("{}.{}", ___________graph_traversal_string, "id").as_str());
+            // schema_instance
+            //     .in_
+            //     .push_str(format!("{}.{}", ___________graph_traversal_string, "in").as_str());
+            // schema_instance
+            //     .out
+            //     .push_str(format!("{}.{}", ___________graph_traversal_string, "out").as_str());
             // schema_instance.timeWritten.push_str(
             //     format!("{}.{}", ___________graph_traversal_string, "timeWritten").as_str(),
             // );
+            schema_instance.timeWritten =
+                DbField::new(format!("{}.{}", ___________graph_traversal_string, "id"))
+                    .____________update_many_bindings(bindings);
+            schema_instance.timeWritten =
+                DbField::new(format!("{}.{}", ___________graph_traversal_string, "in"))
+                    .____________update_many_bindings(bindings);
+            schema_instance.timeWritten =
+                DbField::new(format!("{}.{}", ___________graph_traversal_string, "out"))
+                    .____________update_many_bindings(bindings);
             schema_instance.timeWritten = DbField::new(format!(
                 "{}.{}",
                 ___________graph_traversal_string, "timeWritten"
             ))
-            .__update_many_bindings(bindings);
+            .____________update_many_bindings(bindings);
             schema_instance
         }
     }
@@ -602,7 +611,7 @@ pub mod book {
             // schema_instance.title = schema_instance.title.__update_many_bindings(bindings);
             schema_instance.title =
                 DbField::new(format!("{}.{}", ___________graph_traversal_string, "title"))
-                    .__update_many_bindings(bindings);
+                    .____________update_many_bindings(bindings);
             // schema_instance.title
             schema_instance
         }
