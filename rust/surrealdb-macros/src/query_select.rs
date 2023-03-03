@@ -761,7 +761,7 @@ impl<'a> QueryBuilder<'a> {
         // self.split
         //     .extend(fields.iter().map(ToString::to_string).collect::<Vec<_>>());
         fields.iter().for_each(|f| {
-            self.split.push(f.to_string());
+            self.group_by.push(f.to_string());
         });
         self
     }
@@ -790,7 +790,7 @@ impl<'a> QueryBuilder<'a> {
         self.update_bindings(orderables.get_bindings());
 
         let orders: Vec<Order> = orderables.into();
-        self.order_by.extend_from_slice(orders.to_vec().as_slice());
+        self.order_by.extend(orders);
         self
     }
 
