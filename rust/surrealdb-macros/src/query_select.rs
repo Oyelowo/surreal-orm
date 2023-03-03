@@ -36,20 +36,20 @@ pub fn order(field: &DbField) -> Order {
 }
 
 /// Represents an ordering field, direction, and options for a database query.
-#[derive(Debug, Clone, Copy)]
-pub struct Order<'a> {
-    field: &'a DbField,
+#[derive(Debug, Clone)]
+pub struct Order {
+    field: DbField,
     direction: Option<OrderDirection>,
     option: Option<OrderOption>,
 }
 
-impl<'a> Parametric for Order<'a> {
+impl Parametric for Order {
     fn get_bindings(&self) -> BindingsList {
         self.field.get_bindings()
     }
 }
 
-impl<'a> Parametric for &[Order<'a>] {
+impl Parametric for &[Order] {
     fn get_bindings(&self) -> BindingsList {
         self.into_iter()
             .flat_map(|o| o.get_bindings())
@@ -57,7 +57,7 @@ impl<'a> Parametric for &[Order<'a>] {
     }
 }
 
-impl<'a> Parametric for Vec<Order<'a>> {
+impl Parametric for Vec<Order> {
     fn get_bindings(&self) -> BindingsList {
         self.into_iter()
             .flat_map(|o| o.get_bindings())
@@ -65,7 +65,7 @@ impl<'a> Parametric for Vec<Order<'a>> {
     }
 }
 
-impl<'a> Parametric for Orderables<'a> {
+impl Parametric for Orderables {
     fn get_bindings(&self) -> BindingsList {
         match self {
             Orderables::Order(o) => o.get_bindings(),
@@ -74,31 +74,31 @@ impl<'a> Parametric for Orderables<'a> {
     }
 }
 
-pub enum Orderables<'a> {
-    Order(Order<'a>),
-    OrdersList(Vec<Order<'a>>),
+pub enum Orderables {
+    Order(Order),
+    OrdersList(Vec<Order>),
 }
 
-impl<'a> From<Order<'a>> for Orderables<'a> {
-    fn from(value: Order<'a>) -> Self {
+impl From<Order> for Orderables {
+    fn from(value: Order) -> Self {
         Self::Order(value)
     }
 }
 
-impl<'a> From<Vec<Order<'a>>> for Orderables<'a> {
-    fn from(value: Vec<Order<'a>>) -> Self {
+impl From<Vec<Order>> for Orderables {
+    fn from(value: Vec<Order>) -> Self {
         Self::OrdersList(value)
     }
 }
 
-impl<'a, const N: usize> From<&[Order<'a>; N]> for Orderables<'a> {
-    fn from(value: &[Order<'a>; N]) -> Self {
+impl<const N: usize> From<&[Order; N]> for Orderables {
+    fn from(value: &[Order; N]) -> Self {
         Self::OrdersList(value.to_vec())
     }
 }
 
-impl<'a> From<Orderables<'a>> for Vec<Order<'a>> {
-    fn from(value: Orderables<'a>) -> Self {
+impl From<Orderables> for Vec<Order> {
+    fn from(value: Orderables) -> Self {
         match value {
             Orderables::Order(o) => vec![o.into()],
             Orderables::OrdersList(ol) => ol,
@@ -106,7 +106,7 @@ impl<'a> From<Orderables<'a>> for Vec<Order<'a>> {
     }
 }
 
-impl<'a> Order<'a> {
+impl Order {
     /// Creates a new `Order` instance with the specified database field.
     ///
     /// # Arguments
@@ -121,9 +121,9 @@ impl<'a> Order<'a> {
     /// let id_field = DbField::new("id");
     /// let order = Order::new(&id_field);
     /// ```
-    pub fn new(field: &'a DbField) -> Self {
+    pub fn new(field: &DbField) -> Self {
         Order {
-            field,
+            field: field.clone(),
             direction: None,
             option: None,
         }
@@ -212,7 +212,7 @@ impl<'a> Order<'a> {
     }
 }
 
-impl<'a> Display for &Order<'a> {
+impl Display for &Order {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!(
             "{} {} {}",
@@ -255,16 +255,16 @@ impl Display for OrderOption {
 }
 
 #[derive(Debug, Clone)]
-pub enum Targettables<'a> {
+pub enum Targettables {
     Table(Table),
     Tables(Vec<sql::Table>),
     SurrealId(SurrealId),
     SurrealIds(Vec<SurrealId>),
     // Should already be bound
-    SubQuery(QueryBuilder<'a>),
+    SubQuery(QueryBuilder),
 }
 
-impl<'a> From<Vec<sql::Table>> for Targettables<'a> {
+impl From<Vec<sql::Table>> for Targettables {
     fn from(value: Vec<sql::Table>) -> Self {
         Self::Tables(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
@@ -275,31 +275,31 @@ impl<'a> From<Vec<sql::Table>> for Targettables<'a> {
 //     }
 // }
 
-impl<'a> From<Vec<sql::Thing>> for Targettables<'a> {
+impl From<Vec<sql::Thing>> for Targettables {
     fn from(value: Vec<sql::Thing>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
 }
 
-impl<'a> From<sql::Thing> for Targettables<'a> {
+impl From<sql::Thing> for Targettables {
     fn from(value: sql::Thing) -> Self {
         Self::SurrealId(value.into())
     }
 }
 
-impl<'a, const N: usize> From<&[sql::Table; N]> for Targettables<'a> {
+impl<const N: usize> From<&[sql::Table; N]> for Targettables {
     fn from(value: &[sql::Table; N]) -> Self {
         Self::Tables(value.to_vec())
     }
 }
 
-impl<'a, const N: usize> From<&[SurrealId; N]> for Targettables<'a> {
+impl<const N: usize> From<&[SurrealId; N]> for Targettables {
     fn from(value: &[SurrealId; N]) -> Self {
         Self::SurrealIds(value.to_vec())
     }
 }
 
-impl<'a, const N: usize> From<&[sql::Thing; N]> for Targettables<'a> {
+impl<const N: usize> From<&[sql::Thing; N]> for Targettables {
     fn from(value: &[sql::Thing; N]) -> Self {
         Self::SurrealIds(
             value
@@ -310,37 +310,37 @@ impl<'a, const N: usize> From<&[sql::Thing; N]> for Targettables<'a> {
     }
 }
 
-impl<'a> From<Vec<SurrealId>> for Targettables<'a> {
+impl From<Vec<SurrealId>> for Targettables {
     fn from(value: Vec<SurrealId>) -> Self {
         Self::SurrealIds(value)
     }
 }
 
-impl<'a> From<SurrealId> for Targettables<'a> {
+impl From<SurrealId> for Targettables {
     fn from(value: SurrealId) -> Self {
         Self::SurrealId(value)
     }
 }
 
-impl<'a> From<Table> for Targettables<'a> {
+impl From<Table> for Targettables {
     fn from(value: Table) -> Self {
         Self::Table(value)
     }
 }
 
-impl<'a> From<&mut QueryBuilder<'a>> for Targettables<'a> {
-    fn from(value: &mut QueryBuilder<'a>) -> Self {
+impl From<&mut QueryBuilder> for Targettables {
+    fn from(value: &mut QueryBuilder) -> Self {
         Self::SubQuery(value.to_owned())
     }
 }
 
-impl<'a> From<QueryBuilder<'a>> for Targettables<'a> {
-    fn from(value: QueryBuilder<'a>) -> Self {
+impl From<QueryBuilder> for Targettables {
+    fn from(value: QueryBuilder) -> Self {
         Self::SubQuery(value.to_owned())
     }
 }
 
-impl<'a> Parametric for Targettables<'a> {
+impl Parametric for Targettables {
     fn get_bindings(&self) -> BindingsList {
         match self {
             Targettables::Table(table) => {
@@ -471,11 +471,35 @@ pub enum Selectables {
     Fields(Vec<DbField>),
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct All;
+
+impl AsRef<Selectables> for All {
+    fn as_ref(&self) -> &Selectables {
+        todo!()
+    }
+}
+impl AsRef<All> for All {
+    fn as_ref(&self) -> &All {
+        todo!()
+    }
+}
+
+impl AsRef<Selectables> for Selectables {
+    fn as_ref(&self) -> &Selectables {
+        todo!()
+    }
+}
+
+impl From<&All> for Selectables {
+    fn from(_value: &All) -> Self {
+        Self::All
+    }
+}
 
 impl From<All> for Selectables {
     fn from(_value: All) -> Self {
-        Selectables::All
+        Self::All
     }
 }
 
@@ -523,7 +547,7 @@ impl Parametric for Selectables {
 
 /// The query builder struct used to construct complex database queries.
 #[derive(Debug, Clone)]
-pub struct QueryBuilder<'a> {
+pub struct QueryBuilder {
     // projections: Vec<&'a str>,
     projections: Vec<String>,
     /// The list of target tables for the query.
@@ -535,7 +559,7 @@ pub struct QueryBuilder<'a> {
     split: Vec<String>,
     // group_by: Option<Vec<&'a str>>,
     group_by: Vec<String>,
-    order_by: Vec<Order<'a>>,
+    order_by: Vec<Order>,
     limit: Option<u64>,
     start: Option<u64>,
     // fetch: Option<Vec<&'a str>>,
@@ -545,13 +569,45 @@ pub struct QueryBuilder<'a> {
     ________params_accumulator: BindingsList,
 }
 
-impl<'a> Parametric for QueryBuilder<'a> {
+impl Parametric for QueryBuilder {
     fn get_bindings(&self) -> BindingsList {
         self.________params_accumulator.to_vec()
     }
 }
 
-impl<'a> QueryBuilder<'a> {
+impl From<Selectables> for QueryBuilder {
+    fn from(value: Selectables) -> Self {
+        todo!()
+    }
+}
+// fn select(selectables: impl Into<Selectables>) -> QueryBuilder<'static> {
+//     &mut QueryBuilder::new().select(selectables)
+// }
+// return Box::new(x);
+pub fn select(selectables: impl Into<Selectables>) -> QueryBuilder {
+    let mut builder = QueryBuilder::new();
+    let selectables: Selectables = selectables.into();
+    builder.select(selectables);
+    builder
+    // let selectables: Selectables = selectables.into();
+    // selectables.into()
+}
+pub fn query() -> QueryBuilder {
+    let mut builder = QueryBuilder::new();
+
+    // let xx = Box::new(selectables);
+    // builder.select(xx.into());
+    builder
+}
+
+// impl<'a> Queerrr<'a> {
+//     fn select(&mut self, selectables: impl Into<Selectables>) -> QueryBuilder<'a> {
+//         self.select = QueryBuilder::new().select(selectables);
+//         mut self.select
+//     }
+// }
+
+impl QueryBuilder {
     /// Create a new instance of QueryBuilder.
     ///
     /// # Example
@@ -561,8 +617,8 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// let query_builder = QueryBuilder::new();
     /// ```
-    pub fn new() -> QueryBuilder<'a> {
-        QueryBuilder {
+    pub fn new() -> Self {
+        Self {
             projections: vec![],
             targets: vec![],
             where_: None,
@@ -624,7 +680,7 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * FROM users");
     /// ```
-    pub fn from(&'a mut self, targettables: impl Into<Targettables<'a>>) -> &'a mut Self {
+    pub fn from(mut self, targettables: impl Into<Targettables>) -> Self {
         let targets: Targettables = targettables.into();
         let targets_bindings = targets.get_bindings();
 
@@ -664,7 +720,7 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * WHERE age > 18");
     /// ```
-    pub fn where_(&mut self, condition: impl Into<DbFilter> + Parametric + Clone) -> &mut Self {
+    pub fn where_(mut self, condition: impl Into<DbFilter> + Parametric + Clone) -> Self {
         self.update_bindings(condition.get_bindings());
         let condition: DbFilter = condition.into();
         self.where_ = Some(condition.to_string());
@@ -708,7 +764,7 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(query.build(), "SELECT *, age, gender FROM table SPLIT age, gender");
     /// ```
-    pub fn split(&mut self, splittables: impl Into<Splittables>) -> &mut Self {
+    pub fn split(mut self, splittables: impl Into<Splittables>) -> Self {
         let fields: Splittables = splittables.into();
         self.update_bindings(fields.get_bindings());
 
@@ -750,7 +806,7 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(query.build(), "SELECT *, age, gender FROM table GROUP BY age, gender");
     /// ```
-    pub fn group_by(&mut self, groupables: impl Into<Groupables>) -> &mut Self {
+    pub fn group_by(mut self, groupables: impl Into<Groupables>) -> Self {
         let fields: Groupables = groupables.into();
         self.update_bindings(fields.get_bindings());
 
@@ -786,7 +842,7 @@ impl<'a> QueryBuilder<'a> {
     ///     Order::new(DbField::new("name"), Direction::Descending),
     /// ]);
     /// ```
-    pub fn order_by(&mut self, orderables: impl Into<Orderables<'a>>) -> &mut Self {
+    pub fn order_by(mut self, orderables: impl Into<Orderables>) -> Self {
         let orderables: Orderables = orderables.into();
         self.update_bindings(orderables.get_bindings());
 
@@ -808,7 +864,7 @@ impl<'a> QueryBuilder<'a> {
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.limit(10);
     /// ```
-    pub fn limit(&mut self, limit: u64) -> &mut Self {
+    pub fn limit(mut self, limit: u64) -> Self {
         self.limit = Some(limit);
         self
     }
@@ -849,7 +905,7 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(query, "SELECT id, name FROM users OFFSET 50");
     /// ```
-    pub fn start(&mut self, start: u64) -> &mut Self {
+    pub fn start(mut self, start: u64) -> Self {
         self.start = Some(start);
         self
     }
@@ -873,7 +929,7 @@ impl<'a> QueryBuilder<'a> {
     ///
     /// assert_eq!(query, "FETCH friend, book");
     /// ```
-    pub fn fetch(&mut self, fetchables: impl Into<Fetchables>) -> &mut Self {
+    pub fn fetch(mut self, fetchables: impl Into<Fetchables>) -> Self {
         let fields: Fetchables = fetchables.into();
         self.update_bindings(fields.get_bindings());
 
@@ -915,7 +971,7 @@ impl<'a> QueryBuilder<'a> {
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(&mut self, duration: impl Into<self::Duration>) -> &mut Self {
+    pub fn timeout(mut self, duration: impl Into<self::Duration>) -> Self {
         let duration: self::Duration = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
@@ -932,7 +988,7 @@ impl<'a> QueryBuilder<'a> {
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.parallel();
     /// ```
-    pub fn parallel(&mut self) -> &mut Self {
+    pub fn parallel(mut self) -> Self {
         self.parallel = true;
         self
     }
@@ -957,7 +1013,7 @@ impl<'a> QueryBuilder<'a> {
     [ TIMEOUT @duration ]
     [ PARALLEL ]
 ; */
-impl<'a> Display for QueryBuilder<'a> {
+impl Display for QueryBuilder {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let mut query = String::new();
 

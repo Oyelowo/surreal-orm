@@ -228,7 +228,7 @@ impl Into<DbFilter> for &DbField {
     }
 }
 
-impl<'a> Into<DbFilter> for QueryBuilder<'a> {
+impl Into<DbFilter> for QueryBuilder {
     fn into(self) -> DbFilter {
         let query_b: QueryBuilder = self;
         DbFilter::new(query_b)

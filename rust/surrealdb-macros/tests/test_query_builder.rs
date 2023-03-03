@@ -154,7 +154,7 @@ mod tests {
     use surrealdb::sql;
     use surrealdb_macros::db_field::{cond, empty, Binding, Empty, Parametric};
     // use surrealdb_macros::prelude::*;
-    use surrealdb_macros::query_select::{order, All, Order};
+    use surrealdb_macros::query_select::{order, query, select, All, Order};
     use surrealdb_macros::value_type_wrappers::SurrealId;
     use surrealdb_macros::{cond, query_select, DbFilter};
     use surrealdb_macros::{q, DbField};
@@ -349,9 +349,11 @@ mod tests {
         insta::assert_debug_snapshot!(query1.to_string());
         insta::assert_debug_snapshot!(query1.get_bindings());
 
-        let mut queryb = query_select::QueryBuilder::new();
-        let ref mut query = queryb
-            .select(All)
+        let mmm = select(All);
+
+        println!("{mmm}");
+
+        let query = select(All)
             .select(age)
             .select(firstName)
             .select(&[firstName, unoBook])
