@@ -154,7 +154,7 @@ mod tests {
     use surrealdb::sql;
     use surrealdb_macros::db_field::{cond, empty, Binding, Empty, Parametric};
     // use surrealdb_macros::prelude::*;
-    use surrealdb_macros::query_select::{order, Order};
+    use surrealdb_macros::query_select::{order, All, Order};
     use surrealdb_macros::value_type_wrappers::SurrealId;
     use surrealdb_macros::{cond, query_select, DbFilter};
     use surrealdb_macros::{q, DbField};
@@ -326,7 +326,7 @@ mod tests {
             .and(lastName.equal("Oyedayo"));
 
         let query1 = queryb
-            .select_all()
+            .select(All)
             .from(Book::get_table_name())
             .where_(
                 cond(content.like("lowo").and(age).greater_than_or_equal(600))
@@ -351,10 +351,11 @@ mod tests {
 
         let mut queryb = query_select::QueryBuilder::new();
         let ref mut query = queryb
-            .select_all()
+            .select(All)
             .select(age)
             .select(firstName)
-            .select_many(&[firstName, unoBook])
+            .select(&[firstName, unoBook])
+            .select(vec![firstName, unoBook])
             .from(Student::get_table_name())
             .from(&[Student::get_table_name(), Book::get_table_name()])
             .from(vec![Student::get_table_name(), Book::get_table_name()])
