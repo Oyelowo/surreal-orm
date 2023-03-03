@@ -18,6 +18,7 @@ use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     db_field::{cond, empty, Parametric},
     links::{LinkMany, LinkOne, LinkSelf, Reference, Relate},
+    value_type_wrappers::SurrealId,
     RecordId, SurrealdbEdge, SurrealdbNode,
 };
 use typed_builder::TypedBuilder;
@@ -235,27 +236,27 @@ pub mod student {
             );
             schema_instance
         }
-        pub fn bestFriend(&self, filter: surrealdb_macros::DbFilter) -> Student {
+        pub fn bestFriend(&self, filter: impl Into<surrealdb_macros::DbFilter>) -> Student {
             Student::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 filter,
             )
         }
-        pub fn unoBook(&self, filter: surrealdb_macros::DbFilter) -> Book {
+        pub fn unoBook(&self, filter: impl Into<surrealdb_macros::DbFilter>) -> Book {
             Book::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 filter,
                 self.get_bindings(),
             )
         }
-        pub fn course(&self, filter: surrealdb_macros::DbFilter) -> Book {
+        pub fn course(&self, filter: impl Into<surrealdb_macros::DbFilter>) -> Book {
             Book::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 filter,
                 self.get_bindings(),
             )
         }
-        pub fn semCoures(&self, filter: surrealdb_macros::DbFilter) -> Book {
+        pub fn semCoures(&self, filter: impl Into<surrealdb_macros::DbFilter>) -> Book {
             Book::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 filter,
@@ -278,9 +279,9 @@ pub mod student {
     impl Student {
         pub fn writes__(
             &self,
-            filter: impl Into<surrealdb_macros::DbFilter>,
+            filterable: impl Into<surrealdb_macros::DbFilter>,
         ) -> writes___schema________________::Writes__ {
-            let filter: surrealdb_macros::DbFilter = filter.into();
+            let filter: surrealdb_macros::DbFilter = filterable.into();
             writes___schema________________::Writes::__________connect_to_graph_traversal_string(
                 &self.___________graph_traversal_string,
                 filter,
@@ -311,8 +312,8 @@ pub mod student {
             }
         }
         impl Writes__ {
-            pub fn book(&self, filter: impl Into<surrealdb_macros::DbFilter>) -> Book {
-                let filter: surrealdb_macros::DbFilter = filter.into();
+            pub fn book(&self, filterable: impl Into<surrealdb_macros::DbFilter>) -> Book {
+                let filter: surrealdb_macros::DbFilter = filterable.into();
                 Book::__________connect_to_graph_traversal_string(
                     &self.___________graph_traversal_string,
                     filter,
@@ -548,15 +549,22 @@ pub mod book {
         }
         pub fn __________connect_to_graph_traversal_string(
             store: &::std::string::String,
-            filter: impl Into<surrealdb_macros::DbFilter>,
+            filterable: impl Into<surrealdb_macros::DbFilter>,
             existing_bindings: BindingsList,
         ) -> Self {
             let mut schema_instance = Self::empty();
-            let filter: surrealdb_macros::DbFilter = filter.into();
-            let bindings = [existing_bindings, filter.get_bindings()].concat();
+            let filter: surrealdb_macros::DbFilter = filterable.into();
+            // let bindings = [
+            //     existing_bindings.as_slice(),
+            //     filter.get_bindings().as_slice(),
+            // ]
+            // .concat();
+            let bindings = [&existing_bindings[..], &filter.get_bindings()[..]].concat();
+            let bindings = bindings.as_slice();
+
             schema_instance
                 .___________bindings
-                .extend(bindings.to_vec());
+                .extend_from_slice(bindings);
 
             let connection = format!(
                 "{}{}{}",
@@ -695,10 +703,18 @@ fn test_blog_edge_name() {}
 
 fn main() {
     let x = Student::schema()
-        .writes__(cond(
-            StudentWritesBook::schema().timeWritten.greater_than(453),
-        ))
-        .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
+        .writes__(
+            StudentWritesBook::schema()
+                .timeWritten
+                .greater_than(453)
+                .less_than(98)
+                .like("Oyelowo"),
+        )
+        .book(
+            Book::schema()
+                .id
+                .equal(SurrealId::try_from("book:blaze").unwrap()),
+        )
         .title;
 
     // let x = Student::schema().unoBook(cond(

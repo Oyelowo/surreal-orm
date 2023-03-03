@@ -1732,12 +1732,12 @@ impl DbField {
         }
     }
 
-    pub fn __update_many_bindings(&self, bindings: Vec<Binding>) -> Self {
+    pub fn __update_many_bindings<'bi>(&self, bindings: impl Into<&'bi [Binding]>) -> Self {
+        let bindings: &'bi [Binding] = bindings.into();
         println!("bindingszz {bindings:?}");
-        let mut updated_params = vec![];
-        updated_params.extend(self.bindings.to_vec());
-        updated_params.extend(bindings);
-        // updated_params
+        // updated_params.extend_from_slice(&self.bindings[..]);
+        // updated_params.extend_from_slice(&bindings[..]);
+        let updated_params = [&self.get_bindings().as_slice(), bindings].concat();
         Self {
             field_name: self.field_name.to_string(),
             bindings: updated_params,
@@ -1745,10 +1745,11 @@ impl DbField {
     }
 
     pub fn __update_bindings(&self, binding: Binding) -> Vec<Binding> {
-        let mut updated_params = vec![];
-        updated_params.extend(self.bindings.to_vec());
-        updated_params.extend([binding]);
-        updated_params
+        // let mut updated_params = Vec::with_capacity(self.bindings.len() + 1);
+        // updated_params.extend(self.bindings.to_vec());
+        // updated_params.extend([binding]);
+        // updated_params
+        [self.bindings.as_slice(), &[binding]].concat()
     }
 
     fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> DbField
