@@ -241,9 +241,9 @@ impl Into<DbFilter> for &DbField {
     }
 }
 
-impl Into<DbFilter> for QueryBuilderSelect {
+impl<T> Into<DbFilter> for QueryBuilderSelect<T> {
     fn into(self) -> DbFilter {
-        let query_b: QueryBuilderSelect = self;
+        let query_b: QueryBuilderSelect<T> = self;
         DbFilter::new(query_b)
     }
 }

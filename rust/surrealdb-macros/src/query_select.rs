@@ -258,7 +258,10 @@ impl Display for OrderOption {
 }
 
 #[derive(Debug, Clone)]
-pub enum Targettables<T> {
+pub enum Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     Table(Table),
     Tables(Vec<sql::Table>),
     SurrealId(SurrealId),
@@ -267,7 +270,10 @@ pub enum Targettables<T> {
     SubQuery(QueryBuilderSelect<T>),
 }
 
-impl<T> From<Vec<sql::Table>> for Targettables<T> {
+impl<T> From<Vec<sql::Table>> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: Vec<sql::Table>) -> Self {
         Self::Tables(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
@@ -278,72 +284,108 @@ impl<T> From<Vec<sql::Table>> for Targettables<T> {
 //     }
 // }
 
-impl<T> From<Vec<sql::Thing>> for Targettables<T> {
+impl<T> From<Vec<sql::Thing>> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: Vec<sql::Thing>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
 }
 
-impl<T> From<&sql::Table> for Targettables<T> {
+impl<T> From<&sql::Table> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: &sql::Table) -> Self {
         Self::Table(value.to_owned())
     }
 }
-impl<T> From<&sql::Thing> for Targettables<T> {
+impl<T> From<&sql::Thing> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: &sql::Thing) -> Self {
         Self::SurrealId(value.to_owned().into())
     }
 }
 
-impl<T> From<sql::Thing> for Targettables<T> {
+impl<T> From<sql::Thing> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: sql::Thing) -> Self {
         Self::SurrealId(value.into())
     }
 }
 
-impl<T> From<&sql::Table> for Targettables<T> {
+impl<T> From<Vec<&sql::Table>> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: Vec<&sql::Table>) -> Self {
         Self::Tables(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
-impl<T, const N: usize> From<&[&sql::Table; N]> for Targettables<T> {
+impl<T, const N: usize> From<&[&sql::Table; N]> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: &[&sql::Table; N]) -> Self {
         Self::Tables(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
-impl<T, const N: usize> From<&[sql::Table; N]> for Targettables<T> {
+impl<T, const N: usize> From<&[sql::Table; N]> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: &[sql::Table; N]) -> Self {
         Self::Tables(value.to_vec())
     }
 }
 
-impl<T> From<&SurrealId> for Targettables<T> {
+impl<T> From<&SurrealId> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: &SurrealId) -> Self {
         Self::SurrealId(value.to_owned())
     }
 }
 
-impl<T, const N: usize> From<&[SurrealId; N]> for Targettables<T> {
+impl<T, const N: usize> From<&[SurrealId; N]> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: &[SurrealId; N]) -> Self {
         Self::SurrealIds(value.to_vec())
     }
 }
 
-impl<T> From<Vec<&SurrealId>> for Targettables<T> {
+impl<T> From<Vec<&SurrealId>> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: Vec<&SurrealId>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
-impl<T, const N: usize> From<&[&SurrealId; N]> for Targettables<T> {
+impl<T, const N: usize> From<&[&SurrealId; N]> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: &[&SurrealId; N]) -> Self {
         Self::SurrealIds(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
-impl<T, const N: usize> From<&[sql::Thing; N]> for Targettables<T> {
+impl<T, const N: usize> From<&[sql::Thing; N]> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: &[sql::Thing; N]) -> Self {
         Self::SurrealIds(
             value
@@ -354,37 +396,55 @@ impl<T, const N: usize> From<&[sql::Thing; N]> for Targettables<T> {
     }
 }
 
-impl<T> From<Vec<SurrealId>> for Targettables<T> {
+impl<T> From<Vec<SurrealId>> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: Vec<SurrealId>) -> Self {
         Self::SurrealIds(value)
     }
 }
 
-impl<T> From<SurrealId> for Targettables<T> {
+impl<T> From<SurrealId> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: SurrealId) -> Self {
         Self::SurrealId(value)
     }
 }
 
-impl<T> From<Table> for Targettables<T> {
+impl<T> From<Table> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: Table) -> Self {
         Self::Table(value)
     }
 }
 
-impl<T> From<&mut QueryBuilderSelect<T>> for Targettables<T> {
+impl<T> From<&mut QueryBuilderSelect<T>> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: &mut QueryBuilderSelect<T>) -> Self {
         Self::SubQuery(value.to_owned())
     }
 }
 
-impl<T> From<QueryBuilderSelect<T>> for Targettables<T> {
+impl<T> From<QueryBuilderSelect<T>> for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: QueryBuilderSelect<T>) -> Self {
         Self::SubQuery(value.to_owned())
     }
 }
 
-impl<T> Parametric for Targettables<T> {
+impl<T> Parametric for Targettables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn get_bindings(&self) -> BindingsList {
         match self {
             Targettables::Table(table) => {
