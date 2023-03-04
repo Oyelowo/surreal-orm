@@ -409,20 +409,20 @@ async fn test_it() -> surrealdb::Result<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await?;
 
-    let results = query_insert::InsertStatement::new()
-        .insert(xx.clone())
-        .insert_many(companies)
-        // .get_one(db.clone())
-        .get_many(db)
-        .await
-        .unwrap();
+    // let results = query_insert::InsertStatement::new()
+    //     .insert(xx.clone())
+    //     .insert_many(companies)
+    //     // .get_one(db.clone())
+    //     .get_many(db)
+    //     .await
+    //     .unwrap();
 
-    println!("==========================================");
-    println!("==========================================");
-    println!(
-        "userQueryyy result: {}",
-        serde_json::to_string(&results).unwrap()
-    );
+    // println!("==========================================");
+    // println!("==========================================");
+    // println!(
+    //     "userQueryyy result: {}",
+    //     serde_json::to_string(&results).unwrap()
+    // );
     // // let mut results = results.await?;
     // println!("==========================================");
     // println!("==========================================");

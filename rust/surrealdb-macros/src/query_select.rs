@@ -588,7 +588,7 @@ impl Parametric for Selectables {
 
 /// The query builder struct used to construct complex database queries.
 #[derive(Debug, Clone)]
-pub(crate) struct QueryBuilderSelect {
+pub struct QueryBuilderSelect {
     projections: Vec<String>,
     targets: Vec<String>,
     where_: Option<String>,

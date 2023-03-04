@@ -154,7 +154,7 @@ mod tests {
     use surrealdb::sql;
     use surrealdb_macros::db_field::{cond, empty, Binding, Empty, Parametric};
     // use surrealdb_macros::prelude::*;
-    use surrealdb_macros::query_select::{order, query, select, All, Order};
+    use surrealdb_macros::query_select::{order, select, All, Order};
     use surrealdb_macros::value_type_wrappers::SurrealId;
     use surrealdb_macros::{cond, query_select, DbFilter};
     use surrealdb_macros::{q, DbField};
@@ -187,8 +187,6 @@ mod tests {
         let wrt = &StudentWritesBook::schema();
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
         let book::Book { content, .. } = Book::schema();
-
-        let mut queryb = query_select::QueryBuilder::new();
 
         mana(bk.content.contains("Lowo"));
         mana(None);
@@ -325,8 +323,7 @@ mod tests {
             .or(firstName.equal("Oyelowo"))
             .and(lastName.equal("Oyedayo"));
 
-        let mut query1 = queryb
-            .select(All)
+        let mut query1 = select(All)
             .from(Book::get_table_name())
             .where_(
                 cond(content.like("lowo").and(age).greater_than_or_equal(600))

@@ -4,7 +4,10 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::{json, Value};
 use surrealdb::{engine::local::Db, method::Query, opt::QueryResult, sql, Response, Surreal};
 
-use crate::{query_select::QueryBuilderSelect, DbField, SurrealdbNode};
+use crate::{
+    db_field::Binding, query_select::QueryBuilderSelect, BindingsList, DbField, Parametric,
+    SurrealdbNode,
+};
 
 pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbNode> {
     // table: String,
@@ -12,11 +15,72 @@ pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbNode> {
     on_duplicate_key_update: Vec<Updater>,
 }
 
-enum Insertables<T: SurrealdbNode> {
+pub enum Insertables<T: Serialize + DeserializeOwned + SurrealdbNode> {
     Node(T),
-    Nodes(T),
+    Nodes(Vec<T>),
     FromQuery(QueryBuilderSelect),
 }
+
+impl<N: SurrealdbNode + DeserializeOwned + Serialize> Parametric for N {
+    fn get_bindings(&self) -> BindingsList {
+        let value = self;
+        let field_names = get_field_names(value);
+        // let mut variables = Vec::new();
+        // let mut values = String::new();
+
+        let xx = field_names.into_iter().map(|field_name| {
+            let field_value = get_field_value(value, &field_name)
+                .expect("Unable to get value name. This should never happen!");
+            Binding::new(field_value)
+        });
+        // let mut row_values = Vec::new();
+        // for field_name in &field_names {
+        //     let field_value = get_field_value(value, field_name)
+        //         .expect("Unable to get value name. This should never happen!");
+        //
+        //     // let placeholder_var_names = format!("{}_{}", field_name, i);
+        //     let placeholder_var_names = format!("{}_{}", field_name, i);
+        //     variables.push((placeholder_var_names.clone(), field_value));
+        //     // row_values.push(format!("${}", variables.len()));
+        //     row_values.push(format!("${}", placeholder_var_names));
+        // }
+        // // let mut variables = Vec::new();
+        // let mut values = String::new();
+        //
+        // for (i, value) in self.values.iter().enumerate() {
+        //     let mut row_values = Vec::new();
+        //     for field_name in &field_names {
+        //         let field_value = get_field_value(value, field_name)?;
+        //         let placeholder_var_names = format!("{}_{}", field_name, i);
+        //         variables.push((placeholder_var_names.clone(), field_value));
+        //         // row_values.push(format!("${}", variables.len()));
+        //         row_values.push(format!("${}", placeholder_var_names));
+        //     }
+        todo!()
+    }
+}
+
+impl<T: Serialize + DeserializeOwned + SurrealdbNode> Parametric for Insertables<T> {
+    fn get_bindings(&self) -> crate::BindingsList {
+        match self {
+            Insertables::Node(node) => node.get_bindings(),
+            Insertables::Nodes(nodes) => nodes
+                .into_iter()
+                .flat_map(|n| n.get_bindings())
+                .collect::<Vec<_>>(),
+            Insertables::FromQuery(query) => query.get_bindings(),
+        }
+    }
+}
+
+// impl<T: SurrealdbNode + Into<sql::Value>, N: SurrealdbNode + Serialize> From<N> for Insertables<T> {
+//     fn from(value: N) -> Self {
+//         let v = serde_json::to_string(&value).unwrap();
+//         let v = sql::json(&v).unwrap();
+//         let v: sql::Value = v.into();
+//         Self::Node { field1: v }
+//     }
+// }
 
 impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
     pub fn new() -> Self {
@@ -26,8 +90,9 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         }
     }
 
-    pub fn insert(&mut self, value: T) -> &mut Self {
-        self.values.push(value);
+    pub fn insert<V: Into<Insertables<T>>>(&mut self, value: V) -> &mut Self {
+        let value: Insertables<T> = value.into();
+        // self.values.push(value);
         self
     }
 
