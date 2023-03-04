@@ -173,19 +173,26 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         query
     }
 
-    pub async fn get_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+    pub async fn get_one(self, db: Surreal<Db>) -> surrealdb::Result<T> {
         let query = self.build();
-        let response = self
+        let mut response = self
             .bindings
             .iter()
             .fold(db.query(query), |acc, val| {
                 acc.bind((val.get_param(), val.get_value()))
             })
-            .await?
-            .take::<Option<T>>(0)?;
+            .await?;
+
+        // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
+        // trying to return many, then pick the first of the returned.
+        let mut returned_val = match response.take::<Option<T>>(0) {
+            Err(err) => response.take::<Vec<T>>(0)?,
+            Ok(one) => vec![one.unwrap()],
+        };
 
         // TODO:: Handle error if nothing is returned
-        Ok(response.unwrap())
+        let only_or_last = returned_val.pop().unwrap();
+        Ok(only_or_last)
     }
 
     pub async fn get_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
