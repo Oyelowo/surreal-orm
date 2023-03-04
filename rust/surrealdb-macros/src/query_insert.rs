@@ -444,41 +444,59 @@ mod tests {
     fn test_increment_by() {
         let updater = Updater::new("score".to_string());
         let updated_updater = updater.increment_by(10);
-        assert_eq!(updated_updater.get_updater_string(), "score += 10");
+        assert_eq!(
+            updated_updater.get_updater_string(),
+            "score += _param_00000000"
+        );
     }
 
     #[test]
     fn test_append() {
         let updater = Updater::new("names".to_string());
         let updated_updater = updater.append("Alice");
-        assert_eq!(updated_updater.get_updater_string(), "names += 'Alice'");
+        assert_eq!(
+            updated_updater.get_updater_string(),
+            "names += _param_00000000"
+        );
     }
 
     #[test]
     fn test_decrement_by() {
         let updater = Updater::new("score".to_string());
         let updated_updater = updater.decrement_by(5);
-        assert_eq!(updated_updater.get_updater_string(), "score -= 5");
+        assert_eq!(
+            updated_updater.get_updater_string(),
+            "score -= _param_00000000"
+        );
     }
 
     #[test]
     fn test_remove() {
         let updater = Updater::new("names".to_string());
         let updated_updater = updater.remove("Alice");
-        assert_eq!(updated_updater.get_updater_string(), "names -= 'Alice'");
+        assert_eq!(
+            updated_updater.get_updater_string(),
+            "names -= _param_00000000"
+        );
     }
 
     #[test]
     fn test_plus_equal() {
         let updater = Updater::new("score".to_string());
         let updated_updater = updater.plus_equal(10);
-        assert_eq!(updated_updater.get_updater_string(), "score += 10");
+        assert_eq!(
+            updated_updater.get_updater_string(),
+            "score += _param_00000000"
+        );
     }
 
     #[test]
     fn test_minus_equal() {
         let updater = Updater::new("names".to_string());
         let updated_updater = updater.minus_equal("Alice");
-        assert_eq!(updated_updater.get_updater_string(), "names -= 'Alice'");
+        assert_eq!(
+            updated_updater.get_updater_string(),
+            "names -= _param_00000000"
+        );
     }
 }
