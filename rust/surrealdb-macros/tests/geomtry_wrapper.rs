@@ -61,7 +61,7 @@ mod tests {
 
     use geo::Coord;
     use surrealdb_macros::{
-        query_insert::insert,
+        query_insert::{insert, Runnable},
         query_select::{select, All},
         SurrealdbNode,
     };

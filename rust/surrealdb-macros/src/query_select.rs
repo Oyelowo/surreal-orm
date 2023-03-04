@@ -9,12 +9,14 @@ use std::{
     ops::Deref,
 };
 
+use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Table, Value};
 
 use crate::{
     db_field::{Binding, BindingsList, DbFilter, Parametric},
+    query_insert::{Buildable, Runnable},
     value_type_wrappers::SurrealId,
-    DbField, SurrealdbNode,
+    DbField, SurrealdbModel, SurrealdbNode,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -1101,3 +1103,11 @@ impl Display for QueryBuilderSelect {
         write!(f, "{}", query)
     }
 }
+
+impl Buildable for QueryBuilderSelect {
+    fn build(&self) -> String {
+        format!("{self}")
+    }
+}
+
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Runnable<T> for QueryBuilderSelect {}

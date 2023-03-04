@@ -162,11 +162,12 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for InsertStat
 
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> Runnable<T> for InsertStatement<T> {}
 
-trait Buildable {
+pub trait Buildable {
     fn build(&self) -> String;
 }
+
 #[async_trait]
-trait Runnable<T>
+pub trait Runnable<T>
 where
     Self: Parametric + Buildable,
     T: Serialize + DeserializeOwned + SurrealdbModel,
