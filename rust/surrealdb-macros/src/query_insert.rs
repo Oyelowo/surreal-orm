@@ -1,4 +1,4 @@
-use std::{collections::HashMap, marker::PhantomData};
+use std::{collections::HashMap, fmt::format, marker::PhantomData};
 
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -57,7 +57,8 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<QueryBuilderSelect> 
 impl<T: SurrealdbModel + DeserializeOwned + Serialize> Parametric for T {
     fn get_bindings(&self) -> BindingsList {
         let value = self;
-        let field_names = get_field_names(value);
+        // let fields_names = get_field_names(value);
+        let field_names = T::get_serializable_field_names();
 
         field_names
             .into_iter()
@@ -122,10 +123,11 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for InsertState
         }
 
         let bindings = self.bindings.as_slice();
-        let field_names = bindings
-            .iter()
-            .map(|b| b.get_original_name().to_owned())
-            .collect::<Vec<_>>();
+        let field_names = T::get_serializable_field_names();
+        // let field_names = bindings
+        //     .iter()
+        //     .map(|b| b.get_original_name().to_owned())
+        //     .collect::<Vec<_>>();
 
         let mut query = String::new();
         query.push_str("INSERT INTO ");
@@ -139,11 +141,15 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for InsertState
             .iter()
             .map(|b| format!("${}", b.get_param()))
             .collect::<Vec<_>>()
+            .chunks_exact(field_names.len())
+            .map(|fields_values_params_list| format!("({})", fields_values_params_list.join(", ")))
+            .collect::<Vec<_>>()
             .join(", ");
+        // .join(", ");
 
-        query.push_str(" (");
+        // query.push_str(" (");
         query.push_str(&placeholders);
-        query.push_str(") ");
+        // query.push_str(") ");
 
         if !&self.on_duplicate_key_update.is_empty() {
             let updates_str = self.on_duplicate_key_update.join(", ");
@@ -156,6 +162,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for InsertState
         query
     }
 }
+
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for InsertStatement<T> {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
