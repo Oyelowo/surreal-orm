@@ -28,7 +28,10 @@ pub use db_field::Parametric;
 pub use surrealdb::opt::RecordId;
 use surrealdb::sql;
 
-pub trait SurrealdbNode {
+// SurrealdbModel is a superset of SurrealdbNode and SurrealdbEdge. IOW, both are
+pub trait SurrealdbModel {}
+
+pub trait SurrealdbNode: SurrealdbModel {
     type Schema;
     type TableNameChecker;
     fn schema() -> Self::Schema;
@@ -37,7 +40,7 @@ pub trait SurrealdbNode {
     fn get_table_name() -> sql::Table;
 }
 
-pub trait SurrealdbEdge {
+pub trait SurrealdbEdge: SurrealdbModel {
     type In;
     type Out;
     type TableNameChecker;

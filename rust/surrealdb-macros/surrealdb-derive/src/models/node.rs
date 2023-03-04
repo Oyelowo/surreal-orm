@@ -112,6 +112,8 @@ impl ToTokens for FieldsGetterOpts {
                 }
             }
 
+            impl #crate_name::SurrealdbModel for #struct_name_ident {}
+            
             pub mod #module_name {
                 use #crate_name::Parametric as _;
 
