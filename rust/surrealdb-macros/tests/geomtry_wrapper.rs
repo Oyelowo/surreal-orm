@@ -72,7 +72,7 @@ mod tests {
 
         let results = query_insert::InsertStatement::new()
             .insert(company)
-            .get_one(db)
+            .return_one(db)
             .await
             .unwrap();
 

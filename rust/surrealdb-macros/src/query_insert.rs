@@ -133,7 +133,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         //     return Err(String::from("No values to insert"));
         // }
 
-        let bindings = self.bindings;
+        let bindings = self.bindings.as_slice();
         // let first_value = self.values.get(0).unwrap();
         // let field_names = get_field_names(first_value);
         let field_names = bindings
@@ -173,7 +173,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         query
     }
 
-    pub async fn get_one(self, db: Surreal<Db>) -> surrealdb::Result<T> {
+    pub async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
         let query = self.build();
         let mut response = self
             .bindings
@@ -196,7 +196,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         Ok(only_or_last)
     }
 
-    pub async fn get_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+    pub async fn return_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
         let query = self.build();
         let mut response = self
             .bindings
@@ -422,7 +422,7 @@ impl Updater {
     /// let updater = Updater::new("score = score + 1".to_string());
     /// assert_eq!(updater.to_string(), "score = score + 1");
     /// ```
-    pub fn get_updater_string(&self) -> String {
+    pub fn get_updater_string(self) -> String {
         self.column_updater_string
     }
 
