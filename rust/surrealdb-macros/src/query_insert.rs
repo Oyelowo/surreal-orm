@@ -18,7 +18,7 @@ use crate::{
 pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbNode> {
     // table: String,
     values: Vec<T>,
-    on_duplicate_key_update: Vec<Updater>,
+    on_duplicate_key_update: Vec<String>,
     bindings: BindingsList,
 }
 
@@ -122,11 +122,14 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         //     .map(|(k, v)| (String::from(*k), String::from(*v)))
         //     .collect();
         // self.on_duplicate_key_update = (update_map);
-        let xx = match updates {
+        let updater_query = match updates {
             Updateables::Updater(up) => vec![up.get_updater_string()],
-            Updateables::Updaters(ups) => todo!(),
+            Updateables::Updaters(ups) => ups
+                .into_iter()
+                .map(|u| u.get_updater_string())
+                .collect::<Vec<_>>(),
         };
-        self.on_duplicate_key_update.push(update);
+        self.on_duplicate_key_update.extend(updater_query);
         self
     }
 
@@ -183,15 +186,10 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         query.push_str(&values);
 
         if !&self.on_duplicate_key_update.is_empty() {
-            let updates_str: Vec<String> = self
-                .on_duplicate_key_update
-                .iter()
-                .map(|updater| format!("{} = ", updater))
-                // .map(|(k, v)| format!("{} = {}", k, v))
-                .collect();
+            let updates_str = self.on_duplicate_key_update.join(", ");
 
             query.push_str(" ON DUPLICATE KEY UPDATE ");
-            query.push_str(&updates_str.join(", "));
+            query.push_str(&updates_str);
         }
 
         query.push_str(";");
@@ -427,8 +425,8 @@ impl Updater {
     /// let updater = Updater::new("score = score + 1".to_string());
     /// assert_eq!(updater.to_string(), "score = score + 1");
     /// ```
-    pub fn get_updater_string(&self) -> &str {
-        &self.column_updater_string
+    pub fn get_updater_string(&self) -> String {
+        self.column_updater_string
     }
 
     fn _____update_field(&self, operator: sql::Operator, value: impl Into<sql::Value>) -> Updater {
