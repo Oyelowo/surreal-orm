@@ -1,8 +1,14 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, mem::BikeshedIntrinsicFrom};
 
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::{json, Value};
-use surrealdb::{engine::local::Db, method::Query, opt::QueryResult, sql, Response, Surreal};
+use surrealdb::{
+    engine::local::Db,
+    method::Query,
+    opt::QueryResult,
+    sql::{self, Operator},
+    Response, Surreal,
+};
 
 use crate::{
     db_field::Binding, query_select::QueryBuilderSelect, BindingsList, DbField, Parametric,
@@ -13,6 +19,7 @@ pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbNode> {
     // table: String,
     values: Vec<T>,
     on_duplicate_key_update: Vec<Updater>,
+    bindings: BindingsList,
 }
 
 pub enum Insertables<T: Serialize + DeserializeOwned + SurrealdbNode> {
@@ -28,11 +35,14 @@ impl<N: SurrealdbNode + DeserializeOwned + Serialize> Parametric for N {
         // let mut variables = Vec::new();
         // let mut values = String::new();
 
-        let xx = field_names.into_iter().map(|field_name| {
-            let field_value = get_field_value(value, &field_name)
-                .expect("Unable to get value name. This should never happen!");
-            Binding::new(field_value)
-        });
+        let xx = field_names
+            .into_iter()
+            .map(|field_name| {
+                let field_value = get_field_value(value, &field_name)
+                    .expect("Unable to get value name. This should never happen!");
+                Binding::new(field_value).with_name(field_name)
+            })
+            .collect::<Vec<_>>();
         // let mut row_values = Vec::new();
         // for field_name in &field_names {
         //     let field_value = get_field_value(value, field_name)
@@ -56,7 +66,7 @@ impl<N: SurrealdbNode + DeserializeOwned + Serialize> Parametric for N {
         //         // row_values.push(format!("${}", variables.len()));
         //         row_values.push(format!("${}", placeholder_var_names));
         //     }
-        todo!()
+        xx
     }
 }
 
@@ -87,11 +97,14 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         Self {
             values: Vec::new(),
             on_duplicate_key_update: Vec::new(),
+            bindings: vec![],
         }
     }
 
-    pub fn insert<V: Into<Insertables<T>>>(&mut self, value: V) -> &mut Self {
+    pub fn insert<V: Into<Insertables<T>>>(mut self, value: V) -> Self {
         let value: Insertables<T> = value.into();
+        let bindings = value.get_bindings();
+        self.bindings.extend(bindings);
         // self.values.push(value);
         self
     }
@@ -101,24 +114,35 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         self
     }
 
-    fn on_duplicate_key_update(&mut self, update: Updater) -> &mut Self {
+    fn on_duplicate_key_update(mut self, updateables: impl Into<Updateables>) -> Self {
+        let updates: Updateables = updateables.into();
+        self.bindings.extend(updates.get_bindings());
         // let update_map: HashMap<String, String> = updates
         //     .iter()
         //     .map(|(k, v)| (String::from(*k), String::from(*v)))
         //     .collect();
         // self.on_duplicate_key_update = (update_map);
+        let xx = match updates {
+            Updateables::Updater(up) => vec![up.get_updater_string()],
+            Updateables::Updaters(ups) => todo!(),
+        };
         self.on_duplicate_key_update.push(update);
         self
     }
 
     // pub fn build(&self) -> Result<(String, Vec<(String, Value)>), String> {
-    pub fn build(&self) -> Result<(String, Vec<(String, sql::Value)>), String> {
-        if self.values.is_empty() {
-            return Err(String::from("No values to insert"));
-        }
+    pub fn build(self) -> String {
+        // if self.values.is_empty() {
+        //     return Err(String::from("No values to insert"));
+        // }
 
-        let first_value = self.values.get(0).unwrap();
-        let field_names = get_field_names(first_value);
+        let bindings = self.bindings;
+        // let first_value = self.values.get(0).unwrap();
+        // let field_names = get_field_names(first_value);
+        let field_names = bindings
+            .iter()
+            .map(|b| b.get_original_name().to_owned())
+            .collect::<Vec<_>>();
 
         let mut query = String::new();
         query.push_str("INSERT INTO ");
@@ -129,25 +153,32 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         query.push_str(&field_names.join(", "));
         query.push_str(") VALUES ");
 
-        let mut variables = Vec::new();
-        let mut values = String::new();
+        // let mut variables = Vec::new();
+        // let mut values = String::new();
 
-        for (i, value) in self.values.iter().enumerate() {
-            let mut row_values = Vec::new();
-            for field_name in &field_names {
-                let field_value = get_field_value(value, field_name)?;
-                let placeholder_var_names = format!("{}_{}", field_name, i);
-                variables.push((placeholder_var_names.clone(), field_value));
-                // row_values.push(format!("${}", variables.len()));
-                row_values.push(format!("${}", placeholder_var_names));
-            }
-            if i > 0 {
-                values.push_str(", ");
-            }
-            values.push_str("(");
-            values.push_str(&row_values.join(", "));
-            values.push_str(")");
-        }
+        let values = self
+            .bindings
+            .iter()
+            .map(|b| format!("({}, {})", b.get_param(), b.get_value()))
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        // fmr (i, value) in self.values.iter().enumerate() {
+        //     let mut row_values = Vec::new();
+        //     for field_name in &field_names {
+        //         let field_value = get_field_value(value, field_name)?;
+        //         let placeholder_var_names = format!("{}_{}", field_name, i);
+        //         variables.push((placeholder_var_names.clone(), field_value));
+        //         // row_values.push(format!("${}", variables.len()));
+        //         row_values.push(format!("${}", placeholder_var_names));
+        //     }
+        //     if i > 0 {
+        //         values.push_str(", ");
+        //     }
+        //     values.push_str("(");
+        //     values.push_str(&row_values.join(", "));
+        //     values.push_str(")");
+        // }
 
         query.push_str(&values);
 
@@ -164,7 +195,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         }
 
         query.push_str(";");
-        Ok((query, variables))
+        query
     }
 
     pub async fn get_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
@@ -221,6 +252,13 @@ where
 /// A helper struct for generating SQL update statements.
 pub struct Updater {
     column_updater_string: String,
+    ____bindings: BindingsList,
+}
+
+impl Parametric for Updater {
+    fn get_bindings(&self) -> BindingsList {
+        todo!()
+    }
 }
 
 pub fn updater(field: impl Into<DbField>) -> Updater {
@@ -230,6 +268,23 @@ pub fn updater(field: impl Into<DbField>) -> Updater {
 impl std::fmt::Display for Updater {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.column_updater_string))
+    }
+}
+
+enum Updateables {
+    Updater(Updater),
+    Updaters(Vec<Updater>),
+}
+
+impl Parametric for Updateables {
+    fn get_bindings(&self) -> BindingsList {
+        match self {
+            Updateables::Updater(up) => up.get_bindings(),
+            Updateables::Updaters(ups) => ups
+                .into_iter()
+                .flat_map(|u| u.get_bindings())
+                .collect::<Vec<_>>(),
+        }
     }
 }
 
@@ -246,6 +301,7 @@ impl Updater {
         let db_field = db_field.into();
         Self {
             column_updater_string: db_field.to_string(),
+            ____bindings: vec![],
         }
     }
     /// Returns a new `Updater` instance with the string to increment the column by the given value.
@@ -259,19 +315,13 @@ impl Updater {
     ///
     /// ```
     /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("score = 5".to_string());
+    /// let updater = Updater::new("score".to_string());
     /// let updated_updater = updater.increment_by(2);
-    /// assert_eq!(updated_updater.to_string(), "score = 5 + 2");
+    /// assert_eq!(updated_updater.to_string(), "score += 2");
     /// ```
     pub fn increment_by(&self, value: impl Into<sql::Number>) -> Self {
         let value: sql::Number = value.into();
-        let increment_string = format!("{self} += {}", value);
-        // let other = serde_json::to_string(&other).unwrap();
-        // let other = sql::json(&other).unwrap();
-        // println!("PAOELEEEE {}", &other);
-        // println!("PAOELEEEE {}", serde_json::to_string(&other).unwrap());
-        // println!("{}", Self::new(format!("{self} += {other}")));
-        Self::new(increment_string)
+        self._____update_field(Operator::Inc, value)
     }
 
     /// Returns a new `Updater` instance with the string to append the given value to a column that stores an array.
@@ -285,14 +335,12 @@ impl Updater {
     ///
     /// ```
     /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("tags = ARRAY['rust']".to_string());
-    /// let updated_updater = updater.append("python");
-    /// assert_eq!(updated_updater.to_string(), "tags = ARRAY['rust', 'python']");
+    /// let updater = Updater::new("tags += 'rust'".to_string());
+    /// let updated_updater = updater.remove("python");
+    /// assert_eq!(updated_updater.to_string(), "tags += 'rust'");
     /// ```
     pub fn append(&self, value: impl Into<sql::Value>) -> Self {
-        let value: sql::Value = value.into();
-        let add_string = format!("{self} += {}", value);
-        Self::new(add_string)
+        self._____update_field(Operator::Inc, value)
     }
 
     /// Returns a new `Updater` instance with the string to decrement the column by the given value.
@@ -306,14 +354,13 @@ impl Updater {
     ///
     /// ```
     /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("score = 5".to_string());
+    /// let updater = Updater::new("score".to_string());
     /// let updated_updater = updater.decrement_by(2);
-    /// assert_eq!(updated_updater.to_string(), "score = 5 - 2");
+    /// assert_eq!(updated_updater.to_string(), "score -= 2");
     /// ```
     pub fn decrement_by(&self, value: impl Into<sql::Number>) -> Self {
         let value: sql::Number = value.into();
-        let decrement_string = format!("{self} -= {}", value);
-        Self::new(decrement_string)
+        self._____update_field(Operator::Dec, value)
     }
 
     /// Returns a new `Updater` instance with the string to remove the given value from a column that stores an array.
@@ -327,14 +374,12 @@ impl Updater {
     ///
     /// ```
     /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("tags = ARRAY['rust', 'python']".to_string());
+    /// let updater = Updater::new("tags -= 'rust'".to_string());
     /// let updated_updater = updater.remove("python");
-    /// assert_eq!(updated_updater.to_string(), "tags = ARRAY['rust']");
+    /// assert_eq!(updated_updater.to_string(), "tags -= 'rust'");
     /// ```
     pub fn remove(&self, value: impl Into<sql::Value>) -> Self {
-        let value: sql::Value = value.into();
-        let remove_string = format!("{self} -= {}", value);
-        Self::new(remove_string)
+        self._____update_field(Operator::Dec, value)
     }
 
     /// Returns a new `Updater` instance with the string to add the given value to the column.
@@ -352,9 +397,7 @@ impl Updater {
     /// assert_eq!(updated_updater.to_string(), "score = 5 + 2");
     /// ```
     pub fn plus_equal(&self, value: impl Into<sql::Value>) -> Self {
-        let value: sql::Value = value.into();
-        let increment_string = format!("{self} += {}", value);
-        Self::new(increment_string)
+        self._____update_field(Operator::Inc, value)
     }
 
     /// Returns a new `Updater` instance with the string to remove the given value from the column.
@@ -372,9 +415,7 @@ impl Updater {
     /// assert_eq!(updated_updater.to_string(), "name = 'J'");
     /// ```
     pub fn minus_equal(&self, value: impl Into<sql::Value>) -> Self {
-        let value: sql::Value = value.into();
-        let remove_string = format!("{self} -= {}", value);
-        Self::new(remove_string)
+        self._____update_field(Operator::Dec, value)
     }
 
     /// Returns the string representation of the column update statement.
@@ -388,6 +429,16 @@ impl Updater {
     /// ```
     pub fn get_updater_string(&self) -> &str {
         &self.column_updater_string
+    }
+
+    fn _____update_field(&self, operator: sql::Operator, value: impl Into<sql::Value>) -> Updater {
+        let value: sql::Value = value.into();
+        let binding = Binding::new(value);
+        let column_updater_string = format!("{self} {operator} {}", binding.get_param());
+        Self {
+            column_updater_string,
+            ____bindings: vec![binding],
+        }
     }
 }
 

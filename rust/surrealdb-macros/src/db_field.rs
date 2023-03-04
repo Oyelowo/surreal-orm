@@ -380,21 +380,38 @@ impl Parametric for DbFilter {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Binding((String, sql::Value));
+pub struct Binding {
+    param: String,
+    value: sql::Value,
+    original_inline_name: String,
+}
 
 impl Binding {
     pub fn new(value: impl Into<sql::Value>) -> Self {
         let value = value.into();
         let param_name = generate_param_name(&"param");
-        Binding((param_name, value))
+        Binding {
+            param: param_name.clone(),
+            value,
+            original_inline_name: param_name,
+        }
+    }
+
+    pub fn with_name(mut self, original_name: String) -> Self {
+        self.original_inline_name = original_name;
+        self
+    }
+
+    pub fn get_original_name(&self) -> &String {
+        &self.original_inline_name
     }
 
     pub fn get_param(&self) -> &String {
-        &self.0 .0
+        &self.param
     }
 
     pub fn get_value(&self) -> &sql::Value {
-        &self.0 .1
+        &self.value
     }
 }
 
@@ -404,11 +421,11 @@ impl From<sql::Value> for Binding {
     }
 }
 
-impl From<(String, sql::Value)> for Binding {
-    fn from(value: (String, Value)) -> Self {
-        Self(value)
-    }
-}
+// impl From<(String, sql::Value)> for Binding {
+//     fn from(value: (String, Value)) -> Self {
+//         Self { field1: value }
+//     }
+// }
 
 /// Can have parameters which can be bound
 pub trait Parametric {
