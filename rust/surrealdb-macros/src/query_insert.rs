@@ -112,52 +112,8 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> InsertStatement<T> {
         self.on_duplicate_key_update.extend(updater_query);
         self
     }
-
-    pub async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
-        let query = self.build();
-        let mut response = self
-            .bindings
-            .iter()
-            .fold(db.query(query), |acc, val| {
-                acc.bind((val.get_param(), val.get_value()))
-            })
-            .await?;
-
-        // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
-        // trying to return Vec<T> rather than Option<T>, then pick the first of the returned
-        // Ok<T>.
-        let mut returned_val = match response.take::<Option<T>>(0) {
-            Err(err) => response.take::<Vec<T>>(0)?,
-            Ok(one) => vec![one.unwrap()],
-        };
-
-        // TODO:: Handle error if nothing is returned
-        let only_or_last = returned_val.pop().unwrap();
-        Ok(only_or_last)
-    }
-
-    pub async fn return_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
-        let query = self.build();
-        let mut response = self
-            .bindings
-            .iter()
-            .fold(db.query(query), |acc, val| {
-                acc.bind((val.get_param(), val.get_value()))
-            })
-            .await?;
-
-        // This does the reverse of get_one
-        // If it errors, try to check if only single entry has been inputed, hence, suurealdb
-        // trying to return Option<T>, then pick the return the only item as Vec<T>.
-        let mut returned_val = match response.take::<Vec<T>>(0) {
-            Err(err) => vec![response.take::<Option<T>>(0)?.unwrap()],
-            Ok(one) => one,
-        };
-
-        // TODO:: Handle error if nothing is returned
-        Ok(returned_val)
-    }
 }
+
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for InsertStatement<T> {
     // fn build(&self) -> String {}
     fn build(&self) -> String {
