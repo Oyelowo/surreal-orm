@@ -36,7 +36,7 @@ pub fn insert<T: Serialize + DeserializeOwned + SurrealdbModel>(
 pub enum Insertables<T: Serialize + DeserializeOwned + SurrealdbModel> {
     Node(T),
     Nodes(Vec<T>),
-    FromQuery(QueryBuilderSelect),
+    FromQuery(QueryBuilderSelect<T>),
 }
 
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<Vec<T>> for Insertables<T> {
@@ -51,8 +51,10 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<T> for Insertables<T
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<QueryBuilderSelect> for Insertables<T> {
-    fn from(value: QueryBuilderSelect) -> Self {
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<QueryBuilderSelect<T>>
+    for Insertables<T>
+{
+    fn from(value: QueryBuilderSelect<T>) -> Self {
         Self::FromQuery(value)
     }
 }

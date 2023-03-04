@@ -60,6 +60,7 @@ mod geometry_tests {
     use std::time::Duration;
 
     use geo::Coord;
+    use surrealdb::sql::statements::CommitStatement;
     use surrealdb_macros::{
         query_insert::{insert, Runnable},
         query_select::{select, All},
@@ -361,13 +362,22 @@ mod geometry_tests {
         // Insert companies
         let results = insert(companies).return_many(db.clone()).await.unwrap();
 
+        // db.clone()
+        //     .query(format!("{}", CommitStatement))
+        //     .await
+        //     .unwrap();
+        //
         let c = Company::schema();
-        let select_query = select(All)
+        let select_query = select::<Company>(All)
             .from(Company::get_table_name())
-            .where_(c.tags.any_like("foo"))
+            // .where_(c.tags.any_like("foo"))
             .timeout(Duration::from_secs(20))
             .parallel();
 
+        println!(
+            "SSSSSSS {:?}",
+            select_query.return_many(db.clone()).await.unwrap()
+        );
         let results = insert::<GenZCompany>(select_query)
             .return_many(db)
             .await
