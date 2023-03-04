@@ -200,7 +200,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for InsertState
 }
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for InsertStatement<T> {
     fn get_bindings(&self) -> BindingsList {
-        self.get_bindings()
+        self.bindings.to_vec()
     }
 }
 

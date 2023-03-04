@@ -29,7 +29,9 @@ pub use surrealdb::opt::RecordId;
 use surrealdb::sql;
 
 // SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
-pub trait SurrealdbModel {}
+pub trait SurrealdbModel {
+    fn get_table_name() -> sql::Table;
+}
 
 pub trait SurrealdbNode: SurrealdbModel {
     type Schema;
@@ -37,7 +39,6 @@ pub trait SurrealdbNode: SurrealdbModel {
     fn schema() -> Self::Schema;
     // fn get_key<T: Into<RecordId>>(&self) -> ::std::option::Option<&T>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
-    fn get_table_name() -> sql::Table;
 }
 
 pub trait SurrealdbEdge: SurrealdbModel {
@@ -47,7 +48,6 @@ pub trait SurrealdbEdge: SurrealdbModel {
     type Schema;
 
     fn schema() -> Self::Schema;
-    fn get_table_name() -> sql::Table;
     // fn get_key(&self) -> ::std::option::Option<&SurId>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
 }

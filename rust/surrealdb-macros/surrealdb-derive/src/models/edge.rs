@@ -118,18 +118,17 @@ impl ToTokens for FieldsGetterOpts {
                         #module_name::#struct_name_ident::new()
                     }
                     
-                    fn get_table_name() -> ::surrealdb::sql::Table {
-                        #table_name_str.into()
-                    }
-                
-                    
                     fn get_key<T: From<#crate_name::RecordId>>(self) -> ::std::option::Option<T>{
                         let record_id = self.id.map(|id| #crate_name::RecordId::from(id).into());
                         record_id
                     }
                 }
         
-                impl #crate_name::SurrealdbModel for #struct_name_ident {}
+                impl #crate_name::SurrealdbModel for #struct_name_ident {
+                    fn get_table_name() -> ::surrealdb::sql::Table {
+                        #table_name_str.into()
+                    }
+                }
                 
                 pub mod #module_name {
                     use #crate_name::SurrealdbNode;

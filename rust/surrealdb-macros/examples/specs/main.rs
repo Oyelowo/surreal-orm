@@ -96,15 +96,18 @@ pub struct Blog {
 // Recursive expansion of the SurrealdbNode macro
 // ==============================================
 
+impl surrealdb_macros::SurrealdbModel for Student {
+    fn get_table_name() -> ::surrealdb::sql::Table {
+        "student".into()
+    }
+}
 impl surrealdb_macros::SurrealdbNode for Student {
     type TableNameChecker = student::TableNameStaticChecker;
     type Schema = student::Student;
     fn schema() -> Self::Schema {
         student::Student::new()
     }
-    fn get_table_name() -> ::surrealdb::sql::Table {
-        "student".into()
-    }
+
     fn get_key<T: From<surrealdb_macros::RecordId>>(self) -> ::std::option::Option<T> {
         let record_id = self
             .id
@@ -372,6 +375,14 @@ fn test_student_edge_name() {
 // ==============================================
 
 impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
+    surrealdb_macros::SurrealdbModel for Writes<In, Out>
+{
+    fn get_table_name() -> ::surrealdb::sql::Table {
+        "rites".into()
+    }
+}
+
+impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
     surrealdb_macros::SurrealdbEdge for Writes<In, Out>
 {
     type In = In;
@@ -380,9 +391,6 @@ impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
     type Schema = writes_schema::Writes;
     fn schema() -> Self::Schema {
         writes_schema::Writes::new()
-    }
-    fn get_table_name() -> ::surrealdb::sql::Table {
-        "rites".into()
     }
     fn get_key<T: From<surrealdb_macros::RecordId>>(self) -> ::std::option::Option<T> {
         let record_id = self
