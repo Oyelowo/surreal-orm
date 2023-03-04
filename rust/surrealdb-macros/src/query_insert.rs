@@ -173,7 +173,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for InsertState
 
         let mut query = String::new();
         query.push_str("INSERT INTO ");
-        query.push_str(&T::get_table_name());
+        query.push_str(&T::table_name());
         query.push_str(" (");
         query.push_str(&field_names.join(", "));
         query.push_str(") VALUES ");

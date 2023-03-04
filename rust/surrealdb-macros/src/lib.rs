@@ -30,7 +30,7 @@ use surrealdb::sql;
 
 // SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
 pub trait SurrealdbModel {
-    fn get_table_name() -> sql::Table;
+    fn table_name() -> sql::Table;
 }
 
 pub trait SurrealdbNode: SurrealdbModel {
@@ -39,6 +39,7 @@ pub trait SurrealdbNode: SurrealdbModel {
     fn schema() -> Self::Schema;
     // fn get_key<T: Into<RecordId>>(&self) -> ::std::option::Option<&T>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
+    fn get_table_name() -> sql::Table;
 }
 
 pub trait SurrealdbEdge: SurrealdbModel {
@@ -50,6 +51,7 @@ pub trait SurrealdbEdge: SurrealdbModel {
     fn schema() -> Self::Schema;
     // fn get_key(&self) -> ::std::option::Option<&SurId>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
+    fn get_table_name() -> sql::Table;
 }
 
 // pub enum Clause {

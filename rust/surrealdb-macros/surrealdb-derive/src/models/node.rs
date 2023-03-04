@@ -107,10 +107,14 @@ impl ToTokens for FieldsGetterOpts {
                     let record_id = self.id.map(|id| #crate_name::RecordId::from(id).into());
                     record_id
                 }
+                
+                fn get_table_name() -> ::surrealdb::sql::Table {
+                    #table_name_str.into()
+                }
             }
 
             impl #crate_name::SurrealdbModel for #struct_name_ident {
-                fn get_table_name() -> ::surrealdb::sql::Table {
+                fn table_name() -> ::surrealdb::sql::Table {
                     #table_name_str.into()
                 }
             }
