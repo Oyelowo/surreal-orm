@@ -42,6 +42,7 @@ struct Company {
 #[cfg(test)]
 mod tests {
     use geo::Coord;
+    use surrealdb_macros::query_insert::insert;
 
     use super::*;
 
@@ -70,13 +71,11 @@ mod tests {
         let db = Surreal::new::<Mem>(()).await.unwrap();
         db.use_ns("test").use_db("test").await?;
 
-        let results = query_insert::InsertStatement::new()
-            .insert(company)
-            .return_one(db)
-            .await
-            .unwrap();
+        // let results = insert::<Company>(company);
+        let results = insert(company).return_one(db).await.unwrap();
 
-        Ok(serde_json::to_string(&results).unwrap())
+        // Ok(serde_json::to_string(&results).unwrap())
+        todo!()
     }
 
     #[tokio::test]
@@ -293,11 +292,7 @@ mod tests {
         let db = Surreal::new::<Mem>(()).await.unwrap();
         db.use_ns("test").use_db("test").await?;
 
-        let results = query_insert::InsertStatement::new()
-            .insert_many(companies)
-            .get_many(db)
-            .await
-            .unwrap();
+        let results = insert(companies).return_many(db).await.unwrap();
 
         insta::assert_debug_snapshot!(results);
         Ok(())
