@@ -65,7 +65,7 @@ impl<T: SurrealdbModel + DeserializeOwned + Serialize> Parametric for T {
             .map(|field_name| {
                 let field_value = get_field_value(value, &field_name)
                     .expect("Unable to get value name. This should never happen!");
-                Binding::new(field_value).with_name(field_name)
+                Binding::new(field_value).with_name(field_name.into())
             })
             .collect::<Vec<_>>()
     }
