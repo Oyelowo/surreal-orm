@@ -352,16 +352,22 @@ mod tests {
 
         println!("{mmm}");
 
+        let ref student_table = Student::get_table_name();
+        let ref book_table = Book::get_table_name();
+        let ref book_id = SurrealId::try_from("book:1").unwrap();
+        let ref student_id = SurrealId::try_from("student:1").unwrap();
+
         let mut query = select(All)
             .select(age)
             .select(firstName)
             .select(&[firstName, unoBook])
             .select(vec![firstName, unoBook])
-            .from(Student::get_table_name())
-            .from(&[Student::get_table_name(), Book::get_table_name()])
-            .from(vec![Student::get_table_name(), Book::get_table_name()])
-            .from(SurrealId::try_from("book:1").unwrap())
-            .from(&[SurrealId::try_from("book:1").unwrap()])
+            .from(student_table)
+            .from(&[student_table, book_table])
+            .from(vec![student_table, book_table])
+            .from(book_id)
+            .from(&[book_id, student_id])
+            .from(vec![book_id, student_id])
             .from(vec![SurrealId::try_from("book:1").unwrap()])
             .from(query1)
             .where_(

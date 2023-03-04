@@ -281,9 +281,32 @@ impl From<Vec<sql::Thing>> for Targettables {
     }
 }
 
+impl From<&sql::Table> for Targettables {
+    fn from(value: &sql::Table) -> Self {
+        Self::Table(value.to_owned())
+    }
+}
+impl From<&sql::Thing> for Targettables {
+    fn from(value: &sql::Thing) -> Self {
+        Self::SurrealId(value.to_owned().into())
+    }
+}
+
 impl From<sql::Thing> for Targettables {
     fn from(value: sql::Thing) -> Self {
         Self::SurrealId(value.into())
+    }
+}
+
+impl From<Vec<&sql::Table>> for Targettables {
+    fn from(value: Vec<&sql::Table>) -> Self {
+        Self::Tables(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
+    }
+}
+
+impl<const N: usize> From<&[&sql::Table; N]> for Targettables {
+    fn from(value: &[&sql::Table; N]) -> Self {
+        Self::Tables(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
@@ -293,9 +316,27 @@ impl<const N: usize> From<&[sql::Table; N]> for Targettables {
     }
 }
 
+impl From<&SurrealId> for Targettables {
+    fn from(value: &SurrealId) -> Self {
+        Self::SurrealId(value.to_owned())
+    }
+}
+
 impl<const N: usize> From<&[SurrealId; N]> for Targettables {
     fn from(value: &[SurrealId; N]) -> Self {
         Self::SurrealIds(value.to_vec())
+    }
+}
+
+impl From<Vec<&SurrealId>> for Targettables {
+    fn from(value: Vec<&SurrealId>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
+    }
+}
+
+impl<const N: usize> From<&[&SurrealId; N]> for Targettables {
+    fn from(value: &[&SurrealId; N]) -> Self {
+        Self::SurrealIds(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
