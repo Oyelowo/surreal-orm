@@ -1,4 +1,4 @@
-use std::{collections::HashMap, mem::BikeshedIntrinsicFrom};
+use std::{collections::HashMap, marker::PhantomData};
 
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -16,8 +16,7 @@ use crate::{
 };
 
 pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbNode> {
-    // table: String,
-    values: Vec<T>,
+    node_type: PhantomData<T>,
     on_duplicate_key_update: Vec<String>,
     bindings: BindingsList,
 }
@@ -95,9 +94,9 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> Parametric for Insertables
 impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
     pub fn new() -> Self {
         Self {
-            values: Vec::new(),
             on_duplicate_key_update: Vec::new(),
             bindings: vec![],
+            node_type: PhantomData,
         }
     }
 
@@ -106,11 +105,6 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         let bindings = value.get_bindings();
         self.bindings.extend(bindings);
         // self.values.push(value);
-        self
-    }
-
-    pub fn insert_many(&mut self, values: Vec<T>) -> &mut Self {
-        self.values = values;
         self
     }
 
@@ -134,7 +128,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
     }
 
     // pub fn build(&self) -> Result<(String, Vec<(String, Value)>), String> {
-    pub fn build(self) -> String {
+    pub fn build(&self) -> String {
         // if self.values.is_empty() {
         //     return Err(String::from("No values to insert"));
         // }
@@ -166,23 +160,6 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
             .collect::<Vec<_>>()
             .join(", ");
 
-        // fmr (i, value) in self.values.iter().enumerate() {
-        //     let mut row_values = Vec::new();
-        //     for field_name in &field_names {
-        //         let field_value = get_field_value(value, field_name)?;
-        //         let placeholder_var_names = format!("{}_{}", field_name, i);
-        //         variables.push((placeholder_var_names.clone(), field_value));
-        //         // row_values.push(format!("${}", variables.len()));
-        //         row_values.push(format!("${}", placeholder_var_names));
-        //     }
-        //     if i > 0 {
-        //         values.push_str(", ");
-        //     }
-        //     values.push_str("(");
-        //     values.push_str(&row_values.join(", "));
-        //     values.push_str(")");
-        // }
-
         query.push_str(&values);
 
         if !&self.on_duplicate_key_update.is_empty() {
@@ -197,11 +174,13 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
     }
 
     pub async fn get_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
-        let (query, variables) = self.build().unwrap();
-        let response = variables
-            .clone()
+        let query = self.build();
+        let response = self
+            .bindings
             .iter()
-            .fold(db.query(query), |acc, val| acc.bind(val))
+            .fold(db.query(query), |acc, val| {
+                acc.bind((val.get_param(), val.get_value()))
+            })
             .await?
             .take::<Option<T>>(0)?;
 
