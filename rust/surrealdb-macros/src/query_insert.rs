@@ -37,13 +37,19 @@ pub enum Insertables<T: Serialize + DeserializeOwned + SurrealdbNode> {
 
 impl<T: Serialize + DeserializeOwned + SurrealdbNode> From<Vec<T>> for Insertables<T> {
     fn from(value: Vec<T>) -> Self {
-        todo!()
+        Self::Nodes(value)
     }
 }
 
 impl<T: Serialize + DeserializeOwned + SurrealdbNode> From<T> for Insertables<T> {
     fn from(value: T) -> Self {
-        todo!()
+        Self::Node(value)
+    }
+}
+
+impl<T: Serialize + DeserializeOwned + SurrealdbNode> From<QueryBuilderSelect> for Insertables<T> {
+    fn from(value: QueryBuilderSelect) -> Self {
+        Self::FromQuery(value)
     }
 }
 

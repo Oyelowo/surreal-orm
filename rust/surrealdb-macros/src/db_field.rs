@@ -159,14 +159,26 @@ impl From<GeometryOrField> for Value {
 }
 
 #[derive(serde::Serialize, Debug, Clone)]
-pub enum NumberOrField {
+pub enum Ordinal {
+    Datetime(sql::Datetime),
     Number(sql::Number),
     Field(Value),
+}
+impl From<sql::Datetime> for Ordinal {
+    fn from(value: sql::Datetime) -> Self {
+        Self::Datetime(value.into())
+    }
+}
+
+impl From<chrono::DateTime<chrono::Utc>> for Ordinal {
+    fn from(value: chrono::DateTime<chrono::Utc>) -> Self {
+        Self::Datetime(value.into())
+    }
 }
 
 macro_rules! impl_number_or_field_from {
     ($($t:ty),*) => {
-        $(impl From<$t> for NumberOrField {
+        $(impl From<$t> for Ordinal {
             fn from(value: $t) -> Self {
                 Self::Number(sql::Number::from(value))
             }
@@ -178,22 +190,23 @@ impl_number_or_field_from!(
     i8, i16, i32, i64, isize, u8, u16, u32, u64, usize, f32, f64, BigDecimal
 );
 
-impl Into<NumberOrField> for DbField {
-    fn into(self) -> NumberOrField {
-        NumberOrField::Field(self.into())
+impl Into<Ordinal> for DbField {
+    fn into(self) -> Ordinal {
+        Ordinal::Field(self.into())
     }
 }
 
-impl Into<NumberOrField> for &DbField {
-    fn into(self) -> NumberOrField {
-        NumberOrField::Field(self.into())
+impl Into<Ordinal> for &DbField {
+    fn into(self) -> Ordinal {
+        Ordinal::Field(self.into())
     }
 }
-impl Into<Value> for NumberOrField {
+impl Into<Value> for Ordinal {
     fn into(self) -> Value {
         match self {
-            NumberOrField::Number(n) => n.into(),
-            NumberOrField::Field(f) => f.into(),
+            Ordinal::Datetime(n) => n.into(),
+            Ordinal::Number(n) => n.into(),
+            Ordinal::Field(f) => f.into(),
         }
     }
 }
@@ -208,9 +221,9 @@ impl Into<Value> for NumberOrField {
 //     }
 // }
 
-impl Into<NumberOrField> for sql::Number {
-    fn into(self) -> NumberOrField {
-        NumberOrField::Number(self)
+impl Into<Ordinal> for sql::Number {
+    fn into(self) -> Ordinal {
+        Ordinal::Number(self)
     }
 }
 
@@ -933,9 +946,9 @@ impl DbField {
     /// ```
     pub fn less_than<T>(&self, value: T) -> Self
     where
-        T: Into<NumberOrField>,
+        T: Into<Ordinal>,
     {
-        let value: NumberOrField = value.into();
+        let value: Ordinal = value.into();
         self.generate_query(sql::Operator::LessThan, value)
     }
 
@@ -955,9 +968,9 @@ impl DbField {
     /// ```
     pub fn less_than_or_equal<T>(&self, value: T) -> Self
     where
-        T: Into<NumberOrField>,
+        T: Into<Ordinal>,
     {
-        let value: NumberOrField = value.into();
+        let value: Ordinal = value.into();
         self.generate_query(sql::Operator::LessThanOrEqual, value)
     }
 
@@ -977,9 +990,9 @@ impl DbField {
     /// ```
     pub fn greater_than<T>(&self, value: T) -> Self
     where
-        T: Into<NumberOrField>,
+        T: Into<Ordinal>,
     {
-        let value: NumberOrField = value.into();
+        let value: Ordinal = value.into();
         self.generate_query(sql::Operator::MoreThan, value)
     }
 
@@ -999,9 +1012,9 @@ impl DbField {
     /// ```
     pub fn greater_than_or_equal<T>(&self, value: T) -> Self
     where
-        T: Into<NumberOrField>,
+        T: Into<Ordinal>,
     {
-        let value: NumberOrField = value.into();
+        let value: Ordinal = value.into();
         self.generate_query(sql::Operator::MoreThanOrEqual, value)
     }
 
@@ -1695,11 +1708,11 @@ impl DbField {
     /// ```
     pub fn between<T>(&self, lower_bound: T, upper_bound: T) -> Self
     where
-        T: Into<NumberOrField>,
+        T: Into<Ordinal>,
     {
-        let lower_bound: NumberOrField = lower_bound.into();
+        let lower_bound: Ordinal = lower_bound.into();
         let lower_bound: Value = lower_bound.into();
-        let upper_bound: NumberOrField = upper_bound.into();
+        let upper_bound: Ordinal = upper_bound.into();
         let upper_bound: Value = upper_bound.into();
         let lower_bound_binding = Binding::new(lower_bound);
         let upper_bound_binding = Binding::new(upper_bound);
@@ -1736,11 +1749,11 @@ impl DbField {
     /// ```
     pub fn within<T>(&self, lower_bound: T, upper_bound: T) -> Self
     where
-        T: Into<NumberOrField>,
+        T: Into<Ordinal>,
     {
-        let lower_bound: NumberOrField = lower_bound.into();
+        let lower_bound: Ordinal = lower_bound.into();
         let lower_bound: Value = lower_bound.into();
-        let upper_bound: NumberOrField = upper_bound.into();
+        let upper_bound: Ordinal = upper_bound.into();
         let upper_bound: Value = upper_bound.into();
         let lower_bound_binding = Binding::new(lower_bound);
         let upper_bound_binding = Binding::new(upper_bound);
