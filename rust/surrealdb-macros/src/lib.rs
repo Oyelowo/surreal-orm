@@ -31,6 +31,7 @@ use surrealdb::sql;
 // SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
 pub trait SurrealdbModel {
     fn table_name() -> sql::Table;
+    fn get_serializable_field_names() -> Vec<String>;
 }
 
 pub trait SurrealdbNode: SurrealdbModel {

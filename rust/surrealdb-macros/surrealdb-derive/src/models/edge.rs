@@ -87,6 +87,7 @@ impl ToTokens for FieldsGetterOpts {
                 connection_with_field_appended,
                 record_link_fields_methods,
                 schema_struct_fields_names_kv_empty,
+                serialized_field_name_no_skip,
                 ..
         } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
@@ -131,6 +132,10 @@ impl ToTokens for FieldsGetterOpts {
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbModel for #struct_name_ident<In, Out> {
                     fn table_name() -> ::surrealdb::sql::Table {
                         #table_name_str.into()
+                    }
+                    
+                    fn get_serializable_field_names() -> Vec<String> {
+                        return vec![#( #serialized_field_name_no_skip) *]
                     }
                 }
                 
