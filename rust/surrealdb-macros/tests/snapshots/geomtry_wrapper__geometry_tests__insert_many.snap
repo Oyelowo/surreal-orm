@@ -9,6 +9,47 @@ expression: results
                 Thing {
                     tb: "company",
                     id: Number(
+                        1,
+                    ),
+                },
+            ),
+        ),
+        nam: Uuid(
+            725cfebe-a7f2-4100-aeb3-7f73998fff02,
+        ),
+        name: "Acme Inc.",
+        founded: Datetime(
+            1967-05-03T00:00:00Z,
+        ),
+        founders: [
+            Person {
+                name: "John Doe",
+            },
+            Person {
+                name: "Jane Doe",
+            },
+        ],
+        tags: [
+            "foo",
+            "bar",
+        ],
+        home: GeometryCustom(
+            Point(
+                Point(
+                    Coord {
+                        x: 45.3,
+                        y: 78.1,
+                    },
+                ),
+            ),
+        ),
+    },
+    Company {
+        id: Some(
+            SurrealId(
+                Thing {
+                    tb: "company",
+                    id: Number(
                         2,
                     ),
                 },

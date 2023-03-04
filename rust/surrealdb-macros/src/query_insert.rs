@@ -12,14 +12,17 @@ use surrealdb::{
 };
 
 use crate::{
-    db_field::Binding, query_select::QueryBuilderSelect, BindingsList, DbField, Parametric,
-    SurrealdbModel,
+    db_field::Binding,
+    query_select::{self, QueryBuilderSelect},
+    BindingsList, DbField, Parametric, SurrealdbModel,
 };
 
 pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbModel> {
     node_type: PhantomData<T>,
     on_duplicate_key_update: Vec<String>,
     bindings: BindingsList,
+    // You can select values to copy data from an existing table into a new one
+    select_query_string: Option<String>,
 }
 
 pub fn insert<T: Serialize + DeserializeOwned + SurrealdbModel>(
@@ -90,11 +93,25 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> InsertStatement<T> {
             on_duplicate_key_update: Vec::new(),
             bindings: vec![],
             node_type: PhantomData,
+            select_query_string: None,
         }
     }
 
     pub fn insert<V: Into<Insertables<T>>>(mut self, value: V) -> Self {
         let value: Insertables<T> = value.into();
+        if let Insertables::FromQuery(query_select) = &value {
+            self.select_query_string = Some(format!("{query_select}"));
+        }
+
+        // I am handling deriving other values params later during actual query building
+        // since we can derive that by chunking the bindings by the number of serialized fields
+        // which I am able to derive at compile time. Call me zeus Oyelowo! haha!
+        // Leaving this here for posteriy
+        // let xx = match value {
+        //     Insertables::Node(n) => [],
+        //     Insertables::Nodes(_) => todo!(),
+        //     Insertables::FromQuery(_) => todo!(),
+        // };
         let bindings = value.get_bindings();
         self.bindings.extend(bindings);
         self
@@ -132,24 +149,35 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for InsertState
         let mut query = String::new();
         query.push_str("INSERT INTO ");
         query.push_str(&T::table_name());
-        query.push_str(" (");
-        query.push_str(&field_names.join(", "));
-        query.push_str(") VALUES ");
 
-        let placeholders = self
-            .bindings
-            .iter()
-            .map(|b| format!("${}", b.get_param()))
-            .collect::<Vec<_>>()
-            .chunks_exact(field_names.len())
-            .map(|fields_values_params_list| format!("({})", fields_values_params_list.join(", ")))
-            .collect::<Vec<_>>()
-            .join(", ");
-        // .join(", ");
+        if let Some(query_select) = &self.select_query_string {
+            query.push_str(" (");
+            query.push_str(&query_select.trim_end_matches(";"));
+            query.push_str(")");
+        } else {
+            query.push_str(" (");
+            query.push_str(&field_names.join(", "));
+            query.push_str(") ");
 
-        // query.push_str(" (");
-        query.push_str(&placeholders);
-        // query.push_str(") ");
+            query.push_str("VALUES ");
+
+            let placeholders = self
+                .bindings
+                .iter()
+                .map(|b| format!("${}", b.get_param()))
+                .collect::<Vec<_>>()
+                .chunks_exact(field_names.len())
+                .map(|fields_values_params_list| {
+                    format!("({})", fields_values_params_list.join(", "))
+                })
+                .collect::<Vec<_>>()
+                .join(", ");
+            // .join(", ");
+
+            // query.push_str(" (");
+            query.push_str(&placeholders);
+            // query.push_str(") ");
+        }
 
         if !&self.on_duplicate_key_update.is_empty() {
             let updates_str = self.on_duplicate_key_update.join(", ");
