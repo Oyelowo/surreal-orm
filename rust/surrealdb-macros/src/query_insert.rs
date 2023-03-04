@@ -21,6 +21,15 @@ pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbNode> {
     bindings: BindingsList,
 }
 
+// pub fn insert<V: Into<Insertables<T>>>(mut self, value: V) -> Self {
+pub fn insert<T: Serialize + DeserializeOwned + SurrealdbNode, V: Into<Insertables<T>>>(
+    insertables: impl Into<Insertables<T>>,
+) -> InsertStatement<T> {
+    let mut builder = InsertStatement::<T>::new();
+    let insertables: Insertables<T> = insertables.into();
+    builder.insert(insertables)
+}
+
 pub enum Insertables<T: Serialize + DeserializeOwned + SurrealdbNode> {
     Node(T),
     Nodes(Vec<T>),
