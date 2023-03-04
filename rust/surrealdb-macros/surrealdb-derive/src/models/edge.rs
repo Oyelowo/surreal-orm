@@ -135,7 +135,7 @@ impl ToTokens for FieldsGetterOpts {
                     }
                     
                     fn get_serializable_field_names() -> Vec<&'static str> {
-                        return vec![#( #serialized_field_name_no_skip) *]
+                        return vec![#( #serialized_field_name_no_skip), *]
                     }
                 }
                 
