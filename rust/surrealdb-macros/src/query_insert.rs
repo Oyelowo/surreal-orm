@@ -25,9 +25,10 @@ pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbModel> {
     select_query_string: Option<String>,
 }
 
-pub fn insert<T: Serialize + DeserializeOwned + SurrealdbModel>(
-    insertables: impl Into<Insertables<T>>,
-) -> InsertStatement<T> {
+pub fn insert<T>(insertables: impl Into<Insertables<T>>) -> InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     let mut builder = InsertStatement::<T>::new();
     let insertables: Insertables<T> = insertables.into();
     builder.insert(insertables)
@@ -39,20 +40,27 @@ pub enum Insertables<T: Serialize + DeserializeOwned + SurrealdbModel> {
     FromQuery(QueryBuilderSelect<T>),
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<Vec<T>> for Insertables<T> {
+impl<T> From<Vec<T>> for Insertables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: Vec<T>) -> Self {
         Self::Nodes(value)
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<T> for Insertables<T> {
+impl<T> From<T> for Insertables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn from(value: T) -> Self {
         Self::Node(value)
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<QueryBuilderSelect<T>>
-    for Insertables<T>
+impl<T> From<QueryBuilderSelect<T>> for Insertables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     fn from(value: QueryBuilderSelect<T>) -> Self {
         Self::FromQuery(value)

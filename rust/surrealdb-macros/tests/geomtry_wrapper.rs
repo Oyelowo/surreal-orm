@@ -368,7 +368,7 @@ mod geometry_tests {
         //     .unwrap();
         //
         let c = Company::schema();
-        let select_query = select::<Company>(All)
+        let select_query = select(All)
             .from(Company::get_table_name())
             // .where_(c.tags.any_like("foo"))
             .timeout(Duration::from_secs(20))

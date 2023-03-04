@@ -100,6 +100,10 @@ impl surrealdb_macros::SurrealdbModel for Student {
     fn table_name() -> ::surrealdb::sql::Table {
         "student".into()
     }
+
+    fn get_serializable_field_names() -> Vec<&'static str> {
+        todo!()
+    }
 }
 impl surrealdb_macros::SurrealdbNode for Student {
     type TableNameChecker = student::TableNameStaticChecker;
@@ -384,6 +388,10 @@ impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
     fn table_name() -> ::surrealdb::sql::Table {
         "rites".into()
     }
+
+    fn get_serializable_field_names() -> Vec<&'static str> {
+        todo!()
+    }
 }
 
 impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
@@ -518,6 +526,10 @@ fn test_writes_edge_name() {}
 impl surrealdb_macros::SurrealdbModel for Book {
     fn table_name() -> ::surrealdb::sql::Table {
         "book".into()
+    }
+
+    fn get_serializable_field_names() -> Vec<&'static str> {
+        todo!()
     }
 }
 impl surrealdb_macros::SurrealdbNode for Book {
@@ -654,6 +666,10 @@ fn test_book_edge_name() {}
 impl surrealdb_macros::SurrealdbModel for Blog {
     fn table_name() -> ::surrealdb::sql::Table {
         "blog".into()
+    }
+
+    fn get_serializable_field_names() -> Vec<&'static str> {
+        todo!()
     }
 }
 

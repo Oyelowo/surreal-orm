@@ -651,7 +651,6 @@ async fn main() -> surrealdb::Result<()> {
     let ref age = DbField::new("age");
     let firstName = &name;
     let lastName = &name;
-    let mut queryb = query_select::QueryBuilderSelect::new();
     let line = line_string![
         (x: -21.95156, y: 64.1446),
         (x: -21.951, y: 64.14479),
@@ -699,13 +698,15 @@ async fn main() -> surrealdb::Result<()> {
                          //         .and(age.greater_than(711).greater_than_or_equal(421).equal(25))
                          //         .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
                          // );
-    let ref mut query = select(All).from(Company::get_table_name()).where_(
-        cond(age.greater_than(id.clone()))
-            .or(firstName.like("Oyelowo"))
-            .and(lastName.exactly_equal("Oyedayo"))
-            .and(age.less_than(150))
-            .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
-    );
+    let ref mut query = select::<Company>(All)
+        .from(Company::get_table_name())
+        .where_(
+            cond(age.greater_than(id.clone()))
+                .or(firstName.like("Oyelowo"))
+                .and(lastName.exactly_equal("Oyedayo"))
+                .and(age.less_than(150))
+                .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
+        );
     println!("MAWAOOOO----->{}", query);
     println!("BINDAAAA----->{:?}", query.get_bindings());
     let xx = cond(age.greater_than(id.clone()));
