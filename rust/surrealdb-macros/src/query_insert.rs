@@ -13,16 +13,16 @@ use surrealdb::{
 
 use crate::{
     db_field::Binding, query_select::QueryBuilderSelect, BindingsList, DbField, Parametric,
-    SurrealdbNode,
+    SurrealdbModel,
 };
 
-pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbNode> {
+pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbModel> {
     node_type: PhantomData<T>,
     on_duplicate_key_update: Vec<String>,
     bindings: BindingsList,
 }
 
-pub fn insert<T: Serialize + DeserializeOwned + SurrealdbNode>(
+pub fn insert<T: Serialize + DeserializeOwned + SurrealdbModel>(
     insertables: impl Into<Insertables<T>>,
 ) -> InsertStatement<T> {
     let mut builder = InsertStatement::<T>::new();
@@ -30,31 +30,31 @@ pub fn insert<T: Serialize + DeserializeOwned + SurrealdbNode>(
     builder.insert(insertables)
 }
 
-pub enum Insertables<T: Serialize + DeserializeOwned + SurrealdbNode> {
+pub enum Insertables<T: Serialize + DeserializeOwned + SurrealdbModel> {
     Node(T),
     Nodes(Vec<T>),
     FromQuery(QueryBuilderSelect),
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbNode> From<Vec<T>> for Insertables<T> {
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<Vec<T>> for Insertables<T> {
     fn from(value: Vec<T>) -> Self {
         Self::Nodes(value)
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbNode> From<T> for Insertables<T> {
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<T> for Insertables<T> {
     fn from(value: T) -> Self {
         Self::Node(value)
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbNode> From<QueryBuilderSelect> for Insertables<T> {
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<QueryBuilderSelect> for Insertables<T> {
     fn from(value: QueryBuilderSelect) -> Self {
         Self::FromQuery(value)
     }
 }
 
-impl<N: SurrealdbNode + DeserializeOwned + Serialize> Parametric for N {
+impl<N: SurrealdbModel + DeserializeOwned + Serialize> Parametric for N {
     fn get_bindings(&self) -> BindingsList {
         let value = self;
         let field_names = get_field_names(value);
@@ -70,7 +70,7 @@ impl<N: SurrealdbNode + DeserializeOwned + Serialize> Parametric for N {
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbNode> Parametric for Insertables<T> {
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for Insertables<T> {
     fn get_bindings(&self) -> crate::BindingsList {
         match self {
             Insertables::Node(node) => node.get_bindings(),
@@ -83,7 +83,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> Parametric for Insertables
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> InsertStatement<T> {
     pub fn new() -> Self {
         Self {
             on_duplicate_key_update: Vec::new(),
@@ -158,7 +158,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
         Ok(returned_val)
     }
 }
-impl<T: Serialize + DeserializeOwned + SurrealdbNode> Buildable for InsertStatement<T> {
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for InsertStatement<T> {
     // fn build(&self) -> String {}
     fn build(&self) -> String {
         if self.bindings.is_empty() {
@@ -198,7 +198,13 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> Buildable for InsertStatem
         query
     }
 }
-impl<T: Serialize + DeserializeOwned> Runnable<T> for InsertStatement<T> {}
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for InsertStatement<T> {
+    fn get_bindings(&self) -> BindingsList {
+        self.get_bindings()
+    }
+}
+
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Runnable<T> for InsertStatement<T> {}
 
 trait Buildable {
     fn build(&self) -> String;
@@ -207,7 +213,7 @@ trait Buildable {
 trait Runnable<T>
 where
     Self: Parametric + Buildable,
-    T: Serialize + DeserializeOwned,
+    T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
         let query = self.build();

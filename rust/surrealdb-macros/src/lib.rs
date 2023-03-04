@@ -28,7 +28,7 @@ pub use db_field::Parametric;
 pub use surrealdb::opt::RecordId;
 use surrealdb::sql;
 
-// SurrealdbModel is a superset of SurrealdbNode and SurrealdbEdge. IOW, both are
+// SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
 pub trait SurrealdbModel {}
 
 pub trait SurrealdbNode: SurrealdbModel {
