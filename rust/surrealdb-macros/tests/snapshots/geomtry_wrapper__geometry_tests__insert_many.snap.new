@@ -1,0 +1,48 @@
+---
+source: surrealdb-macros/tests/geomtry_wrapper.rs
+assertion_line: 320
+expression: results
+---
+[
+    Company {
+        id: Some(
+            SurrealId(
+                Thing {
+                    tb: "company",
+                    id: Number(
+                        2,
+                    ),
+                },
+            ),
+        ),
+        nam: Uuid(
+            375cfebe-a7f2-4100-aeb3-7f73998fff02,
+        ),
+        name: "Apple Inc.",
+        founded: Datetime(
+            1967-05-03T00:00:00Z,
+        ),
+        founders: [
+            Person {
+                name: "John Doe",
+            },
+            Person {
+                name: "Jane Doe",
+            },
+        ],
+        tags: [
+            "foo",
+            "bar",
+        ],
+        home: GeometryCustom(
+            Point(
+                Point(
+                    Coord {
+                        x: 63.0,
+                        y: 21.0,
+                    },
+                ),
+            ),
+        ),
+    },
+]

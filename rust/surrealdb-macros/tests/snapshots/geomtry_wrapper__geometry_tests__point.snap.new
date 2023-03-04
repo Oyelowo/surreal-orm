@@ -1,0 +1,6 @@
+---
+source: surrealdb-macros/tests/geomtry_wrapper.rs
+assertion_line: 112
+expression: company
+---
+{"id":"company:lowo","nam":"285cfebe-a7f2-4100-aeb3-7f73998fff02","name":"Mana Inc.","founded":"1967-05-03T00:00:00Z","founders":[{"name":"John Doe"},{"name":"Jane Doe"}],"tags":["foo","bar"],"home":{"type":"Point","coordinates":[40.02,116.34]}}

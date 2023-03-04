@@ -134,14 +134,16 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for InsertState
         query.push_str(&field_names.join(", "));
         query.push_str(") VALUES ");
 
-        let values = self
+        let placeholders = self
             .bindings
             .iter()
-            .map(|b| format!("({}, {})", b.get_param(), b.get_value()))
+            .map(|b| format!("${}", b.get_param()))
             .collect::<Vec<_>>()
             .join(", ");
 
-        query.push_str(&values);
+        query.push_str(" (");
+        query.push_str(&placeholders);
+        query.push_str(") ");
 
         if !&self.on_duplicate_key_update.is_empty() {
             let updates_str = self.on_duplicate_key_update.join(", ");
@@ -174,6 +176,7 @@ where
 {
     async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
         let query = self.build();
+        println!("XXXX {query}");
         let mut response = self
             .get_bindings()
             .iter()
@@ -186,8 +189,8 @@ where
         // trying to return Vec<T> rather than Option<T>, then pick the first of the returned
         // Ok<T>.
         let mut returned_val = match response.take::<Option<T>>(0) {
-            Err(err) => response.take::<Vec<T>>(0)?,
             Ok(one) => vec![one.unwrap()],
+            Err(err) => response.take::<Vec<T>>(0)?,
         };
 
         // TODO:: Handle error if nothing is returned

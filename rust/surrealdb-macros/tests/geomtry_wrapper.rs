@@ -56,7 +56,7 @@ struct GenZCompany {
 }
 
 #[cfg(test)]
-mod tests {
+mod geometry_tests {
     use std::time::Duration;
 
     use geo::Coord;
@@ -96,8 +96,7 @@ mod tests {
         // let results = insert::<Company>(company);
         let results = insert(company).return_one(db).await.unwrap();
 
-        // Ok(serde_json::to_string(&results).unwrap())
-        todo!()
+        Ok(serde_json::to_string(&results).unwrap())
     }
 
     #[tokio::test]
