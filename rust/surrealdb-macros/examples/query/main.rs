@@ -650,7 +650,7 @@ async fn main() -> surrealdb::Result<()> {
     let ref age = DbField::new("age");
     let firstName = &name;
     let lastName = &name;
-    let mut queryb = query_select::QueryBuilder::new();
+    let mut queryb = query_select::QueryBuilderSelect::new();
     let line = line_string![
         (x: -21.95156, y: 64.1446),
         (x: -21.951, y: 64.14479),

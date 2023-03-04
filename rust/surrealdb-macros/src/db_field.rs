@@ -16,7 +16,7 @@ use std::{
 use proc_macro2::Span;
 use surrealdb::sql::{self, Number, Value};
 
-use crate::query_select::QueryBuilder;
+use crate::query_select::QueryBuilderSelect;
 
 /// Represents a field in the database. This type wraps a `String` and
 /// provides a convenient way to refer to a database fields.
@@ -228,9 +228,9 @@ impl Into<DbFilter> for &DbField {
     }
 }
 
-impl Into<DbFilter> for QueryBuilder {
+impl Into<DbFilter> for QueryBuilderSelect {
     fn into(self) -> DbFilter {
-        let query_b: QueryBuilder = self;
+        let query_b: QueryBuilderSelect = self;
         DbFilter::new(query_b)
     }
 }

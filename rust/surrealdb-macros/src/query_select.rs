@@ -261,7 +261,7 @@ pub enum Targettables {
     SurrealId(SurrealId),
     SurrealIds(Vec<SurrealId>),
     // Should already be bound
-    SubQuery(QueryBuilder),
+    SubQuery(QueryBuilderSelect),
 }
 
 impl From<Vec<sql::Table>> for Targettables {
@@ -369,14 +369,14 @@ impl From<Table> for Targettables {
     }
 }
 
-impl From<&mut QueryBuilder> for Targettables {
-    fn from(value: &mut QueryBuilder) -> Self {
+impl From<&mut QueryBuilderSelect> for Targettables {
+    fn from(value: &mut QueryBuilderSelect) -> Self {
         Self::SubQuery(value.to_owned())
     }
 }
 
-impl From<QueryBuilder> for Targettables {
-    fn from(value: QueryBuilder) -> Self {
+impl From<QueryBuilderSelect> for Targettables {
+    fn from(value: QueryBuilderSelect) -> Self {
         Self::SubQuery(value.to_owned())
     }
 }
@@ -588,67 +588,40 @@ impl Parametric for Selectables {
 
 /// The query builder struct used to construct complex database queries.
 #[derive(Debug, Clone)]
-pub struct QueryBuilder {
-    // projections: Vec<&'a str>,
+pub(crate) struct QueryBuilderSelect {
     projections: Vec<String>,
-    /// The list of target tables for the query.
-    // targets: Vec<&'a str>,
     targets: Vec<String>,
     where_: Option<String>,
-    // where_: Option<&'a str>,
-    // split: Option<Vec<&'a str>>,
     split: Vec<String>,
-    // group_by: Option<Vec<&'a str>>,
     group_by: Vec<String>,
     order_by: Vec<Order>,
     limit: Option<u64>,
     start: Option<u64>,
-    // fetch: Option<Vec<&'a str>>,
     fetch: Vec<String>,
     timeout: Option<String>,
     parallel: bool,
     ________params_accumulator: BindingsList,
 }
 
-impl Parametric for QueryBuilder {
+impl Parametric for QueryBuilderSelect {
     fn get_bindings(&self) -> BindingsList {
         self.________params_accumulator.to_vec()
     }
 }
 
-impl From<Selectables> for QueryBuilder {
+impl From<Selectables> for QueryBuilderSelect {
     fn from(value: Selectables) -> Self {
         todo!()
     }
 }
-// fn select(selectables: impl Into<Selectables>) -> QueryBuilder<'static> {
-//     &mut QueryBuilder::new().select(selectables)
-// }
-// return Box::new(x);
-pub fn select(selectables: impl Into<Selectables>) -> QueryBuilder {
-    let mut builder = QueryBuilder::new();
+
+pub fn select(selectables: impl Into<Selectables>) -> QueryBuilderSelect {
+    let mut builder = QueryBuilderSelect::new();
     let selectables: Selectables = selectables.into();
-    let builder = builder.select(selectables);
-    builder
-    // let selectables: Selectables = selectables.into();
-    // selectables.into()
-}
-pub fn query() -> QueryBuilder {
-    let mut builder = QueryBuilder::new();
-
-    // let xx = Box::new(selectables);
-    // builder.select(xx.into());
-    builder
+    builder.select(selectables)
 }
 
-// impl<'a> Queerrr<'a> {
-//     fn select(&mut self, selectables: impl Into<Selectables>) -> QueryBuilder<'a> {
-//         self.select = QueryBuilder::new().select(selectables);
-//         mut self.select
-//     }
-// }
-
-impl QueryBuilder {
+impl QueryBuilderSelect {
     /// Create a new instance of QueryBuilder.
     ///
     /// # Example
@@ -1054,7 +1027,7 @@ impl QueryBuilder {
     [ TIMEOUT @duration ]
     [ PARALLEL ]
 ; */
-impl Display for QueryBuilder {
+impl Display for QueryBuilderSelect {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let mut query = String::new();
 

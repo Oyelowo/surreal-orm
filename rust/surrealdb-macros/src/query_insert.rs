@@ -4,12 +4,18 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::{json, Value};
 use surrealdb::{engine::local::Db, method::Query, opt::QueryResult, sql, Response, Surreal};
 
-use crate::{DbField, SurrealdbNode};
+use crate::{query_select::QueryBuilderSelect, DbField, SurrealdbNode};
 
 pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbNode> {
     // table: String,
     values: Vec<T>,
     on_duplicate_key_update: Vec<Updater>,
+}
+
+enum Insertables<T: SurrealdbNode> {
+    Node(T),
+    Nodes(T),
+    FromQuery(QueryBuilderSelect),
 }
 
 impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
