@@ -54,7 +54,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<QueryBuilderSelect> 
     }
 }
 
-impl<N: SurrealdbModel + DeserializeOwned + Serialize> Parametric for N {
+impl<T: SurrealdbModel + DeserializeOwned + Serialize> Parametric for T {
     fn get_bindings(&self) -> BindingsList {
         let value = self;
         let field_names = get_field_names(value);
@@ -200,6 +200,7 @@ where
 
     async fn return_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
         let query = self.build();
+        println!("XXXX {query}");
         let mut response = self
             .get_bindings()
             .iter()
@@ -208,12 +209,13 @@ where
             })
             .await?;
 
+        println!("mmmmm {response:?}");
         // This does the reverse of get_one
         // If it errors, try to check if only single entry has been inputed, hence, suurealdb
         // trying to return Option<T>, then pick the return the only item as Vec<T>.
         let mut returned_val = match response.take::<Vec<T>>(0) {
+            Ok(many) => many,
             Err(err) => vec![response.take::<Option<T>>(0)?.unwrap()],
-            Ok(one) => one,
         };
 
         // TODO:: Handle error if nothing is returned

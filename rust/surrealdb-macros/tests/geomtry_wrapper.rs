@@ -366,10 +366,7 @@ mod geometry_tests {
             .from(Company::get_table_name())
             .where_(c.tags.any_like("foo"))
             .timeout(Duration::from_secs(20))
-            .parallel()
-            .return_many(db.clone())
-            .await
-            .unwrap();
+            .parallel();
 
         let results = insert::<GenZCompany>(select_query)
             .return_many(db)
