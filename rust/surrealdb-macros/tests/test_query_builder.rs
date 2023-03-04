@@ -323,7 +323,7 @@ mod tests {
             .or(firstName.equal("Oyelowo"))
             .and(lastName.equal("Oyedayo"));
 
-        let mut query1 = select(All)
+        let mut query1 = select::<Book>(All)
             .from(Book::get_table_name())
             .where_(
                 cond(content.like("lowo").and(age).greater_than_or_equal(600))
@@ -344,10 +344,6 @@ mod tests {
 
         insta::assert_debug_snapshot!(query1.to_string());
         insta::assert_debug_snapshot!(query1.get_bindings());
-
-        let mmm = select(All);
-
-        println!("{mmm}");
 
         let ref student_table = Student::get_table_name();
         let ref book_table = Book::get_table_name();

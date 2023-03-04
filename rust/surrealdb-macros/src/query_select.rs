@@ -425,19 +425,19 @@ where
 
 impl<T> From<&mut QueryBuilderSelect<T>> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned + SurrealdbModel + Clone,
 {
     fn from(value: &mut QueryBuilderSelect<T>) -> Self {
-        Self::SubQuery(value.to_owned())
+        Self::SubQuery(value.clone())
     }
 }
 
 impl<T> From<QueryBuilderSelect<T>> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned + SurrealdbModel + Clone,
 {
     fn from(value: QueryBuilderSelect<T>) -> Self {
-        Self::SubQuery(value.to_owned())
+        Self::SubQuery(value.clone())
     }
 }
 
@@ -762,7 +762,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> QueryBuilderSelect<T> {
     /// assert_eq!(builder.to_string(), "SELECT * FROM users");
     /// ```
     pub fn from(mut self, targettables: impl Into<Targettables<T>>) -> Self {
-        let targets: Targettables = targettables.into();
+        let targets: Targettables<T> = targettables.into();
         let targets_bindings = targets.get_bindings();
 
         // When we have either one or many table names or record ids, we want to use placeholders
@@ -1094,7 +1094,10 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> QueryBuilderSelect<T> {
     [ TIMEOUT @duration ]
     [ PARALLEL ]
 ; */
-impl<T> Display for QueryBuilderSelect<T> {
+impl<T> Display for QueryBuilderSelect<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let mut query = String::new();
 
@@ -1169,7 +1172,10 @@ impl<T> Display for QueryBuilderSelect<T> {
     }
 }
 
-impl<T> Buildable for QueryBuilderSelect<T> {
+impl<T> Buildable for QueryBuilderSelect<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn build(&self) -> String {
         format!("{self}")
     }
