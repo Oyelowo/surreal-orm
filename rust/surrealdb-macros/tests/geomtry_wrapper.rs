@@ -369,14 +369,29 @@ mod geometry_tests {
         //     .unwrap();
         //
         let c = Company::schema();
-        // let select_query = select(All)
-        //     .from(&SurrealId::try_from("company:2").unwrap())
-        //     // .where_(c.tags.any_like("foo"))
-        //     .timeout(Duration::from_secs(20))
-        //     .parallel();
+        let select_query = select::<Company>(All)
+            .from(&SurrealId::try_from("company:2").unwrap())
+            .where_(c.tags.any_like("foo"))
+            .timeout(Duration::from_secs(20))
+            .parallel();
+        // .return_one(db.clone())
+        // .await
+        // .unwrap();
+
+        // println!("BindSel {:?}", select_query.get_bindings());
+        println!(
+            "SSSSSSS {:?}",
+            select_query.return_one(db.clone()).await.unwrap()
+        );
+        println!(
+            "SSSSSSS {:?}",
+            select_query.return_many(db.clone()).await.unwrap()
+        );
+
+        assert!(false);
         let select_query = select(All)
             .from(Company::get_table_name())
-            // .where_(c.tags.any_like("foo"))
+            .where_(c.tags.any_like("foo"))
             .timeout(Duration::from_secs(20))
             .parallel();
 
