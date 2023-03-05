@@ -39,9 +39,33 @@ struct Company {
     tags: Vec<String>,
     home: GeometryCustom,
 }
+
+#[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "gen_z_company")]
+struct GenZCompany {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[builder(default, setter(strip_option))]
+    id: Option<SurrealId>,
+    nam: Uuid,
+    name: String,
+    founded: Datetime,
+    founders: Vec<Person>,
+    tags: Vec<String>,
+    home: GeometryCustom,
+}
+
 #[cfg(test)]
-mod tests {
+mod geometry_tests {
+    use std::time::Duration;
+
     use geo::Coord;
+    use surrealdb::sql::statements::CommitStatement;
+    use surrealdb_macros::{
+        query_insert::{insert, Runnable},
+        query_select::{select, All},
+        Parametric, SurrealdbNode,
+    };
 
     use super::*;
 
@@ -70,11 +94,8 @@ mod tests {
         let db = Surreal::new::<Mem>(()).await.unwrap();
         db.use_ns("test").use_db("test").await?;
 
-        let results = query_insert::InsertStatement::new()
-            .insert(company)
-            .get_one(db)
-            .await
-            .unwrap();
+        // let results = insert::<Company>(company);
+        let results = insert(company).return_one(db).await.unwrap();
 
         Ok(serde_json::to_string(&results).unwrap())
     }
@@ -293,9 +314,93 @@ mod tests {
         let db = Surreal::new::<Mem>(()).await.unwrap();
         db.use_ns("test").use_db("test").await?;
 
-        let results = query_insert::InsertStatement::new()
-            .insert_many(companies)
-            .get_many(db)
+        let results = insert(companies).return_many(db).await.unwrap();
+
+        insta::assert_debug_snapshot!(results);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn insert_from_select_query() -> surrealdb::Result<()> {
+        let companies = vec![
+            Company {
+                id: Some("company:1".try_into().unwrap()),
+                name: "Acme Inc.".to_string(),
+                founded: "1967-05-03".into(),
+                founders: vec![
+                    Person {
+                        name: "John Doe".to_string(),
+                    },
+                    Person {
+                        name: "Jane Doe".to_string(),
+                    },
+                ],
+                tags: vec!["foo".to_string(), "bar".to_string()],
+                nam: Uuid::try_from("725cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
+                home: GeometryCustom((45.3, 78.1).into()),
+            },
+            Company {
+                id: Some("company:2".try_into().unwrap()),
+                name: "Apple Inc.".to_string(),
+                founded: "1967-05-03".into(),
+                founders: vec![
+                    Person {
+                        name: "John Doe".to_string(),
+                    },
+                    Person {
+                        name: "Jane Doe".to_string(),
+                    },
+                ],
+                tags: vec!["foo".to_string(), "bar".to_string()],
+                nam: Uuid::try_from("375cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
+                home: GeometryCustom((63.0, 21.0).into()),
+            },
+        ];
+
+        let db = Surreal::new::<Mem>(()).await.unwrap();
+        db.use_ns("test").use_db("test").await?;
+        // Insert companies
+        let results = insert(companies).return_many(db.clone()).await.unwrap();
+
+        println!("QQQQQQINS {:?}", results);
+        // db.clone()
+        //     .query(format!("{}", CommitStatement))
+        //     .await
+        //     .unwrap();
+        //
+        let c = Company::schema();
+        let select_query = select::<Company>(All)
+            .from(&SurrealId::try_from("company:2").unwrap())
+            .where_(c.tags.any_like("foo"))
+            .timeout(Duration::from_secs(20))
+            .parallel();
+        // .return_one(db.clone())
+        // .await
+        // .unwrap();
+
+        // println!("BindSel {:?}", select_query.get_bindings());
+        println!(
+            "SSSSSSS {:?}",
+            select_query.return_one(db.clone()).await.unwrap()
+        );
+        println!(
+            "SSSSSSS {:?}",
+            select_query.return_many(db.clone()).await.unwrap()
+        );
+
+        let select_query = select(All)
+            .from(Company::get_table_name())
+            .where_(c.tags.any_like("foo"))
+            .timeout(Duration::from_secs(20))
+            .parallel();
+
+        println!("BindSel {:?}", select_query.get_bindings());
+        println!(
+            "SSSSSSS {:?}",
+            select_query.return_many(db.clone()).await.unwrap()
+        );
+        let results = insert::<GenZCompany>(select_query)
+            .return_many(db)
             .await
             .unwrap();
 

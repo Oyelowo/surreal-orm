@@ -112,6 +112,8 @@ struct NodeEdgeMetadata {
 
 #[derive(Default, Clone)]
 pub struct SchemaFieldsProperties {
+    /// list of fields names that are actually serialized and not skipped.
+    pub serialized_field_name_no_skip: Vec<String>,
     /// Generated example: pub timeWritten: DbField,
     /// key(normalized_field_name)-value(DbField) e.g pub out: DbField, of field name and DbField type
     /// to build up struct for generating fields of a Schema of the SurrealdbEdge
@@ -280,7 +282,7 @@ impl SchemaFieldsProperties {
                 let relationship = RelationType::from(field_receiver);
                 let NormalisedField { 
                          ref field_ident_normalised,
-                         ref field_ident_normalised_as_str
+                         ref field_ident_normalised_as_str,
                 } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
                 
                 let VariablesModelMacro { 
@@ -342,6 +344,11 @@ impl SchemaFieldsProperties {
 
                 store.serialized_field_names_normalised
                     .push(field_ident_normalised_as_str.to_owned());
+                
+                if !field_receiver.skip_serializing {
+                    store.serialized_field_name_no_skip
+                        .push(field_ident_normalised_as_str.to_owned());
+                }
 
                 store.connection_with_field_appended
                     .push(quote!(

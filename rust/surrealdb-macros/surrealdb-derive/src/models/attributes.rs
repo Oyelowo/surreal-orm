@@ -235,6 +235,11 @@ impl NormalisedField {
                     field_ident_normalised.to_string(),
                 )
             };
+        let serialized_field_name_no_skip = if field_receiver.skip_serializing {
+            None
+        } else {
+            Some(field_ident_normalised_as_str.clone())
+        };
         Self {
             field_ident_normalised,
             field_ident_normalised_as_str,

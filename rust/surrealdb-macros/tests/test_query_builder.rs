@@ -150,9 +150,11 @@ impl WhiteSpaceRemoval for String {}
 #[cfg(test)]
 mod tests {
     use super::*;
+    use _core::time::Duration;
+    use surrealdb::sql;
     use surrealdb_macros::db_field::{cond, empty, Binding, Empty, Parametric};
     // use surrealdb_macros::prelude::*;
-    use surrealdb_macros::query_select::{order, Order};
+    use surrealdb_macros::query_select::{order, select, All, Order};
     use surrealdb_macros::value_type_wrappers::SurrealId;
     use surrealdb_macros::{cond, query_select, DbFilter};
     use surrealdb_macros::{q, DbField};
@@ -185,8 +187,6 @@ mod tests {
         let wrt = &StudentWritesBook::schema();
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
         let book::Book { content, .. } = Book::schema();
-
-        let mut queryb = query_select::QueryBuilder::new();
 
         mana(bk.content.contains("Lowo"));
         mana(None);
@@ -309,7 +309,6 @@ mod tests {
         let book::Book { content, .. } = Book::schema();
 
         content
-            // .contains_any("Dyayo")
             .contains_any(vec!["Dyayo", "fdfd"])
             .contains_any(&["Dyayo", "fdfd"])
             .contains_all(vec!["Dyayo", "fdfd"])
@@ -324,8 +323,7 @@ mod tests {
             .or(firstName.equal("Oyelowo"))
             .and(lastName.equal("Oyedayo"));
 
-        let query1 = queryb
-            .select_all()
+        let mut query1 = select::<Book>(All)
             .from(Book::get_table_name())
             .where_(
                 cond(content.like("lowo").and(age).greater_than_or_equal(600))
@@ -336,32 +334,35 @@ mod tests {
             .order_by(order(lastName).desc())
             .limit(50)
             .start(20)
-            .timeout("15")
+            .timeout(Duration::from_secs(9))
             .parallel();
 
         let is_lowo = true;
         if is_lowo {
-            query1.limit(50);
-            query1.group_by(age);
+            query1 = query1.limit(50).group_by(age);
         }
 
         insta::assert_debug_snapshot!(query1.to_string());
         insta::assert_debug_snapshot!(query1.get_bindings());
 
-        let mut queryb = query_select::QueryBuilder::new();
-        let ref mut query = queryb
-            .select_all()
+        let ref student_table = Student::get_table_name();
+        let ref book_table = Book::get_table_name();
+        let ref book_id = SurrealId::try_from("book:1").unwrap();
+        let ref student_id = SurrealId::try_from("student:1").unwrap();
+
+        let mut query = select(All)
             .select(age)
             .select(firstName)
-            .select_many(&[firstName, unoBook])
-            .from(Student::get_table_name())
-            .from(&[Student::get_table_name(), Book::get_table_name()])
-            .from(vec![Student::get_table_name(), Book::get_table_name()])
-            .from(SurrealId::try_from("book:1").unwrap())
-            .from(&[SurrealId::try_from("book:1").unwrap()])
+            .select(&[firstName, unoBook])
+            .select(vec![firstName, unoBook])
+            .from(student_table)
+            .from(&[student_table, book_table])
+            .from(vec![student_table, book_table])
+            .from(book_id)
+            .from(&[book_id, student_id])
+            .from(vec![book_id, student_id])
             .from(vec![SurrealId::try_from("book:1").unwrap()])
             .from(query1)
-            // .from(3)
             .where_(
                 cond(
                     age.greater_than(age)
@@ -388,23 +389,24 @@ mod tests {
             .order_by(&[order(id).numeric().desc(), order(firstName).desc()])
             .group_by(course)
             .group_by(firstName)
-            .group_by(&"lastName".into())
-            .group_by_many(&[lastName, unoBook, &DbField::new("lowo")])
+            .group_by(&[lastName, unoBook, &DbField::new("lowo")])
+            .group_by(vec![lastName, unoBook, &DbField::new("lowo")])
             .start(5)
             .limit(400)
             .fetch(firstName)
             .fetch(lastName)
-            .fetch_many(&[age, unoBook])
-            .fetch_many(&[age, unoBook])
+            .fetch(&[age, unoBook])
+            .fetch(vec![age, unoBook])
             .split(lastName)
             .split(firstName)
-            .split_many(&[firstName, semCoures])
-            .timeout("10s")
+            .split(&[firstName, semCoures])
+            .split(vec![firstName, semCoures])
+            .timeout(Duration::from_secs(8))
             .parallel();
 
         let is_oyelowo = true;
         if is_oyelowo {
-            query.group_by_many(&[age, bestFriend, &DbField::new("lowo")]);
+            query = query.group_by(&[age, bestFriend, &DbField::new("dayo")]);
         }
 
         // stringify_tokens!("lowo", "knows", 5);

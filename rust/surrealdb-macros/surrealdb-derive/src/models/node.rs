@@ -60,6 +60,8 @@ impl ToTokens for FieldsGetterOpts {
                 record_link_fields_methods,
                 node_edge_metadata,
                 schema_struct_fields_names_kv_empty,
+                serialized_field_name_no_skip,
+                
                 ..
         } = SchemaFieldsProperties::from_receiver_data(
             schema_props_args,
@@ -102,16 +104,27 @@ impl ToTokens for FieldsGetterOpts {
                     #module_name::#struct_name_ident::new()
                 }
                 
-                fn get_table_name() -> ::surrealdb::sql::Table {
-                    #table_name_str.into()
-                }
                 
                 fn get_key<T: From<#crate_name::RecordId>>(self) -> ::std::option::Option<T>{
                     let record_id = self.id.map(|id| #crate_name::RecordId::from(id).into());
                     record_id
                 }
+                
+                fn get_table_name() -> ::surrealdb::sql::Table {
+                    #table_name_str.into()
+                }
             }
 
+            impl #crate_name::SurrealdbModel for #struct_name_ident {
+                fn table_name() -> ::surrealdb::sql::Table {
+                    #table_name_str.into()
+                }
+                
+                fn get_serializable_field_names() -> Vec<&'static str> {
+                    return vec![#( #serialized_field_name_no_skip), *]
+                }
+            }
+            
             pub mod #module_name {
                 use #crate_name::Parametric as _;
 

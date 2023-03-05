@@ -28,7 +28,13 @@ pub use db_field::Parametric;
 pub use surrealdb::opt::RecordId;
 use surrealdb::sql;
 
-pub trait SurrealdbNode {
+// SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
+pub trait SurrealdbModel {
+    fn table_name() -> sql::Table;
+    fn get_serializable_field_names() -> Vec<&'static str>;
+}
+
+pub trait SurrealdbNode: SurrealdbModel {
     type Schema;
     type TableNameChecker;
     fn schema() -> Self::Schema;
@@ -37,16 +43,16 @@ pub trait SurrealdbNode {
     fn get_table_name() -> sql::Table;
 }
 
-pub trait SurrealdbEdge {
+pub trait SurrealdbEdge: SurrealdbModel {
     type In;
     type Out;
     type TableNameChecker;
     type Schema;
 
     fn schema() -> Self::Schema;
-    fn get_table_name() -> sql::Table;
     // fn get_key(&self) -> ::std::option::Option<&SurId>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
+    fn get_table_name() -> sql::Table;
 }
 
 // pub enum Clause {

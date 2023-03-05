@@ -96,15 +96,26 @@ pub struct Blog {
 // Recursive expansion of the SurrealdbNode macro
 // ==============================================
 
+impl surrealdb_macros::SurrealdbModel for Student {
+    fn table_name() -> ::surrealdb::sql::Table {
+        "student".into()
+    }
+
+    fn get_serializable_field_names() -> Vec<&'static str> {
+        todo!()
+    }
+}
 impl surrealdb_macros::SurrealdbNode for Student {
     type TableNameChecker = student::TableNameStaticChecker;
     type Schema = student::Student;
     fn schema() -> Self::Schema {
         student::Student::new()
     }
+
     fn get_table_name() -> ::surrealdb::sql::Table {
         "student".into()
     }
+
     fn get_key<T: From<surrealdb_macros::RecordId>>(self) -> ::std::option::Option<T> {
         let record_id = self
             .id
@@ -372,6 +383,18 @@ fn test_student_edge_name() {
 // ==============================================
 
 impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
+    surrealdb_macros::SurrealdbModel for Writes<In, Out>
+{
+    fn table_name() -> ::surrealdb::sql::Table {
+        "rites".into()
+    }
+
+    fn get_serializable_field_names() -> Vec<&'static str> {
+        todo!()
+    }
+}
+
+impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
     surrealdb_macros::SurrealdbEdge for Writes<In, Out>
 {
     type In = In;
@@ -381,14 +404,15 @@ impl<In: surrealdb_macros::SurrealdbNode, Out: surrealdb_macros::SurrealdbNode>
     fn schema() -> Self::Schema {
         writes_schema::Writes::new()
     }
-    fn get_table_name() -> ::surrealdb::sql::Table {
-        "rites".into()
-    }
     fn get_key<T: From<surrealdb_macros::RecordId>>(self) -> ::std::option::Option<T> {
         let record_id = self
             .id
             .map(|id| surrealdb_macros::RecordId::from(id).into());
         record_id
+    }
+
+    fn get_table_name() -> ::surrealdb::sql::Table {
+        "rites".into()
     }
 }
 pub mod writes_schema {
@@ -499,6 +523,15 @@ fn test_writes_edge_name() {}
 // Recursive expansion of the SurrealdbNode macro
 // ==============================================
 
+impl surrealdb_macros::SurrealdbModel for Book {
+    fn table_name() -> ::surrealdb::sql::Table {
+        "book".into()
+    }
+
+    fn get_serializable_field_names() -> Vec<&'static str> {
+        todo!()
+    }
+}
 impl surrealdb_macros::SurrealdbNode for Book {
     type TableNameChecker = book::TableNameStaticChecker;
     type Schema = book::Book;
@@ -629,6 +662,16 @@ fn test_book_edge_name() {}
 // ==============================================
 // Recursive expansion of the SurrealdbNode macro
 // ==============================================
+
+impl surrealdb_macros::SurrealdbModel for Blog {
+    fn table_name() -> ::surrealdb::sql::Table {
+        "blog".into()
+    }
+
+    fn get_serializable_field_names() -> Vec<&'static str> {
+        todo!()
+    }
+}
 
 impl surrealdb_macros::SurrealdbNode for Blog {
     type TableNameChecker = blog::TableNameStaticChecker;

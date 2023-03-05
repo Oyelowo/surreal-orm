@@ -51,10 +51,13 @@ use surrealdb_macros::query_insert;
 use surrealdb_macros::query_insert::updater;
 use surrealdb_macros::query_insert::Updater;
 use surrealdb_macros::query_select;
+use surrealdb_macros::query_select::select;
+use surrealdb_macros::query_select::All;
 use surrealdb_macros::value_type_wrappers::GeometryCustom;
 use surrealdb_macros::value_type_wrappers::SurrealId;
 use surrealdb_macros::DbField;
 use surrealdb_macros::SurId;
+use surrealdb_macros::SurrealdbModel;
 use surrealdb_macros::SurrealdbNode;
 fn mana() {
     #[derive(Serialize, Deserialize)]
@@ -407,20 +410,20 @@ async fn test_it() -> surrealdb::Result<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await?;
 
-    let results = query_insert::InsertStatement::new()
-        .insert(xx.clone())
-        .insert_many(companies)
-        // .get_one(db.clone())
-        .get_many(db)
-        .await
-        .unwrap();
+    // let results = query_insert::InsertStatement::new()
+    //     .insert(xx.clone())
+    //     .insert_many(companies)
+    //     // .get_one(db.clone())
+    //     .get_many(db)
+    //     .await
+    //     .unwrap();
 
-    println!("==========================================");
-    println!("==========================================");
-    println!(
-        "userQueryyy result: {}",
-        serde_json::to_string(&results).unwrap()
-    );
+    // println!("==========================================");
+    // println!("==========================================");
+    // println!(
+    //     "userQueryyy result: {}",
+    //     serde_json::to_string(&results).unwrap()
+    // );
     // // let mut results = results.await?;
     // println!("==========================================");
     // println!("==========================================");
@@ -648,7 +651,6 @@ async fn main() -> surrealdb::Result<()> {
     let ref age = DbField::new("age");
     let firstName = &name;
     let lastName = &name;
-    let mut queryb = query_select::QueryBuilder::new();
     let line = line_string![
         (x: -21.95156, y: 64.1446),
         (x: -21.951, y: 64.14479),
@@ -696,13 +698,15 @@ async fn main() -> surrealdb::Result<()> {
                          //         .and(age.greater_than(711).greater_than_or_equal(421).equal(25))
                          //         .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
                          // );
-    let ref mut query = queryb.select_all().from(Company::get_table_name()).where_(
-        cond(age.greater_than(id.clone()))
-            .or(firstName.like("Oyelowo"))
-            .and(lastName.exactly_equal("Oyedayo"))
-            .and(age.less_than(150))
-            .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
-    );
+    let ref mut query = select::<Company>(All)
+        .from(Company::get_table_name())
+        .where_(
+            cond(age.greater_than(id.clone()))
+                .or(firstName.like("Oyelowo"))
+                .and(lastName.exactly_equal("Oyedayo"))
+                .and(age.less_than(150))
+                .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
+        );
     println!("MAWAOOOO----->{}", query);
     println!("BINDAAAA----->{:?}", query.get_bindings());
     let xx = cond(age.greater_than(id.clone()));

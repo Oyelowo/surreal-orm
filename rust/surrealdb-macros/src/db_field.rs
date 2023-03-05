@@ -4,7 +4,10 @@ Email: oyelowooyedayo@gmail.com
 */
 
 use bigdecimal::BigDecimal;
-use serde::{de::value, Serialize};
+use serde::{
+    de::{value, DeserializeOwned},
+    Serialize,
+};
 use std::{
     borrow::Cow,
     cell::{Cell, RefCell},
@@ -16,7 +19,7 @@ use std::{
 use proc_macro2::Span;
 use surrealdb::sql::{self, Number, Value};
 
-use crate::query_select::QueryBuilder;
+use crate::{query_select::SelectStatement, SurrealdbModel};
 
 /// Represents a field in the database. This type wraps a `String` and
 /// provides a convenient way to refer to a database fields.
@@ -159,14 +162,26 @@ impl From<GeometryOrField> for Value {
 }
 
 #[derive(serde::Serialize, Debug, Clone)]
-pub enum NumberOrField {
+pub enum Ordinal {
+    Datetime(sql::Datetime),
     Number(sql::Number),
     Field(Value),
+}
+impl From<sql::Datetime> for Ordinal {
+    fn from(value: sql::Datetime) -> Self {
+        Self::Datetime(value.into())
+    }
+}
+
+impl From<chrono::DateTime<chrono::Utc>> for Ordinal {
+    fn from(value: chrono::DateTime<chrono::Utc>) -> Self {
+        Self::Datetime(value.into())
+    }
 }
 
 macro_rules! impl_number_or_field_from {
     ($($t:ty),*) => {
-        $(impl From<$t> for NumberOrField {
+        $(impl From<$t> for Ordinal {
             fn from(value: $t) -> Self {
                 Self::Number(sql::Number::from(value))
             }
@@ -178,22 +193,23 @@ impl_number_or_field_from!(
     i8, i16, i32, i64, isize, u8, u16, u32, u64, usize, f32, f64, BigDecimal
 );
 
-impl Into<NumberOrField> for DbField {
-    fn into(self) -> NumberOrField {
-        NumberOrField::Field(self.into())
+impl Into<Ordinal> for DbField {
+    fn into(self) -> Ordinal {
+        Ordinal::Field(self.into())
     }
 }
 
-impl Into<NumberOrField> for &DbField {
-    fn into(self) -> NumberOrField {
-        NumberOrField::Field(self.into())
+impl Into<Ordinal> for &DbField {
+    fn into(self) -> Ordinal {
+        Ordinal::Field(self.into())
     }
 }
-impl Into<Value> for NumberOrField {
+impl Into<Value> for Ordinal {
     fn into(self) -> Value {
         match self {
-            NumberOrField::Number(n) => n.into(),
-            NumberOrField::Field(f) => f.into(),
+            Ordinal::Datetime(n) => n.into(),
+            Ordinal::Number(n) => n.into(),
+            Ordinal::Field(f) => f.into(),
         }
     }
 }
@@ -208,9 +224,9 @@ impl Into<Value> for NumberOrField {
 //     }
 // }
 
-impl Into<NumberOrField> for sql::Number {
-    fn into(self) -> NumberOrField {
-        NumberOrField::Number(self)
+impl Into<Ordinal> for sql::Number {
+    fn into(self) -> Ordinal {
+        Ordinal::Number(self)
     }
 }
 
@@ -228,9 +244,12 @@ impl Into<DbFilter> for &DbField {
     }
 }
 
-impl<'a> Into<DbFilter> for QueryBuilder<'a> {
+impl<T> Into<DbFilter> for SelectStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn into(self) -> DbFilter {
-        let query_b: QueryBuilder = self;
+        let query_b: SelectStatement<T> = self;
         DbFilter::new(query_b)
     }
 }
@@ -271,6 +290,11 @@ impl From<DbField> for Cow<'static, DbField> {
 impl From<String> for DbField {
     fn from(value: String) -> Self {
         Self::new(value)
+    }
+}
+impl From<&DbField> for DbField {
+    fn from(value: &DbField) -> Self {
+        value.to_owned()
     }
 }
 impl From<&str> for DbField {
@@ -375,21 +399,38 @@ impl Parametric for DbFilter {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Binding((String, sql::Value));
+pub struct Binding {
+    param: String,
+    value: sql::Value,
+    original_inline_name: String,
+}
 
 impl Binding {
     pub fn new(value: impl Into<sql::Value>) -> Self {
         let value = value.into();
         let param_name = generate_param_name(&"param");
-        Binding((param_name, value))
+        Binding {
+            param: param_name.clone(),
+            value,
+            original_inline_name: param_name,
+        }
+    }
+
+    pub fn with_name(mut self, original_name: String) -> Self {
+        self.original_inline_name = original_name;
+        self
+    }
+
+    pub fn get_original_name(&self) -> &String {
+        &self.original_inline_name
     }
 
     pub fn get_param(&self) -> &String {
-        &self.0 .0
+        &self.param
     }
 
     pub fn get_value(&self) -> &sql::Value {
-        &self.0 .1
+        &self.value
     }
 }
 
@@ -399,11 +440,11 @@ impl From<sql::Value> for Binding {
     }
 }
 
-impl From<(String, sql::Value)> for Binding {
-    fn from(value: (String, Value)) -> Self {
-        Self(value)
-    }
-}
+// impl From<(String, sql::Value)> for Binding {
+//     fn from(value: (String, Value)) -> Self {
+//         Self { field1: value }
+//     }
+// }
 
 /// Can have parameters which can be bound
 pub trait Parametric {
@@ -911,9 +952,9 @@ impl DbField {
     /// ```
     pub fn less_than<T>(&self, value: T) -> Self
     where
-        T: Into<NumberOrField>,
+        T: Into<Ordinal>,
     {
-        let value: NumberOrField = value.into();
+        let value: Ordinal = value.into();
         self.generate_query(sql::Operator::LessThan, value)
     }
 
@@ -933,9 +974,9 @@ impl DbField {
     /// ```
     pub fn less_than_or_equal<T>(&self, value: T) -> Self
     where
-        T: Into<NumberOrField>,
+        T: Into<Ordinal>,
     {
-        let value: NumberOrField = value.into();
+        let value: Ordinal = value.into();
         self.generate_query(sql::Operator::LessThanOrEqual, value)
     }
 
@@ -955,9 +996,9 @@ impl DbField {
     /// ```
     pub fn greater_than<T>(&self, value: T) -> Self
     where
-        T: Into<NumberOrField>,
+        T: Into<Ordinal>,
     {
-        let value: NumberOrField = value.into();
+        let value: Ordinal = value.into();
         self.generate_query(sql::Operator::MoreThan, value)
     }
 
@@ -977,9 +1018,9 @@ impl DbField {
     /// ```
     pub fn greater_than_or_equal<T>(&self, value: T) -> Self
     where
-        T: Into<NumberOrField>,
+        T: Into<Ordinal>,
     {
-        let value: NumberOrField = value.into();
+        let value: Ordinal = value.into();
         self.generate_query(sql::Operator::MoreThanOrEqual, value)
     }
 
@@ -1673,11 +1714,11 @@ impl DbField {
     /// ```
     pub fn between<T>(&self, lower_bound: T, upper_bound: T) -> Self
     where
-        T: Into<NumberOrField>,
+        T: Into<Ordinal>,
     {
-        let lower_bound: NumberOrField = lower_bound.into();
+        let lower_bound: Ordinal = lower_bound.into();
         let lower_bound: Value = lower_bound.into();
-        let upper_bound: NumberOrField = upper_bound.into();
+        let upper_bound: Ordinal = upper_bound.into();
         let upper_bound: Value = upper_bound.into();
         let lower_bound_binding = Binding::new(lower_bound);
         let upper_bound_binding = Binding::new(upper_bound);
@@ -1714,11 +1755,11 @@ impl DbField {
     /// ```
     pub fn within<T>(&self, lower_bound: T, upper_bound: T) -> Self
     where
-        T: Into<NumberOrField>,
+        T: Into<Ordinal>,
     {
-        let lower_bound: NumberOrField = lower_bound.into();
+        let lower_bound: Ordinal = lower_bound.into();
         let lower_bound: Value = lower_bound.into();
-        let upper_bound: NumberOrField = upper_bound.into();
+        let upper_bound: Ordinal = upper_bound.into();
         let upper_bound: Value = upper_bound.into();
         let lower_bound_binding = Binding::new(lower_bound);
         let upper_bound_binding = Binding::new(upper_bound);
