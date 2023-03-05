@@ -13,7 +13,7 @@ use surrealdb::{
 
 use crate::{
     db_field::Binding,
-    query_select::{self, QueryBuilderSelect},
+    query_select::{self, SelectStatement},
     BindingsList, DbField, Parametric, SurrealdbModel,
 };
 
@@ -40,7 +40,7 @@ where
 {
     Node(T),
     Nodes(Vec<T>),
-    FromQuery(QueryBuilderSelect<T>),
+    FromQuery(SelectStatement<T>),
 }
 
 impl<T> From<Vec<T>> for Insertables<T>
@@ -61,11 +61,11 @@ where
     }
 }
 
-impl<T> From<QueryBuilderSelect<T>> for Insertables<T>
+impl<T> From<SelectStatement<T>> for Insertables<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    fn from(value: QueryBuilderSelect<T>) -> Self {
+    fn from(value: SelectStatement<T>) -> Self {
         Self::FromQuery(value)
     }
 }
