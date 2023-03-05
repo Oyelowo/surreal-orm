@@ -1,6 +1,0 @@
----
-source: surrealdb-macros/tests/geomtry_wrapper.rs
-assertion_line: 388
-expression: results
----
-[]

@@ -262,7 +262,7 @@ pub enum Targettables<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    Table(Table),
+    Table(sql::Table),
     Tables(Vec<sql::Table>),
     SurrealId(SurrealId),
     SurrealIds(Vec<SurrealId>),
@@ -448,10 +448,12 @@ where
     fn get_bindings(&self) -> BindingsList {
         match self {
             Targettables::Table(table) => {
+                // Table binding does not seem to work right now. skip it first
                 let binding = Binding::new(table.to_owned());
                 vec![binding]
             }
             Targettables::Tables(tables) => {
+                // Table binding does not seem to work right now. skip it first
                 let bindings = tables
                     .to_vec()
                     .into_iter()
@@ -769,10 +771,9 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> QueryBuilderSelect<T> {
         // as the targets which would be bound later but for a subquery in from, that must have
         // already been done by the Subquery(in this case, select query) builder itself
         let target_names = match targets {
-            Targettables::Table(_)
-            | Targettables::Tables(_)
-            | Targettables::SurrealId(_)
-            | Targettables::SurrealIds(_) => targets_bindings
+            Targettables::Table(table) => vec![table.to_string()],
+            Targettables::Tables(tbs) => tbs.iter().map(|t| t.to_string()).collect::<Vec<_>>(),
+            Targettables::SurrealId(_) | Targettables::SurrealIds(_) => targets_bindings
                 .iter()
                 .map(|b| format!("${}", b.get_param()))
                 .collect::<Vec<_>>(),
