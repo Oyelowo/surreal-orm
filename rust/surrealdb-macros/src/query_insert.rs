@@ -304,7 +304,7 @@ pub struct Updater {
 
 impl Parametric for Updater {
     fn get_bindings(&self) -> BindingsList {
-        todo!()
+        self.____bindings.to_vec()
     }
 }
 
