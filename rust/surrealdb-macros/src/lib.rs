@@ -9,6 +9,7 @@ pub use model_id::SurId;
 pub mod db_field;
 pub mod operators_macros;
 pub mod query_insert;
+pub mod query_relate;
 pub mod query_select;
 pub mod value_type_wrappers;
 // pub mod querydb;
