@@ -5,7 +5,7 @@ use surrealdb::sql::{self, Operator};
 
 use crate::{
     db_field::Binding,
-    query_insert::{Buildable, Runnable},
+    query_insert::{Buildable, Runnable, Updateables, Updater},
     query_select::SelectStatement,
     value_type_wrappers::SurrealId,
     BindingsList, DbField, Parametric, SurrealdbEdge,
@@ -56,7 +56,7 @@ where
     with: Option<String>,
     relation: String,
     content_param: Option<String>,
-    set: Option<Vec<(String, String)>>,
+    set: Vec<String>,
     return_type: Option<ReturnType>,
     timeout: Option<Duration>,
     parallel: bool,
@@ -75,7 +75,7 @@ where
             table: None,
             with: None,
             content_param: None,
-            set: None,
+            set: vec![],
             return_type: None,
             timeout: None,
             parallel: false,
@@ -113,15 +113,18 @@ where
         self
     }
 
-    pub fn set(mut self, field: &str, value: &str) -> Self {
-        let set_vec = match self.set {
-            Some(mut v) => {
-                v.push((field.to_string(), value.to_string()));
-                v
-            }
-            None => vec![(field.to_string(), value.to_string())],
+    pub fn set(mut self, settables: impl Into<Updateables>) -> Self {
+        let settable: Updateables = settables.into();
+        self.bindings.extend(settable.get_bindings());
+
+        let setter_query = match settable {
+            Updateables::Updater(up) => vec![up.get_updater_string()],
+            Updateables::Updaters(ups) => ups
+                .into_iter()
+                .map(|u| u.get_updater_string())
+                .collect::<Vec<_>>(),
         };
-        self.set = Some(set_vec);
+        self.set.extend(setter_query);
         self
     }
 
@@ -139,25 +142,45 @@ where
         self.parallel = true;
         self
     }
+}
 
-    pub fn build(&self) -> String {
+impl<T> std::fmt::Display for RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}", self.build()))
+    }
+}
+
+impl<T> Parametric for RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    fn get_bindings(&self) -> crate::BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+impl<T> Buildable for RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    fn build(&self) -> String {
+        // format!("{self}")
         let mut query = String::new();
 
         if !&self.relation.is_empty() {
             query += &format!("RELATE {} -> ", self.relation);
         }
 
-        if let Some(content) = &self.content_param {
-            query += &format!("CONTENT ${} ", content);
+        if let Some(param) = &self.content_param {
+            query += &format!("CONTENT ${} ", param);
         }
 
-        if let Some(set) = &self.set {
+        if !&self.set.is_empty() {
             query += "SET ";
-            let set_vec = set
-                .iter()
-                .map(|(field, value)| format!("{} = {}", field, value))
-                .collect::<Vec<String>>()
-                .join(", ");
+            let set_vec = self.set.join(", ");
             query += &set_vec;
             query += " ";
         }
@@ -195,33 +218,6 @@ where
     }
 }
 
-impl<T> std::fmt::Display for RelateStatement<T>
-where
-    T: Serialize + DeserializeOwned,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
-    }
-}
-
-impl<T> Parametric for RelateStatement<T>
-where
-    T: Serialize + DeserializeOwned,
-{
-    fn get_bindings(&self) -> crate::BindingsList {
-        todo!()
-    }
-}
-
-impl<T> Buildable for RelateStatement<T>
-where
-    T: Serialize + DeserializeOwned,
-{
-    fn build(&self) -> String {
-        format!("{self}")
-    }
-}
-
 impl<T: Serialize + DeserializeOwned> Runnable<T> for RelateStatement<T> {}
 
 #[test]
@@ -231,8 +227,8 @@ fn test_query_builder() {
         .table("table")
         .with("with")
         // .content("content")
-        .set("field1", "value1")
-        .set("field2", "value2")
+        // .set("field1", "value1")
+        // .set("field2", "value2")
         .return_type(ReturnType::Projections(vec!["projection1", "projection2"]))
         .timeout(Duration::from_secs(30))
         .parallel()
