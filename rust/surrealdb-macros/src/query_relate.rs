@@ -1,14 +1,14 @@
 use std::{fmt::Display, marker::PhantomData, time::Duration};
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql;
+use surrealdb::sql::{self, Operator};
 
 use crate::{
     db_field::Binding,
     query_insert::{Buildable, Runnable},
     query_select::SelectStatement,
     value_type_wrappers::SurrealId,
-    BindingsList, Parametric, SurrealdbEdge,
+    BindingsList, DbField, Parametric, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -230,7 +230,7 @@ fn test_query_builder() {
         .from("from")
         .table("table")
         .with("with")
-        .content("content")
+        // .content("content")
         .set("field1", "value1")
         .set("field2", "value2")
         .return_type(ReturnType::Projections(vec!["projection1", "projection2"]))

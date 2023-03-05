@@ -351,6 +351,25 @@ impl Updater {
             ____bindings: vec![],
         }
     }
+    /// Sets a field name
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to set.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use my_cool_db::Setter;
+    /// let updater = Setter::new("score".to_string());
+    /// let updated_updater = updater.equal(2);
+    /// assert_eq!(updated_updater.to_string(), "score = 2");
+    /// ```
+    pub fn equal(&self, value: impl Into<sql::Value>) -> Self {
+        let value: sql::Value = value.into();
+        self._____update_field(Operator::Equal, value)
+    }
+
     /// Returns a new `Updater` instance with the string to increment the column by the given value.
     /// Alias for plus_equal but idiomatically for numbers
     ///
