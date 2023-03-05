@@ -13,10 +13,24 @@ use surrealdb::{
     sql::{self, thing, Geometry},
 };
 
-use crate::model_id::SurrealdbOrmError;
+use crate::{db_field::Binding, model_id::SurrealdbOrmError, Parametric};
 
 #[derive(Debug, Serialize, Clone)]
 pub struct SurrealId(RecordId);
+
+impl Parametric for SurrealId {
+    fn get_bindings(&self) -> crate::BindingsList {
+        let val: sql::Thing = self.to_owned().into();
+        let val: sql::Value = val.into();
+        vec![Binding::new(val)]
+    }
+}
+
+impl ::std::fmt::Display for SurrealId {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        f.write_fmt(format_args!("{}", self.to_raw()))
+    }
+}
 
 impl<'de> Deserialize<'de> for SurrealId {
     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>

@@ -42,6 +42,7 @@ pub trait SurrealdbNode: SurrealdbModel {
     // fn get_key<T: Into<RecordId>>(&self) -> ::std::option::Option<&T>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
     fn get_table_name() -> sql::Table;
+    fn with(filterable: impl Into<DbFilter>) -> Self::Schema;
 }
 
 pub trait SurrealdbEdge: SurrealdbModel {
@@ -65,7 +66,7 @@ pub trait SurrealdbEdge: SurrealdbModel {
 // pub fn format_filter(filter: DbFilter, _table_name: &'static str) -> String {
 pub fn format_filter(filter: impl Into<DbFilter>) -> String {
     let filter: DbFilter = filter.into();
-    println!("FFFFILEEERRR {}", filter);
+    // println!("FFFFILEEERRR {}", filter);
     if filter.to_string().is_empty() {
         "".into()
     } else {

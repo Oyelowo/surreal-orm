@@ -16,7 +16,7 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
-    db_field::{cond, empty, Parametric},
+    db_field::{cond, empty, Empty, Parametric},
     links::{LinkMany, LinkOne, LinkSelf, Reference, Relate},
     value_type_wrappers::SurrealId,
     RecordId, SurrealdbEdge, SurrealdbNode,
@@ -784,6 +784,10 @@ fn main() {
         )
         .title;
 
+    let a = SurrealId::try_from("student:1").unwrap();
+    let b = SurrealId::try_from("book:1").unwrap();
+    let mm = Student::with(a).writes__(Empty).book(b);
+
     // let x = Student::schema().unoBook(cond(
     //     Book::schema().id.equal(RecordId::from(("book", "blaze"))),
     // ));
@@ -791,7 +795,7 @@ fn main() {
 
     println!("XAM {x}");
     let m = x.get_bindings();
-    println!("Bindingzzzz {m:?}");
+    // println!("Bindingzzzz {m:?}");
     // assert_eq!(
     //     x.to_string(),
     //     // "->writes->book[WHERE id = book:blaze].title".to_string()

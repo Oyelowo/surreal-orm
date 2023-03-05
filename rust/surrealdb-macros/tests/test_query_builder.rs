@@ -187,6 +187,13 @@ mod tests {
         let wrt = &StudentWritesBook::schema();
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
         let book::Book { content, .. } = Book::schema();
+        let written_book_selection = st
+            .bestFriend(Empty)
+            .writes__(wrt.timeWritten.equal("12:00"))
+            .book(bk.content.contains("Oyelowo in Uranus"))
+            .__as__(st.writtenBooks);
+
+        assert_eq!(written_book_selection, "34".to_string());
 
         mana(bk.content.contains("Lowo"));
         mana(None);
@@ -264,14 +271,6 @@ mod tests {
         //     .or(age.greater_than(age));
         //
         // println!("maerfineirNAMAAAA :{xx}");
-
-        let written_book_selection = st
-            .bestFriend(Empty)
-            .writes__(wrt.timeWritten.equal("12:00"))
-            .book(bk.content.contains("Oyelowo in Uranus"))
-            .__as__(st.writtenBooks);
-
-        assert_eq!(written_book_selection, "".to_string());
 
         let st = Student::schema();
         let written_book_selection = st

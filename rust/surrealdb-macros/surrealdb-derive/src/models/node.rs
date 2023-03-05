@@ -100,6 +100,17 @@ impl ToTokens for FieldsGetterOpts {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
                 type Schema = #module_name::#struct_name_ident;
 
+                fn with(filterable: impl Into<#crate_name::DbFilter>) -> Self::Schema {
+                    #module_name::#struct_name_ident::new()
+                    let filter: #crate_name::DbFilter = filterable.into();
+                    
+                    ##module_name::#struct_name_ident::#__________connect_to_graph_traversal_string(
+                                &"".into(),
+                                filter,
+                                vec![],
+                    )
+                }
+                
                 fn schema() -> Self::Schema {
                     #module_name::#struct_name_ident::new()
                 }
