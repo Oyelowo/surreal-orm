@@ -1,4 +1,4 @@
-use std::{fmt::Display, marker::PhantomData, time::Duration};
+use std::{fmt::Display, marker::PhantomData};
 
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Operator};
@@ -6,7 +6,7 @@ use surrealdb::sql::{self, Operator};
 use crate::{
     db_field::Binding,
     query_insert::{Buildable, Runnable, Updateables, Updater},
-    query_select::SelectStatement,
+    query_select::{self, SelectStatement},
     value_type_wrappers::SurrealId,
     BindingsList, DbField, Parametric, SurrealdbEdge,
 };
@@ -39,12 +39,42 @@ where
 }
 
 #[derive(Debug)]
-pub enum ReturnType {
+pub enum Return {
     None,
     Before,
     After,
     Diff,
-    Projections(Vec<&'static str>),
+    Projections(Vec<DbField>),
+}
+
+impl From<Vec<&DbField>> for Return {
+    fn from(value: Vec<&DbField>) -> Self {
+        Self::Projections(value.into_iter().map(ToOwned::to_owned).collect::<Vec<_>>())
+    }
+}
+
+impl From<Vec<DbField>> for Return {
+    fn from(value: Vec<DbField>) -> Self {
+        Self::Projections(value)
+    }
+}
+
+impl<const N: usize> From<&[DbField; N]> for Return {
+    fn from(value: &[DbField; N]) -> Self {
+        Self::Projections(value.to_vec())
+    }
+}
+
+impl<const N: usize> From<&[&DbField; N]> for Return {
+    fn from(value: &[&DbField; N]) -> Self {
+        Self::Projections(
+            value
+                .to_vec()
+                .into_iter()
+                .map(ToOwned::to_owned)
+                .collect::<Vec<_>>(),
+        )
+    }
 }
 
 pub struct RelateStatement<T>
@@ -57,7 +87,7 @@ where
     relation: String,
     content_param: Option<String>,
     set: Vec<String>,
-    return_type: Option<ReturnType>,
+    return_type: Option<Return>,
     timeout: Option<Duration>,
     parallel: bool,
     bindings: BindingsList,
@@ -106,10 +136,10 @@ where
     }
 
     pub fn content(mut self, content: impl SurrealdbEdge + Serialize) -> Self {
-        let xx = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
-        let x = Binding::new(xx);
-        self.content_param = Some(x.get_param().to_owned());
-        self.bindings.push(x);
+        let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
+        let binding = Binding::new(sql_value);
+        self.content_param = Some(binding.get_param().to_owned());
+        self.bindings.push(binding);
         self
     }
 
@@ -128,16 +158,56 @@ where
         self
     }
 
-    pub fn return_type(mut self, return_type: ReturnType) -> Self {
+    pub fn return_(mut self, return_type: impl Into<Return>) -> Self {
+        let return_type = return_type.into();
         self.return_type = Some(return_type);
         self
     }
 
-    pub fn timeout(mut self, duration: Duration) -> Self {
-        self.timeout = Some(duration);
+    /// Sets the timeout duration for the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `duration` - a string slice that specifies the timeout duration. It can be expressed in any format that the database driver supports.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use my_db_client::{Query, QueryBuilder};
+    ///
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.timeout("5s");
+    /// ```
+    ///
+    /// ---
+    ///
+    /// Indicates that the query should be executed in parallel.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use my_db_client::{Query, QueryBuilder};
+    ///
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.parallel();
+    /// ```
+    pub fn timeout(mut self, duration: impl Into<query_select::Duration>) -> Self {
+        let duration: query_select::Duration = duration.into();
+        let duration = sql::Duration::from(duration);
+        self.timeout = Some(duration.to_string());
         self
     }
 
+    /// Indicates that the query should be executed in parallel.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use my_db_client::{Query, QueryBuilder};
+    ///
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.parallel();
+    /// ```
     pub fn parallel(mut self) -> Self {
         self.parallel = true;
         self
@@ -188,11 +258,11 @@ where
         if let Some(return_type) = &self.return_type {
             query += "RETURN ";
             match return_type {
-                ReturnType::None => query += "NONE ",
-                ReturnType::Before => query += "BEFORE ",
-                ReturnType::After => query += "AFTER ",
-                ReturnType::Diff => query += "DIFF ",
-                ReturnType::Projections(projections) => {
+                Return::None => query += "NONE ",
+                Return::Before => query += "BEFORE ",
+                Return::After => query += "AFTER ",
+                Return::Diff => query += "DIFF ",
+                Return::Projections(projections) => {
                     let projections = projections
                         .iter()
                         .map(|p| format!("{}", p))
@@ -205,7 +275,7 @@ where
         }
 
         if let Some(timeout) = &self.timeout {
-            query += &format!("TIMEOUT {} ", timeout.as_millis());
+            query += &format!("TIMEOUT {} ", timeout);
         }
 
         if self.parallel {
@@ -229,8 +299,8 @@ fn test_query_builder() {
         // .content("content")
         // .set("field1", "value1")
         // .set("field2", "value2")
-        .return_type(ReturnType::Projections(vec!["projection1", "projection2"]))
-        .timeout(Duration::from_secs(30))
+        // .return_(Return::Projections(vec!["projection1", "projection2"]))
+        // .timeout(Duration::from_secs(30))
         .parallel()
         .build();
 
