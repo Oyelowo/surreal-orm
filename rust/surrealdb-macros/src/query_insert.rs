@@ -220,7 +220,7 @@ pub trait Buildable {
 pub trait Runnable<T>
 where
     Self: Parametric + Buildable,
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
         let query = self.build();

@@ -260,7 +260,7 @@ impl Display for OrderOption {
 #[derive(Debug, Clone)]
 pub enum Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     Table(sql::Table),
     Tables(Vec<sql::Table>),
@@ -272,7 +272,7 @@ where
 
 impl<T> From<Vec<sql::Table>> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: Vec<sql::Table>) -> Self {
         Self::Tables(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
@@ -286,7 +286,7 @@ where
 
 impl<T> From<Vec<sql::Thing>> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: Vec<sql::Thing>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
@@ -295,7 +295,7 @@ where
 
 impl<T> From<&sql::Table> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: &sql::Table) -> Self {
         Self::Table(value.to_owned())
@@ -303,7 +303,7 @@ where
 }
 impl<T> From<&sql::Thing> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: &sql::Thing) -> Self {
         Self::SurrealId(value.to_owned().into())
@@ -312,7 +312,7 @@ where
 
 impl<T> From<sql::Thing> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: sql::Thing) -> Self {
         Self::SurrealId(value.into())
@@ -321,7 +321,7 @@ where
 
 impl<T> From<Vec<&sql::Table>> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: Vec<&sql::Table>) -> Self {
         Self::Tables(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
@@ -330,7 +330,7 @@ where
 
 impl<T, const N: usize> From<&[&sql::Table; N]> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: &[&sql::Table; N]) -> Self {
         Self::Tables(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
@@ -339,7 +339,7 @@ where
 
 impl<T, const N: usize> From<&[sql::Table; N]> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: &[sql::Table; N]) -> Self {
         Self::Tables(value.to_vec())
@@ -348,7 +348,7 @@ where
 
 impl<T> From<&SurrealId> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: &SurrealId) -> Self {
         Self::SurrealId(value.to_owned())
@@ -357,7 +357,7 @@ where
 
 impl<T, const N: usize> From<&[SurrealId; N]> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: &[SurrealId; N]) -> Self {
         Self::SurrealIds(value.to_vec())
@@ -366,7 +366,7 @@ where
 
 impl<T> From<Vec<&SurrealId>> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: Vec<&SurrealId>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
@@ -375,7 +375,7 @@ where
 
 impl<T, const N: usize> From<&[&SurrealId; N]> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: &[&SurrealId; N]) -> Self {
         Self::SurrealIds(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
@@ -384,7 +384,7 @@ where
 
 impl<T, const N: usize> From<&[sql::Thing; N]> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: &[sql::Thing; N]) -> Self {
         Self::SurrealIds(
@@ -398,7 +398,7 @@ where
 
 impl<T> From<Vec<SurrealId>> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: Vec<SurrealId>) -> Self {
         Self::SurrealIds(value)
@@ -407,7 +407,7 @@ where
 
 impl<T> From<SurrealId> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: SurrealId) -> Self {
         Self::SurrealId(value)
@@ -416,7 +416,7 @@ where
 
 impl<T> From<Table> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn from(value: Table) -> Self {
         Self::Table(value)
@@ -425,7 +425,7 @@ where
 
 impl<T> From<&mut QueryBuilderSelect<T>> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel + Clone,
+    T: Serialize + DeserializeOwned + Clone,
 {
     fn from(value: &mut QueryBuilderSelect<T>) -> Self {
         Self::SubQuery(value.clone())
@@ -434,7 +434,7 @@ where
 
 impl<T> From<QueryBuilderSelect<T>> for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel + Clone,
+    T: Serialize + DeserializeOwned + Clone,
 {
     fn from(value: QueryBuilderSelect<T>) -> Self {
         Self::SubQuery(value.clone())
@@ -443,7 +443,7 @@ where
 
 impl<T> Parametric for Targettables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn get_bindings(&self) -> BindingsList {
         match self {
@@ -653,7 +653,7 @@ impl Parametric for Selectables {
 
 /// The query builder struct used to construct complex database queries.
 #[derive(Debug, Clone)]
-pub struct QueryBuilderSelect<T: Serialize + DeserializeOwned + SurrealdbModel> {
+pub struct QueryBuilderSelect<T: Serialize + DeserializeOwned> {
     projections: Vec<String>,
     targets: Vec<String>,
     where_: Option<String>,
@@ -669,27 +669,27 @@ pub struct QueryBuilderSelect<T: Serialize + DeserializeOwned + SurrealdbModel> 
     __return_type: PhantomData<T>,
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for QueryBuilderSelect<T> {
+impl<T: Serialize + DeserializeOwned> Parametric for QueryBuilderSelect<T> {
     fn get_bindings(&self) -> BindingsList {
         self.________params_accumulator.to_vec()
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<Selectables> for QueryBuilderSelect<T> {
+impl<T: Serialize + DeserializeOwned> From<Selectables> for QueryBuilderSelect<T> {
     fn from(value: Selectables) -> Self {
         todo!()
     }
 }
 
-pub fn select<T: Serialize + DeserializeOwned + SurrealdbModel>(
+pub fn select<T: Serialize + DeserializeOwned>(
     selectables: impl Into<Selectables>,
 ) -> QueryBuilderSelect<T> {
-    let mut builder = QueryBuilderSelect::new();
+    let builder = QueryBuilderSelect::new();
     let selectables: Selectables = selectables.into();
     builder.select(selectables)
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> QueryBuilderSelect<T> {
+impl<T: Serialize + DeserializeOwned> QueryBuilderSelect<T> {
     /// Create a new instance of QueryBuilder.
     ///
     /// # Example
@@ -1097,7 +1097,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> QueryBuilderSelect<T> {
 ; */
 impl<T> Display for QueryBuilderSelect<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let mut query = String::new();
@@ -1175,11 +1175,11 @@ where
 
 impl<T> Buildable for QueryBuilderSelect<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned,
 {
     fn build(&self) -> String {
         format!("{self}")
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> Runnable<T> for QueryBuilderSelect<T> {}
+impl<T: Serialize + DeserializeOwned> Runnable<T> for QueryBuilderSelect<T> {}
