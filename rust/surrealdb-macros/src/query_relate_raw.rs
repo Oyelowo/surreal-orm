@@ -1,11 +1,5 @@
 use std::time::Duration;
 
-use serde::{de::DeserializeOwned, Serialize};
-
-use crate::{
-    query_insert::Runnable, query_select::SelectStatement, value_type_wrappers::SurrealId,
-};
-
 // RELATE @from -> @table -> @with
 // 	[ CONTENT @value
 // 	  | SET @field = @value ...
@@ -14,16 +8,6 @@ use crate::{
 // 	[ TIMEOUT @duration ]
 // 	[ PARALLEL ]
 // ;
-
-// Student::with(None|id|Query).writes.(Book::id|None|Query);
-
-enum Relatables {
-    None,
-    SurrealId(SurrealId),
-    SelectStatement(SelectStatement),
-}
-
-fn relate(relatables: impl Into<Relatables>) {}
 
 #[derive(Debug)]
 pub enum ReturnType {
@@ -174,8 +158,6 @@ impl RelateStatement {
         query
     }
 }
-
-impl<T: Serialize + DeserializeOwned> Runnable<T> for RelateStatement {}
 
 #[test]
 fn test_query_builder() {

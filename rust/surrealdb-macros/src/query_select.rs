@@ -1182,4 +1182,4 @@ where
     }
 }
 
-impl<T: Serialize + DeserializeOwned> Runnable<T> for SelectStatement<T> {}
+impl<T> Runnable<T> for SelectStatement<T> where T: Serialize + DeserializeOwned {}
