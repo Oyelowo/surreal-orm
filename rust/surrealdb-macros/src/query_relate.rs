@@ -81,9 +81,6 @@ pub struct RelateStatement<T>
 where
     T: Serialize + DeserializeOwned,
 {
-    from: Option<String>,
-    table: Option<String>,
-    with: Option<String>,
     relation: String,
     content_param: Option<String>,
     set: Vec<String>,
@@ -100,10 +97,7 @@ where
 {
     pub fn new() -> Self {
         RelateStatement {
-            from: None,
             relation: "".into(),
-            table: None,
-            with: None,
             content_param: None,
             set: vec![],
             return_type: None,
