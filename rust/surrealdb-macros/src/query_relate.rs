@@ -1,9 +1,12 @@
-use std::time::Duration;
+use std::{marker::PhantomData, time::Duration};
 
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
-    query_insert::Runnable, query_select::SelectStatement, value_type_wrappers::SurrealId,
+    query_insert::{Buildable, Runnable},
+    query_select::SelectStatement,
+    value_type_wrappers::SurrealId,
+    Parametric,
 };
 
 // RELATE @from -> @table -> @with
@@ -17,13 +20,20 @@ use crate::{
 
 // Student::with(None|id|Query).writes.(Book::id|None|Query);
 
-enum Relatables {
+enum Relatables<T>
+where
+    T: Serialize + DeserializeOwned,
+{
     None,
     SurrealId(SurrealId),
-    SelectStatement(SelectStatement),
+    SelectStatement(SelectStatement<T>),
 }
 
-fn relate(relatables: impl Into<Relatables>) {}
+fn relate<T>(relatables: impl Into<Relatables<T>>)
+where
+    T: Serialize + DeserializeOwned,
+{
+}
 
 #[derive(Debug)]
 pub enum ReturnType {
@@ -34,7 +44,10 @@ pub enum ReturnType {
     Projections(Vec<&'static str>),
 }
 
-pub struct RelateStatement {
+pub struct RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned,
+{
     from: Option<String>,
     table: Option<String>,
     with: Option<String>,
@@ -43,9 +56,13 @@ pub struct RelateStatement {
     return_type: Option<ReturnType>,
     timeout: Option<Duration>,
     parallel: bool,
+    __return_type: PhantomData<T>,
 }
 
-impl RelateStatement {
+impl<T> RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned,
+{
     pub fn new() -> Self {
         RelateStatement {
             from: None,
@@ -56,6 +73,7 @@ impl RelateStatement {
             return_type: None,
             timeout: None,
             parallel: false,
+            __return_type: PhantomData,
         }
     }
 
@@ -175,11 +193,38 @@ impl RelateStatement {
     }
 }
 
-impl<T: Serialize + DeserializeOwned> Runnable<T> for RelateStatement {}
+impl<T> std::fmt::Display for RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!()
+    }
+}
+
+impl<T> Parametric for RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    fn get_bindings(&self) -> crate::BindingsList {
+        todo!()
+    }
+}
+
+impl<T> Buildable for RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    fn build(&self) -> String {
+        format!("{self}")
+    }
+}
+
+impl<T: Serialize + DeserializeOwned> Runnable<T> for RelateStatement<T> {}
 
 #[test]
 fn test_query_builder() {
-    let query = RelateStatement::new()
+    let query = RelateStatement::<i32>::new()
         .from("from")
         .table("table")
         .with("with")

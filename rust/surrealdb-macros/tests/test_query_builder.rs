@@ -271,6 +271,8 @@ mod tests {
             .book(bk.content.contains("Oyelowo in Uranus"))
             .__as__(st.writtenBooks);
 
+        assert_eq!(written_book_selection, "".to_string());
+
         let st = Student::schema();
         let written_book_selection = st
             .bestFriend(Empty)
