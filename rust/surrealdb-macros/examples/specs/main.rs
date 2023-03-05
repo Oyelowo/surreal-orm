@@ -122,6 +122,10 @@ impl surrealdb_macros::SurrealdbNode for Student {
             .map(|id| surrealdb_macros::RecordId::from(id).into());
         record_id
     }
+
+    fn with(filterable: impl Into<surrealdb_macros::DbFilter>) -> Self::Schema {
+        todo!()
+    }
 }
 pub mod student {
     use ::serde::Serialize;
@@ -547,6 +551,10 @@ impl surrealdb_macros::SurrealdbNode for Book {
             .map(|id| surrealdb_macros::RecordId::from(id).into());
         record_id
     }
+
+    fn with(filterable: impl Into<surrealdb_macros::DbFilter>) -> Self::Schema {
+        todo!()
+    }
 }
 pub mod book {
     use ::serde::Serialize;
@@ -687,6 +695,10 @@ impl surrealdb_macros::SurrealdbNode for Blog {
             .id
             .map(|id| surrealdb_macros::RecordId::from(id).into());
         record_id
+    }
+
+    fn with(filterable: impl Into<surrealdb_macros::DbFilter>) -> Self::Schema {
+        todo!()
     }
 }
 pub mod blog {

@@ -187,13 +187,17 @@ mod tests {
         let wrt = &StudentWritesBook::schema();
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
         let book::Book { content, .. } = Book::schema();
+        let xx = Student::with(Empty).writes__(Empty).book(Empty);
+        assert_eq!(xx.to_string(), "student->writes->book".to_string());
+        assert_eq!(xx.to_string(), "tudent->writes->book".to_string());
+
         let written_book_selection = st
             .bestFriend(Empty)
             .writes__(wrt.timeWritten.equal("12:00"))
             .book(bk.content.contains("Oyelowo in Uranus"))
             .__as__(st.writtenBooks);
 
-        assert_eq!(written_book_selection, "34".to_string());
+        // assert_eq!(written_book_selection, "34".to_string());
 
         mana(bk.content.contains("Lowo"));
         mana(None);

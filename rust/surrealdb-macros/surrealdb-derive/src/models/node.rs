@@ -101,10 +101,9 @@ impl ToTokens for FieldsGetterOpts {
                 type Schema = #module_name::#struct_name_ident;
 
                 fn with(filterable: impl Into<#crate_name::DbFilter>) -> Self::Schema {
-                    #module_name::#struct_name_ident::new()
                     let filter: #crate_name::DbFilter = filterable.into();
                     
-                    ##module_name::#struct_name_ident::#__________connect_to_graph_traversal_string(
+                    #module_name::#struct_name_ident::#__________connect_to_graph_traversal_string(
                                 &"".into(),
                                 filter,
                                 vec![],
@@ -182,19 +181,6 @@ impl ToTokens for FieldsGetterOpts {
                         }
                     }
                     
-                    pub fn __with_id__(mut self, id: impl ::std::fmt::Display) -> Self {
-                        self.#___________graph_traversal_string.push_str(id.to_string().as_str());
-                        self
-                    }
-                    
-                    pub fn __with__(db_name: impl ::std::fmt::Display) -> Self {
-                        let mut #schema_instance = Self::new();
-                        #schema_instance
-                            .#___________graph_traversal_string
-                            .push_str(db_name.to_string().as_str());
-                        #schema_instance
-                    }
-
                     pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, filterable: impl Into<#crate_name::DbFilter>, existing_bindings: #crate_name::BindingsList) -> Self {
                         let mut #schema_instance = Self::empty(); 
                         let filter: #crate_name::DbFilter = filterable.into();
