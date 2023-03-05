@@ -24,6 +24,9 @@ pub use db_field::BindingsList;
 pub use db_field::DbField;
 pub use db_field::DbFilter;
 pub use db_field::Parametric;
+use serde::de::DeserializeOwned;
+use serde::Deserialize;
+use serde::Serialize;
 // pub use db_field::Param;
 // pub use db_field::ParamsExtractor;
 pub use surrealdb::opt::RecordId;
@@ -35,7 +38,7 @@ pub trait SurrealdbModel {
     fn get_serializable_field_names() -> Vec<&'static str>;
 }
 
-pub trait SurrealdbNode: SurrealdbModel {
+pub trait SurrealdbNode: SurrealdbModel + Serialize {
     type Schema;
     type TableNameChecker;
     fn schema() -> Self::Schema;
@@ -45,7 +48,7 @@ pub trait SurrealdbNode: SurrealdbModel {
     fn with(filterable: impl Into<DbFilter>) -> Self::Schema;
 }
 
-pub trait SurrealdbEdge: SurrealdbModel {
+pub trait SurrealdbEdge: SurrealdbModel + Serialize {
     type In;
     type Out;
     type TableNameChecker;
@@ -90,5 +93,37 @@ pub fn format_filter(filter: impl Into<DbFilter>) -> String {
 //             }
 //             format!("[WHERE id = {id}]")
 //         }
+//     }
+// }
+
+// impl<T> Parametric for T
+// where
+//     T: SurrealdbEdge + DeserializeOwned + Serialize,
+// {
+//     fn get_bindings(&self) -> BindingsList {
+//         let value = self;
+//         // let fields_names = get_field_names(value);
+//         let field_names = T::get_serializable_field_names();
+//
+//         field_names
+//             .into_iter()
+//             .map(|field_name| {
+//                 let field_value = get_field_value(value, &field_name)
+//                     .expect("Unable to get value name. This should never happen!");
+//                 Binding::new(field_value).with_name(field_name.into())
+//             })
+//             .collect::<Vec<_>>()
+//     }
+// }
+
+// struct Mana<T: SurrealdbEdge + Serialize>(T);
+//
+// impl<T> Into<sql::Value> for Mana<T>
+// where
+//     T: SurrealdbEdge + Serialize,
+// {
+//     fn into(self) -> sql::Value {
+//         // self.0;
+//         sql::Value::from(self.0)
 //     }
 // }

@@ -1,12 +1,14 @@
-use std::{marker::PhantomData, time::Duration};
+use std::{fmt::Display, marker::PhantomData, time::Duration};
 
 use serde::{de::DeserializeOwned, Serialize};
+use surrealdb::sql;
 
 use crate::{
+    db_field::Binding,
     query_insert::{Buildable, Runnable},
     query_select::SelectStatement,
     value_type_wrappers::SurrealId,
-    Parametric,
+    BindingsList, Parametric, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -19,6 +21,7 @@ use crate::{
 // ;
 
 // Student::with(None|id|Query).writes.(Book::id|None|Query);
+trait Relationable {}
 
 enum Relatables<T>
 where
@@ -51,11 +54,13 @@ where
     from: Option<String>,
     table: Option<String>,
     with: Option<String>,
-    content: Option<String>,
+    relation: String,
+    content_param: Option<String>,
     set: Option<Vec<(String, String)>>,
     return_type: Option<ReturnType>,
     timeout: Option<Duration>,
     parallel: bool,
+    bindings: BindingsList,
     __return_type: PhantomData<T>,
 }
 
@@ -66,15 +71,23 @@ where
     pub fn new() -> Self {
         RelateStatement {
             from: None,
+            relation: "".into(),
             table: None,
             with: None,
-            content: None,
+            content_param: None,
             set: None,
             return_type: None,
             timeout: None,
             parallel: false,
             __return_type: PhantomData,
+            bindings: vec![],
         }
+    }
+
+    pub fn relations(mut self, connection: impl Parametric + Display) -> Self {
+        self.relation = connection.to_string();
+        self.bindings.extend(connection.get_bindings());
+        self
     }
 
     pub fn from(mut self, from: &str) -> Self {
@@ -92,8 +105,11 @@ where
         self
     }
 
-    pub fn content(mut self, content: &str) -> Self {
-        self.content = Some(content.to_string());
+    pub fn content(mut self, content: impl SurrealdbEdge + Serialize) -> Self {
+        let xx = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
+        let x = Binding::new(xx);
+        self.content_param = Some(x.get_param().to_owned());
+        self.bindings.push(x);
         self
     }
 
@@ -127,26 +143,12 @@ where
     pub fn build(&self) -> String {
         let mut query = String::new();
 
-        if let Some(from) = &self.from {
-            query += &format!("RELATE {} -> ", from);
-        } else {
-            panic!("from field is missing");
+        if !&self.relation.is_empty() {
+            query += &format!("RELATE {} -> ", self.relation);
         }
 
-        if let Some(table) = &self.table {
-            query += &format!("{} -> ", table);
-        } else {
-            panic!("table field is missing");
-        }
-
-        if let Some(with) = &self.with {
-            query += &format!("{} ", with);
-        } else {
-            panic!("with field is missing");
-        }
-
-        if let Some(content) = &self.content {
-            query += &format!("CONTENT {} ", content);
+        if let Some(content) = &self.content_param {
+            query += &format!("CONTENT ${} ", content);
         }
 
         if let Some(set) = &self.set {
