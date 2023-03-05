@@ -388,7 +388,6 @@ mod geometry_tests {
             select_query.return_many(db.clone()).await.unwrap()
         );
 
-        assert!(false);
         let select_query = select(All)
             .from(Company::get_table_name())
             .where_(c.tags.any_like("foo"))

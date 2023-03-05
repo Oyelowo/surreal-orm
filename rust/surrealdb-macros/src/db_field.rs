@@ -19,7 +19,7 @@ use std::{
 use proc_macro2::Span;
 use surrealdb::sql::{self, Number, Value};
 
-use crate::{query_select::QueryBuilderSelect, SurrealdbModel};
+use crate::{query_select::SelectStatement, SurrealdbModel};
 
 /// Represents a field in the database. This type wraps a `String` and
 /// provides a convenient way to refer to a database fields.
@@ -244,12 +244,12 @@ impl Into<DbFilter> for &DbField {
     }
 }
 
-impl<T> Into<DbFilter> for QueryBuilderSelect<T>
+impl<T> Into<DbFilter> for SelectStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     fn into(self) -> DbFilter {
-        let query_b: QueryBuilderSelect<T> = self;
+        let query_b: SelectStatement<T> = self;
         DbFilter::new(query_b)
     }
 }

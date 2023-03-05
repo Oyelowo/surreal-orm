@@ -267,7 +267,7 @@ where
     SurrealId(SurrealId),
     SurrealIds(Vec<SurrealId>),
     // Should already be bound
-    SubQuery(QueryBuilderSelect<T>),
+    SubQuery(SelectStatement<T>),
 }
 
 impl<T> From<Vec<sql::Table>> for Targettables<T>
@@ -423,20 +423,20 @@ where
     }
 }
 
-impl<T> From<&mut QueryBuilderSelect<T>> for Targettables<T>
+impl<T> From<&mut SelectStatement<T>> for Targettables<T>
 where
     T: Serialize + DeserializeOwned + Clone,
 {
-    fn from(value: &mut QueryBuilderSelect<T>) -> Self {
+    fn from(value: &mut SelectStatement<T>) -> Self {
         Self::SubQuery(value.clone())
     }
 }
 
-impl<T> From<QueryBuilderSelect<T>> for Targettables<T>
+impl<T> From<SelectStatement<T>> for Targettables<T>
 where
     T: Serialize + DeserializeOwned + Clone,
 {
-    fn from(value: QueryBuilderSelect<T>) -> Self {
+    fn from(value: SelectStatement<T>) -> Self {
         Self::SubQuery(value.clone())
     }
 }
@@ -653,7 +653,7 @@ impl Parametric for Selectables {
 
 /// The query builder struct used to construct complex database queries.
 #[derive(Debug, Clone)]
-pub struct QueryBuilderSelect<T: Serialize + DeserializeOwned> {
+pub struct SelectStatement<T: Serialize + DeserializeOwned> {
     projections: Vec<String>,
     targets: Vec<String>,
     where_: Option<String>,
@@ -669,13 +669,13 @@ pub struct QueryBuilderSelect<T: Serialize + DeserializeOwned> {
     __return_type: PhantomData<T>,
 }
 
-impl<T: Serialize + DeserializeOwned> Parametric for QueryBuilderSelect<T> {
+impl<T: Serialize + DeserializeOwned> Parametric for SelectStatement<T> {
     fn get_bindings(&self) -> BindingsList {
         self.________params_accumulator.to_vec()
     }
 }
 
-impl<T: Serialize + DeserializeOwned> From<Selectables> for QueryBuilderSelect<T> {
+impl<T: Serialize + DeserializeOwned> From<Selectables> for SelectStatement<T> {
     fn from(value: Selectables) -> Self {
         todo!()
     }
@@ -683,13 +683,13 @@ impl<T: Serialize + DeserializeOwned> From<Selectables> for QueryBuilderSelect<T
 
 pub fn select<T: Serialize + DeserializeOwned>(
     selectables: impl Into<Selectables>,
-) -> QueryBuilderSelect<T> {
-    let builder = QueryBuilderSelect::new();
+) -> SelectStatement<T> {
+    let builder = SelectStatement::new();
     let selectables: Selectables = selectables.into();
     builder.select(selectables)
 }
 
-impl<T: Serialize + DeserializeOwned> QueryBuilderSelect<T> {
+impl<T: Serialize + DeserializeOwned> SelectStatement<T> {
     /// Create a new instance of QueryBuilder.
     ///
     /// # Example
@@ -1095,7 +1095,7 @@ impl<T: Serialize + DeserializeOwned> QueryBuilderSelect<T> {
     [ TIMEOUT @duration ]
     [ PARALLEL ]
 ; */
-impl<T> Display for QueryBuilderSelect<T>
+impl<T> Display for SelectStatement<T>
 where
     T: Serialize + DeserializeOwned,
 {
@@ -1173,7 +1173,7 @@ where
     }
 }
 
-impl<T> Buildable for QueryBuilderSelect<T>
+impl<T> Buildable for SelectStatement<T>
 where
     T: Serialize + DeserializeOwned,
 {
@@ -1182,4 +1182,4 @@ where
     }
 }
 
-impl<T: Serialize + DeserializeOwned> Runnable<T> for QueryBuilderSelect<T> {}
+impl<T: Serialize + DeserializeOwned> Runnable<T> for SelectStatement<T> {}
