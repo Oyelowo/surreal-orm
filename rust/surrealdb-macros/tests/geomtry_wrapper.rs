@@ -64,7 +64,7 @@ mod geometry_tests {
     use surrealdb_macros::{
         query_insert::{insert, Runnable},
         query_select::{select, All},
-        SurrealdbNode,
+        Parametric, SurrealdbNode,
     };
 
     use super::*;
@@ -362,6 +362,7 @@ mod geometry_tests {
         // Insert companies
         let results = insert(companies).return_many(db.clone()).await.unwrap();
 
+        println!("QQQQQQINS {:?}", results);
         // db.clone()
         //     .query(format!("{}", CommitStatement))
         //     .await
@@ -374,6 +375,7 @@ mod geometry_tests {
             .timeout(Duration::from_secs(20))
             .parallel();
 
+        println!("BindSel {:?}", select_query.get_bindings());
         println!(
             "SSSSSSS {:?}",
             select_query.return_many(db.clone()).await.unwrap()

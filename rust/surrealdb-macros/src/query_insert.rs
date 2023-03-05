@@ -34,7 +34,10 @@ where
     builder.insert(insertables)
 }
 
-pub enum Insertables<T: Serialize + DeserializeOwned + SurrealdbModel> {
+pub enum Insertables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     Node(T),
     Nodes(Vec<T>),
     FromQuery(QueryBuilderSelect<T>),
