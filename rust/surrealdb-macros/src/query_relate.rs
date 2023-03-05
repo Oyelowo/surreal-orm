@@ -237,7 +237,6 @@ where
     T: Serialize + DeserializeOwned,
 {
     fn build(&self) -> String {
-        // format!("{self}")
         let mut query = String::new();
 
         if !&self.relation.is_empty() {

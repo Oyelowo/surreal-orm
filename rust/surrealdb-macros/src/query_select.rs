@@ -1100,6 +1100,17 @@ where
     T: Serialize + DeserializeOwned,
 {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl<T> Runnable<T> for SelectStatement<T> where T: Serialize + DeserializeOwned {}
+
+impl<T> Buildable for SelectStatement<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    fn build(&self) -> String {
         let mut query = String::new();
 
         query.push_str("SELECT ");
@@ -1159,27 +1170,6 @@ where
         }
 
         query.push(';');
-        // Idea
-        // println!("VOOOOVOOO ",);
-        self.________params_accumulator
-            .clone()
-            .into_iter()
-            .map(|x| {
-                let yy = (format!("{}", x.get_param()), format!("{}", x.get_value()));
-                dbg!(yy)
-            })
-            .collect::<Vec<_>>();
-        write!(f, "{}", query)
+        query
     }
 }
-
-impl<T> Buildable for SelectStatement<T>
-where
-    T: Serialize + DeserializeOwned,
-{
-    fn build(&self) -> String {
-        format!("{self}")
-    }
-}
-
-impl<T> Runnable<T> for SelectStatement<T> where T: Serialize + DeserializeOwned {}
