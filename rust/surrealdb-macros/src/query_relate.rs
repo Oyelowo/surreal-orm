@@ -88,7 +88,7 @@ where
     content_param: Option<String>,
     set: Vec<String>,
     return_type: Option<Return>,
-    timeout: Option<Duration>,
+    timeout: Option<String>,
     parallel: bool,
     bindings: BindingsList,
     __return_type: PhantomData<T>,
@@ -117,21 +117,6 @@ where
     pub fn relations(mut self, connection: impl Parametric + Display) -> Self {
         self.relation = connection.to_string();
         self.bindings.extend(connection.get_bindings());
-        self
-    }
-
-    pub fn from(mut self, from: &str) -> Self {
-        self.from = Some(from.to_string());
-        self
-    }
-
-    pub fn table(mut self, table: &str) -> Self {
-        self.table = Some(table.to_string());
-        self
-    }
-
-    pub fn with(mut self, with: &str) -> Self {
-        self.with = Some(with.to_string());
         self
     }
 
@@ -240,7 +225,7 @@ where
         let mut query = String::new();
 
         if !&self.relation.is_empty() {
-            query += &format!("RELATE {} -> ", self.relation);
+            query += &format!("RELATE {}", self.relation);
         }
 
         if let Some(param) = &self.content_param {
@@ -292,9 +277,9 @@ impl<T: Serialize + DeserializeOwned> Runnable<T> for RelateStatement<T> {}
 #[test]
 fn test_query_builder() {
     let query = RelateStatement::<i32>::new()
-        .from("from")
-        .table("table")
-        .with("with")
+        // .from("from")
+        // .table("table")
+        // .with("with")
         // .content("content")
         // .set("field1", "value1")
         // .set("field2", "value2")
