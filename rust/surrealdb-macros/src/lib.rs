@@ -5,6 +5,7 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(unused_imports)]
 
+use db_field::Empty;
 pub use model_id::SurrealId;
 pub mod db_field;
 pub mod operators_macros;
@@ -73,16 +74,51 @@ pub fn format_filter(filter: impl Into<DbFilter>) -> String {
 }
 
 fn where_() {}
-// pub enum Clause<T: Serialize + DeserializeOwned> {
-pub enum Clause {
+pub enum Clause<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    // pub enum Clause {
     Empty,
     Where(DbFilter),
-    Query(SelectStatement<sql::Value>),
+    // Query(SelectStatement<sql::Value>),
+    Query(SelectStatement<T>),
     Id(SurrealId),
 }
 
+impl<T> From<SurrealId> for Clause<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    fn from(value: SurrealId) -> Self {
+        Self::Id(value)
+    }
+}
+
+impl<T> From<Empty> for Clause<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    fn from(value: Empty) -> Self {
+        Self::Empty
+    }
+}
+
+impl<T> From<SelectStatement<T>> for Clause<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    fn from(value: SelectStatement<T>) -> Self {
+        Self::Query(value.into())
+    }
+}
+
+// fn fdfdf<T>(xx: impl Into<Clause<T>>) {}
 // pub fn format_clause<T: Serialize + DeserializeOwned>(
-pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
+pub fn format_clause<T>(clause: Clause<T>, table_name: &'static str) -> String
+where
+    T: Serialize + DeserializeOwned,
+{
     match clause {
         Clause::Empty => "".into(),
         Clause::Where(filter) => {
