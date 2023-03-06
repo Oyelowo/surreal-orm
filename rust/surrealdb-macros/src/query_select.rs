@@ -1065,8 +1065,6 @@ impl SelectStatement {
     [ PARALLEL ]
 ; */
 impl  Display for SelectStatement
-
-    
 {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", self.build())
@@ -1076,8 +1074,6 @@ impl  Display for SelectStatement
 // impl  Runnable  for SelectStatement  T: Serialize + DeserializeOwned {}
 
 impl  Buildable for SelectStatement
-
-    
 {
     fn build(&self) -> String {
         let mut query = String::new();
@@ -1142,105 +1138,64 @@ impl  Buildable for SelectStatement
         query
     }
 }
-// #[async_trait::async_trait]
-// pub trait Runnablexxxx
-//
-//     Self: Parametric + Buildable,
-// {
-//     // async fn return_test<U: Serialize + DeserializeOwned>(
-//     //     &self,
-//     //     db: Surreal<Db>,
-//     // ) -> surrealdb::Result<U> {
-//     //     // let query = self.build();
-//     //     let query = "";
-//     //     println!("XXXX {query}");
-//     //     let mut response = self
-//     //         .get_bindings()
-//     //         .iter()
-//     //         .fold(db.query(query), |acc, val| {
-//     //             acc.bind((val.get_param(), val.get_value()))
-//     //         })
-//     //         .await?;
-//     //
-//     //     // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
-//     //     // trying to return Vec  rather than Option , then pick the first of the returned
-//     //     // Ok .
-//     //     // let mut returned_val = match response.take::<Option<U>>(0) {
-//     //     //     Ok(one) => vec![one.unwrap()],
-//     //     //     // Err(err) => response.take::<Vec >(0)?,
-//     //     //     Err(err) => response.take::<U>(0)?,
-//     //     // };
-//     //     //
-//     //     // TODO:: Handle error if nothing is returned
-//     //     // let only_or_last = returned_val.pop().unwrap();
-//     //     // Ok(only_or_last)
-//     //     return response.take::<U>(0).unwrap();
-//     // }
-//
-//     async fn return_one(
-//         &self,
-//         db: surrealdb::Surreal<surrealdb::engine::local::Db>,
-//     ) -> surrealdb::Result  {
-//         let query = self.build();
-//         println!("XXXX {query}");
-//         let mut response = self
-//             .get_bindings()
-//             .iter()
-//             .fold(db.query(query), |acc, val| {
-//                 acc.bind((val.get_param(), val.get_value()))
-//             })
-//             .await?;
-//
-//         // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
-//         // trying to return Vec  rather than Option , then pick the first of the returned
-//         // Ok .
-//         let mut returned_val = match response.take::<Option >(0) {
-//             Ok(one) => vec![one.unwrap()],
-//             Err(err) => response.take::<Vec >(0)?,
-//         };
-//
-//         // TODO:: Handle error if nothing is returned
-//         let only_or_last = returned_val.pop().unwrap();
-//         Ok(only_or_last)
-//     }
-//
-//     async fn return_many(
-//         &self,
-//         db: surrealdb::Surreal<surrealdb::engine::local::Db>,
-//     ) -> surrealdb::Result<Vec > {
-//         let query = self.build();
-//         println!("XXXX {query}");
-//         let mut response = self
-//             .get_bindings()
-//             .iter()
-//             .fold(db.query(query), |acc, val| {
-//                 acc.bind((val.get_param(), val.get_value()))
-//             })
-//             .await?;
-//
-//         println!("mmmmm {response:?}");
-//         // This does the reverse of get_one
-//         // If it errors, try to check if only single entry has been inputed, hence, suurealdb
-//         // trying to return Option , then pick the return the only item as Vec .
-//         let mut returned_val = match response.take::<Vec >(0) {
-//             Ok(many) => many,
-//             Err(err) => vec![response.take::<Option >(0)?.unwrap()],
-//         };
-//
-//         // TODO:: Handle error if nothing is returned
-//         Ok(returned_val)
-//     }
-// }
-//
-// // #[derive(Debug, Clone)]
-// // pub struct SelectStatemen;
-// //
-// // impl  Buildable  for SelectStatemen
-// // 
-// //     
-// // {
-// //     fn build(&self) -> String {
-// //         todo!()
-// //     }
-// // }
-// // impl  Runnable  for SelectStatemen  T: Serialize + DeserializeOwned {}
+
+#[async_trait::async_trait]
+pub trait Runnable 
+    where Self: Parametric + Buildable,
+{
+    async fn return_one<T: Serialize + DeserializeOwned >(
+        &self,
+        db: surrealdb::Surreal<surrealdb::engine::local::Db>,
+    ) -> surrealdb::Result  {
+        let query = self.build();
+        println!("XXXX {query}");
+        let mut response = self
+            .get_bindings()
+            .iter()
+            .fold(db.query(query), |acc, val| {
+                acc.bind((val.get_param(), val.get_value()))
+            })
+            .await?;
+
+        // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
+        // trying to return Vec  rather than Option , then pick the first of the returned
+        // Ok .
+        let mut returned_val = match response.take::<Option >(0) {
+            Ok(one) => vec![one.unwrap()],
+            Err(err) => response.take::<Vec >(0)?,
+        };
+
+        // TODO:: Handle error if nothing is returned
+        let only_or_last = returned_val.pop().unwrap();
+        Ok(only_or_last)
+    }
+
+    async fn return_many<T: Serialize + DeserializeOwned >(
+        &self,
+        db: surrealdb::Surreal<surrealdb::engine::local::Db>,
+    ) -> surrealdb::Result<Vec > {
+        let query = self.build();
+        println!("XXXX {query}");
+        let mut response = self
+            .get_bindings()
+            .iter()
+            .fold(db.query(query), |acc, val| {
+                acc.bind((val.get_param(), val.get_value()))
+            })
+            .await?;
+
+        println!("mmmmm {response:?}");
+        // This does the reverse of get_one
+        // If it errors, try to check if only single entry has been inputed, hence, suurealdb
+        // trying to return Option , then pick the return the only item as Vec .
+        let mut returned_val = match response.take::<Vec >(0) {
+            Ok(many) => many,
+            Err(err) => vec![response.take::<Option >(0)?.unwrap()],
+        };
+
+        // TODO:: Handle error if nothing is returned
+        Ok(returned_val)
+    }
+}
+
+impl  Runnable  for SelectStatemen  T: Serialize + DeserializeOwned {}
