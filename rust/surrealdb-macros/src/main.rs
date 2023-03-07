@@ -59,7 +59,9 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     id: Option<RecordId>,
 
     // #[surrealdb(link_one = "Book", skip_serializing)]
+    #[serde(skip_serializing)]
     r#in: In,
+    #[serde(skip_serializing)]
     out: Out,
     time_written: String,
 }

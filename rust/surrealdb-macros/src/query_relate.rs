@@ -8,7 +8,7 @@ use crate::{
     query_insert::{Buildable, Runnable, Updateables, Updater},
     query_select::{self, SelectStatement},
     value_type_wrappers::SurrealId,
-    BindingsList, DbField, Parametric, SurrealdbEdge,
+    BindingsList, Clause, DbField, Parametric, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -29,7 +29,14 @@ enum Relatables {
     SelectStatement(SelectStatement),
 }
 
-fn relate(relatables: impl Into<Relatables>) {}
+pub fn relate<T>(connection: impl Into<DbField>) -> RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbEdge,
+{
+    let mut builder = RelateStatement::<T>::new();
+    let connection: DbField = connection.into();
+    builder.relate(connection)
+}
 
 #[derive(Debug)]
 pub enum Return {
@@ -72,7 +79,7 @@ impl<const N: usize> From<&[&DbField; N]> for Return {
 
 pub struct RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned,
+    T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
     relation: String,
     content_param: Option<String>,
@@ -86,7 +93,7 @@ where
 
 impl<T> RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned,
+    T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
     pub fn new() -> Self {
         RelateStatement {
@@ -101,13 +108,13 @@ where
         }
     }
 
-    pub fn relations(mut self, connection: impl Parametric + Display) -> Self {
+    pub fn relate(mut self, connection: impl Parametric + Display) -> Self {
         self.relation = connection.to_string();
         self.bindings.extend(connection.get_bindings());
         self
     }
 
-    pub fn content(mut self, content: impl SurrealdbEdge + Serialize) -> Self {
+    pub fn content(mut self, content: T) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
         self.content_param = Some(binding.get_param().to_owned());
@@ -187,7 +194,7 @@ where
 
 impl<T> std::fmt::Display for RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned,
+    T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.build()))
@@ -196,7 +203,7 @@ where
 
 impl<T> Parametric for RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned,
+    T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
     fn get_bindings(&self) -> crate::BindingsList {
         self.bindings.to_vec()
@@ -205,7 +212,7 @@ where
 
 impl<T> Buildable for RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned,
+    T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
     fn build(&self) -> String {
         let mut query = String::new();
@@ -258,7 +265,7 @@ where
     }
 }
 
-impl<T: Serialize + DeserializeOwned> Runnable<T> for RelateStatement<T> {}
+impl<T: Serialize + DeserializeOwned + SurrealdbEdge> Runnable<T> for RelateStatement<T> {}
 
 #[test]
 fn test_query_builder() {

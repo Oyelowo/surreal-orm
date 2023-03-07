@@ -97,6 +97,17 @@ pub enum Clause {
     Id(SurrealId),
 }
 
+impl Parametric for Clause {
+    fn get_bindings(&self) -> BindingsList {
+        match self {
+            Clause::Empty => vec![],
+            Clause::Where(filter) => filter.get_bindings(),
+            Clause::Query(select_statement) => select_statement.get_bindings(),
+            Clause::Id(id) => id.get_bindings(),
+        }
+    }
+}
+
 impl Clause {
     pub fn get_errors(&self, table_name: &'static str) -> Vec<String> {
         let mut errors = vec![];
