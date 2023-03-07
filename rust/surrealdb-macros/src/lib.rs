@@ -73,19 +73,61 @@ pub fn format_filter(filter: impl Into<DbFilter>) -> String {
     }
 }
 
-fn where_() {}
+pub fn where_(condition: impl Parametric + Into<DbFilter> + std::fmt::Display) -> DbFilter {
+    // let filter = DbFilter::new(format!("{condition}")).___update_bindings(&condition);
+    condition.into()
+}
+
 pub enum Clause {
-    // pub enum Clause {
     Empty,
     Where(DbFilter),
-    // Query(SelectStatement<sql::Value>),
     Query(SelectStatement),
     Id(SurrealId),
+}
+
+impl Clause {
+    pub fn get_errors(&self, table_name: &'static str) -> Vec<String> {
+        let mut errors = vec![];
+        if let Clause::Id(id) = self {
+            if !id
+                .to_string()
+                .starts_with(format!("{table_name}:").as_str())
+            {
+                errors.push(format!(
+                    "invalid id {id}. Id does not belong to table {table_name}"
+                ))
+            }
+        }
+        errors
+    }
+}
+
+impl std::fmt::Display for Clause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let clause = match self {
+            Clause::Empty => "".into(),
+            Clause::Where(filter) => {
+                format!("[WHERE {filter}]")
+            }
+            Clause::Id(id) => {
+                format!("{id}")
+            }
+            Clause::Query(select_statement) => format!("({select_statement})"),
+        };
+
+        write!(f, "{}", clause)
+    }
 }
 
 impl From<SurrealId> for Clause {
     fn from(value: SurrealId) -> Self {
         Self::Id(value)
+    }
+}
+
+impl From<&SurrealId> for Clause {
+    fn from(value: &SurrealId) -> Self {
+        Self::Id(value.to_owned())
     }
 }
 
@@ -101,6 +143,11 @@ impl From<SelectStatement> for Clause {
     }
 }
 
+impl From<&SelectStatement> for Clause {
+    fn from(value: &SelectStatement) -> Self {
+        Self::Query(value.to_owned().into())
+    }
+}
 // fn fdfdf<T>(xx: impl Into<Clause<T>>) {}
 // pub fn format_clause<T: Serialize + DeserializeOwned>(
 pub fn format_clause(clause: Clause, table_name: &'static str) -> String {

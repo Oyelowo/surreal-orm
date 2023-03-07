@@ -274,7 +274,7 @@ impl From<DbField> for DbFilter {
 //     }
 // }
 
-impl<'a> From<Cow<'a, DbField>> for DbField {
+impl<'a> From<Cow<'a, Self>> for DbField {
     fn from(value: Cow<'a, DbField>) -> Self {
         match value {
             Cow::Borrowed(v) => v.clone(),
@@ -299,7 +299,7 @@ impl From<String> for DbField {
         Self::new(value)
     }
 }
-impl From<&DbField> for DbField {
+impl From<&Self> for DbField {
     fn from(value: &DbField) -> Self {
         value.to_owned()
     }
@@ -660,7 +660,7 @@ impl<'a> From<Cow<'a, DbFilter>> for DbFilter {
     }
 }
 
-impl From<Option<DbFilter>> for DbFilter {
+impl From<Option<Self>> for DbFilter {
     fn from(value: Option<DbFilter>) -> Self {
         match value {
             Some(v) => v,
