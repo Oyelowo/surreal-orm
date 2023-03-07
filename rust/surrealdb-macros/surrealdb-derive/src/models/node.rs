@@ -100,12 +100,12 @@ impl ToTokens for FieldsGetterOpts {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
                 type Schema = #module_name::#struct_name_ident;
 
-                fn with(filterable: impl Into<#crate_name::DbFilter>) -> Self::Schema {
-                    let filter: #crate_name::DbFilter = filterable.into();
+                fn with(clause: impl Into<#crate_name::Clause>) -> Self::Schema {
+                    let clause: #crate_name::Clause = clause.into();
                     
                     #module_name::#struct_name_ident::#__________connect_to_graph_traversal_string(
                                 &"".into(),
-                                filter,
+                                clause,
                                 vec![],
                     )
                 }
@@ -181,15 +181,18 @@ impl ToTokens for FieldsGetterOpts {
                         }
                     }
                     
-                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, filterable: impl Into<#crate_name::DbFilter>, existing_bindings: #crate_name::BindingsList) -> Self {
+                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, clause: impl Into<#crate_name::Clause>, existing_bindings: #crate_name::BindingsList) -> Self {
                         let mut #schema_instance = Self::empty(); 
-                        let filter: #crate_name::DbFilter = filterable.into();
-                        let bindings = [&existing_bindings[..], &filter.get_bindings()[..]].concat();
+                        let clause: #crate_name::Clause = clause.into();
+                        let bindings = [&existing_bindings[..], &clause.get_bindings()[..]].concat();
                         let bindings = bindings.as_slice();
 
                         schema_instance.#___________bindings = bindings.into();
                         
-                        let connection = format!("{}{}{}", store, #table_name_str, #crate_name::format_filter(filter));
+                        // TODO: Check potentially get errors that relate statement can use for
+                        // validation
+                        let errors = clause.get_errors(#table_name_str.into());
+                        let connection = format!("{}{}{}", store, #table_name_str, clause);
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;

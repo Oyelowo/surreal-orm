@@ -5,6 +5,8 @@ Email: oyelowooyedayo@gmail.com
 
 #![allow(unused_imports)]
 
+use std::ops::Deref;
+
 use db_field::Empty;
 pub mod db_field;
 pub mod operators_macros;
@@ -110,7 +112,8 @@ impl std::fmt::Display for Clause {
                 format!("[WHERE {filter}]")
             }
             Clause::Id(id) => {
-                format!("{id}")
+                // The Table name component of the Id comes from the macro. e.g For student:5, the Schema which this is wrapped into provide. So all we need here is the id component, student
+                format!(":{}", id.deref().id)
             }
             Clause::Query(select_statement) => format!("({select_statement})"),
         };
