@@ -74,7 +74,8 @@ impl ToTokens for FieldsGetterOpts {
             ___________out_marker,
             ___________bindings,
             ____________update_many_bindings,
-            bindings,  
+            bindings,
+            ___________errors,  
         } = VariablesModelMacro::new();
         let schema_props_args = SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident, table_name_ident };
 
@@ -185,6 +186,7 @@ impl ToTokens for FieldsGetterOpts {
                             clause: impl Into<#crate_name::Clause>,
                             arrow_direction: &str,
                             existing_bindings: #crate_name::BindingsList,
+                            existing_errors: #crate_name::BindingsList,
                         ) -> Self {
                             let mut schema_instance = Self::empty();
                             let clause: #crate_name::Clause = clause.into();
@@ -192,6 +194,11 @@ impl ToTokens for FieldsGetterOpts {
                             let bindings = bindings.as_slice();
                             schema_instance.#___________bindings = bindings.into();
                             
+                            let errors = clause.get_errors(#table_name_str.into());
+                            let errors = [&existing_errors[..], &errors[..]].concat();
+                            let errors = errors.as_slice();
+                            schema_instance.#___________errors = errors.into();
+
                             let schema_edge_str_with_arrow = format!(
                                 "{}{}{}{}{}",
                                 store.as_str(),

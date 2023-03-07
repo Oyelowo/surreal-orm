@@ -47,6 +47,7 @@ impl ToTokens for FieldsGetterOpts {
             __________connect_to_graph_traversal_string, 
             ___________graph_traversal_string,
             ___________bindings,
+            ___________errors,
             schema_instance, .. 
         } = VariablesModelMacro::new();
         let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident, table_name_ident};
@@ -150,11 +151,18 @@ impl ToTokens for FieldsGetterOpts {
                    #( #schema_struct_fields_types_kv) *
                     pub(crate) #___________graph_traversal_string: ::std::string::String,
                     #___________bindings: #crate_name::BindingsList,
+                    #___________errors: Vec<String>,
                 }
 
                 impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
+                    }
+                }
+                
+                impl #crate_name::Errorneous for #struct_name_ident {
+                    fn get_errors(&self) -> Vec<String> {
+                        self.#___________errors.to_vec()
                     }
                 }
                 
@@ -170,6 +178,7 @@ impl ToTokens for FieldsGetterOpts {
                            #( #schema_struct_fields_names_kv) *
                             #___________graph_traversal_string: "".into(),
                             #___________bindings: vec![],
+                            #___________errors: vec![],
                         }
                     }
 
@@ -178,6 +187,7 @@ impl ToTokens for FieldsGetterOpts {
                            #( #schema_struct_fields_names_kv_empty) *
                             #___________graph_traversal_string: "".into(),
                             #___________bindings: vec![],
+                            #___________errors: vec![],
                         }
                     }
                     
@@ -185,6 +195,7 @@ impl ToTokens for FieldsGetterOpts {
                         store: &::std::string::String,
                         clause: impl Into<#crate_name::Clause>,
                         existing_bindings: #crate_name::BindingsList,
+                        existing_errors: #crate_name::BindingsList,
                     ) -> Self {
                         let mut #schema_instance = Self::empty(); 
                         let clause: #crate_name::Clause = clause.into();
@@ -193,9 +204,13 @@ impl ToTokens for FieldsGetterOpts {
 
                         schema_instance.#___________bindings = bindings.into();
                         
-                        // TODO: Check potentially get errors that relate statement can use for
-                        // validation
                         let errors = clause.get_errors(#table_name_str.into());
+                        let errors = [&existing_errors[..], &errors[..]].concat();
+                        let errors = errors.as_slice();
+
+                        schema_instance.#___________errors = errors.into();
+                        
+                        
                         let connection = format!("{}{}{}", store, #table_name_str, clause);
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
