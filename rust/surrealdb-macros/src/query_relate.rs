@@ -29,12 +29,12 @@ enum Relatables {
     SelectStatement(SelectStatement),
 }
 
-pub fn relate<T>(connection: impl Into<DbField>) -> RelateStatement<T>
+pub fn relate<T>(connection: impl std::fmt::Display + Parametric) -> RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
     let mut builder = RelateStatement::<T>::new();
-    let connection: DbField = connection.into();
+    // let connection: DbField = connection.into();
     builder.relate(connection)
 }
 

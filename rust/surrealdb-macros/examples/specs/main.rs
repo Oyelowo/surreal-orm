@@ -123,7 +123,7 @@ impl surrealdb_macros::SurrealdbNode for Student {
         record_id
     }
 
-    fn with(filterable: impl Into<surrealdb_macros::DbFilter>) -> Self::Schema {
+    fn with(filterable: impl Into<surrealdb_macros::Clause>) -> Self::Schema {
         todo!()
     }
 }
@@ -552,7 +552,7 @@ impl surrealdb_macros::SurrealdbNode for Book {
         record_id
     }
 
-    fn with(filterable: impl Into<surrealdb_macros::DbFilter>) -> Self::Schema {
+    fn with(filterable: impl Into<surrealdb_macros::Clause>) -> Self::Schema {
         todo!()
     }
 }
@@ -697,7 +697,7 @@ impl surrealdb_macros::SurrealdbNode for Blog {
         record_id
     }
 
-    fn with(filterable: impl Into<surrealdb_macros::DbFilter>) -> Self::Schema {
+    fn with(filterable: impl Into<surrealdb_macros::Clause>) -> Self::Schema {
         todo!()
     }
 }

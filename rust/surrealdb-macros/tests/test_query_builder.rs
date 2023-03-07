@@ -153,6 +153,8 @@ mod tests {
     use _core::time::Duration;
     use surrealdb::sql;
     use surrealdb_macros::db_field::{cond, empty, Binding, Empty, Parametric};
+    use surrealdb_macros::query_insert::Runnable;
+    use surrealdb_macros::query_relate::{relate, Return};
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_select::{order, select, All, Order, RunnableSelect};
     use surrealdb_macros::value_type_wrappers::SurrealId;
@@ -438,6 +440,54 @@ mod tests {
         //     lastName, unoBook, lowo, age, bestFriend, lowo;"
         //         .remove_extra_whitespace()
         // )
+    }
+
+    #[tokio::test]
+    async fn relate_query() -> surrealdb::Result<()> {
+        let db = Surreal::new::<Mem>(()).await.unwrap();
+        db.use_ns("test").use_db("test").await?;
+        relate(
+            Student::with(SurrealId::try_from("student:1").unwrap())
+                .writes__(Empty)
+                .book(SurrealId::try_from("book2").unwrap()),
+        )
+        .content(StudentWritesBook {
+            id: todo!(),
+            _in: todo!(),
+            out: todo!(),
+            time_written: todo!(),
+        })
+        .return_(Return::Before)
+        .return_one(db.clone());
+
+        let x = Student::schema()
+            .writes__(Empty)
+            .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
+            .title;
+
+        assert_eq!(
+            x.to_string(),
+            // "->writes->book[WHERE id = book:blaze].title".to_string()
+            "->writes->book[WHERE id = $_param_00000000].title".to_string()
+        );
+
+        let m = x.get_bindings();
+        assert_eq!(
+            serde_json::to_string(&m).unwrap(),
+            "[[\"_param_00000000\",\"book:blaze\"]]".to_string()
+        );
+
+        let student = Student::schema();
+        // Another case
+        let x = student
+            .bestFriend(student.age.between(18, 150))
+            .bestFriend(Empty)
+            .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))
+            .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))));
+
+        insta::assert_display_snapshot!(x);
+        insta::assert_debug_snapshot!(x.get_bindings());
+        Ok(())
     }
 
     #[test]
