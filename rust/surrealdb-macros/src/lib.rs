@@ -75,8 +75,18 @@ pub fn format_filter(filter: impl Into<DbFilter>) -> String {
     }
 }
 
-pub fn where_(condition: impl Parametric + Into<DbFilter> + std::fmt::Display) -> DbFilter {
+pub trait Erroneous {
+    fn get_errors(&self) -> Vec<String>;
+}
+
+pub fn where_(
+    condition: impl Parametric + Into<DbFilter> + std::fmt::Display + Erroneous,
+) -> DbFilter {
     // let filter = DbFilter::new(format!("{condition}")).___update_bindings(&condition);
+
+    if condition.get_errors().is_empty() {
+        // TODO: Maybe pass to DB filter and check and return Result<DbFilter> in relate_query
+    }
     condition.into()
 }
 
