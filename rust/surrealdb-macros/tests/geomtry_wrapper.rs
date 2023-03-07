@@ -404,6 +404,7 @@ mod geometry_tests {
             .await
             .unwrap();
 
+        // let results: GenZCompany = insert(select_query).return_many(db).await.unwrap();
         insta::assert_debug_snapshot!(results);
         Ok(())
     }

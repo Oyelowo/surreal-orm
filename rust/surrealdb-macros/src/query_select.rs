@@ -15,7 +15,7 @@ use surrealdb::sql::{self, Table, Value};
 
 use crate::{
     db_field::{Binding, BindingsList, DbFilter, Parametric},
-    query_insert::{Buildable, Runnable},
+    query_insert::Buildable,
     value_type_wrappers::SurrealId,
     DbField, SurrealdbModel, SurrealdbNode,
 };
@@ -258,8 +258,7 @@ impl Display for OrderOption {
 }
 
 #[derive(Debug, Clone)]
-pub enum Targettables
-{
+pub enum Targettables {
     Table(sql::Table),
     Tables(Vec<sql::Table>),
     SurrealId(SurrealId),
@@ -268,8 +267,7 @@ pub enum Targettables
     SubQuery(SelectStatement),
 }
 
-impl From<Vec<sql::Table>> for Targettables
-{
+impl From<Vec<sql::Table>> for Targettables {
     fn from(value: Vec<sql::Table>) -> Self {
         Self::Tables(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
@@ -280,86 +278,72 @@ impl From<Vec<sql::Table>> for Targettables
 //     }
 // }
 
-impl From<Vec<sql::Thing>> for Targettables
-{
+impl From<Vec<sql::Thing>> for Targettables {
     fn from(value: Vec<sql::Thing>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
 }
 
-impl From<&sql::Table> for Targettables
-{
+impl From<&sql::Table> for Targettables {
     fn from(value: &sql::Table) -> Self {
         Self::Table(value.to_owned())
     }
 }
-impl From<&sql::Thing> for Targettables
-{
+impl From<&sql::Thing> for Targettables {
     fn from(value: &sql::Thing) -> Self {
         Self::SurrealId(value.to_owned().into())
     }
 }
 
-impl From<sql::Thing> for Targettables
-{
+impl From<sql::Thing> for Targettables {
     fn from(value: sql::Thing) -> Self {
         Self::SurrealId(value.into())
     }
 }
 
-impl From<Vec<&sql::Table>> for Targettables
-{
+impl From<Vec<&sql::Table>> for Targettables {
     fn from(value: Vec<&sql::Table>) -> Self {
         Self::Tables(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
-impl< const N: usize> From<&[&sql::Table; N]> for Targettables
-{
+impl<const N: usize> From<&[&sql::Table; N]> for Targettables {
     fn from(value: &[&sql::Table; N]) -> Self {
         Self::Tables(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
-impl< const N: usize> From<&[sql::Table; N]> for Targettables
-{
+impl<const N: usize> From<&[sql::Table; N]> for Targettables {
     fn from(value: &[sql::Table; N]) -> Self {
         Self::Tables(value.to_vec())
     }
 }
 
-impl From<&SurrealId> for Targettables
-{
+impl From<&SurrealId> for Targettables {
     fn from(value: &SurrealId) -> Self {
         Self::SurrealId(value.to_owned())
     }
 }
 
-impl< const N: usize> From<&[SurrealId; N]> for Targettables
-
-{
+impl<const N: usize> From<&[SurrealId; N]> for Targettables {
     fn from(value: &[SurrealId; N]) -> Self {
         Self::SurrealIds(value.to_vec())
     }
 }
 
-impl From<Vec<&SurrealId>> for Targettables
-
-{
+impl From<Vec<&SurrealId>> for Targettables {
     fn from(value: Vec<&SurrealId>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
-impl< const N: usize> From<&[&SurrealId; N]> for Targettables
-{
+impl<const N: usize> From<&[&SurrealId; N]> for Targettables {
     fn from(value: &[&SurrealId; N]) -> Self {
         Self::SurrealIds(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
-impl< const N: usize> From<&[sql::Thing; N]> for Targettables
-{
+impl<const N: usize> From<&[sql::Thing; N]> for Targettables {
     fn from(value: &[sql::Thing; N]) -> Self {
         Self::SurrealIds(
             value
@@ -370,52 +354,37 @@ impl< const N: usize> From<&[sql::Thing; N]> for Targettables
     }
 }
 
-impl  From<Vec<SurrealId>> for Targettables 
-
-    
-{
+impl From<Vec<SurrealId>> for Targettables {
     fn from(value: Vec<SurrealId>) -> Self {
         Self::SurrealIds(value)
     }
 }
 
-impl  From<SurrealId> for Targettables 
-
-    
-{
+impl From<SurrealId> for Targettables {
     fn from(value: SurrealId) -> Self {
         Self::SurrealId(value)
     }
 }
 
-impl  From<Table> for Targettables 
-
-    
-{
+impl From<Table> for Targettables {
     fn from(value: Table) -> Self {
         Self::Table(value)
     }
 }
 
-impl  From<&mut SelectStatement> for Targettables 
-{
-    fn from(value: &mut SelectStatement ) -> Self {
+impl From<&mut SelectStatement> for Targettables {
+    fn from(value: &mut SelectStatement) -> Self {
         Self::SubQuery(value.clone())
     }
 }
 
-impl  From<SelectStatement > for Targettables 
-
-{
-    fn from(value: SelectStatement ) -> Self {
+impl From<SelectStatement> for Targettables {
+    fn from(value: SelectStatement) -> Self {
         Self::SubQuery(value.clone())
     }
 }
 
-impl  Parametric for Targettables 
-
-    
-{
+impl Parametric for Targettables {
     fn get_bindings(&self) -> BindingsList {
         match self {
             Targettables::Table(table) => {
@@ -637,7 +606,6 @@ pub struct SelectStatement {
     timeout: Option<String>,
     parallel: bool,
     ________params_accumulator: BindingsList,
-    __return_type: PhantomData ,
 }
 
 impl Parametric for SelectStatement {
@@ -682,7 +650,6 @@ impl SelectStatement {
             timeout: None,
             parallel: false,
             ________params_accumulator: vec![],
-            __return_type: PhantomData,
         }
     }
 
@@ -732,8 +699,8 @@ impl SelectStatement {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * FROM users");
     /// ```
-    pub fn from(mut self, targettables: impl Into<Targettables >) -> Self {
-        let targets: Targettables  = targettables.into();
+    pub fn from(mut self, targettables: impl Into<Targettables>) -> Self {
+        let targets: Targettables = targettables.into();
         let targets_bindings = targets.get_bindings();
 
         // When we have either one or many table names or record ids, we want to use placeholders
@@ -1064,8 +1031,7 @@ impl SelectStatement {
     [ TIMEOUT @duration ]
     [ PARALLEL ]
 ; */
-impl  Display for SelectStatement
-{
+impl Display for SelectStatement {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", self.build())
     }
@@ -1073,8 +1039,7 @@ impl  Display for SelectStatement
 
 // impl  Runnable  for SelectStatement  T: Serialize + DeserializeOwned {}
 
-impl  Buildable for SelectStatement
-{
+impl Buildable for SelectStatement {
     fn build(&self) -> String {
         let mut query = String::new();
 
@@ -1140,13 +1105,14 @@ impl  Buildable for SelectStatement
 }
 
 #[async_trait::async_trait]
-pub trait Runnable 
-    where Self: Parametric + Buildable,
+pub trait Runnable
+where
+    Self: Parametric + Buildable,
 {
-    async fn return_one<T: Serialize + DeserializeOwned >(
+    async fn return_one<T: Serialize + DeserializeOwned>(
         &self,
         db: surrealdb::Surreal<surrealdb::engine::local::Db>,
-    ) -> surrealdb::Result  {
+    ) -> surrealdb::Result<T> {
         let query = self.build();
         println!("XXXX {query}");
         let mut response = self
@@ -1160,9 +1126,9 @@ pub trait Runnable
         // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
         // trying to return Vec  rather than Option , then pick the first of the returned
         // Ok .
-        let mut returned_val = match response.take::<Option >(0) {
+        let mut returned_val = match response.take::<Option>(0) {
             Ok(one) => vec![one.unwrap()],
-            Err(err) => response.take::<Vec >(0)?,
+            Err(err) => response.take::<Vec>(0)?,
         };
 
         // TODO:: Handle error if nothing is returned
@@ -1170,10 +1136,10 @@ pub trait Runnable
         Ok(only_or_last)
     }
 
-    async fn return_many<T: Serialize + DeserializeOwned >(
+    async fn return_many<T: Serialize + DeserializeOwned>(
         &self,
         db: surrealdb::Surreal<surrealdb::engine::local::Db>,
-    ) -> surrealdb::Result<Vec > {
+    ) -> surrealdb::Result<Vec<T>> {
         let query = self.build();
         println!("XXXX {query}");
         let mut response = self
@@ -1188,9 +1154,9 @@ pub trait Runnable
         // This does the reverse of get_one
         // If it errors, try to check if only single entry has been inputed, hence, suurealdb
         // trying to return Option , then pick the return the only item as Vec .
-        let mut returned_val = match response.take::<Vec >(0) {
+        let mut returned_val = match response.take::<Vec>(0) {
             Ok(many) => many,
-            Err(err) => vec![response.take::<Option >(0)?.unwrap()],
+            Err(err) => vec![response.take::<Option>(0)?.unwrap()],
         };
 
         // TODO:: Handle error if nothing is returned
@@ -1198,4 +1164,4 @@ pub trait Runnable
     }
 }
 
-impl  Runnable  for SelectStatemen  T: Serialize + DeserializeOwned {}
+impl Runnable for SelectStatement {}
