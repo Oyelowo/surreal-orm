@@ -40,7 +40,7 @@ where
 {
     Node(T),
     Nodes(Vec<T>),
-    FromQuery(SelectStatement<T>),
+    FromQuery(SelectStatement),
 }
 
 impl<T> From<Vec<T>> for Insertables<T>
@@ -61,11 +61,11 @@ where
     }
 }
 
-impl<T> From<SelectStatement<T>> for Insertables<T>
+impl<T> From<SelectStatement> for Insertables<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    fn from(value: SelectStatement<T>) -> Self {
+    fn from(value: SelectStatement) -> Self {
         Self::FromQuery(value)
     }
 }

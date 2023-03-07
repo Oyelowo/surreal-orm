@@ -244,12 +244,9 @@ impl Into<DbFilter> for &DbField {
     }
 }
 
-impl<T> Into<DbFilter> for SelectStatement<T>
-where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
-{
+impl Into<DbFilter> for SelectStatement {
     fn into(self) -> DbFilter {
-        let query_b: SelectStatement<T> = self;
+        let query_b: SelectStatement = self;
         DbFilter::new(query_b)
     }
 }

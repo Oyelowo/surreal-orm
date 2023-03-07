@@ -23,20 +23,13 @@ use crate::{
 // Student::with(None|id|Query).writes.(Book::id|None|Query);
 trait Relationable {}
 
-enum Relatables<T>
-where
-    T: Serialize + DeserializeOwned,
-{
+enum Relatables {
     None,
     SurrealId(SurrealId),
-    SelectStatement(SelectStatement<T>),
+    SelectStatement(SelectStatement),
 }
 
-fn relate<T>(relatables: impl Into<Relatables<T>>)
-where
-    T: Serialize + DeserializeOwned,
-{
-}
+fn relate(relatables: impl Into<Relatables>) {}
 
 #[derive(Debug)]
 pub enum Return {
@@ -152,9 +145,9 @@ where
     /// # Examples
     ///
     /// ```
-    /// use my_db_client::{Query, QueryBuilder};
+    /// use surrealdb_orm::select;
     ///
-    /// let mut query_builder = QueryBuilder::new();
+    /// let mut query_builder = SelectStatement::new();
     /// query_builder.timeout("5s");
     /// ```
     ///
@@ -165,9 +158,9 @@ where
     /// # Examples
     ///
     /// ```
-    /// use my_db_client::{Query, QueryBuilder};
+    /// use surrealdb_orm::select;
     ///
-    /// let mut query_builder = QueryBuilder::new();
+    /// let mut query_builder = SelectStatement::new();
     /// query_builder.parallel();
     /// ```
     pub fn timeout(mut self, duration: impl Into<query_select::Duration>) -> Self {
@@ -182,10 +175,9 @@ where
     /// # Examples
     ///
     /// ```
-    /// use my_db_client::{Query, QueryBuilder};
+    /// use surrealdb_orm::select;
     ///
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.parallel();
+    /// select(All).parallel();
     /// ```
     pub fn parallel(mut self) -> Self {
         self.parallel = true;

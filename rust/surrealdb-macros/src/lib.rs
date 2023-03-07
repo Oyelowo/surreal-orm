@@ -74,51 +74,36 @@ pub fn format_filter(filter: impl Into<DbFilter>) -> String {
 }
 
 fn where_() {}
-pub enum Clause<T>
-where
-    T: Serialize + DeserializeOwned,
-{
+pub enum Clause {
     // pub enum Clause {
     Empty,
     Where(DbFilter),
     // Query(SelectStatement<sql::Value>),
-    Query(SelectStatement<T>),
+    Query(SelectStatement),
     Id(SurrealId),
 }
 
-impl<T> From<SurrealId> for Clause<T>
-where
-    T: Serialize + DeserializeOwned,
-{
+impl From<SurrealId> for Clause {
     fn from(value: SurrealId) -> Self {
         Self::Id(value)
     }
 }
 
-impl<T> From<Empty> for Clause<T>
-where
-    T: Serialize + DeserializeOwned,
-{
+impl From<Empty> for Clause {
     fn from(value: Empty) -> Self {
         Self::Empty
     }
 }
 
-impl<T> From<SelectStatement<T>> for Clause<T>
-where
-    T: Serialize + DeserializeOwned,
-{
-    fn from(value: SelectStatement<T>) -> Self {
+impl From<SelectStatement> for Clause {
+    fn from(value: SelectStatement) -> Self {
         Self::Query(value.into())
     }
 }
 
 // fn fdfdf<T>(xx: impl Into<Clause<T>>) {}
 // pub fn format_clause<T: Serialize + DeserializeOwned>(
-pub fn format_clause<T>(clause: Clause<T>, table_name: &'static str) -> String
-where
-    T: Serialize + DeserializeOwned,
-{
+pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
     match clause {
         Clause::Empty => "".into(),
         Clause::Where(filter) => {

@@ -1126,9 +1126,9 @@ where
         // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
         // trying to return Vec  rather than Option , then pick the first of the returned
         // Ok .
-        let mut returned_val = match response.take::<Option>(0) {
+        let mut returned_val = match response.take::<Option<T>>(0) {
             Ok(one) => vec![one.unwrap()],
-            Err(err) => response.take::<Vec>(0)?,
+            Err(err) => response.take::<Vec<T>>(0)?,
         };
 
         // TODO:: Handle error if nothing is returned
@@ -1154,9 +1154,9 @@ where
         // This does the reverse of get_one
         // If it errors, try to check if only single entry has been inputed, hence, suurealdb
         // trying to return Option , then pick the return the only item as Vec .
-        let mut returned_val = match response.take::<Vec>(0) {
+        let mut returned_val = match response.take::<Vec<T>>(0) {
             Ok(many) => many,
-            Err(err) => vec![response.take::<Option>(0)?.unwrap()],
+            Err(err) => vec![response.take::<Option<T>>(0)?.unwrap()],
         };
 
         // TODO:: Handle error if nothing is returned
