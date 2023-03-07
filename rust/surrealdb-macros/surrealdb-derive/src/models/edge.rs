@@ -164,6 +164,12 @@ impl ToTokens for FieldsGetterOpts {
                         }
                     }
                     
+                    impl #crate_name::Erroneous for #struct_name_ident {
+                        fn get_errors(&self) -> Vec<String> {
+                            self.#___________errors.to_vec()
+                        }
+                    }
+                    
                     impl #struct_name_ident {
                         pub fn new() -> Self {
                             Self {
@@ -185,17 +191,18 @@ impl ToTokens for FieldsGetterOpts {
                             store: &::std::string::String,
                             clause: impl Into<#crate_name::Clause>,
                             arrow_direction: &str,
-                            existing_bindings: #crate_name::BindingsList,
-                            existing_errors: #crate_name::BindingsList,
+                            origin_schema: impl #crate_name::Parametric + #crate_name::Erroneous
+                            // existing_bindings: #crate_name::BindingsList,
+                            // existing_errors: #crate_name::BindingsList,
                         ) -> Self {
                             let mut schema_instance = Self::empty();
                             let clause: #crate_name::Clause = clause.into();
-                            let bindings = [&existing_bindings[..], &clause.get_bindings()[..]].concat();
+                            let bindings = [&origin_schema.get_bindings()[..], &clause.get_bindings()[..]].concat();
                             let bindings = bindings.as_slice();
                             schema_instance.#___________bindings = bindings.into();
                             
-                            let errors = clause.get_errors(#table_name_str.into());
-                            let errors = [&existing_errors[..], &errors[..]].concat();
+                            let clause_errors = clause.get_errors(#table_name_str.into());
+                            let errors = [&origin_schema.get_errors()[..], &clause_errors[..]].concat();
                             let errors = errors.as_slice();
                             schema_instance.#___________errors = errors.into();
 

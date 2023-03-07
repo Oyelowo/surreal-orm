@@ -481,7 +481,8 @@ impl NodeEdgeMetadataStore {
                                     #destination_node_schema_ident::#__________connect_to_graph_traversal_string(
                                                 &self.#___________graph_traversal_string,
                                                 clause,
-                                                self.get_bindings(),
+                                                self,
+                                                // self.get_bindings(),
                                     )
                                 }
                             );
@@ -577,7 +578,8 @@ impl NodeEdgeMetadataStore {
                             &self.#___________graph_traversal_string,
                             clause,
                             #arrow,
-                            self.get_bindings()
+                            self
+                            // self.get_bindings()
                         ).into()
                     }
                 }
