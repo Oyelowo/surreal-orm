@@ -192,23 +192,3 @@ impl From<&SelectStatement> for Clause {
         Self::Query(value.to_owned().into())
     }
 }
-
-pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
-    match clause {
-        Clause::Empty => "".into(),
-        Clause::Where(filter) => {
-            let filter = filter.to_string();
-            format!("[WHERE {filter}]")
-        }
-        Clause::Id(id) => {
-            if !id
-                .to_string()
-                .starts_with(format!("{table_name}:").as_str())
-            {
-                panic!("invalid id {id}. Id does not belong to table {table_name}")
-            }
-            format!("{id}]")
-        }
-        Clause::Query(select_statement) => format!("({select_statement})"),
-    }
-}
