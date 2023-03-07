@@ -90,11 +90,18 @@ pub fn where_(
     condition.into()
 }
 
+#[derive(Debug, Clone)]
 pub enum Clause {
     Empty,
     Where(DbFilter),
     Query(SelectStatement),
     Id(SurrealId),
+}
+
+impl From<&Self> for Clause {
+    fn from(value: &Self) -> Self {
+        value.clone()
+    }
 }
 
 impl Parametric for Clause {
