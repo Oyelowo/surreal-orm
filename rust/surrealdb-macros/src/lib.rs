@@ -64,17 +64,6 @@ pub trait SurrealdbEdge: SurrealdbModel + Serialize {
     fn get_table_name() -> sql::Table;
 }
 
-// pub fn format_filter(filter: DbFilter, _table_name: &'static str) -> String {
-pub fn format_filter(filter: impl Into<DbFilter>) -> String {
-    let filter: DbFilter = filter.into();
-    // println!("FFFFILEEERRR {}", filter);
-    if filter.to_string().is_empty() {
-        "".into()
-    } else {
-        format!("[WHERE {filter}]")
-    }
-}
-
 pub trait Erroneous {
     fn get_errors(&self) -> Vec<String>;
 }
@@ -203,8 +192,7 @@ impl From<&SelectStatement> for Clause {
         Self::Query(value.to_owned().into())
     }
 }
-// fn fdfdf<T>(xx: impl Into<Clause<T>>) {}
-// pub fn format_clause<T: Serialize + DeserializeOwned>(
+
 pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
     match clause {
         Clause::Empty => "".into(),
@@ -219,41 +207,8 @@ pub fn format_clause(clause: Clause, table_name: &'static str) -> String {
             {
                 panic!("invalid id {id}. Id does not belong to table {table_name}")
             }
-            // format!("[WHERE id = {id}]")
             format!("{id}]")
         }
         Clause::Query(select_statement) => format!("({select_statement})"),
     }
 }
-
-// impl<T> Parametric for T
-// where
-//     T: SurrealdbEdge + DeserializeOwned + Serialize,
-// {
-//     fn get_bindings(&self) -> BindingsList {
-//         let value = self;
-//         // let fields_names = get_field_names(value);
-//         let field_names = T::get_serializable_field_names();
-//
-//         field_names
-//             .into_iter()
-//             .map(|field_name| {
-//                 let field_value = get_field_value(value, &field_name)
-//                     .expect("Unable to get value name. This should never happen!");
-//                 Binding::new(field_value).with_name(field_name.into())
-//             })
-//             .collect::<Vec<_>>()
-//     }
-// }
-
-// struct Mana<T: SurrealdbEdge + Serialize>(T);
-//
-// impl<T> Into<sql::Value> for Mana<T>
-// where
-//     T: SurrealdbEdge + Serialize,
-// {
-//     fn into(self) -> sql::Value {
-//         // self.0;
-//         sql::Value::from(self.0)
-//     }
-// }
