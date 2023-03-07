@@ -162,6 +162,30 @@ impl From<&SurrealId> for Clause {
     }
 }
 
+impl From<DbField> for Clause {
+    fn from(value: DbField) -> Self {
+        Self::Where(value.into())
+    }
+}
+
+impl From<&DbField> for Clause {
+    fn from(value: &DbField) -> Self {
+        Self::Where(value.to_owned().into())
+    }
+}
+
+impl From<DbFilter> for Clause {
+    fn from(value: DbFilter) -> Self {
+        Self::Where(value)
+    }
+}
+
+impl From<&DbFilter> for Clause {
+    fn from(value: &DbFilter) -> Self {
+        Self::Where(value.to_owned())
+    }
+}
+
 impl From<Empty> for Clause {
     fn from(value: Empty) -> Self {
         Self::Empty
