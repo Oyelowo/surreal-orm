@@ -181,7 +181,11 @@ impl ToTokens for FieldsGetterOpts {
                         }
                     }
                     
-                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, clause: impl Into<#crate_name::Clause>, existing_bindings: #crate_name::BindingsList) -> Self {
+                    pub fn #__________connect_to_graph_traversal_string(
+                        store: &::std::string::String,
+                        clause: impl Into<#crate_name::Clause>,
+                        existing_bindings: #crate_name::BindingsList,
+                    ) -> Self {
                         let mut #schema_instance = Self::empty(); 
                         let clause: #crate_name::Clause = clause.into();
                         let bindings = [&existing_bindings[..], &clause.get_bindings()[..]].concat();

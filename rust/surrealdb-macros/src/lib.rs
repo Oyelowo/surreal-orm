@@ -49,7 +49,7 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize {
     // fn get_key<T: Into<RecordId>>(&self) -> ::std::option::Option<&T>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
     fn get_table_name() -> sql::Table;
-    fn with(filterable: impl Into<DbFilter>) -> Self::Schema;
+    fn with(clause: impl Into<Clause>) -> Self::Schema;
 }
 
 pub trait SurrealdbEdge: SurrealdbModel + Serialize {
