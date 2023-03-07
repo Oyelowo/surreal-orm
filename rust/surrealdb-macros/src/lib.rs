@@ -121,9 +121,9 @@ impl std::fmt::Display for Clause {
             Clause::Where(filter) => {
                 format!("[WHERE {filter}]")
             }
-            Clause::Id(id) => {
+            Clause::Id(surreal_id) => {
                 // The Table name component of the Id comes from the macro. e.g For student:5, the Schema which this is wrapped into provide. So all we need here is the id component, student
-                format!(":{}", id.deref().id)
+                format!(":{}", surreal_id.id)
             }
             Clause::Query(select_statement) => format!("({select_statement})"),
         };
