@@ -1105,7 +1105,7 @@ impl Buildable for SelectStatement {
 }
 
 #[async_trait::async_trait]
-pub trait Runnable
+pub trait RunnableSelect
 where
     Self: Parametric + Buildable,
 {
@@ -1164,4 +1164,4 @@ where
     }
 }
 
-impl Runnable for SelectStatement {}
+impl RunnableSelect for SelectStatement {}

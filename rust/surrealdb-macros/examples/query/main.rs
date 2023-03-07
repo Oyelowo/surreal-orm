@@ -56,7 +56,6 @@ use surrealdb_macros::query_select::All;
 use surrealdb_macros::value_type_wrappers::GeometryCustom;
 use surrealdb_macros::value_type_wrappers::SurrealId;
 use surrealdb_macros::DbField;
-use surrealdb_macros::SurId;
 use surrealdb_macros::SurrealdbModel;
 use surrealdb_macros::SurrealdbNode;
 fn mana() {
@@ -698,15 +697,13 @@ async fn main() -> surrealdb::Result<()> {
                          //         .and(age.greater_than(711).greater_than_or_equal(421).equal(25))
                          //         .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
                          // );
-    let ref mut query = select::<Company>(All)
-        .from(Company::get_table_name())
-        .where_(
-            cond(age.greater_than(id.clone()))
-                .or(firstName.like("Oyelowo"))
-                .and(lastName.exactly_equal("Oyedayo"))
-                .and(age.less_than(150))
-                .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
-        );
+    let ref mut query = select(All).from(Company::get_table_name()).where_(
+        cond(age.greater_than(id.clone()))
+            .or(firstName.like("Oyelowo"))
+            .and(lastName.exactly_equal("Oyedayo"))
+            .and(age.less_than(150))
+            .or(age.greater_than(382).greater_than_or_equal(975).equal(52)),
+    );
     println!("MAWAOOOO----->{}", query);
     println!("BINDAAAA----->{:?}", query.get_bindings());
     let xx = cond(age.greater_than(id.clone()));

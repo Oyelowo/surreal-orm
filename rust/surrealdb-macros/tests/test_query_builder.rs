@@ -154,7 +154,7 @@ mod tests {
     use surrealdb::sql;
     use surrealdb_macros::db_field::{cond, empty, Binding, Empty, Parametric};
     // use surrealdb_macros::prelude::*;
-    use surrealdb_macros::query_select::{order, select, All, Order};
+    use surrealdb_macros::query_select::{order, select, All, Order, RunnableSelect};
     use surrealdb_macros::value_type_wrappers::SurrealId;
     use surrealdb_macros::{cond, query_select, DbFilter};
     use surrealdb_macros::{q, DbField};
@@ -328,7 +328,7 @@ mod tests {
             .or(firstName.equal("Oyelowo"))
             .and(lastName.equal("Oyedayo"));
 
-        let mut query1 = select::<Book>(All)
+        let mut query1 = select(All)
             .from(Book::get_table_name())
             .where_(
                 cond(content.like("lowo").and(age).greater_than_or_equal(600))
@@ -346,6 +346,8 @@ mod tests {
         if is_lowo {
             query1 = query1.limit(50).group_by(age);
         }
+
+        // let xx: Vec<Book> = query1.return_many(db.clone()).await.unwrap();
 
         insta::assert_debug_snapshot!(query1.to_string());
         insta::assert_debug_snapshot!(query1.get_bindings());

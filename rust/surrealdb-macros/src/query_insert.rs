@@ -70,6 +70,15 @@ where
     }
 }
 
+impl<T> From<&SelectStatement> for Insertables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn from(value: &SelectStatement) -> Self {
+        Self::FromQuery(value.to_owned())
+    }
+}
+
 impl<T: SurrealdbModel + DeserializeOwned + Serialize> Parametric for T {
     fn get_bindings(&self) -> BindingsList {
         let value = self;

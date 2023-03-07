@@ -6,7 +6,6 @@ Email: oyelowooyedayo@gmail.com
 #![allow(unused_imports)]
 
 use db_field::Empty;
-pub use model_id::SurrealId;
 pub mod db_field;
 pub mod operators_macros;
 pub mod query_insert;
@@ -33,6 +32,7 @@ use serde::Serialize;
 // pub use db_field::ParamsExtractor;
 pub use surrealdb::opt::RecordId;
 use surrealdb::sql;
+use value_type_wrappers::SurrealId;
 
 // SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
 pub trait SurrealdbModel {
