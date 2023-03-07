@@ -187,7 +187,7 @@ impl ToTokens for FieldsGetterOpts {
                             existing_bindings: #crate_name::BindingsList,
                         ) -> Self {
                             let mut schema_instance = Self::empty();
-                            let clause: #crate_name::DbFilter = clause.into();
+                            let clause: #crate_name::Clause = clause.into();
                             let bindings = [&existing_bindings[..], &clause.get_bindings()[..]].concat();
                             let bindings = bindings.as_slice();
                             schema_instance.#___________bindings = bindings.into();
