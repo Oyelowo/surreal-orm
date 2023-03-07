@@ -449,6 +449,49 @@ mod tests {
         let db = Surreal::new::<Mem>(()).await.unwrap();
         db.use_ns("test").use_db("test").await?;
         let student_id = SurrealId::try_from("student:1").unwrap();
+        let book_id = SurrealId::try_from("book:2").unwrap();
+
+        let write = StudentWritesBook {
+            time_written: "12:00".into(),
+            ..Default::default()
+        };
+
+        let x = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
+            .content(write.clone())
+            .parallel();
+
+        insta::assert_display_snapshot!(x);
+        insta::assert_debug_snapshot!(x.get_bindings());
+
+        let xx = relate(Student::with(student_id).writes__(Empty).book(book_id))
+            .content(write.clone())
+            .return_(Return::Before)
+            .return_many(db.clone())
+            .await?;
+
+        let xxx = relate(
+            Student::with(select(All).from(Student::get_table_name()))
+                .writes__(Empty)
+                .book(
+                    select(All)
+                        .from(Book::get_table_name())
+                        .where_(Book::schema().title.like("Oyelowo")),
+                ),
+        )
+        .content(write)
+        .return_many(db.clone())
+        .await?;
+
+        // insta::assert_display_snapshot!(x);
+        // insta::assert_debug_snapshot!(x.get_bindings());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn relate_query_run() -> surrealdb::Result<()> {
+        let db = Surreal::new::<Mem>(()).await.unwrap();
+        db.use_ns("test").use_db("test").await?;
+        let student_id = SurrealId::try_from("student:1").unwrap();
         let book_id = SurrealId::try_from("book2").unwrap();
 
         let write = StudentWritesBook {
@@ -458,20 +501,30 @@ mod tests {
 
         let x = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
             .content(write.clone())
-            .return_(Return::Before)
+            .return_(Return::After)
             .return_one(db.clone())
             .await?;
 
+        insta::assert_display_snapshot!(serde_json::to_string(&x).unwrap());
+
         let xx = relate(Student::with(student_id).writes__(Empty).book(book_id))
-            .content(write)
+            .content(write.clone())
             .return_(Return::Before)
             .return_many(db.clone())
             .await?;
 
-        let x = Student::schema()
-            .writes__(Empty)
-            .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
-            .title;
+        let xxx = relate(
+            Student::with(select(All).from(Student::get_table_name()))
+                .writes__(Empty)
+                .book(
+                    select(All)
+                        .from(Book::get_table_name())
+                        .where_(Book::schema().title.like("Oyelowo")),
+                ),
+        )
+        .content(write)
+        .return_many(db.clone())
+        .await?;
 
         // insta::assert_display_snapshot!(x);
         // insta::assert_debug_snapshot!(x.get_bindings());

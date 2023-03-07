@@ -1,6 +1,0 @@
----
-source: surrealdb-macros/tests/test_query_builder.rs
-assertion_line: 349
-expression: query1.to_string()
----
-"SELECT * FROM book WHERE (content ~ $_param_863f4296 AND $_param_6b0e5f7a >= $_param_1bd80cfb) OR (firstName = $_param_2acf2c6d) AND (lastName = $_param_fafedc95) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 9s PARALLEL;"
