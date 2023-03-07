@@ -571,7 +571,7 @@ impl NodeEdgeMetadataStore {
                         &self,
                         clause: impl Into<#crate_name::Clause>,
                     ) -> #edge_inner_module_name::#edge_name_as_struct_with_direction_ident {
-                        let clause: #crate_name::DbFilter = clause.into();
+                        let clause: #crate_name::Clause = clause.into();
                         
                         #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_to_graph_traversal_string(
                             &self.#___________graph_traversal_string,
