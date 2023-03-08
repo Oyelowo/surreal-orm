@@ -587,6 +587,7 @@ impl NodeEdgeMetadataStore {
                 mod #edge_inner_module_name {
                     #( #imports) *
                     use #crate_name::Parametric as _;
+                    use #crate_name::Erroneous as _;
                     
                     #( #destination_node_schema) *
                     
