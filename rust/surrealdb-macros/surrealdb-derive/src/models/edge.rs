@@ -143,6 +143,7 @@ impl ToTokens for FieldsGetterOpts {
                 pub mod #module_name {
                     use #crate_name::SurrealdbNode;
                     use #crate_name::Parametric as _;
+                    use #crate_name::Erroneous as _;
                     
                     pub struct TableNameStaticChecker {
                         pub #table_name_ident: String,
@@ -171,12 +172,6 @@ impl ToTokens for FieldsGetterOpts {
                         }
                     }
                     
-                    impl #crate_name::Erroneous for &#struct_name_ident {
-                        fn get_errors(&self) -> Vec<String> {
-                            self.#___________errors.to_vec()
-                        }
-                    }
-                    
                     impl #struct_name_ident {
                         pub fn new() -> Self {
                             Self {
@@ -200,18 +195,17 @@ impl ToTokens for FieldsGetterOpts {
                             store: &::std::string::String,
                             clause: impl Into<#crate_name::Clause>,
                             arrow_direction: &str,
-                            origin_schema: impl #crate_name::Parametric + #crate_name::Erroneous
-                            // existing_bindings: #crate_name::BindingsList,
-                            // existing_errors: #crate_name::BindingsList,
+                            existing_bindings: #crate_name::BindingsList,
+                            existing_errors: Vec<String>,
                         ) -> Self {
                             let mut schema_instance = Self::empty();
                             let clause: #crate_name::Clause = clause.into();
-                            let bindings = [&origin_schema.get_bindings()[..], &clause.get_bindings()[..]].concat();
+                            let bindings = [&existing_bindings[..], &clause.get_bindings()[..]].concat();
                             let bindings = bindings.as_slice();
                             schema_instance.#___________bindings = bindings.into();
                             
                             let clause_errors = clause.get_errors(#table_name_str.into());
-                            let errors = [&origin_schema.get_errors()[..], &clause_errors[..]].concat();
+                            let errors = [&existing_errors[..], &clause_errors[..]].concat();
                             let errors = errors.as_slice();
                             schema_instance.#___________errors = errors.into();
 
