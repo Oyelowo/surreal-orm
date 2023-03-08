@@ -195,7 +195,8 @@ impl ReferencedNodeMeta {
             record_link_default_alias_as_method: quote!(
                 pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::Clause>) -> #schema_type_ident {
                     #schema_type_ident::#__________connect_to_graph_traversal_string(
-                        &self.#___________graph_traversal_string,
+                        // &self.#___________graph_traversal_string,
+                        self.get_connection(),
                         clause,
                         self.get_bindings(),
                         self.get_errors()

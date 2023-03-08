@@ -479,7 +479,8 @@ impl NodeEdgeMetadataStore {
                                     let clause: #crate_name::Clause = clause.into();
                                     
                                     #destination_node_schema_ident::#__________connect_to_graph_traversal_string(
-                                                &self.#___________graph_traversal_string,
+                                                self.get_connection(),
+                                                // &self.#___________graph_traversal_string,
                                                 clause,
                                                 self.get_bindings(),
                                                 self.get_errors(),
@@ -575,7 +576,8 @@ impl NodeEdgeMetadataStore {
                         let clause: #crate_name::Clause = clause.into();
                         
                         #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_to_graph_traversal_string(
-                            &self.#___________graph_traversal_string,
+                            // &self.#___________graph_traversal_string,
+                            self.get_connection(),
                             clause,
                             #arrow,
                             self.get_bindings(),
@@ -588,6 +590,7 @@ impl NodeEdgeMetadataStore {
                     #( #imports) *
                     use #crate_name::Parametric as _;
                     use #crate_name::Erroneous as _;
+                    use #crate_name::Schemaful as _;
                     
                     #( #destination_node_schema) *
                     

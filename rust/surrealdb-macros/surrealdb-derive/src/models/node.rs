@@ -105,7 +105,7 @@ impl ToTokens for FieldsGetterOpts {
                     let clause: #crate_name::Clause = clause.into();
                     
                     #module_name::#struct_name_ident::#__________connect_to_graph_traversal_string(
-                                &"".into(),
+                                "".into(),
                                 clause,
                                 // #module_name::#struct_name_ident::new().get_bindings()
                                 vec![],
@@ -141,6 +141,7 @@ impl ToTokens for FieldsGetterOpts {
             pub mod #module_name {
                 use #crate_name::Parametric as _;
                 use #crate_name::Erroneous as _;
+                use #crate_name::Schemaful as _;
 
                 pub struct TableNameStaticChecker {
                     pub #table_name_ident: String,
@@ -152,11 +153,17 @@ impl ToTokens for FieldsGetterOpts {
                 #[derive(Debug)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
-                    pub(crate) #___________graph_traversal_string: ::std::string::String,
+                    #___________graph_traversal_string: ::std::string::String,
                     #___________bindings: #crate_name::BindingsList,
                     #___________errors: Vec<String>,
                 }
 
+                impl #crate_name::Schemaful for #struct_name_ident {
+                    fn get_connection(&self) -> String {
+                        self.#___________graph_traversal_string.to_string()
+                    }
+                }
+                
                 impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
@@ -195,7 +202,7 @@ impl ToTokens for FieldsGetterOpts {
                     }
                     
                     pub fn #__________connect_to_graph_traversal_string(
-                        store: &::std::string::String,
+                        store: ::std::string::String,
                         clause: impl Into<#crate_name::Clause>,
                         existing_bindings: #crate_name::BindingsList,
                         existing_errors: Vec<String>,

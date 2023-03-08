@@ -64,6 +64,10 @@ pub trait SurrealdbEdge: SurrealdbModel + Serialize {
     fn get_table_name() -> sql::Table;
 }
 
+pub trait Schemaful {
+    fn get_connection(&self) -> String;
+}
+
 pub trait Erroneous {
     fn get_errors(&self) -> Vec<String>;
 }
