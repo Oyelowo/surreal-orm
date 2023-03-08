@@ -578,7 +578,7 @@ impl NodeEdgeMetadataStore {
                             &self.#___________graph_traversal_string,
                             clause,
                             #arrow,
-                            self.get_bindings()
+                            self.get_bindings(),
                             self.get_errors()
                         ).into()
                     }
