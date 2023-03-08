@@ -167,6 +167,12 @@ impl ToTokens for FieldsGetterOpts {
                     }
                 }
                 
+                impl #crate_name::Erroneous for &#struct_name_ident {
+                    fn get_errors(&self) -> Vec<String> {
+                        self.#___________errors.to_vec()
+                    }
+                }
+                
                 impl ::std::fmt::Display for #struct_name_ident {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                         f.write_fmt(format_args!("{}", self.#___________graph_traversal_string))

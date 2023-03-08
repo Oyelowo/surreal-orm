@@ -8,7 +8,7 @@ use crate::{
     query_insert::{Buildable, Runnable, Updateables, Updater},
     query_select::{self, SelectStatement},
     value_type_wrappers::SurrealId,
-    BindingsList, Clause, DbField, Parametric, SurrealdbEdge,
+    BindingsList, Clause, DbField, Erroneous, Parametric, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -29,10 +29,11 @@ enum Relatables {
     SelectStatement(SelectStatement),
 }
 
-pub fn relate<T>(connection: impl std::fmt::Display + Parametric) -> RelateStatement<T>
+pub fn relate<T>(connection: impl std::fmt::Display + Parametric + Erroneous) -> RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
+    let errors = connection.get_errors();
     let mut builder = RelateStatement::<T>::new();
     // let connection: DbField = connection.into();
     builder.relate(connection)

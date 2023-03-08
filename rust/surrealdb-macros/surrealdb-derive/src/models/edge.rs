@@ -156,6 +156,7 @@ impl ToTokens for FieldsGetterOpts {
                        #( #schema_struct_fields_types_kv) *
                         pub #___________graph_traversal_string: ::std::string::String,
                         #___________bindings: #crate_name::BindingsList,
+                        #___________errors: Vec<String>,
                     }
 
                     impl #crate_name::Parametric for #struct_name_ident {
@@ -170,12 +171,19 @@ impl ToTokens for FieldsGetterOpts {
                         }
                     }
                     
+                    impl #crate_name::Erroneous for &#struct_name_ident {
+                        fn get_errors(&self) -> Vec<String> {
+                            self.#___________errors.to_vec()
+                        }
+                    }
+                    
                     impl #struct_name_ident {
                         pub fn new() -> Self {
                             Self {
                                #( #schema_struct_fields_names_kv) *
                                 #___________graph_traversal_string: "".into(),
                                 #___________bindings: vec![],
+                                #___________errors: vec![],
                             }
                         }
 
@@ -184,6 +192,7 @@ impl ToTokens for FieldsGetterOpts {
                                #( #schema_struct_fields_names_kv_empty) *
                                 #___________graph_traversal_string: "".into(),
                                 #___________bindings: vec![],
+                                #___________errors: vec![],
                             }
                         }
                         
