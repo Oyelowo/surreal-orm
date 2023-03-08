@@ -74,7 +74,8 @@ impl ToTokens for FieldsGetterOpts {
             ___________out_marker,
             ___________bindings,
             ____________update_many_bindings,
-            bindings,  
+            bindings,
+            ___________errors,  
         } = VariablesModelMacro::new();
         let schema_props_args = SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident, table_name_ident };
 
@@ -142,6 +143,8 @@ impl ToTokens for FieldsGetterOpts {
                 pub mod #module_name {
                     use #crate_name::SurrealdbNode;
                     use #crate_name::Parametric as _;
+                    use #crate_name::Erroneous as _;
+                    use #crate_name::Schemaful as _;
                     
                     pub struct TableNameStaticChecker {
                         pub #table_name_ident: String,
@@ -153,13 +156,26 @@ impl ToTokens for FieldsGetterOpts {
                     #[derive(Debug)]
                     pub struct #struct_name_ident {
                        #( #schema_struct_fields_types_kv) *
-                        pub #___________graph_traversal_string: ::std::string::String,
+                        #___________graph_traversal_string: ::std::string::String,
                         #___________bindings: #crate_name::BindingsList,
+                        #___________errors: Vec<String>,
+                    }
+                    
+                    impl #crate_name::Schemaful for #struct_name_ident {
+                        fn get_connection(&self) -> String {
+                            self.#___________graph_traversal_string.to_string()
+                        }
                     }
 
                     impl #crate_name::Parametric for #struct_name_ident {
                         fn get_bindings(&self) -> #crate_name::BindingsList {
                             self.#___________bindings.to_vec()
+                        }
+                    }
+                    
+                    impl #crate_name::Erroneous for #struct_name_ident {
+                        fn get_errors(&self) -> Vec<String> {
+                            self.#___________errors.to_vec()
                         }
                     }
                     
@@ -169,6 +185,7 @@ impl ToTokens for FieldsGetterOpts {
                                #( #schema_struct_fields_names_kv) *
                                 #___________graph_traversal_string: "".into(),
                                 #___________bindings: vec![],
+                                #___________errors: vec![],
                             }
                         }
 
@@ -177,27 +194,34 @@ impl ToTokens for FieldsGetterOpts {
                                #( #schema_struct_fields_names_kv_empty) *
                                 #___________graph_traversal_string: "".into(),
                                 #___________bindings: vec![],
+                                #___________errors: vec![],
                             }
                         }
                         
                         pub fn #__________connect_to_graph_traversal_string(
-                            store: &::std::string::String,
-                            filter: impl Into<#crate_name::DbFilter>,
+                            store: ::std::string::String,
+                            clause: impl Into<#crate_name::Clause>,
                             arrow_direction: &str,
                             existing_bindings: #crate_name::BindingsList,
+                            existing_errors: Vec<String>,
                         ) -> Self {
                             let mut schema_instance = Self::empty();
-                            let filter: #crate_name::DbFilter = filter.into();
-                            let bindings = [&existing_bindings[..], &filter.get_bindings()[..]].concat();
+                            let clause: #crate_name::Clause = clause.into();
+                            let bindings = [&existing_bindings[..], &clause.get_bindings()[..]].concat();
                             let bindings = bindings.as_slice();
                             schema_instance.#___________bindings = bindings.into();
                             
+                            let clause_errors = clause.get_errors(#table_name_str.into());
+                            let errors = [&existing_errors[..], &clause_errors[..]].concat();
+                            let errors = errors.as_slice();
+                            schema_instance.#___________errors = errors.into();
+
                             let schema_edge_str_with_arrow = format!(
                                 "{}{}{}{}{}",
                                 store.as_str(),
                                 arrow_direction,
                                 #table_name_str,
-                                #crate_name::format_filter(filter),
+                                clause,
                                 arrow_direction,
                             );
                             

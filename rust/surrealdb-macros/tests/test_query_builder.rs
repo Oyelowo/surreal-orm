@@ -20,65 +20,67 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
+    value_type_wrappers::SurrealId,
     RecordId, SurrealdbEdge, SurrealdbNode,
 };
 use test_case::test_case;
 use typed_builder::TypedBuilder;
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "student")]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<RecordId>,
+    id: Option<SurrealId>,
+
     first_name: String,
     last_name: String,
     age: u8,
 
-    #[surrealdb(link_self = "Student", skip_serializing)]
+    #[surrealdb(link_self = "Student")]
     best_friend: LinkSelf<Student>,
 
-    #[surrealdb(link_one = "Book", skip_serializing)]
+    #[surrealdb(link_one = "Book")]
     #[serde(rename = "unoBook")]
     fav_book: LinkOne<Book>,
 
     #[surrealdb(link_one = "Book", skip_serializing)]
     course: LinkOne<Book>,
 
-    #[surrealdb(link_many = "Book", skip_serializing)]
+    #[surrealdb(link_many = "Book")]
     #[serde(rename = "semCoures")]
     all_semester_courses: LinkMany<Book>,
 
     #[surrealdb(relate(model = "StudentWritesBook", connection = "->writes->book"))]
+    #[serde(skip_serializing)]
     written_books: Relate<Book>,
 }
 
-#[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "writes")]
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<RecordId>,
+    id: Option<SurrealId>,
 
-    // #[surrealdb(link_one = "Book", skip_serializing)]
-    #[serde(rename = "in")]
-    _in: In,
-    // r#in: In,
-    out: Out,
+    #[serde(rename = "in", skip_serializing)]
+    in_: LinkOne<In>,
+    #[serde(skip_serializing)]
+    out: LinkOne<Out>,
     time_written: String,
 }
 
 type StudentWritesBook = Writes<Student, Book>;
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
 pub struct Book {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<RecordId>,
+    id: Option<SurrealId>,
     title: String,
     content: String,
 }
@@ -89,7 +91,7 @@ pub struct Book {
 pub struct Blog {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    id: Option<RecordId>,
+    id: Option<SurrealId>,
     title: String,
     content: String,
 }
@@ -153,8 +155,10 @@ mod tests {
     use _core::time::Duration;
     use surrealdb::sql;
     use surrealdb_macros::db_field::{cond, empty, Binding, Empty, Parametric};
+    use surrealdb_macros::query_insert::Runnable;
+    use surrealdb_macros::query_relate::{relate, Return};
     // use surrealdb_macros::prelude::*;
-    use surrealdb_macros::query_select::{order, select, All, Order};
+    use surrealdb_macros::query_select::{order, select, All, Order, RunnableSelect};
     use surrealdb_macros::value_type_wrappers::SurrealId;
     use surrealdb_macros::{cond, query_select, DbFilter};
     use surrealdb_macros::{q, DbField};
@@ -187,6 +191,17 @@ mod tests {
         let wrt = &StudentWritesBook::schema();
         let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
         let book::Book { content, .. } = Book::schema();
+        let xx = Student::with(Empty).writes__(Empty).book(Empty);
+        assert_eq!(xx.to_string(), "student->writes->book".to_string());
+        assert_eq!(xx.to_string(), "tudent->writes->book".to_string());
+
+        let written_book_selection = st
+            .bestFriend(Empty)
+            .writes__(wrt.timeWritten.equal("12:00"))
+            .book(bk.content.contains("Oyelowo in Uranus"))
+            .__as__(st.writtenBooks);
+
+        // assert_eq!(written_book_selection, "34".to_string());
 
         mana(bk.content.contains("Lowo"));
         mana(None);
@@ -265,12 +280,6 @@ mod tests {
         //
         // println!("maerfineirNAMAAAA :{xx}");
 
-        let written_book_selection = st
-            .bestFriend(Empty)
-            .writes__(wrt.timeWritten.equal("12:00"))
-            .book(bk.content.contains("Oyelowo in Uranus"))
-            .__as__(st.writtenBooks);
-
         let st = Student::schema();
         let written_book_selection = st
             .bestFriend(Empty)
@@ -323,7 +332,7 @@ mod tests {
             .or(firstName.equal("Oyelowo"))
             .and(lastName.equal("Oyedayo"));
 
-        let mut query1 = select::<Book>(All)
+        let mut query1 = select(All)
             .from(Book::get_table_name())
             .where_(
                 cond(content.like("lowo").and(age).greater_than_or_equal(600))
@@ -341,6 +350,8 @@ mod tests {
         if is_lowo {
             query1 = query1.limit(50).group_by(age);
         }
+
+        // let xx: Vec<Book> = query1.return_many(db.clone()).await.unwrap();
 
         insta::assert_debug_snapshot!(query1.to_string());
         insta::assert_debug_snapshot!(query1.get_bindings());
@@ -431,6 +442,93 @@ mod tests {
         //     lastName, unoBook, lowo, age, bestFriend, lowo;"
         //         .remove_extra_whitespace()
         // )
+    }
+
+    #[tokio::test]
+    async fn relate_query() -> surrealdb::Result<()> {
+        let db = Surreal::new::<Mem>(()).await.unwrap();
+        db.use_ns("test").use_db("test").await?;
+        let student_id = SurrealId::try_from("student:1").unwrap();
+        let book_id = SurrealId::try_from("book:2").unwrap();
+
+        let write = StudentWritesBook {
+            time_written: "12:00".into(),
+            ..Default::default()
+        };
+
+        let x = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
+            .content(write.clone())
+            .parallel();
+
+        insta::assert_display_snapshot!(x);
+        insta::assert_debug_snapshot!(x.get_bindings());
+
+        let xx = relate(Student::with(student_id).writes__(Empty).book(book_id))
+            .content(write.clone())
+            .return_(Return::Before)
+            .return_many(db.clone())
+            .await?;
+
+        let xxx = relate(
+            Student::with(select(All).from(Student::get_table_name()))
+                .writes__(Empty)
+                .book(
+                    select(All)
+                        .from(Book::get_table_name())
+                        .where_(Book::schema().title.like("Oyelowo")),
+                ),
+        )
+        .content(write)
+        .return_many(db.clone())
+        .await?;
+
+        // insta::assert_display_snapshot!(x);
+        // insta::assert_debug_snapshot!(x.get_bindings());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn relate_query_run() -> surrealdb::Result<()> {
+        let db = Surreal::new::<Mem>(()).await.unwrap();
+        db.use_ns("test").use_db("test").await?;
+        let student_id = SurrealId::try_from("student:1").unwrap();
+        let book_id = SurrealId::try_from("book2").unwrap();
+
+        let write = StudentWritesBook {
+            time_written: "12:00".into(),
+            ..Default::default()
+        };
+
+        let x = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
+            .content(write.clone())
+            .return_(Return::After)
+            .return_one(db.clone())
+            .await?;
+
+        insta::assert_display_snapshot!(serde_json::to_string(&x).unwrap());
+
+        let xx = relate(Student::with(student_id).writes__(Empty).book(book_id))
+            .content(write.clone())
+            .return_(Return::Before)
+            .return_many(db.clone())
+            .await?;
+
+        let xxx = relate(
+            Student::with(select(All).from(Student::get_table_name()))
+                .writes__(Empty)
+                .book(
+                    select(All)
+                        .from(Book::get_table_name())
+                        .where_(Book::schema().title.like("Oyelowo")),
+                ),
+        )
+        .content(write)
+        .return_many(db.clone())
+        .await?;
+
+        // insta::assert_display_snapshot!(x);
+        // insta::assert_debug_snapshot!(x.get_bindings());
+        Ok(())
     }
 
     #[test]

@@ -63,7 +63,7 @@ mod geometry_tests {
     use surrealdb::sql::statements::CommitStatement;
     use surrealdb_macros::{
         query_insert::{insert, Runnable},
-        query_select::{select, All},
+        query_select::{select, All, RunnableSelect},
         Parametric, SurrealdbNode,
     };
 
@@ -369,7 +369,7 @@ mod geometry_tests {
         //     .unwrap();
         //
         let c = Company::schema();
-        let select_query = select::<Company>(All)
+        let select_query = select(All)
             .from(&SurrealId::try_from("company:2").unwrap())
             .where_(c.tags.any_like("foo"))
             .timeout(Duration::from_secs(20))
@@ -379,16 +379,18 @@ mod geometry_tests {
         // .unwrap();
 
         // println!("BindSel {:?}", select_query.get_bindings());
+        let one_: Company = select_query.return_one(db.clone()).await.unwrap();
+        println!("SSSSSSS {:?}", one_);
+
         println!(
             "SSSSSSS {:?}",
-            select_query.return_one(db.clone()).await.unwrap()
-        );
-        println!(
-            "SSSSSSS {:?}",
-            select_query.return_many(db.clone()).await.unwrap()
+            select_query
+                .return_many::<Vec<Company>>(db.clone())
+                .await
+                .unwrap()
         );
 
-        let select_query = select(All)
+        let ref select_query = select(All)
             .from(Company::get_table_name())
             .where_(c.tags.any_like("foo"))
             .timeout(Duration::from_secs(20))
@@ -397,12 +399,20 @@ mod geometry_tests {
         println!("BindSel {:?}", select_query.get_bindings());
         println!(
             "SSSSSSS {:?}",
-            select_query.return_many(db.clone()).await.unwrap()
+            select_query
+                .return_many::<Company>(db.clone())
+                .await
+                .unwrap()
         );
+        let results: GenZCompany = insert(select_query).return_one(db.clone()).await.unwrap();
+        let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
+
         let results = insert::<GenZCompany>(select_query)
-            .return_many(db)
+            .return_many(db.clone())
             .await
             .unwrap();
+
+        let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
 
         insta::assert_debug_snapshot!(results);
         Ok(())

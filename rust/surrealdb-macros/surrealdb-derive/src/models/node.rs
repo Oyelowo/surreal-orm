@@ -47,6 +47,7 @@ impl ToTokens for FieldsGetterOpts {
             __________connect_to_graph_traversal_string, 
             ___________graph_traversal_string,
             ___________bindings,
+            ___________errors,
             schema_instance, .. 
         } = VariablesModelMacro::new();
         let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident, table_name_ident};
@@ -100,6 +101,18 @@ impl ToTokens for FieldsGetterOpts {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
                 type Schema = #module_name::#struct_name_ident;
 
+                fn with(clause: impl Into<#crate_name::Clause>) -> Self::Schema {
+                    let clause: #crate_name::Clause = clause.into();
+                    
+                    #module_name::#struct_name_ident::#__________connect_to_graph_traversal_string(
+                                "".into(),
+                                clause,
+                                // #module_name::#struct_name_ident::new().get_bindings()
+                                vec![],
+                                vec![],
+                    )
+                }
+                
                 fn schema() -> Self::Schema {
                     #module_name::#struct_name_ident::new()
                 }
@@ -127,6 +140,8 @@ impl ToTokens for FieldsGetterOpts {
             
             pub mod #module_name {
                 use #crate_name::Parametric as _;
+                use #crate_name::Erroneous as _;
+                use #crate_name::Schemaful as _;
 
                 pub struct TableNameStaticChecker {
                     pub #table_name_ident: String,
@@ -138,13 +153,26 @@ impl ToTokens for FieldsGetterOpts {
                 #[derive(Debug)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
-                    pub(crate) #___________graph_traversal_string: ::std::string::String,
+                    #___________graph_traversal_string: ::std::string::String,
                     #___________bindings: #crate_name::BindingsList,
+                    #___________errors: Vec<String>,
                 }
 
+                impl #crate_name::Schemaful for #struct_name_ident {
+                    fn get_connection(&self) -> String {
+                        self.#___________graph_traversal_string.to_string()
+                    }
+                }
+                
                 impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
+                    }
+                }
+                
+                impl #crate_name::Erroneous for #struct_name_ident {
+                    fn get_errors(&self) -> Vec<String> {
+                        self.#___________errors.to_vec()
                     }
                 }
                 
@@ -160,6 +188,7 @@ impl ToTokens for FieldsGetterOpts {
                            #( #schema_struct_fields_names_kv) *
                             #___________graph_traversal_string: "".into(),
                             #___________bindings: vec![],
+                            #___________errors: vec![],
                         }
                     }
 
@@ -168,31 +197,31 @@ impl ToTokens for FieldsGetterOpts {
                            #( #schema_struct_fields_names_kv_empty) *
                             #___________graph_traversal_string: "".into(),
                             #___________bindings: vec![],
+                            #___________errors: vec![],
                         }
                     }
                     
-                    pub fn __with_id__(mut self, id: impl ::std::fmt::Display) -> Self {
-                        self.#___________graph_traversal_string.push_str(id.to_string().as_str());
-                        self
-                    }
-                    
-                    pub fn __with__(db_name: impl ::std::fmt::Display) -> Self {
-                        let mut #schema_instance = Self::new();
-                        #schema_instance
-                            .#___________graph_traversal_string
-                            .push_str(db_name.to_string().as_str());
-                        #schema_instance
-                    }
-
-                    pub fn #__________connect_to_graph_traversal_string(store: &::std::string::String, filterable: impl Into<#crate_name::DbFilter>, existing_bindings: #crate_name::BindingsList) -> Self {
+                    pub fn #__________connect_to_graph_traversal_string(
+                        store: ::std::string::String,
+                        clause: impl Into<#crate_name::Clause>,
+                        existing_bindings: #crate_name::BindingsList,
+                        existing_errors: Vec<String>,
+                    ) -> Self {
                         let mut #schema_instance = Self::empty(); 
-                        let filter: #crate_name::DbFilter = filterable.into();
-                        let bindings = [&existing_bindings[..], &filter.get_bindings()[..]].concat();
+                        let clause: #crate_name::Clause = clause.into();
+                        let bindings = [&existing_bindings[..], &clause.get_bindings()[..]].concat();
                         let bindings = bindings.as_slice();
 
                         schema_instance.#___________bindings = bindings.into();
                         
-                        let connection = format!("{}{}{}", store, #table_name_str, #crate_name::format_filter(filter));
+                        let clause_errors = clause.get_errors(#table_name_str.into());
+                        let errors = [&existing_errors[..], &clause_errors[..]].concat();
+                        let errors = errors.as_slice();
+
+                        schema_instance.#___________errors = errors.into();
+                        
+                        
+                        let connection = format!("{}{}{}", store, #table_name_str, clause);
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;

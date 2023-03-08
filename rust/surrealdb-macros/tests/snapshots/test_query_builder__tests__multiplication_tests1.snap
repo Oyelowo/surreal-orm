@@ -2,4 +2,4 @@
 source: surrealdb-macros/tests/test_query_builder.rs
 expression: query1.to_string()
 ---
-"SELECT * FROM _param_00000000 WHERE (content ~ $_param_00000000 AND $_param_00000000 >= $_param_00000000) OR (firstName = $_param_00000000) AND (lastName = $_param_00000000) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 9s PARALLEL;"
+"SELECT * FROM book WHERE (content ~ $_param_863f4296 AND $_param_6b0e5f7a >= $_param_1bd80cfb) OR (firstName = $_param_2acf2c6d) AND (lastName = $_param_fafedc95) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 9s PARALLEL;"

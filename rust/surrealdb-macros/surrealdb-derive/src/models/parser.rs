@@ -475,13 +475,15 @@ impl NodeEdgeMetadataStore {
         
         
         let foreign_node_connection_method = || quote!(
-                                pub fn #destination_node_table_name(&self, filterable: impl Into<#crate_name::DbFilter>) -> #destination_node_schema_ident {
-                                    let filter: #crate_name::DbFilter = filterable.into();
+                                pub fn #destination_node_table_name(&self, clause: impl Into<#crate_name::Clause>) -> #destination_node_schema_ident {
+                                    let clause: #crate_name::Clause = clause.into();
                                     
                                     #destination_node_schema_ident::#__________connect_to_graph_traversal_string(
-                                                &self.#___________graph_traversal_string,
-                                                filter,
+                                                self.get_connection(),
+                                                // &self.#___________graph_traversal_string,
+                                                clause,
                                                 self.get_bindings(),
+                                                self.get_errors(),
                                     )
                                 }
                             );
@@ -569,15 +571,17 @@ impl NodeEdgeMetadataStore {
                 impl #origin_struct_ident {
                     pub fn #edge_name_as_method_ident(
                         &self,
-                        filterable: impl Into<#crate_name::DbFilter>,
+                        clause: impl Into<#crate_name::Clause>,
                     ) -> #edge_inner_module_name::#edge_name_as_struct_with_direction_ident {
-                        let filter: #crate_name::DbFilter = filterable.into();
+                        let clause: #crate_name::Clause = clause.into();
                         
                         #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_to_graph_traversal_string(
-                            &self.#___________graph_traversal_string,
-                            filter,
+                            // &self.#___________graph_traversal_string,
+                            self.get_connection(),
+                            clause,
                             #arrow,
-                            self.get_bindings()
+                            self.get_bindings(),
+                            self.get_errors()
                         ).into()
                     }
                 }
@@ -585,6 +589,8 @@ impl NodeEdgeMetadataStore {
                 mod #edge_inner_module_name {
                     #( #imports) *
                     use #crate_name::Parametric as _;
+                    use #crate_name::Erroneous as _;
+                    use #crate_name::Schemaful as _;
                     
                     #( #destination_node_schema) *
                     

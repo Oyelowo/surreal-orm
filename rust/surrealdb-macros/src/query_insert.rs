@@ -40,7 +40,7 @@ where
 {
     Node(T),
     Nodes(Vec<T>),
-    FromQuery(SelectStatement<T>),
+    FromQuery(SelectStatement),
 }
 
 impl<T> From<Vec<T>> for Insertables<T>
@@ -61,12 +61,21 @@ where
     }
 }
 
-impl<T> From<SelectStatement<T>> for Insertables<T>
+impl<T> From<SelectStatement> for Insertables<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    fn from(value: SelectStatement<T>) -> Self {
+    fn from(value: SelectStatement) -> Self {
         Self::FromQuery(value)
+    }
+}
+
+impl<T> From<&SelectStatement> for Insertables<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn from(value: &SelectStatement) -> Self {
+        Self::FromQuery(value.to_owned())
     }
 }
 
@@ -222,6 +231,36 @@ where
     Self: Parametric + Buildable,
     T: Serialize + DeserializeOwned,
 {
+    // async fn return_test<U: Serialize + DeserializeOwned>(
+    //     &self,
+    //     db: Surreal<Db>,
+    // ) -> surrealdb::Result<U> {
+    //     // let query = self.build();
+    //     let query = "";
+    //     println!("XXXX {query}");
+    //     let mut response = self
+    //         .get_bindings()
+    //         .iter()
+    //         .fold(db.query(query), |acc, val| {
+    //             acc.bind((val.get_param(), val.get_value()))
+    //         })
+    //         .await?;
+    //
+    //     // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
+    //     // trying to return Vec<T> rather than Option<T>, then pick the first of the returned
+    //     // Ok<T>.
+    //     // let mut returned_val = match response.take::<Option<U>>(0) {
+    //     //     Ok(one) => vec![one.unwrap()],
+    //     //     // Err(err) => response.take::<Vec<T>>(0)?,
+    //     //     Err(err) => response.take::<U>(0)?,
+    //     // };
+    //     //
+    //     // TODO:: Handle error if nothing is returned
+    //     // let only_or_last = returned_val.pop().unwrap();
+    //     // Ok(only_or_last)
+    //     return response.take::<U>(0).unwrap();
+    // }
+
     async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
         let query = self.build();
         println!("XXXX {query}");
@@ -304,7 +343,7 @@ pub struct Updater {
 
 impl Parametric for Updater {
     fn get_bindings(&self) -> BindingsList {
-        todo!()
+        self.____bindings.to_vec()
     }
 }
 
@@ -351,6 +390,25 @@ impl Updater {
             ____bindings: vec![],
         }
     }
+    /// Sets a field name
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to set.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use my_cool_db::Setter;
+    /// let updater = Setter::new("score".to_string());
+    /// let updated_updater = updater.equal(2);
+    /// assert_eq!(updated_updater.to_string(), "score = 2");
+    /// ```
+    pub fn equal(&self, value: impl Into<sql::Value>) -> Self {
+        let value: sql::Value = value.into();
+        self._____update_field(Operator::Equal, value)
+    }
+
     /// Returns a new `Updater` instance with the string to increment the column by the given value.
     /// Alias for plus_equal but idiomatically for numbers
     ///

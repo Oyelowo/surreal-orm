@@ -10,6 +10,7 @@ pub(crate) struct VariablesModelMacro {
     /// Overall, this helps us do the graph traversal
     pub __________connect_to_graph_traversal_string: syn::Ident,
     pub ___________bindings: syn::Ident,
+    pub ___________errors: syn::Ident,
     pub ___________graph_traversal_string: syn::Ident,
     pub ____________update_many_bindings: syn::Ident,
     pub bindings: syn::Ident,
@@ -30,6 +31,8 @@ impl VariablesModelMacro {
             format_ident!("__________connect_to_graph_traversal_string");
         let ___________graph_traversal_string = format_ident!("___________graph_traversal_string");
         let ___________bindings = format_ident!("___________bindings");
+        let ___________errors = format_ident!("___________errors");
+
         let bindings = format_ident!("bindings");
         let ____________update_many_bindings = format_ident!("____________update_many_bindings");
 
@@ -51,6 +54,7 @@ impl VariablesModelMacro {
             ___________bindings,
             ____________update_many_bindings,
             bindings,
+            ___________errors,
         }
     }
 

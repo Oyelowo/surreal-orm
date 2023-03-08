@@ -19,7 +19,7 @@ use std::{
 use proc_macro2::Span;
 use surrealdb::sql::{self, Number, Value};
 
-use crate::{query_select::SelectStatement, SurrealdbModel};
+use crate::{query_select::SelectStatement, value_type_wrappers::SurrealId, SurrealdbModel};
 
 /// Represents a field in the database. This type wraps a `String` and
 /// provides a convenient way to refer to a database fields.
@@ -72,7 +72,7 @@ struct ValueCustom(sql::Value);
 
 impl From<sql::Value> for ValueCustom {
     fn from(value: sql::Value) -> Self {
-        todo!()
+        ValueCustom(value)
     }
 }
 
@@ -244,13 +244,20 @@ impl Into<DbFilter> for &DbField {
     }
 }
 
-impl<T> Into<DbFilter> for SelectStatement<T>
-where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
-{
+impl Into<DbFilter> for SelectStatement {
     fn into(self) -> DbFilter {
-        let query_b: SelectStatement<T> = self;
+        let query_b: SelectStatement = self;
         DbFilter::new(query_b)
+    }
+}
+impl From<SurrealId> for DbFilter {
+    fn from(value: SurrealId) -> Self {
+        // TODO: Check if to inline the string directly or stick with parametization and
+        // autobinding
+        DbFilter::new(value)
+        // DbFilter::new(vec![value])
+        // DbFilter::new(value.to_raw())
+        // DbFilter::new("".into()).___update_bindings(&vec![b])
     }
 }
 impl From<DbField> for DbFilter {
@@ -267,7 +274,7 @@ impl From<DbField> for DbFilter {
 //     }
 // }
 
-impl<'a> From<Cow<'a, DbField>> for DbField {
+impl<'a> From<Cow<'a, Self>> for DbField {
     fn from(value: Cow<'a, DbField>) -> Self {
         match value {
             Cow::Borrowed(v) => v.clone(),
@@ -292,7 +299,7 @@ impl From<String> for DbField {
         Self::new(value)
     }
 }
-impl From<&DbField> for DbField {
+impl From<&Self> for DbField {
     fn from(value: &DbField) -> Self {
         value.to_owned()
     }
@@ -389,7 +396,7 @@ impl std::fmt::Display for DbField {
 #[derive(Debug, Clone)]
 pub struct DbFilter {
     query_string: String,
-    bindings: Vec<Binding>,
+    bindings: BindingsList,
 }
 
 impl Parametric for DbFilter {
@@ -560,7 +567,7 @@ impl DbFilter {
     /// ```
     pub fn or(self, filter: impl Into<Self> + Parametric) -> Self {
         let precendence = self._______bracket_if_not_already();
-        let new_params = self.___update_params(&filter);
+        let new_params = self.___update_bindings(&filter);
 
         let ref filter: Self = filter.into();
         let query_string = format!("{precendence} OR ({filter})");
@@ -590,7 +597,7 @@ impl DbFilter {
     /// ```
     pub fn and(self, filter: impl Into<Self> + Parametric) -> Self {
         let precendence = self._______bracket_if_not_already();
-        let new_params = self.___update_params(&filter);
+        let new_params = self.___update_bindings(&filter);
 
         let ref filter: Self = filter.into();
         let query_string = format!("{precendence} AND ({filter})");
@@ -601,17 +608,18 @@ impl DbFilter {
         }
     }
 
-    fn ___update_params(self, filter: &impl Parametric) -> Vec<Binding> {
+    pub(crate) fn ___update_bindings(self, filter: &impl Parametric) -> Vec<Binding> {
         // let new_params = self
         //     .params
         //     .to_owned()
         //     .into_iter()
         //     .chain(filter.get_params().into_iter())
         //     .collect::<Vec<_>>(); // Consumed
-        let mut new_params = vec![];
-        new_params.extend(self.bindings);
-        new_params.extend(filter.get_bindings());
-        new_params
+        // let mut new_bindings = vec![];
+        // new_bindings.extend(self.bindings);
+        // new_bindings.extend(filter.get_bindings());
+        // new_bindings
+        [self.bindings.as_slice(), filter.get_bindings().as_slice()].concat()
     }
 
     /// Wraps this `DbFilter` instance in a set of brackets.
@@ -652,7 +660,7 @@ impl<'a> From<Cow<'a, DbFilter>> for DbFilter {
     }
 }
 
-impl From<Option<DbFilter>> for DbFilter {
+impl From<Option<Self>> for DbFilter {
     fn from(value: Option<DbFilter>) -> Self {
         match value {
             Some(v) => v,
@@ -1784,7 +1792,7 @@ impl DbField {
         bindings: impl Into<&'bi [Binding]>,
     ) -> Self {
         let bindings: &'bi [Binding] = bindings.into();
-        println!("bindingszz {bindings:?}");
+        // println!("bindingszz {bindings:?}");
         // updated_params.extend_from_slice(&self.bindings[..]);
         // updated_params.extend_from_slice(&bindings[..]);
         let updated_params = [&self.get_bindings().as_slice(), bindings].concat();
