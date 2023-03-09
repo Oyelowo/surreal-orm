@@ -20,15 +20,6 @@ use crate::{
 // 	[ PARALLEL ]
 // ;
 
-// Student::with(None|id|Query).writes.(Book::id|None|Query);
-trait Relationable {}
-
-enum Relatables {
-    None,
-    SurrealId(SurrealId),
-    SelectStatement(SelectStatement),
-}
-
 pub fn relate<T>(connection: impl std::fmt::Display + Parametric + Erroneous) -> RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
@@ -266,7 +257,7 @@ where
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbEdge> Runnable<T> for RelateStatement<T> {}
+impl<T> Runnable<T> for RelateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbEdge {}
 
 #[test]
 fn test_query_builder() {
