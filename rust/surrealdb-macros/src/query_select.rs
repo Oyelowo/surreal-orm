@@ -366,7 +366,7 @@ impl From<SurrealId> for Targettables {
     }
 }
 
-impl From<Table> for Targettables {
+impl From<sql::Table> for Targettables {
     fn from(value: Table) -> Self {
         Self::Table(value)
     }
@@ -605,18 +605,18 @@ pub struct SelectStatement {
     fetch: Vec<String>,
     timeout: Option<String>,
     parallel: bool,
-    ________params_accumulator: BindingsList,
+    bindings: BindingsList,
 }
 
 impl Parametric for SelectStatement {
     fn get_bindings(&self) -> BindingsList {
-        self.________params_accumulator.to_vec()
+        self.bindings.to_vec()
     }
 }
 
 impl From<Selectables> for SelectStatement {
     fn from(value: Selectables) -> Self {
-        todo!()
+        value.into()
     }
 }
 
@@ -649,7 +649,7 @@ impl SelectStatement {
             fetch: vec![],
             timeout: None,
             parallel: false,
-            ________params_accumulator: vec![],
+            bindings: vec![],
         }
     }
 
@@ -749,7 +749,7 @@ impl SelectStatement {
         // let mut updated_params = vec![];
         // updated_params.extend(self.________params_accumulator.to_vec());
         // updated_params.extend(parametric_value.get_bindings());
-        self.________params_accumulator.extend(bindings);
+        self.bindings.extend(bindings);
         self
     }
 

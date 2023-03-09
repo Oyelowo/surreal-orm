@@ -1,15 +1,38 @@
 use std::marker::PhantomData;
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql::{self};
+use surrealdb::sql;
 
 use crate::{
     db_field::Binding,
     query_insert::{Buildable, Runnable, Updateables},
     query_relate::{self, Return},
     value_type_wrappers::SurrealId,
-    BindingsList, DbFilter, Parametric, SurrealdbModel,
+    BindingsList, DbFilter, Erroneous, Parametric, SurrealdbModel,
 };
+
+pub fn update<T>(targettables: impl Into<Targettable>) -> UpdateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    // TODO: Pass this to UpdateStatement constructor and gather the errors to be handled when
+    // query is run using one of the run methods.
+    let table_name = T::table_name();
+    let targettables: Targettable = targettables.into();
+    if !targettables
+        .get_bindings()
+        .first()
+        .unwrap()
+        .get_value()
+        .to_raw_string()
+        .starts_with(&table_name.to_string())
+    {
+        panic!("You're trying to update into the wrong table");
+    }
+    // let errors: String = connection.get_errors();
+    let mut builder = UpdateStatement::<T>::new();
+    builder.update(targettables)
+}
 
 pub struct UpdateStatement<T>
 where
@@ -24,19 +47,67 @@ where
     timeout: Option<String>,
     bindings: BindingsList,
     parallel: bool,
-    __return_type: PhantomData<T>,
+    __model_return_type: PhantomData<T>,
 }
 
 pub enum Targettable {
     Table(sql::Table),
-    Id(SurrealId),
+    SurrealId(SurrealId),
+}
+
+impl From<&sql::Table> for Targettable {
+    fn from(value: &sql::Table) -> Self {
+        Self::Table(value.to_owned())
+    }
+}
+impl From<&sql::Thing> for Targettable {
+    fn from(value: &sql::Thing) -> Self {
+        Self::SurrealId(value.to_owned().into())
+    }
+}
+
+impl From<sql::Thing> for Targettable {
+    fn from(value: sql::Thing) -> Self {
+        Self::SurrealId(value.into())
+    }
+}
+
+impl From<&SurrealId> for Targettable {
+    fn from(value: &SurrealId) -> Self {
+        Self::SurrealId(value.to_owned())
+    }
+}
+
+impl From<SurrealId> for Targettable {
+    fn from(value: SurrealId) -> Self {
+        Self::SurrealId(value)
+    }
+}
+
+impl From<sql::Table> for Targettable {
+    fn from(value: sql::Table) -> Self {
+        Self::Table(value)
+    }
+}
+
+impl Parametric for Targettable {
+    fn get_bindings(&self) -> BindingsList {
+        match self {
+            Targettable::Table(table) => {
+                // Table binding does not seem to work right now. skip it first
+                let binding = Binding::new(table.to_owned());
+                vec![binding]
+            }
+            Targettable::SurrealId(id) => vec![Binding::new(id.to_owned())],
+        }
+    }
 }
 
 impl<T> UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    pub fn new(target: impl Into<Targettable>) -> Self {
+    pub fn new() -> Self {
         Self {
             target: "".into(),
             content: None,
@@ -47,8 +118,24 @@ where
             timeout: None,
             parallel: false,
             bindings: vec![],
-            __return_type: PhantomData,
+            __model_return_type: PhantomData,
         }
+    }
+
+    pub fn update(mut self, targettables: impl Into<Targettable>) -> Self {
+        let targets: Targettable = targettables.into();
+        let targets_bindings = targets.get_bindings();
+
+        let target_names = match targets {
+            Targettable::Table(table) => vec![table.to_string()],
+            Targettable::SurrealId(_) => targets_bindings
+                .iter()
+                .map(|b| format!("${}", b.get_param()))
+                .collect::<Vec<_>>(),
+        };
+        self.update_bindings(targets_bindings);
+        self.target.extend(target_names);
+        self
     }
 
     pub fn content(mut self, content: T) -> Self {
