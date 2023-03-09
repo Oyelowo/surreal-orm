@@ -11,7 +11,31 @@ use crate::{
     BindingsList, Parametric, SurrealdbNode,
 };
 
-pub struct CreateQueryBuilder<T>
+pub fn update<T>(targettables: impl Into<Targettable>) -> CreateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+    // TODO: Pass this to UpdateStatement constructor and gather the errors to be handled when
+    // query is run using one of the run methods.
+    let table_name = T::table_name();
+    let targettables: Targettable = targettables.into();
+    if !targettables
+        .get_bindings()
+        .first()
+        .unwrap()
+        .get_value()
+        .to_raw_string()
+        .starts_with(&table_name.to_string())
+    {
+        panic!("You're trying to update into the wrong table");
+    }
+    // let errors: String = connection.get_errors();
+    let mut builder = CreateStatement::<T>::new(targettables);
+    builder
+    // builder.new(targettables)
+}
+
+pub struct CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -25,7 +49,7 @@ where
     __model_return_type: PhantomData<T>,
 }
 
-impl<T> CreateQueryBuilder<T>
+impl<T> CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
