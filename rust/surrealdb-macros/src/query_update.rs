@@ -1,12 +1,27 @@
-struct UpdateQuery<'a> {
-    target: &'a str,
-    content: Option<&'a str>,
-    merge: Option<&'a str>,
-    set: Vec<(&'a str, &'a str)>,
-    condition: Option<&'a str>,
+use std::marker::PhantomData;
+
+use serde::{de::DeserializeOwned, Serialize};
+use surrealdb::sql;
+
+use crate::{
+    db_field::Binding, query_insert::Updateables, value_type_wrappers::SurrealId, BindingsList,
+    DbFilter, Parametric, SurrealdbModel,
+};
+
+struct UpdateQuery<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    target: String,
+    content: Option<String>,
+    merge: Option<String>,
+    set: Vec<String>,
+    where_: Option<String>,
     return_type: ReturnType,
-    timeout: Option<&'a str>,
+    timeout: Option<String>,
+    bindings: BindingsList,
     parallel: bool,
+    __return_type: PhantomData<T>,
 }
 
 enum ReturnType {
@@ -14,40 +29,88 @@ enum ReturnType {
     Before,
     After,
     Diff,
-    Fields(Vec<&'static str>),
+    Fields(Vec<String>),
+}
+enum Targettable {
+    Table(String),
+    Id(SurrealId),
 }
 
-impl<'a> UpdateQuery<'a> {
-    fn new(target: &'a str) -> Self {
+impl<T> UpdateQuery<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn new(target: impl Into<Targettable>) -> Self {
         Self {
-            target,
+            target: "".into(),
             content: None,
             merge: None,
             set: Vec::new(),
-            condition: None,
+            where_: None,
             return_type: ReturnType::After,
             timeout: None,
             parallel: false,
+            bindings: vec![],
+            __return_type: PhantomData,
         }
     }
 
-    fn content(mut self, content: &'a str) -> Self {
-        self.content = Some(content);
+    pub fn content(mut self, content: T) -> Self {
+        let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
+        let binding = Binding::new(sql_value);
+        self.content = Some(binding.get_param().to_owned());
+        self.bindings.push(binding);
         self
     }
 
-    fn merge(mut self, merge: &'a str) -> Self {
-        self.merge = Some(merge);
+    fn merge(mut self, merge: impl Serialize) -> Self {
+        let sql_value = sql::json(&serde_json::to_string(&merge).unwrap()).unwrap();
+        let binding = Binding::new(sql_value);
+        self.merge = Some(binding.get_param().to_owned());
+        self.bindings.push(binding);
         self
     }
 
-    fn set(mut self, field: &'a str, value: &'a str) -> Self {
-        self.set.push((field, value));
+    pub fn set(mut self, settables: impl Into<Updateables>) -> Self {
+        let settable: Updateables = settables.into();
+        self.bindings.extend(settable.get_bindings());
+
+        let setter_query = match settable {
+            Updateables::Updater(up) => vec![up.get_updater_string()],
+            Updateables::Updaters(ups) => ups
+                .into_iter()
+                .map(|u| u.get_updater_string())
+                .collect::<Vec<_>>(),
+        };
+        self.set.extend(setter_query);
         self
     }
 
-    fn condition(mut self, condition: &'a str) -> Self {
-        self.condition = Some(condition);
+    /// Adds a condition to the `` clause of the SQL query.
+    ///
+    /// # Arguments
+    ///
+    /// * `condition` - A reference to a filter condition.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use query_builder::{QueryBuilder, DbField, DbFilter};
+    ///
+    /// let mut builder = QueryBuilder::select();
+    /// let condition = DbFilter::from(("age", ">", 18));
+    /// builder._(condition);
+    ///
+    /// assert_eq!(builder.to_string(), "SELECT *  age > 18");
+    /// ```
+    pub fn where_(mut self, condition: impl Into<DbFilter> + Parametric + Clone) -> Self {
+        self.update_bindings(condition.get_bindings());
+        let condition: DbFilter = condition.into();
+        self.where_ = Some(condition.to_string());
+        self
+    }
+    fn update_bindings(&mut self, bindings: BindingsList) -> &mut Self {
+        self.bindings.extend(bindings);
         self
     }
 
@@ -56,11 +119,50 @@ impl<'a> UpdateQuery<'a> {
         self
     }
 
-    fn timeout(mut self, timeout: &'a str) -> Self {
-        self.timeout = Some(timeout);
+    /// Sets the timeout duration for the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `duration` - a string slice that specifies the timeout duration. It can be expressed in any format that the database driver supports.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use my_db_client::{Query, QueryBuilder};
+    ///
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.timeout("5s");
+    /// ```
+    ///
+    /// ---
+    ///
+    /// Indicates that the query should be executed in parallel.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use my_db_client::{Query, QueryBuilder};
+    ///
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.parallel();
+    /// ```
+    pub fn timeout(mut self, duration: impl Into<crate::query_select::Duration>) -> Self {
+        let duration: crate::query_select::Duration = duration.into();
+        let duration = sql::Duration::from(duration);
+        self.timeout = Some(duration.to_string());
         self
     }
 
+    /// Indicates that the query should be executed in parallel.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use my_db_client::{Query, QueryBuilder};
+    ///
+    /// let mut query_builder = QueryBuilder::new();
+    /// query_builder.parallel();
+    /// ```
     fn parallel(mut self) -> Self {
         self.parallel = true;
         self
@@ -70,35 +172,31 @@ impl<'a> UpdateQuery<'a> {
         let mut query = String::new();
 
         query.push_str("UPDATE ");
-        query.push_str(self.target);
+        query.push_str(self.target.as_str());
 
-        if let Some(content) = self.content {
+        if let Some(content) = &self.content {
             query.push_str(" CONTENT ");
-            query.push_str(content);
-        } else if let Some(merge) = self.merge {
+            query.push_str(&content);
+        } else if let Some(merge) = &self.merge {
             query.push_str(" MERGE ");
             query.push_str(merge);
         } else if !self.set.is_empty() {
             query.push_str(" SET ");
-            for (i, (field, value)) in self.set.iter().enumerate() {
-                if i > 0 {
-                    query.push_str(", ");
-                }
-                query.push_str(field);
-                query.push_str(" = ");
-                query.push_str(value);
-            }
+            query += "SET ";
+            let set_vec = self.set.join(", ");
+            query += &set_vec;
+            query += " ";
         }
 
-        if let Some(condition) = self.condition {
+        if let Some(condition) = &self.where_ {
             query.push_str(" WHERE ");
-            query.push_str(condition);
+            query.push_str(condition.as_str());
         }
 
         match &self.return_type {
             ReturnType::None => query.push_str(" RETURN NONE"),
             ReturnType::Before => query.push_str(" RETURN BEFORE"),
-            ReturnType::After => {} // Default, do nothing
+            ReturnType::After => query.push_str(" RETURN AFTER"),
             ReturnType::Diff => query.push_str(" RETURN DIFF"),
             ReturnType::Fields(fields) => {
                 query.push_str(" RETURN ");
@@ -111,7 +209,7 @@ impl<'a> UpdateQuery<'a> {
             }
         }
 
-        if let Some(timeout) = self.timeout {
+        if let Some(timeout) = &self.timeout {
             query.push_str(" TIMEOUT ");
             query.push_str(timeout);
         }

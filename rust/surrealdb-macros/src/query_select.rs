@@ -989,8 +989,8 @@ impl SelectStatement {
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<self::Duration>) -> Self {
-        let duration: self::Duration = duration.into();
+    pub fn timeout(mut self, duration: impl Into<Duration>) -> Self {
+        let duration: Duration = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
