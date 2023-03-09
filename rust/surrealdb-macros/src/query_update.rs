@@ -4,11 +4,14 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    db_field::Binding, query_insert::Updateables, value_type_wrappers::SurrealId, BindingsList,
-    DbFilter, Parametric, SurrealdbModel,
+    db_field::Binding,
+    query_insert::Updateables,
+    query_relate::{self, Return},
+    value_type_wrappers::SurrealId,
+    BindingsList, DbFilter, Parametric, SurrealdbModel,
 };
 
-struct UpdateQuery<T>
+pub struct UpdateQuery<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
@@ -17,22 +20,15 @@ where
     merge: Option<String>,
     set: Vec<String>,
     where_: Option<String>,
-    return_type: ReturnType,
+    return_type: Option<query_relate::Return>,
     timeout: Option<String>,
     bindings: BindingsList,
     parallel: bool,
     __return_type: PhantomData<T>,
 }
 
-enum ReturnType {
-    None,
-    Before,
-    After,
-    Diff,
-    Fields(Vec<String>),
-}
 enum Targettable {
-    Table(String),
+    Table(sql::Table),
     Id(SurrealId),
 }
 
@@ -40,14 +36,14 @@ impl<T> UpdateQuery<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    fn new(target: impl Into<Targettable>) -> Self {
+    pub fn new(target: impl Into<Targettable>) -> Self {
         Self {
             target: "".into(),
             content: None,
             merge: None,
             set: Vec::new(),
             where_: None,
-            return_type: ReturnType::After,
+            return_type: None,
             timeout: None,
             parallel: false,
             bindings: vec![],
@@ -63,7 +59,7 @@ where
         self
     }
 
-    fn merge(mut self, merge: impl Serialize) -> Self {
+    pub fn merge(mut self, merge: impl Serialize) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&merge).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
         self.merge = Some(binding.get_param().to_owned());
@@ -109,13 +105,15 @@ where
         self.where_ = Some(condition.to_string());
         self
     }
+
     fn update_bindings(&mut self, bindings: BindingsList) -> &mut Self {
         self.bindings.extend(bindings);
         self
     }
 
-    fn return_type(mut self, return_type: ReturnType) -> Self {
-        self.return_type = return_type;
+    pub fn return_(mut self, return_type: impl Into<Return>) -> Self {
+        let return_type = return_type.into();
+        self.return_type = Some(return_type);
         self
     }
 
@@ -163,7 +161,7 @@ where
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.parallel();
     /// ```
-    fn parallel(mut self) -> Self {
+    pub fn parallel(mut self) -> Self {
         self.parallel = true;
         self
     }
@@ -193,18 +191,21 @@ where
             query.push_str(condition.as_str());
         }
 
-        match &self.return_type {
-            ReturnType::None => query.push_str(" RETURN NONE"),
-            ReturnType::Before => query.push_str(" RETURN BEFORE"),
-            ReturnType::After => query.push_str(" RETURN AFTER"),
-            ReturnType::Diff => query.push_str(" RETURN DIFF"),
-            ReturnType::Fields(fields) => {
-                query.push_str(" RETURN ");
-                for (i, field) in fields.iter().enumerate() {
-                    if i > 0 {
-                        query.push_str(", ");
-                    }
-                    query.push_str(field);
+        if let Some(return_type) = &self.return_type {
+            query += "RETURN ";
+            match return_type {
+                Return::None => query += "NONE ",
+                Return::Before => query += "BEFORE ",
+                Return::After => query += "AFTER ",
+                Return::Diff => query += "DIFF ",
+                Return::Projections(projections) => {
+                    let projections = projections
+                        .iter()
+                        .map(|p| format!("{}", p))
+                        .collect::<Vec<String>>()
+                        .join(", ");
+                    query += &projections;
+                    query += " ";
                 }
             }
         }

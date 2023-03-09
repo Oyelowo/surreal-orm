@@ -23,12 +23,6 @@ use crate::{
 // Student::with(None|id|Query).writes.(Book::id|None|Query);
 trait Relationable {}
 
-enum Relatables {
-    None,
-    SurrealId(SurrealId),
-    SelectStatement(SelectStatement),
-}
-
 pub fn relate<T>(connection: impl std::fmt::Display + Parametric + Erroneous) -> RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
