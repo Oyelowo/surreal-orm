@@ -1,17 +1,17 @@
 use std::marker::PhantomData;
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql;
+use surrealdb::sql::{self};
 
 use crate::{
     db_field::Binding,
-    query_insert::Updateables,
+    query_insert::{Buildable, Updateables},
     query_relate::{self, Return},
     value_type_wrappers::SurrealId,
     BindingsList, DbFilter, Parametric, SurrealdbModel,
 };
 
-pub struct UpdateQuery<T>
+pub struct UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
@@ -27,12 +27,12 @@ where
     __return_type: PhantomData<T>,
 }
 
-enum Targettable {
+pub enum Targettable {
     Table(sql::Table),
     Id(SurrealId),
 }
 
-impl<T> UpdateQuery<T>
+impl<T> UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
@@ -165,7 +165,12 @@ where
         self.parallel = true;
         self
     }
+}
 
+impl<T> Buildable for UpdateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn build(&self) -> String {
         let mut query = String::new();
 
