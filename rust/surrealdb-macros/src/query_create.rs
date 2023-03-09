@@ -11,7 +11,7 @@ use crate::{
     BindingsList, Parametric, SurrealdbNode,
 };
 
-pub fn update<T>(targettables: impl Into<Targettable>) -> CreateStatement<T>
+pub fn create<T>(targettables: impl Into<Targettable>) -> CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
