@@ -260,7 +260,7 @@ where
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbEdge> Runnable<T> for RelateStatement<T> {}
+impl<T> Runnable<T> for RelateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbEdge {}
 
 #[test]
 fn test_query_builder() {

@@ -5,7 +5,7 @@ use surrealdb::sql::{self};
 
 use crate::{
     db_field::Binding,
-    query_insert::{Buildable, Updateables},
+    query_insert::{Buildable, Runnable, Updateables},
     query_relate::{self, Return},
     value_type_wrappers::SurrealId,
     BindingsList, DbFilter, Parametric, SurrealdbModel,
@@ -227,3 +227,23 @@ where
         query
     }
 }
+
+impl<T> std::fmt::Display for UpdateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}", self.build()))
+    }
+}
+
+impl<T> Parametric for UpdateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn get_bindings(&self) -> crate::BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+impl<T> Runnable<T> for UpdateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
