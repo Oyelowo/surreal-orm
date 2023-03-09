@@ -5,7 +5,7 @@ use surrealdb::sql;
 
 use crate::{
     db_field::Binding,
-    query_insert::Updateables,
+    query_insert::{Buildable, Runnable, Updateables},
     query_relate::Return,
     query_update::{self, Targettable},
     BindingsList, Parametric, SurrealdbNode,
@@ -146,14 +146,19 @@ where
         self.parallel = true;
         self
     }
+}
 
-    pub fn build(self) -> String {
+impl<T> Buildable for CreateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+    fn build(&self) -> String {
         let mut query = String::new();
 
         query.push_str("CREATE ");
         query.push_str(&self.target);
 
-        if let Some(content) = self.content {
+        if let Some(content) = &self.content {
             query.push_str(" CONTENT ");
             query.push_str(&content);
         } else if !&self.set.is_empty() {
@@ -163,7 +168,7 @@ where
             query += " ";
         }
 
-        if let Some(return_type) = self.return_type {
+        if let Some(return_type) = &self.return_type {
             query.push_str(" RETURN ");
             match return_type {
                 Return::None => query.push_str("NONE"),
@@ -181,7 +186,7 @@ where
             }
         }
 
-        if let Some(timeout) = self.timeout {
+        if let Some(timeout) = &self.timeout {
             query.push_str(" TIMEOUT ");
             query.push_str(&timeout);
         }
@@ -195,3 +200,23 @@ where
         query
     }
 }
+
+impl<T> std::fmt::Display for CreateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}", self.build()))
+    }
+}
+
+impl<T> Parametric for CreateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+    fn get_bindings(&self) -> crate::BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+impl<T> Runnable<T> for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
