@@ -193,6 +193,26 @@ impl Buildable for RemoveScopeStatement {
     }
 }
 
+pub fn remove_table(table: impl Into<Table>) -> RemoveTableStatement {
+    RemoveTableStatement::new(table)
+}
+struct RemoveTableStatement {
+    table: Table,
+}
+
+impl RemoveTableStatement {
+    fn new(table: impl Into<Table>) -> Self {
+        Self {
+            table: table.into(),
+        }
+    }
+}
+
+impl Buildable for RemoveTableStatement {
+    fn build(&self) -> String {
+        format!("REMOVE TABLE {}", self.table)
+    }
+}
 struct RemoveStatement {
     namespace: Option<Namespace>,
     database: Option<Database>,
