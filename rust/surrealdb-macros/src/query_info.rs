@@ -27,22 +27,22 @@ impl InfoStatement {
         }
     }
 
-    fn namespace(mut self) -> Self {
+    pub fn namespace(mut self) -> Self {
         self.level = SurrealLevel::Namespace;
         self
     }
 
-    fn database(mut self) -> Self {
+    pub fn database(mut self) -> Self {
         self.level = SurrealLevel::Database;
         self
     }
 
-    fn scope(mut self, scope: &str) -> Self {
+    pub fn scope(mut self, scope: &str) -> Self {
         self.level = SurrealLevel::Scope(scope.to_string());
         self
     }
 
-    fn table(mut self, table: &str) -> Self {
+    pub fn table(mut self, table: &str) -> Self {
         self.level = SurrealLevel::Table(table.to_string());
         self
     }

@@ -17,6 +17,7 @@ pub mod query_insert;
 pub mod query_relate;
 pub mod query_remove;
 pub mod query_select;
+pub mod query_sleep;
 pub mod query_update;
 pub mod value_type_wrappers;
 // pub mod querydb;
