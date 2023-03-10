@@ -246,6 +246,68 @@ impl Buildable for RemoveEventStatement {
     }
 }
 
+pub fn remove_field(field: impl Into<DbField>) -> RemoveFieldStatement {
+    RemoveFieldStatement::new(field)
+}
+struct RemoveFieldStatement {
+    field: DbField,
+    table: Option<Table>,
+}
+
+impl RemoveFieldStatement {
+    fn new(field: impl Into<DbField>) -> Self {
+        Self {
+            field: field.into(),
+            table: None,
+        }
+    }
+
+    fn on_table(mut self, table: impl Into<Table>) -> Self {
+        self.table = Some(table.into());
+        self
+    }
+}
+
+impl Buildable for RemoveFieldStatement {
+    fn build(&self) -> String {
+        let query = format!("REMOVE FIELD {}", self.field);
+        if let Some(table) = self.table {
+            let query = format!("{} ON TABLE {}", query, table);
+        }
+        query
+    }
+}
+pub fn remove_index(index: impl Into<Index>) -> RemoveIndexStatement {
+    RemoveIndexStatement::new(index)
+}
+struct RemoveIndexStatement {
+    index: Index,
+    table: Option<Table>,
+}
+
+impl RemoveIndexStatement {
+    fn new(index: impl Into<Index>) -> Self {
+        Self {
+            index: index.into(),
+            table: None,
+        }
+    }
+
+    fn on_table(mut self, table: impl Into<Table>) -> Self {
+        self.table = Some(table.into());
+        self
+    }
+}
+
+impl Buildable for RemoveIndexStatement {
+    fn build(&self) -> String {
+        let query = format!("REMOVE INDEX {}", self.index);
+        if let Some(table) = self.table {
+            let query = format!("{} ON TABLE {}", query, table);
+        }
+        query
+    }
+}
 struct RemoveStatement {
     namespace: Option<Namespace>,
     database: Option<Database>,
