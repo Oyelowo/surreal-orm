@@ -213,6 +213,39 @@ impl Buildable for RemoveTableStatement {
         format!("REMOVE TABLE {}", self.table)
     }
 }
+
+pub fn remove_event(event: impl Into<Event>) -> RemoveEventStatement {
+    RemoveEventStatement::new(event)
+}
+struct RemoveEventStatement {
+    event: Event,
+    table: Option<Table>,
+}
+
+impl RemoveEventStatement {
+    fn new(event: impl Into<Event>) -> Self {
+        Self {
+            table: None,
+            event: event.into(),
+        }
+    }
+
+    fn on_table(mut self, table: impl Into<Table>) -> Self {
+        self.table = Some(table.into());
+        self
+    }
+}
+
+impl Buildable for RemoveEventStatement {
+    fn build(&self) -> String {
+        let query = format!("REMOVE EVENT {}", self.event);
+        if let Some(table) = self.table {
+            let query = format!("{} ON TABLE {}", query, table);
+        }
+        query
+    }
+}
+
 struct RemoveStatement {
     namespace: Option<Namespace>,
     database: Option<Database>,
