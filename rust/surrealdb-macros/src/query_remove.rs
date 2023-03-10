@@ -20,14 +20,14 @@ use std::fmt::Display;
 
 use crate::{query_insert::Buildable, DbField};
 
-struct Namespace(String);
-struct Database(String);
-struct Login(String);
-struct Token(String);
-struct Scope(String);
-struct Table(String);
-struct Event(String);
-struct Index(String);
+pub struct Namespace(String);
+pub struct Database(String);
+pub struct Login(String);
+pub struct Token(String);
+pub struct Scope(String);
+pub struct Table(String);
+pub struct Event(String);
+pub struct Index(String);
 
 macro_rules! impl_display_for_all {
     ($($types_:ty),*) => {
@@ -68,7 +68,7 @@ struct TokenDetails {
 pub fn remove_namespace(namespace: impl Into<Namespace>) -> RemoveNamespaceStatement {
     RemoveNamespaceStatement::new(namespace)
 }
-struct RemoveNamespaceStatement {
+pub struct RemoveNamespaceStatement {
     namespace: Namespace,
 }
 
@@ -84,11 +84,12 @@ impl Buildable for RemoveNamespaceStatement {
         format!("REMOVE NAMESPACE {}", self.namespace)
     }
 }
+impl Runnable for RemoveNamespaceStatement {}
 
 pub fn remove_database(database: impl Into<Database>) -> RemoveDatabaseStatement {
     RemoveDatabaseStatement::new(database)
 }
-struct RemoveDatabaseStatement {
+pub struct RemoveDatabaseStatement {
     database: Database,
 }
 
@@ -105,11 +106,12 @@ impl Buildable for RemoveDatabaseStatement {
         format!("REMOVE DATABASE {}", self.database)
     }
 }
+impl Runnable for RemoveDatabaseStatement {}
 
 pub fn remove_login(login: impl Into<Login>) -> RemoveLoginStatement {
     RemoveLoginStatement::new(login)
 }
-struct RemoveLoginStatement {
+pub struct RemoveLoginStatement {
     login: Login,
     on: Option<NamespaceOrDatabase>,
 }
@@ -122,27 +124,33 @@ impl RemoveLoginStatement {
         }
     }
 
-    fn on(mut self, on: impl Into<NamespaceOrDatabase>) -> Self {
-        self.on = Some(on.into());
+    fn on_namespace(mut self) -> Self {
+        self.on = Some(NamespaceOrDatabase::Namespace);
+        self
+    }
+
+    fn on_database(mut self) -> Self {
+        self.on = Some(NamespaceOrDatabase::Database);
         self
     }
 }
 
 impl Buildable for RemoveLoginStatement {
     fn build(&self) -> String {
-        let query = format!("REMOVE LOGIN {}", self.login);
+        let mut query = format!("REMOVE LOGIN {}", self.login);
 
-        if let Some(on) = self.on {
+        if let Some(on) = &self.on {
             query = format!("{} ON {}", query, on);
         }
         query
     }
 }
+impl Runnable for RemoveLoginStatement {}
 
 pub fn remove_token(token: impl Into<Token>) -> RemoveTokenStatement {
     RemoveTokenStatement::new(token)
 }
-struct RemoveTokenStatement {
+pub struct RemoveTokenStatement {
     token: Token,
     on: Option<NamespaceOrDatabase>,
 }
@@ -155,27 +163,33 @@ impl RemoveTokenStatement {
         }
     }
 
-    fn on(mut self, on: impl Into<NamespaceOrDatabase>) -> Self {
-        self.on = Some(on.into());
+    fn on_namespace(mut self) -> Self {
+        self.on = Some(NamespaceOrDatabase::Namespace);
+        self
+    }
+
+    fn on_database(mut self) -> Self {
+        self.on = Some(NamespaceOrDatabase::Database);
         self
     }
 }
 
 impl Buildable for RemoveTokenStatement {
     fn build(&self) -> String {
-        let query = format!("REMOVE TOKEN {}", self.token);
+        let mut query = format!("REMOVE TOKEN {}", self.token);
 
-        if let Some(on) = self.on {
+        if let Some(on) = &self.on {
             query = format!("{} ON {}", query, on);
         }
         query
     }
 }
+impl Runnable for RemoveTokenStatement {}
 
 pub fn remove_scope(scope: impl Into<Scope>) -> RemoveScopeStatement {
     RemoveScopeStatement::new(scope)
 }
-struct RemoveScopeStatement {
+pub struct RemoveScopeStatement {
     scope: Scope,
 }
 
@@ -192,11 +206,12 @@ impl Buildable for RemoveScopeStatement {
         format!("REMOVE SCOPE {}", self.scope)
     }
 }
+impl Runnable for RemoveScopeStatement {}
 
 pub fn remove_table(table: impl Into<Table>) -> RemoveTableStatement {
     RemoveTableStatement::new(table)
 }
-struct RemoveTableStatement {
+pub struct RemoveTableStatement {
     table: Table,
 }
 
@@ -213,11 +228,12 @@ impl Buildable for RemoveTableStatement {
         format!("REMOVE TABLE {}", self.table)
     }
 }
+impl Runnable for RemoveTableStatement {}
 
 pub fn remove_event(event: impl Into<Event>) -> RemoveEventStatement {
     RemoveEventStatement::new(event)
 }
-struct RemoveEventStatement {
+pub struct RemoveEventStatement {
     event: Event,
     table: Option<Table>,
 }
@@ -239,17 +255,18 @@ impl RemoveEventStatement {
 impl Buildable for RemoveEventStatement {
     fn build(&self) -> String {
         let query = format!("REMOVE EVENT {}", self.event);
-        if let Some(table) = self.table {
+        if let Some(table) = &self.table {
             let query = format!("{} ON TABLE {}", query, table);
         }
         query
     }
 }
+impl Runnable for RemoveEventStatement {}
 
 pub fn remove_field(field: impl Into<DbField>) -> RemoveFieldStatement {
     RemoveFieldStatement::new(field)
 }
-struct RemoveFieldStatement {
+pub struct RemoveFieldStatement {
     field: DbField,
     table: Option<Table>,
 }
@@ -271,16 +288,18 @@ impl RemoveFieldStatement {
 impl Buildable for RemoveFieldStatement {
     fn build(&self) -> String {
         let query = format!("REMOVE FIELD {}", self.field);
-        if let Some(table) = self.table {
+        if let Some(table) = &self.table {
             let query = format!("{} ON TABLE {}", query, table);
         }
         query
     }
 }
+impl Runnable for RemoveFieldStatement {}
+
 pub fn remove_index(index: impl Into<Index>) -> RemoveIndexStatement {
     RemoveIndexStatement::new(index)
 }
-struct RemoveIndexStatement {
+pub struct RemoveIndexStatement {
     index: Index,
     table: Option<Table>,
 }
@@ -302,134 +321,27 @@ impl RemoveIndexStatement {
 impl Buildable for RemoveIndexStatement {
     fn build(&self) -> String {
         let query = format!("REMOVE INDEX {}", self.index);
-        if let Some(table) = self.table {
+        if let Some(table) = &self.table {
             let query = format!("{} ON TABLE {}", query, table);
         }
         query
     }
 }
-struct RemoveStatement {
-    namespace: Option<Namespace>,
-    database: Option<Database>,
-    login: Option<LoginDetails>,
-    token: Option<TokenDetails>,
-    scope: Option<Scope>,
-    table: Option<Table>,
-    event: Option<(Event, Table)>,
-    field: Option<(DbField, Table)>,
-    index: Option<(Index, Table)>,
-}
-// remove().namespace("kawaa");
-// remove_namespace("kawaa");
+impl Runnable for RemoveIndexStatement {}
 
-impl RemoveStatement {
-    fn namespace(mut self, name: Namespace) -> Self {
-        self.namespace = Some(name);
-        self
+#[async_trait::async_trait]
+pub trait Runnable
+where
+    Self: Buildable,
+{
+    async fn run(
+        &self,
+        db: surrealdb::Surreal<surrealdb::engine::local::Db>,
+    ) -> surrealdb::Result<()> {
+        let query = self.build();
+        db.query(query).await?;
+        Ok(())
     }
-
-    fn database(mut self, name: Database) -> Self {
-        self.database = Some(name);
-        self
-    }
-
-    fn login(mut self, name: impl Into<Login>, on: impl Into<NamespaceOrDatabase>) -> Self {
-        let name = name.into();
-        let on: NamespaceOrDatabase = on.into();
-
-        let login_details = LoginDetails { name, on };
-        self.login = Some(login_details);
-        self
-    }
-
-    fn token(mut self, name: impl Into<Token>, on: impl Into<NamespaceOrDatabase>) -> Self {
-        let name = name.into();
-        let on: NamespaceOrDatabase = on.into();
-
-        let token_details = TokenDetails { name, on };
-        self.token = Some(token_details);
-        self
-    }
-
-    fn scope(mut self, name: Scope) -> Self {
-        self.scope = Some(name);
-        self
-    }
-
-    fn table(mut self, name: Table) -> Self {
-        self.table = Some(name);
-        self
-    }
-
-    fn event(mut self, name: impl Into<Event>, on: impl Into<Table>) -> Self {
-        let on = on.into();
-        let name = name.into();
-        self.event = Some((name, on));
-        self
-    }
-
-    fn field(mut self, name: impl Into<DbField>, on: impl Into<Table>) -> Self {
-        let on = on.into();
-        let name = name.into();
-        self.field = Some((name, on));
-        self
-    }
-
-    fn index(mut self, name: impl Into<Index>, on: impl Into<Table>) -> Self {
-        let on = on.into();
-        let name = name.into();
-        self.index = Some((name, on));
-        self
-    }
-}
-
-impl Buildable for RemoveStatement {
-    fn build(&self) -> String {
-        let mut query = String::from("REMOVE");
-
-        if let Some(namespace) = &self.namespace {
-            query.push_str(&format!(" NAMESPACE {}", namespace));
-        }
-
-        if let Some(database) = &self.database {
-            query.push_str(&format!(" DATABASE {}", database));
-        }
-
-        if let Some(login) = &self.login {
-            query.push_str(&format!(" LOGIN ON {}", login.on));
-            if let Some(scope) = &self.scope {
-                query.push_str(&format!(" ON {}", scope));
-            }
-        }
-
-        if let Some(token) = &self.token {
-            query.push_str(&format!(" TOKEN ON {}", token.on));
-            if let Some(scope) = &self.scope {
-                query.push_str(&format!(" ON {}", scope));
-            }
-        }
-
-        if let Some(table) = &self.table {
-            query.push_str(&format!(" TABLE {}", table));
-            if let Some(event) = &self.event {
-                query.push_str(&format!(" ON TABLE {} {}", event, event));
-            } else if let Some(field) = &self.field {
-                query.push_str(&format!(" ON TABLE {} {}", field.table(), field));
-            } else if let Some(index) = &self.index {
-                query.push_str(&format!(" ON TABLE {} {}", index.table(), index));
-            }
-        }
-
-        query
-    }
-}
-impl std::fmt::Display for RemoveStatement {
-    fn to_string(&self) -> String {}
 }
 #[test]
-fn test() {
-    let statement = RemoveStatement::new()
-        .database("my_database")
-        .table("my_table")
-        .field("my_field", Some("my_table"));
-}
+fn test() {}
