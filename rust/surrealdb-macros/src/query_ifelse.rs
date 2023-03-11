@@ -102,20 +102,12 @@ impl ThenExpression {
 }
 
 pub struct IfStatement {
-    condition: String,
-    then_expression: String,
-    else_if_conditions: Vec<String>,
-    else_if_expressions: Vec<String>,
-    else_expression: Option<String>,
+    flow_data: FlowStatementData,
     bindings: BindingsList,
 }
 
 pub struct ElseIfStatement {
-    condition: String,
-    then_expression: String,
-    else_if_conditions: Vec<String>,
-    else_if_expressions: Vec<String>,
-    else_expression: Option<String>,
+    flow_data: FlowStatementData,
     bindings: BindingsList,
 }
 
@@ -142,11 +134,6 @@ struct Flow {
 
 pub struct ElseStatement {
     flow_data: FlowStatementData,
-    // condition: String,
-    // then_expression: String,
-    // else_if_conditions: Vec<String>,
-    // else_if_expressions: Vec<String>,
-    // else_expression: Option<String>,
     bindings: BindingsList,
 }
 
@@ -190,7 +177,8 @@ impl IfStatement {
         //     // self.then_expression = then_expression.to_string();
         //     self.bindings.extend(condition.get_bindings());
         //     self.bindings.extend(then_expression.get_bindings());
-        self
+        // self
+        todo!()
     }
 
     // pub fn if_then<T: Serialize + DeserializeOwned>(
