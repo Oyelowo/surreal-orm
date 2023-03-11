@@ -118,7 +118,6 @@ impl ElseIfStatement {
 }
 
 struct ExpressionContent(String);
-struct ConditionContent(String);
 
 enum FlowStatementData {
     If(Flow),
@@ -128,7 +127,7 @@ enum FlowStatementData {
 }
 
 struct Flow {
-    condition: ConditionContent,
+    condition: DbFilter,
     expression: ExpressionContent,
 }
 
@@ -148,12 +147,12 @@ impl IfStatement {
     where
         T: Serialize + DeserializeOwned,
     {
+        let if_data = FlowStatementData::If(Flow {
+            condition,
+            expression: todo!(),
+        });
         Self {
-            condition: "".to_string(),
-            then_expression: "".to_string(),
-            else_if_conditions: vec![],
-            else_if_expressions: vec![],
-            else_expression: None,
+            flow_data: todo!(),
             bindings: todo!(),
         }
     }
