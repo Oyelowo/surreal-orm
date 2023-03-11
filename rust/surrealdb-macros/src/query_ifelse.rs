@@ -81,6 +81,7 @@ fn test() {
     //     .else_if_then(true, 45)
     //     .else_(56);
 }
+
 pub struct ThenExpression {
     condition: String,
     then_expression: String,
@@ -124,12 +125,28 @@ impl ElseIfStatement {
     }
 }
 
+struct ExpressionContent(String);
+struct ConditionContent(String);
+
+enum FlowStatementData {
+    If(Flow),
+    ElseIfs(Vec<Flow>),
+    Else(ExpressionContent),
+    End,
+}
+
+struct Flow {
+    condition: ConditionContent,
+    expression: ExpressionContent,
+}
+
 pub struct ElseStatement {
-    condition: String,
-    then_expression: String,
-    else_if_conditions: Vec<String>,
-    else_if_expressions: Vec<String>,
-    else_expression: Option<String>,
+    flow_data: FlowStatementData,
+    // condition: String,
+    // then_expression: String,
+    // else_if_conditions: Vec<String>,
+    // else_if_expressions: Vec<String>,
+    // else_expression: Option<String>,
     bindings: BindingsList,
 }
 
@@ -140,7 +157,10 @@ impl Parametric for IfStatement {
 }
 
 impl IfStatement {
-    pub fn new(cond: bool) -> Self {
+    pub fn new<T>(condition: impl Into<DbFilter>, expression: impl Into<Expression<T>>) -> Self
+    where
+        T: Serialize + DeserializeOwned,
+    {
         Self {
             condition: "".to_string(),
             then_expression: "".to_string(),
@@ -151,8 +171,26 @@ impl IfStatement {
         }
     }
 
-    pub fn then(mut self, expression: i32) -> ThenExpression {
-        todo!()
+    pub fn then<T>(mut self, expression: impl Into<Expression<T>>) -> ThenExpression
+    where
+        T: Serialize + DeserializeOwned,
+    {
+        //     let condition: DbFilter = condition.into();
+        //     self.condition = format!("{}", condition);
+        //     let then_expression: Expression<T> = then_expression.into();
+        //     let param = match &then_expression {
+        //         Expression::SelectStatement(s) => format!("({s})"),
+        //         Expression::Value(v) => self
+        //             .get_bindings()
+        //             .first()
+        //             .expect("Must have one binding")
+        //             .get_raw()
+        //             .to_string(),
+        //     };
+        //     // self.then_expression = then_expression.to_string();
+        //     self.bindings.extend(condition.get_bindings());
+        //     self.bindings.extend(then_expression.get_bindings());
+        self
     }
 
     // pub fn if_then<T: Serialize + DeserializeOwned>(
