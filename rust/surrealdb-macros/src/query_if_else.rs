@@ -5,6 +5,7 @@ use surrealdb::sql;
 
 use crate::{db_field::Binding, query_select::SelectStatement, BindingsList, DbFilter, Parametric};
 
+#[derive(Clone)]
 enum Expression<T>
 where
     T: Serialize + DeserializeOwned,
@@ -14,23 +15,23 @@ where
     // Value(sql::Value),
 }
 
-impl<T> Display for Expression<T>
-where
-    T: Serialize + DeserializeOwned,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let x = match self {
-            Expression::SelectStatement(s) => &format!("({s})"),
-            // Expression::SelectStatement(s) => s.get_bindings().first().unwrap().get_raw(),
-            Expression::Value(v) => {
-                let bindings = self.get_bindings();
-                assert_eq!(bindings.len(), 1);
-                &format!("{}", self.get_bindings().first().expect("Param must have been generated for value. This is a bug. Please report here: ").get_param())
-            }
-        };
-        write!(f, "{}", x)
-    }
-}
+// impl<T> Display for Expression<T>
+// where
+//     T: Serialize + DeserializeOwned,
+// {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         let x = match self {
+//             Expression::SelectStatement(s) => &format!("({s})"),
+//             // Expression::SelectStatement(s) => s.get_bindings().first().unwrap().get_raw(),
+//             Expression::Value(v) => {
+//                 let bindings = self.get_bindings();
+//                 assert_eq!(bindings.len(), 1);
+//                 &format!("{}", self.get_bindings().first().expect("Param must have been generated for value. This is a bug. Please report here: ").get_param())
+//             }
+//         };
+//         write!(f, "{}", x)
+//     }
+// }
 
 impl<T: Serialize + DeserializeOwned> Parametric for Expression<T> {
     fn get_bindings(&self) -> BindingsList {
@@ -62,7 +63,7 @@ impl<T: Serialize + DeserializeOwned> From<T> for Expression<T> {
     }
 }
 
-pub struct IfElseStatementBuilder {
+pub struct IfElseStatement {
     condition: String,
     then_expression: String,
     else_if_conditions: Vec<String>,
@@ -71,13 +72,13 @@ pub struct IfElseStatementBuilder {
     bindings: BindingsList,
 }
 
-impl Parametric for IfElseStatementBuilder {
+impl Parametric for IfElseStatement {
     fn get_bindings(&self) -> crate::BindingsList {
         todo!()
     }
 }
 
-impl IfElseStatementBuilder {
+impl IfElseStatement {
     pub fn new() -> Self {
         Self {
             condition: "".to_string(),
@@ -97,18 +98,16 @@ impl IfElseStatementBuilder {
         let condition: DbFilter = condition.into();
         self.condition = format!("{}", condition);
         let then_expression: Expression<T> = then_expression.into();
-        let xx = then_expression
-            .get_bindings()
-            .into_iter()
-            .map(|x| x.get_param())
-            .collect::<Vec<_>>()
-            .first()
-            .unwrap();
-        let param = match then_expression {
+        let param = match &then_expression {
             Expression::SelectStatement(s) => format!("({s})"),
-            Expression::Value(v) => xx.to_string(),
+            Expression::Value(v) => self
+                .get_bindings()
+                .first()
+                .expect("Must have one binding")
+                .get_raw()
+                .to_string(),
         };
-        self.then_expression = then_expression.to_string();
+        // self.then_expression = then_expression.to_string();
         self.bindings.extend(condition.get_bindings());
         self.bindings.extend(then_expression.get_bindings());
         self
@@ -119,11 +118,12 @@ impl IfElseStatementBuilder {
         condition: impl Into<DbFilter>,
         then_expression: impl Into<Expression<T>>,
     ) -> Self {
-        Self {
-            condition: condition.into().to_string(),
-            then_expression: then_expression.to_string(),
-            ..self
-        }
+        // Self {
+        //     condition: condition.into().to_string(),
+        //     then_expression: then_expression.to_string(),
+        //     ..self
+        // }
+        todo!()
     }
 
     pub fn else_expr<E>(mut self, expression: E) -> Self
@@ -132,24 +132,6 @@ impl IfElseStatementBuilder {
     {
         self.else_expression = Some(expression.to_string());
         self
-    }
-
-    pub fn build(self) -> Result<IfElseStatement, String> {
-        if self.condition.is_empty() {
-            return Err("Condition is missing".to_string());
-        }
-
-        if self.then_expression.is_empty() {
-            return Err("Then expression is missing".to_string());
-        }
-
-        Ok(IfElseStatement {
-            condition: self.condition,
-            then_expression: self.then_expression,
-            else_if_conditions: self.else_if_conditions,
-            else_if_expressions: self.else_if_expressions,
-            else_expression: self.else_expression,
-        })
     }
 }
 
@@ -170,12 +152,12 @@ impl fmt::Display for IfElseStatement {
     }
 }
 fn main() {
-    let statement = IfElseStatementBuilder::new()
-        .if_then("$scope = 'admin'", "SELECT * FROM account")
-        .else_if("$scope = 'user'", "SELECT * FROM $auth.account")
-        .else_expr("[]")
-        .build()
-        .unwrap();
+    // let statement = IfElseStatement::new()
+    //     .if_then("$scope = 'admin'", "SELECT * FROM account")
+    //     .else_if("$scope = 'user'", "SELECT * FROM $auth.account")
+    //     .else_expr("[]")
+    //     .build()
+    //     .unwrap();
 
-    println!("{}", statement);
+    // println!("{}", statement);
 }
