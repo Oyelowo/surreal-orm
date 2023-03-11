@@ -410,6 +410,7 @@ pub struct Binding {
     param: String,
     value: sql::Value,
     original_inline_name: String,
+    raw_string: String,
 }
 
 impl Binding {
@@ -420,12 +421,22 @@ impl Binding {
             param: param_name.clone(),
             value,
             original_inline_name: param_name,
+            raw_string: param_name,
         }
+    }
+
+    pub fn with_raw(mut self, raw_string: String) -> Self {
+        self.raw_string = raw_string;
+        self
     }
 
     pub fn with_name(mut self, original_name: String) -> Self {
         self.original_inline_name = original_name;
         self
+    }
+
+    pub fn get_raw(&self) -> &String {
+        &self.raw_string
     }
 
     pub fn get_original_name(&self) -> &String {
