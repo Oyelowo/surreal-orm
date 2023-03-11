@@ -20,8 +20,13 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let x = match self {
-            Expression::SelectStatement(s) => format!("({s})"),
-            Expression::Value(v) => format!("{}", self.get_bindings().first().unwrap().get_param()),
+            Expression::SelectStatement(s) => &format!("({s})"),
+            // Expression::SelectStatement(s) => s.get_bindings().first().unwrap().get_raw(),
+            Expression::Value(v) => {
+                let bindings = self.get_bindings();
+                assert_eq!(bindings.len(), 1);
+                &format!("{}", self.get_bindings().first().expect("Param must have been generated for value. This is a bug. Please report here: ").get_param())
+            }
         };
         write!(f, "{}", x)
     }
@@ -30,7 +35,12 @@ where
 impl<T: Serialize + DeserializeOwned> Parametric for Expression<T> {
     fn get_bindings(&self) -> BindingsList {
         match self {
-            Expression::SelectStatement(s) => s.get_bindings(),
+            Expression::SelectStatement(s) => s
+                .get_bindings()
+                .into_iter()
+                // query must have already been built and bound
+                .map(|b| b.with_raw(format!("({s})")))
+                .collect::<_>(),
             Expression::Value(v) => {
                 let sql_value = sql::json(&serde_json::to_string(&v).unwrap()).unwrap();
                 vec![Binding::new(sql_value)]
@@ -85,19 +95,22 @@ impl IfElseStatementBuilder {
         then_expression: impl Into<Expression<T>>,
     ) -> Self {
         let condition: DbFilter = condition.into();
-        self.condition = condition.into();
+        self.condition = format!("{}", condition);
         let then_expression: Expression<T> = then_expression.into();
         let xx = then_expression
             .get_bindings()
             .into_iter()
-            .map(|x| x.get_param());
+            .map(|x| x.get_param())
+            .collect::<Vec<_>>()
+            .first()
+            .unwrap();
         let param = match then_expression {
             Expression::SelectStatement(s) => format!("({s})"),
-            Expression::Value(v) => v.get_bindings(),
+            Expression::Value(v) => xx.to_string(),
         };
-        self.then_expression = then_expression.into().to_string();
+        self.then_expression = then_expression.to_string();
         self.bindings.extend(condition.get_bindings());
-        self.bindings.extend(then_expression.into().get_bindings());
+        self.bindings.extend(then_expression.get_bindings());
         self
     }
 
