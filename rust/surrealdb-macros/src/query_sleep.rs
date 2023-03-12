@@ -21,7 +21,6 @@ impl SleepStatement {
     fn new(duration: impl Into<Duration>) -> Self {
         let duration: Duration = duration.into();
         let duration = sql::Duration::from(duration);
-        // self.timeout = Some(duration.to_string());
         Self(duration.to_string())
     }
 }
