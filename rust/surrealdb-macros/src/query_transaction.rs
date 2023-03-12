@@ -14,42 +14,46 @@ use surrealdb::sql;
 use crate::{
     db_field::{cond, Binding},
     query_create::CreateStatement,
+    query_delete::DeleteStatement,
     query_insert::{Buildable, InsertStatement},
     query_relate::RelateStatement,
+    query_remove::RemoveScopeStatement,
     query_select::SelectStatement,
     query_update::UpdateStatement,
     BindingsList, DbField, DbFilter, Parametric,
 };
 
 #[derive(Clone)]
-// pub enum Query<TModel, TNode, TEdge> {
-pub enum Query {
-    // CreateStatement(CreateStatement<TNode>),
-    // InsertStatement(InsertStatement<TModel>),
-    // UpdateStatement(UpdateStatement<TModel>),
-    // RelateStatement(RelateStatement<TEdge>),
+pub enum Query<TModel, TNode, TEdge> {
+    // pub enum Query {
+    RemoveScopeStatement(RemoveScopeStatement),
+    DeleteStatement(DeleteStatement<TModel>),
+    CreateStatement(CreateStatement<TNode>),
+    InsertStatement(InsertStatement<TModel>),
+    UpdateStatement(UpdateStatement<TModel>),
+    RelateStatement(RelateStatement<TEdge>),
     SelectStatement(SelectStatement),
     // Value(sql::Value),
 }
 
-// impl<TModel, TNode, TEdge> Display for Query<TModel, TNode, TEdge> {
-impl Display for Query {
+impl<TModel, TNode, TEdge> Display for Query<TModel, TNode, TEdge> {
+    // impl Display for Query {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let expression = match self {
             Query::SelectStatement(s) => format!("({s})"),
-            // Expression::SelectStatement(s) => s.get_bindings().first().unwrap().get_raw(),
-            // Query::Value(v) => {
-            //     let bindings = self.get_bindings();
-            //     assert_eq!(bindings.len(), 1);
-            //     format!("{}", self.get_bindings().first().expect("Param must have been generated for value. This is a bug. Please report here: ").get_param())
-            // }
+            Query::CreateStatement(_) => todo!(),
+            Query::InsertStatement(_) => todo!(),
+            Query::UpdateStatement(_) => todo!(),
+            Query::RelateStatement(_) => todo!(),
+            Query::RemoveScopeStatement(_) => todo!(),
+            Query::DeleteStatement(_) => todo!(),
         };
         write!(f, "{}", expression)
     }
 }
 
-// impl<TModel, TNode, TEdge> Parametric for Query<TModel, TNode, TEdge> {
-impl Parametric for Query {
+impl<TModel, TNode, TEdge> Parametric for Query<TModel, TNode, TEdge> {
+    // impl Parametric for Query {
     fn get_bindings(&self) -> BindingsList {
         match self {
             Query::SelectStatement(s) => s
@@ -58,19 +62,41 @@ impl Parametric for Query {
                 // query must have already been built and bound
                 .map(|b| b.with_raw(format!("({s})")))
                 .collect::<_>(),
-            // Query::Value(sql_value) => {
-            //     // let sql_value = sql::json(&serde_json::to_string(&v).unwrap()).unwrap();
-            //     let sql_value: sql::Value = sql_value.to_owned();
-            //     vec![Binding::new(sql_value.clone()).with_raw(sql_value.to_raw_string())]
-            // }
+            Query::CreateStatement(_) => todo!(),
+            Query::InsertStatement(_) => todo!(),
+            Query::UpdateStatement(_) => todo!(),
+            Query::RelateStatement(_) => todo!(),
+            Query::RemoveScopeStatement(_) => todo!(),
+            Query::DeleteStatement(_) => todo!(),
         }
     }
 }
 
-// impl<TModel, TNode, TEdge> From<SelectStatement> for Query<TModel, TNode, TEdge> {
-impl From<SelectStatement> for Query {
+impl<TModel, TNode, TEdge> From<SelectStatement> for Query<TModel, TNode, TEdge> {
+    // impl From<SelectStatement> for Query {
     fn from(value: SelectStatement) -> Self {
         Self::SelectStatement(value)
+    }
+}
+
+impl<TModel, TNode, TEdge> From<CreateStatement<TNode>> for Query<TModel, TNode, TEdge> {
+    // impl From<CreateStatement> for Query {
+    fn from(value: CreateStatement<TNode>) -> Self {
+        Self::CreateStatement(value)
+    }
+}
+
+impl<TModel, TNode, TEdge> From<InsertStatement<TModel>> for Query<TModel, TNode, TEdge> {
+    // impl From<InsertStatement> for Query {
+    fn from(value: InsertStatement<TModel>) -> Self {
+        Self::InsertStatement(value)
+    }
+}
+
+impl<TModel, TNode, TEdge> From<UpdateStatement<TModel>> for Query<TModel, TNode, TEdge> {
+    // impl From<UpdateStatement> for Query {
+    fn from(value: UpdateStatement<TModel>) -> Self {
+        Self::UpdateStatement(value)
     }
 }
 
