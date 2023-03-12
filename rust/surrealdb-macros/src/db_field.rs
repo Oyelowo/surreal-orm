@@ -451,6 +451,10 @@ impl Binding {
         &self.param
     }
 
+    pub fn get_param_dollarised(&self) -> String {
+        format!("${}", &self.param)
+    }
+
     pub fn get_value(&self) -> &sql::Value {
         &self.value
     }
