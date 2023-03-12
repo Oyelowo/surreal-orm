@@ -44,6 +44,11 @@ macro_rules! impl_display_for_all {
                 write!(f, "{}", self.0)
             }
         }
+        impl From<String> for $types_ {
+            fn from(value: String) -> Self {
+                Self(value)
+            }
+        }
     )*
     };
 }
