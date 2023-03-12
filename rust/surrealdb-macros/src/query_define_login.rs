@@ -41,42 +41,42 @@ impl Display for LoginType {
     }
 }
 
-pub struct Passhash(sql::Strand);
+pub struct Passhash(String);
 
 impl From<String> for Passhash {
     fn from(value: String) -> Self {
-        Self(value.into())
+        Self(value)
     }
 }
 
 impl From<&str> for Passhash {
     fn from(value: &str) -> Self {
-        Self(value.into())
+        Self(value.to_string())
     }
 }
 
 impl Display for Passhash {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self)
+        write!(f, "{}", self.0)
     }
 }
 
-pub struct Password(sql::Strand);
+pub struct Password(String);
 impl From<String> for Password {
     fn from(value: String) -> Self {
-        Self(value.into())
+        Self(value)
     }
 }
 
 impl From<&str> for Password {
     fn from(value: &str) -> Self {
-        Self(value.into())
+        Self(value.to_string())
     }
 }
 
 impl Display for Password {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -116,13 +116,15 @@ impl DefineLoginStatement {
 
     // Set the password credential
     pub fn password(mut self, password: impl Into<Password>) -> Self {
-        self.credential = Some(LoginCredential::Password(password.into()));
+        let password: Password = password.into();
+        self.credential = Some(LoginCredential::Password(password));
         self
     }
 
     // Set the passhash credential
     pub fn passhash(mut self, passhash: impl Into<Passhash>) -> Self {
-        self.credential = Some(LoginCredential::Passhash(passhash.into()));
+        let passhash: Passhash = passhash.into();
+        self.credential = Some(LoginCredential::Passhash(passhash));
         self
     }
 }
@@ -172,7 +174,10 @@ mod tests {
             .on(LoginType::Database)
             .password("oyelowo");
 
-        assert_eq!(login_with_password.build(), "LET $name = _param_00000000;");
+        assert_eq!(
+            login_with_password.to_string(),
+            "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
+        );
     }
 
     #[test]
@@ -181,6 +186,9 @@ mod tests {
             .on(LoginType::Namespace)
             .password("oyedayo");
 
-        assert_eq!(login_with_hash.build(), "LET $name = _param_00000000;");
+        assert_eq!(
+            login_with_hash.to_string(),
+            "DEFINE LOGIN username ON NAMESPACE PASSWORD oyedayo"
+        );
     }
 }
