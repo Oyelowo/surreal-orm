@@ -1,9 +1,18 @@
+/*
+Author: Oyelowo Oyedayo
+Email: oyelowooyedayo@gmail.com
+*/
+
 use std::fmt::{self, Display};
 
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
-use crate::{db_field::Binding, query_select::SelectStatement, BindingsList, DbFilter, Parametric};
+use crate::{
+    db_field::{cond, Binding},
+    query_select::SelectStatement,
+    BindingsList, DbField, DbFilter, Parametric,
+};
 
 #[derive(Clone)]
 pub enum Expression<T>
@@ -76,49 +85,6 @@ impl<T: Serialize + DeserializeOwned> From<T> for Expression<T> {
 fn if_(condition: impl Into<DbFilter>) -> IfStatement {
     todo!()
 }
-fn dfdf() {
-    if_(todo!())
-        .then(5454)
-        .else_if(todo!())
-        .then(todo!())
-        .else_if(todo!())
-        .then(todo!())
-        .else_(todo!())
-        .end();
-
-    let xx = if_(todo!()).then(todo!()).else_(todo!()).end();
-    let xx = if_(todo!()).then(todo!()).end();
-
-    let xx = if_(todo!())
-        .then(todo!())
-        .else_if(todo!())
-        .then(todo!())
-        .end();
-
-    let xx = if_(todo!())
-        .then(todo!())
-        .else_if(todo!())
-        .then(todo!())
-        .else_if(todo!())
-        .then(todo!())
-        .else_(todo!())
-        .end();
-}
-
-fn test() {
-    // if_(true)
-    //     .then(32)
-    //     .else_if(false)
-    //     .then(54)
-    //     .else_if(true)
-    //     .then(900)
-    //     .else_(45);
-    //
-    // if_then(true, i32)
-    //     .else_if_then(true, 45)
-    //     .else_if_then(true, 45)
-    //     .else_(56);
-}
 
 pub struct ThenExpression {
     flow_data: FlowStatementData,
@@ -129,7 +95,6 @@ impl ThenExpression {
     fn else_if(mut self, condition: impl Into<DbFilter>) -> ElseIfStatement {
         let condition: DbFilter = condition.into();
         self.bindings.extend(condition.get_bindings());
-        // let bindings = condition.get_bindings();
         self.flow_data.else_if_data.conditions.push(condition);
 
         ElseIfStatement {
@@ -138,11 +103,13 @@ impl ThenExpression {
         }
     }
 
-    fn else_<T>(mut self, expression: Expression<T>) -> ElseStatement
+    fn else_<T>(mut self, expression: impl Into<Expression<T>>) -> ElseStatement
     where
         T: Serialize + DeserializeOwned,
     {
+        let expression: Expression<T> = expression.into();
         self.flow_data.else_data = ExpressionContent(format!("{expression}"));
+
         ElseStatement {
             flow_data: self.flow_data,
             bindings: self.bindings,
@@ -223,7 +190,7 @@ pub struct ElseStatement {
 }
 
 impl ElseIfStatement {
-    pub fn then<T>(mut self, expression: Expression<T>) -> ThenExpression
+    pub fn then<T>(mut self, expression: impl Into<Expression<T>>) -> ThenExpression
     where
         T: Serialize + DeserializeOwned,
     {
@@ -298,4 +265,42 @@ fn main() {
     //     .unwrap();
 
     // println!("{}", statement);
+}
+
+#[test]
+fn test() {
+    let name = DbField::new("name");
+    let age = DbField::new("age");
+    let country = DbField::new("country");
+
+    if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+        .then("Valid".to_string())
+        .end();
+
+    if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+        .then("Valid")
+        .else_("Invalid")
+        .end();
+
+    if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+        .then("Valid")
+        .else_if(name.like("Oyelowo Oyedayo"))
+        .then("The man!")
+        .end();
+
+    if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+        .then("Valid")
+        .else_if(name.like("Oyelowo Oyedayo"))
+        .then("The Apple!")
+        .else_("The Mango!")
+        .end();
+
+    if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+        .then("Valid")
+        .else_if(name.like("Oyelowo Oyedayo"))
+        .then("The man!")
+        .else_if(cond(country.is("Canada")).or(country.is("Norway")))
+        .then("Cold")
+        .else_("Hot")
+        .end();
 }
