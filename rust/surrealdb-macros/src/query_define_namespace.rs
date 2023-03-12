@@ -40,9 +40,7 @@ impl DefineNamespaceStatement {
 
 impl Buildable for DefineNamespaceStatement {
     fn build(&self) -> String {
-        let mut query = format!("DEFINE NAMESPACE {};", self.namespace);
-
-        query
+        format!("DEFINE NAMESPACE {};", self.namespace)
     }
 }
 
