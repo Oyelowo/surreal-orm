@@ -7,7 +7,7 @@ use crate::{
     query_insert::{Buildable, Runnable},
     query_relate::Return,
     query_update::{self, Targettable},
-    BindingsList, DbFilter, Parametric, SurrealdbModel,
+    BindingsList, DbFilter, Parametric, Queryable, SurrealdbModel,
 };
 
 /*
@@ -55,6 +55,8 @@ where
     bindings: BindingsList,
     __model_return_type: PhantomData<T>,
 }
+
+impl<T> Queryable for DeleteStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
 
 impl<T> DeleteStatement<T>
 where
