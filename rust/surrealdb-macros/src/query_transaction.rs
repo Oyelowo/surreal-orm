@@ -74,16 +74,8 @@ impl From<SelectStatement> for Query {
     }
 }
 
-// impl<<TModel, TNode, TEdge>,T: Into<sql::Value>> From<T> for Query<TModel, TNode, TEdge> {
-// impl<T: Into<sql::Value>> From<T> for Query {
-//     fn from(value: T) -> Self {
-//         Self::Value(value.into())
-//     }
-// }
-
 pub fn begin_transaction() -> QueryTransaction {
-    // BeginTransaction::new(condition)
-    todo!()
+    BeginTransaction::new()
 }
 
 fn test_tra() {
