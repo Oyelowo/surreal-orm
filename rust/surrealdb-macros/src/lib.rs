@@ -23,6 +23,7 @@ pub mod query_select;
 pub mod query_sleep;
 pub mod query_transaction;
 pub mod query_update;
+pub mod query_use;
 pub mod value_type_wrappers;
 // pub mod querydb;
 pub mod prelude {
