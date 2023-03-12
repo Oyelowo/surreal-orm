@@ -44,7 +44,7 @@ pub use surrealdb::opt::RecordId;
 use surrealdb::sql;
 use value_type_wrappers::SurrealId;
 
-pub trait Querable {}
+pub trait Queryable {}
 
 // SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
 pub trait SurrealdbModel {
