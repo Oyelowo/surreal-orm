@@ -49,9 +49,15 @@ impl From<String> for Passhash {
     }
 }
 
+impl From<&str> for Passhash {
+    fn from(value: &str) -> Self {
+        Self(value.into())
+    }
+}
+
 impl Display for Passhash {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+        write!(f, "{}", self)
     }
 }
 
@@ -62,9 +68,15 @@ impl From<String> for Password {
     }
 }
 
+impl From<&str> for Password {
+    fn from(value: &str) -> Self {
+        Self(value.into())
+    }
+}
+
 impl Display for Password {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+        write!(f, "{}", self)
     }
 }
 
@@ -148,3 +160,27 @@ impl Parametric for DefineLoginStatement {
     }
 }
 impl Runnable for DefineLoginStatement {}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_define_login_statement_with_password() {
+        let login_with_password = define_login("username")
+            .on(LoginType::Database)
+            .password("oyelowo");
+
+        assert_eq!(login_with_password.build(), "LET $name = _param_00000000;");
+    }
+
+    #[test]
+    fn test_define_login_statement_with_passhash() {
+        let login_with_hash = define_login("username")
+            .on(LoginType::Namespace)
+            .password("oyedayo");
+
+        assert_eq!(login_with_hash.build(), "LET $name = _param_00000000;");
+    }
+}
