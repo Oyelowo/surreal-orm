@@ -26,7 +26,7 @@ impl SleepStatement {
 }
 impl Buildable for SleepStatement {
     fn build(&self) -> String {
-        format!("SLEEP {};", self.0.to_string())
+        format!("SLEEP {};", self.0)
     }
 }
 impl Queryable for SleepStatement {}
