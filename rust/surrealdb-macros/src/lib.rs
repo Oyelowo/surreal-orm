@@ -12,6 +12,7 @@ pub mod db_field;
 pub mod operators_macros;
 pub mod query_create;
 pub mod query_delete;
+pub mod query_ifelse;
 pub mod query_info;
 pub mod query_insert;
 pub mod query_relate;

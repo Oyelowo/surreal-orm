@@ -40,6 +40,7 @@ pub struct DbField {
     field_name: String,
     bindings: BindingsList,
 }
+
 pub type BindingsList = Vec<Binding>;
 impl Parametric for DbField {
     fn get_bindings(&self) -> BindingsList {
@@ -393,7 +394,7 @@ impl std::fmt::Display for DbField {
 ///
 /// assert_eq!(all_filters.to_string(), "(name = 'John') OR (age > 18) OR (name like '%Doe%')");
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct DbFilter {
     query_string: String,
     bindings: BindingsList,
@@ -410,22 +411,34 @@ pub struct Binding {
     param: String,
     value: sql::Value,
     original_inline_name: String,
+    raw_string: String,
 }
 
 impl Binding {
     pub fn new(value: impl Into<sql::Value>) -> Self {
         let value = value.into();
         let param_name = generate_param_name(&"param");
+        let value_string = format!("{}", &value);
         Binding {
             param: param_name.clone(),
             value,
-            original_inline_name: param_name,
+            original_inline_name: param_name.clone(),
+            raw_string: value_string,
         }
+    }
+
+    pub fn with_raw(mut self, raw_string: String) -> Self {
+        self.raw_string = raw_string;
+        self
     }
 
     pub fn with_name(mut self, original_name: String) -> Self {
         self.original_inline_name = original_name;
         self
+    }
+
+    pub fn get_raw(&self) -> &String {
+        &self.raw_string
     }
 
     pub fn get_original_name(&self) -> &String {
@@ -686,7 +699,9 @@ impl std::fmt::Display for DbFilter {
 
 fn generate_param_name(prefix: &str) -> String {
     let nil_id = uuid::Uuid::nil();
-    // #[cfg(test)]
+    #[cfg(test)]
+    let sanitized_uuid = uuid::Uuid::nil();
+
     #[cfg(feature = "mock")]
     let sanitized_uuid = uuid::Uuid::nil();
 
