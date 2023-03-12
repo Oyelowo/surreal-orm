@@ -17,6 +17,7 @@ pub mod query_delete;
 pub mod query_ifelse;
 pub mod query_info;
 pub mod query_insert;
+pub mod query_let;
 pub mod query_relate;
 pub mod query_remove;
 pub mod query_select;
