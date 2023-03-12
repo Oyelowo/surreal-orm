@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use surrealdb::{opt::RecordId, sql::Thing};

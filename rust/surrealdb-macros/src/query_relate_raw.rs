@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 // Experimental to give flexibility of on the fly query generation. Probably will remove
 use std::time::Duration;
 
